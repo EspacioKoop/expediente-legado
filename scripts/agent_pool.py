@@ -13,8 +13,7 @@ from pathlib import Path
 from typing import Any
 
 BLOCKING_LABELS = {"agent:working", "agent:pr-open", "agent:needs-human"}
-LEGACY_LABEL = "agent:auto"
-POOL_LABEL = "agent:pool"
+QUEUE_LABELS = {"agent:auto", "agent:pool", "agent:qwen", "agent:gemini"}
 PROVIDER_LABELS = {"agent:qwen": "qwen", "agent:gemini": "gemini"}
 MAX_ALLOWED_PARALLEL = 6
 
@@ -44,6 +43,13 @@ def _worker(item: dict[str, Any]) -> dict[str, str] | None:
     return {"worker": worker_id.strip(), "provider": provider}
 
 
+def _preferred_provider(issue: dict[str, Any]) -> str | None:
+    provider = issue.get("preferredProvider") or issue.get("preferred_provider")
+    if provider in {"qwen", "gemini"}:
+        return str(provider)
+    return None
+
+
 def _sort_key(issue: dict[str, Any]) -> tuple[str, int]:
     created = issue.get("createdAt") or issue.get("created_at") or ""
     try:
@@ -62,16 +68,16 @@ def eligible_issue(issue: dict[str, Any]) -> tuple[bool, str | None]:
         return False, None
 
     labels = _labels(issue)
-    if POOL_LABEL not in labels:
+    if not labels & QUEUE_LABELS:
         return False, None
     if labels & BLOCKING_LABELS:
         return False, None
 
-    # Durante la transición el pool y el autopilot legado no deben competir.
-    if LEGACY_LABEL in labels:
-        return False, None
-
-    requested = {provider for label, provider in PROVIDER_LABELS.items() if label in labels}
+    requested = {
+        provider
+        for label, provider in PROVIDER_LABELS.items()
+        if label in labels
+    }
     if len(requested) > 1:
         return False, None
     provider = next(iter(requested), None)
@@ -85,24 +91,42 @@ def select_tasks(
     max_parallel: int = MAX_ALLOWED_PARALLEL,
 ) -> list[dict[str, Any]]:
     limit = max(1, min(int(max_parallel), MAX_ALLOWED_PARALLEL))
-    free_workers = [normalized for item in workers if (normalized := _worker(item))]
+    free_workers = [
+        normalized for item in workers if (normalized := _worker(item))
+    ]
     tasks: list[dict[str, Any]] = []
 
     for issue in sorted(issues, key=_sort_key):
+        if not free_workers:
+            break
+
         ok, requested_provider = eligible_issue(issue)
         if not ok:
             continue
 
-        choice_index = next(
-            (
-                index
-                for index, worker in enumerate(free_workers)
-                if requested_provider is None or worker["provider"] == requested_provider
-            ),
-            None,
-        )
-        if choice_index is None:
-            continue
+        preferred_provider = requested_provider or _preferred_provider(issue)
+        if requested_provider is not None:
+            choice_index = next(
+                (
+                    index
+                    for index, worker in enumerate(free_workers)
+                    if worker["provider"] == requested_provider
+                ),
+                None,
+            )
+            if choice_index is None:
+                continue
+        elif preferred_provider is not None:
+            choice_index = next(
+                (
+                    index
+                    for index, worker in enumerate(free_workers)
+                    if worker["provider"] == preferred_provider
+                ),
+                0,
+            )
+        else:
+            choice_index = 0
 
         worker = free_workers.pop(choice_index)
         tasks.append(
@@ -112,7 +136,7 @@ def select_tasks(
                 "worker": worker["worker"],
             }
         )
-        if len(tasks) >= limit or not free_workers:
+        if len(tasks) >= limit:
             break
 
     return tasks
