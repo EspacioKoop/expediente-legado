@@ -10,6 +10,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 MODELO = ROOT / "godot" / "guion" / "dialogo_ideologico.gd"
+DECISION = ROOT / "godot" / "guion" / "decision_ideologica_expediente.gd"
 DIA = ROOT / "godot" / "guion" / "dia_clima_app.gd"
 CAREO = ROOT / "godot" / "guion" / "careo_contexto_app.gd"
 PRUEBA_GODOT = "res://pruebas/issue_920_smoke.gd"
@@ -19,6 +20,7 @@ class DialogoIdeologico920Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.modelo = MODELO.read_text(encoding="utf-8")
+        cls.decision = DECISION.read_text(encoding="utf-8")
         cls.dia = DIA.read_text(encoding="utf-8")
         cls.careo = CAREO.read_text(encoding="utf-8")
 
@@ -39,6 +41,30 @@ class DialogoIdeologico920Test(unittest.TestCase):
         self.assertIn(". resolver(", self.dia)
         self.assertIn("DialogoDiegetico.mostrar(", self.dia)
         self.assertIn("DialogoIdeologico.registrar_respuesta(", self.dia)
+
+    def test_companeros_tienen_secuela_con_memoria_y_prioridad(self) -> None:
+        for actor in ("ACTOR_BECARIO", "ACTOR_JUBILACION"):
+            self.assertIn(actor, self.decision)
+            self.assertIn(actor, self.modelo)
+        self.assertIn("resolver_companero(", self.modelo)
+        self.assertIn('"prioridad": 20', self.modelo)
+        self.assertIn('"prioridad": 10', self.modelo)
+        self.assertIn('"actor_recuerda"', self.modelo)
+        self.assertIn("DecisionIdeologicaExpediente.registrar_lectura_social(", self.modelo)
+
+    def test_oficina_aplica_rama_social_sin_saltar_dialogo_religioso(self) -> None:
+        religiosa = self.dia.index("DialogoReligion933.resolver_clave")
+        social = self.dia.index("DialogoIdeologico.resolver_companero")
+        self.assertLess(religiosa, social)
+        self.assertIn("DialogoIdeologico.registrar_respuesta(", self.dia)
+        self.assertIn("return clave_social", self.dia)
+
+    def test_observadores_se_declaran_en_el_evento_y_no_en_el_hud(self) -> None:
+        self.assertIn('"observadores"', self.decision)
+        self.assertIn("ACTOR_BECARIO", self.decision)
+        self.assertIn("ACTOR_JUBILACION", self.decision)
+        self.assertNotIn('estado["pistas_descubiertas"] =', self.modelo)
+        self.assertNotIn("CanvasLayer", self.modelo)
 
     def test_careo_solo_presenta_contexto_y_no_muta_combate(self) -> None:
         self.assertIn("SUPERFICIE_CAREO_EXPOSICION", self.careo)
