@@ -12,6 +12,7 @@ func _init() -> void:
 	_probar_gate_produccion()
 	_probar_contribuciones_idempotentes()
 	_probar_contribucion_sin_puntos_cliente()
+	_probar_enteros_json_sin_truncar()
 	print("meta_hastur_382: %d pasadas, %d fallos" % [pasadas, fallos])
 	quit(0 if fallos == 0 else 1)
 
@@ -69,6 +70,30 @@ func _probar_contribucion_sin_puntos_cliente() -> void:
 	var rechazada := MetaHasturDatos.validar_contribucion(manipulada)
 	_comprobar("cliente no envia progreso", rechazada["ok"], false)
 	_comprobar("razon campo inesperado", rechazada["reason"], "unexpected_progress")
+
+
+func _probar_enteros_json_sin_truncar() -> void:
+	var datos: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(RUTA_FIXTURE))
+	var snapshot: Dictionary = datos["snapshots"]["primer_umbral"].duplicate(true)
+
+	snapshot["community_progress"] = 25.5
+	var progreso_fraccional := MetaHasturDatos.validar_snapshot(snapshot)
+	_comprobar("progreso fraccional rechazado", progreso_fraccional["ok"], false)
+	_comprobar(
+		"progreso fraccional no se trunca",
+		progreso_fraccional["reason"],
+		"invalid_progress_type"
+	)
+
+	snapshot = datos["snapshots"]["primer_umbral"].duplicate(true)
+	snapshot["contract_version"] = 1.5
+	var version_fraccional := MetaHasturDatos.validar_snapshot(snapshot)
+	_comprobar("version fraccional rechazada", version_fraccional["ok"], false)
+	_comprobar(
+		"version fraccional no se trunca",
+		version_fraccional["reason"],
+		"invalid_contract_version_type"
+	)
 
 
 func _contribucion(contribution_id: String, tipo: String) -> Dictionary:
