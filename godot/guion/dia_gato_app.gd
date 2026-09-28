@@ -187,6 +187,7 @@ func _montar_objetivos_sueno() -> void:
 			tipo in [
 				SuenoObjetivoVariedad3D.TIPO_SECUENCIA,
 				SuenoObjetivoVariedad3D.TIPO_PERMANENCIA,
+				SuenoObjetivoVariedad3D.TIPO_RETORNO,
 			]
 			and _montar_objetivo_variedad(objetivo)
 		):
@@ -221,6 +222,11 @@ func _montar_objetivo_variedad(objetivo: Dictionary) -> bool:
 		puntos = [
 			objetivo.get("guia_pos", objetivo.get("pos", Vector3.ZERO)),
 			objetivo.get("pos", Vector3.ZERO),
+		]
+	elif tipo == SuenoObjetivoVariedad3D.TIPO_RETORNO:
+		puntos = [
+			objetivo.get("pos", Vector3.ZERO),
+			_entrada_guia,
 		]
 	var controlador := SuenoObjetivoVariedad3D.new()
 	controlador.name = "VariedadObjetivo_%s" % objetivo_id
