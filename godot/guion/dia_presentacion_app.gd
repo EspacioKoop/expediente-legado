@@ -13,14 +13,13 @@ var _pisada: AudioStreamPlayer3D
 var _desde_paso := 0.0
 
 
-func configurar(
-	caminante: CharacterBody3D,
-	voz: AudioStreamPlayer,
-	pisada: AudioStreamPlayer3D,
-) -> void:
+func configurar(caminante: CharacterBody3D) -> void:
 	_caminante = caminante
-	_voz = voz
-	_pisada = pisada
+	_voz = AudioStreamPlayer.new()
+	add_child(_voz)
+	_pisada = AudioStreamPlayer3D.new()
+	_pisada.unit_size = 3.0
+	_caminante.add_child(_pisada)
 
 
 func andar(delta: float, bloqueado: bool, suelo: String) -> void:
