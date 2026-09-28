@@ -11,12 +11,14 @@ signal continuar_solicitado
 const RUTA_TEXTOS := "res://datos/final_politico_textos.json"
 
 var _resumen: Dictionary = {}
+var _figura_vida: Array = []
 var _textos: Dictionary = {}
 var _boton: Button
 
 
-func configurar(resumen: Dictionary) -> void:
+func configurar(resumen: Dictionary, figura_vida: Array = []) -> void:
 	_resumen = resumen.duplicate(true)
+	_figura_vida = figura_vida.duplicate(true)
 
 
 func _ready() -> void:
@@ -89,6 +91,7 @@ func _construir() -> void:
 			caja.add_child(_etiqueta(_texto_ejemplo(ejemplo)))
 
 	_montar_auditorias(caja)
+	_montar_vida(caja)
 
 	_boton = Button.new()
 	_boton.name = "Continuar"
@@ -123,6 +126,33 @@ func _montar_auditorias(caja: VBoxContainer) -> void:
 		var linea := _etiqueta(tr("AUDITORIAS_FINAL_LINEA") % [nombre, estado])
 		linea.name = "Auditoria_%s" % id
 		caja.add_child(linea)
+
+
+func _montar_vida(caja: VBoxContainer) -> void:
+	if _figura_vida.is_empty():
+		return
+
+	var lienzo := Control.new()
+	lienzo.name = "RemateVidaVisual"
+	lienzo.custom_minimum_size = Vector2(760, 190)
+	lienzo.clip_contents = true
+	lienzo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	caja.add_child(lienzo)
+
+	for pieza in _figura_vida:
+		if typeof(pieza) != TYPE_DICTIONARY:
+			continue
+		var rect_crudo = (pieza as Dictionary).get("rect")
+		var color_crudo = (pieza as Dictionary).get("color")
+		if typeof(rect_crudo) != TYPE_RECT2 or typeof(color_crudo) != TYPE_COLOR:
+			continue
+		var rect: Rect2 = rect_crudo
+		var marca := ColorRect.new()
+		marca.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		marca.position = rect.position + Vector2(380, 95)
+		marca.size = rect.size
+		marca.color = color_crudo
+		lienzo.add_child(marca)
 
 
 func _texto_estado_auditoria(estado: String) -> String:
