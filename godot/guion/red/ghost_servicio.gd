@@ -16,6 +16,7 @@ var _transporte: RefCounted
 var _habilitado := true
 var _actor_public_id := ""
 var _actores_recientes: Array[String] = []
+var _veces_mostrado: Dictionary = {}
 
 
 func _init(transporte: RefCounted, habilitado: bool = true) -> void:
@@ -37,6 +38,7 @@ func configurar_actor_local(actor_public_id: String) -> void:
 
 func reiniciar_seleccion() -> void:
 	_actores_recientes.clear()
+	_veces_mostrado.clear()
 
 
 func publicar(evento: Dictionary, ahora_unix: int) -> Dictionary:
@@ -97,7 +99,9 @@ func consultar(
 
 
 func _seleccionar(validos: Array[Dictionary], salida: Array, solo_nuevos: bool) -> void:
-	for evento in validos:
+	var candidatos := validos.duplicate()
+	candidatos.sort_custom(_ordenar_candidatos)
+	for evento in candidatos:
 		if salida.size() >= MAX_VISIBLES:
 			return
 		var actor := String(evento["actor_public_id"])
@@ -113,7 +117,23 @@ func _seleccionar(validos: Array[Dictionary], salida: Array, solo_nuevos: bool) 
 			salida.append(evento)
 
 
+func _ordenar_candidatos(a: Dictionary, b: Dictionary) -> bool:
+	var actor_a := String(a.get("actor_public_id", ""))
+	var actor_b := String(b.get("actor_public_id", ""))
+	var veces_a := int(_veces_mostrado.get(actor_a, 0))
+	var veces_b := int(_veces_mostrado.get(actor_b, 0))
+	if veces_a != veces_b:
+		return veces_a < veces_b
+
+	var creado_a := int(a.get("created_at", 0))
+	var creado_b := int(b.get("created_at", 0))
+	if creado_a != creado_b:
+		return creado_a > creado_b
+	return actor_a < actor_b
+
+
 func _recordar_actor(actor_public_id: String) -> void:
+	_veces_mostrado[actor_public_id] = int(_veces_mostrado.get(actor_public_id, 0)) + 1
 	_actores_recientes.erase(actor_public_id)
 	_actores_recientes.append(actor_public_id)
 	while _actores_recientes.size() > MAX_ACTORES_RECIENTES:
