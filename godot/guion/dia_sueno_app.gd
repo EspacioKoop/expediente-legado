@@ -55,8 +55,8 @@ func _espacio_de(fase: String) -> Dictionary:
 	espacio = HorrorTexturas.aplicar(espacio, id, nivel_horror)
 
 	# #162: la selección nocturna ya decidió la semilla. Aquí solo vuelve visible
-	# su semántica segura: repetición y relaciones YA descubiertas alteran luz y
-	# ambiente sin tocar geometría, salidas, contenido ni progreso.
+	# su semántica segura: repetición, relaciones descubiertas y contradicciones
+	# explícitamente declaradas alteran luz/ambiente sin tocar navegación o progreso.
 	var seleccion: Array = jornada.get("seleccion_nocturna", [])
 	var memoria := (
 		MemoriaNocturna
@@ -64,6 +64,7 @@ func _espacio_de(fase: String) -> Dictionary:
 			seleccion,
 			contenido.casos,
 			partida.estado.get("pistas_descubiertas", []),
+			MemoriaNocturnaContradicciones.todas(),
 		)
 	)
 	return MemoriaNocturnaPresentacion.aplicar(espacio, seleccion, memoria)
