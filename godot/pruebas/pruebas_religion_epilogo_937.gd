@@ -136,7 +136,8 @@ func _probar_final_base_estable() -> void:
 	var vacio := {
 		"vuelta": 1,
 		"motivo": "prueba",
-		"canales": {
+		"canales":
+		{
 			ReligionEventos.CANAL_EXPOSICION: [],
 			ReligionEventos.CANAL_PRACTICA: [],
 			ReligionEventos.CANAL_CONVICCION: [],
@@ -146,22 +147,25 @@ func _probar_final_base_estable() -> void:
 	var a := ReligionTrayectoria.derivar_epilogo("mismo_final", vacio)
 	var con_hecho := vacio.duplicate(true)
 	con_hecho["canales"][ReligionEventos.CANAL_VINCULO] = [
-		ReligionEventos.crear_evento(
-			"vinculo:persona",
-			ReligionEventos.CANAL_VINCULO,
-			"npc:persona",
-			"cafeteria",
-			2,
-			"",
-			[],
-			[],
-			false,
-			[],
-			{
-				"vuelta": 1,
-				"procedencia": "dialogo:cafeteria",
-				"actor": "npc:persona",
-			},
+		(
+			ReligionEventos
+			. crear_evento(
+				"vinculo:persona",
+				ReligionEventos.CANAL_VINCULO,
+				"npc:persona",
+				"cafeteria",
+				2,
+				"",
+				[],
+				[],
+				false,
+				[],
+				{
+					"vuelta": 1,
+					"procedencia": "dialogo:cafeteria",
+					"actor": "npc:persona",
+				},
+			)
 		)
 	]
 	var b := ReligionTrayectoria.derivar_epilogo("mismo_final", con_hecho)
@@ -187,18 +191,21 @@ func _registrar(
 	var datos := metadatos.duplicate(true)
 	datos["vuelta"] = 1
 	datos["procedencia"] = "prueba:937:%s" % id_evento
-	var evento := ReligionEventos.crear_evento(
-		id_evento,
-		canal,
-		fuente,
-		contexto,
-		jornada,
-		"",
-		[],
-		[],
-		false,
-		[],
-		datos,
+	var evento := (
+		ReligionEventos
+		. crear_evento(
+			id_evento,
+			canal,
+			fuente,
+			contexto,
+			jornada,
+			"",
+			[],
+			[],
+			false,
+			[],
+			datos,
+		)
 	)
 	_comprobar(ReligionEventos.registrar(registro, evento), "registra %s" % id_evento)
 
