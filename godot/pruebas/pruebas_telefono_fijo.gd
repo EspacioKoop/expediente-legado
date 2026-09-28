@@ -123,8 +123,14 @@ func _probar() -> void:
 	var descolgar := panel.find_child("Descolgar", true, false) as Button
 	var contestador := panel.find_child("Contestador", true, false) as Button
 	var cerrar := panel.find_child("CerrarTelefono", true, false) as Button
-	_comprobar(descolgar != null and not descolgar.disabled, "descolgar entra en la cadena de foco")
-	_comprobar(contestador != null and not contestador.disabled, "contestador entra en la cadena de foco")
+	_comprobar(
+		descolgar != null and not descolgar.disabled,
+		"descolgar entra en la cadena de foco",
+	)
+	_comprobar(
+		contestador != null and not contestador.disabled,
+		"contestador entra en la cadena de foco",
+	)
 	_comprobar(cerrar != null, "cerrar existe como destino de foco")
 	if descolgar != null:
 		_comprobar(not descolgar.focus_next.is_empty(), "descolgar tiene foco siguiente explícito")
