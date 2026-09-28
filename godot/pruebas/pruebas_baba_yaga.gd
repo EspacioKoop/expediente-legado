@@ -16,6 +16,7 @@ func _initialize() -> void:
 	_probar_habitacion_giratoria()
 	_probar_interior_variable()
 	_probar_accesibilidad_y_reproduccion()
+	_probar_preflight_softlock_automatizable()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 
@@ -566,6 +567,73 @@ func _probar_accesibilidad_y_reproduccion() -> void:
 	)
 	sueno.queue_free()
 	copia.queue_free()
+
+
+func _probar_preflight_softlock_automatizable() -> void:
+	for reduccion_movimiento in [false, true]:
+		var sueno := SuenoBabaYaga.new()
+		get_root().add_child(sueno)
+		sueno.preparar()
+		var copia := SuenoBabaYaga.new()
+		get_root().add_child(copia)
+		copia.preparar()
+		var retorno := sueno.get_node_or_null("RetornoSeguro") as Node3D
+		var retorno_copia := copia.get_node_or_null("RetornoSeguro") as Node3D
+		_comprobar(retorno != null, "preflight encuentra retorno seguro")
+		_comprobar(retorno_copia != null, "preflight encuentra retorno tras restaurar")
+		var retorno_inicial := retorno.position
+		var retorno_copia_inicial := retorno_copia.position
+
+		for ciclo in range(2):
+			for fase in range(SuenoBabaYaga.POSICIONES_CABANA.size()):
+				var cambio := sueno.aplicar_evento(
+					SuenoBabaYaga.EVENTO_UMBRAL, false, reduccion_movimiento
+				)
+				_comprobar(cambio["ok"], "cada cruce de umbral conserva un estado válido")
+				_comprobar(cambio["cabana_visible"], "cada fase conserva la cabaña visible")
+				_comprobar(cambio["retorno_disponible"], "cada fase conserva retorno seguro")
+				_comprobar(sueno.cabana_visible(), "estado vivo conserva la cabaña")
+				_comprobar(sueno.ruta_retorno_disponible(), "estado vivo conserva la salida")
+				_comprobar(retorno.visible, "retorno sigue visible en el ciclo")
+				_comprobar(retorno.position, retorno_inicial, "retorno no se desplaza en el ciclo")
+
+				var archivador := sueno.aplicar_evento(
+					SuenoBabaYaga.EVENTO_FUERA_CAMPO, true, reduccion_movimiento
+				)
+				_comprobar(archivador["ok"], "fuera de campo conserva un estado válido")
+				_comprobar(
+					archivador["retorno_disponible"],
+					"mover el archivador conserva retorno seguro",
+				)
+				_comprobar(sueno.cabana_visible(), "mover el archivador conserva la cabaña")
+				_comprobar(sueno.ruta_retorno_disponible(), "mover el archivador conserva salida")
+
+				var guardado := sueno.estado_reproducible()
+				copia.restaurar_estado(guardado)
+				_comprobar(
+					copia.estado_reproducible(),
+					guardado,
+					"cada fase se restaura sin inventar otro estado",
+				)
+				_comprobar(copia.cabana_visible(), "restaurar cada fase conserva la cabaña")
+				_comprobar(
+					copia.ruta_retorno_disponible(),
+					"restaurar cada fase conserva la salida",
+				)
+				_comprobar(retorno_copia.visible, "retorno restaurado sigue visible")
+				_comprobar(
+					retorno_copia.position,
+					retorno_copia_inicial,
+					"restaurar no desplaza el retorno seguro",
+				)
+				_comprobar(
+					sueno.fase_ambiental_actual(),
+					(fase + 1) % SuenoBabaYaga.POSICIONES_CABANA.size(),
+					"el ciclo recorre las fases esperadas",
+				)
+
+		sueno.queue_free()
+		copia.queue_free()
 
 
 func _comprobar(actual, esperado = true, nombre: String = "") -> void:
