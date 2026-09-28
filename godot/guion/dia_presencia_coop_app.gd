@@ -115,7 +115,10 @@ func desactivar_sala() -> Dictionary:
 
 func conectar_codigo(codigo: String) -> Dictionary:
 	var normalizado := PresenciaSalaPanel.normalizar_codigo(codigo)
-	if not PresenciaSalaPanel.codigo_valido(normalizado) or not PresenciaDatos.validar_room_id(normalizado):
+	if (
+		not PresenciaSalaPanel.codigo_valido(normalizado)
+		or not PresenciaDatos.validar_room_id(normalizado)
+	):
 		var invalido := {"ok": false, "status": "invalid_room_id"}
 		_mostrar_estado_sala(invalido)
 		return invalido
@@ -402,9 +405,12 @@ func _salir_sala_desde_ui() -> void:
 func _mostrar_estado_sala(resultado: Dictionary) -> void:
 	if not is_instance_valid(_panel_sala):
 		return
-	_panel_sala.mostrar_estado(
-		String(resultado.get("status", "error")),
-		{"room_id": _room_id},
+	(
+		_panel_sala
+		. mostrar_estado(
+			String(resultado.get("status", "error")),
+			{"room_id": _room_id},
+		)
 	)
 	_actualizar_boton_sala()
 
