@@ -226,5 +226,13 @@ EOF
           GH_TOKEN: ${{ github.token }}
           ISSUE: ${{ steps.select.outputs.issue }}
         run: |
+          if [[ -s /tmp/created.json ]]; then
+            jq -r '.[]' /tmp/created.json | while IFS= read -r child; do
+              [[ "$child" =~ ^[0-9]+$ ]] || continue
+              gh issue close "$child" --repo "$GITHUB_REPOSITORY" --comment \
+                "Rollback automático: la descomposición del padre #$ISSUE no terminó completa; este subissue parcial no entra en ejecución." \
+                >/dev/null 2>&1 || true
+            done
+          fi
           gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human --remove-label agent:decompose >/dev/null 2>&1 || true
-          gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Agent decompose no pudo producir una descomposición contractual dentro del presupuesto. No se creó ninguna subtarea parcial." >/dev/null || true
+          gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Agent decompose no pudo completar una descomposición contractual dentro del presupuesto. Cualquier subissue parcial creado en este intento se cerró automáticamente." >/dev/null || true
