@@ -454,7 +454,7 @@ func _contexto_chat(dia: Node, presentes: Array[String]) -> Dictionary:
 	var eventos: Array[String] = []
 	var declarados: Variant = dia.jornada.get("eventos", [])
 	if declarados is Array:
-		for valor in declarados as Array:
+		for valor in (declarados as Array):
 			var evento := String(valor)
 			if not evento.is_empty() and not eventos.has(evento):
 				eventos.append(evento)
