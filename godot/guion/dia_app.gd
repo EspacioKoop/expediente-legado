@@ -200,14 +200,17 @@ func _entrar_en(fase: String) -> void:
 ## de lo que se leyó ese día. Es la única fase que pregunta en vez de mirar el
 ## catálogo, y aun así esta pantalla no sabe qué forma tiene ninguna sala.
 func _espacio_de(fase: String) -> Dictionary:
-	var resultado := DiaEspaciosApp.construir(
-		fase,
-		jornada,
-		partida.estado,
-		contenido.casos,
-		_raiz(),
-		Callable(self, "_opciones_sueno"),
-		Callable(self, "_registro_literario_para_sueno"),
+	var resultado := (
+		DiaEspaciosApp
+		. construir(
+			fase,
+			jornada,
+			partida.estado,
+			contenido.casos,
+			_raiz(),
+			Callable(self, "_opciones_sueno"),
+			Callable(self, "_registro_literario_para_sueno"),
+		)
 	)
 	if resultado.has("rivales"):
 		_rivales = resultado["rivales"]
@@ -282,10 +285,13 @@ func _guardar_o_avisar(destino: String) -> bool:
 
 ## Mantiene el hook heredable de reintento; la implementación vive en #1761.
 func _reintentar_guardado() -> void:
-	_guardado_app.reintentar_guardado(
-		jornada,
-		Callable(self, "_entrar_en"),
-		Callable(self, "_sonar"),
+	(
+		_guardado_app
+		. reintentar_guardado(
+			jornada,
+			Callable(self, "_entrar_en"),
+			Callable(self, "_sonar"),
+		)
 	)
 
 
