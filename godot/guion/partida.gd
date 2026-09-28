@@ -256,6 +256,12 @@ func borrar(ruta: String = RUTA) -> bool:
 ## ids y sus banderas.
 func _para_guardar() -> Dictionary:
 	var reducido := estado.duplicate()
+	# La copia persistida debe ser internamente coherente aunque un consumidor
+	# legado haya actualizado `jornada.vuelta` directamente. No mutamos el
+	# estado vivo: la reasignación canónica sigue siendo responsabilidad de Jornada.
+	if typeof(reducido.get("jornada")) == TYPE_DICTIONARY:
+		reducido["jornada"] = Dictionary(reducido["jornada"]).duplicate(true)
+		CatalogoVidaMetricas.asegurar(reducido["jornada"])
 	reducido["version"] = VERSION
 	reducido["logros"] = _solo_estado(estado.get("logros", []), ESTADO_LOGRO)
 	reducido["tarot"] = _solo_estado(estado.get("tarot", []), ESTADO_CARTA)
