@@ -9,6 +9,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 MODULO = ROOT / "scripts" / "agent_claim_guard.py"
 WORKFLOW = ROOT / ".github" / "workflows" / "agent-autopilot.yml"
+WORKER_WORKFLOW = ROOT / ".github" / "workflows" / "agent-worker.yml"
 
 SPEC = importlib.util.spec_from_file_location("agent_claim_guard", MODULO)
 assert SPEC and SPEC.loader
@@ -98,6 +99,28 @@ class AgentClaimGuardTest(unittest.TestCase):
         )[0]
         self.assertIn("continue-on-error: true", gemini)
         self.assertIn("steps.claim_guard.outputs.drift != 'true'", workflow)
+
+
+    def test_worker_pool_replanifica_en_vez_de_escalar_el_primer_desvio(self):
+        workflow = WORKER_WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("Normalizar cambios al CLAIM", workflow)
+        self.assertIn("scripts/agent_claim_guard.py", workflow)
+        self.assertIn("AGENT_POOL_REPLAN", workflow)
+        self.assertIn("MAX_REPLANS: '2'", workflow)
+        self.assertIn("gh workflow run agent-worker.yml", workflow)
+        self.assertIn("motivo=agent-pool-replan-claim-incompleto", workflow)
+        self.assertIn('select(startswith("AGENT_POOL_REPLAN "))', workflow)
+        self.assertIn("steps.claim_guard.outputs.drift == 'true'", workflow)
+        self.assertIn("steps.claim_guard.outputs.drift != 'true'", workflow)
+        qwen = workflow.split("name: Implementar con Qwen", 1)[1].split(
+            "uses: QwenLM/qwen-code-action@v1", 1
+        )[0]
+        gemini = workflow.split("name: Implementar con Gemini", 1)[1].split(
+            "uses: google-github-actions/run-gemini-cli@v0", 1
+        )[0]
+        self.assertIn("continue-on-error: true", qwen)
+        self.assertIn("continue-on-error: true", gemini)
+        self.assertIn("observed_paths", workflow)
 
 
 if __name__ == "__main__":
