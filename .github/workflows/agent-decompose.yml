@@ -1,0 +1,230 @@
+name: Agent decompose
+
+on:
+  issues:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: 'Issue a descomponer'
+        required: true
+        type: number
+
+permissions:
+  contents: read
+  issues: write
+  id-token: write
+
+concurrency:
+  group: agent-decompose-${{ github.event.issue.number || inputs.issue }}
+  cancel-in-progress: false
+
+jobs:
+  decompose:
+    if: github.event_name != 'issues' || github.event.label.name == 'agent:decompose'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      HAS_QWEN: ${{ secrets.QWEN_API_KEY != '' }}
+      HAS_GEMINI: ${{ secrets.GEMINI_API_KEY != '' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Crear etiquetas de descomposicion
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create agent:decompose --repo "$GITHUB_REPOSITORY" --color C5DEF5 --description "Descomponer issue en cortes pequeños" --force
+          gh label create agent:decomposed --repo "$GITHUB_REPOSITORY" --color BFDADC --description "Issue ya descompuesto por el planner" --force
+          gh label create agent:blocked --repo "$GITHUB_REPOSITORY" --color D4C5F9 --description "Subtarea bloqueada por dependencias" --force
+          gh label create agent:auto --repo "$GITHUB_REPOSITORY" --color 5319E7 --description "Cola automatica de agentes" --force
+          gh label create agent:needs-human --repo "$GITHUB_REPOSITORY" --color D93F0B --description "Necesita intervencion humana" --force
+
+      - id: select
+        name: Validar issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+          EVENT_ISSUE: ${{ github.event.issue.number }}
+          INPUT_ISSUE: ${{ inputs.issue }}
+        run: |
+          set -euo pipefail
+          issue="$INPUT_ISSUE"
+          [[ "$EVENT" == issues ]] && issue="$EVENT_ISSUE"
+          [[ "$issue" =~ ^[0-9]+$ ]] || exit 2
+          state="$(gh issue view "$issue" --repo "$GITHUB_REPOSITORY" --json state --jq .state)"
+          [[ "$state" == OPEN ]] || { echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
+          already="$(gh issue view "$issue" --repo "$GITHUB_REPOSITORY" --json comments --jq '[.comments[].body | select(startswith("AGENT_DECOMPOSED parent=#'"$issue"' "))] | length')"
+          [[ "$already" == 0 ]] || { echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
+          echo "run=true" >> "$GITHUB_OUTPUT"
+          echo "issue=$issue" >> "$GITHUB_OUTPUT"
+
+      - name: Materializar issue y normas
+        if: steps.select.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ steps.select.outputs.issue }}
+        run: |
+          set -euo pipefail
+          gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json title,body,comments --jq '"# Issue\n\n## " + .title + "\n\n" + (.body//"") + "\n\n## Comentarios recientes\n" + ((.comments[-12:]//[])|map("- "+.author.login+": "+.body)|join("\n\n"))' > .agent-decompose-input.md
+          if git clone --depth 1 https://github.com/EspacioKoop/normas_platino.git .agent-platino; then
+            rm -rf .agent-platino/.git
+          else
+            mkdir -p .agent-platino
+            printf '%s\n' '# Normas Platino no disponibles en esta ejecucion' > .agent-platino/README.md
+          fi
+
+      - id: qwen_config
+        name: Resolver Qwen
+        if: steps.select.outputs.run == 'true' && env.HAS_QWEN == 'true'
+        env:
+          KEY: ${{ secrets.QWEN_API_KEY }}
+          URL: ${{ vars.QWEN_BASE_URL }}
+          MODEL: ${{ vars.QWEN_MODEL }}
+        run: |
+          set -euo pipefail
+          url="$URL"
+          if [[ -z "$url" ]]; then
+            if [[ "$KEY" == sk-sp-* ]]; then
+              url="https://coding-intl.dashscope.aliyuncs.com/v1"
+            else
+              url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
+            fi
+          fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "model=${MODEL:-qwen3-coder-plus}" >> "$GITHUB_OUTPUT"
+
+      - id: plan_qwen
+        name: Descomponer con Qwen
+        if: steps.select.outputs.run == 'true' && env.HAS_QWEN == 'true'
+        timeout-minutes: 5
+        continue-on-error: true
+        uses: QwenLM/qwen-code-action@v1
+        with:
+          openai_api_key: ${{ secrets.QWEN_API_KEY }}
+          openai_base_url: ${{ steps.qwen_config.outputs.url }}
+          openai_model: ${{ steps.qwen_config.outputs.model }}
+          qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
+          settings: '{"model":{"maxSessionTurns":8},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
+          prompt: 'Lee AGENTS.md, .agent-decompose-input.md y las Normas Platino en .agent-platino. Inspecciona el repo solo para decidir si el issue cabe en un corte seguro de <=12 rutas. No edites nada. Si cabe, devuelve fits_single_cut=true. Si no, crea entre 2 y 4 subtareas pequeñas; cada una con title, goal, files concretos (max 12) y depends_on con indices anteriores. Si dos subtareas comparten ruta, la posterior DEBE depender de la anterior. Termina con AGENT_DECOMPOSE_BEGIN seguido de JSON {"fits_single_cut":false,"subtasks":[{"title":"...","goal":"...","files":["ruta"],"depends_on":[]}]} y AGENT_DECOMPOSE_END.'
+
+      - id: plan_gemini
+        name: Descomponer con Gemini
+        if: steps.select.outputs.run == 'true' && env.HAS_QWEN != 'true' && env.HAS_GEMINI == 'true'
+        timeout-minutes: 5
+        continue-on-error: true
+        uses: google-github-actions/run-gemini-cli@v0
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          gemini_model: ${{ vars.GEMINI_MODEL }}
+          gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
+          settings: '{"model":{"maxSessionTurns":8},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
+          prompt: 'Lee AGENTS.md, .agent-decompose-input.md y las Normas Platino en .agent-platino. Inspecciona el repo solo para decidir si el issue cabe en un corte seguro de <=12 rutas. No edites nada. Si cabe, devuelve fits_single_cut=true. Si no, crea entre 2 y 4 subtareas pequeñas; cada una con title, goal, files concretos (max 12) y depends_on con indices anteriores. Si dos subtareas comparten ruta, la posterior DEBE depender de la anterior. Termina con AGENT_DECOMPOSE_BEGIN seguido de JSON {"fits_single_cut":false,"subtasks":[{"title":"...","goal":"...","files":["ruta"],"depends_on":[]}]} y AGENT_DECOMPOSE_END.'
+
+      - id: normalize
+        name: Validar descomposicion
+        if: steps.select.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ steps.select.outputs.issue }}
+          SUMMARY: ${{ steps.plan_qwen.outputs.summary || steps.plan_gemini.outputs.summary }}
+        run: |
+          set -euo pipefail
+          if [[ "$HAS_QWEN" != true && "$HAS_GEMINI" != true ]]; then
+            echo "No hay provider para descomponer" >&2
+            exit 3
+          fi
+          printf '%s' "${SUMMARY:-}" > /tmp/agent-decompose-summary.txt
+          python3 scripts/agent_decompose.py --summary-file /tmp/agent-decompose-summary.txt --output /tmp/agent-decompose.json >/dev/null
+          fits="$(jq -r '.fits_single_cut' /tmp/agent-decompose.json)"
+          if [[ "$fits" == true ]]; then
+            gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --remove-label agent:decompose --remove-label agent:needs-human --add-label agent:auto >/dev/null
+            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Agent decompose: el issue ya cabe en un corte seguro; se retira agent:decompose y entra en agent:auto sin crear subissues." >/dev/null
+            echo "create=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "create=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Crear subtareas
+        if: steps.normalize.outputs.create == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ steps.select.outputs.issue }}
+        run: |
+          set -euo pipefail
+          printf '{}\n' > /tmp/created.json
+          count="$(jq '.subtasks | length' /tmp/agent-decompose.json)"
+          for ((i=0; i<count; i++)); do
+            task="$(jq -c ".subtasks[$i]" /tmp/agent-decompose.json)"
+            title="$(jq -r '.title' <<<"$task")"
+            goal="$(jq -r '.goal' <<<"$task")"
+            mapfile -t dep_indexes < <(jq -r '.depends_on[]' <<<"$task")
+            dep_numbers=()
+            for dep_index in "${dep_indexes[@]}"; do
+              dep_number="$(jq -r --arg key "$dep_index" '.[$key]' /tmp/created.json)"
+              [[ "$dep_number" =~ ^[0-9]+$ ]] || exit 4
+              dep_numbers+=("$dep_number")
+            done
+
+            if (( ${#dep_numbers[@]} == 0 )); then
+              dep_marker="none"
+              queue_label="agent:auto"
+              dep_text="Ninguna; puede entrar en cola inmediatamente."
+            else
+              dep_marker=""
+              dep_text=""
+              for dep_number in "${dep_numbers[@]}"; do
+                [[ -n "$dep_marker" ]] && dep_marker+=","
+                dep_marker+="#$dep_number"
+                dep_text+="- #$dep_number"$'\n'
+              done
+              queue_label="agent:blocked"
+            fi
+
+            files="$(jq -r '.files[] | "- "+.' <<<"$task")"
+            cat > /tmp/subissue.md <<EOF
+Subtarea generada automáticamente desde #$ISSUE.
+
+## Objetivo
+$goal
+
+## Rutas previstas
+$files
+
+## Dependencias
+$dep_text
+
+<!-- agent-parent: #$ISSUE -->
+<!-- agent-depends-on: $dep_marker -->
+
+El CLAIM real lo decidirá el worker al planificar; estas rutas son el corte esperado, no una reserva.
+EOF
+            url="$(gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body-file /tmp/subissue.md --label "$queue_label")"
+            number="${url##*/}"
+            [[ "$number" =~ ^[0-9]+$ ]] || exit 5
+            tmp="$(mktemp)"
+            jq --arg key "$i" --argjson number "$number" '. + {($key):$number}' /tmp/created.json > "$tmp"
+            mv "$tmp" /tmp/created.json
+          done
+
+          subissues="$(jq -r 'to_entries | sort_by(.key|tonumber) | map("#"+(.value|tostring)) | join(",")' /tmp/created.json)"
+          gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --remove-label agent:decompose --remove-label agent:needs-human --add-label agent:decomposed >/dev/null
+          gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "AGENT_DECOMPOSED parent=#$ISSUE subissues=$subissues
+
+          Se crearon $count cortes. Solo las subtareas sin dependencias entraron en agent:auto; las demás usan agent:blocked. El issue padre permanece abierto." >/dev/null
+
+      - name: Marcar descomposicion no parseable
+        if: failure() && steps.select.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ steps.select.outputs.issue }}
+        run: |
+          gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human --remove-label agent:decompose >/dev/null 2>&1 || true
+          gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Agent decompose no pudo producir una descomposición contractual dentro del presupuesto. No se creó ninguna subtarea parcial." >/dev/null || true
