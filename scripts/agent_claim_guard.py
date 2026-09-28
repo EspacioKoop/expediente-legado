@@ -102,10 +102,19 @@ def _es_trackeada(root: Path, ruta: str) -> bool:
 
 
 def _ruta_segura(root: Path, ruta: str) -> Path:
-    candidata = (root / ruta).resolve(strict=False)
+    """Valida la ruta sin seguir el symlink final.
+
+    Resolver el destino completo haría que un symlink no trackeado que apunte
+    fuera del repo se considerase una fuga antes de poder eliminarlo. Sí se
+    resuelve el directorio padre para impedir escapar mediante componentes
+    intermedios que sean symlinks.
+    """
+
     raiz = root.resolve()
+    candidata = root / ruta
+    padre = candidata.parent.resolve(strict=False)
     try:
-        candidata.relative_to(raiz)
+        padre.relative_to(raiz)
     except ValueError as exc:
         raise ValueError(f"ruta fuera del repositorio: {ruta}") from exc
     return candidata
