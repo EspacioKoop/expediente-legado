@@ -1,6 +1,7 @@
 import importlib.util
 import json
 from pathlib import Path
+import re
 import subprocess
 import tempfile
 import unittest
@@ -57,6 +58,26 @@ class AgentClaimGuardTest(unittest.TestCase):
 
         self.assertEqual(resultado["changed_allowed"], ["permitido.txt"])
         self.assertEqual(resultado["outside"], ["bloqueado.txt", "nuevo.txt"])
+
+    def test_contexto_generado_por_el_worker_no_es_desvio(self):
+        # Caso real del piloto #1656: el context packer escribe .agent-context.md.
+        (self.repo / "permitido.txt").write_text("ok\n", encoding="utf-8")
+        (self.repo / ".agent-context.md").write_text("wiki\n", encoding="utf-8")
+        (self.repo / ".agent-review-input.md").write_text("diff\n", encoding="utf-8")
+
+        resultado = guard.ejecutar(self.repo, self.plan, restaurar=False)
+
+        self.assertEqual(resultado["outside"], [])
+
+    def test_todo_artefacto_agent_del_worker_se_ignora(self):
+        # Un artefacto .agent-* nuevo en el worker no puede volver a descartar
+        # implementaciones en silencio.
+        worker = WORKER_WORKFLOW.read_text(encoding="utf-8")
+        artefactos = {t.rstrip("./") for t in re.findall(r"\.agent-[A-Za-z0-9_.-]+/?", worker)}
+        self.assertIn(".agent-context.md", artefactos)
+        for ruta in sorted(artefactos):
+            with self.subTest(ruta=ruta):
+                self.assertTrue(guard._se_ignora(ruta) or guard._se_ignora(ruta + "/x"))
 
     def test_restore_elimina_solo_desvio_y_conserva_el_claim(self):
         (self.repo / "permitido.txt").write_text("cambio válido\n", encoding="utf-8")
