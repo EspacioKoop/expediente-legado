@@ -20,7 +20,7 @@ Lee también el issue concreto, sus comentarios, PRs relacionadas, reviews y CI.
 ## Ciclo obligatorio
 
 1. Comprueba `main`, PR abiertos, issue, comentarios, plan maestro y reservas.
-2. Elige un pendiente prioritario **libre**. No abras un segundo corte si ya hay una PR activa que cubre el mismo hueco.
+2. Elige un pendiente prioritario **libre**. No abras un segundo corte si ya hay una PR activa que cubre el mismo hueco. Un issue con `agent:auto`, `agent:pool`, `agent:qwen` o `agent:gemini` **no está libre**: está delegado al pool (ver «Niveles de trabajo»).
 3. Antes de modificar archivos publica en #182:
 
    ```text
@@ -51,6 +51,22 @@ Lee también el issue concreto, sus comentarios, PRs relacionadas, reviews y CI.
 Las reservas legacy anteriores al corte de migración del 15 de septiembre de 2026 se liberan automáticamente porque se confirmó que no había otros agentes trabajando durante la migración. A partir de ahí, todo `CLAIM` nuevo debe llevar `lease=48h`.
 
 Usa `Closes #N` solo si el PR satisface el issue entero. Para entregas parciales, `Refs #N` y explica lo que queda.
+
+## Niveles de trabajo
+
+- **Nivel 1:** @eGurucharri decide prioridad, integra y valida en playtest.
+- **Nivel 2:** agentes asistidos desde chat (Claude, ChatGPT, Codex, Odiseo…). Investigan, planifican, implementan cortes y **delegan** al pool.
+- **Nivel 3:** el pool autónomo (`agent-pool.yml`). Ejecuta issues delegados; no sustituye al nivel 2.
+
+Para delegar, el nivel 2 crea o prepara el issue con el plan (`AGENT_PLAN_BEGIN … AGENT_PLAN_END`, ver [docs/agents/parallel-pool.md](docs/agents/parallel-pool.md)) y le pone la label de cola **en el mismo momento**: un issue sin label parece libre y otro agente lo toma.
+
+El nivel 2 **no toma** un issue con label de cola. Solo interviene en estos casos:
+
+- el pool lo deja en `agent:needs-human`;
+- rescata trabajo que el pool completó pero no pudo publicar (rama subida sin PR). En ese caso quita antes la label de cola, cita el run de origen y conserva el código producido;
+- @eGurucharri lo pide.
+
+Revisar y comentar un issue delegado sigue siendo cooperación normal.
 
 ## Archivos compartidos
 
