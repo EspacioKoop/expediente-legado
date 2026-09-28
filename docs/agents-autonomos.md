@@ -134,13 +134,16 @@ El dispatcher documentado en [`agents/parallel-pool.md`](agents/parallel-pool.md
 El dispatcher:
 
 - reúne hasta seis issues elegibles y usa como máximo un trabajo por slot/proveedor en cada tanda;
-- separa Qwen primario, Gemini y cuatro slots OpenAI-compatible;
-- aplica `concurrency` por issue para impedir dos workers simultáneos sobre la misma tarea;
-- sigue publicando y releyendo CLAIMs en #1713: el lock técnico no sustituye la reserva;
-- ejecuta context packer, Deno KV y CI brain antes de abrir un PR draft;
-- ante cambios fuera del CLAIM, restaura el intento, libera la reserva y replantea hasta dos veces antes de escalar a `agent:needs-human`.
+- separa Qwen primario, Gemini y los slots OpenAI-compatible configurados;
+- consulta el **control-plane Deno KV** y excluye issues con un lease activo antes de construir la matrix;
+- cada worker adquiere atómicamente un lease por issue antes de marcar `agent:working`; el lease dura 30 minutos y se renueva al entrar en planificación, implementación, validación y publicación;
+- mantiene `concurrency` por issue y los CLAIMs de #1713 como barreras redundantes durante la migración;
+- si Deno/OIDC no están disponibles, falla abierto al mecanismo histórico de GitHub; un HTTP 409 por lease vivo sí evita arrancar un duplicado;
+- ejecuta context packer, memoria Deno y CI brain antes de abrir un PR draft;
+- ante cambios fuera del CLAIM, restaura el intento, libera la reserva y replantea hasta dos veces antes de escalar a `agent:needs-human`;
+- al terminar una tanda comprueba si siguen quedando issues elegibles y, si los hay, programa inmediatamente la siguiente tanda para mantener ocupados los slots.
 
-El barrido del pool se ejecuta cada 15 minutos, además del disparo por etiqueta. `agent-autopilot.yml` ya no hace polling ni escucha labels: queda únicamente como ejecución manual.
+El barrido cada 15 minutos queda como red de seguridad; el drenado tras cada tanda evita esperar al siguiente cron cuando aún hay cola. `agent-autopilot.yml` ya no hace polling ni escucha labels: queda únicamente como ejecución manual.
 
 ## Normas Platino, wiki y memoria
 
@@ -172,20 +175,20 @@ reservar, se refinan por rutas. En reparación, el selector usa el log fallido y
 las rutas del CLAIM. Los logs no se guardan completos: el CI brain persiste solo
 fingerprints normalizados y metadatos compactos.
 
-La URL de memoria se deriva de la variable ya existente `SIGA98_FEEDBACK_FALLBACK_URL`, sustituyendo `/api/report` por `/api/agent-memory/*`. No hay otra credencial que copiar.
+La URL de memoria y del control-plane se deriva de la variable ya existente `SIGA98_FEEDBACK_FALLBACK_URL`, sustituyendo `/api/report` por `/api/agent-memory/*` o `/api/agent-pool/*`. Ambos usan OIDC de corta duración y no requieren otra credencial en GitHub.
 
 ## Flujo de seguridad y coordinación
 
-1. El proveedor lee el issue y sus comentarios recientes.
-2. Hace una fase de planificación **solo lectura** y propone como máximo 12 rutas concretas.
-3. El workflow publica el `CLAIM` en #1713.
-4. Relee #1713 y rechaza el trabajo si una reserva anterior solapa alguna ruta.
-5. Solo entonces crea la rama `agent/<proveedor>-<issue>-<run>`.
-6. El modelo recibe herramientas de archivos, pero no shell, GitHub API ni credenciales Git.
-7. El workflow rechaza cualquier modificación fuera de las rutas del `CLAIM`.
-8. Ejecuta preflight proporcional.
-9. El workflow hace commit/push y abre un PR **draft** con `Refs #N`.
-10. Lanza `CI` explícitamente sobre la rama. Nunca hay auto-merge.
+1. El worker adquiere un lease atómico del issue en Deno KV; si otro run lo posee, termina sin tocar labels ni código.
+2. El proveedor lee el issue y sus comentarios recientes.
+3. Hace una fase de planificación **solo lectura** y propone como máximo 12 rutas concretas.
+4. El workflow publica el `CLAIM` en #1713.
+5. Relee #1713 y rechaza el trabajo si una reserva anterior solapa alguna ruta.
+6. Solo entonces crea la rama `agent/<proveedor>-<issue>-<run>`.
+7. El modelo recibe herramientas de archivos, pero no shell, GitHub API ni credenciales Git.
+8. El workflow rechaza cualquier modificación fuera de las rutas del `CLAIM`.
+9. Ejecuta preflight proporcional.
+10. El workflow hace commit/push y abre un PR **draft** con `Refs #N`, lanza `CI` y libera el lease al terminar el job. Nunca hay auto-merge.
 
 La API key solo se inyecta en la Action oficial del proveedor correspondiente. Los pasos Git/GitHub usan el `GITHUB_TOKEN` efímero después de que el modelo haya terminado.
 
