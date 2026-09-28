@@ -81,6 +81,9 @@ static func nueva() -> Dictionary:
 		"semilla": Azar.raiz_nueva(),
 		"pistas_descubiertas": [],
 		"sellos_obtenidos": [],
+		# #1682: cinta onírica evaluada y toma elegida para una acusación futura.
+		# Vive en Partida para sobrevivir al despertar y a guardar/recargar.
+		GrabacionOniricaEstado.CLAVE_ESTADO: GrabacionOniricaEstado.nuevo(),
 		# #149: dos lecturas del mismo catálogo. La total sobrevive a una
 		# reasignación; la de vuelta se vacía al empezar otra vida laboral.
 		"anomalias_descubiertas": [],
@@ -295,6 +298,15 @@ static func validar(guardado) -> Array:
 		else:
 			errores.append_array(_validar_jornada(guardado["jornada"]))
 
+	if guardado.has(GrabacionOniricaEstado.CLAVE_ESTADO):
+		if typeof(guardado[GrabacionOniricaEstado.CLAVE_ESTADO]) != TYPE_DICTIONARY:
+			errores.append("%s no es un objeto" % GrabacionOniricaEstado.CLAVE_ESTADO)
+		else:
+			for error in GrabacionOniricaEstado.validar(
+				guardado[GrabacionOniricaEstado.CLAVE_ESTADO]
+			):
+				errores.append("%s.%s" % [GrabacionOniricaEstado.CLAVE_ESTADO, error])
+
 	if guardado.has(Auditorias.CLAVE_ESTADO):
 		if typeof(guardado[Auditorias.CLAVE_ESTADO]) != TYPE_DICTIONARY:
 			errores.append("%s no es un objeto" % Auditorias.CLAVE_ESTADO)
@@ -506,6 +518,7 @@ func _fusionar(guardado: Dictionary) -> Dictionary:
 	LiteraturaEventos.asegurar_en_estado(fusionado)
 	Pronosticos.completar(fusionado["pronosticos"])
 	Auditorias.asegurar_en_estado(fusionado)
+	GrabacionOniricaEstado.asegurar_en_estado(fusionado)
 	return fusionado
 
 

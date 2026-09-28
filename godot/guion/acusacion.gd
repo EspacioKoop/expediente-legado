@@ -105,7 +105,7 @@ static func acusar(
 		for carta_id in castigo.get("cartas_desbloqueadas", []):
 			cartas_desbloqueadas.append(carta_id)
 
-	return {
+	var resultado := {
 		"resultado": "cerrado",
 		"sospechoso": sospechoso["nombre"],
 		"desenlace": sospechoso.get("desenlace", ""),
@@ -120,6 +120,13 @@ static func acusar(
 		# cuesta una vida, así que es una escena con algo en juego.
 		"duelo": sospechoso if not sospechoso.get("ataques", []).is_empty() else {},
 	}
+
+	# #1682: la acusación no reevalúa el sueño. Solo adjunta la toma ya
+	# seleccionada y persistida si su original pertenece a este expediente.
+	var cinta_onirica := GrabacionOniricaEstado.para_caso(estado, caso)
+	if not cinta_onirica.is_empty():
+		resultado["cinta_onirica"] = cinta_onirica
+	return resultado
 
 
 ## Quita vidas y conserva la frontera de último recurso al llegar a cero.
