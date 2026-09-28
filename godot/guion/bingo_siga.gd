@@ -183,11 +183,11 @@ static func resumen_historial(jornada: Dictionary) -> Dictionary:
 			continue
 		var objetivos: Variant = entrada.get("objetivos", [])
 		var completados: Variant = entrada.get("completados", [])
-		var total_objetivos := objetivos.size() if objetivos is Array else 0
-		var total_completados := completados.size() if completados is Array else 0
+		var total_objetivos: int = objetivos.size() if objetivos is Array else 0
+		var total_completados: int = completados.size() if completados is Array else 0
 		resumen["jornadas_registradas"] += 1
 		resumen["objetivos_completados"] += total_completados
-		var completa := total_objetivos > 0 and total_completados >= total_objetivos
+		var completa: bool = total_objetivos > 0 and total_completados >= total_objetivos
 		completas_por_dia[dia] = completa
 		if completa:
 			resumen["tarjetas_completas"] += 1
