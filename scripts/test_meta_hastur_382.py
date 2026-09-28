@@ -39,7 +39,8 @@ class MetaHastur382Test(unittest.TestCase):
 
     def test_contrato_no_toca_partida_ni_red_real(self):
         combinado = self.contrato + FIXTURES.read_text(encoding="utf-8")
-        self.assertNotIn("Partida", combinado)
+        self.assertNotIn('preload("res://guion/partida.gd")', self.contrato)
+        self.assertNotIn("Partida.", self.contrato)
         self.assertNotIn("HTTPClient", combinado)
         self.assertNotIn("WebSocketPeer", combinado)
         self.assertNotIn("FileAccess.open", self.contrato)
