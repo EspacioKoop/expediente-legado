@@ -8,6 +8,7 @@
 extends Control
 
 const SYSTEM_MARK: Texture2D = preload("res://arte/os98/system_mark.svg")
+const CINEMATICA_APP := preload("res://guion/cinematica_app.gd")
 const COLOR_TEXTO := Color(0.92, 0.93, 0.90)
 const COLOR_TEXTO_DESACTIVADO := Color(0.55, 0.56, 0.53)
 const COLOR_CONTORNO := Color(0.0, 0.0, 0.0, 0.85)
@@ -25,9 +26,13 @@ const ZONAS_POR_BOTON := {
 	"_salir": "salir",
 }
 
+static var _apertura_creditos_mostrada := false
+
 var ruta := Partida.RUTA
 var partida := Partida.new()
 var _diorama: InicioDiorama3D
+var _envoltorio: MarginContainer
+var _apertura_creditos: Node3D = null
 var _continuar: Button
 var _nueva: Button
 var _cargar: Button
@@ -64,10 +69,52 @@ func _ready() -> void:
 	_diorama.configurar_reduccion_movimiento(
 		bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false))
 	)
+	if _apertura_creditos_mostrada:
+		_enfocar_menu_inicial()
+	else:
+		_iniciar_apertura_creditos()
+
+
+func _enfocar_menu_inicial() -> void:
 	if _continuar.disabled:
 		_nueva.grab_focus()
 	else:
 		_continuar.grab_focus()
+
+
+func _iniciar_apertura_creditos() -> void:
+	_apertura_creditos_mostrada = true
+	_envoltorio.visible = false
+	_diorama.configurar_activo(false)
+	var rodaje := CreditosInicioCinematica.planos()
+	if rodaje.is_empty():
+		_terminar_apertura_creditos()
+		return
+	var app := CINEMATICA_APP.new()
+	app.name = "AperturaCreditos3D"
+	app.terminada.connect(_terminar_apertura_creditos)
+	_apertura_creditos = app
+	add_child(app)
+	app.reproducir(rodaje, CreditosInicioCinematica.ID)
+
+
+func _terminar_apertura_creditos() -> void:
+	if is_instance_valid(_apertura_creditos):
+		_apertura_creditos.queue_free()
+	_apertura_creditos = null
+	_envoltorio.visible = true
+	_diorama.configurar_activo(true)
+	_enfocar_menu_inicial()
+
+
+func _unhandled_input(evento: InputEvent) -> void:
+	if not is_instance_valid(_apertura_creditos):
+		return
+	if evento is InputEventMouseButton:
+		var click := evento as InputEventMouseButton
+		if click.pressed and click.button_index == MOUSE_BUTTON_LEFT:
+			_apertura_creditos.call("saltar")
+			get_viewport().set_input_as_handled()
 
 
 func _construir_interfaz() -> void:
@@ -85,18 +132,18 @@ func _construir_interfaz() -> void:
 	fondo.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(fondo)
 
-	var envoltorio := MarginContainer.new()
-	envoltorio.name = "EnvoltorioInicio"
-	envoltorio.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_envoltorio = MarginContainer.new()
+	_envoltorio.name = "EnvoltorioInicio"
+	_envoltorio.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for lado in ["left", "top", "right", "bottom"]:
-		envoltorio.add_theme_constant_override("margin_" + lado, 48)
-	add_child(envoltorio)
+		_envoltorio.add_theme_constant_override("margin_" + lado, 48)
+	add_child(_envoltorio)
 
 	var caja := VBoxContainer.new()
 	caja.name = "ListaInicio"
 	caja.alignment = BoxContainer.ALIGNMENT_END
 	caja.add_theme_constant_override("separation", 6)
-	envoltorio.add_child(caja)
+	_envoltorio.add_child(caja)
 
 	_crear_cabecera(caja)
 	_crear_estado(caja)
