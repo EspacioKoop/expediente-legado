@@ -34,7 +34,10 @@ class SuenoObjetivoVariedad299Test(unittest.TestCase):
         self.assertIn("to_utf8_buffer()", self.politica)
         self.assertIn("dia * 17", self.politica)
         self.assertIn("posmod", self.politica)
-        self.assertIn("CANTIDAD_POR_NOCHE := 3", self.politica)
+        self.assertIn(
+            "CANTIDAD_POR_NOCHE := SuenoObjetivos.POSIBLES_PRIMER_CORTE",
+            self.politica,
+        )
         self.assertIn("TIPO_RETORNO", self.politica)
         self.assertIn('"ida_y_vuelta"', self.politica)
         self.assertIn("SuenoObjetivosVariedad.tipos_para", self.dia)
