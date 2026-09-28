@@ -17,6 +17,18 @@ const PLAN_COMPANEROS := {
 	"agresiva": [3, 5, 3],
 	"absurda": [7, 6, 8],
 }
+## Presencia social fuera del rectángulo jugable. Son presentación: no tienen
+## collider ni participan en Golf/GolfBola.
+const POSICIONES_COMPANEROS := [
+	Vector3(-1.62, 0.0, 1.10),
+	Vector3(1.62, 0.0, -0.10),
+	Vector3(-1.62, 0.0, -1.30),
+]
+const COLORES_COMPANEROS := [
+	Color(0.48, 0.60, 0.70),
+	Color(0.66, 0.48, 0.52),
+	Color(0.52, 0.62, 0.46),
+]
 const CONFIGURACIONES := [
 	{
 		"inicio": Vector2(0.0, 1.72),
@@ -42,10 +54,13 @@ const CONFIGURACIONES := [
 var estado: Dictionary = {}
 var resultado_final: Dictionary = {}
 var hoyo_actual: GolfHoyoApp
+var _companeros_visual: Array[Node3D] = []
+var _idles_companeros: Array[CompaneroIdle3D] = []
 
 
 func _ready() -> void:
 	estado = Golf.nueva(LANZADORES)
+	_montar_companeros()
 	_abrir_hoyo(0)
 
 
@@ -101,6 +116,41 @@ func _resolver_turnos_companeros(indice_hoyo: int) -> void:
 			Golf.golpear(estado, actual)
 		if int(estado.get("hoyo", 0)) == hoyo_antes:
 			Golf.terminar_hoyo(estado, actual)
+
+
+func _montar_companeros() -> void:
+	var preferencias := PreferenciasSiga.cargar()
+	var reducir := bool(preferencias.get("reduccion_movimiento", false))
+	for indice in range(1, LANZADORES.size()):
+		var perfil := String(LANZADORES[indice])
+		var visual_indice := indice - 1
+		var cuerpo := Node3D.new()
+		cuerpo.name = "CompaneroGolf_%s" % perfil
+		cuerpo.position = POSICIONES_COMPANEROS[visual_indice]
+		cuerpo.rotation.y = -PI / 2.0 if cuerpo.position.x < 0.0 else PI / 2.0
+		cuerpo.set_meta("perfil_golf", perfil)
+		add_child(cuerpo)
+		if not Modelos.persona(cuerpo, "persona", COLORES_COMPANEROS[visual_indice]):
+			cuerpo.queue_free()
+			continue
+
+		var idle := CompaneroIdle3D.new()
+		idle.name = "IdleGolf_%s" % perfil
+		add_child(idle)
+		(
+			idle
+			. configurar(
+				cuerpo,
+				hash("golf-%s" % perfil),
+				false,
+				reducir,
+				false,
+				perfil == "prudente",
+				false,
+			)
+		)
+		_companeros_visual.append(cuerpo)
+		_idles_companeros.append(idle)
 
 
 func _al_abandonar_hoyo() -> void:
