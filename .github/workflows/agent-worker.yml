@@ -542,6 +542,9 @@ jobs:
       - id: implement_qwen
         name: Implementar con Qwen
         if: steps.reserve.outputs.reserved == 'true' && inputs.provider == 'qwen'
+        # Un modelo lento no puede agotar los 60 min del job: falla con margen
+        # para liberar la reserva (#1695: Nemotron Super superó 40 min).
+        timeout-minutes: 35
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
@@ -555,6 +558,9 @@ jobs:
       - id: implement_gemini
         name: Implementar con Gemini
         if: steps.reserve.outputs.reserved == 'true' && inputs.provider == 'gemini'
+        # Un modelo lento no puede agotar los 60 min del job: falla con margen
+        # para liberar la reserva (#1695: Nemotron Super superó 40 min).
+        timeout-minutes: 35
         continue-on-error: true
         uses: google-github-actions/run-gemini-cli@v0
         with:
@@ -632,8 +638,16 @@ jobs:
 
       - name: Validar diff y preflight
         if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true'
+        env:
+          IMPLEMENT_OUTCOME: ${{ inputs.provider == 'qwen' && steps.implement_qwen.outcome || steps.implement_gemini.outcome }}
         run: |
           set -euo pipefail
+          # La implementación usa continue-on-error: si se cortó (timeout, error de
+          # API) sus cambios están a medias y nunca deben llegar a una PR.
+          if [[ "$IMPLEMENT_OUTCOME" != success ]]; then
+            echo "::error::implementación incompleta (outcome=$IMPLEMENT_OUTCOME); no se publica" >&2
+            exit 1
+          fi
           cp .agent-plan.json /tmp/plan.json
           cp .agent-task.md /tmp/agent-task.md
           rm -f .agent-task.md .agent-plan.json .agent-context.md .agent-memory.json .agent-history.json .agent-platino-sha gha-creds-*.json
