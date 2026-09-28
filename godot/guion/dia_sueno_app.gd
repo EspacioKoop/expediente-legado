@@ -58,10 +58,13 @@ func _espacio_de(fase: String) -> Dictionary:
 	# su semántica segura: repetición y relaciones YA descubiertas alteran luz y
 	# ambiente sin tocar geometría, salidas, contenido ni progreso.
 	var seleccion: Array = jornada.get("seleccion_nocturna", [])
-	var memoria := MemoriaNocturna.analizar(
-		seleccion,
-		contenido.casos,
-		partida.estado.get("pistas_descubiertas", []),
+	var memoria := (
+		MemoriaNocturna
+		. analizar(
+			seleccion,
+			contenido.casos,
+			partida.estado.get("pistas_descubiertas", []),
+		)
 	)
 	return MemoriaNocturnaPresentacion.aplicar(espacio, seleccion, memoria)
 
