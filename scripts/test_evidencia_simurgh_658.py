@@ -38,8 +38,9 @@ class EvidenciaSimurgh658Test(unittest.TestCase):
         for prefijo in ("pluma", "archivos", "lampara"):
             self.assertIn(f'"id": "{prefijo}_escritorio"', self.captura)
             self.assertIn(f'"id": "{prefijo}_monumental"', self.captura)
-            self.assertIn(f"{prefijo}_escritorio.png", self.workflow)
-            self.assertIn(f"{prefijo}_monumental.png", self.workflow)
+        self.assertIn("for ancla in pluma archivos lampara; do", self.workflow)
+        self.assertIn('"evidencia-simurgh-658/${ancla}_escritorio.png"', self.workflow)
+        self.assertIn('"evidencia-simurgh-658/${ancla}_monumental.png"', self.workflow)
 
     def test_gate_fija_framing_sin_autoaprobar(self):
         self.assertIn("camara.is_position_in_frustum", self.captura)
