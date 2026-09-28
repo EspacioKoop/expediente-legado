@@ -19,6 +19,7 @@ func _probar() -> void:
 	_probar_textos()
 	_probar_orden_de_la_charla()
 	_probar_clientes()
+	_probar_dialogo_contextual()
 	await _probar_montaje()
 	_probar_sin_tiendas()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
@@ -128,6 +129,36 @@ func _probar_clientes() -> void:
 	# Las ROMs compradas viven en el perfil del jugador (`user://`), no en la
 	# partida: aquí solo se comprueba que Kike sí reconoce clientes.
 	_comprobar(not String(kike["frase_cliente"]).is_empty(), "Kike reconoce a quien le compra")
+
+
+func _probar_dialogo_contextual() -> void:
+	var paco := DependientesTiendas.de("paco")
+	var jornada := {"dia": 3}
+	var basicas := DialogoDependientesContextual.opciones(paco, jornada, Clima.DESPEJADO)
+	_comprobar(basicas.size() == 2, "sin contexto extra ofrece dos respuestas")
+	_comprobar(basicas[0]["id"] == "pragmatica", "la primera respuesta es pragmática")
+	var lluvia := DialogoDependientesContextual.opciones(paco, jornada, Clima.LLUVIA)
+	_comprobar(lluvia.any(func(opcion): return opcion["id"] == "tiempo"), "la lluvia abre rama propia")
+
+	var cliente := {"dia": 3, ComercioBarrio.CLAVE_COMPRAS: ["periodico_tarde_98"]}
+	var compra := DialogoDependientesContextual.opciones(paco, cliente, Clima.DESPEJADO)
+	_comprobar(compra.any(func(opcion): return opcion["id"] == "cliente"), "la compra previa abre rama")
+	_comprobar(compra.size() <= 4, "nunca muestra más de cuatro respuestas")
+
+	var primera := DialogoDependientesContextual.registrar(jornada, "paco", "curiosidad")
+	_comprobar(bool(primera.get("nueva", false)), "la primera respuesta registra memoria")
+	var reentrada := DialogoDependientesContextual.reentrada(jornada, "paco")
+	_comprobar(not reentrada.is_empty(), "la memoria produce reentrada")
+	var repetida := DialogoDependientesContextual.registrar(jornada, "paco", "pragmatica")
+	_comprobar(not bool(repetida.get("nueva", true)), "repetir no reescribe la memoria")
+	_comprobar(
+		DialogoDependientesContextual.reentrada(jornada, "paco") == reentrada,
+		"la primera elección permanece estable"
+	)
+
+	for id_dependiente in ["paco", "remedios", "kike"]:
+		for clave in DialogoDependientesContextual.claves(id_dependiente):
+			_comprobar(TranslationServer.translate(clave) != clave, "%s tiene texto" % clave)
 
 
 func _probar_montaje() -> void:
