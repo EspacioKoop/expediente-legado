@@ -1,4 +1,5 @@
 import { handleAgentMemory } from "./agent_memory.ts";
+import { handleAgentPool } from "./agent_pool_state.ts";
 
 const DEFAULT_REPOSITORY = "EspacioKoop/expediente-legado";
 const CATEGORIES = new Set([
@@ -195,10 +196,11 @@ async function handler(
     return json({
       ok: true,
       service: "siga98-feedback-deno",
-      version: 2,
+      version: 3,
       github_configured: Boolean(Deno.env.get("GITHUB_TOKEN")),
       kv_configured: kvConfigured,
       agent_memory: true,
+      agent_pool_control: true,
     });
   }
 
@@ -211,6 +213,17 @@ async function handler(
       return json({ ok: false, error: "service_unavailable" }, 503);
     }
     return await handleAgentMemory(request, url, kv, configuredRepository());
+  }
+
+  if (url.pathname.startsWith("/api/agent-pool/")) {
+    let kv: Deno.Kv;
+    try {
+      kv = await getKv();
+    } catch (error) {
+      console.error("Agent pool KV unavailable", error);
+      return json({ ok: false, error: "service_unavailable" }, 503);
+    }
+    return await handleAgentPool(request, url, kv, configuredRepository());
   }
 
   if (url.pathname !== "/api/report") {
