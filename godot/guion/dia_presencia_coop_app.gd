@@ -434,10 +434,11 @@ func _actualizar_estado_red() -> void:
 func _estado_red() -> Dictionary:
 	if _servicio == null or not _servicio.activa():
 		return {"ok": true, "status": "inactive", "online": false}
-	var estado_transporte := _servicio.estado_transporte()
+	var estado_transporte: Variant = _servicio.estado_transporte()
 	if not estado_transporte is Dictionary:
 		return {"ok": false, "status": "transport_unavailable", "online": false}
-	return estado_transporte
+	var estado: Dictionary = estado_transporte
+	return estado
 
 
 func _actualizar_boton_sala() -> void:
