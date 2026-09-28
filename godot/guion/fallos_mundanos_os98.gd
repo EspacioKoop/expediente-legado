@@ -93,6 +93,33 @@ const REGLAS := [
 		"fixture_anomalo": "cache_de_recurso_imposible",
 		"refs": ["#667"],
 	},
+	{
+		"id": "firma_catalogada_detectada",
+		"superficie": "software",
+		"evento": "firma_catalogada",
+		"causa": "El limpiador ficticio encontró una firma catalogada en un objeto del OS simulado.",
+		"resolucion":
+		"Neutralizar la incidencia o cerrar el aviso sin modificar archivos del sistema real.",
+		"salida_segura": "cerrar_aviso",
+		"regla_normal": "El limpiador ficticio solo detecta firmas presentes en su catálogo interno.",
+		"fixture_anomalo": "firma_no_catalogada_detectada",
+		"refs": ["#668", "#539"],
+	},
+]
+
+const FIRMAS_LIMPIADOR := [
+	{
+		"id": "macro-marmota-98",
+		"nombre": "Macro Marmota 98",
+		"tipo": "macro_ficticia",
+		"descripcion": "Macro de demostración que reaparece al abrir un documento simulado.",
+	},
+	{
+		"id": "residente-cinta-azul",
+		"nombre": "Cinta Azul residente",
+		"tipo": "residente_ficticio",
+		"descripcion": "Utilidad residente dudosa que solo existe dentro del estado del OS98.",
+	},
 ]
 
 
@@ -109,6 +136,116 @@ static func regla(id: String) -> Dictionary:
 		if String(declaracion.get("id", "")) == id:
 			return declaracion.duplicate(true)
 	return {}
+
+
+static func firmas_limpiador() -> Array[Dictionary]:
+	var salida: Array[Dictionary] = []
+	for valor in FIRMAS_LIMPIADOR:
+		salida.append((valor as Dictionary).duplicate(true))
+	return salida
+
+
+static func firma_limpiador(id: String) -> Dictionary:
+	for valor in FIRMAS_LIMPIADOR:
+		var firma := valor as Dictionary
+		if String(firma.get("id", "")) == id:
+			return firma.duplicate(true)
+	return {}
+
+
+## Escanea exclusivamente objetos ya presentes en el estado ficticio del OS98.
+## Una firma desconocida se ignora: #539 podrá violar después esa regla de forma explícita.
+static func escanear_limpiador(estado_os: Dictionary) -> Array[Dictionary]:
+	var detecciones: Array[Dictionary] = []
+	var objetos: Variant = estado_os.get("objetos_simulados", [])
+	if not objetos is Array:
+		return detecciones
+	for valor in objetos as Array:
+		if not valor is Dictionary:
+			continue
+		var objeto := valor as Dictionary
+		if not bool(objeto.get("activo", false)):
+			continue
+		var firma := firma_limpiador(String(objeto.get("firma_id", "")))
+		if firma.is_empty():
+			continue
+		detecciones.append(
+			{
+				"objeto_id": String(objeto.get("id", "")),
+				"firma_id": String(firma.get("id", "")),
+				"nombre": String(firma.get("nombre", "")),
+				"tipo": String(firma.get("tipo", "")),
+			}
+		)
+	detecciones.sort_custom(_orden_detecciones_limpiador)
+	return detecciones
+
+
+## Neutraliza una detección conocida mutando solo el diccionario simulado recibido.
+## No borra el objeto: marca un estado reversible para que guardar/cerrar siga siendo seguro.
+static func neutralizar_limpiador(estado_os: Dictionary, objeto_id: String) -> Dictionary:
+	var objetos: Variant = estado_os.get("objetos_simulados", [])
+	if not objetos is Array:
+		return {"ok": false, "motivo": "estado_invalido"}
+	var lista := objetos as Array
+	for indice in range(lista.size()):
+		var valor: Variant = lista[indice]
+		if not valor is Dictionary:
+			continue
+		var objeto := valor as Dictionary
+		if String(objeto.get("id", "")) != objeto_id:
+			continue
+		var firma := firma_limpiador(String(objeto.get("firma_id", "")))
+		if firma.is_empty():
+			return {"ok": false, "motivo": "firma_no_catalogada"}
+		if not bool(objeto.get("activo", false)):
+			return {"ok": false, "motivo": "ya_inactivo"}
+		var copia := objeto.duplicate(true)
+		copia["activo"] = false
+		copia["neutralizado"] = true
+		lista[indice] = copia
+		estado_os["objetos_simulados"] = lista
+		return {
+			"ok": true,
+			"objeto_id": objeto_id,
+			"firma": firma,
+			"incidencia": evaluar("firma_catalogada_detectada", {"evento": "firma_catalogada"}),
+		}
+	return {"ok": false, "motivo": "objeto_desconocido"}
+
+
+## Reversión explícita para pruebas/UX de recuperación: tampoco toca nada fuera del estado simulado.
+static func restaurar_limpiador(estado_os: Dictionary, objeto_id: String) -> bool:
+	var objetos: Variant = estado_os.get("objetos_simulados", [])
+	if not objetos is Array:
+		return false
+	var lista := objetos as Array
+	for indice in range(lista.size()):
+		var valor: Variant = lista[indice]
+		if not valor is Dictionary:
+			continue
+		var objeto := valor as Dictionary
+		if String(objeto.get("id", "")) != objeto_id:
+			continue
+		if firma_limpiador(String(objeto.get("firma_id", ""))).is_empty():
+			return false
+		if not bool(objeto.get("neutralizado", false)):
+			return false
+		var copia := objeto.duplicate(true)
+		copia["activo"] = true
+		copia["neutralizado"] = false
+		lista[indice] = copia
+		estado_os["objetos_simulados"] = lista
+		return true
+	return false
+
+
+static func _orden_detecciones_limpiador(a: Dictionary, b: Dictionary) -> bool:
+	var objeto_a := String(a.get("objeto_id", ""))
+	var objeto_b := String(b.get("objeto_id", ""))
+	if objeto_a == objeto_b:
+		return String(a.get("firma_id", "")) < String(b.get("firma_id", ""))
+	return objeto_a < objeto_b
 
 
 ## Evalúa únicamente estado ficticio suministrado por el consumidor.
