@@ -104,6 +104,24 @@ CONTEXT_STOPWORDS = {
 }
 
 
+class _GithubSafeRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """No reenvía credenciales GitHub cuando un artefacto salta a blob storage."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        redirected = super().redirect_request(req, fp, code, msg, headers, newurl)
+        if redirected is None:
+            return None
+
+        source = urllib.parse.urlsplit(req.full_url).hostname
+        target = urllib.parse.urlsplit(redirected.full_url).hostname
+        if source and target and source.casefold() != target.casefold():
+            for mapping in (redirected.headers, redirected.unredirected_hdrs):
+                for key in list(mapping):
+                    if key.casefold() == "authorization":
+                        del mapping[key]
+        return redirected
+
+
 def github_bytes(url: str, token: str) -> bytes:
     request = urllib.request.Request(
         url,
@@ -114,8 +132,9 @@ def github_bytes(url: str, token: str) -> bytes:
             "X-GitHub-Api-Version": "2022-11-28",
         },
     )
+    opener = urllib.request.build_opener(_GithubSafeRedirectHandler())
     try:
-        with urllib.request.urlopen(request, timeout=30) as response:
+        with opener.open(request, timeout=30) as response:
             return response.read()
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", "replace")[:1000]
