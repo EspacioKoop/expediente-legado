@@ -13,6 +13,7 @@ signal rumbo_cambiado(posicion: Vector3)
 const TIPO_RECORRIDO := SuenoObjetivosVariedad.TIPO_RECORRIDO
 const TIPO_SECUENCIA := SuenoObjetivosVariedad.TIPO_SECUENCIA
 const TIPO_PERMANENCIA := SuenoObjetivosVariedad.TIPO_PERMANENCIA
+const TIPO_RETORNO := SuenoObjetivosVariedad.TIPO_RETORNO
 
 const RADIO_ZONA := 1.2
 const RANGO_LUZ := 2.8
@@ -46,7 +47,7 @@ func configurar(objetivo_id: String, tipo: String, actor: Node3D, puntos: Array)
 		or _actor == null
 		or not is_instance_valid(_actor)
 		or _puntos.is_empty()
-		or _tipo not in [TIPO_SECUENCIA, TIPO_PERMANENCIA]
+		or _tipo not in [TIPO_SECUENCIA, TIPO_PERMANENCIA, TIPO_RETORNO]
 	):
 		return false
 
@@ -60,7 +61,7 @@ func configurar(objetivo_id: String, tipo: String, actor: Node3D, puntos: Array)
 func punto_actual() -> Vector3:
 	if _puntos.is_empty():
 		return global_position
-	if _tipo == TIPO_SECUENCIA:
+	if _tipo in [TIPO_SECUENCIA, TIPO_RETORNO]:
 		return _puntos[mini(_indice_secuencia, _puntos.size() - 1)]
 	return _puntos[0]
 
@@ -111,7 +112,7 @@ func _crear_zona(indice: int, punto: Vector3) -> void:
 func _al_entrar(cuerpo: Node3D, indice: int) -> void:
 	if _terminado or cuerpo != _actor:
 		return
-	if _tipo == TIPO_SECUENCIA:
+	if _tipo in [TIPO_SECUENCIA, TIPO_RETORNO]:
 		if indice != _indice_secuencia:
 			return
 		_indice_secuencia += 1
@@ -140,7 +141,7 @@ func _actualizar_luces() -> void:
 		var luz := _luces[indice]
 		if not is_instance_valid(luz):
 			continue
-		if _tipo == TIPO_SECUENCIA:
+		if _tipo in [TIPO_SECUENCIA, TIPO_RETORNO]:
 			luz.visible = indice == _indice_secuencia
 			luz.light_energy = ENERGIA_LUZ_ACTIVA if luz.visible else 0.0
 		else:
