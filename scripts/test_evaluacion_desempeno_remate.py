@@ -53,6 +53,11 @@ class EvaluacionDesempenoRemateTest(unittest.TestCase):
             self.assertIn(clave + ",", self.textos)
         self.assertIn("EVALUACION_REMATE_ROTULO,", self.textos)
 
+    def test_remate_incluye_categoria_v3_sin_nota_total(self):
+        self.assertIn('"actividad_improductiva"', self.presentacion)
+        self.assertIn('var y := -40.0', self.presentacion)
+        self.assertIn('y += 17.0', self.presentacion)
+
     def test_el_despido_real_anexa_el_informe(self):
         self.assertIn("EvaluacionDesempenoCinematica.planos_de(estado, vistas)", self.despido)
         self.assertIn("DespidoCinematica.planos_con_remate(", self.visor)
@@ -66,7 +71,7 @@ class EvaluacionDesempenoRemateTest(unittest.TestCase):
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
         resumen = RESUMEN.search(resultado.stdout)
         self.assertIsNotNone(resumen, resultado.stdout)
-        self.assertGreaterEqual(int(resumen.group(1)), 9, resultado.stdout)
+        self.assertGreaterEqual(int(resumen.group(1)), 11, resultado.stdout)
 
 
 if __name__ == "__main__":
