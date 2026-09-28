@@ -1,0 +1,93 @@
+import csv
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import tempfile
+import unittest
+
+
+ROOT = Path(__file__).resolve().parents[1]
+DIALOGO = ROOT / "godot" / "guion" / "dialogo_religion_933.gd"
+DIA = ROOT / "godot" / "guion" / "dia_clima_app.gd"
+TEXTOS = ROOT / "godot" / "datos" / "textos.csv"
+PRUEBA_GODOT = "res://pruebas/pruebas_dialogo_religion_933.gd"
+
+
+class DialogoReligion933Test(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.dialogo = DIALOGO.read_text(encoding="utf-8")
+        cls.dia = DIA.read_text(encoding="utf-8")
+        with TEXTOS.open(encoding="utf-8", newline="") as archivo:
+            cls.textos = {fila["clave"]: fila["es"] for fila in csv.DictReader(archivo)}
+
+    def test_dos_interlocutores_consumen_canales_distintos(self) -> None:
+        self.assertIn("ACTOR_CUNADO", self.dialogo)
+        self.assertIn("ACTOR_CORRESPONDENCIA", self.dialogo)
+        self.assertIn("ReligionEventos.CANAL_EXPOSICION", self.dialogo)
+        self.assertIn("ReligionEventos.CANAL_PRACTICA", self.dialogo)
+        self.assertNotIn("ReligionEventos.CANAL_CONVICCION", self.dialogo)
+        self.assertNotIn("ReligionEventos.CANAL_VINCULO", self.dialogo)
+
+    def test_conocimiento_es_explicito_y_limitado_a_la_vuelta(self) -> None:
+        self.assertIn('evento.get("publico", false)', self.dialogo)
+        self.assertIn('evento.get("conocido_por", [])', self.dialogo)
+        self.assertIn("ReligionEventos.eventos_de_vuelta(", self.dialogo)
+
+    def test_oficina_propaga_id_estable_y_conserva_dialogo_base(self) -> None:
+        self.assertIn('companero.set_meta("id_companero"', self.dia)
+        self.assertIn('companero.get_meta("id_companero", "")', self.dia)
+        self.assertIn("DialogoReligion933.resolver_clave(", self.dia)
+        self.assertIn("return clave_dialogo", self.dia)
+        self.assertIn("DialogoIdeologico.SUPERFICIE_OFICINA_CUNADO", self.dia)
+
+    def test_no_toca_progreso_ni_economia(self) -> None:
+        combinado = self.dialogo
+        for termino in (
+            "pistas_descubiertas",
+            "veredictos",
+            "dinero",
+            "acciones",
+            "Estres.aplicar",
+            "registrar(",
+        ):
+            self.assertNotIn(termino, combinado)
+
+    def test_textos_visibles_estan_catalogados(self) -> None:
+        for clave in (
+            "RELIGION_933_CUNADO_EXPOSICION",
+            "RELIGION_933_CORRESPONDENCIA_PRACTICA",
+        ):
+            self.assertIn(clave, self.textos)
+            self.assertTrue(self.textos[clave].strip())
+
+    def test_runtime_standalone(self) -> None:
+        motor = os.environ.get("GODOT_BIN") or shutil.which("godot4")
+        if not motor:
+            self.skipTest("Godot no disponible en este entorno")
+        with tempfile.TemporaryDirectory(prefix="religion-933-") as temporal:
+            entorno = os.environ.copy()
+            for variable, carpeta in (
+                ("XDG_DATA_HOME", "datos"),
+                ("XDG_CONFIG_HOME", "config"),
+                ("XDG_CACHE_HOME", "cache"),
+            ):
+                entorno[variable] = str(Path(temporal) / carpeta)
+            resultado = subprocess.run(
+                [motor, "--headless", "--path", str(ROOT / "godot"), "--script", PRUEBA_GODOT],
+                env=entorno,
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                timeout=30,
+                check=False,
+            )
+        self.assertEqual(resultado.returncode, 0, resultado.stdout)
+        self.assertIn("0 fallos", resultado.stdout)
+        self.assertNotIn("SCRIPT ERROR:", resultado.stdout)
+        self.assertNotIn("Parse Error:", resultado.stdout)
+
+
+if __name__ == "__main__":
+    unittest.main()

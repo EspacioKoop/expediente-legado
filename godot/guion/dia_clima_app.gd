@@ -281,6 +281,7 @@ func _montar_companeros_conversables() -> void:
 		companero.position = figura["pos"] + Vector3(0.0, 0.9, 0.0)
 		companero.nombre_visible = String(figura.get("rotulo", ""))
 		companero.clave_dialogo = clave
+		companero.set_meta("id_companero", String(figura.get("id_companero", "")))
 		companero.set_meta("dialogo_literario", dialogo_literario)
 		(
 			companero
@@ -445,23 +446,25 @@ func _clave_conversacion_contextual(
 	companero: CompaneroInteractivo3D,
 	clave_dialogo: String,
 ) -> String:
-	if companero.nombre_visible != tr("COMPA_CUNADO"):
-		return clave_dialogo
-
-	var variante := (
-		DialogoIdeologico
-		. resolver(
-			DialogoIdeologico.SUPERFICIE_OFICINA_CUNADO,
-			partida.estado,
+	if companero.nombre_visible == tr("COMPA_CUNADO"):
+		var variante := (
+			DialogoIdeologico
+			. resolver(
+				DialogoIdeologico.SUPERFICIE_OFICINA_CUNADO,
+				partida.estado,
+			)
 		)
-	)
-	var clave_reaccion := String(variante.get("clave", ""))
-	if clave_reaccion.is_empty():
-		return clave_dialogo
+		var clave_reaccion := String(variante.get("clave", ""))
+		if not clave_reaccion.is_empty():
+			if DialogoIdeologico.registrar_respuesta(partida.estado, variante):
+				_guardar_o_avisar("")
+			return clave_reaccion
 
-	if DialogoIdeologico.registrar_respuesta(partida.estado, variante):
-		_guardar_o_avisar("")
-	return clave_reaccion
+	var actor_id := String(companero.get_meta("id_companero", ""))
+	var clave_religiosa := DialogoReligion933.resolver_clave(partida.estado, actor_id)
+	if not clave_religiosa.is_empty():
+		return clave_religiosa
+	return clave_dialogo
 
 
 func _al_cerrar_dialogo() -> void:

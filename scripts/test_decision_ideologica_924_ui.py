@@ -49,10 +49,11 @@ class DecisionIdeologica924UITest(unittest.TestCase):
 
     def test_el_cunado_reacciona_solo_al_evento_observable(self) -> None:
         self.assertIn(
-            'companero.nombre_visible != tr("COMPA_CUNADO")',
+            'companero.nombre_visible == tr("COMPA_CUNADO")',
             self.dia,
         )
         self.assertIn("DialogoIdeologico.SUPERFICIE_OFICINA_CUNADO", self.dia)
+        self.assertIn("if not clave_reaccion.is_empty():", self.dia)
         self.assertIn("DialogoIdeologico.registrar_respuesta(", self.dia)
         self.assertIn('_guardar_o_avisar("")', self.dia)
 
