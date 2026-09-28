@@ -201,11 +201,14 @@ func _vuelo_previo() -> Dictionary:
 		return {}
 	if int(estado.get("turno", 0)) != 0 or _vuelo_en_curso:
 		return {}
-	return AvionesPapel.simular(
-		MODELOS[modelo.selected],
-		float(direccion.value),
-		float(altura.value),
-		float(potencia.value),
+	return (
+		AvionesPapel
+		. simular(
+			MODELOS[modelo.selected],
+			float(direccion.value),
+			float(altura.value),
+			float(potencia.value),
+		)
 	)
 
 
