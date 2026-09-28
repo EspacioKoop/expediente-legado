@@ -113,9 +113,8 @@ static func comparar_con_anterior(jornada: Dictionary) -> Dictionary:
 			"actual": actuales.size(),
 			"anterior": anteriores.size(),
 			"comunes": comunes.size(),
-			"fraccion_actual": (
-				0.0 if actuales.is_empty() else float(comunes.size()) / float(actuales.size())
-			),
+			"fraccion_actual":
+			0.0 if actuales.is_empty() else float(comunes.size()) / float(actuales.size()),
 		}
 	return resultado
 
@@ -125,7 +124,11 @@ static func validar(valor: Dictionary, vuelta_esperada: int = 0) -> Array:
 	if valor.is_empty():
 		return errores
 	var vuelta = valor.get("vuelta", 0)
-	if typeof(vuelta) not in [TYPE_INT, TYPE_FLOAT] or int(vuelta) < 1 or float(vuelta) != int(vuelta):
+	if (
+		typeof(vuelta) not in [TYPE_INT, TYPE_FLOAT]
+		or int(vuelta) < 1
+		or float(vuelta) != int(vuelta)
+	):
 		errores.append("vuelta inválida")
 	elif vuelta_esperada > 0 and int(vuelta) != vuelta_esperada:
 		errores.append("vuelta no coincide con Jornada")
