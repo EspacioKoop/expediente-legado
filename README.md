@@ -13,6 +13,7 @@ El proyecto nació como aplicación web con Spring Boot y se está reescribiendo
 | [ROADMAP.md](ROADMAP.md) | Fases, gates y dirección hasta la 1.0 |
 | [Índice de documentación](docs/README.md) | Qué documento es canónico para cada área |
 | [Wiki](https://github.com/EspacioKoop/expediente-legado/wiki) | Conceptos permanentes para jugadores, desarrolladores y agentes; si discrepa del repo, manda el repo |
+| [Agentes autónomos](docs/agents-autonomos.md) | Autopilot, pool paralelo, proveedores, memoria y límites de seguridad |
 | [Referencias ludonarrativas](docs/research/referencias-ludonarrativas.md) | Técnicas de investigación/presentación y sus límites de adopción |
 | [AGENTS.md](AGENTS.md) | Flujo obligatorio para agentes y trampas conocidas |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Ramas, PR, pruebas y revisión |
@@ -22,9 +23,9 @@ El proyecto nació como aplicación web con Spring Boot y se está reescribiendo
 
 Este repositorio adopta las [Normas Platino](https://github.com/EspacioKoop/normas_platino): **reserva antes de editar, rama propia, PR obligatorio, CI y autorización humana de integración**. El silencio no caduca una reserva y `PR_READY` no equivale a permiso para mergear. Una reserva protege archivos, no bloquea la cooperación.
 
-## Estado actual — 2026-09-26
+## Estado actual — 2026-09-28
 
-La referencia sigue siendo `main`. Este corte documenta el estado integrado hasta `6ccfa4317897d70ca9462e7c92aefea41095b2bc`; un PR abierto o una rama adelantada no cuentan como funcionalidad disponible hasta su merge.
+La referencia sigue siendo `main`. Este corte documenta el estado integrado hasta `b21901c5b7036d27b427e022cb4a7b3659dd95ba`; un PR abierto o una rama adelantada no cuentan como funcionalidad disponible hasta su merge.
 
 El núcleo ya no está en una fase de “port mínimo”. En los últimos cortes se han reforzado la investigación documental, la interfaz diegética de SIGA-98, las consecuencias espaciales del trabajo burocrático, la vida ambiental y la identidad visual/onírica. Aun así, **el siguiente playthrough humano completo sigue siendo el gate principal**: CI verde y evidencia automatizada no sustituyen legibilidad, tacto, ritmo ni continuidad real.
 
@@ -39,6 +40,7 @@ El núcleo ya no está en una fase de “port mínimo”. En los últimos cortes
 
 - **Reconstrucciones 3D por fuente:** #1365 y #1369 cubren los diez expedientes actuales con reconstrucciones breves ligadas a documentos leídos. Son representaciones de un punto de vista, no una “verdad canónica secreta”.
 - **Terminal SIGA:** #1410 crea un núcleo de terminal ficticio y seguro; #1416 lo conecta al puesto de oficina; #1422 añade archivos temporales/usuarios simulados y #1423 historial navegable. No ejecuta red, procesos ni filesystem reales.
+- **Mensajería interna OS98:** #1591 integra el chat corporativo como aplicación real del shell, con canales, presencia narrativa, historial y respuestas cerradas. Reutiliza Jornada/Web98 y estado local de partida; no crea red, shell ni una fuente paralela de pistas.
 - **Análisis y falsificación de copias:** #1426 añade análisis opcional basado en hechos visibles; #1429 permite intervenir copias temporales de forma determinista y #1431 añade revisión interna narrativa. Este bloque no debe reescribir el documento fuente ni convertir el minijuego en una vía para inventar evidencia.
 - **Archivado con consecuencias:** #1435 materializa desorden recuperable al archivar mal y #1436 deriva una demora de búsqueda acotada de ese mismo estado. Las consecuencias son reversibles y no crean una segunda fuente de persistencia.
 - **Profundidad de investigación:** #286/#431/#513 siguen siendo los paraguas/gates de calidad. Más herramientas no equivalen automáticamente a un expediente más interesante: el playtest debe comprobar qué aporta realmente a leer, contrastar y decidir.
@@ -70,6 +72,17 @@ Siguen necesitando persona, hardware o export real, entre otros:
 - **#431/#513/#286** — profundidad de expedientes y utilidad real de documentos/reconstrucciones;
 - **#119/#966** — mezcla y audio adaptativo en contexto;
 - **#112** — exportación/publicación cuando vuelva a activarse la entrega pública.
+
+### Alpha, observabilidad y agentes
+
+- **Canal continuo de playtest:** `playtest-latest` mantiene una alpha identificada por SHA. F9 abre el parte de incidencias desde el juego (#1461); el envío remoto conserva copia/fallback y la cadena alojada puede usar Cloudflare → Deno → Vercel (#1524/#1531) sin incluir credenciales en la build.
+- **Observabilidad opcional:** #1556 prepara Sentry para las alphas solo cuando Actions recibe `SENTRY_DSN`. Sin DSN no cambia la build; F9 sigue siendo el canal humano independiente.
+- **Agentes autónomos:** #1542 inicia el autopilot Qwen/Gemini y #1590 integra Kev + context packer. #1595 unifica `agent:auto`, `agent:pool`, `agent:qwen` y `agent:gemini` en el dispatcher paralelo; `agent-autopilot.yml` queda como entrada manual. Las selecciones Qwen/Gemini explícitas siguen siendo obligatorias y nunca hay auto-merge.
+- **Memoria y contexto:** #1555/#1563 añaden Normas Platino + wiki + Deno KV + CI brain; #1567 aporta selección determinista de contexto de wiki y #1590 conecta ese context packer también al autopilot antes del plan y tras el CLAIM. La autoridad sigue siendo repo/issue/#181/#182 y las Normas Platino.
+- **Resiliencia de proveedores:** #1569/#1571/#1585 permiten OmniRoute privado por Tailscale con fallback a Qwen directo y slots OpenAI-compatible; #1583 añade smoke aislado para los fallbacks sin permisos de escritura.
+- **Paralelismo seguro:** #1572 añade un pool de hasta seis workers; #1579/#1588 replanifican hasta dos veces si el modelo sale de las rutas reservadas y #1595 convierte ese pool en la cola operativa común. La preferencia de Kev es blanda cuando no hay proveedor explícito: si el slot sugerido no está libre, puede usarse otro disponible. El pool no cambia la regla de merge humano ni sustituye #182.
+
+Esta infraestructura acelera mantenimiento y QA, pero **no cuenta como avance jugable por sí sola**. El gate del proyecto sigue siendo la partida humana completa sobre un SHA concreto de `main`.
 
 ## Stack
 

@@ -1,12 +1,14 @@
 # Pool paralelo de agentes
 
-El pool anade concurrencia horizontal sin sustituir todavia al autopilot legado.
+El pool es la cola operativa común de agentes y aporta concurrencia horizontal de hasta seis workers. El workflow `agent-autopilot.yml` queda como entrada manual para un issue concreto.
 
 ## Modelo operativo
 
-La etiqueta `agent:pool` mete un issue en la cola paralela. **No debe coexistir con `agent:auto`** durante la transicion: el selector ignora explicitamente cualquier issue que tenga ambas etiquetas.
+`agent-pool.yml` reúne issues etiquetados con `agent:auto`, `agent:pool`, `agent:qwen` o `agent:gemini`, los deduplica y asigna, como máximo, una tarea por slot configurado. `agent:pool` queda como alias compatible; puede coexistir con `agent:auto` sin duplicar la tarea.
 
-`agent-pool.yml` reune hasta seis issues elegibles y asigna, como maximo, una tarea por slot configurado:
+Los labels `agent:qwen` y `agent:gemini` fuerzan proveedor. Para `agent:auto`/`agent:pool`, Kev puede indicar una preferencia blanda entre los workers disponibles; si el slot preferido no está libre, el dispatcher usa otro disponible.
+
+Slots:
 
 - `qwen-primary`;
 - `gemini`;
@@ -22,12 +24,21 @@ El lock por issue no sustituye #182. Despues de planificar, cada worker publica 
 
 ## Activacion
 
-1. Configura al menos un proveedor: `QWEN_API_KEY`, `GEMINI_API_KEY`, o un `QWEN_FALLBACK_N_API_KEY` acompanado de `QWEN_FALLBACK_N_BASE_URL`.
-2. Anade `agent:pool` al issue.
-3. El evento de etiqueta lanza una tanda; ademas hay un barrido cada 15 minutos.
-4. El dispatcher usa hasta seis workers disponibles.
+1. Configura al menos un proveedor: `QWEN_API_KEY`, `GEMINI_API_KEY`, o un `QWEN_FALLBACK_N_API_KEY` acompañado de `QWEN_FALLBACK_N_BASE_URL`.
+2. Añade `agent:auto` o `agent:pool`; usa `agent:qwen` / `agent:gemini` cuando el proveedor deba ser obligatorio.
+3. El evento de etiqueta lanza una tanda; además hay un barrido cada 15 minutos.
+4. El dispatcher usa hasta seis workers disponibles, deduplicando cada issue.
 
-Las etiquetas `agent:qwen` y `agent:gemini` fuerzan proveedor, no un slot concreto. Sin ellas, el selector usa el siguiente slot libre en orden determinista.
+## Replan ante salidas del CLAIM
+
+Después de la implementación, el worker ejecuta un guard provider-agnostic. Si Qwen o Gemini modifican rutas no incluidas en el plan/CLAIM:
+
+1. restaura esas rutas antes de preflight, memoria, commit o push;
+2. libera la reserva del intento descartado;
+3. publica `AGENT_POOL_REPLAN` con las rutas observadas;
+4. reejecuta el mismo issue/proveedor para que el planner amplíe el corte y vuelva a comprobar #182.
+
+Se permiten como máximo **dos replans** por issue. Si el modelo vuelve a salir del alcance, el issue pasa a `agent:needs-human`. Este mecanismo recupera errores de planificación; no autoriza a saltarse una reserva existente.
 
 ## CI
 
@@ -41,6 +52,6 @@ Cada worker conserva la jerarquia vigente: repositorio/issue/#181/#182/Normas Pl
 
 El context packer limita la wiki antes de planificar y se vuelve a ejecutar con las rutas reservadas antes de implementar.
 
-## Migracion pendiente
+## Autopilot manual
 
-Este corte no modifica `agent-autopilot.yml`. El siguiente paso, tras estabilizar este pool, es convertir `agent:auto` en alias del dispatcher o retirar el carril global `concurrency: agent-autopilot`. Hasta entonces, usa `agent:pool` exclusivamente para la cola paralela.
+La migración de cola ya está completada: `agent:auto` entra por este dispatcher. `agent-autopilot.yml` no escucha labels ni hace polling horario; se conserva para `workflow_dispatch` manual, donde se indica explícitamente el issue y puede elegirse `provider=auto`, Qwen o Gemini.

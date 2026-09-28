@@ -1,6 +1,6 @@
-# Agentes autónomos: Qwen + Gemini
+# Agentes autónomos: autopilot, pool, Qwen + Gemini
 
-El repositorio puede convertir issues autorizados en PRs draft usando Qwen Code o Gemini CLI sin entregar al modelo credenciales de push.
+El repositorio puede convertir issues autorizados en PRs draft usando Qwen Code o Gemini CLI sin entregar al modelo credenciales de push. La cola operativa entra por el dispatcher paralelo de hasta seis workers; `agent-autopilot.yml` se conserva como entrada manual para ejecutar un issue concreto.
 
 ## Configuración mínima
 
@@ -45,10 +45,11 @@ Configuración del repositorio:
 | Secret | `OMNIROUTE_API_KEY` | API key de endpoint creada en OmniRoute; no usar la contraseña del dashboard |
 | Variable | `OMNIROUTE_BASE_URL` | URL privada Tailscale terminada en `/v1` |
 | Variable | `OMNIROUTE_MODEL` | Modelo, alias o combo de OmniRoute; recomendado: `autopilot-code` |
-| Secret | `TS_OAUTH_CLIENT_ID` | Client ID de la identidad federada de Tailscale |
-| Secret | `TS_AUDIENCE` | Audience de la identidad federada |
+| Secret | `TS_OAUTH_CLIENT_ID` | Client ID de Tailscale |
+| Secret | `TS_OAUTH_SECRET` | OAuth secret preferente para el tag `github-autopilot` |
+| Secret | `TS_AUDIENCE` | Audience usada solo como fallback OIDC |
 
-El workflow usa `tailscale/github-action@v4` con `tag:github-autopilot`. La policy de la tailnet debe permitir a ese tag únicamente TCP/443 hacia el equipo que ejecuta OmniRoute. No usar Tailscale Funnel ni abrir los puertos 20128/20130/20131 en el router.
+El workflow usa `tailscale/github-action@v4` con `tag:github-autopilot`. OAuth (`TS_OAUTH_CLIENT_ID` + `TS_OAUTH_SECRET`) tiene prioridad; OIDC (`TS_OAUTH_CLIENT_ID` + `TS_AUDIENCE`) queda como fallback. Si Tailscale falla, OmniRoute se marca como no disponible y el worker continúa por los backends directos. La policy de la tailnet debe permitir al tag únicamente TCP/443 hacia el equipo que ejecuta OmniRoute. No usar Tailscale Funnel ni abrir los puertos 20128/20130/20131 en el router.
 
 En la máquina que aloja OmniRoute, publica únicamente el puerto API local mediante `tailscale serve --bg http://127.0.0.1:<puerto>`, usa la URL MagicDNS resultante terminada en `/v1` como `OMNIROUTE_BASE_URL` y restringe la policy para que `tag:github-autopilot` solo pueda alcanzar TCP/443 de ese equipo.
 
@@ -101,14 +102,38 @@ El workflow nunca aprueba ni fusiona PRs; el ajuste solo permite crear el draft.
 
 Los labels se crean automáticamente al integrarse el workflow:
 
-- `agent:auto`: entra en la cola automática;
-- `agent:qwen`: ejecución inmediata con Qwen;
-- `agent:gemini`: ejecución inmediata con Gemini;
+- `agent:auto`: cola automática, proveedor elegido por disponibilidad/Kev;
+- `agent:pool`: alias compatible de la misma cola paralela;
+- `agent:qwen`: cola con Qwen obligatorio;
+- `agent:gemini`: cola con Gemini obligatorio;
 - `agent:working`: hay una ejecución activa;
 - `agent:pr-open`: ya existe un PR generado;
 - `agent:needs-human`: hubo ambigüedad, conflicto, falta de configuración o se agotó la reparación automática.
 
-Etiquetar un issue con `agent:auto`, `agent:qwen` o `agent:gemini` lo dispara. Además, cada hora el scheduler recoge el primer `agent:auto` que siga pendiente. También se puede lanzar **Agent autopilot** manualmente desde Actions indicando issue y proveedor.
+Etiquetar un issue con `agent:auto`, `agent:pool`, `agent:qwen` o `agent:gemini` lo mete en el dispatcher común. El pool hace además un barrido cada 15 minutos y deduplica issues encontrados por varias etiquetas. **Agent autopilot** queda disponible desde Actions para ejecutar manualmente un issue concreto y un proveedor (`auto`, Qwen o Gemini).
+
+### Selección automática y contexto acotado
+
+En la cola unificada, el dispatcher consulta `scripts/kev_router.py` para obtener una **preferencia blanda** cuando no existe proveedor explícito. `agent:qwen` y `agent:gemini` son obligatorios; para `agent:auto`/`agent:pool`, si el proveedor sugerido no tiene slot libre se usa otro worker disponible. La ejecución manual de `agent-autopilot.yml` mantiene el router cuando se selecciona `provider=auto`. Sin `KEV_BASE_URL`, con timeout, baja confianza o respuesta inválida, se conserva una selección determinista.
+
+Kev recibe únicamente título, cuerpo y labels del issue. No recibe `GITHUB_TOKEN`, secretos de proveedores, logs completos ni memorias sin filtrar.
+
+El autopilot y el pool usan además `scripts/agent_context_pack.py`: generan un `.agent-context.md` acotado desde la wiki antes del plan y lo regeneran tras el CLAIM incorporando las rutas reservadas. La wiki completa queda como respaldo local; el pack nunca desplaza al repositorio, issue, #181/#182 ni a las Normas Platino como fuentes de autoridad.
+
+### Pool paralelo
+
+El dispatcher documentado en [`agents/parallel-pool.md`](agents/parallel-pool.md) es la cola operativa común para `agent:auto`, `agent:pool`, `agent:qwen` y `agent:gemini`. `agent:pool` se conserva como alias compatible y ya puede coexistir con `agent:auto`: el selector deduplica por issue.
+
+El dispatcher:
+
+- reúne hasta seis issues elegibles y usa como máximo un trabajo por slot/proveedor en cada tanda;
+- separa Qwen primario, Gemini y cuatro slots OpenAI-compatible;
+- aplica `concurrency` por issue para impedir dos workers simultáneos sobre la misma tarea;
+- sigue publicando y releyendo CLAIMs en #182: el lock técnico no sustituye la reserva;
+- ejecuta context packer, Deno KV y CI brain antes de abrir un PR draft;
+- ante cambios fuera del CLAIM, restaura el intento, libera la reserva y replantea hasta dos veces antes de escalar a `agent:needs-human`.
+
+El barrido del pool se ejecuta cada 15 minutos, además del disparo por etiqueta. `agent-autopilot.yml` ya no hace polling ni escucha labels: queda únicamente como ejecución manual.
 
 ## Normas Platino, wiki y memoria
 
@@ -188,7 +213,8 @@ No son necesarias para empezar:
 ## Límites deliberados
 
 - nunca merge automático;
-- una sola creación autónoma a la vez para reducir colisiones;
+- la cola automática usa el pool de hasta seis workers, uno por slot y nunca dos simultáneos sobre el mismo issue; el autopilot manual conserva una ejecución concreta por invocación;
+- máximo dos replans automáticos cuando un intento sale de las rutas del CLAIM;
 - máximo 12 rutas por corte;
 - máximo dos reparaciones automáticas de CI;
 - no se automatizan validaciones humanas visuales, mando físico ni decisiones narrativas;
