@@ -298,6 +298,7 @@ class AgentPoolTest(unittest.TestCase):
         self.assertIn('if [[ "$JOB_STATUS" == cancelled ]]', worker)
         self.assertIn("motivo=agent-pool-cancelado-sin-PR", worker)
         self.assertIn("vuelve a cola sin penalizar al worker", worker)
+        self.assertNotIn("en `$WORKER`", worker)
 
         cancel_block = worker.split('if [[ "$JOB_STATUS" == cancelled ]]', 1)[1].split(
             'if [[ "${RESERVED:-}" != true && -z "$pr" ]]', 1
