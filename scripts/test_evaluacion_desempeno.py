@@ -25,6 +25,10 @@ class EvaluacionDesempenoContractTest(unittest.TestCase):
             'gato.get("dias_sin_comer", 0)',
             'jornada.get("trabajillos", {})',
             'trabajillos.get("hechos", 0)',
+            'jornada.get(BingoSiga.CLAVE_ESTADO, {})',
+            'entrada.get("objetivos", [])',
+            'entrada.get("completados", [])',
+            'dato.get("tipo", "")',
         ]:
             self.assertIn(token, self.source)
 
@@ -36,10 +40,33 @@ class EvaluacionDesempenoContractTest(unittest.TestCase):
             '"liquidez"',
             '"exploracion_onirica"',
             '"dependencia_dinero"',
+            '"actividad_improductiva"',
         ]:
             self.assertIn(category, self.source)
         self.assertNotIn('"puntuacion_total"', self.source)
         self.assertNotIn('"nota"', self.source)
+
+    def test_actividad_improductiva_usa_historial_por_vuelta_del_bingo(self):
+        self.assertIn('const VERSION_EVALUACION_ACTUAL := 3', self.source)
+        self.assertIn(
+            'const CATEGORIAS_V2 := CATEGORIAS_V1 + ["dependencia_dinero"]',
+            self.source,
+        )
+        self.assertIn(
+            'const CATEGORIAS := CATEGORIAS_V2 + ["actividad_improductiva"]',
+            self.source,
+        )
+        self.assertIn("static func _actividad_improductiva(jornada: Dictionary) -> int:", self.source)
+        self.assertIn('String(dato.get("tipo", "")) != "improductivo"', self.source)
+        self.assertIn('(completados as Array).has(objetivo_id)', self.source)
+        self.assertIn('"actividad_improductiva": _rango(actividad_improductiva, 1, 3)', self.source)
+
+    def test_validacion_mantiene_compatibilidad_v1_v2_y_v3(self):
+        self.assertIn("if version_evaluacion == 1:", self.source)
+        self.assertIn("requeridas = CATEGORIAS_V1", self.source)
+        self.assertIn("elif version_evaluacion == 2:", self.source)
+        self.assertIn("requeridas = CATEGORIAS_V2", self.source)
+        self.assertIn("version_evaluacion > VERSION_EVALUACION_ACTUAL", self.source)
 
     def test_calcular_remains_pure_and_grants_no_rewards(self):
         calcular = self.source.split("static func calcular", 1)[1].split(

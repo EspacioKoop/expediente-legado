@@ -23,12 +23,12 @@ class EvaluacionDesempenoV2Tests(unittest.TestCase):
         self.assertNotIn("Trabajillos._estado", self.source)
 
     def test_versiona_sin_romper_informes_v1(self):
-        self.assertIn("const VERSION_EVALUACION_ACTUAL := 2", self.source)
+        self.assertIn("const VERSION_EVALUACION_ACTUAL := 3", self.source)
         self.assertIn('registro.get("version_evaluacion", 1)', self.source)
-        self.assertIn(
-            "CATEGORIAS_V1 if version_evaluacion == 1 else CATEGORIAS",
-            self.source,
-        )
+        self.assertIn("if version_evaluacion == 1:", self.source)
+        self.assertIn("requeridas = CATEGORIAS_V1", self.source)
+        self.assertIn("elif version_evaluacion == 2:", self.source)
+        self.assertIn("requeridas = CATEGORIAS_V2", self.source)
         self.assertIn(
             '"version_evaluacion": VERSION_EVALUACION_ACTUAL',
             self.source,
