@@ -13,7 +13,10 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
-import gestionar_reservas as base
+try:
+    from . import gestionar_reservas as base
+except ImportError:  # ejecución directa: python scripts/gestionar_reservas_rollover.py
+    import gestionar_reservas as base
 
 
 RAIZ = Path(__file__).resolve().parents[1]
