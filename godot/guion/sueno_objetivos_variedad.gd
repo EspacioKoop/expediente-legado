@@ -66,9 +66,7 @@ static func sincronizar_descriptores(estado: Dictionary, objetivos_espacio: Arra
 				objetivo.get("tipo", descriptor_actual.get("tipo", "interaccion"))
 			)
 			descriptor_actual["condicion"] = String(
-				objetivo.get(
-					"condicion", descriptor_actual.get("condicion", "evento_determinista")
-				)
+				objetivo.get("condicion", descriptor_actual.get("condicion", "evento_determinista"))
 			)
 			descriptores[indice] = descriptor_actual
 			break
