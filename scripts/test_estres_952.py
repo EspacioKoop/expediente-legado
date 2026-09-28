@@ -105,7 +105,7 @@ class Estres952Test(unittest.TestCase):
 
     def test_cambiar_de_fase_reinicia_la_exposicion_y_modales_no_cuentan(self):
         self.assertIn("_reiniciar_temporizador_estres_entorno()", self.dia)
-        self.assertIn("partida.guardado_pendiente or _pantalla != null or _entrada != null", self.dia)
+        self.assertIn("partida.guardado_pendiente or _pantalla != null or _entrada_vuelta_activa()", self.dia)
         self.assertIn("is_instance_valid(_dialogo_actual)", self.dia)
         self.assertIn("not _caminante.is_physics_processing()", self.dia)
         self.assertIn('_guardar_o_avisar("")', self.dia)
