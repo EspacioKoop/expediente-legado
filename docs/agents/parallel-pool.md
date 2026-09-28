@@ -49,6 +49,7 @@ El mismo control-plane mantiene el **circuit breaker por worker**. Un fallo de c
 3. El evento de etiqueta lanza una tanda; además hay un barrido cada 15 minutos como red de seguridad.
 4. El dispatcher usa hasta seis workers disponibles, deduplicando cada issue y excluyendo leases activos.
 5. Al terminar la tanda, si aún queda cola elegible, se lanza otra inmediatamente; no se espera al siguiente cron.
+6. Si no hay cola ni planificación pendiente, `agent-feeder.yml` puede seleccionar un único issue conservador y enviarlo primero a `agent:decompose`; el feeder nunca implementa directamente.
 
 ## Replan ante salidas del CLAIM
 

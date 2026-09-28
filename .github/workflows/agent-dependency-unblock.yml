@@ -10,6 +10,7 @@ on:
 permissions:
   issues: write
   contents: read
+  actions: write
 
 concurrency:
   group: agent-dependency-unblock
@@ -78,4 +79,10 @@ jobs:
             [[ "$provider" == gemini ]] && queue_label=agent:gemini
             gh issue edit "$issue" --repo "$GITHUB_REPOSITORY" --remove-label agent:blocked --add-label "$queue_label" >/dev/null
             gh issue comment "$issue" --repo "$GITHUB_REPOSITORY" --body "Agent dependencies: todas las dependencias declaradas están cerradas; la subtarea entra en $queue_label." >/dev/null || true
+            echo "$issue" >> /tmp/agent-unblocked.txt
           done
+
+          if [[ -s /tmp/agent-unblocked.txt ]]; then
+            echo "Subtareas desbloqueadas: $(paste -sd, /tmp/agent-unblocked.txt)"
+            gh workflow run agent-pool.yml --repo "$GITHUB_REPOSITORY" --ref main -f max_parallel=6
+          fi
