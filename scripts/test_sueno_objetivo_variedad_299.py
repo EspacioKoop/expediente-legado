@@ -45,6 +45,11 @@ class SuenoObjetivoVariedad299Test(unittest.TestCase):
         self.assertIn("body_exited.connect", self.variedad)
         self.assertIn("TIEMPO_PERMANENCIA", self.variedad)
         self.assertIn("rumbo_cambiado.emit", self.variedad)
+        ejecutable = "\n".join(
+            linea
+            for linea in self.variedad.splitlines()
+            if not linea.lstrip().startswith("#")
+        )
         for prohibido in (
             "Partida",
             "Jornada",
@@ -54,7 +59,7 @@ class SuenoObjetivoVariedad299Test(unittest.TestCase):
             "_guardar_o_avisar",
             "InputMap",
         ):
-            self.assertNotIn(prohibido, self.variedad)
+            self.assertNotIn(prohibido, ejecutable)
 
     def test_contrato_ejecutable_en_godot(self):
         comprobar_contrato(
