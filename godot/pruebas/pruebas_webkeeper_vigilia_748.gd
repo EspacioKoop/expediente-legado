@@ -2,6 +2,7 @@ extends SceneTree
 
 ## Regresión del handshake de WEBKEEPER 98 hacia Anansi akan (#748).
 
+
 class ConsolaWebkeeperPrueba:
 	extends ConsolaPortatil98
 
@@ -75,7 +76,10 @@ func _probar_handshake_webkeeper() -> void:
 	consola.memoria_prueba[Webkeeper98Vigilia.DIRECCION_COMPLETADO] = 0
 	observador._process(0.0)
 	_comprobar(
-		SemillasOniricas.obtener_semillas(jornada)[SemillasOniricas.clave("anansi_akan")]["fuentes"],
+		(
+			SemillasOniricas
+			. obtener_semillas(jornada)[SemillasOniricas.clave("anansi_akan")]["fuentes"]
+		),
 		["rom:webkeeper_98"],
 		"el registro permanece idempotente",
 	)
