@@ -38,6 +38,7 @@ jobs:
       matrix: ${{ steps.select.outputs.matrix }}
       count: ${{ steps.select.outputs.count }}
       fallback_keys: ${{ steps.select.outputs.fallback_keys }}
+      requested_max: ${{ steps.select.outputs.requested_max }}
     steps:
       - uses: actions/checkout@v4
 
@@ -72,6 +73,7 @@ jobs:
           KEV_MODEL: ${{ vars.KEV_MODEL || 'kev-latest' }}
           KEV_ROUTER_MIN_CONFIDENCE: ${{ vars.KEV_ROUTER_MIN_CONFIDENCE || '0.45' }}
           KEV_API_KEY: ${{ secrets.KEV_API_KEY }}
+          CONTROL_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
           # Slots de fallback (#1685): URL y modelo se descubren desde las variables
           # con scripts/agent_slots.py. Los secretos no se pueden enumerar, así que
           # esta tabla es el único sitio con números de slot: añade una línea por
@@ -102,6 +104,36 @@ jobs:
             /tmp/issues-auto.json /tmp/issues-pool.json \
             /tmp/issues-qwen.json /tmp/issues-gemini.json \
             > /tmp/issues.json
+
+          # Control-plane Deno KV (#1728): un lease activo gana sobre labels
+          # rezagadas. Si Deno no responde, la selección conserva el mecanismo
+          # histórico para que la migración sea fail-open.
+          if [[ -n "${CONTROL_URL:-}" && "$(jq 'length' /tmp/issues.json)" -gt 0 ]]; then
+            base="${CONTROL_URL%/}"
+            base="${base%/api/report}"
+            if oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+              "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-pool")" &&
+              oidc_token="$(jq -er '.value' <<<"$oidc_json")"; then
+              issue_ids="$(jq -c '[.[].number]' /tmp/issues.json)"
+              payload="$(jq -nc --argjson issues "$issue_ids" '{schema:1,issues:$issues}')"
+              if curl -fsS -X POST "$base/api/agent-pool/status" \
+                -H "Authorization: Bearer $oidc_token" \
+                -H 'Content-Type: application/json' \
+                --data "$payload" -o /tmp/agent-pool-status.json; then
+                leased="$(jq -c '[.leases[]?.issue]' /tmp/agent-pool-status.json)"
+                tmp="$(mktemp)"
+                jq --argjson leased "$leased" \
+                  'map(select(.number as $n | ($leased | index($n) | not)))' \
+                  /tmp/issues.json > "$tmp"
+                mv "$tmp" /tmp/issues.json
+                echo "Control-plane: $(jq 'length' <<<"$leased") leases activos excluidos."
+              else
+                echo "::warning::Control-plane Deno no disponible al filtrar la cola; se usa fallback GitHub."
+              fi
+            else
+              echo "::warning::No se pudo obtener OIDC para el control-plane; se usa fallback GitHub."
+            fi
+          fi
 
           # Inventario único de workers (#1685): qwen-primary, gemini y cada slot
           # de fallback, con su tier, salen de las variables del repo. Añadir un
@@ -245,6 +277,7 @@ jobs:
           count="$(jq '.include|length' /tmp/matrix.json)"
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
           echo "count=$count" >> "$GITHUB_OUTPUT"
+          echo "requested_max=$REQUESTED_MAX" >> "$GITHUB_OUTPUT"
           configured="$(jq 'length' /tmp/workers.json)"
           healthy="$(jq '[.[] | select(if has("healthy") then .healthy else true end)] | length' /tmp/workers.json)"
           echo "Seleccionados $count workers de $healthy saludables ($configured configurados)."
@@ -263,3 +296,41 @@ jobs:
       worker: ${{ matrix.worker }}
       fallback_keys: ${{ needs.prepare.outputs.fallback_keys }}
     secrets: inherit
+
+
+  drain:
+    needs: [prepare, run]
+    if: ${{ always() && needs.prepare.result == 'success' && needs.prepare.outputs.count != '0' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Drenar cola si queda trabajo elegible
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_MAX: ${{ needs.prepare.outputs.requested_max || '6' }}
+        run: |
+          set -euo pipefail
+          for label in auto pool qwen gemini; do
+            gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+              --label "agent:$label" --limit 100 \
+              --json number,labels > "/tmp/pending-$label.json"
+          done
+          jq -s '
+            add
+            | unique_by(.number)
+            | map(select(
+                ([.labels[].name] | index("agent:working")) == null and
+                ([.labels[].name] | index("agent:pr-open")) == null and
+                ([.labels[].name] | index("agent:needs-human")) == null
+              ))
+          ' /tmp/pending-auto.json /tmp/pending-pool.json \
+            /tmp/pending-qwen.json /tmp/pending-gemini.json > /tmp/pending.json
+
+          pending="$(jq 'length' /tmp/pending.json)"
+          if (( pending > 0 )); then
+            echo "Quedan $pending issues elegibles; programando siguiente tanda."
+            gh workflow run agent-pool.yml --repo "$GITHUB_REPOSITORY" --ref main \
+              -f max_parallel="$REQUESTED_MAX"
+          else
+            echo "Cola drenada: no quedan issues elegibles."
+          fi
