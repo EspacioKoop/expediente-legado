@@ -14,6 +14,13 @@ var _relacionar: Button
 var _origen_relacion := ""
 
 
+func _ready() -> void:
+	super._ready()
+	# La disponibilidad se fotografía al entrar en el visor por primera vez en
+	# esta vida. No filtra el catálogo: solo registra los IDs que ya se muestran.
+	CatalogoVidaMetricas.sincronizar_disponibles(jornada, contenido.casos)
+
+
 func _columna_documento() -> Control:
 	var columna: Control = super._columna_documento()
 	_relacionar = Button.new()
@@ -34,11 +41,17 @@ func _al_elegir_documento(indice: int) -> void:
 		return
 
 	var leidos: Array = jornada.get("leidos_total", [])
+	var memoria_mutada := false
 	if not leidos.has(registro_actual["id"]):
 		leidos.append(registro_actual["id"])
 		jornada["leidos_total"] = leidos
-		# `jornada` se conserva completa en Partida, así que esta memoria sobrevive
-		# al cambio de día y a la recarga sin crear un segundo archivo de estado.
+		memoria_mutada = true
+	var metricas_mutadas := CatalogoVidaMetricas.registrar_abierto(
+		jornada, String(caso.get("id", ""))
+	)
+	# `jornada` se conserva completa en Partida: la lectura acumulada y la
+	# métrica local se escriben juntas, sin telemetría remota.
+	if memoria_mutada or metricas_mutadas:
 		_guardar_o_avisar()
 	_actualizar_boton_relacion()
 

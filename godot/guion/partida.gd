@@ -256,6 +256,12 @@ func borrar(ruta: String = RUTA) -> bool:
 ## ids y sus banderas.
 func _para_guardar() -> Dictionary:
 	var reducido := estado.duplicate()
+	# La copia persistida debe ser internamente coherente aunque un consumidor
+	# legado haya actualizado `jornada.vuelta` directamente. No mutamos el
+	# estado vivo: la reasignación canónica sigue siendo responsabilidad de Jornada.
+	if typeof(reducido.get("jornada")) == TYPE_DICTIONARY:
+		reducido["jornada"] = Dictionary(reducido["jornada"]).duplicate(true)
+		CatalogoVidaMetricas.asegurar(reducido["jornada"])
 	reducido["version"] = VERSION
 	reducido["logros"] = _solo_estado(estado.get("logros", []), ESTADO_LOGRO)
 	reducido["tarot"] = _solo_estado(estado.get("tarot", []), ESTADO_CARTA)
@@ -451,7 +457,21 @@ static func _validar_jornada(jornada: Dictionary) -> Array:
 		else:
 			for error in RondaCierre.validar(jornada["ronda_cierre"]):
 				errores.append("jornada.ronda_cierre.%s" % error)
-	for clave in ["leido_hoy", "mapa", "sueno_escenas", "mapa_anoche"]:
+	if jornada.has(CatalogoVidaMetricas.CLAVE_ACTUAL):
+		if typeof(jornada[CatalogoVidaMetricas.CLAVE_ACTUAL]) != TYPE_DICTIONARY:
+			errores.append("jornada.%s no es un objeto" % CatalogoVidaMetricas.CLAVE_ACTUAL)
+		else:
+			for error in CatalogoVidaMetricas.validar(
+				jornada[CatalogoVidaMetricas.CLAVE_ACTUAL], int(jornada.get("vuelta", 1))
+			):
+				errores.append("jornada.%s.%s" % [CatalogoVidaMetricas.CLAVE_ACTUAL, error])
+	if jornada.has(CatalogoVidaMetricas.CLAVE_ANTERIOR):
+		if typeof(jornada[CatalogoVidaMetricas.CLAVE_ANTERIOR]) != TYPE_DICTIONARY:
+			errores.append("jornada.%s no es un objeto" % CatalogoVidaMetricas.CLAVE_ANTERIOR)
+		else:
+			for error in CatalogoVidaMetricas.validar(jornada[CatalogoVidaMetricas.CLAVE_ANTERIOR]):
+				errores.append("jornada.%s.%s" % [CatalogoVidaMetricas.CLAVE_ANTERIOR, error])
+	for clave in ["leido_hoy", "leidos_total", "mapa", "sueno_escenas", "mapa_anoche"]:
 		if jornada.has(clave) and typeof(jornada[clave]) != TYPE_ARRAY:
 			errores.append("jornada.%s no es una lista" % clave)
 	if (

@@ -133,6 +133,13 @@ static func nueva(raiz: int = 0, vuelta: int = 1) -> Dictionary:
 		# Lo leído hoy: es lo que alimenta el sueño de esta noche. Se vacía al
 		# despertar, porque un sueño es de su día.
 		"leido_hoy": [],
+		# Memoria de documentos abiertos durante toda esta vida laboral. Ya la
+		# usa el visor para relaciones; declararla aquí hace que una reasignación
+		# la reinicie de forma canónica.
+		"leidos_total": [],
+		# #91: observación local del uso real del catálogo. No selecciona casos.
+		CatalogoVidaMetricas.CLAVE_ACTUAL: CatalogoVidaMetricas.nueva(vuelta),
+		CatalogoVidaMetricas.CLAVE_ANTERIOR: {},
 		# #162: hasta tres folios leídos que el jugador decide llevarse a la
 		# noche. Vive en Jornada para que guardar/recargar conserve la misma
 		# preparación y se borra al despertar o al empezar otra vida laboral.
@@ -212,6 +219,7 @@ static func completar(jornada: Dictionary, raiz: int = 0) -> Dictionary:
 	# semilla después. Completar es el punto donde el plan de #93 ya puede
 	# derivarse de la raíz real sin volver a sortear en cada carga.
 	Imprevistos.completar(jornada)
+	CatalogoVidaMetricas.asegurar(jornada)
 	if jornada["fase"] == "sueño":
 		# Solo las partidas anteriores al reloj necesitan recibir tiempo.
 		if sin_reloj:
@@ -636,10 +644,12 @@ static func siguiente_fase(fase: String) -> String:
 ## la que más dice de cómo llevaste la vuelta anterior.
 static func reiniciar_vuelta(jornada: Dictionary) -> Dictionary:
 	var gato: Dictionary = jornada["gato"]
+	var metricas_anteriores := CatalogoVidaMetricas.snapshot(jornada)
 	# La raíz es de la PARTIDA y sobrevive al despido; el contador de vuelta
 	# avanza, que es lo que hace que la planta 4 se llene de otra gente.
 	var nueva_vida := nueva(int(jornada.get("raiz", 0)), int(jornada.get("vuelta", 1)) + 1)
 	nueva_vida["gato"] = gato
+	nueva_vida[CatalogoVidaMetricas.CLAVE_ANTERIOR] = metricas_anteriores
 	for clave in nueva_vida:
 		jornada[clave] = nueva_vida[clave]
 	return jornada
