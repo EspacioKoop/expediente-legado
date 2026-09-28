@@ -145,7 +145,7 @@ func _probar() -> void:
 		"cambiar de franja no muta la persistencia",
 	)
 
-	var perfil_seco := (
+	var perfil_seco: Dictionary = (
 		controller
 		. perfil_visual(
 			{
@@ -158,7 +158,7 @@ func _probar() -> void:
 			0.2,
 		)
 	)
-	var perfil_lluvia := (
+	var perfil_lluvia: Dictionary = (
 		controller
 		. perfil_visual(
 			{"fase": "trayecto", "dia": 1, "hora_minutos": 12 * 60, "clima_forzado": Clima.LLUVIA},
@@ -170,7 +170,7 @@ func _probar() -> void:
 		float(perfil_lluvia["alpha"]) > float(perfil_seco["alpha"]),
 		"la precipitación hace más legible el desgaste de paso",
 	)
-	var perfil_sueno := (
+	var perfil_sueno: Dictionary = (
 		controller
 		. perfil_visual(
 			{"fase": "sueño", "dia": 1, "hora_minutos": 23 * 60},
