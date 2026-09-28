@@ -116,6 +116,16 @@ jobs:
           )
 
           for issue in "${candidates[@]}"; do
+            comments="$(gh issue view "$issue" --repo "$GITHUB_REPOSITORY" \
+              --json comments --jq '[.comments[-30:][]? | {body:.body}]')"
+            tmp="$(mktemp)"
+            jq --argjson issue "$issue" --argjson comments "$comments" \
+              'map(if .number == $issue
+                   then . + {comments:$comments}
+                   else . end)' \
+              /tmp/issues.json > "$tmp"
+            mv "$tmp" /tmp/issues.json
+
             state="/tmp/kev-$issue.json"
             jq --argjson issue "$issue" \
               '.[] | select(.number == $issue) |
