@@ -69,4 +69,6 @@ func _comprobar(actual, esperado = true, nombre: String = "") -> void:
 		_pasadas += 1
 		return
 	_fallos += 1
-	push_error("FALLO diálogo archivado #965: %s (actual=%s esperado=%s)" % [nombre, actual, esperado])
+	push_error(
+		"FALLO diálogo archivado #965: %s (actual=%s esperado=%s)" % [nombre, actual, esperado]
+	)
