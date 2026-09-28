@@ -46,10 +46,16 @@ class AgentFeederTest(unittest.TestCase):
             issue(6, "Bug con PR", ["bug"]),
             issue(7, "Épica: sistema enorme"),
             issue(8, "Bug elegible", ["bug", "prioridad:P2"]),
+            issue(
+                9,
+                "Feature con gate",
+                body="Contexto técnico suficiente.\n\n## Gate de validación humana\nPase con mando físico.",
+            ),
         ]
         result = mod.select_candidate(candidates, prs, now=NOW)
         self.assertEqual(8, result["selected"]["number"])
         self.assertEqual(1, result["eligible"])
+        self.assertEqual(1, result["rejected"]["gate-humano"])
 
     def test_excluye_issue_activo_recientemente(self):
         result = mod.select_candidate(
