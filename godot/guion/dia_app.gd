@@ -245,68 +245,19 @@ func _entrar_en(fase: String) -> void:
 ## de lo que se leyó ese día. Es la única fase que pregunta en vez de mirar el
 ## catálogo, y aun así esta pantalla no sabe qué forma tiene ninguna sala.
 func _espacio_de(fase: String) -> Dictionary:
-	if fase != "sueño":
-		# En copia: el catálogo es una constante, y añadirle la plantilla de
-		# esta vuelta encima la dejaría pegada para toda la partida.
-		var sitio := EspaciosCatalogo.de_fase(fase).duplicate(true)
-		sitio["figuras"] = _plantilla_en(sitio)
-		return sitio
-
-	var opciones := SeleccionNocturna.opciones_sueno(jornada, _opciones_sueno())
-	var cantidad := clampi(
-		int(opciones.get("cantidad", Sueno.ESCENAS_POR_NOCHE)), 1, SuenoFormas.ids().size()
+	var resultado := DiaEspaciosApp.construir(
+		fase,
+		jornada,
+		partida.estado,
+		contenido.casos,
+		_raiz(),
+		Callable(self, "_opciones_sueno"),
+		Callable(self, "_registro_literario_para_sueno"),
+		Callable(self, "_plantilla_en"),
 	)
-	if jornada["sueno_escenas"].is_empty():
-		jornada["sueno_escenas"] = Sueno.noche(
-			jornada["dia"], jornada["leido_hoy"], jornada["mapa"], _raiz(), opciones
-		)
-	var id: String = jornada["sueno_escenas"][0]
-	# Se apunta al ENTRAR y no al salir: el mapa es lo que has pisado, y
-	# despertarse de golpe en mitad de una sala no la borra de haber estado.
-	# La sala de respaldo sin vivienda no se convierte en progreso del mapa.
-	if bool(opciones.get("recordar_mapa", true)):
-		Sueno.recordar(jornada["mapa"], id)
-
-	# De qué está hecha esta escena (#87). El reparto es de la NOCHE y no de la
-	# sala: se calcula con la lista entera de escenas y se coge el trozo que le
-	# toca a esta, o las tres saldrían amuebladas con lo mismo.
-	var fuentes := (
-		SuenoContenido
-		. fuentes(
-			jornada["leido_hoy"],
-			contenido.casos,
-			partida.estado["pistas_descubiertas"],
-			partida.estado.get("veredictos", {}),
-			SuenoCombate.vencidos(partida.estado),
-		)
-	)
-	var semilla_noche := Sueno.semilla(
-		jornada["dia"], jornada["leido_hoy"], _raiz(), opciones.get("seleccion_nocturna", [])
-	)
-	var reparto := SuenoContenido.repartir(fuentes, cantidad, semilla_noche)
-	var cual: int = cantidad - jornada["sueno_escenas"].size()
-	var trozo: Dictionary = reparto[clampi(cual, 0, reparto.size() - 1)]
-
-	# #947: el castillo cambia de lectura entre noches/posiciones sin guardar un
-	# segundo estado de progreso. La misma noche recargada conserva semilla y
-	# posición, por lo que patio/scriptorium/torre siguen siendo reproducibles.
-	var forma_actual := SuenoFormas.de(id)
-	if String(forma_actual.get("identidad_onirica", "")) == SuenoCastillo.ID:
-		var estado_castillo: Dictionary = trozo.get("estado_presentacion", {}).duplicate(true)
-		estado_castillo["vuelta_castillo"] = cual + 1
-		estado_castillo["semilla_castillo"] = semilla_noche
-		trozo["estado_presentacion"] = estado_castillo
-	# Quién se deja pelear en ESTA escena (#88). Se calcula al montarla y no al
-	# pisarla: la zona de reto solo lleva un id, y quien la pise tiene que poder
-	# saber contra quién sin volver a repartir el sueño.
-	_rivales = {}
-	for quien in trozo["figuras"]:
-		if SuenoCombate.se_pelea(quien, partida.estado):
-			_rivales[quien["id"]] = quien
-	var espacio_sueno := Sueno.espacio(id, jornada["sueno_escenas"].size() - 1, trozo)
-	# #1182: literatura modula la PRESENTACION de una sala que el sueño ya
-	# selecciono. No toca Sueno.noche(), fuentes #87, salidas ni hechos SIGA.
-	return SuenoLiteratura.aplicar(espacio_sueno, _registro_literario_para_sueno(), cual)
+	if resultado.has("rivales"):
+		_rivales = resultado["rivales"]
+	return resultado["espacio"]
 
 
 ## #1182: el autoload literario es una dependencia opcional de presentacion.
