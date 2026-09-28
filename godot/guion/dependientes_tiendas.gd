@@ -5,13 +5,11 @@
 ## cuerpo y la conversación, esto decide la línea. Cada uno tiene su voz, y
 ## esa voz es el texto de sus claves; aquí solo está el orden en que habla:
 ##
-## 1. Lo que pasa hoy. Si el día trae lluvia, nieve o niebla, lo comenta; si
-##    no, y ya le has comprado algo alguna vez, te pregunta por ello.
-## 2. El saludo del día, que rota con el número de día. Así cada visita en un
-##    día distinto abre con otra cosa, y la misma partida siempre dice lo mismo
-##    el mismo día.
-## 3. Si sigues dándole conversación en la misma visita, su manera de decirte
-##    que ya vale. Esa se repite: no hay una cuarta cosa que contar.
+## 1. La visita entra por una rama contextual: clima, cliente o saludo.
+## 2. Clima y cliente tienen un seguimiento propio antes de volver al saludo
+##    del día; no es solo una primera frase rotatoria.
+## 3. Si sigues dándole conversación, la charla desemboca en su insistencia.
+## La única memoria es el número de charlas del nodo durante esa visita.
 ##
 ## Ser cliente lo deciden las compras que ya guardan `ComercioBarrio` y
 ## `TiendaVideojuegos`; este módulo no lleva cuenta de nada.
@@ -43,6 +41,8 @@ const DEPENDIENTES := [
 			Clima.NIEBLA: "DEPEND_PACO_NIEBLA",
 		},
 		"frase_cliente": "DEPEND_PACO_CLIENTE",
+		"seguimiento_cliente": "DEPEND_PACO_CLIENTE_SEGUIMIENTO",
+		"seguimiento_clima": "DEPEND_PACO_CLIMA_SEGUIMIENTO",
 		"insiste": "DEPEND_PACO_INSISTE",
 		"suenos": ["DEPEND_PACO_SUENO_1", "DEPEND_PACO_SUENO_2", "DEPEND_PACO_SUENO_3"],
 		"extrano": "DEPEND_PACO_SUENO_EXTRANO",
@@ -73,6 +73,8 @@ const DEPENDIENTES := [
 			Clima.NIEBLA: "DEPEND_REMEDIOS_NIEBLA",
 		},
 		"frase_cliente": "DEPEND_REMEDIOS_CLIENTE",
+		"seguimiento_cliente": "DEPEND_REMEDIOS_CLIENTE_SEGUIMIENTO",
+		"seguimiento_clima": "DEPEND_REMEDIOS_CLIMA_SEGUIMIENTO",
 		"insiste": "DEPEND_REMEDIOS_INSISTE",
 		"suenos": ["DEPEND_REMEDIOS_SUENO_1", "DEPEND_REMEDIOS_SUENO_2", "DEPEND_REMEDIOS_SUENO_3"],
 		"extrano": "DEPEND_REMEDIOS_SUENO_EXTRANO",
@@ -103,6 +105,8 @@ const DEPENDIENTES := [
 			Clima.NIEBLA: "DEPEND_JULIAN_NIEBLA",
 		},
 		"frase_cliente": "",
+		"seguimiento_cliente": "",
+		"seguimiento_clima": "DEPEND_JULIAN_CLIMA_SEGUIMIENTO",
 		"insiste": "DEPEND_JULIAN_INSISTE",
 		"suenos": ["DEPEND_JULIAN_SUENO_1", "DEPEND_JULIAN_SUENO_2", "DEPEND_JULIAN_SUENO_3"],
 		"extrano": "DEPEND_JULIAN_SUENO_EXTRANO",
@@ -133,6 +137,8 @@ const DEPENDIENTES := [
 			Clima.NIEBLA: "DEPEND_KIKE_NIEBLA",
 		},
 		"frase_cliente": "DEPEND_KIKE_CLIENTE",
+		"seguimiento_cliente": "DEPEND_KIKE_CLIENTE_SEGUIMIENTO",
+		"seguimiento_clima": "DEPEND_KIKE_CLIMA_SEGUIMIENTO",
 		"insiste": "DEPEND_KIKE_INSISTE",
 		"suenos": ["DEPEND_KIKE_SUENO_1", "DEPEND_KIKE_SUENO_2", "DEPEND_KIKE_SUENO_3"],
 		"extrano": "DEPEND_KIKE_SUENO_EXTRANO",
@@ -170,6 +176,10 @@ static func claves(dependiente: Dictionary) -> Array[String]:
 		salida.append(String(clave))
 	if not String(dependiente["frase_cliente"]).is_empty():
 		salida.append(String(dependiente["frase_cliente"]))
+	for campo in ["seguimiento_cliente", "seguimiento_clima"]:
+		var clave := String(dependiente.get(campo, ""))
+		if not clave.is_empty():
+			salida.append(clave)
 	salida.append(String(dependiente["insiste"]))
 	return salida
 
@@ -184,13 +194,31 @@ static func frase(
 	var saludos: Array = dependiente["saludos"]
 	var climas: Dictionary = dependiente["climas"]
 	var turnos: Array[String] = []
-	if climas.has(clima):
-		turnos.append(String(climas[clima]))
-	elif es_cliente(dependiente, jornada):
-		turnos.append(String(dependiente["frase_cliente"]))
+	match rama_contextual(dependiente, jornada, clima):
+		"clima":
+			turnos.append(String(climas[clima]))
+			var seguimiento_clima := String(dependiente.get("seguimiento_clima", ""))
+			if not seguimiento_clima.is_empty():
+				turnos.append(seguimiento_clima)
+		"cliente":
+			turnos.append(String(dependiente["frase_cliente"]))
+			var seguimiento_cliente := String(dependiente.get("seguimiento_cliente", ""))
+			if not seguimiento_cliente.is_empty():
+				turnos.append(seguimiento_cliente)
 	turnos.append(String(saludos[(dia - 1) % saludos.size()]))
 	turnos.append(String(dependiente["insiste"]))
 	return turnos[clampi(charla, 0, turnos.size() - 1)]
+
+
+static func rama_contextual(
+	dependiente: Dictionary, jornada: Dictionary, clima: String
+) -> String:
+	var climas: Dictionary = dependiente["climas"]
+	if climas.has(clima):
+		return "clima"
+	if es_cliente(dependiente, jornada):
+		return "cliente"
+	return "saludo"
 
 
 ## Si ya le has comprado algo alguna vez. Solo cuenta en las tiendas que
