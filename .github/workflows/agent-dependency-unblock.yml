@@ -1,0 +1,81 @@
+name: Agent dependency unblock
+
+on:
+  issues:
+    types: [closed]
+  schedule:
+    - cron: '11,41 * * * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+concurrency:
+  group: agent-dependency-unblock
+  cancel-in-progress: false
+
+jobs:
+  unblock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Desbloquear subtareas cuyas dependencias cerraron
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh label create agent:blocked --repo "$GITHUB_REPOSITORY" --color D4C5F9 --description "Subtarea bloqueada por dependencias" --force
+          gh label create agent:auto --repo "$GITHUB_REPOSITORY" --color 5319E7 --description "Cola automatica de agentes" --force
+
+          gh issue list --repo "$GITHUB_REPOSITORY" --state open --label agent:blocked --limit 100 --json number,body > /tmp/blocked.json
+
+          jq -c '.[]' /tmp/blocked.json | while IFS= read -r item; do
+            issue="$(jq -r '.number' <<<"$item")"
+            body="$(jq -r '.body // ""' <<<"$item")"
+            deps="$(
+              BODY="$body" python3 - <<'PY'
+          import os, re
+          body=os.environ.get("BODY","")
+          match=re.search(r"<!--\s*agent-depends-on:\s*([^>]+?)\s*-->", body)
+          if not match:
+              raise SystemExit(0)
+          raw=match.group(1).strip()
+          if raw=="none":
+              print("")
+              raise SystemExit(0)
+          values=[]
+          for token in raw.split(","):
+              token=token.strip()
+              found=re.fullmatch(r"#(\d+)", token)
+              if not found:
+                  raise SystemExit(0)
+              values.append(found.group(1))
+          print(" ".join(values))
+          PY
+            )"
+            [[ -n "$deps" ]] || continue
+            provider="$(
+              BODY="$body" python3 - <<'PY'
+          import os, re
+          match=re.search(r"<!--\s*agent-provider:\s*(auto|qwen|gemini)\s*-->", os.environ.get("BODY",""))
+          print(match.group(1) if match else "auto")
+          PY
+            )"
+
+            ready=true
+            for dep in $deps; do
+              state="$(gh issue view "$dep" --repo "$GITHUB_REPOSITORY" --json state --jq .state 2>/dev/null || echo UNKNOWN)"
+              if [[ "$state" != CLOSED ]]; then
+                ready=false
+                break
+              fi
+            done
+            [[ "$ready" == true ]] || continue
+
+            queue_label=agent:auto
+            [[ "$provider" == qwen ]] && queue_label=agent:qwen
+            [[ "$provider" == gemini ]] && queue_label=agent:gemini
+            gh issue edit "$issue" --repo "$GITHUB_REPOSITORY" --remove-label agent:blocked --add-label "$queue_label" >/dev/null
+            gh issue comment "$issue" --repo "$GITHUB_REPOSITORY" --body "Agent dependencies: todas las dependencias declaradas están cerradas; la subtarea entra en $queue_label." >/dev/null || true
+          done
