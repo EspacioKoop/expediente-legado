@@ -10,6 +10,7 @@ func _initialize() -> void:
 
 func _ejecutar() -> void:
 	_probar_programacion_narrativa()
+	_probar_preflight_audio()
 	await _probar_audio_y_transporte()
 	_probar_radio_deliberada()
 	_probar_exposicion_ideologica()
@@ -59,6 +60,60 @@ func _probar_programacion_narrativa() -> void:
 	_comprobar(manana.get("id", ""), "boletin_barrio", "la mañana selecciona su boletín")
 	_comprobar(tarde.get("id", ""), "mesa_local", "la tarde selecciona otra programación")
 	radio.queue_free()
+
+
+func _probar_preflight_audio() -> void:
+	var volumenes := MinicadenaDomestica98.VOLUMENES_LOCALES_DB
+	_comprobar(volumenes.size() >= 3, "hay varios escalones de volumen local")
+	for indice in range(1, volumenes.size()):
+		_comprobar(
+			float(volumenes[indice]) > float(volumenes[indice - 1]),
+			"los escalones de volumen son estrictamente crecientes",
+		)
+	_comprobar(float(volumenes[-1]) <= -3.0, "el máximo local conserva margen antes del bus común")
+
+	var radio := MinicadenaDomestica98.new()
+	root.add_child(radio)
+	radio.configurar({"dia": 1, "acciones": Jornada.ACCIONES_POR_DIA})
+	var audio := radio.get_node_or_null("MusicaPuntual") as AudioStreamPlayer3D
+	_comprobar(
+		audio != null and audio.stream is AudioStreamWAV, "el preflight dispone de PCM procedural"
+	)
+	if audio == null or not audio.stream is AudioStreamWAV:
+		radio.queue_free()
+		return
+
+	var inicial := audio.stream as AudioStreamWAV
+	var hash_radio := hash(inicial.data)
+	var pico_radio := _pico_pcm(inicial)
+	_comprobar(pico_radio > 0.005, "la cama de radio no es silencio accidental")
+	_comprobar(pico_radio < 0.10, "la cama de radio conserva headroom amplio antes de ganancia/bus")
+
+	radio.alternar_encendido()
+	radio.cambiar_emisora()
+	var otra_emisora := audio.stream as AudioStreamWAV
+	_comprobar(hash(otra_emisora.data) != hash_radio, "cambiar emisora cambia la textura audible")
+	_comprobar(_pico_pcm(otra_emisora) < 0.10, "otra emisora conserva el mismo límite de headroom")
+
+	radio.alternar_cassette()
+	var cassette := audio.stream as AudioStreamWAV
+	_comprobar(
+		hash(cassette.data) != hash(otra_emisora.data),
+		"cassette y radio no comparten la misma textura"
+	)
+	_comprobar(_pico_pcm(cassette) < 0.10, "la cama de cassette conserva headroom amplio")
+	radio.queue_free()
+
+
+func _pico_pcm(stream: AudioStreamWAV) -> float:
+	var datos := stream.data
+	var pico := 0.0
+	for indice in range(0, datos.size() - 1, 2):
+		var valor := int(datos[indice]) | (int(datos[indice + 1]) << 8)
+		if valor >= 32768:
+			valor -= 65536
+		pico = maxf(pico, absf(float(valor) / 32767.0))
+	return pico
 
 
 func _probar_audio_y_transporte() -> void:
