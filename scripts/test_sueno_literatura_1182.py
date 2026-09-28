@@ -9,6 +9,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 SUENO_LITERATURA = ROOT / "godot" / "guion" / "sueno_literatura.gd"
 DIA = ROOT / "godot" / "guion" / "dia_app.gd"
+ESPACIOS = ROOT / "godot" / "guion" / "dia_espacios_app.gd"
 CATALOGO = ROOT / "godot" / "datos" / "literatura_obras.json"
 TEST_GODOT = "res://pruebas/pruebas_sueno_literatura_1182.gd"
 
@@ -18,6 +19,7 @@ class SuenoLiteratura1182Test(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.modulo = SUENO_LITERATURA.read_text(encoding="utf-8")
         cls.dia = DIA.read_text(encoding="utf-8")
+        cls.espacios = ESPACIOS.read_text(encoding="utf-8")
         cls.catalogo = json.loads(CATALOGO.read_text(encoding="utf-8"))
 
     def test_consumidor_usa_solo_insight_literario(self) -> None:
@@ -28,11 +30,14 @@ class SuenoLiteratura1182Test(unittest.TestCase):
 
     def test_no_reselecciona_la_noche(self) -> None:
         self.assertNotIn("Sueno.noche(", self.modulo)
+        self.assertIn("SuenoLiteratura.aplicar(", self.espacios)
+        self.assertLess(
+            self.espacios.index("Sueno.espacio("),
+            self.espacios.index("SuenoLiteratura.aplicar("),
+        )
         tramo = self.dia.split("func _espacio_de", 1)[1].split("\n\nfunc ", 1)[0]
-        self.assertIn("SuenoLiteratura.aplicar(", tramo)
-        self.assertLess(tramo.index("Sueno.espacio("), tramo.index("SuenoLiteratura.aplicar("))
-        self.assertIn("_registro_literario_para_sueno()", tramo)
-        self.assertNotIn("GestorLiteratura.obtener_registro_literario()", tramo)
+        self.assertIn('Callable(self, "_registro_literario_para_sueno")', tramo)
+        self.assertNotIn("GestorLiteratura.obtener_registro_literario()", self.espacios)
 
     def test_integracion_no_exige_autoload_al_compilar(self) -> None:
         self.assertIn("if not is_inside_tree():", self.dia)
