@@ -63,8 +63,24 @@ jobs:
           [[ "$state" == OPEN ]] || { echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
           already="$(gh issue view "$issue" --repo "$GITHUB_REPOSITORY" --json comments --jq '[.comments[].body | select(startswith("AGENT_DECOMPOSED parent=#'"$issue"' "))] | length')"
           [[ "$already" == 0 ]] || { echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
+
+          labels="$(gh issue view "$issue" --repo "$GITHUB_REPOSITORY" --json labels --jq '[.labels[].name]|join(" ")')"
+          requested_provider=auto
+          [[ " $labels " == *" agent:qwen "* ]] && requested_provider=qwen
+          [[ " $labels " == *" agent:gemini "* ]] && requested_provider=gemini
+          if [[ " $labels " == *" agent:qwen "* && " $labels " == *" agent:gemini "* ]]; then
+            echo "providers explícitos ambiguos" >&2
+            exit 3
+          fi
+
+          # Sacar el padre de la cola mientras se descompone para evitar que el
+          # dispatcher lo ejecute en paralelo con este planner.
+          for label in agent:auto agent:pool agent:qwen agent:gemini; do
+            gh issue edit "$issue" --repo "$GITHUB_REPOSITORY" --remove-label "$label" >/dev/null 2>&1 || true
+          done
           echo "run=true" >> "$GITHUB_OUTPUT"
           echo "issue=$issue" >> "$GITHUB_OUTPUT"
+          echo "requested_provider=$requested_provider" >> "$GITHUB_OUTPUT"
 
       - name: Materializar issue y normas
         if: steps.select.outputs.run == 'true'
@@ -134,6 +150,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           ISSUE: ${{ steps.select.outputs.issue }}
+          REQUESTED_PROVIDER: ${{ steps.select.outputs.requested_provider }}
           SUMMARY: ${{ steps.plan_qwen.outputs.summary || steps.plan_gemini.outputs.summary }}
         run: |
           set -euo pipefail
@@ -145,8 +162,11 @@ jobs:
           python3 scripts/agent_decompose.py --summary-file /tmp/agent-decompose-summary.txt --output /tmp/agent-decompose.json >/dev/null
           fits="$(jq -r '.fits_single_cut' /tmp/agent-decompose.json)"
           if [[ "$fits" == true ]]; then
-            gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --remove-label agent:decompose --remove-label agent:needs-human --add-label agent:auto >/dev/null
-            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Agent decompose: el issue ya cabe en un corte seguro; se retira agent:decompose y entra en agent:auto sin crear subissues." >/dev/null
+            queue_label=agent:auto
+            [[ "$REQUESTED_PROVIDER" == qwen ]] && queue_label=agent:qwen
+            [[ "$REQUESTED_PROVIDER" == gemini ]] && queue_label=agent:gemini
+            gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --remove-label agent:decompose --remove-label agent:needs-human --add-label "$queue_label" >/dev/null
+            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Agent decompose: el issue ya cabe en un corte seguro; se retira agent:decompose y vuelve a la cola como $queue_label sin crear subissues." >/dev/null
             echo "create=false" >> "$GITHUB_OUTPUT"
           else
             echo "create=true" >> "$GITHUB_OUTPUT"
@@ -157,6 +177,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           ISSUE: ${{ steps.select.outputs.issue }}
+          REQUESTED_PROVIDER: ${{ steps.select.outputs.requested_provider }}
         run: |
           set -euo pipefail
           printf '{}\n' > /tmp/created.json
@@ -176,6 +197,8 @@ jobs:
             if (( ${#dep_numbers[@]} == 0 )); then
               dep_marker="none"
               queue_label="agent:auto"
+              [[ "$REQUESTED_PROVIDER" == qwen ]] && queue_label="agent:qwen"
+              [[ "$REQUESTED_PROVIDER" == gemini ]] && queue_label="agent:gemini"
               dep_text="Ninguna; puede entrar en cola inmediatamente."
             else
               dep_marker=""
@@ -203,6 +226,7 @@ $dep_text
 
 <!-- agent-parent: #$ISSUE -->
 <!-- agent-depends-on: $dep_marker -->
+<!-- agent-provider: $REQUESTED_PROVIDER -->
 
 El CLAIM real lo decidirá el worker al planificar; estas rutas son el corte esperado, no una reserva.
 EOF
