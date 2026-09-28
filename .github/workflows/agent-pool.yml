@@ -103,17 +103,15 @@ jobs:
             /tmp/issues-qwen.json /tmp/issues-gemini.json \
             > /tmp/issues.json
 
-          workers='[]'
-          add_worker() {
-            local id="$1" provider="$2"
-            workers="$(jq -c --arg worker "$id" --arg provider "$provider" \
-              '. + [{worker:$worker,provider:$provider}]' <<<"$workers")"
-          }
-          [[ "$HAS_QWEN" == true || "$HAS_OMNIROUTE" == true ]] && add_worker qwen-primary qwen
-          [[ "$HAS_GEMINI" == true ]] && add_worker gemini gemini
-          fallbacks="$(python3 scripts/agent_slots.py listar)"
-          workers="$(jq -c --argjson extra "$fallbacks" '. + $extra' <<<"$workers")"
-          echo "fallback_keys=$(tr -s ' ' <<<"$FALLBACK_KEYS" | xargs)" >> "$GITHUB_OUTPUT"
+          # Inventario único de workers (#1685): qwen-primary, gemini y cada slot
+          # de fallback, con su tier, salen de las variables del repo. Añadir un
+          # modelo o proveedor es configuración, no YAML.
+          base_keys=""
+          [[ "$HAS_QWEN" == true ]] && base_keys+=" qwen"
+          [[ "$HAS_GEMINI" == true ]] && base_keys+=" gemini"
+          export BASE_KEYS="$base_keys" OMNIROUTE="$HAS_OMNIROUTE"
+          workers="$(python3 scripts/agent_slots.py workers)"
+          echo "fallback_keys=$(python3 scripts/agent_slots.py usables)" >> "$GITHUB_OUTPUT"
           printf '%s\n' "$workers" > /tmp/workers-configured.json
 
           # #1600: credencial configurada no equivale a slot saludable. Los workers

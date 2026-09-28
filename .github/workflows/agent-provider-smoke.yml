@@ -26,17 +26,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - id: slot
+        name: Secret del slot
+        env:
+          VARS_JSON: ${{ toJSON(vars) }}
+        run: |
+          set -euo pipefail
+          # Propio o heredado con QWEN_FALLBACK_N_KEY_FROM (#1685); nunca la clave.
+          echo "secret=$(python3 scripts/agent_slots.py secreto --worker "$SLOT" || true)" >> "$GITHUB_OUTPUT"
+
       - id: config
         name: Resolver backend
         env:
           # Slots dinámicos (#1685): URL/modelo desde las variables; la clave se
           # comprueba sin exponerla al shell.
           VARS_JSON: ${{ toJSON(vars) }}
-          SLOT_HAS_KEY: ${{ secrets[format('QWEN_FALLBACK_{0}_API_KEY', env.SLOT_N)] != '' }}
+          SLOT_HAS_KEY: ${{ steps.slot.outputs.secret != '' && secrets[steps.slot.outputs.secret] != '' }}
         run: |
           set -euo pipefail
           [[ "$SLOT" =~ ^qwen-fallback-([1-9][0-9]*)$ ]] || { echo "Slot no permitido: $SLOT" >&2; exit 2; }
-          [[ "$SLOT_HAS_KEY" == true ]] || { echo "Falta el secret QWEN_FALLBACK_${SLOT_N}_API_KEY" >&2; exit 3; }
+          [[ "$SLOT_HAS_KEY" == true ]] || { echo "Falta la clave del slot $SLOT_N (propia o KEY_FROM)" >&2; exit 3; }
           resuelto="$(FALLBACK_KEYS="$SLOT_N" python3 scripts/agent_slots.py resolver --worker "$SLOT")"
           model="$(jq -r '.model' <<<"$resuelto")"
           [[ -n "$model" ]] || { echo "Falta MODEL para $SLOT" >&2; exit 3; }
@@ -48,7 +57,7 @@ jobs:
         name: Smoke del slot
         uses: QwenLM/qwen-code-action@v1
         with:
-          openai_api_key: ${{ secrets[format('QWEN_FALLBACK_{0}_API_KEY', env.SLOT_N)] }}
+          openai_api_key: ${{ secrets[steps.slot.outputs.secret] }}
           openai_base_url: ${{ steps.config.outputs.url }}
           openai_model: ${{ steps.config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}

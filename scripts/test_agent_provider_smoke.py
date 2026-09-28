@@ -33,7 +33,8 @@ class AgentProviderSmokeTest(unittest.TestCase):
         self.assertIn("SLOT_N: ${{ github.event_name == 'push' && 1 || inputs.slot }}", self.workflow)
         self.assertIn("format('qwen-fallback-{0}'", self.workflow)
         self.assertIn("python3 scripts/agent_slots.py resolver", self.workflow)
-        self.assertIn("secrets[format('QWEN_FALLBACK_{0}_API_KEY', env.SLOT_N)]", self.workflow)
+        self.assertIn("python3 scripts/agent_slots.py secreto", self.workflow)
+        self.assertIn("openai_api_key: ${{ secrets[steps.slot.outputs.secret] }}", self.workflow)
         self.assertNotIn("smoke_f1", self.workflow)
         self.assertNotIn("QWEN_FALLBACK_2_API_KEY", self.workflow)
 
@@ -45,8 +46,11 @@ class AgentProviderSmokeTest(unittest.TestCase):
     def test_no_expone_la_key_en_pasos_shell(self):
         bloque = self.workflow.split("- id: config", 1)[1].split("- id: smoke", 1)[0]
         # En el paso shell solo entra si hay clave, nunca la clave.
-        self.assertIn("SLOT_HAS_KEY: ${{ secrets[format('QWEN_FALLBACK_{0}_API_KEY', env.SLOT_N)] != '' }}", bloque)
-        self.assertNotRegex(bloque, r"_API_KEY', env\.SLOT_N\)\] \}\}")
+        self.assertIn(
+            "SLOT_HAS_KEY: ${{ steps.slot.outputs.secret != '' && secrets[steps.slot.outputs.secret] != '' }}",
+            bloque,
+        )
+        self.assertNotRegex(bloque, r"secrets\[steps\.slot\.outputs\.secret\] \}\}")
 
 if __name__ == "__main__":
     unittest.main()

@@ -227,6 +227,29 @@ class AgentPoolTest(unittest.TestCase):
 
         self.assertEqual("qwen-fallback-1", tasks[0]["worker"])
 
+    def test_tier_superior_solo_recibe_trabajo_si_el_anterior_no_tiene_hueco(self):
+        # #1685: un backend flojo (tier 2) queda de último recurso aunque su
+        # score histórico sea mejor que el de los preferentes.
+        workers = [
+            {"worker": "qwen-fallback-1", "provider": "qwen", "score": 95, "tier": 2},
+            {"worker": "qwen-fallback-2", "provider": "qwen", "score": 40},
+            {"worker": "qwen-fallback-3", "provider": "qwen", "score": 60, "tier": 1},
+        ]
+        issues = [issue(n, "agent:qwen") for n in (57, 58, 59)]
+
+        tasks = mod.select_tasks(issues, workers)
+
+        self.assertEqual(
+            ["qwen-fallback-3", "qwen-fallback-2", "qwen-fallback-1"],
+            [t["worker"] for t in tasks],
+        )
+
+    def test_tier_invalido_cuenta_como_preferente(self):
+        for tier in (0, -3, "x", True, None):
+            with self.subTest(tier=tier):
+                normalizado = mod._worker({"worker": "w", "provider": "qwen", "tier": tier})
+                self.assertEqual(1, normalizado["tier"])
+
     def test_score_respeta_preferencia_kev_y_solo_desempata_slot(self):
         workers = [
             {"worker": "qwen-primary", "provider": "qwen", "score": 99},
