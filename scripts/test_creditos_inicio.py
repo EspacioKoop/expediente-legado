@@ -9,6 +9,35 @@ LECTOR_PATH = ROOT / "godot/guion/creditos_inicio.gd"
 PROCEDENCIA_PATH = ROOT / "godot/assets/procedencia.json"
 
 ORDEN = ["open_source", "agradecimientos", "desarrollo", "direccion", "titulo"]
+AGENTES_CLAIM_SNAPSHOT = {
+    "ARQUIMEDES",
+    "Autopilot-gemini",
+    "Autopilot-qwen",
+    "Autopilot-qwen-followup",
+    "ChatGPT",
+    "Claude",
+    "Claude-Code",
+    "Claude-Opus-5",
+    "Claude-Opus-5.5",
+    "Claude-Sonnet-5",
+    "Codex",
+    "Codex-142",
+    "Codex-CI-206",
+    "Codex-GPT-6",
+    "Hermes-Agent",
+    "Odiseo",
+    "Odiseo(GPT-5.6-Sol)",
+    "Odiseo-Codex",
+    "Odiseo-Codex-GPT5",
+    "Odiseo-GPT",
+    "Odiseo-GPT-5.6",
+    "Odiseo-GPT-5.6-Sol",
+    "Odiseo-GPT5.6-Sol",
+    "Pool-qwen",
+    "VaroTv7-GPT-5.6-Sol",
+    "claude-opus-5",
+    "claude-opus-5.5",
+}
 
 
 class CreditosInicioTest(unittest.TestCase):
@@ -44,20 +73,27 @@ class CreditosInicioTest(unittest.TestCase):
         self.assertTrue(agradecimientos["pendiente"])
         self.assertEqual(agradecimientos["entradas"], [])
 
-    def test_desarrollo_direccion_y_titulo_reflejan_la_decision_del_issue(self) -> None:
+    def test_desarrollo_normaliza_el_snapshot_actual_del_registro_182(self) -> None:
         bloques = {bloque["id"]: bloque for bloque in self.catalogo["bloques"]}
-        nombres = [entrada["nombre"] for entrada in bloques["desarrollo"]["entradas"]]
-        self.assertEqual(
-            nombres,
-            [
-                "eGurucharri",
-                "VaroTv7",
-                "Odiseo",
-                "Codex",
-                "Claude Opus 5",
-                "Claude Sonnet 5",
-            ],
-        )
+        desarrollo = bloques["desarrollo"]
+        self.assertEqual(desarrollo["fuente_registro"], "#182")
+        self.assertEqual(desarrollo["snapshot_registro"], "2026-09-28")
+
+        aliases = []
+        for entrada in desarrollo["entradas"]:
+            if entrada.get("tipo") == "agente":
+                self.assertTrue(entrada.get("aliases_claim"))
+                aliases.extend(entrada["aliases_claim"])
+        self.assertEqual(len(aliases), len(set(aliases)))
+        self.assertEqual(set(aliases), AGENTES_CLAIM_SNAPSHOT)
+
+        personas = [
+            entrada["nombre"] for entrada in desarrollo["entradas"] if entrada.get("tipo") == "persona"
+        ]
+        self.assertEqual(personas, ["eGurucharri", "VaroTv7"])
+
+    def test_direccion_y_titulo_reflejan_la_decision_del_issue(self) -> None:
+        bloques = {bloque["id"]: bloque for bloque in self.catalogo["bloques"]}
         self.assertEqual(
             bloques["direccion"]["entradas"],
             [{"nombre": "Dirigido por Eloy Gurucharri"}],
