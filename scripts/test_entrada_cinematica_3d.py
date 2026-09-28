@@ -87,7 +87,7 @@ class EntradaCinematica3DTest(unittest.TestCase):
         self.assertIn("_terminar()", salto)
         self.assertIn("Cinematica.anotar_vista(_estado, _id)", self.reproductor)
         self.assertIn("terminada.emit()", self.reproductor)
-        self.assertIn("_entrada.terminada.connect(_cerrar_vuelta)", self.ciclo)
+        self.assertIn("_entrada.terminada.connect(_notificar_vuelta_terminada)", self.ciclo)\n        self.assertIn("_ciclo_laboral.vuelta_terminada.connect(_cerrar_vuelta)", self.dia)
         self.assertIn("_ciclo_laboral.abrir_vuelta(jornada)", self.dia)
 
     def test_se_conservan_identidad_repeticion_y_remate(self) -> None:
