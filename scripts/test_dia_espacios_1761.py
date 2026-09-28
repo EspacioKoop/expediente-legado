@@ -20,7 +20,9 @@ class DiaEspacios1761Test(unittest.TestCase):
         self.assertIn("DiaEspaciosApp.construir(", bloque)
         self.assertIn('Callable(self, "_opciones_sueno")', bloque)
         self.assertIn('Callable(self, "_registro_literario_para_sueno")', bloque)
-        self.assertIn('Callable(self, "_plantilla_en")', bloque)
+        self.assertNotIn("_plantilla_en", self.dia)
+        self.assertIn("static func plantilla_en(", self.espacios)
+        self.assertIn("Companeros.plantilla", self.espacios)
         self.assertIn('_rivales = resultado["rivales"]', bloque)
 
     def test_catalogo_y_sueno_viven_fuera_del_orquestador(self):
