@@ -49,13 +49,17 @@ El mismo KV coordina la exclusión por issue de la pool mediante endpoints priva
 - `POST /api/agent-pool/acquire`: crea un lease atómico si el issue está libre;
 - `POST /api/agent-pool/transition`: renueva el TTL y registra la fase;
 - `POST /api/agent-pool/release`: libera el lease del run propietario;
-- `POST /api/agent-pool/status`: permite al dispatcher excluir leases activos.
+- `POST /api/agent-pool/status`: permite al dispatcher excluir leases activos;
+- `POST /api/agent-pool/worker-health/status`: devuelve circuit breakers activos por worker;
+- `POST /api/agent-pool/worker-health/report`: abre o cierra el circuit breaker de un worker.
 
 Usa una audiencia OIDC separada, `siga98-agent-pool`. El dispatcher `agent-pool.yml` solo puede consultar estado; `agent-worker.yml` puede adquirir, renovar y liberar. Cuando el worker se ejecuta como reusable workflow se valida además la pareja `workflow_ref=agent-pool.yml` + `job_workflow_ref=agent-worker.yml`.
 
 Cada lease dura **30 minutos** y se renueva por fase. Las transiciones y los leases se escriben con `Deno.Kv.atomic().check(...)`, evitando dos adquisiciones simultáneas. Los eventos compactos de transición se conservan 7 días para poder medir el embudo real sin usar un workflow verde como proxy de éxito.
 
-Durante el primer corte (#1728) los workflows son deliberadamente fail-open si el gateway no está disponible: siguen usando `concurrency`, labels y CLAIM/RELEASE. Un `409 leased` sí bloquea el worker duplicado. Esto permite validar el control-plane antes de retirar coordinación histórica.
+Durante la migración (#1728) los workflows son deliberadamente fail-open si el gateway no está disponible: siguen usando `concurrency`, labels y CLAIM/RELEASE. Un `409 leased` sí bloquea el worker duplicado. El health de workers usa Deno KV como fuente primaria; los marcadores `AGENT_POOL_SLOT_UNHEALTHY/HEALTHY` de #1713 quedan como fallback mientras conviven ambas capas.
+
+Los circuit breakers de workers se almacenan con TTL. El cliente puede solicitar cooldown, pero el servidor lo limita a **5 minutos–6 horas**. Un fallo de cuota reportado por `agent-worker.yml` abre el circuito; un `agent-provider-smoke.yml` verde lo cierra inmediatamente. El smoke usa OIDC y solo recibe `id-token: write`, no permisos de escritura sobre Contents, Issues ni PRs.
 
 ## Despliegue
 
@@ -128,11 +132,12 @@ Debe responder con:
 {
   "ok": true,
   "service": "siga98-feedback-deno",
-  "version": 3,
+  "version": 4,
   "github_configured": true,
   "kv_configured": true,
   "agent_memory": true,
-  "agent_pool_control": true
+  "agent_pool_control": true,
+  "agent_pool_worker_health": true
 }
 ```
 
