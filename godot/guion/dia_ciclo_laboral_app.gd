@@ -71,10 +71,13 @@ func abrir_vuelta(jornada: Dictionary) -> void:
 	add_child(_entrada)
 	_entrada.terminada.connect(_cerrar_vuelta)
 	var vistas := Cinematica.vistas_de(_partida.estado, EntradaCinematica.ID)
-	_entrada.reproducir(
-		EntradaCinematica.planos_de(vistas),
-		EntradaCinematica.ID,
-		_partida.estado,
+	(
+		_entrada
+		. reproducir(
+			EntradaCinematica.planos_de(vistas),
+			EntradaCinematica.ID,
+			_partida.estado,
+		)
 	)
 
 
