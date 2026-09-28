@@ -311,24 +311,26 @@ jobs:
       - id: plan_qwen
         name: Plan Qwen
         if: steps.guard.outputs.run == 'true' && inputs.provider == 'qwen'
+        continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
           openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || steps.qwen_config.outputs.credential == 'fallback-1' && secrets.QWEN_FALLBACK_1_API_KEY || steps.qwen_config.outputs.credential == 'fallback-2' && secrets.QWEN_FALLBACK_2_API_KEY || steps.qwen_config.outputs.credential == 'fallback-3' && secrets.QWEN_FALLBACK_3_API_KEY || secrets.QWEN_FALLBACK_4_API_KEY }}
           openai_base_url: ${{ steps.qwen_config.outputs.url }}
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
-          settings: '{"model":{"maxSessionTurns":20},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
+          settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
           prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-context.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino. Jerarquia: repo/issue/#181/#182 y Normas Platino > contexto de wiki > memoria temporal Deno KV > memoria historica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integracion y sus tests: files debe incluir TODAS las rutas que una implementacion correcta podria necesitar. Si los comentarios recientes contienen AGENT_POOL_REPLAN, revisa explicitamente sus observed_paths y anadelas solo si son realmente necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Maximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
 
       - id: plan_gemini
         name: Plan Gemini
         if: steps.guard.outputs.run == 'true' && inputs.provider == 'gemini'
+        continue-on-error: true
         uses: google-github-actions/run-gemini-cli@v0
         with:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
-          settings: '{"model":{"maxSessionTurns":20},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
+          settings: '{"model":{"maxSessionTurns":40},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
           prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-context.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino. Jerarquia: repo/issue/#181/#182 y Normas Platino > contexto de wiki > memoria temporal Deno KV > memoria historica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integracion y sus tests: files debe incluir TODAS las rutas que una implementacion correcta podria necesitar. Si los comentarios recientes contienen AGENT_POOL_REPLAN, revisa explicitamente sus observed_paths y anadelas solo si son realmente necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Maximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
 
       - id: reserve
@@ -425,8 +427,11 @@ jobs:
 
           if grep -q '^reserved=false$' "$GITHUB_OUTPUT"; then
             gh issue comment 182 --repo "$GITHUB_REPOSITORY" --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=colision-agent-pool" >/dev/null || true
-            gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human --remove-label agent:working >/dev/null || true
-            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Agent pool detenido: $(grep '^reason=' "$GITHUB_OUTPUT"|cut -d= -f2-)" || true
+            gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+              --remove-label agent:working --remove-label agent:needs-human \
+              >/dev/null 2>&1 || true
+            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
+              "Agent pool: $(grep '^reason=' "$GITHUB_OUTPUT"|cut -d= -f2-). Se reencola automáticamente; la colisión de CLAIM no requiere intervención humana." || true
           fi
 
       - name: Afinar contexto y memoria por rutas
@@ -682,11 +687,94 @@ jobs:
           ISSUE: ${{ inputs.issue }}
           BRANCH: ${{ steps.guard.outputs.branch }}
           RESERVED: ${{ steps.reserve.outputs.reserved }}
+          PROVIDER: ${{ inputs.provider }}
           WORKER: ${{ inputs.worker }}
+          HAS_QWEN: ${{ secrets.QWEN_API_KEY != '' }}
+          HAS_OMNIROUTE: ${{ secrets.OMNIROUTE_API_KEY != '' && secrets.TS_OAUTH_CLIENT_ID != '' && (secrets.TS_OAUTH_SECRET != '' || secrets.TS_AUDIENCE != '') && vars.OMNIROUTE_BASE_URL != '' && vars.OMNIROUTE_MODEL != '' }}
+          HAS_F1: ${{ secrets.QWEN_FALLBACK_1_API_KEY != '' }}
+          HAS_F2: ${{ secrets.QWEN_FALLBACK_2_API_KEY != '' }}
+          HAS_F3: ${{ secrets.QWEN_FALLBACK_3_API_KEY != '' }}
+          HAS_F4: ${{ secrets.QWEN_FALLBACK_4_API_KEY != '' }}
+          F1_URL: ${{ vars.QWEN_FALLBACK_1_BASE_URL }}
+          F2_URL: ${{ vars.QWEN_FALLBACK_2_BASE_URL }}
+          F3_URL: ${{ vars.QWEN_FALLBACK_3_BASE_URL }}
+          F4_URL: ${{ vars.QWEN_FALLBACK_4_BASE_URL }}
+          HAS_GEMINI: ${{ secrets.GEMINI_API_KEY != '' }}
         run: |
-          gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human --remove-label agent:working >/dev/null 2>&1 || true
-          gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Agent pool ($WORKER) se detuvo: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" || true
+          set -euo pipefail
           pr="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --head "${BRANCH:-none}" --json number --jq '.[0].number // empty' || true)"
-          if [[ "$RESERVED" == true && -z "$pr" ]]; then
-            gh issue comment 182 --repo "$GITHUB_REPOSITORY" --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=agent-pool-fallo-antes-de-PR" >/dev/null || true
+
+          if [[ "${RESERVED:-}" != true && -z "$pr" ]]; then
+            marker="AGENT_POOL_WORKER_FAILURE worker=$WORKER provider=$PROVIDER stage=plan run=$GITHUB_RUN_ID"
+            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "$marker" >/dev/null || true
+            gh issue comment 182 --repo "$GITHUB_REPOSITORY" \
+              --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=agent-pool-plan-retry" \
+              >/dev/null || true
+
+            labels="$(gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json labels --jq '[.labels[].name]|join(" ")')"
+            available=()
+            qwen_allowed=true
+            gemini_allowed=true
+            [[ " $labels " == *" agent:qwen "* ]] && gemini_allowed=false
+            [[ " $labels " == *" agent:gemini "* ]] && qwen_allowed=false
+
+            if [[ "$qwen_allowed" == true ]]; then
+              [[ "$HAS_QWEN" == true || "$HAS_OMNIROUTE" == true ]] && available+=(qwen-primary)
+              [[ "$HAS_F1" == true && -n "$F1_URL" ]] && available+=(qwen-fallback-1)
+              [[ "$HAS_F2" == true && -n "$F2_URL" ]] && available+=(qwen-fallback-2)
+              [[ "$HAS_F3" == true && -n "$F3_URL" ]] && available+=(qwen-fallback-3)
+              [[ "$HAS_F4" == true && -n "$F4_URL" ]] && available+=(qwen-fallback-4)
+            fi
+            if [[ "$gemini_allowed" == true && "$HAS_GEMINI" == true ]]; then
+              available+=(gemini)
+            fi
+
+            gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json comments > /tmp/agent-retry-comments.json
+            available_csv="$(IFS=,; echo "${available[*]}")"
+            exhausted="$(
+              AVAILABLE="$available_csv" python3 - <<'PY'
+          import json, os, re
+          available={item for item in os.environ.get("AVAILABLE","").split(",") if item}
+          failed=set()
+          pattern=re.compile(r"^AGENT_POOL_WORKER_FAILURE\s+worker=([A-Za-z0-9._-]+)\b")
+          data=json.load(open("/tmp/agent-retry-comments.json",encoding="utf-8"))
+          for comment in data.get("comments",[]):
+              body=comment.get("body","") if isinstance(comment,dict) else ""
+              for line in body.splitlines():
+                  line=line.strip()
+                  if line.startswith("AGENT_POOL_RETRY_RESET"):
+                      failed.clear()
+                      continue
+                  match=pattern.match(line)
+                  if match:
+                      failed.add(match.group(1))
+          print("true" if available and available.issubset(failed) else "false")
+          PY
+            )"
+
+            if [[ "$exhausted" == true ]]; then
+              gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+                --add-label agent:needs-human --remove-label agent:working \
+                >/dev/null 2>&1 || true
+              gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
+                "Agent pool agotó los workers compatibles durante planificación. Último fallo: $WORKER. Requiere revisión humana o AGENT_POOL_RETRY_RESET cuando cambie la disponibilidad." || true
+            else
+              gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+                --remove-label agent:working --remove-label agent:needs-human \
+                >/dev/null 2>&1 || true
+              gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
+                "Agent pool reencolado tras fallo de planificación en `$WORKER`; el siguiente dispatcher evitará ese worker para este issue." || true
+            fi
+            exit 0
+          fi
+
+          gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+            --add-label agent:needs-human --remove-label agent:working \
+            >/dev/null 2>&1 || true
+          gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
+            "Agent pool ($WORKER) se detuvo después de reservar/implementar: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" || true
+          if [[ "${RESERVED:-}" == true && -z "$pr" ]]; then
+            gh issue comment 182 --repo "$GITHUB_REPOSITORY" \
+              --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=agent-pool-fallo-antes-de-PR" \
+              >/dev/null || true
           fi
