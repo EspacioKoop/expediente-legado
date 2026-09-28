@@ -17,9 +17,7 @@ func _probar() -> void:
 	_comprobar(vacia["intensidad_maxima"] == 0, "vacío tiene intensidad cero")
 	_comprobar(vacia["relaciones"].is_empty(), "vacío no inventa relaciones")
 
-	var repetida := MemoriaNocturna.analizar(
-		["F-1", "F-1", "F-2"], casos, ["P-12"]
-	)
+	var repetida := MemoriaNocturna.analizar(["F-1", "F-1", "F-2"], casos, ["P-12"])
 	_comprobar(repetida["documentos_unicos"] == 2, "repetir conserva dos documentos únicos")
 	_comprobar(repetida["intensidad_maxima"] == 2, "repetir intensifica la memoria")
 	_comprobar(repetida["repeticiones"].size() == 1, "solo se marca el folio repetido")
