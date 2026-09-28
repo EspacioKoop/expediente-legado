@@ -251,6 +251,116 @@ class ReintentosTest(unittest.TestCase):
         self.assertNotIsInstance(ctx.exception, reservas.ErrorTransitorio)
 
 
+class LimpiezaLabelsAgenteTest(unittest.TestCase):
+    def test_merge_limpia_solo_labels_de_coordinacion(self):
+        reserva = reservas.Reserva(
+            issue=70,
+            agent="A",
+            branch="feature/70",
+            files="a.gd",
+            goal="A",
+            claimed_at=datetime(2026, 9, 28, tzinfo=UTC),
+            last_activity=datetime(2026, 9, 28, tzinfo=UTC),
+            lease_hours=48,
+        )
+        llamadas = []
+
+        def api(method, path, payload=None, dormir=None):
+            llamadas.append((method, path, payload))
+            if method == "GET":
+                return (
+                    {
+                        "labels": [
+                            {"name": "area:siga"},
+                            {"name": "prioridad:P1"},
+                            {"name": "agent:auto"},
+                            {"name": "agent:pr-open"},
+                            {"name": "agent:needs-human"},
+                        ]
+                    },
+                    {},
+                )
+            return ({}, {})
+
+        pr = {
+            "number": 700,
+            "merged_at": "2026-09-28T12:00:00Z",
+            "merge_commit_sha": "abc",
+        }
+        with mock.patch.object(reservas, "api_json", api):
+            reservas.publicar_release(
+                reserva,
+                "merge-detectado-automaticamente",
+                pr,
+                dry_run=False,
+            )
+
+        self.assertIn(
+            (
+                "PATCH",
+                "/repos//issues/70",
+                {"labels": ["area:siga", "prioridad:P1"]},
+            ),
+            llamadas,
+        )
+        self.assertTrue(
+            any(
+                method == "POST"
+                and path.endswith("/issues/182/comments")
+                for method, path, _ in llamadas
+            )
+        )
+
+    def test_cierre_sin_merge_no_limpia_labels(self):
+        reserva = reservas.Reserva(
+            issue=71,
+            agent="A",
+            branch="feature/71",
+            files="a.gd",
+            goal="A",
+            claimed_at=datetime(2026, 9, 28, tzinfo=UTC),
+            last_activity=datetime(2026, 9, 28, tzinfo=UTC),
+            lease_hours=48,
+        )
+        llamadas = []
+
+        def api(method, path, payload=None, dormir=None):
+            llamadas.append((method, path, payload))
+            return ({}, {})
+
+        with mock.patch.object(reservas, "api_json", api):
+            reservas.publicar_release(
+                reserva,
+                "PR-cerrado-sin-integrar",
+                {"number": 701, "merged_at": None},
+                dry_run=False,
+            )
+
+        self.assertFalse(any(method == "GET" for method, _, _ in llamadas))
+        self.assertFalse(any(method == "PATCH" for method, _, _ in llamadas))
+
+    def test_dry_run_no_modifica_labels(self):
+        llamadas = []
+
+        def api(method, path, payload=None, dormir=None):
+            llamadas.append((method, path, payload))
+            return (
+                {
+                    "labels": [
+                        {"name": "area:siga"},
+                        {"name": "agent:working"},
+                    ]
+                },
+                {},
+            )
+
+        with mock.patch.object(reservas, "api_json", api):
+            retiradas = reservas.limpiar_labels_agente(72, dry_run=True)
+
+        self.assertEqual(["agent:working"], retiradas)
+        self.assertEqual([("GET", "/repos//issues/72", None)], llamadas)
+
+
 class AislamientoDeFallosTest(unittest.TestCase):
     def test_un_fallo_al_liberar_no_impide_liberar_las_demas(self):
         t0 = datetime(2026, 9, 15, 0, 0, tzinfo=UTC)
