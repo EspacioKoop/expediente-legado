@@ -37,7 +37,7 @@ def _labels(issue: dict[str, Any]) -> set[str]:
     return result
 
 
-def _worker(item: dict[str, Any]) -> dict[str, str] | None:
+def _worker(item: dict[str, Any]) -> dict[str, Any] | None:
     worker_id = item.get("worker")
     provider = item.get("provider")
     healthy = item.get("healthy", True)
@@ -47,7 +47,15 @@ def _worker(item: dict[str, Any]) -> dict[str, str] | None:
         return None
     if healthy is False:
         return None
-    return {"worker": worker_id.strip(), "provider": provider}
+    raw_score = item.get("score", 50.0)
+    try:
+        score = float(raw_score)
+    except (TypeError, ValueError):
+        score = 50.0
+    if isinstance(raw_score, bool):
+        score = 50.0
+    score = max(0.0, min(100.0, score))
+    return {"worker": worker_id.strip(), "provider": provider, "score": score}
 
 
 def _preferred_provider(issue: dict[str, Any]) -> str | None:
@@ -127,7 +135,7 @@ def eligible_issue(issue: dict[str, Any]) -> tuple[bool, str | None]:
 
 
 def _usable_indices(
-    workers: list[dict[str, str]],
+    workers: list[dict[str, Any]],
     issue: dict[str, Any],
 ) -> list[int]:
     avoided = _avoid_workers(issue)
@@ -136,6 +144,25 @@ def _usable_indices(
         for index, worker in enumerate(workers)
         if worker["worker"] not in avoided
     ]
+
+
+def _best_index(
+    workers: list[dict[str, Any]],
+    indices: list[int],
+    *,
+    provider: str | None = None,
+) -> int | None:
+    candidates = [
+        index
+        for index in indices
+        if provider is None or workers[index]["provider"] == provider
+    ]
+    if not candidates:
+        return None
+    return max(
+        candidates,
+        key=lambda index: (float(workers[index].get("score", 50.0)), -index),
+    )
 
 
 def select_tasks(
@@ -164,13 +191,10 @@ def select_tasks(
             break
 
         usable = _usable_indices(free_workers, issue)
-        choice_index = next(
-            (
-                index
-                for index in usable
-                if free_workers[index]["provider"] == requested_provider
-            ),
-            None,
+        choice_index = _best_index(
+            free_workers,
+            usable,
+            provider=requested_provider,
         )
         if choice_index is None:
             continue
@@ -198,16 +222,17 @@ def select_tasks(
 
         preferred_provider = _preferred_provider(issue)
         if preferred_provider is not None:
-            choice_index = next(
-                (
-                    index
-                    for index in usable
-                    if free_workers[index]["provider"] == preferred_provider
-                ),
-                usable[0],
+            choice_index = _best_index(
+                free_workers,
+                usable,
+                provider=preferred_provider,
             )
+            if choice_index is None:
+                choice_index = _best_index(free_workers, usable)
         else:
-            choice_index = usable[0]
+            choice_index = _best_index(free_workers, usable)
+        if choice_index is None:
+            continue
 
         worker = free_workers.pop(choice_index)
         tasks.append(
