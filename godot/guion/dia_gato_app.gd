@@ -460,6 +460,7 @@ func _actualizar_objetivo_puzzle_onirico(resultado: Dictionary) -> bool:
 	if resultado_estado == PuzzleOnirico.ESTADO_COMPLETADO:
 		if not SuenoObjetivos.completar(estado, objetivo_id):
 			return false
+		Estres.aplicar(jornada, "resolucion")
 		_tras_cambio_objetivo(estado, false)
 		return true
 	if (
