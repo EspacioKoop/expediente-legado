@@ -115,6 +115,26 @@ func _probar() -> void:
 	_comprobar(aparato.get_node_or_null("VolumenInteraccion") != null, "interacción 3D")
 	aparato.queue_free()
 
+	var panel := TelefonoFijoPanel.new()
+	root.add_child(panel)
+	var dia_panel := _jornada(1)
+	TelefonoFijo.preparar_casa(dia_panel)
+	panel.abrir(dia_panel)
+	var descolgar := panel.find_child("Descolgar", true, false) as Button
+	var contestador := panel.find_child("Contestador", true, false) as Button
+	var cerrar := panel.find_child("CerrarTelefono", true, false) as Button
+	_comprobar(descolgar != null and not descolgar.disabled, "descolgar entra en la cadena de foco")
+	_comprobar(contestador != null and not contestador.disabled, "contestador entra en la cadena de foco")
+	_comprobar(cerrar != null, "cerrar existe como destino de foco")
+	if descolgar != null:
+		_comprobar(not descolgar.focus_next.is_empty(), "descolgar tiene foco siguiente explícito")
+		_comprobar(not descolgar.focus_previous.is_empty(), "descolgar tiene foco anterior explícito")
+	if contestador != null:
+		_comprobar(not contestador.focus_next.is_empty(), "contestador tiene foco siguiente explícito")
+	if cerrar != null:
+		_comprobar(not cerrar.focus_next.is_empty(), "cerrar cierra el ciclo de foco")
+	panel.queue_free()
+
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 
