@@ -23,6 +23,17 @@ TOKEN = os.environ.get("GITHUB_TOKEN", "")
 REINTENTOS_MAX = int(os.environ.get("RESERVAS_REINTENTOS", "5"))
 ESPERA_MAX_SEGUNDOS = float(os.environ.get("RESERVAS_ESPERA_MAX", "60"))
 CODIGOS_TRANSITORIOS = frozenset({429, 500, 502, 503, 504})
+LABELS_COORDINACION_AGENTE = frozenset(
+    {
+        "agent:auto",
+        "agent:pool",
+        "agent:qwen",
+        "agent:gemini",
+        "agent:working",
+        "agent:pr-open",
+        "agent:needs-human",
+    }
+)
 
 CLAIM_RE = re.compile(
     r"^CLAIM issue=#(?P<issue>\d+) agent=(?P<agent>\S+) "
@@ -289,6 +300,25 @@ def obtener_pr_cerrada_de_rama(rama: str) -> dict | None:
     return max(cerradas, key=lambda pr: pr["closed_at"]) if cerradas else None
 
 
+def limpiar_labels_agente(issue: int, dry_run: bool) -> list[str]:
+    """Retira solo estado/cola de agentes, preservando labels funcionales."""
+
+    payload, _ = api_json("GET", f"/repos/{REPO}/issues/{issue}")
+    actuales = [
+        str(item.get("name", ""))
+        for item in (payload or {}).get("labels", [])
+        if isinstance(item, dict) and item.get("name")
+    ]
+    nuevas = [label for label in actuales if label not in LABELS_COORDINACION_AGENTE]
+    retiradas = [label for label in actuales if label in LABELS_COORDINACION_AGENTE]
+    if not retiradas:
+        return []
+    print(f"CLEANUP_LABELS issue=#{issue} removed={','.join(retiradas)}")
+    if not dry_run:
+        api_json("PATCH", f"/repos/{REPO}/issues/{issue}", {"labels": nuevas})
+    return retiradas
+
+
 def publicar_release(reserva: Reserva, motivo: str, pr: dict | None, dry_run: bool) -> None:
     partes = [f"RELEASE issue=#{reserva.issue}"]
     if pr:
@@ -300,6 +330,8 @@ def publicar_release(reserva: Reserva, motivo: str, pr: dict | None, dry_run: bo
     partes.append("auto=reservas.yml")
     body = " ".join(partes)
     print(body)
+    if motivo == "merge-detectado-automaticamente":
+        limpiar_labels_agente(reserva.issue, dry_run)
     if not dry_run:
         api_json("POST", f"/repos/{REPO}/issues/{REGISTRO_ISSUE}/comments", {"body": body})
     # También en dry-run: el estado es solo de esta ejecución, y así la
