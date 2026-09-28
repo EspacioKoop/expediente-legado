@@ -98,38 +98,78 @@ class AgentPoolTest(unittest.TestCase):
         )
         self.assertEqual("qwen", fallback[0]["provider"])
 
-    def test_reserva_slot_para_provider_explicito_antes_de_flexible(self):
+    def test_bloquea_estados_que_ya_tienen_trabajo(self):
+        issues = [
+            issue(40, "agent:auto", "agent:working"),
+            issue(41, "agent:auto", "agent:pr-open"),
+            issue(42, "agent:auto", "agent:needs-human"),
+            issue(43, "agent:auto"),
+        ]
+        selected = mod.select_tasks(issues, self.workers)
+        self.assertEqual([43], [task["issue"] for task in selected])
+
+    def test_dos_labels_de_provider_son_ambiguos(self):
+        issues = [issue(50, "agent:auto", "agent:qwen", "agent:gemini")]
+        self.assertEqual([], mod.select_tasks(issues, self.workers))
+
+    def test_reserva_gemini_explicito_antes_de_tarea_flexible(self):
         workers = [
-            {"worker": "qwen-primary", "provider": "qwen"},
-            {"worker": "gemini", "provider": "gemini"},
+            {"worker": "gemini-unico", "provider": "gemini"},
+            {"worker": "qwen-unico", "provider": "qwen"},
         ]
         issues = [
             issue(
-                35,
+                51,
                 "agent:auto",
-                created="2026-09-27T00:00:00Z",
+                created="2026-09-28T00:00:00Z",
                 preferred="gemini",
             ),
             issue(
-                36,
+                52,
                 "agent:gemini",
-                created="2026-09-28T00:00:00Z",
+                created="2026-09-28T01:00:00Z",
             ),
         ]
 
-        tasks = mod.select_tasks(issues, workers, max_parallel=2)
+        tasks = mod.select_tasks(issues, workers)
 
         self.assertEqual(
-            [
-                {"issue": 36, "provider": "gemini", "worker": "gemini"},
-                {"issue": 35, "provider": "qwen", "worker": "qwen-primary"},
-            ],
-            tasks,
+            {
+                51: ("qwen", "qwen-unico"),
+                52: ("gemini", "gemini-unico"),
+            },
+            {
+                task["issue"]: (task["provider"], task["worker"])
+                for task in tasks
+            },
+        )
+
+    def test_reserva_qwen_explicito_antes_de_tarea_flexible(self):
+        workers = [
+            {"worker": "qwen-unico", "provider": "qwen"},
+            {"worker": "gemini-unico", "provider": "gemini"},
+        ]
+        issues = [
+            issue(53, "agent:auto", created="2026-09-28T00:00:00Z"),
+            issue(54, "agent:qwen", created="2026-09-28T01:00:00Z"),
+        ]
+
+        tasks = mod.select_tasks(issues, workers)
+
+        self.assertEqual(
+            {
+                53: ("gemini", "gemini-unico"),
+                54: ("qwen", "qwen-unico"),
+            },
+            {
+                task["issue"]: (task["provider"], task["worker"])
+                for task in tasks
+            },
         )
 
     def test_evitar_worker_que_ya_fallo_planificando(self):
         candidate = issue(
-            37,
+            55,
             "agent:auto",
             preferred="gemini",
             comments=[
@@ -144,7 +184,7 @@ class AgentPoolTest(unittest.TestCase):
 
     def test_retry_reset_permite_reutilizar_worker(self):
         candidate = issue(
-            38,
+            56,
             "agent:auto",
             preferred="gemini",
             comments=[
@@ -157,19 +197,25 @@ class AgentPoolTest(unittest.TestCase):
 
         self.assertEqual("gemini", tasks[0]["worker"])
 
-    def test_bloquea_estados_que_ya_tienen_trabajo(self):
-        issues = [
-            issue(40, "agent:auto", "agent:working"),
-            issue(41, "agent:auto", "agent:pr-open"),
-            issue(42, "agent:auto", "agent:needs-human"),
-            issue(43, "agent:auto"),
+    def test_provider_explicito_evade_worker_fallido_del_mismo_provider(self):
+        workers = [
+            {"worker": "qwen-primary", "provider": "qwen"},
+            {"worker": "qwen-fallback-1", "provider": "qwen"},
         ]
-        selected = mod.select_tasks(issues, self.workers)
-        self.assertEqual([43], [task["issue"] for task in selected])
+        candidate = issue(
+            57,
+            "agent:qwen",
+            comments=[
+                "AGENT_POOL_WORKER_FAILURE worker=qwen-primary provider=qwen stage=plan run=1"
+            ],
+        )
 
-    def test_dos_labels_de_provider_son_ambiguos(self):
-        issues = [issue(50, "agent:auto", "agent:qwen", "agent:gemini")]
-        self.assertEqual([], mod.select_tasks(issues, self.workers))
+        tasks = mod.select_tasks([candidate], workers)
+
+        self.assertEqual(
+            [{"issue": 57, "provider": "qwen", "worker": "qwen-fallback-1"}],
+            tasks,
+        )
 
     def test_capacidad_provider_no_se_sobreasigna(self):
         workers = [{"worker": "gemini", "provider": "gemini"}]
