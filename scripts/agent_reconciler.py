@@ -118,12 +118,13 @@ def reconcile(
         for run in runs
         if isinstance(run, dict) and str(run.get("id", "")).isdigit()
     }
-    open_pr_heads = {
-        str(pr.get("headRefName") or pr.get("head_ref") or pr.get("head") or "")
+    open_prs = [
+        pr
         for pr in prs
         if isinstance(pr, dict)
         and str(pr.get("state", "OPEN")).upper() in {"OPEN", "OPENED"}
-    }
+    ]
+    open_pr_heads = {_pr_head(pr) for pr in open_prs}
     ttl_seconds = max(15, ttl_minutes) * 60
     actions: list[dict[str, Any]] = []
 
@@ -135,12 +136,27 @@ def reconcile(
         labels = _labels(issue)
         claim = claims.get(number)
         branch = claim.get("branch") if claim else None
+        pr_referenciada = _open_pr_for_issue(number, open_prs)
+
+        def reencolar(**campos: Any) -> None:
+            # El CLAIM puede haber quedado fuera de la ventana de comentarios
+            # leída de #182; una PR abierta que referencia el issue manda:
+            # reencolarlo pondría a otro worker sobre trabajo ya entregado.
+            if pr_referenciada is not None:
+                actions.append(
+                    {
+                        "issue": number,
+                        "action": "pr_open",
+                        "branch": _pr_head(pr_referenciada),
+                        "reason": "open-pr-referencia-issue",
+                    }
+                )
+            else:
+                actions.append({"issue": number, "action": "requeue", **campos})
 
         if "agent:working" in labels:
             if claim is None:
-                actions.append(
-                    {"issue": number, "action": "requeue", "reason": "working-without-claim"}
-                )
+                reencolar(reason="working-without-claim")
                 continue
             if not branch or not branch.startswith("agent/"):
                 actions.append(
@@ -175,29 +191,17 @@ def reconcile(
                     )
                     continue
                 if status == "completed" or conclusion in TERMINAL_CONCLUSIONS:
-                    actions.append(
-                        {
-                            "issue": number,
-                            "action": "requeue",
-                            "branch": branch,
-                            "run_id": run_id,
-                            "reason": f"run-{conclusion or status}",
-                        }
+                    reencolar(
+                        branch=branch,
+                        run_id=run_id,
+                        reason=f"run-{conclusion or status}",
                     )
                     continue
 
             updated = _parse_time(issue.get("updatedAt") or issue.get("updated_at"))
             stale = updated is not None and (now - updated).total_seconds() >= ttl_seconds
             if stale:
-                actions.append(
-                    {
-                        "issue": number,
-                        "action": "requeue",
-                        "branch": branch,
-                        "run_id": run_id,
-                        "reason": "stale-working",
-                    }
-                )
+                reencolar(branch=branch, run_id=run_id, reason="stale-working")
             else:
                 actions.append(
                     {
@@ -210,16 +214,37 @@ def reconcile(
                 )
             continue
 
-        if "agent:pr-open" in labels and claim is None:
-            has_open_pr = False
-            if branch:
-                has_open_pr = branch in open_pr_heads
-            if not has_open_pr:
-                actions.append(
-                    {"issue": number, "action": "requeue", "reason": "pr-open-without-pr"}
-                )
+        if "agent:pr-open" in labels and claim is None and pr_referenciada is None:
+            actions.append(
+                {"issue": number, "action": "requeue", "reason": "pr-open-without-pr"}
+            )
 
     return actions
+
+
+def _pr_head(pr: dict[str, Any]) -> str:
+    return str(pr.get("headRefName") or pr.get("head_ref") or pr.get("head") or "")
+
+
+def _open_pr_for_issue(number: int, open_prs: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """PR abierta que trabaja el issue según las convenciones del repo.
+
+    Solo señales fuertes: rama (`tipo/N-slug`, `agent/prov-N-run`), título
+    (`fix(N): ...`) o palabra de cierre en el cuerpo. Un `Refs #N` suelto no
+    cuenta: muchas PRs citan issues relacionados que no están trabajando.
+    """
+
+    rama = re.compile(rf"(?:^|[/-]){number}(?:[-/]|$)")
+    titulo = re.compile(rf"^\w+\({number}\)")
+    cierre = re.compile(rf"\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#{number}(?!\d)", re.I)
+    for pr in open_prs:
+        if rama.search(_pr_head(pr)):
+            return pr
+        if titulo.search(str(pr.get("title") or "")):
+            return pr
+        if cierre.search(str(pr.get("body") or "")):
+            return pr
+    return None
 
 
 def _read_list(path: Path) -> list[dict[str, Any]]:

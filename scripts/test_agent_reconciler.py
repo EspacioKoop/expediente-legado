@@ -146,6 +146,70 @@ class AgentReconcilerTest(unittest.TestCase):
         ]
         self.assertEqual([102], mod.discover_run_ids(issues, comments))
 
+    def test_pr_open_con_claim_fuera_de_ventana_no_reencola(self):
+        # El workflow solo lee los últimos 300 comentarios de #182 (~39 h):
+        # una PR abierta más tiempo pierde su CLAIM visible.
+        issues = [issue(500, "agent:pr-open", "area:siga")]
+        prs = [{"number": 900, "state": "OPEN", "headRefName": "agent/qwen-500-123"}]
+        self.assertEqual([], mod.reconcile(issues, [], prs, [], now=self.now))
+
+    def test_working_sin_claim_con_pr_abierta_normaliza_en_vez_de_reencolar(self):
+        issues = [issue(501, "agent:auto", "agent:working")]
+        prs = [
+            {
+                "number": 901,
+                "state": "OPEN",
+                "headRefName": "infra/cambio-sin-numero",
+                "title": "fix(501): algo",
+            }
+        ]
+        actions = mod.reconcile(issues, [], prs, [], now=self.now)
+        self.assertEqual("pr_open", actions[0]["action"])
+        self.assertEqual("open-pr-referencia-issue", actions[0]["reason"])
+
+    def test_run_terminado_con_pr_que_cierra_el_issue_no_reencola(self):
+        issues = [issue(502, "agent:auto", "agent:working")]
+        comments = [
+            comment(
+                "CLAIM issue=#502 agent=Pool-qwen "
+                "branch=agent/qwen-502-777 files=a goal=x lease=48h"
+            )
+        ]
+        prs = [
+            {
+                "number": 902,
+                "state": "OPEN",
+                "headRefName": "fix/otra-rama",
+                "body": "Cambio.\n\nCloses #502",
+            }
+        ]
+        runs = [{"id": 777, "status": "completed", "conclusion": "cancelled"}]
+        actions = mod.reconcile(issues, comments, prs, runs, now=self.now)
+        self.assertEqual("pr_open", actions[0]["action"])
+
+    def test_refs_suelto_no_cuenta_como_pr_del_issue(self):
+        issues = [issue(503, "agent:pr-open")]
+        prs = [
+            {
+                "number": 903,
+                "state": "OPEN",
+                "headRefName": "fix/1503-otra",
+                "title": "fix(1503): otra cosa",
+                "body": "Refs #503 #5030 #182",
+            }
+        ]
+        actions = mod.reconcile(issues, [], prs, [], now=self.now)
+        self.assertEqual("requeue", actions[0]["action"])
+        self.assertEqual("pr-open-without-pr", actions[0]["reason"])
+
+    def test_workflow_no_ejecuta_reason_ni_pierde_datos_de_pr(self):
+        workflow = (ROOT / ".github" / "workflows" / "agent-reconciler.yml").read_text(
+            encoding="utf-8"
+        )
+        # Backticks dentro de comillas dobles ejecutan $reason como comando (#1613).
+        self.assertNotIn("`$", workflow)
+        self.assertRegex(workflow, r"--json\s+number,state,headRefName,title,body")
+
 
 if __name__ == "__main__":
     unittest.main()
