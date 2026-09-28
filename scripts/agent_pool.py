@@ -40,9 +40,12 @@ def _labels(issue: dict[str, Any]) -> set[str]:
 def _worker(item: dict[str, Any]) -> dict[str, str] | None:
     worker_id = item.get("worker")
     provider = item.get("provider")
+    healthy = item.get("healthy", True)
     if not isinstance(worker_id, str) or not worker_id.strip():
         return None
     if provider not in {"qwen", "gemini"}:
+        return None
+    if healthy is False:
         return None
     return {"worker": worker_id.strip(), "provider": provider}
 
