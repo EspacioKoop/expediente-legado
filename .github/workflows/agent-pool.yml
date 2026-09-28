@@ -157,7 +157,7 @@ jobs:
             for history_run in "${history_runs[@]}"; do
               [[ -n "$history_run" ]] || continue
               if gh api "repos/$GITHUB_REPOSITORY/actions/runs/$history_run/jobs?per_page=100" \
-                --jq '[.jobs[] | {name:.name,conclusion:.conclusion}]' \
+                --jq '[.jobs[] | {name:.name,conclusion:.conclusion,steps:[.steps[]? | {name:.name,conclusion:.conclusion}]}]' \
                 > /tmp/worker-jobs-one.json 2>/dev/null; then
                 tmp="$(mktemp)"
                 jq -s '.[0] + .[1]' /tmp/worker-jobs.json /tmp/worker-jobs-one.json > "$tmp"
