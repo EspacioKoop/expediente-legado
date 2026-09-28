@@ -1,0 +1,36 @@
+{
+  "contract_version": 1,
+  "rules_version": 1,
+  "snapshots": {
+    "cero": {
+      "contract_version": 1,
+      "rules_version": 1,
+      "season_id": "pre1-fixture",
+      "phase": "latente",
+      "community_progress": 0,
+      "thresholds": [25, 50, 75, 100],
+      "contributors_approx": 0,
+      "updated_at": 2000000000
+    },
+    "primer_umbral": {
+      "contract_version": 1,
+      "rules_version": 1,
+      "season_id": "pre1-fixture",
+      "phase": "umbral",
+      "community_progress": 25,
+      "thresholds": [25, 50, 75, 100],
+      "contributors_approx": 12,
+      "updated_at": 2000000060
+    },
+    "completo": {
+      "contract_version": 1,
+      "rules_version": 1,
+      "season_id": "pre1-fixture",
+      "phase": "derrota",
+      "community_progress": 100,
+      "thresholds": [25, 50, 75, 100],
+      "contributors_approx": 98,
+      "updated_at": 2000000120
+    }
+  }
+}
