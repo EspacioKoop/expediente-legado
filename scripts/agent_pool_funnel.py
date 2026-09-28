@@ -89,9 +89,18 @@ def embudo(jobs: list[dict[str, Any]]) -> dict[str, Any]:
             salida[nombre] = llegan
         return salida
 
+    acumulado_total = acumulado(alcanzadas)
+    # Tasas sobre el total de workers para distinguir capacidad de actividad real:
+    # con 0 workers las tasas son 0.0 en vez de dividir por cero.
+    tasas = {
+        "reservation_rate": acumulado_total["reserva"] / total if total else 0.0,
+        "implementation_rate": acumulado_total["implementa"] / total if total else 0.0,
+        "pr_rate": acumulado_total["pr_draft"] / total if total else 0.0,
+    }
     return {
         "workers": total,
-        "embudo": acumulado(alcanzadas),
+        "embudo": acumulado_total,
+        **tasas,
         "implementa_fuera_de_claim": alcanzadas["implementa_fuera_de_claim"],
         "por_worker": {w: acumulado(c) | {"workers": sum(c.values())} for w, c in sorted(por_worker.items())},
     }
@@ -103,7 +112,8 @@ def tabla(resultado: dict[str, Any]) -> str:
     for nombre in NOMBRES_FASE:
         n = resultado["embudo"][nombre]
         lineas.append(f"| {nombre} | {n} | {100 * n / total:.0f}% |")
-    lineas.append(f"\nWorkers analizados: {resultado['workers']}. "
+    lineas.append(f"\nPR/worker: {resultado['pr_rate']:.0%}. "
+                  f"Workers analizados: {resultado['workers']}. "
                   f"Implementaciones descartadas por salir del CLAIM: {resultado['implementa_fuera_de_claim']}.")
     return "\n".join(lineas)
 
