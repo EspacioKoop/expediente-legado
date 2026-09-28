@@ -111,6 +111,11 @@ func _catalogo_apps() -> Array[Dictionary]:
 			"aliases": ["software", "programas"],
 		},
 		{"id": "correo", "titulo": "Correo corporativo", "aliases": ["correo", "mail"]},
+		{
+			"id": "chat-corporativo",
+			"titulo": ChatCorporativoSiga.texto("titulo_app"),
+			"aliases": ["chat", "irc", "mensajeria"],
+		},
 		{"id": "bloc-notas", "titulo": "Bloc de notas", "aliases": ["notas", "bloc"]},
 		{"id": "calculadora", "titulo": "Calculadora", "aliases": ["calc"]},
 		{
