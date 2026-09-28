@@ -408,6 +408,36 @@ class LimpiezaLabelsAgenteTest(unittest.TestCase):
             llamadas,
         )
 
+    def test_fallo_al_limpiar_labels_no_impide_el_release(self):
+        reserva = reservas.Reserva(
+            issue=73,
+            agent="A",
+            branch="feature/73",
+            files="a.gd",
+            goal="A",
+            claimed_at=datetime(2026, 9, 28, tzinfo=UTC),
+            last_activity=datetime(2026, 9, 28, tzinfo=UTC),
+            lease_hours=48,
+        )
+        llamadas = []
+
+        def api(method, path, payload=None, dormir=None):
+            llamadas.append((method, path))
+            if method == "GET":
+                raise RuntimeError("GitHub API 404 en issue transferido")
+            return ({}, {})
+
+        pr = {"number": 703, "merged_at": "2026-09-28T12:00:00Z", "merge_commit_sha": "abc"}
+        with mock.patch.object(reservas, "api_json", api), mock.patch(
+            "sys.stdout", new_callable=io.StringIO
+        ) as salida:
+            reservas.publicar_release(reserva, "merge-detectado-automaticamente", pr, dry_run=False)
+
+        self.assertEqual("POST", llamadas[0][0])
+        self.assertTrue(llamadas[0][1].endswith("/issues/182/comments"))
+        self.assertTrue(reserva.released)
+        self.assertIn("AVISO: no se pudieron limpiar labels de agente en #73", salida.getvalue())
+
 
 class AislamientoDeFallosTest(unittest.TestCase):
     def test_un_fallo_al_liberar_no_impide_liberar_las_demas(self):
