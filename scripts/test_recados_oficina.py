@@ -16,10 +16,19 @@ RESUMEN_GODOT = re.compile(r"(\d+) pasadas, 0 fallos")
 
 
 class RecadosOficinaTest(unittest.TestCase):
-    def test_recados_no_tocan_estado_de_juego(self):
+    def test_recados_no_mutan_estado_de_juego(self):
         texto = "".join(p.read_text(encoding="utf-8") for p in (NAVEGACION, RECADO, CONTROLLER))
-        for termino in ("Jornada.", "Partida", "guardar(", "dinero", "Inventario"):
+        self.assertIn("Jornada.franja_horaria(dia.jornada)", texto)
+        for termino in ("Partida", "guardar(", "dinero", "Inventario", 'dia.jornada["'):
             self.assertNotIn(termino, texto)
+
+    def test_densidad_horaria_solo_modula_el_reloj_de_recados(self):
+        texto = CONTROLLER.read_text(encoding="utf-8")
+        self.assertIn('recados_habilitados(franja)', texto)
+        self.assertIn('franja != "noche"', texto)
+        self.assertIn('"mediodia": 80.0', texto)
+        self.assertIn('"tarde": 30.0', texto)
+        self.assertNotIn("queue_free()", texto.split("static func recados_habilitados", 1)[1].split("## Manda", 1)[0])
 
     def test_sin_azar_ni_colision_propia(self):
         texto = RECADO.read_text(encoding="utf-8") + CONTROLLER.read_text(encoding="utf-8")
