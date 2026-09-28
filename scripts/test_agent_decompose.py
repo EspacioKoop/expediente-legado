@@ -98,6 +98,24 @@ class AgentDecomposeTest(unittest.TestCase):
                 )
             )
 
+    def test_workflow_tiene_presupuesto_duro_y_no_cierra_padre(self):
+        workflow = (
+            ROOT / ".github" / "workflows" / "agent-decompose.yml"
+        ).read_text(encoding="utf-8")
+        self.assertIn('maxSessionTurns":8', workflow)
+        self.assertIn("timeout-minutes: 5", workflow)
+        self.assertIn("continue-on-error: true", workflow)
+        self.assertIn("agent:decomposed", workflow)
+        self.assertNotIn('gh issue close "$ISSUE"', workflow)
+
+    def test_desbloqueo_depende_de_cierre_real(self):
+        workflow = (
+            ROOT / ".github" / "workflows" / "agent-dependency-unblock.yml"
+        ).read_text(encoding="utf-8")
+        self.assertIn("agent-depends-on:", workflow)
+        self.assertIn('[[ "$state" != CLOSED ]]', workflow)
+        self.assertIn("--remove-label agent:blocked --add-label agent:auto", workflow)
+
     def test_ruta_protegida_se_rechaza(self):
         with self.assertRaisesRegex(ValueError, "insegura"):
             mod.parse_decomposition(
