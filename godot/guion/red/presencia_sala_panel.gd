@@ -4,6 +4,7 @@ extends PanelContainer
 signal crear_sala_solicitada(codigo: String)
 signal unirse_sala_solicitada(codigo: String)
 signal salir_sala_solicitada
+signal ocultar_participante_solicitado(actor_public_id: String)
 signal cerrar_solicitado
 
 const RUTA_TEXTOS := "res://datos/presencia_sala_textos.json"
@@ -16,6 +17,8 @@ var _estado: Label
 var _crear: Button
 var _unirse: Button
 var _salir: Button
+var _participantes: ItemList
+var _ocultar: Button
 var _normalizando := false
 
 
@@ -62,6 +65,19 @@ func mostrar_estado(status: String, detalles: Dictionary = {}) -> void:
 
 func codigo_actual() -> String:
 	return normalizar_codigo(_codigo.text)
+
+
+func texto(clave: String) -> String:
+	return _texto(clave)
+
+
+func actualizar_participantes(actores: Array[String]) -> void:
+	_participantes.clear()
+	for actor in actores:
+		_participantes.add_item(actor)
+	_participantes.visible = not actores.is_empty()
+	_ocultar.visible = not actores.is_empty()
+	_ocultar.disabled = actores.is_empty()
 
 
 static func normalizar_codigo(valor: String) -> String:
@@ -144,6 +160,19 @@ func _montar() -> void:
 	_estado.accessibility_live = AccessibilityServer.LIVE_POLITE
 	caja.add_child(_estado)
 
+	_participantes = ItemList.new()
+	_participantes.name = "ParticipantesSala"
+	_participantes.custom_minimum_size = Vector2(0.0, 72.0)
+	_participantes.accessibility_name = _texto("participantes")
+	_participantes.visible = false
+	caja.add_child(_participantes)
+
+	_ocultar = _boton("OcultarParticipante", _texto("ocultar"))
+	_ocultar.visible = false
+	_ocultar.disabled = true
+	_ocultar.pressed.connect(_ocultar_seleccionado)
+	caja.add_child(_ocultar)
+
 	var botones := HBoxContainer.new()
 	botones.alignment = BoxContainer.ALIGNMENT_END
 	botones.add_theme_constant_override("separation", 8)
@@ -191,6 +220,16 @@ func _unirse_sala() -> void:
 		return
 	_estado.text = _texto("conectando")
 	unirse_sala_solicitada.emit(codigo)
+
+
+func _ocultar_seleccionado() -> void:
+	var seleccion := _participantes.get_selected_items()
+	if seleccion.is_empty():
+		return
+	var indice := int(seleccion[0])
+	if indice < 0 or indice >= _participantes.item_count:
+		return
+	ocultar_participante_solicitado.emit(_participantes.get_item_text(indice))
 
 
 func _al_codigo_cambiado(valor: String) -> void:
