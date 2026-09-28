@@ -162,6 +162,22 @@ La prensa general y el resto de publicaciones **siguen sin semilla por decisión
 
 Los tests Python asociados ejecutan estos smokes con Godot headless y comprueban que las capas de presentación no compran, cobran ni mueven objetos por su cuenta.
 
+## Gate humano reproducible
+
+El pase pendiente de escala, legibilidad y foco queda documentado en
+[`docs/playtest-publicaciones-674.md`](playtest-publicaciones-674.md).
+
+Puede registrarse con:
+
+```bash
+python3 scripts/registrar_playtest_674.py \
+  --salida docs/playtests/playtest-674.md
+```
+
+El registrador exige `1920×1080`, teclado real, mando físico, evidencia para
+compra/hallazgo/casa/visor y una comprobación separada de que ignorar las
+publicaciones no bloquea el recorrido. CI no sustituye ese juicio humano.
+
 ## Alcance pendiente
 
 Este PR **no cierra #674**. Quedan fuera deliberadamente:
