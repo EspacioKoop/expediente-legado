@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -21,6 +22,11 @@ except ImportError:  # ejecución directa: python scripts/gestionar_reservas_rol
 
 RAIZ = Path(__file__).resolve().parents[1]
 CONFIG = RAIZ / ".github" / "reservas-registro.json"
+
+# Los workflows históricos usan GH_TOKEN para la CLI de GitHub. La capa base
+# usa GITHUB_TOKEN; aceptar ambos evita duplicar secretos/env en cada paso.
+if not base.TOKEN:
+    base.TOKEN = os.environ.get("GH_TOKEN", "")
 
 
 def cargar_config(ruta: Path = CONFIG) -> tuple[int, list[int]]:
