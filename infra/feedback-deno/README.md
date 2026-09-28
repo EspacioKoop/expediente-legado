@@ -113,6 +113,8 @@ autenticación en el keyring del sistema.
 
 ### Deploy tras cambiar el gateway
 
+`feedback-deno.yml` **no despliega**: sigue siendo el check de formato/tipos del gateway. El despliegue queda aislado en el workflow de producción para no exponer credenciales en PRs.
+
 `.github/workflows/feedback-deno-deploy.yml` se dispara al integrar en `main`
 cambios bajo `infra/feedback-deno/` y también admite `workflow_dispatch`. Primero
 ejecuta `deno task check`; después, si existe `secrets.DENO_DEPLOY_TOKEN`, usa el
