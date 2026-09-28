@@ -5,6 +5,8 @@
 ## Vive como autoload para no duplicarse entre las tres partes del juego.
 extends CanvasLayer
 
+const MenuFocoNavegacion = preload("res://guion/menu_foco_navegacion.gd")
+
 const RUTA_PRESENTACION_SELLOS := "res://datos/sellos_presentacion.json"
 const RUTA_TEXTOS_REMAPEO := "res://datos/menu_remapeo_textos.json"
 const RUTA_TEXTOS_DIFICULTAD := "res://datos/menu_dificultad_textos.json"
@@ -813,7 +815,7 @@ func _abrir() -> void:
 	_panel_incidencias.visible = false
 	_fondo.visible = true
 	get_tree().paused = true
-	_enfocar_primero(_panel_principal, _continuar)
+	MenuFocoNavegacion.enfocar_primero(_panel_principal, _continuar)
 	_quizas_mostrar_verificacion()
 
 
@@ -883,7 +885,7 @@ func _mostrar_opciones() -> void:
 	_panel_incidencias.visible = false
 	_panel_opciones.visible = true
 	_refrescar_dificultad()
-	_enfocar_primero(_panel_opciones, _volumen)
+	MenuFocoNavegacion.enfocar_primero(_panel_opciones, _volumen)
 
 
 func _mostrar_sellos() -> void:
@@ -892,7 +894,7 @@ func _mostrar_sellos() -> void:
 	_panel_historial.visible = false
 	_panel_incidencias.visible = false
 	_panel_sellos.visible = true
-	_enfocar_primero(_panel_sellos, _sellos_volver)
+	MenuFocoNavegacion.enfocar_primero(_panel_sellos, _sellos_volver)
 
 
 func _mostrar_historial() -> void:
@@ -902,7 +904,7 @@ func _mostrar_historial() -> void:
 	_panel_incidencias.visible = false
 	_panel_historial.visible = true
 	_refrescar_historial()
-	_enfocar_primero(_panel_historial, _historial_volver)
+	MenuFocoNavegacion.enfocar_primero(_panel_historial, _historial_volver)
 
 
 func _mostrar_incidencias() -> void:
@@ -929,53 +931,11 @@ func _mostrar_principal(foco_destino: Control = null) -> void:
 	_panel_historial.visible = false
 	_panel_incidencias.visible = false
 	_panel_principal.visible = true
-	_encadenar_foco_panel(_panel_principal)
+	MenuFocoNavegacion.encadenar(_panel_principal)
 	if is_instance_valid(foco_destino) and foco_destino.is_visible_in_tree():
 		foco_destino.grab_focus()
 	else:
 		_opciones.grab_focus()
-
-
-## Construye una ruta vertical explícita para teclado/mando. La navegación
-## automática de Godot depende de la geometría final y puede saltar entre
-## columnas del remapeo; aquí cada panel tiene un orden estable y circular.
-func _controles_foco(panel: Control) -> Array[Control]:
-	var controles: Array[Control] = []
-	for nodo in panel.find_children("*", "Control", true, false):
-		var control := nodo as Control
-		if control == null or control.focus_mode == Control.FOCUS_NONE:
-			continue
-		if not (control is BaseButton or control is HSlider):
-			continue
-		if control is BaseButton and (control as BaseButton).disabled:
-			continue
-		if not control.is_visible_in_tree():
-			continue
-		controles.append(control)
-	return controles
-
-
-func _encadenar_foco_panel(panel: Control) -> Array[Control]:
-	var controles := _controles_foco(panel)
-	if controles.is_empty():
-		return controles
-	for indice in controles.size():
-		var actual := controles[indice]
-		var anterior := controles[(indice - 1 + controles.size()) % controles.size()]
-		var siguiente := controles[(indice + 1) % controles.size()]
-		actual.focus_neighbor_top = actual.get_path_to(anterior)
-		actual.focus_previous = actual.get_path_to(anterior)
-		actual.focus_neighbor_bottom = actual.get_path_to(siguiente)
-		actual.focus_next = actual.get_path_to(siguiente)
-	return controles
-
-
-func _enfocar_primero(panel: Control, respaldo: Control) -> void:
-	var controles := _encadenar_foco_panel(panel)
-	if not controles.is_empty():
-		controles[0].grab_focus()
-	elif is_instance_valid(respaldo):
-		respaldo.grab_focus()
 
 
 func _al_cambiar_volumen(valor: float) -> void:
