@@ -134,16 +134,20 @@ func _probar() -> void:
 		"descolgar expone el mismo nombre al lector de pantalla",
 	)
 	_comprobar(
-		estado_panel != null
-		and not estado_panel.accessibility_name.is_empty()
-		and estado_panel.accessibility_live == AccessibilityServer.LIVE_POLITE,
+		(
+			estado_panel != null
+			and not estado_panel.accessibility_name.is_empty()
+			and estado_panel.accessibility_live == AccessibilityServer.LIVE_POLITE
+		),
 		"el estado del teléfono es una región accesible actualizable",
 	)
 	_comprobar(
-		transcripcion != null
-		and transcripcion.focus_mode == Control.FOCUS_ALL
-		and transcripcion.selection_enabled
-		and not transcripcion.accessibility_name.is_empty(),
+		(
+			transcripcion != null
+			and transcripcion.focus_mode == Control.FOCUS_ALL
+			and transcripcion.selection_enabled
+			and not transcripcion.accessibility_name.is_empty()
+		),
 		"la transcripción puede recibir foco y leerse",
 	)
 	_comprobar(
@@ -168,9 +172,11 @@ func _probar() -> void:
 		)
 	panel._al_descolgar()
 	_comprobar(
-		transcripcion != null
-		and not transcripcion.text.is_empty()
-		and transcripcion.accessibility_description == transcripcion.text,
+		(
+			transcripcion != null
+			and not transcripcion.text.is_empty()
+			and transcripcion.accessibility_description == transcripcion.text
+		),
 		"la transcripción anuncia exactamente el texto visible",
 	)
 	panel.queue_free()
