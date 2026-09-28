@@ -139,14 +139,18 @@ func _al_salir(cuerpo: Node3D, indice: int) -> void:
 func _actualizar_luces() -> void:
 	for indice in _luces.size():
 		var luz := _luces[indice]
-		if not is_instance_valid(luz):
+		var zona := _zonas[indice]
+		if not is_instance_valid(luz) or not is_instance_valid(zona):
 			continue
 		if _tipo in [TIPO_SECUENCIA, TIPO_RETORNO]:
-			luz.visible = indice == _indice_secuencia
-			luz.light_energy = ENERGIA_LUZ_ACTIVA if luz.visible else 0.0
+			var activa := indice == _indice_secuencia
+			luz.visible = activa
+			luz.light_energy = ENERGIA_LUZ_ACTIVA if activa else 0.0
+			zona.set_deferred("monitoring", activa)
 		else:
 			luz.visible = indice == 0
 			luz.light_energy = ENERGIA_LUZ_BASE
+			zona.set_deferred("monitoring", indice == 0)
 
 
 func _completar() -> void:
