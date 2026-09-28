@@ -64,15 +64,21 @@ func _construir() -> void:
 	_estado = Label.new()
 	_estado.name = "TelefonoEstado"
 	_estado.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_estado.accessibility_name = "Estado del teléfono"
+	_estado.accessibility_live = AccessibilityServer.LIVE_POLITE
 	columna.add_child(_estado)
 
 	_contenido = RichTextLabel.new()
 	_contenido.name = "TelefonoTranscript"
 	_contenido.bbcode_enabled = false
+	_contenido.focus_mode = Control.FOCUS_ALL
+	_contenido.selection_enabled = true
 	_contenido.fit_content = false
 	_contenido.scroll_active = true
 	_contenido.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_contenido.custom_minimum_size.y = 220
+	_contenido.accessibility_name = "Transcripción del teléfono"
+	_contenido.accessibility_live = AccessibilityServer.LIVE_POLITE
 	columna.add_child(_contenido)
 
 	var acciones := HBoxContainer.new()
@@ -106,6 +112,8 @@ func _construir() -> void:
 		var boton := Button.new()
 		boton.name = "Llamar_%s" % contacto_id
 		boton.text = "%s · %s" % [contacto.get("nombre", "Contacto"), contacto.get("numero", "")]
+		boton.accessibility_name = boton.text
+		boton.focus_mode = Control.FOCUS_ALL
 		boton.pressed.connect(_al_llamar.bind(contacto_id))
 		_contactos.add_child(boton)
 
@@ -117,6 +125,8 @@ func _construir() -> void:
 func _boton(texto: String, callable: Callable) -> Button:
 	var boton := Button.new()
 	boton.text = texto
+	boton.accessibility_name = texto
+	boton.focus_mode = Control.FOCUS_ALL
 	boton.pressed.connect(callable)
 	return boton
 
@@ -145,6 +155,8 @@ func _refrescar() -> void:
 	partes.append("Contestador: %d mensaje(s) nuevo(s)." % nuevos)
 	partes.append("Auricular: %s." % ("descolgado" if descolgado else "colgado"))
 	_estado.text = "\n".join(partes)
+	_estado.accessibility_description = _estado.text
+	_contenido.accessibility_description = _contenido.text
 
 	_descolgar.disabled = descolgado
 	_contestador.disabled = llamada.is_empty()
@@ -178,6 +190,8 @@ func _refrescar_mensajes() -> void:
 				marca,
 			]
 		)
+		boton.accessibility_name = boton.text
+		boton.focus_mode = Control.FOCUS_ALL
 		boton.pressed.connect(_al_escuchar_guardado.bind(indice))
 		_mensajes.add_child(boton)
 
