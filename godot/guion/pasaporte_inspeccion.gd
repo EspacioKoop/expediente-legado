@@ -12,9 +12,7 @@ const PREFIJO_SELLO := "inspeccion:"
 const SEPARADOR_VARIANTE := "@"
 const SELLO_DESPERTAR_REGLAMENTARIO := "despertar-reglamentario"
 const ZONAS := ["archivo", "trayecto", "casa", "sueño"]
-const CONDICIONES_ESPECIALES := [
-	"noche", "lluvia", "reasignacion", "gato-ausente", "tras-sueno"
-]
+const CONDICIONES_ESPECIALES := ["noche", "lluvia", "reasignacion", "gato-ausente", "tras-sueno"]
 
 
 static func catalogo() -> Array:
