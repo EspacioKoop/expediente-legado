@@ -25,10 +25,11 @@ class MemoriaNocturnaPresentacionTest(unittest.TestCase):
 
     def test_runtime_usa_el_contrato_semantico_sin_reimplementarlo(self) -> None:
         fuente = DIA.read_text(encoding="utf-8")
-        self.assertIn("MemoriaNocturna.analizar(", fuente)
-        self.assertIn("MemoriaNocturnaPresentacion.aplicar(", fuente)
-        self.assertIn('contenido.casos', fuente)
-        self.assertIn('partida.estado.get("pistas_descubiertas", [])', fuente)
+        compacto = "".join(fuente.split())
+        self.assertIn("MemoriaNocturna.analizar(", compacto)
+        self.assertIn("MemoriaNocturnaPresentacion.aplicar(", compacto)
+        self.assertIn("contenido.casos", compacto)
+        self.assertIn('partida.estado.get("pistas_descubiertas",[])', compacto)
 
     def test_regresion_ejecutable_en_godot(self) -> None:
         motor = os.environ.get("GODOT_BIN", "godot4")
