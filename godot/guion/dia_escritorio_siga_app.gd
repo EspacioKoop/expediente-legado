@@ -207,11 +207,14 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 
 	# #666 reutiliza el mismo shell y estado narrativo que correo/Web98. El
 	# cliente es puramente local: no crea sockets ni permite texto libre.
-	_chat_app = EscritorioSigaApp.new(
-		"chat-corporativo",
-		ChatCorporativoSiga.texto("titulo_app"),
-		Callable(self, "_crear_chat_corporativo"),
-		"correo",
+	_chat_app = (
+		EscritorioSigaApp
+		. new(
+			"chat-corporativo",
+			ChatCorporativoSiga.texto("titulo_app"),
+			Callable(self, "_crear_chat_corporativo"),
+			"correo",
+		)
 	)
 	_chat_app.tamano_minimo = Vector2(660, 420)
 	_chat_app.tamano_preferido = Vector2(860, 580)
@@ -454,7 +457,7 @@ func _contexto_chat(dia: Node, presentes: Array[String]) -> Dictionary:
 	var eventos: Array[String] = []
 	var declarados: Variant = dia.jornada.get("eventos", [])
 	if declarados is Array:
-		for valor in (declarados as Array):
+		for valor in declarados as Array:
 			var evento := String(valor)
 			if not evento.is_empty() and not eventos.has(evento):
 				eventos.append(evento)
