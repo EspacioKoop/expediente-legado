@@ -145,24 +145,38 @@ func _probar() -> void:
 		"cambiar de franja no muta la persistencia",
 	)
 
-	var perfil_seco := controller.perfil_visual(
-		{"fase": "trayecto", "dia": 1, "hora_minutos": 12 * 60, "clima_forzado": Clima.DESPEJADO},
-		"paso",
-		0.2,
+	var perfil_seco := (
+		controller
+		. perfil_visual(
+			{
+				"fase": "trayecto",
+				"dia": 1,
+				"hora_minutos": 12 * 60,
+				"clima_forzado": Clima.DESPEJADO
+			},
+			"paso",
+			0.2,
+		)
 	)
-	var perfil_lluvia := controller.perfil_visual(
-		{"fase": "trayecto", "dia": 1, "hora_minutos": 12 * 60, "clima_forzado": Clima.LLUVIA},
-		"paso",
-		0.2,
+	var perfil_lluvia := (
+		controller
+		. perfil_visual(
+			{"fase": "trayecto", "dia": 1, "hora_minutos": 12 * 60, "clima_forzado": Clima.LLUVIA},
+			"paso",
+			0.2,
+		)
 	)
 	_comprobar(
 		float(perfil_lluvia["alpha"]) > float(perfil_seco["alpha"]),
 		"la precipitación hace más legible el desgaste de paso",
 	)
-	var perfil_sueno := controller.perfil_visual(
-		{"fase": "sueño", "dia": 1, "hora_minutos": 23 * 60},
-		"uso",
-		0.2,
+	var perfil_sueno := (
+		controller
+		. perfil_visual(
+			{"fase": "sueño", "dia": 1, "hora_minutos": 23 * 60},
+			"uso",
+			0.2,
+		)
 	)
 	_comprobar(
 		Color(perfil_sueno["tinte"]) != Color(perfil_seco["tinte"]),
