@@ -14,6 +14,7 @@ func _initialize() -> void:
 	_probar_completar()
 	_probar_fallo_y_salida()
 	_probar_manifestaciones_documentales()
+	_probar_confirmacion_3d_legible()
 	_probar_reduccion_movimiento()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
@@ -173,6 +174,35 @@ func _probar_manifestaciones_documentales() -> void:
 		misma_familia.vista(false)["manifestacion"] == factura.vista(false)["manifestacion"],
 		"la manifestación depende del tipo y no de una tirada aleatoria",
 	)
+
+
+func _probar_confirmacion_3d_legible() -> void:
+	var presentacion = _nuevo("F-P7", 707)
+	var vertical := SuenoEcosArchivo3D.new()
+	_comprobar(vertical.configurar(presentacion), "el vertical 3D acepta la presentación")
+	_comprobar(
+		vertical._confirmar.nombre_objeto == "Confirmar secuencia",
+		"el pedestal de confirmación tiene nombre para el prompt común",
+	)
+	_comprobar(not vertical._confirmar.habilitado, "confirmar empieza deshabilitado")
+	_comprobar(vertical._estado.text.begins_with("0/3"), "el estado muestra progreso de selección")
+
+	_seleccionar_id(presentacion, 0)
+	vertical._sincronizar()
+	_comprobar(vertical._estado.text.begins_with("1/3"), "seleccionar un eco actualiza el progreso")
+	_seleccionar_id(presentacion, 1)
+	_seleccionar_id(presentacion, 2)
+	vertical._sincronizar()
+	_comprobar(vertical._confirmar.habilitado, "tres ecos habilitan confirmar")
+	_comprobar(vertical._estado.text.begins_with("3/3"), "la secuencia lista se lee como tres de tres")
+
+	var base := vertical._confirmar.get_node("Base") as MeshInstance3D
+	var material := base.material_override as StandardMaterial3D
+	_comprobar(
+		material != null and material.albedo_color == SuenoEcosArchivo3D.COLOR_CONFIRMAR_LISTO,
+		"el pedestal cambia visualmente al quedar listo",
+	)
+	vertical.free()
 
 
 func _probar_reduccion_movimiento() -> void:
