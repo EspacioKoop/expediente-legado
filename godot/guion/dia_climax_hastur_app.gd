@@ -284,7 +284,13 @@ func _mostrar_final(dia: Node, contrato: Dictionary) -> void:
 
 	_panel_final = FinalPoliticoPanel.new()
 	_panel_final.name = "FinalPoliticoPanel"
-	_panel_final.configurar(FinalPolitico.resumen(partida_actual.estado, contrato))
+	(
+		_panel_final
+		. configurar(
+			FinalPolitico.resumen(partida_actual.estado, contrato),
+			RemateVidaCinematica.figura_de(partida_actual.estado),
+		)
+	)
 	_panel_final.continuar_solicitado.connect(_al_cerrar_final)
 	_capa_final.add_child(_panel_final)
 

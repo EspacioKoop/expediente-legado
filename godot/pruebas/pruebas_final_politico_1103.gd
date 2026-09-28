@@ -10,6 +10,7 @@ func _init() -> void:
 	_plural()
 	_contextual()
 	_auditorias_descriptivas()
+	_remate_vida_descriptivo()
 	_logros_idempotentes()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos > 0 else 0)
@@ -118,6 +119,22 @@ func _auditorias_descriptivas() -> void:
 		"el final no completa una condición que sigue vigente",
 	)
 	_comprobar(JSON.stringify(estado) == antes, "resumir el final no muta Auditorías")
+
+
+func _remate_vida_descriptivo() -> void:
+	var estado := _estado_base()
+	var jornada: Dictionary = estado["jornada"]
+	jornada["dinero"] = 0
+	jornada["alquiler"]["impagos"] = 1
+	jornada["gato"]["presente"] = false
+	var antes := JSON.stringify(estado)
+	var figura := RemateVidaCinematica.figura_de(estado)
+	_comprobar(not figura.is_empty(), "el final puede reutilizar el remate visual de vida")
+	_comprobar(
+		RemateVida.variante(estado) == RemateVida.SIN_HOGAR,
+		"el remate conserva la variante de vida ya resuelta",
+	)
+	_comprobar(JSON.stringify(estado) == antes, "montar el remate no muta la partida")
 
 
 func _logros_idempotentes() -> void:

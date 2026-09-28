@@ -8,6 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MODELO = ROOT / "godot" / "guion" / "final_politico.gd"
 PANEL = ROOT / "godot" / "guion" / "final_politico_panel.gd"
 OWNER = ROOT / "godot" / "guion" / "dia_climax_hastur_app.gd"
+REMATE = ROOT / "godot" / "guion" / "remate_vida_cinematica.gd"
 TEXTOS = ROOT / "godot" / "datos" / "textos.csv"
 PRUEBA = ROOT / "godot" / "pruebas" / "pruebas_final_politico_1103.gd"
 
@@ -38,6 +39,19 @@ def test_owner_consume_contrato_y_persiste_cierre() -> None:
     assert "FinalPoliticoPanel.new()" in owner
     assert "FinalPolitico.confirmar_cierre" in owner
     assert 'actual["final_politico_pendiente"] = false' in owner
+
+
+def test_final_reutiliza_el_remate_visual_de_vida() -> None:
+    owner = fuente(OWNER)
+    panel = fuente(PANEL)
+    remate = fuente(REMATE)
+    assert "RemateVidaCinematica.figura_de(partida_actual.estado)" in owner
+    assert "func configurar(resumen: Dictionary, figura_vida: Array = [])" in panel
+    assert "_montar_vida(caja)" in panel
+    assert 'lienzo.name = "RemateVidaVisual"' in panel
+    assert "static func figura_de(estado: Dictionary) -> Array:" in remate
+    assert "RemateVida.resumir(estado)" in remate
+    assert "RemateVida.variante(estado)" in remate
 
 
 def test_final_menciona_auditorias_sin_cerrar_la_vida() -> None:
