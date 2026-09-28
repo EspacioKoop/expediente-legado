@@ -62,29 +62,27 @@ El servidor oficial de Kev documenta `POST /v1/systemone`, `kev-latest` y
 autenticación Bearer opcional mediante `KEV_API_KEY`:
 https://github.com/jaredpalmer/kev
 
-## Estado de integración con GitHub Actions
+## Integración con GitHub Actions
 
-En el corte actual de `main`, `scripts/kev_router.py` sigue disponible y probado como
-componente standalone. El autopilot legado aún no depende de Kev y el pool paralelo
-asigna slots/proveedores de forma determinista.
+`.github/workflows/agent-autopilot.yml` ejecuta el router después del checkout y
+antes de inicializar cualquier worker. El estado enviado a Kev se limita a título,
+cuerpo y labels del issue; no incluye `GITHUB_TOKEN`, secretos de proveedores, logs
+completos ni memorias de los agentes.
 
-Una integración posterior puede construir un estado compacto a partir del issue y
-consultar Kev antes del fallback normal, siempre con estas condiciones:
+Las etiquetas explícitas `agent:qwen` / `agent:gemini` y el proveedor elegido en
+`workflow_dispatch` siguen prevaleciendo. Para `auto`, Kev decide únicamente entre
+workers realmente disponibles y, ante ausencia, timeout, baja confianza o respuesta
+inválida, `kev_router.py` conserva el fallback determinista Qwen → Gemini.
 
-- etiquetas explícitas y selección manual conservan prioridad;
-- ausencia, timeout, baja confianza o respuesta inválida de Kev no bloquean el worker;
-- Kev no recibe `GITHUB_TOKEN`, secretos de proveedores, logs completos ni memoria sin filtrar;
-- el comportamiento sin `KEV_BASE_URL` debe seguir siendo determinista.
-
-Configuración prevista:
+Configuración:
 
 - repository variable `KEV_BASE_URL`;
 - repository variable opcional `KEV_MODEL`;
 - repository variable opcional `KEV_ROUTER_MIN_CONFIDENCE`;
 - Actions secret `KEV_API_KEY` únicamente si el endpoint lo exige.
 
-No se documenta una PR abierta como funcionalidad integrada: hasta que el cambio llegue
-a `main`, este fichero describe solo el contrato standalone.
+Sin `KEV_BASE_URL` no hay llamada de red a Kev y el autopilot conserva el
+comportamiento histórico.
 
 ## Validación
 

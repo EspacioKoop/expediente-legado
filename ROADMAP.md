@@ -16,7 +16,7 @@ Mapa de fases hasta la primera versión completa. **La prioridad operativa la fi
 
 ## Estado de integración — 2026-09-28
 
-La referencia es `main`, con corte documental en `ae561599a4a72554b208c4b6b5a2c69729c68ee7`. Un PR cerrado sin merge no cuenta como integración y una CI verde no sustituye validación humana.
+La referencia es `main`, con corte documental en `366cbee398dd337c77c29625ea4a5fe3f8432044`. Un PR cerrado sin merge no cuenta como integración y una CI verde no sustituye validación humana.
 
 Desde el corte anterior el proyecto ha añadido profundidad jugable y, además, una capa operativa mucho más fuerte para playtest y agentes. La regla de prioridad no cambia: **un fallo reproducible del recorrido base gana frente a una expansión opcional o una mejora de infraestructura**.
 
@@ -31,6 +31,7 @@ Desde el corte anterior el proyecto ha añadido profundidad jugable y, además, 
 
 - #1365/#1369 completan reconstrucciones 3D documentales para los diez expedientes actuales. Deben leerse como **punto de vista de una fuente**, nunca como verdad omnisciente.
 - #1410/#1416/#1422/#1423 convierten el terminal SIGA en una superficie jugable: parser ficticio, UI diegética, archivos temporales simulados, usuarios e historial. Todo permanece aislado de filesystem/red/procesos reales.
+- #1591 integra la mensajería corporativa como app OS98 con canales, presencia, historial y respuestas cerradas; sigue siendo una capa narrativa local y no una fuente paralela de progreso.
 - #1426/#1429/#1431 añaden análisis, falsificación temporal y revisión narrativa de copias, con resultados deterministas y sin reescribir la evidencia original.
 - #1435/#1436 conectan archivado incorrecto con desorden visible y demora breve de búsqueda, ambos derivados del mismo estado y recuperables al corregir.
 - #286/#431/#513 siguen siendo los gates de profundidad: la siguiente pregunta es si estas herramientas mejoran la investigación real durante una partida, no cuántas capas existen.
@@ -53,7 +54,7 @@ Desde el corte anterior el proyecto ha añadido profundidad jugable y, además, 
 
 - #1446 mantiene una alpha continua identificada por SHA; #1461 añade F9 como reporte de betatest desde el juego.
 - #1524/#1531 añaden failover alojado para feedback sin secretos en el cliente y #1556 prepara Sentry opcional para alphas.
-- #1542 integra el autopilot Qwen/Gemini; #1555/#1563 añaden memoria temporal e histórica, siempre subordinada al repo y a las Normas Platino.
+- #1542 integra el autopilot Qwen/Gemini; #1555/#1563 añaden memoria temporal e histórica, siempre subordinada al repo y a las Normas Platino; #1590 conecta Kev opcional y context packer al carril `agent:auto` sin alterar selecciones explícitas ni auto-merge.
 - #1569/#1571/#1585 incorporan OmniRoute privado por Tailscale y fallbacks OpenAI-compatible; #1583 aporta smoke de proveedores sin permisos de escritura.
 - #1572 habilita un pool opt-in de hasta seis workers; #1579/#1588 hacen que autopilot y pool descarten intentos fuera del CLAIM y replanifiquen con un máximo de dos ciclos.
 

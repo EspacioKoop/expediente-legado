@@ -22,7 +22,7 @@ Este directorio contiene auditorías, decisiones de diseño, investigación, evi
 
 ## Estado transversal — 2026-09-28
 
-El índice se sincroniza con `main` hasta el commit `ae561599a4a72554b208c4b6b5a2c69729c68ee7`. Para prioridad operativa sigue mandando #181; para integración real, `main` y los PR fusionados.
+El índice se sincroniza con `main` hasta el commit `366cbee398dd337c77c29625ea4a5fe3f8432044`. Para prioridad operativa sigue mandando #181; para integración real, `main` y los PR fusionados.
 
 Cambios materiales desde el corte anterior:
 
@@ -36,7 +36,8 @@ Cambios materiales desde el corte anterior:
 - **atrezzo cultural:** #1440 añade el bonsái inspirado en Yggdrasil y **Yggdrasil's Egg** como dressing sin desbloqueos ni economía;
 - **investigación de diseño:** #1433 versiona el corpus [referencias ludonarrativas](research/referencias-ludonarrativas.md), separando técnica reutilizable de contenido protegido y de features realmente integradas.
 - **playtest/observabilidad:** #1446 mantiene la alpha continua; #1461 habilita F9 para reportes, #1524/#1531 aportan failover de gateway y #1556 prepara Sentry opcional sin sustituir el reporte humano.
-- **agentes:** #1542 integra autopilot Qwen/Gemini; #1555/#1563 memoria subordinada a fuentes canónicas; #1569/#1571/#1585 OmniRoute privado y fallbacks; #1572 pool opt-in de hasta seis workers; #1579/#1588 replan automático ante salidas del CLAIM.
+- **agentes:** #1542 integra autopilot Qwen/Gemini; #1555/#1563 memoria subordinada a fuentes canónicas; #1569/#1571/#1585 OmniRoute privado y fallbacks; #1572 pool opt-in de hasta seis workers; #1579/#1588 replan automático ante salidas del CLAIM; #1590 conecta Kev y el context packer al autopilot serial.
+- **OS98 social:** #1591 integra la mensajería corporativa como app del shell con presencia narrativa, historial y respuestas cerradas, sin red ni progreso paralelo.
 
 El criterio de lectura sigue siendo el mismo: separar **hecho integrado**, **gate pendiente** y **propuesta**. Un artefacto de CI, screenshot automatizado o documento de investigación no cierra por sí solo un requisito humano.
 

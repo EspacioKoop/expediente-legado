@@ -111,6 +111,14 @@ Los labels se crean automáticamente al integrarse el workflow:
 
 Etiquetar un issue con `agent:auto`, `agent:qwen` o `agent:gemini` lo dispara. Además, cada hora el scheduler recoge el primer `agent:auto` que siga pendiente. También se puede lanzar **Agent autopilot** manualmente desde Actions indicando issue y proveedor.
 
+### Selección automática y contexto acotado
+
+Para `agent:auto`, el autopilot consulta `scripts/kev_router.py` **solo** cuando hay más de un worker disponible y no existe una selección explícita. `agent:qwen`, `agent:gemini` y `workflow_dispatch` tienen prioridad. Sin `KEV_BASE_URL`, con timeout, baja confianza o respuesta inválida, se conserva el fallback Qwen → Gemini.
+
+Kev recibe únicamente título, cuerpo y labels del issue. No recibe `GITHUB_TOKEN`, secretos de proveedores, logs completos ni memorias sin filtrar.
+
+El autopilot y el pool usan además `scripts/agent_context_pack.py`: generan un `.agent-context.md` acotado desde la wiki antes del plan y lo regeneran tras el CLAIM incorporando las rutas reservadas. La wiki completa queda como respaldo local; el pack nunca desplaza al repositorio, issue, #181/#182 ni a las Normas Platino como fuentes de autoridad.
+
 ### Pool paralelo
 
 La etiqueta `agent:pool` entra en el dispatcher paralelo documentado en [`agents/parallel-pool.md`](agents/parallel-pool.md). No debe coexistir con `agent:auto` durante la migración actual.

@@ -46,18 +46,16 @@ El resultado incluye un inventario con score y motivos de selección antes del c
 - nunca promueve la wiki por encima del repositorio o las Normas Platino;
 - no resume ni reescribe: conserva el texto fuente seleccionado y solo puede truncarlo por presupuesto.
 
-## Integración actual
+## Integración en los workflows
 
-El script sigue siendo utilizable de forma standalone, pero ya está integrado en el
-worker reusable del **pool paralelo**:
+Tanto `agent-worker.yml` (pool) como `agent-autopilot.yml` generan
+`.agent-context.md` después de clonar la wiki. El primer pack usa el issue como
+consulta; tras publicar y validar el CLAIM, se vuelve a generar incorporando las rutas
+reservadas.
 
-1. clona Normas Platino y la wiki;
-2. genera `.agent-context.md` antes del plan a partir del issue;
-3. tras el CLAIM, lo regenera usando también las rutas reservadas;
-4. entrega al modelo el pack seleccionado y conserva la wiki como fuente secundaria local.
-
-El carril legado `agent:auto` todavía no usa este packer en el corte actual de
-`main`. Esa diferencia es deliberada mientras se estabiliza/migra la infraestructura.
-La jerarquía de autoridad y los límites de seguridad no cambian.
+Los prompts de planificación e implementación leen primero ese pack acotado. La wiki
+completa sigue disponible localmente para una consulta adicional explícita cuando el
+pack no baste. El contexto seleccionado nunca cambia la jerarquía de autoridad:
+repositorio/issue/#181/#182 y Normas Platino siguen prevaleciendo.
 
 Refs #1538 #1551 #1559 #1566.

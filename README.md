@@ -25,7 +25,7 @@ Este repositorio adopta las [Normas Platino](https://github.com/EspacioKoop/norm
 
 ## Estado actual — 2026-09-28
 
-La referencia sigue siendo `main`. Este corte documenta el estado integrado hasta `ae561599a4a72554b208c4b6b5a2c69729c68ee7`; un PR abierto o una rama adelantada no cuentan como funcionalidad disponible hasta su merge.
+La referencia sigue siendo `main`. Este corte documenta el estado integrado hasta `366cbee398dd337c77c29625ea4a5fe3f8432044`; un PR abierto o una rama adelantada no cuentan como funcionalidad disponible hasta su merge.
 
 El núcleo ya no está en una fase de “port mínimo”. En los últimos cortes se han reforzado la investigación documental, la interfaz diegética de SIGA-98, las consecuencias espaciales del trabajo burocrático, la vida ambiental y la identidad visual/onírica. Aun así, **el siguiente playthrough humano completo sigue siendo el gate principal**: CI verde y evidencia automatizada no sustituyen legibilidad, tacto, ritmo ni continuidad real.
 
@@ -40,6 +40,7 @@ El núcleo ya no está en una fase de “port mínimo”. En los últimos cortes
 
 - **Reconstrucciones 3D por fuente:** #1365 y #1369 cubren los diez expedientes actuales con reconstrucciones breves ligadas a documentos leídos. Son representaciones de un punto de vista, no una “verdad canónica secreta”.
 - **Terminal SIGA:** #1410 crea un núcleo de terminal ficticio y seguro; #1416 lo conecta al puesto de oficina; #1422 añade archivos temporales/usuarios simulados y #1423 historial navegable. No ejecuta red, procesos ni filesystem reales.
+- **Mensajería interna OS98:** #1591 integra el chat corporativo como aplicación real del shell, con canales, presencia narrativa, historial y respuestas cerradas. Reutiliza Jornada/Web98 y estado local de partida; no crea red, shell ni una fuente paralela de pistas.
 - **Análisis y falsificación de copias:** #1426 añade análisis opcional basado en hechos visibles; #1429 permite intervenir copias temporales de forma determinista y #1431 añade revisión interna narrativa. Este bloque no debe reescribir el documento fuente ni convertir el minijuego en una vía para inventar evidencia.
 - **Archivado con consecuencias:** #1435 materializa desorden recuperable al archivar mal y #1436 deriva una demora de búsqueda acotada de ese mismo estado. Las consecuencias son reversibles y no crean una segunda fuente de persistencia.
 - **Profundidad de investigación:** #286/#431/#513 siguen siendo los paraguas/gates de calidad. Más herramientas no equivalen automáticamente a un expediente más interesante: el playtest debe comprobar qué aporta realmente a leer, contrastar y decidir.
@@ -76,8 +77,8 @@ Siguen necesitando persona, hardware o export real, entre otros:
 
 - **Canal continuo de playtest:** `playtest-latest` mantiene una alpha identificada por SHA. F9 abre el parte de incidencias desde el juego (#1461); el envío remoto conserva copia/fallback y la cadena alojada puede usar Cloudflare → Deno → Vercel (#1524/#1531) sin incluir credenciales en la build.
 - **Observabilidad opcional:** #1556 prepara Sentry para las alphas solo cuando Actions recibe `SENTRY_DSN`. Sin DSN no cambia la build; F9 sigue siendo el canal humano independiente.
-- **Autopilot conservador:** #1542 convierte issues autorizados en PRs draft con Qwen/Gemini, con planificación antes del CLAIM, rutas acotadas, CI explícita y sin auto-merge.
-- **Memoria y contexto:** #1555/#1563 añaden Normas Platino + wiki + Deno KV + CI brain; #1567 aporta selección determinista de contexto de wiki. La autoridad sigue siendo repo/issue/#181/#182 y las Normas Platino.
+- **Autopilot conservador:** #1542 convierte issues autorizados en PRs draft con Qwen/Gemini, con planificación antes del CLAIM, rutas acotadas, CI explícita y sin auto-merge. #1590 integra Kev como router opcional para `agent:auto`, manteniendo las selecciones explícitas y el fallback determinista.
+- **Memoria y contexto:** #1555/#1563 añaden Normas Platino + wiki + Deno KV + CI brain; #1567 aporta selección determinista de contexto de wiki y #1590 conecta ese context packer también al autopilot antes del plan y tras el CLAIM. La autoridad sigue siendo repo/issue/#181/#182 y las Normas Platino.
 - **Resiliencia de proveedores:** #1569/#1571/#1585 permiten OmniRoute privado por Tailscale con fallback a Qwen directo y slots OpenAI-compatible; #1583 añade smoke aislado para los fallbacks sin permisos de escritura.
 - **Paralelismo seguro:** #1572 añade un pool opt-in de hasta seis workers y #1579/#1588 hacen que autopilot y pool replanifiquen hasta dos veces si el modelo intenta salir de las rutas reservadas. El pool no cambia la regla de merge humano ni sustituye #182.
 
