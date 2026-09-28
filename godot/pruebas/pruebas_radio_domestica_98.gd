@@ -89,6 +89,7 @@ func _probar_preflight_audio() -> void:
 	_comprobar(pico_radio > 0.005, "la cama de radio no es silencio accidental")
 	_comprobar(pico_radio < 0.10, "la cama de radio conserva headroom amplio antes de ganancia/bus")
 
+	radio.alternar_encendido()
 	radio.cambiar_emisora()
 	var otra_emisora := audio.stream as AudioStreamWAV
 	_comprobar(hash(otra_emisora.data) != hash_radio, "cambiar emisora cambia la textura audible")
