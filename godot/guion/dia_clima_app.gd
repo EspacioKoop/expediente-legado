@@ -530,8 +530,8 @@ func _clave_conversacion_contextual(
 	# #965: el desorden del archivado ya es estado derivado y visible. Se usa
 	# como reacción narrativa antes del fallback horario, sin registrar memoria
 	# social, reputación ni consecuencias nuevas.
-	var clave_archivado := (
-		DialogoArchivadoCompaneros.resolver(actor_id, _archivado_sesion.desorden_total())
+	var clave_archivado := DialogoArchivadoCompaneros.resolver(
+		actor_id, _archivado_sesion.desorden_total()
 	)
 	if not clave_archivado.is_empty():
 		return clave_archivado
