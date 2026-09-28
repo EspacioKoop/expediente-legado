@@ -31,7 +31,7 @@ func _probar() -> void:
 			{
 				"vuelta": 2,
 				"motivo": "final_narrativo",
-				"version_evaluacion": 2,
+				"version_evaluacion": 3,
 				"veredictos_total": 8,
 				"evaluacion":
 				{
@@ -41,6 +41,7 @@ func _probar() -> void:
 					"liquidez": EvaluacionDesempeno.ALTA,
 					"exploracion_onirica": EvaluacionDesempeno.ALTA,
 					"dependencia_dinero": EvaluacionDesempeno.ALTA,
+					"actividad_improductiva": EvaluacionDesempeno.MEDIA,
 				},
 			},
 		]
@@ -95,7 +96,14 @@ func _probar() -> void:
 			(vista.find_child("Rango_dependencia_dinero", true, false) as Label).text
 			== tr("EVALUACION_RANGO_ALTA")
 		),
-		"muestra la dependencia económica de un informe v2",
+		"muestra la dependencia económica de un informe v3",
+	)
+	_comprobar(
+		(
+			(vista.find_child("Rango_actividad_improductiva", true, false) as Label).text
+			== tr("EVALUACION_RANGO_MEDIA")
+		),
+		"muestra la actividad improductiva sellada de un informe v3",
 	)
 	lista.select(1)
 	lista.item_selected.emit(1)
@@ -105,6 +113,13 @@ func _probar() -> void:
 			== tr("EVALUACION_RANGO_SIN_DATOS")
 		),
 		"un informe v1 muestra SIN DATOS en la categoría nueva",
+	)
+	_comprobar(
+		(
+			(vista.find_child("Rango_actividad_improductiva", true, false) as Label).text
+			== tr("EVALUACION_RANGO_SIN_DATOS")
+		),
+		"un informe v1 muestra SIN DATOS en actividad improductiva",
 	)
 	_comprobar(JSON.stringify(estado) == antes, "consultar el historial no modifica Partida")
 
