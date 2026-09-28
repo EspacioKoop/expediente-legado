@@ -219,10 +219,13 @@ func _probar_consumidores_verticales() -> void:
 	for caso in casos:
 		var estado := Partida.nueva()
 		_cerrar_caso(estado)
-		var resultado := DecisionIdeologicaExpediente.resolver(
-			estado,
-			DecisionIdeologicaExpediente.CASO_VERTICAL,
-			String(caso["opcion"]),
+		var resultado := (
+			DecisionIdeologicaExpediente
+			. resolver(
+				estado,
+				DecisionIdeologicaExpediente.CASO_VERTICAL,
+				String(caso["opcion"]),
+			)
 		)
 		_comprobar(
 			resultado.get("resultado"),
@@ -230,9 +233,12 @@ func _probar_consumidores_verticales() -> void:
 			"la decisión real queda disponible para consumidores transversales",
 		)
 
-		var variante := DialogoIdeologico.resolver(
-			DialogoIdeologico.SUPERFICIE_OFICINA_CUNADO,
-			estado,
+		var variante := (
+			DialogoIdeologico
+			. resolver(
+				DialogoIdeologico.SUPERFICIE_OFICINA_CUNADO,
+				estado,
+			)
 		)
 		_comprobar(
 			variante.get("clave"),
@@ -247,11 +253,14 @@ func _probar_consumidores_verticales() -> void:
 			"#921 recibe una carga desde la elección de expediente",
 		)
 
-		var modificadores := IdeologiaSueno923.modificadores(
-			estado,
-			int(estado["jornada"].get("dia", 1)),
-			924,
-			false,
+		var modificadores := (
+			IdeologiaSueno923
+			. modificadores(
+				estado,
+				int(estado["jornada"].get("dia", 1)),
+				924,
+				false,
+			)
 		)
 		_comprobar(
 			modificadores.size(),
