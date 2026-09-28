@@ -208,9 +208,9 @@ func _archivar_en(actor: Node, host, archivador: ArchivadorInteractivo3D) -> voi
 	var destino := String(archivador.get_meta("destino_archivado", ""))
 	var caso_id := String(_carpeta_archivado.caso.get("id", ""))
 	var primer_error := not _caso_tiene_error_previo(caso_id)
-	var colocaciones_antes := _estado_archivado.get("colocaciones", []).size()
+	var colocaciones_antes: int = _estado_archivado.get("colocaciones", []).size()
 	var correcta := ArchivadoBandeja.colocar(_estado_archivado, _carpeta_archivado.caso, destino)
-	var registrada := _estado_archivado.get("colocaciones", []).size() > colocaciones_antes
+	var registrada: bool = _estado_archivado.get("colocaciones", []).size() > colocaciones_antes
 	if not correcta and registrada and primer_error:
 		Estres.aplicar(host.jornada, "fallo_critico")
 	_persistir(host)
