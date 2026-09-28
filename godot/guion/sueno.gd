@@ -113,10 +113,13 @@ static func semilla(
 ##
 ## Por defecto conserva la regla de #86: tres escenas y lo NUEVO primero.
 ## `opciones` existe para que #84 pueda pedir una variante degradada sin copiar
-## este algoritmo ni decidir aquí cuál será esa política. Dos claves bastan:
+## este algoritmo ni decidir aquí cuál será esa política. Las opciones admitidas son:
 ##
 ## - `cantidad`: cuántas escenas pedir; se limita de 0 al catálogo disponible.
 ## - `priorizar_vistas`: si es `true`, las salas ya conocidas van antes.
+## - `rumiacion_indecision`: 0..2; adelanta como máximo UNA sala ya vista.
+##   Nivel 1 la intercala tras una nueva y nivel 2 la coloca primero. Nunca
+##   cambia la cantidad ni elimina el resto del catálogo.
 ##
 ## La semilla y el barajado no cambian: misma entrada + misma política produce
 ## siempre el mismo itinerario, también al recargar.
@@ -133,9 +136,28 @@ static func noche(
 	_barajar(vistas, rng)
 
 	var priorizar_vistas := bool(opciones.get("priorizar_vistas", false))
-	var escenas := vistas + nuevas if priorizar_vistas else nuevas + vistas
+	var rumiacion := clampi(int(opciones.get("rumiacion_indecision", 0)), 0, 2)
+	var escenas := _ordenar_por_rumiacion(nuevas, vistas, priorizar_vistas, rumiacion)
 	var cantidad := clampi(int(opciones.get("cantidad", ESCENAS_POR_NOCHE)), 0, escenas.size())
 	return escenas.slice(0, cantidad)
+
+
+## La rumiación no inventa salas ni convierte todas las conocidas en prioridad.
+## Solo adelanta una sala de `vistas`; el resto conserva el orden ya barajado.
+## Una política explícita `priorizar_vistas` sigue teniendo precedencia.
+static func _ordenar_por_rumiacion(
+	nuevas: Array, vistas: Array, priorizar_vistas: bool, nivel: int
+) -> Array:
+	if priorizar_vistas:
+		return vistas + nuevas
+	if nivel <= 0 or vistas.is_empty():
+		return nuevas + vistas
+
+	var recurrente = vistas[0]
+	var resto_vistas := vistas.slice(1)
+	if nivel == 1 and not nuevas.is_empty():
+		return [nuevas[0], recurrente] + nuevas.slice(1) + resto_vistas
+	return [recurrente] + nuevas + resto_vistas
 
 
 ## Anota una sala en el mapa. El mapa es lo que se ha visto, así que una sala
