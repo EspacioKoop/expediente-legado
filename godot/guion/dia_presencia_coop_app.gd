@@ -41,6 +41,7 @@ var _panel_sala: PresenciaSalaPanel
 var _caminante_ui: Node
 var _modo_caminante_previo := Node.PROCESS_MODE_INHERIT
 var _mouse_previo := Input.MOUSE_MODE_CAPTURED
+var _panel_ui_abierto := false
 
 
 func _ready() -> void:
@@ -367,6 +368,9 @@ func _abrir_panel() -> void:
 	_asegurar_ui()
 	if not is_instance_valid(_panel_sala):
 		return
+	if _panel_ui_abierto:
+		return
+	_panel_ui_abierto = true
 	_mouse_previo = Input.mouse_mode
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_caminante_ui = _host.get("_caminante") if _host != null else null
@@ -382,6 +386,9 @@ func _abrir_panel() -> void:
 func _cerrar_panel() -> void:
 	if is_instance_valid(_panel_sala):
 		_panel_sala.cerrar()
+	if not _panel_ui_abierto:
+		return
+	_panel_ui_abierto = false
 	if is_instance_valid(_caminante_ui):
 		_caminante_ui.process_mode = _modo_caminante_previo
 	_caminante_ui = null
