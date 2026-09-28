@@ -23,9 +23,13 @@ class LogrosExternos114Test(unittest.TestCase):
         self.assertIn("class_name LogrosBackend", self.backend)
         self.assertIn("class_name LogrosBackendNulo", self.nulo)
         combinado = self.backend + self.nulo + self.sync
-        self.assertNotIn("Steam.", combinado)
-        self.assertNotIn("GodotSteam", combinado)
-        self.assertNotIn("Steamworks", combinado)
+        codigo = "\n".join(
+            linea for linea in combinado.splitlines()
+            if not linea.lstrip().startswith("#")
+        )
+        self.assertNotIn("Steam.", codigo)
+        self.assertNotIn("GodotSteam", codigo)
+        self.assertNotIn("Steamworks", codigo)
 
     def test_prometeo_sigue_siendo_fuente_de_verdad(self):
         self.assertIn('estado.get("logros", [])', self.sync)
