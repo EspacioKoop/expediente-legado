@@ -38,11 +38,14 @@ static func opciones(tiene_contexto_documental: bool) -> Array[Dictionary]:
 	var salida: Array[Dictionary] = []
 	for id_rama in ids:
 		var rama: Dictionary = RAMAS[id_rama]
-		salida.append(
-			{
-				"id": id_rama,
-				"texto": String(rama.get("texto", "")),
-			}
+		(
+			salida
+			. append(
+				{
+					"id": id_rama,
+					"texto": String(rama.get("texto", "")),
+				}
+			)
 		)
 	return salida
 
