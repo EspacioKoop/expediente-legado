@@ -100,6 +100,36 @@ class ContratoWorkflowsTest(unittest.TestCase):
         self.assertIn("python3 scripts/agent_slots.py resolver", cuerpo)
 
 
+    def test_autopilot_y_ci_repair_usan_fallbacks_dinamicos(self):
+        for nombre in ("agent-autopilot.yml", "agent-ci-repair.yml"):
+            texto = (ROOT / ".github" / "workflows" / nombre).read_text(encoding="utf-8")
+            with self.subTest(workflow=nombre):
+                self.assertIn("python3 scripts/agent_slots.py listar", texto)
+                self.assertIn("python3 scripts/agent_slots.py resolver --worker", texto)
+                self.assertNotIn("HAS_QWEN_FALLBACK_", texto)
+                self.assertNotRegex(
+                    texto,
+                    r"openai_api_key:\s*\$\{\{\s*secrets\.QWEN_FALLBACK_\d+_API_KEY\s*\}\}",
+                )
+                numeros = {
+                    int(n)
+                    for n in re.findall(
+                        r"secrets\.QWEN_FALLBACK_(\d+)_API_KEY != '' && '\1'",
+                        texto,
+                    )
+                }
+                self.assertEqual(set(range(1, slots.MAX_FALLBACKS + 1)), numeros)
+                for intento in range(1, 5):
+                    self.assertIn(
+                        f"secrets[steps.qwen_fallbacks.outputs.secret_{intento}]",
+                        texto,
+                    )
+                    self.assertIn(
+                        f"steps.qwen_fallbacks.outputs.url_{intento}",
+                        texto,
+                    )
+
+
 class ProveedoresYModelosTest(unittest.TestCase):
     def test_key_from_reutiliza_clave_de_otro_slot_o_proveedor_base(self):
         variables = {
