@@ -1,0 +1,99 @@
+name: Agent reconciler
+
+on:
+  schedule:
+    - cron: '4,19,34,49 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+  actions: read
+
+concurrency:
+  group: agent-reconciler
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Construir snapshot
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh issue list --repo "$GITHUB_REPOSITORY" --state open             --search 'label:"agent:working",label:"agent:pr-open"'             --limit 100 --json number,labels,updatedAt > /tmp/issues-search.json || true
+
+          # GitHub search trata varias labels como AND; unimos ambas consultas.
+          gh issue list --repo "$GITHUB_REPOSITORY" --state open             --label agent:working --limit 100 --json number,labels,updatedAt             > /tmp/issues-working.json
+          gh issue list --repo "$GITHUB_REPOSITORY" --state open             --label agent:pr-open --limit 100 --json number,labels,updatedAt             > /tmp/issues-pr.json
+          jq -s 'add | unique_by(.number)'             /tmp/issues-working.json /tmp/issues-pr.json > /tmp/issues.json
+
+          gh issue view 182 --repo "$GITHUB_REPOSITORY" --json comments             --jq '[.comments[-300:][]? | {body:.body}]' > /tmp/comments.json
+          gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 100             --json number,state,headRefName > /tmp/prs.json
+
+          python3 scripts/agent_reconciler.py discover             --issues /tmp/issues.json             --comments /tmp/comments.json             --output /tmp/discovery.json >/dev/null
+
+          printf '[]\n' > /tmp/runs.json
+          while IFS= read -r run_id; do
+            [[ -n "$run_id" ]] || continue
+            if run="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id"               --jq '{id:.id,status:.status,conclusion:.conclusion}' 2>/dev/null)"; then
+              tmp="$(mktemp)"
+              jq --argjson run "$run" '. + [$run]' /tmp/runs.json > "$tmp"
+              mv "$tmp" /tmp/runs.json
+            fi
+          done < <(jq -r '.run_ids[]' /tmp/discovery.json)
+
+      - name: Decidir reconciliación
+        env:
+          TTL_MINUTES: ${{ vars.AGENT_RECONCILE_TTL_MINUTES || '90' }}
+        run: |
+          set -euo pipefail
+          python3 scripts/agent_reconciler.py reconcile             --issues /tmp/issues.json             --comments /tmp/comments.json             --prs /tmp/prs.json             --runs /tmp/runs.json             --ttl-minutes "$TTL_MINUTES"             --output /tmp/actions.json >/dev/null
+          cat /tmp/actions.json
+
+      - name: Aplicar reparación conservadora
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          jq -c '.actions[]' /tmp/actions.json | while IFS= read -r action; do
+            issue="$(jq -r '.issue' <<<"$action")"
+            kind="$(jq -r '.action' <<<"$action")"
+            branch="$(jq -r '.branch // empty' <<<"$action")"
+            reason="$(jq -r '.reason' <<<"$action")"
+
+            case "$kind" in
+              keep)
+                continue
+                ;;
+              pr_open)
+                gh issue edit "$issue" --repo "$GITHUB_REPOSITORY"                   --add-label agent:pr-open --remove-label agent:working                   >/dev/null 2>&1 || true
+                ;;
+              requeue)
+                if [[ -n "$branch" && "$branch" == agent/* ]]; then
+                  gh issue comment 182 --repo "$GITHUB_REPOSITORY"                     --body "RELEASE issue=#$issue branch=$branch motivo=agent-reconciler-$reason"                     >/dev/null || true
+                fi
+                gh issue edit "$issue" --repo "$GITHUB_REPOSITORY"                   --remove-label agent:working --remove-label agent:pr-open                   --remove-label agent:needs-human >/dev/null 2>&1 || true
+                labels="$(gh issue view "$issue" --repo "$GITHUB_REPOSITORY"                   --json labels --jq '[.labels[].name]|join(" ")')"
+                queue=false
+                for label in agent:auto agent:pool agent:qwen agent:gemini; do
+                  [[ " $labels " == *" $label "* ]] && queue=true
+                done
+                [[ "$queue" == true ]] || gh issue edit "$issue"                   --repo "$GITHUB_REPOSITORY" --add-label agent:auto >/dev/null
+                gh issue comment "$issue" --repo "$GITHUB_REPOSITORY"                   --body "Agent reconciler: estado huérfano reparado (`$reason`). El issue vuelve a la cola si sigue siendo elegible."                   >/dev/null || true
+                ;;
+            esac
+          done
