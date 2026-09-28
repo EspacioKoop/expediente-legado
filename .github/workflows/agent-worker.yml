@@ -187,10 +187,14 @@ jobs:
         if: steps.guard.outputs.run == 'true' && inputs.provider == 'qwen'
         env:
           WORKER: ${{ inputs.worker }}
+          VARS_JSON: ${{ toJSON(vars) }}
         run: |
-          # qwen-fallback-N -> N; permite resolver la clave con secrets[format(...)].
+          set -euo pipefail
+          # qwen-fallback-N -> N y el nombre del secret que usa (propio o heredado
+          # con QWEN_FALLBACK_N_KEY_FROM, #1685); la clave se toma con secrets[...].
           if [[ "$WORKER" =~ ^qwen-fallback-([1-9][0-9]*)$ ]]; then
             echo "n=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+            echo "secret=$(python3 scripts/agent_slots.py secreto --worker "$WORKER" || true)" >> "$GITHUB_OUTPUT"
           fi
 
       - id: qwen_config
@@ -210,17 +214,20 @@ jobs:
           VARS_JSON: ${{ toJSON(vars) }}
           POOL_FALLBACK_KEYS: ${{ inputs.fallback_keys }}
           SLOT: ${{ steps.slot.outputs.n }}
-          SLOT_HAS_KEY: ${{ steps.slot.outputs.n != '' && secrets[format('QWEN_FALLBACK_{0}_API_KEY', steps.slot.outputs.n)] != '' }}
+          SLOT_SECRET: ${{ steps.slot.outputs.secret }}
+          SLOT_HAS_KEY: ${{ steps.slot.outputs.secret != '' && secrets[steps.slot.outputs.secret] != '' }}
         run: |
           set -euo pipefail
           model="${PRIMARY_MODEL:-qwen3-coder-plus}"
           credential=""
           slot=""
+          key_secret=""
           fallback() {
             local resuelto
             resuelto="$(python3 scripts/agent_slots.py resolver --worker "$1" --modelo-por-defecto "$model")" || return 1
             credential=fallback
             slot="$(jq -r '.slot' <<<"$resuelto")"
+            key_secret="$(jq -r '.secret' <<<"$resuelto")"
             url="$(jq -r '.url' <<<"$resuelto")"
             model="$(jq -r '.model' <<<"$resuelto")"
           }
@@ -246,7 +253,7 @@ jobs:
               ;;
             qwen-fallback-*)
               if [[ "$SLOT_HAS_KEY" != true ]]; then
-                echo "::error::$WORKER no tiene QWEN_FALLBACK_${SLOT}_API_KEY configurada" >&2
+                echo "::error::$WORKER no tiene clave (${SLOT_SECRET:-KEY_FROM inválido})" >&2
                 exit 3
               fi
               FALLBACK_KEYS="$SLOT" fallback "$WORKER" || exit 3
@@ -255,7 +262,13 @@ jobs:
           esac
           [[ -n "$credential" && -n "$url" && -n "$model" ]] || exit 3
           echo "credential=$credential" >> "$GITHUB_OUTPUT"
+          # Solo secretos de la lista cerrada de agent_slots.py (#1685).
+          if [[ "$credential" == fallback && ! "$key_secret" =~ ^(QWEN_FALLBACK_[1-9][0-9]*_API_KEY|QWEN_API_KEY|GEMINI_API_KEY)$ ]]; then
+            echo "::error::secret no permitido para $WORKER: $key_secret" >&2
+            exit 3
+          fi
           echo "slot=$slot" >> "$GITHUB_OUTPUT"
+          echo "key_secret=$key_secret" >> "$GITHUB_OUTPUT"
           echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "model=$model" >> "$GITHUB_OUTPUT"
 
@@ -381,7 +394,7 @@ jobs:
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
-          openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || secrets[format('QWEN_FALLBACK_{0}_API_KEY', steps.qwen_config.outputs.slot)] }}
+          openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || secrets[steps.qwen_config.outputs.key_secret] }}
           openai_base_url: ${{ steps.qwen_config.outputs.url }}
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
@@ -533,7 +546,7 @@ jobs:
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
-          openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || secrets[format('QWEN_FALLBACK_{0}_API_KEY', steps.qwen_config.outputs.slot)] }}
+          openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || secrets[steps.qwen_config.outputs.key_secret] }}
           openai_base_url: ${{ steps.qwen_config.outputs.url }}
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
@@ -679,7 +692,7 @@ jobs:
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
-          openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || secrets[format('QWEN_FALLBACK_{0}_API_KEY', steps.qwen_config.outputs.slot)] }}
+          openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || secrets[steps.qwen_config.outputs.key_secret] }}
           openai_base_url: ${{ steps.qwen_config.outputs.url }}
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}

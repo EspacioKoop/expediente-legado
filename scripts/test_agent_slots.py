@@ -39,7 +39,8 @@ class SlotsTest(unittest.TestCase):
 
     def test_resolver_worker_y_modelo_por_defecto(self):
         self.assertEqual(
-            {"worker": "qwen-fallback-7", "slot": 7, "url": NVIDIA, "model": "qwen3-coder-plus", "tier": 1},
+            {"worker": "qwen-fallback-7", "slot": 7, "url": NVIDIA, "model": "qwen3-coder-plus", "tier": 1,
+             "secret": "QWEN_FALLBACK_7_API_KEY"},
             slots.resolver(VARS, "qwen-fallback-7", {7}, "qwen3-coder-plus"),
         )
         self.assertIsNone(slots.resolver(VARS, "qwen-fallback-7", {2}))
@@ -83,7 +84,9 @@ class ContratoWorkflowsTest(unittest.TestCase):
         pool = (ROOT / ".github" / "workflows" / "agent-pool.yml").read_text(encoding="utf-8")
         numeros = {int(n) for n in re.findall(r"secrets\.QWEN_FALLBACK_(\d+)_API_KEY != '' && '\1'", pool)}
         self.assertEqual(set(range(1, slots.MAX_FALLBACKS + 1)), numeros)
-        self.assertIn("python3 scripts/agent_slots.py listar", pool)
+        self.assertIn("python3 scripts/agent_slots.py workers", pool)
+        self.assertIn("python3 scripts/agent_slots.py usables", pool)
+        self.assertNotIn("add_worker", pool)
         self.assertIn("fallback_keys: ${{ needs.prepare.outputs.fallback_keys }}", pool)
 
     def test_worker_sin_slots_cableados(self):
@@ -91,8 +94,59 @@ class ContratoWorkflowsTest(unittest.TestCase):
         cuerpo = worker.split("    secrets:", 1)[1].split("jobs:", 1)[1]
         self.assertNotRegex(cuerpo, r"QWEN_FALLBACK_\d+_")
         self.assertNotRegex(cuerpo, r"qwen-fallback-\d+[):]")
-        self.assertEqual(3, cuerpo.count("secrets[format('QWEN_FALLBACK_{0}_API_KEY', steps.qwen_config.outputs.slot)]"))
+        self.assertEqual(3, cuerpo.count("secrets[steps.qwen_config.outputs.key_secret]"))
+        self.assertIn("secrets[steps.slot.outputs.secret] != ''", cuerpo)
+        self.assertIn("^(QWEN_FALLBACK_[1-9][0-9]*_API_KEY|QWEN_API_KEY|GEMINI_API_KEY)$", cuerpo)
         self.assertIn("python3 scripts/agent_slots.py resolver", cuerpo)
+
+
+class ProveedoresYModelosTest(unittest.TestCase):
+    def test_key_from_reutiliza_clave_de_otro_slot_o_proveedor_base(self):
+        variables = {
+            "QWEN_FALLBACK_2_BASE_URL": NVIDIA,
+            "QWEN_FALLBACK_2_MODEL": "nvidia/nemotron-3-super-120b-a12b",
+            "QWEN_FALLBACK_5_BASE_URL": NVIDIA,
+            "QWEN_FALLBACK_5_MODEL": "nvidia/nemotron-3-ultra-550b-a55b",
+            "QWEN_FALLBACK_5_KEY_FROM": "2",
+            "QWEN_FALLBACK_6_BASE_URL": "https://generativelanguage.googleapis.com/v1beta/openai/",
+            "QWEN_FALLBACK_6_MODEL": "gemini-3.8-flash-lite",
+            "QWEN_FALLBACK_6_KEY_FROM": "gemini",
+            "QWEN_FALLBACK_6_TIER": "3",
+        }
+        usables = slots.fallbacks(variables, {2}, {"gemini"})
+        self.assertEqual(
+            [("qwen-fallback-2", "QWEN_FALLBACK_2_API_KEY"), ("qwen-fallback-5", "QWEN_FALLBACK_2_API_KEY"),
+             ("qwen-fallback-6", "GEMINI_API_KEY")],
+            [(s["worker"], s["secret"]) for s in usables],
+        )
+        # Sin la clave de origen, el slot que la hereda no es utilizable.
+        self.assertEqual(["qwen-fallback-2", "qwen-fallback-5"], [s["worker"] for s in slots.fallbacks(variables, {2})])
+
+    def test_key_from_no_puede_nombrar_secretos_arbitrarios(self):
+        for origen in ("OMNIROUTE_API_KEY", "kev", "13", "0", "../x"):
+            with self.subTest(origen=origen):
+                variables = {"QWEN_FALLBACK_3_BASE_URL": NVIDIA, "QWEN_FALLBACK_3_KEY_FROM": origen}
+                self.assertEqual("", slots.secreto_de(variables, 3))
+                self.assertEqual([], slots.fallbacks(variables, set(), {"qwen", "gemini"}))
+
+    def test_inventario_incluye_proveedores_base_con_su_tier(self):
+        variables = {**VARS, "QWEN_PRIMARY_TIER": "1", "GEMINI_TIER": "2", "QWEN_FALLBACK_1_TIER": "3"}
+        inventario = slots.inventario(variables, {1, 2}, {"gemini"}, omniroute=True)
+        self.assertEqual(
+            [("qwen-primary", "qwen", 1), ("gemini", "gemini", 2), ("qwen-fallback-2", "qwen", 1), ("qwen-fallback-1", "qwen", 3)],
+            [(w["worker"], w["provider"], w["tier"]) for w in inventario],
+        )
+        self.assertEqual([], [w for w in slots.inventario({}, set(), set()) if w["worker"] in {"qwen-primary", "gemini"}])
+
+    def test_cli_workers_y_usables(self):
+        variables = {**VARS, "QWEN_FALLBACK_7_KEY_FROM": "gemini"}
+        entorno = {**os.environ, "VARS_JSON": json.dumps(variables), "FALLBACK_KEYS": "2", "BASE_KEYS": "gemini qwen"}
+        script = str(ROOT / "scripts" / "agent_slots.py")
+        usables = subprocess.run([sys.executable, script, "usables"], env=entorno, capture_output=True, text=True, check=True)
+        self.assertEqual("2 7", usables.stdout.strip())
+        workers = subprocess.run([sys.executable, script, "workers"], env=entorno, capture_output=True, text=True, check=True)
+        nombres = [w["worker"] for w in json.loads(workers.stdout)]
+        self.assertEqual(["qwen-primary", "gemini", "qwen-fallback-2", "qwen-fallback-7"], nombres)
 
 
 if __name__ == "__main__":
