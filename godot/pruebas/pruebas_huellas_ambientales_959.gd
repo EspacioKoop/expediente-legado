@@ -280,6 +280,10 @@ func _probar() -> void:
 			not (hijo is Interactuable3D),
 			"los ecos no son interactuables ni crean progreso",
 		)
+		var distancia_entrada := (hijo as Node3D).global_position.distance_to(
+			dia._caminante.global_position
+		)
+		_comprobar(distancia_entrada < 2.5, "los ecos quedan cerca de la entrada del sueño")
 	_comprobar(
 		JSON.stringify(dia.partida.estado["huellas_ambientales"]) == estado_antes_ecos,
 		"entrar en sueño no muta ni duplica las huellas persistentes",
