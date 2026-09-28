@@ -188,6 +188,7 @@ func _construir_interfaz() -> void:
 		var boton: Button = get(propiedad)
 		var zona: String = ZONAS_POR_BOTON[propiedad]
 		boton.focus_entered.connect(_diorama.enfocar.bind(zona))
+		boton.mouse_entered.connect(_diorama.enfocar.bind(zona))
 
 
 func _configurar_foco_menu_principal() -> void:
