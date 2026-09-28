@@ -9,6 +9,7 @@ const POSICION_CASSETTE := Vector3(2.8, 0.92, -3.25)
 const ESCALA_SUENO := 0.78
 
 var _mundo_casa_id := 0
+var _rom_observador_mundo_id := 0
 var _mundo_sueno_id := 0
 var _sueno_montado_esta_noche := false
 var _fase_anterior := ""
@@ -31,6 +32,11 @@ func _process(_delta: float) -> void:
 		if mundo_id != _mundo_casa_id:
 			_mundo_casa_id = mundo_id
 			_montar_cassette(mundo, dia.jornada)
+		# La portátil puede montarse después en el mismo frame. Reintentamos
+		# hasta encontrarla y luego no volvemos a consultar durante este mundo.
+		if mundo_id != _rom_observador_mundo_id:
+			if _montar_observador_webkeeper(mundo, dia.jornada):
+				_rom_observador_mundo_id = mundo_id
 		return
 
 	if fase != "sueño" or _sueno_montado_esta_noche:
@@ -63,6 +69,19 @@ func _montar_cassette(mundo: Node3D, jornada: Dictionary) -> void:
 	cassette.position = POSICION_CASSETTE
 	mundo.add_child(cassette)
 	cassette.configurar(jornada)
+
+
+func _montar_observador_webkeeper(mundo: Node3D, jornada: Dictionary) -> bool:
+	if mundo.get_node_or_null("Webkeeper98VigiliaCasa") != null:
+		return true
+	var consola := mundo.get_node_or_null("ConsolaPortatil98") as ConsolaPortatil98
+	if consola == null:
+		return false
+	var observador := Webkeeper98Vigilia.new()
+	observador.name = "Webkeeper98VigiliaCasa"
+	mundo.add_child(observador)
+	observador.configurar(jornada, consola)
+	return true
 
 
 func _corresponde_a_esta_escena(dia: Node, familias: Array) -> bool:

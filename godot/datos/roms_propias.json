@@ -114,15 +114,15 @@
     {
       "id": "webkeeper_98",
       "titulo": "Kwaku, el guardameta",
-      "estado": "en_proyecto",
+      "estado": "jugable",
       "genero": "deportivo / portero arcade",
       "resumen": "Kwaku, una araña suplente, defiende Web United en tres partidos breves: leer tiros y amagos, cubrir seis zonas y reservar la telaraña para emergencias. Solo ganar la final publica el handshake WRAM.",
       "fuente": "gbc/minijuegos/webkeeper_98",
-      "rom": "",
+      "rom": "res://roms/webkeeper_98.gbc",
       "cabecera": "WEBKEEPER98",
       "cgb": "dual",
       "incluida": false,
-      "precio": 0,
+      "precio": 45,
       "issues": [748, 656, 442],
       "mito": "anansi_akan"
     },
