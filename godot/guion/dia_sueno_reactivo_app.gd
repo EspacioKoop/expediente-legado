@@ -138,9 +138,9 @@ func iniciar_grabacion_anomalia(anomalia: AnomaliaSueno3D) -> Dictionary:
 		return {"ok": false, "error": GrabacionOniricaEstado.ERROR_CINTA_NO_INICIADA}
 
 	var caminante = dia.get("_caminante")
-	if caminante == null or not is_instance_valid(caminante):
-		return {"ok": false, "error": GrabacionOniricaRuntime.ERROR_CAMARA_INVALIDA}
-	var camara := caminante.get_node_or_null("Camara") as Camera3D
+	var camara: Camera3D = null
+	if caminante != null and is_instance_valid(caminante):
+		camara = caminante.get_node_or_null("Camara") as Camera3D
 	var inicio := _grabacion_runtime.iniciar(camara, anomalia, documento, true)
 	if bool(inicio.get("ok", false)):
 		_anomalia_grabada = anomalia
