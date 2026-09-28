@@ -13,6 +13,7 @@ on:
 permissions:
   contents: read
   issues: write
+  actions: write
   id-token: write
 
 concurrency:
@@ -167,6 +168,7 @@ jobs:
             [[ "$REQUESTED_PROVIDER" == gemini ]] && queue_label=agent:gemini
             gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --remove-label agent:decompose --remove-label agent:needs-human --add-label "$queue_label" >/dev/null
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Agent decompose: el issue ya cabe en un corte seguro; se retira agent:decompose y vuelve a la cola como $queue_label sin crear subissues." >/dev/null
+            gh workflow run agent-pool.yml --repo "$GITHUB_REPOSITORY" --ref main -f max_parallel=6
             echo "create=false" >> "$GITHUB_OUTPUT"
           else
             echo "create=true" >> "$GITHUB_OUTPUT"
@@ -243,6 +245,7 @@ jobs:
           gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "AGENT_DECOMPOSED parent=#$ISSUE subissues=$subissues
 
           Se crearon $count cortes. Solo las subtareas sin dependencias entraron en agent:auto; las demás usan agent:blocked. El issue padre permanece abierto." >/dev/null
+          gh workflow run agent-pool.yml --repo "$GITHUB_REPOSITORY" --ref main -f max_parallel=6
 
       - name: Marcar descomposicion no parseable
         if: failure() && steps.select.outputs.run == 'true'
