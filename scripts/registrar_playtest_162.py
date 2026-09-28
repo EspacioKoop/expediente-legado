@@ -2,7 +2,8 @@
 """Registra el gate visual y de mando de memoria nocturna (#162).
 
 El issue conserva aparte la semántica canónica de contradicciones. Este script
-no la infiere y, por diseño, nunca declara #162 completamente cerrable.
+no la infiere y solo considera ese gate resuelto si se aporta una fuente
+canónica versionada concreta.
 """
 
 from __future__ import annotations
@@ -49,9 +50,10 @@ def preguntar_si_no(prompt: str) -> bool:
 def evaluar_gate(datos: dict[str, object]) -> dict[str, bool]:
     estado = {clave: bool(datos.get(clave, False)) for clave in CHECKS}
     estado["gate_visual_mando"] = all(estado.values())
+    fuente_contradicciones = str(datos.get("fuente_contradicciones", "")).strip()
     estado["contradicciones_canonicas_resueltas"] = bool(
         datos.get("contradicciones_canonicas_resueltas", False)
-    )
+    ) and bool(fuente_contradicciones)
     estado["issue_completamente_cerrable"] = (
         estado["gate_visual_mando"] and estado["contradicciones_canonicas_resueltas"]
     )
@@ -100,6 +102,7 @@ def render_markdown(datos: dict[str, object]) -> str:
 
 - gate visual/mando de #162: **{'CUMPLE' if gate['gate_visual_mando'] else 'PENDIENTE'}**
 - semántica canónica de contradicciones: **{'RESUELTA' if gate['contradicciones_canonicas_resueltas'] else 'PENDIENTE'}**
+- fuente canónica declarada: {str(datos.get('fuente_contradicciones', '')).strip() or '—'}
 - #162 completamente cerrable: **{'SÍ' if gate['issue_completamente_cerrable'] else 'NO'}**
 
 La semántica de contradicciones no se deduce de texto, colores ni similitud de
@@ -145,6 +148,11 @@ def recoger_datos() -> dict[str, object]:
 
     datos["contradicciones_canonicas_resueltas"] = preguntar_si_no(
         "¿Existe ya una fuente canónica versionada que declare qué pares son contradictorios?"
+    )
+    datos["fuente_contradicciones"] = (
+        preguntar("Ruta/issue/commit de la fuente canónica: ")
+        if datos["contradicciones_canonicas_resueltas"]
+        else ""
     )
     datos["incidencia"] = input("Detalle de incidencia (opcional): ").strip()
     datos["observaciones"] = input("Observaciones adicionales (opcional): ").strip()
