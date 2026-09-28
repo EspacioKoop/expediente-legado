@@ -23,7 +23,10 @@ func _probar_politica() -> void:
 	var dia_uno := SuenoObjetivosVariedad.tipos_para(1, "montana")
 	var dia_dos := SuenoObjetivosVariedad.tipos_para(2, "montana")
 	_comprobar("cada noche ofrece tres objetivos", dia_uno.size(), 3)
-	_comprobar("los tres objetivos de una noche son distintos", dia_uno.duplicate().size(), 3)
+	var unicos := {}
+	for tipo in dia_uno:
+		unicos[tipo] = true
+	_comprobar("los tres objetivos de una noche son distintos", unicos.size(), 3)
 	_comprobar("otra semilla rota el repertorio", dia_dos == dia_uno, false)
 	_comprobar(
 		"retorno declara ida y vuelta",
