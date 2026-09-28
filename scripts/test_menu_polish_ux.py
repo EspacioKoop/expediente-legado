@@ -24,3 +24,12 @@ def test_menu_global_respeta_margen_seguro_y_viewport() -> None:
     assert "minf(ALTO_MAXIMO_PANEL, alto_disponible)" in codigo
     assert 'margen.add_theme_constant_override("margin_" + lado, 16)' in codigo
     assert 'caja.add_theme_constant_override("separation", 16)' in codigo
+
+
+def test_cancelar_retrocede_antes_de_cerrar_el_menu() -> None:
+    codigo = MENU.read_text(encoding="utf-8")
+    assert "func _volver_un_nivel() -> bool:" in codigo
+    assert "if not _volver_un_nivel():" in codigo
+    assert "_mostrar_principal(_opciones)" in codigo
+    assert "_mostrar_principal(_sellos)" in codigo
+    assert "_mostrar_principal(_historial_boton)" in codigo
