@@ -117,13 +117,30 @@ func _unhandled_input(evento: InputEvent) -> void:
 	if not _fondo.visible and evento is InputEventJoypadButton:
 		return
 	if _fondo.visible:
-		if _panel_incidencias.visible:
-			_volver_de_incidencias()
-		else:
+		if not _volver_un_nivel():
 			_cerrar()
 	elif _puede_abrir():
 		_abrir()
 	get_viewport().set_input_as_handled()
+
+
+## Cancelar/B/Escape recorre primero la jerarquía del menú. Start/Options sigue
+## cerrando el modal completo, de modo que ambas acciones conservan funciones
+## distintas y predecibles con teclado y mando.
+func _volver_un_nivel() -> bool:
+	if _panel_incidencias.visible:
+		_volver_de_incidencias()
+		return true
+	if _panel_opciones.visible:
+		_mostrar_principal(_opciones)
+		return true
+	if _panel_sellos.visible:
+		_mostrar_principal(_sellos)
+		return true
+	if _panel_historial.visible:
+		_mostrar_principal(_historial_boton)
+		return true
+	return false
 
 
 func _puede_abrir() -> bool:
