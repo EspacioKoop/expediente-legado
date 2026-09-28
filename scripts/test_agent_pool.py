@@ -137,7 +137,7 @@ class AgentPoolTest(unittest.TestCase):
             ],
         )
 
-        tasks = mod.select_tasks(candidate and [candidate], self.workers)
+        tasks = mod.select_tasks([candidate], self.workers)
 
         self.assertEqual("qwen-primary", tasks[0]["worker"])
         self.assertEqual("qwen", tasks[0]["provider"])
