@@ -16,6 +16,7 @@ func _ejecutar() -> void:
 	_probar_registro()
 	_probar_lectura_social()
 	_probar_contrato_transversal()
+	_probar_consumidores_verticales()
 	print("issue_924: %d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos > 0 else 0)
 
@@ -191,6 +192,97 @@ func _probar_contrato_transversal() -> void:
 	_comprobar(dominantes.size(), 2, "la contradicción conserva el empate")
 	_comprobar(dominantes.has("comunismo"), true, "el empate conserva comunismo")
 	_comprobar(dominantes.has("neoliberal"), true, "el empate conserva neoliberal")
+
+
+func _probar_consumidores_verticales() -> void:
+	var casos := [
+		{
+			"opcion": "responsabilidad_compartida",
+			"eje": "comunismo",
+			"familia": "reparto",
+			"dialogo": "IDEOLOGIA_924_CUNADO_COLECTIVO",
+		},
+		{
+			"opcion": "revision_procedimental",
+			"eje": "socialdemocrata",
+			"familia": "procedimiento",
+			"dialogo": "IDEOLOGIA_924_CUNADO_PROCEDIMIENTO",
+		},
+		{
+			"opcion": "conciliacion_interna",
+			"eje": "centrista",
+			"familia": "negociacion",
+			"dialogo": "IDEOLOGIA_924_CUNADO_NEGOCIADO",
+		},
+	]
+
+	for caso in casos:
+		var estado := Partida.nueva()
+		_cerrar_caso(estado)
+		var resultado := DecisionIdeologicaExpediente.resolver(
+			estado,
+			DecisionIdeologicaExpediente.CASO_VERTICAL,
+			String(caso["opcion"]),
+		)
+		_comprobar(
+			resultado.get("resultado"),
+			"registrada",
+			"la decisión real queda disponible para consumidores transversales",
+		)
+
+		var variante := DialogoIdeologico.resolver(
+			DialogoIdeologico.SUPERFICIE_OFICINA_CUNADO,
+			estado,
+		)
+		_comprobar(
+			variante.get("clave"),
+			caso["dialogo"],
+			"#920 deriva el diálogo del mismo evento de expediente",
+		)
+
+		var cargas := Prometeo.cargas_ideologicas(estado, Historias.TOPE_CARGAS)
+		_comprobar(
+			cargas.get(caso["eje"]),
+			1,
+			"#921 recibe una carga desde la elección de expediente",
+		)
+
+		var modificadores := IdeologiaSueno923.modificadores(
+			estado,
+			int(estado["jornada"].get("dia", 1)),
+			924,
+			false,
+		)
+		_comprobar(
+			modificadores.size(),
+			1,
+			"#923 consume la elección sin necesitar estado paralelo",
+		)
+		_comprobar(
+			modificadores[0].get("familia"),
+			caso["familia"],
+			"#923 deriva la familia de tags semánticos del mismo evento",
+		)
+		_comprobar(
+			modificadores[0].get("canal"),
+			IdeologiaSueno923.CANAL_ELECCION,
+			"#923 conserva elección separada de exposición",
+		)
+
+		var cierre := FinalPolitico.resumen(estado)
+		_comprobar(cierre.get("elecciones"), 1, "#925 lee la decisión transversal")
+		_comprobar(
+			cierre.get("patron"),
+			FinalPolitico.PATRON_CONSISTENTE,
+			"#925 describe una única decisión sin inventar una personalidad",
+		)
+		var ejemplos: Array = cierre.get("ejemplos", [])
+		_comprobar(ejemplos.size(), 1, "#925 conserva un ejemplo factual")
+		_comprobar(
+			ejemplos[0].get("contexto"),
+			DecisionIdeologicaExpediente.CASO_VERTICAL,
+			"#925 cita el expediente que originó la elección",
+		)
 
 
 func _comprobar(actual, esperado, nombre: String) -> void:
