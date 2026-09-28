@@ -13,11 +13,14 @@ const PREFIJO_TRANSITO := "transito:"
 const FASES_TRANSITO := ["archivo", "trayecto", "casa"]
 const CELDA_TRANSITO := 1.25
 const PASADAS_PARA_MARCA := 3
+const META_TIPO_MARCA := "huella_tipo_959"
+const META_INTENSIDAD_MARCA := "huella_intensidad_959"
 
 var _mundo_id := 0
 var _conectados := {}
 var _ultima_celda_transito := ""
 var _pasadas_transito := {}
+var _contexto_visual := ""
 
 
 func _process(_delta: float) -> void:
@@ -31,11 +34,13 @@ func _process(_delta: float) -> void:
 		_conectados.clear()
 		_ultima_celda_transito = ""
 		_pasadas_transito.clear()
+		_contexto_visual = ""
 		_asegurar_raiz(mundo)
 		_montar_transito_guardado(dia, mundo)
 		_sembrar_celda_actual(dia)
 	_conectar_marcables(dia, mundo, mundo)
 	_registrar_transito(dia, mundo)
+	_sincronizar_contexto_visual(dia, mundo)
 
 
 func _conectar_marcables(dia: Node, mundo: Node3D, nodo: Node) -> void:
@@ -125,6 +130,7 @@ func _registrar_transito(dia: Node, mundo: Node3D) -> void:
 	if huella.is_empty() or int(huella.get("usos", 0)) == usos_antes:
 		return
 	_montar_marca_en(
+		dia,
 		mundo,
 		id,
 		"paso",
@@ -148,6 +154,7 @@ func _montar_transito_guardado(dia: Node, mundo: Node3D) -> void:
 			continue
 		var celda: Vector2i = celda_valor
 		_montar_marca_en(
+			dia,
 			mundo,
 			id,
 			"paso",
@@ -178,6 +185,7 @@ func _montar_o_actualizar_marca(
 	if typeof(offset) == TYPE_VECTOR3:
 		punto_global = marcable.to_global(offset)
 	_montar_marca_en(
+		dia,
 		mundo,
 		id,
 		tipo,
@@ -187,6 +195,7 @@ func _montar_o_actualizar_marca(
 
 
 func _montar_marca_en(
+	dia: Node,
 	mundo: Node3D,
 	id: String,
 	tipo: String,
@@ -212,10 +221,83 @@ func _montar_marca_en(
 	var material := StandardMaterial3D.new()
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	material.roughness = 1.0
-	var alpha := 0.07 + clampf(intensidad, 0.0, HuellasAmbientales.INTENSIDAD_MAX) * 0.28
-	material.albedo_color = Color(0.11, 0.085, 0.065, alpha)
 	plano.material = material
 	marca.mesh = plano
+	marca.set_meta(META_TIPO_MARCA, tipo)
+	marca.set_meta(META_INTENSIDAD_MARCA, intensidad)
+	_aplicar_contexto_visual(marca, dia.jornada, tipo, intensidad)
+
+
+## #959: hora/clima cambian solo la lectura de una huella ya existente. La
+## persistencia continúa siendo intensidad + usos; no guardamos el contexto.
+static func perfil_visual(jornada: Dictionary, tipo: String, intensidad: float) -> Dictionary:
+	var fase := String(jornada.get("fase", ""))
+	var clima := String(jornada.get("clima_forzado", "")).strip_edges()
+	if clima.is_empty():
+		clima = Clima.estado(int(jornada.get("dia", 1)))
+	var franja := Jornada.franja_horaria(jornada)
+	var factor := 1.0
+	var tinte := Color(0.11, 0.085, 0.065)
+
+	if fase == "trayecto" and Clima.precipitacion(clima) and tipo in ["paso", "roce"]:
+		factor *= 1.15
+	if franja == "mediodia":
+		factor *= 0.94
+	elif franja == "noche":
+		factor *= 1.08
+	if tipo == "equipo" and franja in ["tarde", "noche"]:
+		factor *= 1.08
+	if fase == "sueño":
+		factor *= 1.06
+		tinte = Color(0.105, 0.085, 0.12)
+
+	var base := 0.07 + clampf(intensidad, 0.0, HuellasAmbientales.INTENSIDAD_MAX) * 0.28
+	return {
+		"alpha": clampf(base * factor, 0.04, 0.30),
+		"tinte": tinte,
+		"clima": clima,
+		"franja": franja,
+	}
+
+
+func _sincronizar_contexto_visual(dia: Node, mundo: Node3D) -> void:
+	var clima := String(dia.jornada.get("clima_forzado", "")).strip_edges()
+	if clima.is_empty():
+		clima = Clima.estado(int(dia.jornada.get("dia", 1)))
+	var firma := "%s|%s|%s" % [
+		String(dia.jornada.get("fase", "")),
+		clima,
+		Jornada.franja_horaria(dia.jornada),
+	]
+	if firma == _contexto_visual:
+		return
+	_contexto_visual = firma
+	var raiz := _asegurar_raiz(mundo)
+	for hijo in raiz.get_children():
+		if not hijo is MeshInstance3D:
+			continue
+		var marca := hijo as MeshInstance3D
+		var tipo := String(marca.get_meta(META_TIPO_MARCA, "uso"))
+		var intensidad := float(marca.get_meta(META_INTENSIDAD_MARCA, 0.0))
+		_aplicar_contexto_visual(marca, dia.jornada, tipo, intensidad)
+
+
+static func _aplicar_contexto_visual(
+	marca: MeshInstance3D,
+	jornada: Dictionary,
+	tipo: String,
+	intensidad: float,
+) -> void:
+	if marca.mesh == null or not marca.mesh is PlaneMesh:
+		return
+	var plano := marca.mesh as PlaneMesh
+	var material := plano.material as StandardMaterial3D
+	if material == null:
+		return
+	var perfil := perfil_visual(jornada, tipo, intensidad)
+	var tinte: Color = perfil["tinte"]
+	tinte.a = float(perfil["alpha"])
+	material.albedo_color = tinte
 
 
 func _tamano_de(tipo: String) -> Vector2:
