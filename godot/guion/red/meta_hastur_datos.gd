@@ -42,11 +42,7 @@ const MAX_THRESHOLDS := 16
 
 
 static func produccion_habilitada(config: Dictionary, version_1_0: bool) -> bool:
-	return (
-		PRODUCCION_HABILITADA
-		and version_1_0
-		and bool(config.get("global_hastur_event", false))
-	)
+	return PRODUCCION_HABILITADA and version_1_0 and bool(config.get("global_hastur_event", false))
 
 
 static func validar_snapshot(datos: Variant) -> Dictionary:
