@@ -48,6 +48,51 @@ class GestionarReservasTest(unittest.TestCase):
         self.assertTrue(estado[(10, "feature/10-a")].released)
         self.assertFalse(estado[(10, "feature/10-b")].released)
 
+    def test_pr_ready_sin_branch_no_adivina_entre_dos_claim_activos(self):
+        t0 = datetime(2026, 9, 15, 0, 0, tzinfo=UTC)
+        comentarios = [
+            comentario(
+                "CLAIM issue=#10 agent=A branch=feature/10-a files=a.gd goal=A lease=48h",
+                t0,
+            ),
+            comentario(
+                "CLAIM issue=#10 agent=B branch=feature/10-b files=b.gd goal=B lease=48h",
+                t0 + timedelta(minutes=1),
+            ),
+            comentario(
+                "PR_READY issue=#10 pr=#100 sha=abc pruebas=ok limites=ninguno",
+                t0 + timedelta(minutes=2),
+            ),
+        ]
+
+        estado = reservas.reconstruir_reservas(comentarios)
+
+        self.assertIsNone(estado[(10, "feature/10-a")].pr)
+        self.assertIsNone(estado[(10, "feature/10-b")].pr)
+
+    def test_pr_ready_con_branch_resuelve_el_claim_explicito(self):
+        t0 = datetime(2026, 9, 15, 0, 0, tzinfo=UTC)
+        comentarios = [
+            comentario(
+                "CLAIM issue=#10 agent=A branch=feature/10-a files=a.gd goal=A lease=48h",
+                t0,
+            ),
+            comentario(
+                "CLAIM issue=#10 agent=B branch=feature/10-b files=b.gd goal=B lease=48h",
+                t0 + timedelta(minutes=1),
+            ),
+            comentario(
+                "PR_READY issue=#10 pr=#100 sha=abc pruebas=ok limites=ninguno "
+                "branch=feature/10-a",
+                t0 + timedelta(minutes=2),
+            ),
+        ]
+
+        estado = reservas.reconstruir_reservas(comentarios)
+
+        self.assertEqual(100, estado[(10, "feature/10-a")].pr)
+        self.assertIsNone(estado[(10, "feature/10-b")].pr)
+
     def test_heartbeat_renueva_lease(self):
         t0 = datetime(2026, 9, 15, 0, 0, tzinfo=UTC)
         comentarios = [

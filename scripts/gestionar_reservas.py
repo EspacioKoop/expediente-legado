@@ -40,7 +40,7 @@ CLAIM_RE = re.compile(
     r"branch=(?P<branch>\S+) files=(?P<files>\S+) goal=(?P<goal>.+)$"
 )
 HEARTBEAT_RE = re.compile(r"^HEARTBEAT issue=#(?P<issue>\d+) branch=(?P<branch>\S+)(?:\s|$)")
-PR_READY_RE = re.compile(r"^PR_READY issue=#(?P<issue>\d+) pr=#(?P<pr>\d+)(?:\s|$)")
+PR_READY_RE = re.compile(r"^PR_READY issue=#(?P<issue>\d+) pr=#(?P<pr>\d+)(?P<rest>.*)$")
 RELEASE_RE = re.compile(r"^RELEASE issue=#(?P<issue>\d+)(?P<rest>.*)$")
 LEASE_RE = re.compile(r"\s+lease=(?P<hours>\d+)h\s*$")
 BRANCH_RE = re.compile(r"(?:^|\s)branch=(?P<branch>\S+)")
@@ -116,8 +116,13 @@ def reconstruir_reservas(comentarios: list[dict]) -> dict[tuple[int, str], Reser
                     for reserva in reservas.values()
                     if reserva.issue == issue and not reserva.released
                 ]
-                if candidatas:
-                    max(candidatas, key=lambda reserva: reserva.claimed_at).pr = int(match.group("pr"))
+                branch_match = BRANCH_RE.search(match.group("rest") or "")
+                if branch_match:
+                    reserva = reservas.get((issue, branch_match.group("branch")))
+                    if reserva and not reserva.released:
+                        reserva.pr = int(match.group("pr"))
+                elif len(candidatas) == 1:
+                    candidatas[0].pr = int(match.group("pr"))
             elif tipo == "release":
                 issue = int(match.group("issue"))
                 branch_match = BRANCH_RE.search(match.group("rest") or "")
