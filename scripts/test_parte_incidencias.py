@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 import re
 import subprocess
+import shutil
 import unittest
 
 
@@ -40,6 +41,8 @@ class ParteIncidenciasTest(unittest.TestCase):
 
     def test_contrato_ejecutable_en_godot(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
+        if shutil.which(motor) is None:
+            self.skipTest(f"{motor} no disponible en este entorno")
         resultado = subprocess.run(
             [
                 motor,
