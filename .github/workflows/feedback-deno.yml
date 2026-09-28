@@ -32,7 +32,10 @@ jobs:
           deno-version: v2.9.6
       - name: Formato
         working-directory: infra/feedback-deno
-        run: deno fmt --check main.ts agent_pool_state.ts deno.json
+        run: deno fmt --check main.ts agent_memory.ts agent_memory_test.ts agent_pool_state.ts deno.json
       - name: Tipos
         working-directory: infra/feedback-deno
-        run: deno check main.ts
+        run: deno task check
+      - name: Tests de memoria
+        working-directory: infra/feedback-deno
+        run: deno task test
