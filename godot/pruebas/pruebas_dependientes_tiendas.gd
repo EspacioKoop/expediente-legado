@@ -59,8 +59,8 @@ func _probar_textos() -> void:
 func _probar_orden_de_la_charla() -> void:
 	var paco := DependientesTiendas.de("paco")
 	var dia3 := {"dia": 3}
-	# Con lluvia: primero el tiempo, luego el saludo del día y luego la
-	# insistencia, que se queda.
+	# Con lluvia: primero el tiempo, luego un seguimiento propio de esa rama,
+	# después el saludo del día y finalmente la insistencia.
 	var orden := []
 	for charla in 5:
 		orden.append(DependientesTiendas.frase(paco, dia3, Clima.LLUVIA, charla))
@@ -69,13 +69,13 @@ func _probar_orden_de_la_charla() -> void:
 			orden
 			== [
 				"DEPEND_PACO_LLUVIA",
+				"DEPEND_PACO_CLIMA_SEGUIMIENTO",
 				"DEPEND_PACO_SALUDO_3",
-				"DEPEND_PACO_INSISTE",
 				"DEPEND_PACO_INSISTE",
 				"DEPEND_PACO_INSISTE",
 			]
 		),
-		"con lluvia: tiempo, saludo e insistencia (%s)" % [orden]
+		"con lluvia: tiempo, seguimiento, saludo e insistencia (%s)" % [orden]
 	)
 	# Sin nada que comentar, abre con el saludo.
 	_comprobar(
@@ -118,6 +118,19 @@ func _probar_clientes() -> void:
 		DependientesTiendas.frase(paco, del_quiosco, Clima.DESPEJADO, 0) == "DEPEND_PACO_CLIENTE",
 		"al cliente le pregunta por lo que se llevó"
 	)
+	_comprobar(
+		DependientesTiendas.frase(paco, del_quiosco, Clima.DESPEJADO, 1)
+		== "DEPEND_PACO_CLIENTE_SEGUIMIENTO",
+		"la rama cliente tiene un segundo turno propio"
+	)
+	_comprobar(
+		DependientesTiendas.rama_contextual(paco, del_quiosco, Clima.DESPEJADO) == "cliente",
+		"las compras reales seleccionan la rama cliente"
+	)
+	_comprobar(
+		DependientesTiendas.rama_contextual(paco, del_quiosco, Clima.NIEVE) == "clima",
+		"el clima conserva prioridad sobre la rama cliente"
+	)
 	# El tiempo va antes que la compra.
 	_comprobar(
 		DependientesTiendas.frase(paco, del_quiosco, Clima.NIEVE, 0) == "DEPEND_PACO_NIEVE",
@@ -159,8 +172,8 @@ func _probar_montaje() -> void:
 		var primera := DependientesTiendas3D.siguiente_frase(charla, {"dia": 1}, Clima.LLUVIA)
 		var segunda := DependientesTiendas3D.siguiente_frase(charla, {"dia": 1}, Clima.LLUVIA)
 		_comprobar(
-			primera.ends_with("_LLUVIA") and segunda.ends_with("_SALUDO_1"),
-			"%s avanza la charla (%s, %s)" % [id, primera, segunda]
+			primera.ends_with("_LLUVIA") and segunda.ends_with("_CLIMA_SEGUIMIENTO"),
+			"%s mantiene la rama de clima en el segundo turno (%s, %s)" % [id, primera, segunda]
 		)
 
 	# Rehacer el trayecto no duplica a nadie.
