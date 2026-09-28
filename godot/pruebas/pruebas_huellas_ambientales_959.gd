@@ -241,7 +241,9 @@ func _probar() -> void:
 	for _i in range(3):
 		HuellasAmbientales.registrar(dia.partida.estado, "trayecto:portal", "apertura", "trayecto")
 	for _i in range(2):
-		HuellasAmbientales.registrar(dia.partida.estado, "archivo:archivador", "apertura", "archivo")
+		HuellasAmbientales.registrar(
+			dia.partida.estado, "archivo:archivador", "apertura", "archivo"
+		)
 	HuellasAmbientales.registrar(dia.partida.estado, "casa:silla", "roce", "casa")
 
 	var estado_antes_ecos := JSON.stringify(dia.partida.estado["huellas_ambientales"])
@@ -252,8 +254,7 @@ func _probar() -> void:
 		"la huella más intensa tiene prioridad onírica",
 	)
 	_comprobar(
-		float(destacadas[0].get("intensidad", 0.0))
-		>= float(destacadas[1].get("intensidad", 0.0)),
+		float(destacadas[0].get("intensidad", 0.0)) >= float(destacadas[1].get("intensidad", 0.0)),
 		"los ecos se ordenan por intensidad",
 	)
 
