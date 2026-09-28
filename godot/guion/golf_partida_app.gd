@@ -1,8 +1,8 @@
 ## Partida standalone de tres hoyos del golf de pasillo (#158).
 ##
 ## Orquesta el slice GolfHoyoApp sobre el núcleo Golf. No conoce Partida,
-## rankings, recompensas ni compañeros: cada hoyo entrega sus golpes al modelo
-## puro y el siguiente se crea desde una configuración fija y reproducible.
+## rankings ni recompensas. El jugador usa el hoyo 3D y tres compañeros resuelven
+## sus turnos con planes simples, distintos y deterministas sobre el mismo Golf.
 class_name GolfPartidaApp
 extends Node3D
 
@@ -11,6 +11,12 @@ signal partida_terminada(resultado: Dictionary)
 
 const HOYO_SCENE: PackedScene = preload("res://escenas/golf_hoyo_standalone.tscn")
 const JUGADOR := "jugador"
+const LANZADORES := ["jugador", "prudente", "agresiva", "absurda"]
+const PLAN_COMPANEROS := {
+	"prudente": [4, 4, 4],
+	"agresiva": [3, 5, 3],
+	"absurda": [7, 6, 8],
+}
 const CONFIGURACIONES := [
 	{
 		"inicio": Vector2(0.0, 1.72),
@@ -39,7 +45,7 @@ var hoyo_actual: GolfHoyoApp
 
 
 func _ready() -> void:
-	estado = Golf.nueva([JUGADOR])
+	estado = Golf.nueva(LANZADORES)
 	_abrir_hoyo(0)
 
 
@@ -71,10 +77,30 @@ func _al_completar_hoyo(golpes: int) -> void:
 	if int(estado.get("hoyo", 0)) == indice_antes:
 		Golf.terminar_hoyo(estado, jugador)
 
+	if not bool(estado.get("terminada", false)):
+		_resolver_turnos_companeros(indice_antes)
 	if bool(estado.get("terminada", false)):
 		_finalizar()
 		return
 	call_deferred("_abrir_hoyo", int(estado.get("hoyo", 0)))
+
+
+func _resolver_turnos_companeros(indice_hoyo: int) -> void:
+	while not bool(estado.get("terminada", false)):
+		var actual := Golf.jugador_actual(estado)
+		if actual.is_empty() or actual == JUGADOR:
+			return
+		var plan: Array = PLAN_COMPANEROS.get(actual, [])
+		var golpes := Golf.MAX_GOLPES_POR_HOYO
+		if indice_hoyo >= 0 and indice_hoyo < plan.size():
+			golpes = clampi(int(plan[indice_hoyo]), 1, Golf.MAX_GOLPES_POR_HOYO)
+		var hoyo_antes := int(estado.get("hoyo", 0))
+		for _i in range(golpes):
+			if int(estado.get("hoyo", 0)) != hoyo_antes:
+				break
+			Golf.golpear(estado, actual)
+		if int(estado.get("hoyo", 0)) == hoyo_antes:
+			Golf.terminar_hoyo(estado, actual)
 
 
 func _al_abandonar_hoyo() -> void:

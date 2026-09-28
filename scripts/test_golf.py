@@ -4,11 +4,13 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "godot" / "guion" / "golf.gd"
+PARTIDA = ROOT / "godot" / "guion" / "golf_partida_app.gd"
 
 
 class GolfTest(unittest.TestCase):
     def setUp(self):
         self.source = SOURCE.read_text(encoding="utf-8")
+        self.partida = PARTIDA.read_text(encoding="utf-8")
 
     def test_nucleo_standalone_de_tres_hoyos(self):
         self.assertIn("class_name Golf", self.source)
@@ -39,6 +41,20 @@ class GolfTest(unittest.TestCase):
         self.assertIn('return int(a["golpes"]) < int(b["golpes"])', self.source)
         self.assertIn('ganador = String(ranking[0]["jugador"])', self.source)
         self.assertIn('ganador = "empate"', self.source)
+
+    def test_partida_resuelve_tres_perfiles_de_companero_sin_rng(self):
+        self.assertIn(
+            'const LANZADORES := ["jugador", "prudente", "agresiva", "absurda"]',
+            self.partida,
+        )
+        for perfil in ("prudente", "agresiva", "absurda"):
+            self.assertIn(f'"{perfil}": [', self.partida)
+        self.assertIn("Golf.nueva(LANZADORES)", self.partida)
+        self.assertIn("func _resolver_turnos_companeros(", self.partida)
+        self.assertIn("Golf.golpear(estado, actual)", self.partida)
+        self.assertIn("Golf.terminar_hoyo(estado, actual)", self.partida)
+        for prohibido in ("RandomNumberGenerator", "randf(", "randi(", "Partida.", "RankingGolf"):
+            self.assertNotIn(prohibido, self.partida)
 
     def test_abandono_no_marca_partida_completa(self):
         self.assertIn('estado["abandonada"] = true', self.source)
