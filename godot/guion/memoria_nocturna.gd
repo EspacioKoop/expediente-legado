@@ -7,9 +7,7 @@ class_name MemoriaNocturna
 extends RefCounted
 
 
-static func analizar(
-	seleccion: Array, casos: Array, descubiertas: Array = []
-) -> Dictionary:
+static func analizar(seleccion: Array, casos: Array, descubiertas: Array = []) -> Dictionary:
 	var conteos := _conteos(seleccion)
 	var repeticiones := []
 	var folios_ordenados := conteos.keys()
@@ -60,9 +58,7 @@ static func _conteos(seleccion: Array) -> Dictionary:
 	return conteos
 
 
-static func _relaciones_conocidas(
-	conteos: Dictionary, casos: Array, descubiertas: Array
-) -> Array:
+static func _relaciones_conocidas(conteos: Dictionary, casos: Array, descubiertas: Array) -> Array:
 	var relaciones_por_clave := {}
 	for valor in casos:
 		if not valor is Dictionary:
