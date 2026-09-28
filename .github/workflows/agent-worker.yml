@@ -434,45 +434,23 @@ jobs:
           claim="CLAIM issue=#$ISSUE agent=Pool-$PROVIDER branch=$BRANCH files=$files goal=$goal lease=48h"
           cid="$(gh api -X POST "repos/$GITHUB_REPOSITORY/issues/182/comments" -f body="$claim" --jq .id)"
           gh api --paginate "repos/$GITHUB_REPOSITORY/issues/182/comments?per_page=100" \
-            --jq '.[]|[.id,(.body|@base64)]|@tsv' > /tmp/reservas.tsv
-
-          CLAIM_ID="$cid" BRANCH="$BRANCH" python3 - <<'PY'
-          import base64, os, re
-          mine_id=int(os.environ["CLAIM_ID"]); branch=os.environ["BRANCH"]; active={}; mine=None
-          claim_re=re.compile(r"^CLAIM\s+issue=#(\d+).*?\bbranch=([^\s]+).*?\bfiles=([^\s]+)",re.M)
-          release_re=re.compile(r"^RELEASE\s+issue=#(\d+)(?:.*?\bbranch=([^\s]+))?",re.M)
-          def overlap(a,b):
-              a=a.rstrip("/"); b=b.rstrip("/")
-              return a==b or a.startswith(b+"/") or b.startswith(a+"/")
-          for line in open("/tmp/reservas.tsv",encoding="utf-8"):
-              sid,encoded=line.rstrip("\n").split("\t",1)
-              comment_id=int(sid)
-              body=base64.b64decode(encoded).decode("utf-8","replace")
-              for match in release_re.finditer(body):
-                  issue,released_branch=match.groups()
-                  for key in list(active):
-                      if active[key][0]==issue and (not released_branch or released_branch==key):
-                          del active[key]
-              for match in claim_re.finditer(body):
-                  issue,claimed_branch,raw_files=match.groups()
-                  item=(issue,comment_id,raw_files.split(","))
-                  active[claimed_branch]=item
-                  if comment_id==mine_id:
-                      mine=item
-          if mine is None:
-              raise SystemExit("CLAIM perdido")
-          conflicts=[]
-          for claimed_branch,(issue,comment_id,files) in active.items():
-              if comment_id>=mine_id or claimed_branch==branch:
-                  continue
-              if any(overlap(a,b) for a in mine[2] for b in files):
-                  conflicts.append(claimed_branch)
-          out=open(os.environ["GITHUB_OUTPUT"],"a")
-          if conflicts:
-              out.write("reserved=false\nreason=solape:"+",".join(conflicts)+"\n")
-          else:
-              out.write("reserved=true\n")
-          PY
+            --jq '.[]|{id,created_at,body}' | jq -s '.' > /tmp/reservas.json
+          # Capa única de lectura de #182 (#1662): misma semántica que el barrido
+          # (lease, HEARTBEAT, PR_READY, RELEASE por rama) y sin parser propio aquí,
+          # que daba por vivos CLAIM no canónicos que nunca se liberan.
+          python3 scripts/reservas_registro.py conflictos \
+            --comments /tmp/reservas.json --claim-id "$cid" --issue "$ISSUE" --branch "$BRANCH" \
+            > /tmp/reserva.json
+          if [[ "$(jq -r '.mine_found' /tmp/reserva.json)" != true ]]; then
+            echo "CLAIM perdido" >&2
+            exit 1
+          fi
+          if [[ "$(jq '.conflicts | length' /tmp/reserva.json)" -gt 0 ]]; then
+            echo "reserved=false" >> "$GITHUB_OUTPUT"
+            echo "reason=solape:$(jq -r '[.conflicts[].branch] | join(",")' /tmp/reserva.json)" >> "$GITHUB_OUTPUT"
+          else
+            echo "reserved=true" >> "$GITHUB_OUTPUT"
+          fi
 
           if grep -q '^reserved=false$' "$GITHUB_OUTPUT"; then
             gh issue comment 182 --repo "$GITHUB_REPOSITORY" --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=colision-agent-pool" >/dev/null || true
