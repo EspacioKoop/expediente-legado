@@ -39,7 +39,9 @@ class SuenoFeedbackObjetivosTest(unittest.TestCase):
         )[0]
         self.assertIn('completados: Array = estado.get("completados", [])', bloque)
         self.assertIn("not _objetivo_puntuable(estado, objetivo_id)", bloque)
-        self.assertIn('_salida_guia = objetivo.get("pos", _entrada_guia)', bloque)
+        self.assertIn('_objetivos_variedad.get(objetivo_id)', bloque)
+        self.assertIn('controlador.punto_actual()', bloque)
+        self.assertIn('objetivo.get("guia_pos", objetivo.get("pos", _entrada_guia))', bloque)
 
     def test_recarga_no_remonta_la_ruta_sustituida(self):
         montaje = self.codigo.split("func _montar_objetivos_sueno()", 1)[1].split(
