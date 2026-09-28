@@ -54,7 +54,7 @@ func _reiniciar_temporizador_estres_entorno() -> void:
 
 
 func _al_intervalo_estres_entorno() -> void:
-	if partida.guardado_pendiente or _pantalla != null or _entrada != null:
+	if partida.guardado_pendiente or _pantalla != null or _entrada_vuelta_activa():
 		return
 	if is_instance_valid(_dialogo_actual):
 		return
@@ -80,7 +80,7 @@ func _al_intervalo_estres_entorno() -> void:
 
 func _abrir_vuelta() -> void:
 	super._abrir_vuelta()
-	if _entrada != null and _hud_prioridades != null:
+	if _entrada_vuelta_activa() and _hud_prioridades != null:
 		_hud_prioridades.visible = false
 
 
