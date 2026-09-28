@@ -289,6 +289,22 @@ class AgentPoolTest(unittest.TestCase):
         self.assertNotIn("\n  schedule:\n", autopilot)
         self.assertNotIn("\n  issues:\n", autopilot)
 
+    def test_worker_cancelado_libera_estado_sin_penalizar_slot(self):
+        worker = (ROOT / ".github" / "workflows" / "agent-worker.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("failure() || cancelled()", worker)
+        self.assertIn("JOB_STATUS: ${{ job.status }}", worker)
+        self.assertIn('if [[ "$JOB_STATUS" == cancelled ]]', worker)
+        self.assertIn("motivo=agent-pool-cancelado-sin-PR", worker)
+        self.assertIn("vuelve a cola sin penalizar al worker", worker)
+
+        cancel_block = worker.split('if [[ "$JOB_STATUS" == cancelled ]]', 1)[1].split(
+            'if [[ "${RESERVED:-}" != true && -z "$pr" ]]', 1
+        )[0]
+        self.assertNotIn("AGENT_POOL_WORKER_FAILURE", cancel_block)
+        self.assertNotIn("AGENT_POOL_SLOT_UNHEALTHY", cancel_block)
+
     def test_memoria_oidc_reconoce_worker_reusable_sin_abrir_dispatcher(self):
         memory = (ROOT / "infra" / "feedback-deno" / "agent_memory.ts").read_text(
             encoding="utf-8"
