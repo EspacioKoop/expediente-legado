@@ -14,6 +14,7 @@ Solo entran ROMs **propias**: código de este repositorio bajo `gbc/minijuegos/<
 | `croc_riders_98` | Croc Riders 98 | carreras; El Cairo → Giza | tienda de videojuegos | 45 | #95 #389 |
 | `aquiles_98` | MYRMIDON 98 | duelo de observación; leer guardia y talón vulnerable | tienda de videojuegos | 45 | #438 #442 |
 | `ryu_flow_98` | River of the Dragon | puzle de flujo; tres compuertas y cauce determinista | tienda de videojuegos | 45 | #440 #442 #542 #609 #622 #627 |
+| `webkeeper_98` | Kwaku, el guardameta | deportivo / portero arcade; tres partidos y amagos legibles | tienda de videojuegos | 45 | #748 #656 #442 |
 | `jali_98` | JALI 98 | puzle de luz y geometría; tres bandas de calado | tienda de videojuegos | 45 | #932 #916 #931 |
 | `vitral_98` | VITRAL 98 | puzle de composición y luz; cuatro piezas de vidrio/plomo | tienda de videojuegos | 45 | #932 #916 #931 |
 | `sarnath_98` | SARNATH 98 | memoria y orientación; tres rutas abstractas | tienda de videojuegos | 45 | #932 #916 #931 |
@@ -37,12 +38,11 @@ Contrapartes de vigilia de los sueños mitológicos (#435, #442). Permanecen fue
 | `ariadna_labertinto_98` | Ariadne, el hilo del laberinto | Minotauro | laberinto de archivo; ya existe su cartucho 3D en casa | #437 #512 |
 | `uruk_98` | URUK 98 | Gilgamesh | ciudad mínima y tablilla que reconstruir | #436 |
 | `hydra_loop_98` | HYDRA LOOP | Hidra | **fuente prototipo jugable**: cortar hace brotar dos cabezas; sellar un nodo exige haber leído dos cabezas suyas; tres niveles y handshake `$C100 = 0xA5` al romper el bucle | #439 #600 |
-| `webkeeper_98` | Kwaku, el guardameta | Anansi akan | **fuente prototipo jugable**: Kwaku, una araña-portero, disputa tres partidos breves; amagos legibles, telaraña de emergencia, reintento local y handshake solo al ganar la final | #748 #656 #442 |
 | `duat_98` | DUAT 98 | Duat | cámaras y contrapesos | #441 |
 
 `HYDRA LOOP` tiene ya fuente prototipo en `gbc/minijuegos/hydra_loop_98` (portada de `gbc/minijuegos/hydra_loop`) y se compila y prueba con PyBoy en el workflow GBC. Sigue fuera del runtime: `HidraVigilia` no lee todavía su handshake.
 
-`WEBKEEPER 98` abre el género **deportivo / portero arcade**. El debut pide 3 paradas de 6, el segundo partido 4 de 8 y la final 5 de 9. Los amagos cambian de destino visual antes del tiro con una ventana de reacción explícita; tras dos derrotas en el mismo partido se activa una ayuda que muestra directamente el destino real. Perder repite solo el encuentro actual. La ROM mantiene `$C100 == 0` durante arranque, derrotas y victorias parciales, y escribe `0xA5` únicamente al completar la final. Sigue `en_proyecto`: aún no se vende ni activa `anansi_akan` desde el runtime.
+`WEBKEEPER 98` abre el género **deportivo / portero arcade**. El debut pide 3 paradas de 6, el segundo partido 4 de 8 y la final 5 de 9. Los amagos cambian de destino visual antes del tiro con una ventana de reacción explícita; tras dos derrotas en el mismo partido se activa una ayuda que muestra directamente el destino real. Perder repite solo el encuentro actual. La ROM mantiene `$C100 == 0` durante arranque, derrotas y victorias parciales, y escribe `0xA5` únicamente al completar la final. Tras #748 entra en el build/runtime y en la tienda a 45; `Webkeeper98Vigilia`, montado desde el controller real de Anansi en casa, observa `WEBKEEPER98` y solo al leer esa marca registra `anansi_akan` con la fuente estable `rom:webkeeper_98`. Comprar, insertar o arrancar el cartucho no activa la semilla.
 
 `RYU FLOW` salió de esta lista tras #609/#622: su fuente RGBDS es reproducible, el core puede leer su memoria sin efectos laterales y el índice la incluye en el build de runtime. Se mantiene en la tienda, igual que las demás ROMs jugables no incluidas, para respetar el contrato de una sola ROM de serie. `RyuFlowVigilia`, montado desde la casa real, observa la cabecera `RYUFLOW98` y solo cuando `$C100 == 0xA5` registra `dragon_japones` mediante `SemillasOniricas`; el emulador y la consola siguen sin conocer ese handshake concreto.
 
@@ -52,7 +52,7 @@ Contrapartes de vigilia de los sueños mitológicos (#435, #442). Permanecen fue
 - **CI GBC:** `.github/workflows/gbc-fixtures.yml` puede compilar e inspeccionar también fuentes prototipo para demostrar que son reproducibles sin exponerlas al juego.
 - **Tienda:** `TiendaVideojuegos.catalogo()` vende las jugables con precio (`RomsPropias.a_la_venta()`).
 - **Consola:** la Portátil Color 98 y la consola de sobremesa muestran las `incluida`, las compradas y los IDs desbloqueados por sistemas externos (`RomsPropias.en_consola`), siempre que el artefacto exista en la build. La consola no conoce el motivo del desbloqueo.
-- **Sueños:** la fuente de semilla de una ROM es `RomsPropias.fuente_semilla(id)` (`rom:<id>`). El cartucho ARIADNA del Minotauro ya la usa. `RYU FLOW` consume ese mismo contrato desde `RyuFlowVigilia`; comprarla o arrancarla por sí solo no registra nada: hace falta resolver el cauce.
+- **Sueños:** la fuente de semilla de una ROM es `RomsPropias.fuente_semilla(id)` (`rom:<id>`). El cartucho ARIADNA del Minotauro ya la usa. `RYU FLOW` y `WEBKEEPER 98` consumen ese mismo contrato mediante fachadas sobre `SemillaRomVigilia`; comprar o arrancar un cartucho por sí solo no registra nada: hace falta completar su condición real de victoria.
 
 ## Añadir una ROM
 
