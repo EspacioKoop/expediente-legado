@@ -16,7 +16,7 @@ ROM = ROOT / "gbc" / "minijuegos" / "webkeeper_98" / "main.asm"
 README_ROM = ROOT / "gbc" / "minijuegos" / "webkeeper_98" / "README.md"
 DOCS = ROOT / "docs" / "roms-propias.md"
 PRUEBA_GODOT = "res://pruebas/pruebas_webkeeper_vigilia_748.gd"
-RESUMEN = re.compile(r"(\\d+) pasadas, 0 fallos")
+RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
 
 
 class WebkeeperRuntime748Test(unittest.TestCase):
