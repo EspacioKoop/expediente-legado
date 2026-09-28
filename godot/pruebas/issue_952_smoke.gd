@@ -17,6 +17,7 @@ func _ejecutar() -> void:
 	_probar_normalizacion()
 	_probar_entorno()
 	_probar_autocuidado_aviones()
+	_probar_resolucion()
 	_probar_persistencia_json()
 	print("issue_952: %d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos > 0 else 0)
@@ -117,6 +118,18 @@ func _probar_autocuidado_aviones() -> void:
 	Estres.aplicar(abandonada, "documento_sensible", 2.0)
 	AvionesPapelDescanso.finalizar(abandonada, {"abandonada": true})
 	_comprobar_cerca(Estres.valor(abandonada), 24.0, "abandonar no aplica autocuidado")
+
+
+func _probar_resolucion() -> void:
+	var jornada := {"dia": 5, "vuelta": 1, "fase": "sueño"}
+	Estres.aplicar(jornada, "documento_sensible", 2.0)
+	_comprobar_cerca(Estres.valor(jornada), 24.0, "la prueba parte de tensión visible")
+	_comprobar_cerca(
+		Estres.aplicar(jornada, "resolucion"),
+		-8.0,
+		"resolver un puzzle aplica la recuperación canónica",
+	)
+	_comprobar_cerca(Estres.valor(jornada), 16.0, "la resolución deja el nuevo valor persistido")
 
 
 func _probar_persistencia_json() -> void:
