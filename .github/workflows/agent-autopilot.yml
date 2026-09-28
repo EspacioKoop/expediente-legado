@@ -103,24 +103,15 @@ jobs:
           if [[ "$provider" == auto ]]; then
             if [[ " $labels " == *" agent:qwen "* ]]; then provider=qwen
             elif [[ " $labels " == *" agent:gemini "* ]]; then provider=gemini
-            elif [[ "$HAS_QWEN_ANY" == true ]]; then provider=qwen
-            elif [[ "$HAS_GEMINI" == true ]]; then provider=gemini
-            else
-              gh issue edit "$issue" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human >/dev/null
-              gh issue comment "$issue" --repo "$GITHUB_REPOSITORY" --body 'No hay ningún backend de agente configurado: OmniRoute privado, Qwen directo/fallbacks o Gemini.'
-              echo "run=false" >> "$GITHUB_OUTPUT"; exit 0
             fi
           fi
-          [[ "$provider" == qwen && "$HAS_QWEN_ANY" != true ]] && { gh issue edit "$issue" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human >/dev/null; echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
-          [[ "$provider" == gemini && "$HAS_GEMINI" != true ]] && { gh issue edit "$issue" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human >/dev/null; echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
 
           existing="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 100 --json body | jq -r --arg n "Refs #$issue" '[.[]|select(((.body//"")|split("\n")|index($n)) != null)]|length')"
           [[ "$existing" != 0 ]] && { echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
 
           echo "run=true" >> "$GITHUB_OUTPUT"
           echo "issue=$issue" >> "$GITHUB_OUTPUT"
-          echo "provider=$provider" >> "$GITHUB_OUTPUT"
-          echo "branch=agent/${provider}-${issue}-${GITHUB_RUN_ID}" >> "$GITHUB_OUTPUT"
+          echo "requested_provider=$provider" >> "$GITHUB_OUTPUT"
 
       - name: Checkout
         if: steps.select.outputs.run == 'true'
@@ -130,8 +121,52 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - id: route
+        name: Elegir proveedor con Kev
+        if: steps.select.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ steps.select.outputs.issue }}
+          REQUESTED_PROVIDER: ${{ steps.select.outputs.requested_provider }}
+          KEV_BASE_URL: ${{ vars.KEV_BASE_URL }}
+          KEV_MODEL: ${{ vars.KEV_MODEL || 'kev-latest' }}
+          KEV_ROUTER_MIN_CONFIDENCE: ${{ vars.KEV_ROUTER_MIN_CONFIDENCE || '0.45' }}
+          KEV_API_KEY: ${{ secrets.KEV_API_KEY }}
+        run: |
+          set -euo pipefail
+          gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json title,body,labels \
+            --jq '{title:.title,body:(.body//""),labels:[.labels[].name]}' \
+            > /tmp/kev-state.json
+
+          args=(--state-file /tmp/kev-state.json --requested-provider "$REQUESTED_PROVIDER")
+          [[ "$HAS_QWEN_ANY" == true ]] && args+=(--has-qwen)
+          [[ "$HAS_GEMINI" == true ]] && args+=(--has-gemini)
+
+          result="$(python3 scripts/kev_router.py "${args[@]}")"
+          provider="$(jq -r '.provider // empty' <<<"$result")"
+          source="$(jq -r '.source // "unknown"' <<<"$result")"
+          if [[ -z "$provider" ]]; then
+            requested="$(jq -r '.requested_provider // empty' <<<"$result")"
+            gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human >/dev/null
+            if [[ -n "$requested" ]]; then
+              message="El proveedor solicitado ($requested) no esta disponible con la configuracion actual."
+            else
+              message="No hay ningun backend de agente configurado: OmniRoute privado, Qwen directo/fallbacks o Gemini."
+            fi
+            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "$message"
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "source=$source" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "run=true" >> "$GITHUB_OUTPUT"
+          echo "provider=$provider" >> "$GITHUB_OUTPUT"
+          echo "source=$source" >> "$GITHUB_OUTPUT"
+          echo "branch=agent/${provider}-${ISSUE}-${GITHUB_RUN_ID}" >> "$GITHUB_OUTPUT"
+          echo "Kev router: provider=$provider source=$source"
+
       - name: Conectar a OmniRoute por Tailscale (OAuth)
-        if: steps.select.outputs.run == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_OMNIROUTE == 'true' && env.HAS_TS_OAUTH == 'true'
+        if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && env.HAS_OMNIROUTE == 'true' && env.HAS_TS_OAUTH == 'true'
         continue-on-error: true
         uses: tailscale/github-action@v4
         with:
@@ -140,7 +175,7 @@ jobs:
           tags: tag:github-autopilot
 
       - name: Conectar a OmniRoute por Tailscale (OIDC fallback)
-        if: steps.select.outputs.run == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_OMNIROUTE == 'true' && env.HAS_TS_OAUTH != 'true' && env.HAS_TS_OIDC == 'true'
+        if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && env.HAS_OMNIROUTE == 'true' && env.HAS_TS_OAUTH != 'true' && env.HAS_TS_OIDC == 'true'
         continue-on-error: true
         uses: tailscale/github-action@v4
         with:
@@ -150,7 +185,7 @@ jobs:
 
       - id: omniroute
         name: Comprobar OmniRoute privado
-        if: steps.select.outputs.run == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_OMNIROUTE == 'true'
+        if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && env.HAS_OMNIROUTE == 'true'
         continue-on-error: true
         env:
           OMNIROUTE_BASE_URL: ${{ vars.OMNIROUTE_BASE_URL }}
@@ -166,7 +201,7 @@ jobs:
 
       - id: qwen
         name: Configurar Qwen
-        if: steps.select.outputs.run == 'true' && steps.select.outputs.provider == 'qwen'
+        if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen'
         env:
           KEY: ${{ secrets.QWEN_API_KEY }}
         run: |
@@ -178,7 +213,7 @@ jobs:
           echo "model=qwen3-coder-plus" >> "$GITHUB_OUTPUT"
 
       - name: Contexto
-        if: steps.select.outputs.run == 'true'
+        if: steps.route.outputs.run == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           ISSUE: ${{ steps.select.outputs.issue }}
@@ -188,7 +223,7 @@ jobs:
             > .agent-task.md
 
       - name: Cargar memoria histórica de CI
-        if: steps.select.outputs.run == 'true'
+        if: steps.route.outputs.run == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -203,10 +238,10 @@ jobs:
           fi
 
       - name: Cargar Normas Platino, wiki y memoria
-        if: steps.select.outputs.run == 'true'
+        if: steps.route.outputs.run == 'true'
         env:
           ISSUE: ${{ steps.select.outputs.issue }}
-          PROVIDER: ${{ steps.select.outputs.provider }}
+          PROVIDER: ${{ steps.route.outputs.provider }}
           MEMORY_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
         run: |
           set -euo pipefail
@@ -220,6 +255,13 @@ jobs:
             mkdir -p .agent-wiki
             printf '%s\n' '# Wiki no disponible en esta ejecución' > .agent-wiki/README.md
           fi
+
+          python3 scripts/agent_context_pack.py \
+            --wiki-dir .agent-wiki \
+            --issue-file .agent-task.md \
+            --max-pages 8 \
+            --max-bytes 24000 \
+            --output .agent-context.md
 
           printf '%s\n' '{"ok":true,"memories":[]}' > .agent-memory.json
           if [[ -n "${MEMORY_URL:-}" ]]; then
@@ -241,7 +283,7 @@ jobs:
 
       - id: plan_omniroute
         name: Plan mediante OmniRoute
-        if: steps.select.outputs.run == 'true' && steps.select.outputs.provider == 'qwen' && steps.omniroute.outputs.ready == 'true'
+        if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.omniroute.outputs.ready == 'true'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
@@ -250,11 +292,11 @@ jobs:
           openai_model: ${{ vars.OMNIROUTE_MODEL }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":20},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Consulta .agent-wiki solo para contexto relevante. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integración y sus tests: files debe incluir TODAS las rutas que una implementación correcta podría necesitar. Si los comentarios recientes contienen AUTOPILOT_REPLAN, revisa explícitamente sus observed_paths y añádelas solo si son necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-context.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Usa .agent-context.md como contexto wiki seleccionado; consulta .agent-wiki solo si falta contexto imprescindible. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integración y sus tests: files debe incluir TODAS las rutas que una implementación correcta podría necesitar. Si los comentarios recientes contienen AUTOPILOT_REPLAN, revisa explícitamente sus observed_paths y añádelas solo si son necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
 
       - id: plan_qwen
         name: Plan Qwen (primario)
-        if: steps.select.outputs.run == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_QWEN == 'true' && steps.plan_omniroute.outcome != 'success'
+        if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && env.HAS_QWEN == 'true' && steps.plan_omniroute.outcome != 'success'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
@@ -263,11 +305,11 @@ jobs:
           openai_model: ${{ vars.QWEN_MODEL || steps.qwen.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":20},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Consulta .agent-wiki solo para contexto relevante. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integración y sus tests: files debe incluir TODAS las rutas que una implementación correcta podría necesitar. Si los comentarios recientes contienen AUTOPILOT_REPLAN, revisa explícitamente sus observed_paths y añádelas solo si son necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-context.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Usa .agent-context.md como contexto wiki seleccionado; consulta .agent-wiki solo si falta contexto imprescindible. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integración y sus tests: files debe incluir TODAS las rutas que una implementación correcta podría necesitar. Si los comentarios recientes contienen AUTOPILOT_REPLAN, revisa explícitamente sus observed_paths y añádelas solo si son necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
 
       - id: plan_qwen_fallback_1
         name: Plan Qwen (fallback 1)
-        if: steps.select.outputs.run == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_1 == 'true' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success'
+        if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_1 == 'true' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
@@ -276,11 +318,11 @@ jobs:
           openai_model: ${{ vars.QWEN_FALLBACK_1_MODEL || vars.QWEN_MODEL || steps.qwen.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":20},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Consulta .agent-wiki solo para contexto relevante. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integración y sus tests: files debe incluir TODAS las rutas que una implementación correcta podría necesitar. Si los comentarios recientes contienen AUTOPILOT_REPLAN, revisa explícitamente sus observed_paths y añádelas solo si son necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-context.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Usa .agent-context.md como contexto wiki seleccionado; consulta .agent-wiki solo si falta contexto imprescindible. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integración y sus tests: files debe incluir TODAS las rutas que una implementación correcta podría necesitar. Si los comentarios recientes contienen AUTOPILOT_REPLAN, revisa explícitamente sus observed_paths y añádelas solo si son necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
 
       - id: plan_qwen_fallback_2
         name: Plan Qwen (fallback 2)
-        if: steps.select.outputs.run == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_2 == 'true' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success' && steps.plan_qwen_fallback_1.outcome != 'success'
+        if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_2 == 'true' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success' && steps.plan_qwen_fallback_1.outcome != 'success'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
@@ -289,11 +331,11 @@ jobs:
           openai_model: ${{ vars.QWEN_FALLBACK_2_MODEL || vars.QWEN_MODEL || steps.qwen.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":20},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Consulta .agent-wiki solo para contexto relevante. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integración y sus tests: files debe incluir TODAS las rutas que una implementación correcta podría necesitar. Si los comentarios recientes contienen AUTOPILOT_REPLAN, revisa explícitamente sus observed_paths y añádelas solo si son necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-context.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Usa .agent-context.md como contexto wiki seleccionado; consulta .agent-wiki solo si falta contexto imprescindible. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integración y sus tests: files debe incluir TODAS las rutas que una implementación correcta podría necesitar. Si los comentarios recientes contienen AUTOPILOT_REPLAN, revisa explícitamente sus observed_paths y añádelas solo si son necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
 
       - id: plan_qwen_fallback_3
         name: Plan Qwen (fallback 3)
-        if: steps.select.outputs.run == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_3 == 'true' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success' && steps.plan_qwen_fallback_1.outcome != 'success' && steps.plan_qwen_fallback_2.outcome != 'success'
+        if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_3 == 'true' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success' && steps.plan_qwen_fallback_1.outcome != 'success' && steps.plan_qwen_fallback_2.outcome != 'success'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
@@ -302,11 +344,11 @@ jobs:
           openai_model: ${{ vars.QWEN_FALLBACK_3_MODEL || vars.QWEN_MODEL || steps.qwen.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":20},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Consulta .agent-wiki solo para contexto relevante. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integración y sus tests: files debe incluir TODAS las rutas que una implementación correcta podría necesitar. Si los comentarios recientes contienen AUTOPILOT_REPLAN, revisa explícitamente sus observed_paths y añádelas solo si son necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-context.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Usa .agent-context.md como contexto wiki seleccionado; consulta .agent-wiki solo si falta contexto imprescindible. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integración y sus tests: files debe incluir TODAS las rutas que una implementación correcta podría necesitar. Si los comentarios recientes contienen AUTOPILOT_REPLAN, revisa explícitamente sus observed_paths y añádelas solo si son necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
 
       - id: plan_qwen_fallback_4
         name: Plan Qwen (fallback 4)
-        if: steps.select.outputs.run == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_4 == 'true' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success' && steps.plan_qwen_fallback_1.outcome != 'success' && steps.plan_qwen_fallback_2.outcome != 'success' && steps.plan_qwen_fallback_3.outcome != 'success'
+        if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_4 == 'true' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success' && steps.plan_qwen_fallback_1.outcome != 'success' && steps.plan_qwen_fallback_2.outcome != 'success' && steps.plan_qwen_fallback_3.outcome != 'success'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
@@ -315,27 +357,27 @@ jobs:
           openai_model: ${{ vars.QWEN_FALLBACK_4_MODEL || vars.QWEN_MODEL || steps.qwen.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":20},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Consulta .agent-wiki solo para contexto relevante. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integración y sus tests: files debe incluir TODAS las rutas que una implementación correcta podría necesitar. Si los comentarios recientes contienen AUTOPILOT_REPLAN, revisa explícitamente sus observed_paths y añádelas solo si son necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-context.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Usa .agent-context.md como contexto wiki seleccionado; consulta .agent-wiki solo si falta contexto imprescindible. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integración y sus tests: files debe incluir TODAS las rutas que una implementación correcta podría necesitar. Si los comentarios recientes contienen AUTOPILOT_REPLAN, revisa explícitamente sus observed_paths y añádelas solo si son necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
 
       - id: plan_gemini
         name: Plan Gemini
-        if: steps.select.outputs.run == 'true' && steps.select.outputs.provider == 'gemini'
+        if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'gemini'
         uses: google-github-actions/run-gemini-cli@v0
         with:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":20},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Consulta .agent-wiki solo para contexto relevante. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integración y sus tests: files debe incluir TODAS las rutas que una implementación correcta podría necesitar. Si los comentarios recientes contienen AUTOPILOT_REPLAN, revisa explícitamente sus observed_paths y añádelas solo si son necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-context.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Usa .agent-context.md como contexto wiki seleccionado; consulta .agent-wiki solo si falta contexto imprescindible. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integración y sus tests: files debe incluir TODAS las rutas que una implementación correcta podría necesitar. Si los comentarios recientes contienen AUTOPILOT_REPLAN, revisa explícitamente sus observed_paths y añádelas solo si son necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
 
       - id: reserve
         name: Validar plan y reservar
-        if: steps.select.outputs.run == 'true'
+        if: steps.route.outputs.run == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           ISSUE: ${{ steps.select.outputs.issue }}
-          PROVIDER: ${{ steps.select.outputs.provider }}
-          BRANCH: ${{ steps.select.outputs.branch }}
+          PROVIDER: ${{ steps.route.outputs.provider }}
+          BRANCH: ${{ steps.route.outputs.branch }}
           SUMMARY: ${{ steps.plan_omniroute.outputs.summary || steps.plan_qwen.outputs.summary || steps.plan_qwen_fallback_1.outputs.summary || steps.plan_qwen_fallback_2.outputs.summary || steps.plan_qwen_fallback_3.outputs.summary || steps.plan_qwen_fallback_4.outputs.summary || steps.plan_gemini.outputs.summary }}
         run: |
           set -euo pipefail
@@ -410,14 +452,25 @@ jobs:
             gh issue comment "$ISSUE" --body "Agent autopilot detenido: $(grep '^reason=' "$GITHUB_OUTPUT"|cut -d= -f2-)" || true
           fi
 
-      - name: Afinar memoria por rutas reservadas
+      - name: Afinar contexto y memoria por rutas reservadas
         if: steps.reserve.outputs.reserved == 'true'
         env:
           ISSUE: ${{ steps.select.outputs.issue }}
-          PROVIDER: ${{ steps.select.outputs.provider }}
+          PROVIDER: ${{ steps.route.outputs.provider }}
           MEMORY_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
         run: |
           set -euo pipefail
+          mapfile -t files < <(jq -r '.files[]' .agent-plan.json)
+          args=()
+          for file in "${files[@]}"; do args+=(--path "$file"); done
+          python3 scripts/agent_context_pack.py \
+            --wiki-dir .agent-wiki \
+            --issue-file .agent-task.md \
+            "${args[@]}" \
+            --max-pages 8 \
+            --max-bytes 24000 \
+            --output .agent-context.md
+
           [[ -z "${MEMORY_URL:-}" ]] && exit 0
           base="${MEMORY_URL%/}"
           base="${base%/api/report}"
@@ -452,14 +505,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           ISSUE: ${{ steps.select.outputs.issue }}
-          BRANCH: ${{ steps.select.outputs.branch }}
+          BRANCH: ${{ steps.route.outputs.branch }}
         run: |
           git checkout -b "$BRANCH"
           gh issue edit "$ISSUE" --add-label agent:working --remove-label agent:needs-human >/dev/null 2>&1 || true
 
       - id: implement_omniroute
         name: Implementar mediante OmniRoute
-        if: steps.reserve.outputs.reserved == 'true' && steps.select.outputs.provider == 'qwen' && steps.omniroute.outputs.ready == 'true'
+        if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'qwen' && steps.omniroute.outputs.ready == 'true'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
@@ -468,11 +521,11 @@ jobs:
           openai_model: ${{ vars.OMNIROUTE_MODEL }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitió una ruta necesaria, no intentes saltarte el CLAIM: el orquestador detectará el desvío y replanificará. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-context.md, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; usa .agent-context.md como contexto wiki seleccionado y consulta .agent-wiki solo si falta contexto imprescindible. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitió una ruta necesaria, no intentes saltarte el CLAIM: el orquestador detectará el desvío y replanificará. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
 
       - id: implement_qwen
         name: Implementar con Qwen (primario)
-        if: steps.reserve.outputs.reserved == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_QWEN == 'true' && steps.implement_omniroute.outcome != 'success'
+        if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'qwen' && env.HAS_QWEN == 'true' && steps.implement_omniroute.outcome != 'success'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
@@ -481,11 +534,11 @@ jobs:
           openai_model: ${{ vars.QWEN_MODEL || steps.qwen.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitió una ruta necesaria, no intentes saltarte el CLAIM: el orquestador detectará el desvío y replanificará. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-context.md, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; usa .agent-context.md como contexto wiki seleccionado y consulta .agent-wiki solo si falta contexto imprescindible. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitió una ruta necesaria, no intentes saltarte el CLAIM: el orquestador detectará el desvío y replanificará. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
 
       - id: implement_qwen_fallback_1
         name: Implementar con Qwen (fallback 1)
-        if: steps.reserve.outputs.reserved == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_1 == 'true' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success'
+        if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_1 == 'true' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
@@ -494,11 +547,11 @@ jobs:
           openai_model: ${{ vars.QWEN_FALLBACK_1_MODEL || vars.QWEN_MODEL || steps.qwen.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitió una ruta necesaria, no intentes saltarte el CLAIM: el orquestador detectará el desvío y replanificará. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-context.md, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; usa .agent-context.md como contexto wiki seleccionado y consulta .agent-wiki solo si falta contexto imprescindible. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitió una ruta necesaria, no intentes saltarte el CLAIM: el orquestador detectará el desvío y replanificará. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
 
       - id: implement_qwen_fallback_2
         name: Implementar con Qwen (fallback 2)
-        if: steps.reserve.outputs.reserved == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_2 == 'true' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success' && steps.implement_qwen_fallback_1.outcome != 'success'
+        if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_2 == 'true' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success' && steps.implement_qwen_fallback_1.outcome != 'success'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
@@ -507,11 +560,11 @@ jobs:
           openai_model: ${{ vars.QWEN_FALLBACK_2_MODEL || vars.QWEN_MODEL || steps.qwen.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitió una ruta necesaria, no intentes saltarte el CLAIM: el orquestador detectará el desvío y replanificará. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-context.md, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; usa .agent-context.md como contexto wiki seleccionado y consulta .agent-wiki solo si falta contexto imprescindible. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitió una ruta necesaria, no intentes saltarte el CLAIM: el orquestador detectará el desvío y replanificará. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
 
       - id: implement_qwen_fallback_3
         name: Implementar con Qwen (fallback 3)
-        if: steps.reserve.outputs.reserved == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_3 == 'true' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success' && steps.implement_qwen_fallback_1.outcome != 'success' && steps.implement_qwen_fallback_2.outcome != 'success'
+        if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_3 == 'true' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success' && steps.implement_qwen_fallback_1.outcome != 'success' && steps.implement_qwen_fallback_2.outcome != 'success'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
@@ -520,11 +573,11 @@ jobs:
           openai_model: ${{ vars.QWEN_FALLBACK_3_MODEL || vars.QWEN_MODEL || steps.qwen.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitió una ruta necesaria, no intentes saltarte el CLAIM: el orquestador detectará el desvío y replanificará. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-context.md, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; usa .agent-context.md como contexto wiki seleccionado y consulta .agent-wiki solo si falta contexto imprescindible. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitió una ruta necesaria, no intentes saltarte el CLAIM: el orquestador detectará el desvío y replanificará. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
 
       - id: implement_qwen_fallback_4
         name: Implementar con Qwen (fallback 4)
-        if: steps.reserve.outputs.reserved == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_4 == 'true' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success' && steps.implement_qwen_fallback_1.outcome != 'success' && steps.implement_qwen_fallback_2.outcome != 'success' && steps.implement_qwen_fallback_3.outcome != 'success'
+        if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_4 == 'true' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success' && steps.implement_qwen_fallback_1.outcome != 'success' && steps.implement_qwen_fallback_2.outcome != 'success' && steps.implement_qwen_fallback_3.outcome != 'success'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
@@ -533,11 +586,11 @@ jobs:
           openai_model: ${{ vars.QWEN_FALLBACK_4_MODEL || vars.QWEN_MODEL || steps.qwen.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitió una ruta necesaria, no intentes saltarte el CLAIM: el orquestador detectará el desvío y replanificará. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-context.md, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; usa .agent-context.md como contexto wiki seleccionado y consulta .agent-wiki solo si falta contexto imprescindible. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitió una ruta necesaria, no intentes saltarte el CLAIM: el orquestador detectará el desvío y replanificará. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
 
       - id: implement_gemini
         name: Implementar con Gemini
-        if: steps.reserve.outputs.reserved == 'true' && steps.select.outputs.provider == 'gemini'
+        if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'gemini'
         continue-on-error: true
         uses: google-github-actions/run-gemini-cli@v0
         with:
@@ -545,7 +598,7 @@ jobs:
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"tools":{"core":["read_file","write_file","replace","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-plan.json, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitió una ruta necesaria, no intentes saltarte el CLAIM: el orquestador detectará el desvío y replanificará. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-plan.json, .agent-context.md, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; usa .agent-context.md como contexto wiki seleccionado y consulta .agent-wiki solo si falta contexto imprescindible. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitió una ruta necesaria, no intentes saltarte el CLAIM: el orquestador detectará el desvío y replanificará. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
 
       - id: claim_guard
         name: Normalizar cambios al CLAIM
@@ -572,8 +625,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           ISSUE: ${{ steps.select.outputs.issue }}
-          PROVIDER: ${{ steps.select.outputs.provider }}
-          BRANCH: ${{ steps.select.outputs.branch }}
+          PROVIDER: ${{ steps.route.outputs.provider }}
+          BRANCH: ${{ steps.route.outputs.branch }}
           MAX_REPLANS: '2'
         run: |
           set -euo pipefail
@@ -618,7 +671,7 @@ jobs:
         run: |
           set -euo pipefail
           cp .agent-plan.json /tmp/plan.json
-          rm -f .agent-task.md .agent-plan.json .agent-memory.json .agent-history.json .agent-platino-sha gha-creds-*.json
+          rm -f .agent-task.md .agent-plan.json .agent-context.md .agent-memory.json .agent-history.json .agent-platino-sha gha-creds-*.json
           rm -rf .agent-platino .agent-wiki .gemini .qwen gemini-artifacts qwen-artifacts
           git add -A
           git diff --cached --quiet && { echo "sin cambios"; exit 2; }
@@ -645,7 +698,7 @@ jobs:
         continue-on-error: true
         env:
           ISSUE: ${{ steps.select.outputs.issue }}
-          PROVIDER: ${{ steps.select.outputs.provider }}
+          PROVIDER: ${{ steps.route.outputs.provider }}
           MEMORY_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
           SUMMARY: ${{ steps.implement_omniroute.outputs.summary || steps.implement_qwen.outputs.summary || steps.implement_qwen_fallback_1.outputs.summary || steps.implement_qwen_fallback_2.outputs.summary || steps.implement_qwen_fallback_3.outputs.summary || steps.implement_qwen_fallback_4.outputs.summary || steps.implement_gemini.outputs.summary }}
         run: |
@@ -687,8 +740,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           ISSUE: ${{ steps.select.outputs.issue }}
-          PROVIDER: ${{ steps.select.outputs.provider }}
-          BRANCH: ${{ steps.select.outputs.branch }}
+          PROVIDER: ${{ steps.route.outputs.provider }}
+          BRANCH: ${{ steps.route.outputs.branch }}
         run: |
           set -euo pipefail
           git config user.name "agent-autopilot[bot]"
@@ -712,7 +765,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           ISSUE: ${{ steps.select.outputs.issue }}
-          BRANCH: ${{ steps.select.outputs.branch }}
+          BRANCH: ${{ steps.route.outputs.branch }}
           RESERVED: ${{ steps.reserve.outputs.reserved }}
         run: |
           gh issue edit "$ISSUE" --add-label agent:needs-human --remove-label agent:working >/dev/null 2>&1 || true
