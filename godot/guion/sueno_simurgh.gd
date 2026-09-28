@@ -130,7 +130,8 @@ func _montar_prototipo() -> void:
 
 func _montar_escritorio(capa: Node3D) -> void:
 	_crear_caja(capa, "Mesa", Vector3(12.0, 0.35, 8.0), Vector3(0.0, -0.20, 0.0), COLOR_SUELO)
-	_crear_caja(capa, "Pluma", Vector3(3.8, 0.10, 0.36), Vector3(0.0, 0.18, 0.2), COLOR_PLUMA)
+	var pluma := _crear_caja(capa, "Pluma", Vector3(3.8, 0.10, 0.36), Vector3(0.0, 0.18, 0.2), COLOR_PLUMA)
+	pluma.set_meta("ancla_equivalencia", ANCLA_PLUMA)
 	_crear_punto_cambio(
 		capa,
 		"pluma",
@@ -139,6 +140,7 @@ func _montar_escritorio(capa: Node3D) -> void:
 	)
 	var archivos := Node3D.new()
 	archivos.name = "Archivadores"
+	archivos.set_meta("ancla_equivalencia", ANCLA_ARCHIVOS)
 	capa.add_child(archivos)
 	for i in 4:
 		_crear_caja(
@@ -148,19 +150,21 @@ func _montar_escritorio(capa: Node3D) -> void:
 			Vector3(-3.2 + i * 2.1, 0.70, -2.0),
 			COLOR_ARCHIVO,
 		)
-	_crear_caja(capa, "Lampara", Vector3(2.4, 0.22, 2.4), Vector3(3.7, 3.2, -1.8), COLOR_LUZ)
+	var lampara := _crear_caja(capa, "Lampara", Vector3(2.4, 0.22, 2.4), Vector3(3.7, 3.2, -1.8), COLOR_LUZ)
+	lampara.set_meta("ancla_equivalencia", ANCLA_LAMPARA)
 	_crear_caja(capa, "Retorno", Vector3(1.4, 0.12, 1.4), Vector3(-4.7, 0.10, 2.8), COLOR_RETORNO)
 
 
 func _montar_monumental(capa: Node3D) -> void:
 	_crear_caja(capa, "Suelo", Vector3(24.0, 0.35, 18.0), Vector3(0.0, -0.20, 0.0), COLOR_SUELO)
-	_crear_caja(
+	var pasarela := _crear_caja(
 		capa,
 		"PasarelaPluma",
 		Vector3(11.0, 0.28, 1.15),
 		Vector3(0.0, 1.1, 0.2),
 		COLOR_PLUMA,
 	)
+	pasarela.set_meta("ancla_equivalencia", ANCLA_PLUMA)
 	_crear_punto_cambio(
 		capa,
 		"pasarela de pluma",
@@ -169,6 +173,7 @@ func _montar_monumental(capa: Node3D) -> void:
 	)
 	var cordillera := Node3D.new()
 	cordillera.name = "CordilleraArchivos"
+	cordillera.set_meta("ancla_equivalencia", ANCLA_ARCHIVOS)
 	capa.add_child(cordillera)
 	for i in 6:
 		_crear_caja(
@@ -180,6 +185,7 @@ func _montar_monumental(capa: Node3D) -> void:
 		)
 	var nido := Node3D.new()
 	nido.name = "NidoLuminaria"
+	nido.set_meta("ancla_equivalencia", ANCLA_LAMPARA)
 	nido.position = Vector3(3.7, 6.2, -1.8)
 	capa.add_child(nido)
 	for i in 7:
