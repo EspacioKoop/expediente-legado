@@ -84,7 +84,7 @@ class MenuGlobalTest(unittest.TestCase):
         self.assertIn("_historias.historial(estado)", self.menu)
         self.assertIn("_historias.presion_indecision(estado)", self.menu)
         self.assertIn("_texto_eleccion", self.menu)
-        self.assertIn("_historial_volver.grab_focus()", self.menu)
+        self.assertIn("_enfocar_primero(_panel_historial, _historial_volver)", self.menu)
 
     def test_parte_incidencias_es_una_superficie_del_mismo_menu(self):
         self.assertIn("ParteIncidenciasApp.new()", self.menu)
