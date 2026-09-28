@@ -463,10 +463,12 @@ func _actualizar_objetivo_puzzle_onirico(resultado: Dictionary) -> bool:
 		Estres.aplicar(jornada, "resolucion")
 		_tras_cambio_objetivo(estado, false)
 		return true
-	if (
-		resultado_estado == PuzzleOnirico.ESTADO_FALLADO
-		or resultado_estado == PuzzleOnirico.ESTADO_ABANDONADO
-	):
+	if resultado_estado == PuzzleOnirico.ESTADO_FALLADO:
+		if not SuenoObjetivos.fallar(estado, objetivo_id):
+			return false
+		Estres.aplicar(jornada, "fallo_critico")
+		return true
+	if resultado_estado == PuzzleOnirico.ESTADO_ABANDONADO:
 		return SuenoObjetivos.fallar(estado, objetivo_id)
 	return false
 
