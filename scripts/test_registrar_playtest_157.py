@@ -47,7 +47,7 @@ class RegistrarPlaytest157Test(unittest.TestCase):
         self.assertIn("build SHA: `abc123`", informe)
         self.assertIn("Mando USB", informe)
         self.assertIn("gate humano de #157: **CUMPLE**", informe)
-        self.assertIn("no simulan comprensión, gamefeel ni hardware físico", informe)
+        self.assertIn("no simulan comprensión, gamefeel ni hardware físico", " ".join(informe.split()))
 
     def test_incidencia_bloquea_y_queda_visible(self):
         informe = playtest.render_markdown(
