@@ -10,6 +10,7 @@ extends RefCounted
 const EventoOnline = preload("res://guion/red/evento_online.gd")
 const PresenciaDatos = preload("res://guion/red/presencia_datos.gd")
 const GhostDatos = preload("res://guion/red/ghost_datos.gd")
+const MinijuegoSesionDatos = preload("res://guion/red/minijuego_sesion_datos.gd")
 
 const MAX_PEERS := 8
 const MAX_MENSAJE_BYTES := 4096
@@ -262,6 +263,18 @@ func _validar_kind_publicado(peer: Dictionary, normalizado: Dictionary, ahora: i
 			else:
 				resultado["ok"] = true
 				resultado["event"] = validacion["event"]
+		"minigame_action":
+			var validacion := MinijuegoSesionDatos.validar_evento(normalizado, ahora)
+			if not validacion["ok"]:
+				resultado["reason"] = "invalid_minigame_action"
+			else:
+				var evento: Dictionary = validacion["event"]
+				var payload: Dictionary = evento["payload"]
+				if String(payload["room_id"]) != String(peer["room_id"]):
+					resultado["reason"] = "membership_mismatch"
+				else:
+					resultado["ok"] = true
+					resultado["event"] = evento
 	return resultado
 
 
