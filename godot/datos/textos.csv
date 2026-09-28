@@ -252,6 +252,8 @@ SELLO_DESPERTAR_REGLAMENTARIO_TITULO,Despertar reglamentario
 SELLO_DESPERTAR_REGLAMENTARIO_DESCRIPCION,Noche recorrida hasta su cierre ordinario sin despertar forzado.
 SELLO_PASILLO_EN_REGLA_TITULO,Pasillo en regla
 SELLO_PASILLO_EN_REGLA_DESCRIPCION,Actividad de bolos asentada en el registro interno del pasillo.
+SELLO_TRAYECTORIA_REGLAMENTARIA_TITULO,Trayectoria reglamentaria
+SELLO_TRAYECTORIA_REGLAMENTARIA_DESCRIPCION,Ronda de aviones de papel completada y asentada sin incidencia en el registro interno.
 SALIDA_CONFIRMAR_ACEPTAR,Salir
 SALIDA_CONFIRMAR_CANCELAR,Quedarse
 SALIDA_CONFIRMAR_OFICINA,¿Salir de la oficina?
