@@ -8,6 +8,8 @@ class_name DiaCicloLaboralApp
 extends Node
 
 signal reasignacion_solicitada
+signal vuelta_solicitada
+signal vuelta_terminada
 
 const SELLO_REINCORPORACION := "reincorporacion-administrativa"
 
@@ -69,7 +71,7 @@ func abrir_vuelta(jornada: Dictionary) -> void:
 
 	_entrada = load("res://escenas/cinematica.tscn").instantiate()
 	add_child(_entrada)
-	_entrada.terminada.connect(_cerrar_vuelta)
+	_entrada.terminada.connect(_notificar_vuelta_terminada)
 	var vistas := Cinematica.vistas_de(_partida.estado, EntradaCinematica.ID)
 	(
 		_entrada
@@ -145,7 +147,7 @@ func _confirmar_auditorias_nueva_vida(seleccion: Array) -> void:
 	if is_instance_valid(_auditorias_nueva_vida):
 		_auditorias_nueva_vida.queue_free()
 	_auditorias_nueva_vida = null
-	abrir_vuelta(_jornada)
+	vuelta_solicitada.emit()
 
 
 func _registrar_reincorporacion() -> Dictionary:
@@ -154,11 +156,19 @@ func _registrar_reincorporacion() -> Dictionary:
 	return Sellos.registrar_sello(_partida.estado, SELLO_REINCORPORACION)
 
 
-func _cerrar_vuelta() -> void:
-	if _entrada == null:
+func entrada_activa() -> bool:
+	return is_instance_valid(_entrada)
+
+
+func cerrar_vuelta() -> void:
+	if not entrada_activa():
 		return
 	_entrada.queue_free()
 	_entrada = null
 	_caminante.set_physics_process(true)
 	_hud.visible = true
 	_guardar.call("")
+
+
+func _notificar_vuelta_terminada() -> void:
+	vuelta_terminada.emit()
