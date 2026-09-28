@@ -18,6 +18,7 @@ def issue(
     *labels,
     created="2026-09-28T00:00:00Z",
     preferred=None,
+    comments=None,
 ):
     result = {
         "number": number,
@@ -26,6 +27,8 @@ def issue(
     }
     if preferred is not None:
         result["preferredProvider"] = preferred
+    if comments is not None:
+        result["comments"] = [{"body": body} for body in comments]
     return result
 
 
@@ -164,6 +167,56 @@ class AgentPoolTest(unittest.TestCase):
             },
         )
 
+    def test_evitar_worker_que_ya_fallo_planificando(self):
+        candidate = issue(
+            55,
+            "agent:auto",
+            preferred="gemini",
+            comments=[
+                "AGENT_POOL_WORKER_FAILURE worker=gemini provider=gemini stage=plan run=1"
+            ],
+        )
+
+        tasks = mod.select_tasks([candidate], self.workers)
+
+        self.assertEqual("qwen-primary", tasks[0]["worker"])
+        self.assertEqual("qwen", tasks[0]["provider"])
+
+    def test_retry_reset_permite_reutilizar_worker(self):
+        candidate = issue(
+            56,
+            "agent:auto",
+            preferred="gemini",
+            comments=[
+                "AGENT_POOL_WORKER_FAILURE worker=gemini provider=gemini stage=plan run=1",
+                "AGENT_POOL_RETRY_RESET motivo=cuota-recuperada",
+            ],
+        )
+
+        tasks = mod.select_tasks([candidate], self.workers)
+
+        self.assertEqual("gemini", tasks[0]["worker"])
+
+    def test_provider_explicito_evade_worker_fallido_del_mismo_provider(self):
+        workers = [
+            {"worker": "qwen-primary", "provider": "qwen"},
+            {"worker": "qwen-fallback-1", "provider": "qwen"},
+        ]
+        candidate = issue(
+            57,
+            "agent:qwen",
+            comments=[
+                "AGENT_POOL_WORKER_FAILURE worker=qwen-primary provider=qwen stage=plan run=1"
+            ],
+        )
+
+        tasks = mod.select_tasks([candidate], workers)
+
+        self.assertEqual(
+            [{"issue": 57, "provider": "qwen", "worker": "qwen-fallback-1"}],
+            tasks,
+        )
+
     def test_capacidad_provider_no_se_sobreasigna(self):
         workers = [{"worker": "gemini", "provider": "gemini"}]
         issues = [
@@ -182,7 +235,7 @@ class AgentPoolTest(unittest.TestCase):
         ]
         self.assertEqual(6, len(mod.select_tasks(issues, workers, max_parallel=99)))
 
-    def test_workflows_comparten_cola_y_kev(self):
+    def test_workflows_comparten_cola_y_failover(self):
         pool = (ROOT / ".github" / "workflows" / "agent-pool.yml").read_text(
             encoding="utf-8"
         )
@@ -199,6 +252,9 @@ class AgentPoolTest(unittest.TestCase):
 
         self.assertIn("python3 scripts/kev_router.py", pool)
         self.assertIn("preferredProvider", pool)
+        self.assertIn("--json comments", pool)
+        self.assertIn("AGENT_POOL_WORKER_FAILURE", worker)
+        self.assertIn('maxSessionTurns":40', worker)
         self.assertIn("tailscale/github-action@v4", worker)
         self.assertIn("steps.omniroute.outputs.ready", worker)
         self.assertNotIn("\n  schedule:\n", autopilot)
