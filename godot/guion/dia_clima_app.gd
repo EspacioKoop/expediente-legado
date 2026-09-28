@@ -266,19 +266,20 @@ func _conversar_con_dependiente(
 			return
 
 		var dependiente := DependientesTiendas.de(id_dependiente)
-		var modelo_opciones := DialogoDependientesContextual.opciones(
-			dependiente, jornada, clima
-		)
+		var modelo_opciones := DialogoDependientesContextual.opciones(dependiente, jornada, clima)
 		var opciones := []
 		for opcion_bruta in modelo_opciones:
 			if typeof(opcion_bruta) != TYPE_DICTIONARY:
 				continue
 			var opcion: Dictionary = opcion_bruta
-			opciones.append(
-				{
-					"id": String(opcion.get("id", "")),
-					"texto": tr(String(opcion.get("texto", ""))),
-				}
+			(
+				opciones
+				. append(
+					{
+						"id": String(opcion.get("id", "")),
+						"texto": tr(String(opcion.get("texto", ""))),
+					}
+				)
 			)
 		if opciones.size() >= 2:
 			var apertura := DependientesTiendas3D.siguiente_frase(charla, jornada, clima)
