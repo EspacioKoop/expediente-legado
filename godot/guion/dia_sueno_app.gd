@@ -52,7 +52,21 @@ func _espacio_de(fase: String) -> Dictionary:
 	var nivel_horror := HorrorTexturas.nivel_para_noche(
 		total_escenas, jornada["sueno_escenas"].size(), espacio
 	)
-	return HorrorTexturas.aplicar(espacio, id, nivel_horror)
+	espacio = HorrorTexturas.aplicar(espacio, id, nivel_horror)
+
+	# #162: la selección nocturna ya decidió la semilla. Aquí solo vuelve visible
+	# su semántica segura: repetición y relaciones YA descubiertas alteran luz y
+	# ambiente sin tocar geometría, salidas, contenido ni progreso.
+	var seleccion: Array = jornada.get("seleccion_nocturna", [])
+	var memoria := (
+		MemoriaNocturna
+		. analizar(
+			seleccion,
+			contenido.casos,
+			partida.estado.get("pistas_descubiertas", []),
+		)
+	)
+	return MemoriaNocturnaPresentacion.aplicar(espacio, seleccion, memoria)
 
 
 ## Las presentaciones específicas se montan DESPUÉS del espacio jugable. Así la
