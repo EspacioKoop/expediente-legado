@@ -11,6 +11,7 @@ from scripts.godot_pruebas import importar_proyecto
 ROOT = Path(__file__).resolve().parents[1]
 SONIDO = ROOT / "godot" / "guion" / "sonido.gd"
 DIA = ROOT / "godot" / "guion" / "dia_app.gd"
+PRESENTACION = ROOT / "godot" / "guion" / "dia_presentacion_app.gd"
 PROCEDENCIA = ROOT / "godot" / "assets" / "procedencia.json"
 PRUEBA_GODOT = "pruebas/pruebas_pasos_superficie.gd"
 RESUMEN_GODOT = re.compile(r"(\d+) pasadas, 0 fallos")
@@ -36,8 +37,11 @@ class PasosSuperficieTest(unittest.TestCase):
         self.assertNotIn("FRECUENCIA_IMPACTO", texto)
 
     def test_dia_elige_el_suelo_pisado(self):
-        texto = DIA.read_text(encoding="utf-8")
-        self.assertIn("Sonido.paso_sobre(_suelo_pisado())", texto)
+        dia = DIA.read_text(encoding="utf-8")
+        presentacion = PRESENTACION.read_text(encoding="utf-8")
+        self.assertIn("_presentacion_app.andar(delta, _pantalla != null, _suelo_pisado())", dia)
+        self.assertIn("Sonido.paso_sobre(suelo)", presentacion)
+        self.assertIn("DiaPresentacionApp.suelo_pisado(jornada, _espacio_actual)", dia)
 
     def test_pasos_en_godot_headless(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
