@@ -98,6 +98,62 @@ class AgentDecomposeTest(unittest.TestCase):
                 )
             )
 
+    def test_acepta_hasta_seis_subtareas(self):
+        subtasks = []
+        for index in range(6):
+            subtasks.append(
+                {
+                    "title": f"Corte seguro {index}",
+                    "goal": "Objetivo pequeño, independiente y verificable.",
+                    "files": [f"scripts/corte_{index}.py"],
+                    "depends_on": [],
+                }
+            )
+        result = mod.parse_decomposition(
+            wrap({"fits_single_cut": False, "subtasks": subtasks})
+        )
+        self.assertEqual(6, len(result["subtasks"]))
+
+    def test_rechaza_mas_de_seis_subtareas(self):
+        subtasks = []
+        for index in range(7):
+            subtasks.append(
+                {
+                    "title": f"Corte seguro {index}",
+                    "goal": "Objetivo pequeño, independiente y verificable.",
+                    "files": [f"scripts/corte_{index}.py"],
+                    "depends_on": [],
+                }
+            )
+        with self.assertRaisesRegex(ValueError, "entre 2 y 6"):
+            mod.parse_decomposition(
+                wrap({"fits_single_cut": False, "subtasks": subtasks})
+            )
+
+    def test_rechaza_mas_de_ocho_rutas_por_corte(self):
+        with self.assertRaisesRegex(ValueError, "entre 1 y 8"):
+            mod.parse_decomposition(
+                wrap(
+                    {
+                        "fits_single_cut": False,
+                        "subtasks": [
+                            {
+                                "title": "Corte demasiado ancho",
+                                "goal": "Este corte intenta abarcar demasiadas rutas.",
+                                "files": [f"scripts/f_{i}.py" for i in range(9)],
+                                "depends_on": [],
+                            },
+                            {
+                                "title": "Segundo corte seguro",
+                                "goal": "Segundo corte requerido por el contrato.",
+                                "files": ["scripts/segundo.py"],
+                                "depends_on": [],
+                            },
+                        ],
+                    }
+                )
+            )
+
     def test_workflow_tiene_presupuesto_duro_y_no_cierra_padre(self):
         workflow = (
             ROOT / ".github" / "workflows" / "agent-decompose.yml"
@@ -105,6 +161,8 @@ class AgentDecomposeTest(unittest.TestCase):
         self.assertIn('maxSessionTurns":8', workflow)
         self.assertIn("timeout-minutes: 5", workflow)
         self.assertIn("continue-on-error: true", workflow)
+        self.assertIn("crea entre 2 y 6 subtareas pequeñas", workflow)
+        self.assertIn("files concretos (max 8)", workflow)
         self.assertIn("agent:decomposed", workflow)
         self.assertNotIn('gh issue close "$ISSUE"', workflow)
 
