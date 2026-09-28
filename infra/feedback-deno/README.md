@@ -15,7 +15,7 @@ pública. `GITHUB_TOKEN` vive como secret del servicio.
 
 El servicio:
 
-- acepta POST únicamente en `/api/report`;
+- el endpoint público de juego acepta POST únicamente en `/api/report`; las APIs de agentes son privadas y exigen OIDC de GitHub Actions;
 - exige `schema: 1` y `source: siga98-f9`;
 - limita el cuerpo a 24 KiB comprobando también los bytes realmente recibidos;
 - limita a 6 reportes/minuto por origen y 30/minuto global mediante Deno KV;
@@ -41,6 +41,21 @@ La memoria es deliberadamente pequeña: TTL de 30 días, hasta 1200 caracteres p
 El repositorio, los issues, #181/#182, CI y las Normas Platino siguen siendo la fuente de verdad. La wiki es memoria consolidada en solo lectura; Deno KV es únicamente memoria operativa transitoria.
 
 No hace falta crear otro secret en GitHub ni en Deno. La única dependencia adicional del runtime es acceso saliente a `token.actions.githubusercontent.com` para validar los tokens OIDC.
+
+## Control-plane de la pool de agentes
+
+El mismo KV coordina la exclusión por issue de la pool mediante endpoints privados:
+
+- `POST /api/agent-pool/acquire`: crea un lease atómico si el issue está libre;
+- `POST /api/agent-pool/transition`: renueva el TTL y registra la fase;
+- `POST /api/agent-pool/release`: libera el lease del run propietario;
+- `POST /api/agent-pool/status`: permite al dispatcher excluir leases activos.
+
+Usa una audiencia OIDC separada, `siga98-agent-pool`. El dispatcher `agent-pool.yml` solo puede consultar estado; `agent-worker.yml` puede adquirir, renovar y liberar. Cuando el worker se ejecuta como reusable workflow se valida además la pareja `workflow_ref=agent-pool.yml` + `job_workflow_ref=agent-worker.yml`.
+
+Cada lease dura **30 minutos** y se renueva por fase. Las transiciones y los leases se escriben con `Deno.Kv.atomic().check(...)`, evitando dos adquisiciones simultáneas. Los eventos compactos de transición se conservan 7 días para poder medir el embudo real sin usar un workflow verde como proxy de éxito.
+
+Durante el primer corte (#1728) los workflows son deliberadamente fail-open si el gateway no está disponible: siguen usando `concurrency`, labels y CLAIM/RELEASE. Un `409 leased` sí bloquea el worker duplicado. Esto permite validar el control-plane antes de retirar coordinación histórica.
 
 ## Despliegue
 
@@ -95,7 +110,7 @@ autenticación en el keyring del sistema.
 ### Redeploy tras cambiar el gateway
 
 `feedback-deno.yml` solo comprueba formato y tipos: **no despliega**. Tras
-integrar en `main` cualquier cambio de `main.ts` o `agent_memory.ts`, vuelve a
+integrar en `main` cualquier cambio de `main.ts`, `agent_memory.ts` o `agent_pool_state.ts`, vuelve a
 desplegar con `--prod` y compara el `/health` de producción con el de
 `main.ts`. Si no coinciden, producción sigue sirviendo una versión antigua; así
 se produjo el 404 de `/api/agent-memory/search` de #1606, con producción aún en
@@ -113,10 +128,11 @@ Debe responder con:
 {
   "ok": true,
   "service": "siga98-feedback-deno",
-  "version": 2,
+  "version": 3,
   "github_configured": true,
   "kv_configured": true,
-  "agent_memory": true
+  "agent_memory": true,
+  "agent_pool_control": true
 }
 ```
 
