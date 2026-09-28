@@ -78,6 +78,49 @@ func _probar() -> void:
 		"el metadato visual solo registra cantidad de relaciones",
 	)
 
+	var reglas_contradiccion := [
+		{
+			"id": "revision-vs-acta",
+			"caso_id": "caso-1",
+			"registros": ["R-1", "R-2"],
+			"pistas_requeridas": ["P-1", "P-12"],
+		},
+	]
+	var contradiccion_analisis := MemoriaNocturna.analizar(
+		["F-1", "F-2"], casos, ["P-1", "P-12"], reglas_contradiccion
+	)
+	var contradiccion := MemoriaNocturnaPresentacion.aplicar(
+		base, ["F-1", "F-2"], contradiccion_analisis
+	)
+	_comprobar(
+		contradiccion["luces"][1]["color"] == MemoriaNocturnaPresentacion.COLOR_CONTRADICCION_A,
+		"el primer documento contradictorio recibe el primer acento de tensión",
+	)
+	_comprobar(
+		contradiccion["luces"][2]["color"] == MemoriaNocturnaPresentacion.COLOR_CONTRADICCION_B,
+		"el segundo documento contradictorio recibe el acento opuesto",
+	)
+	_comprobar(
+		not is_equal_approx(
+			contradiccion["luces"][1]["energia"], contradiccion["luces"][2]["energia"]
+		),
+		"la contradicción crea una asimetría determinista sin animación parpadeante",
+	)
+	_comprobar(
+		not is_equal_approx(
+			contradiccion["luces"][1]["alcance"], contradiccion["luces"][2]["alcance"]
+		),
+		"la tensión también se expresa en halos distintos",
+	)
+	_comprobar(
+		contradiccion["memoria_nocturna_visual"]["contradicciones"] == 1,
+		"el metadato visual registra la contradicción sin copiar su contenido",
+	)
+	_comprobar(
+		contradiccion["planta"] == base["planta"] and contradiccion["salidas"] == base["salidas"],
+		"la contradicción no cambia navegación ni salida",
+	)
+
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 
@@ -97,7 +140,12 @@ func _caso() -> Dictionary:
 				"registroOrigen": "R-1",
 				"registroOrigen2": "R-2",
 				"descripcion": "No debe llegar a la presentación",
-			}
+			},
+			{
+				"id": "P-1",
+				"registroOrigen": "R-1",
+				"descripcion": "Hecho conocido que habilita la contradicción",
+			},
 		],
 	}
 
