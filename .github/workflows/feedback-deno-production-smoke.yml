@@ -1,0 +1,55 @@
+name: Deno production freshness
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'infra/feedback-deno/**'
+      - 'scripts/check_deno_production.py'
+      - '.github/workflows/feedback-deno-production-smoke.yml'
+  schedule:
+    - cron: '23 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deno-production-freshness
+  cancel-in-progress: true
+
+jobs:
+  freshness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      PROD_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Comprobar configuración
+        run: |
+          set -euo pipefail
+          [[ -n "${PROD_URL:-}" ]] || {
+            echo "::error::Falta vars.SIGA98_FEEDBACK_FALLBACK_URL"
+            exit 2
+          }
+
+      - name: Consultar health de producción
+        run: |
+          set -euo pipefail
+          base="${PROD_URL%/}"
+          base="${base%/api/report}"
+          curl --fail --silent --show-error --max-time 15 \
+            --retry 2 --retry-delay 2 \
+            "$base/health" -o /tmp/deno-production-health.json
+          cat /tmp/deno-production-health.json
+
+      - name: Comparar producción con main
+        run: |
+          python3 scripts/check_deno_production.py \
+            --source infra/feedback-deno/main.ts \
+            --health-json /tmp/deno-production-health.json
