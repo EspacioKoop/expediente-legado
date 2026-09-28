@@ -118,9 +118,7 @@ func _probar_ocho_objetos_desde_productores_reales() -> void:
 	]
 	for compra in compras:
 		var item_id := String(compra[1])
-		var resultado := ComercioBarrio.comprar(
-			jornada, inventario, String(compra[0]), item_id
-		)
+		var resultado := ComercioBarrio.comprar(jornada, inventario, String(compra[0]), item_id)
 		_comprobar(bool(resultado.get("ok", false)), "compra real %s en #676" % item_id)
 		if String(resultado.get("destino", "")) == "carried":
 			_comprobar(
@@ -128,9 +126,7 @@ func _probar_ocho_objetos_desde_productores_reales() -> void:
 				"mueve %s de #676 a home_storage" % item_id
 			)
 
-	var postal := CorreoPostal.recoger(
-		jornada, inventario, "paquete_calendario_magnetico"
-	)
+	var postal := CorreoPostal.recoger(jornada, inventario, "paquete_calendario_magnetico")
 	_comprobar(bool(postal.get("ok", false)), "recoge el calendario real de #672")
 	_comprobar(
 		Inventario.guardar_en_casa(inventario, CasaAcumulacion.ID_IMAN_CALENDARIO),
