@@ -16,11 +16,19 @@ def checkout_block(text: str) -> str:
 
 
 class AgentWorkerLfsTest(unittest.TestCase):
-    def test_worker_materializa_lfs_igual_que_ci_canonico(self):
-        worker = checkout_block(WORKER.read_text(encoding="utf-8"))
-        canonical = checkout_block(CI.read_text(encoding="utf-8"))
-        self.assertIn("lfs: true", canonical)
+    def test_worker_y_ci_completo_materializan_lfs(self):
+        worker_text = WORKER.read_text(encoding="utf-8")
+        ci_text = CI.read_text(encoding="utf-8")
+        worker = checkout_block(worker_text)
+
+        # El worker siempre necesita los assets del repo al implementar.
         self.assertIn("lfs: true", worker)
+
+        # El CI canónico difiere la descarga hasta saber si el diff requiere
+        # el recorrido completo; el fast-path no debe pagar ese coste.
+        self.assertIn("name: Materializar LFS para CI completo", ci_text)
+        self.assertIn("if: steps.scope.outputs.mode == 'full'", ci_text)
+        self.assertIn("git lfs pull", ci_text)
 
     def test_worker_conserva_checkout_de_main_y_sin_credencial_persistente(self):
         worker = checkout_block(WORKER.read_text(encoding="utf-8"))
