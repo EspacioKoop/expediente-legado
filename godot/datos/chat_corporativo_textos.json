@@ -1,0 +1,18 @@
+{
+  "titulo_app": "Mensajería interna",
+  "canales": "Canales",
+  "presencia": "Presencia",
+  "sin_canales": "No hay canales disponibles en esta fase.",
+  "sin_mensajes": "No hay mensajes alcanzados en este canal.",
+  "seleccionar": "Selecciona un mensaje.",
+  "hora": "Hora narrativa: %s",
+  "tipo_sistema": "SISTEMA",
+  "tipo_presencia": "PRESENCIA",
+  "estado_conectado": "conectado",
+  "estado_ausente": "ausente",
+  "estado_desconectado": "desconectado",
+  "abrir_web98": "Abrir en Web98",
+  "responder": "Responder",
+  "respuesta_elegida": "Tu respuesta: %s",
+  "contestacion": "Contestación: %s"
+}
