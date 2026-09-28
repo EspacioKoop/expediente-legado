@@ -114,7 +114,20 @@ class AgentDecomposeTest(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertIn("agent-depends-on:", workflow)
         self.assertIn('[[ "$state" != CLOSED ]]', workflow)
-        self.assertIn("--remove-label agent:blocked --add-label agent:auto", workflow)
+        self.assertIn('queue_label=agent:auto', workflow)
+        self.assertIn('queue_label=agent:qwen', workflow)
+        self.assertIn('queue_label=agent:gemini', workflow)
+        self.assertIn('--remove-label agent:blocked --add-label "$queue_label"', workflow)
+        self.assertIn("agent-provider:", workflow)
+
+    def test_decompose_saca_padre_de_cola_mientras_planifica(self):
+        workflow = (
+            ROOT / ".github" / "workflows" / "agent-decompose.yml"
+        ).read_text(encoding="utf-8")
+        for label in ("agent:auto", "agent:pool", "agent:qwen", "agent:gemini"):
+            self.assertIn(f'--remove-label "$label"', workflow)
+        self.assertIn("requested_provider", workflow)
+        self.assertIn("agent-provider:", workflow)
 
     def test_ruta_protegida_se_rechaza(self):
         with self.assertRaisesRegex(ValueError, "insegura"):
