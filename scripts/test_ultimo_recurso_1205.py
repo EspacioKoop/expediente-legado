@@ -6,6 +6,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ACUSACION = (ROOT / "godot/guion/acusacion.gd").read_text(encoding="utf-8")
 PARTIDA = (ROOT / "godot/guion/partida.gd").read_text(encoding="utf-8")
 DIA = (ROOT / "godot/guion/dia_app.gd").read_text(encoding="utf-8")
+CICLO = (ROOT / "godot/guion/dia_ciclo_laboral_app.gd").read_text(encoding="utf-8")
 VISOR = (ROOT / "godot/guion/visor_sello_app.gd").read_text(encoding="utf-8")
 UI = (ROOT / "godot/guion/ultimo_recurso_app.gd").read_text(encoding="utf-8")
 PROMETEO = (ROOT / "godot/guion/prometeo.gd").read_text(encoding="utf-8")
@@ -87,9 +88,10 @@ class UltimoRecurso1205Test(unittest.TestCase):
         self.assertNotIn("aceptar_cese", UI)
 
     def test_recarga_y_visor_recuperan_la_misma_decision(self) -> None:
-        ready = bloque(DIA, "func _ready()", "## Recupera o presenta")
-        self.assertIn("Acusacion.despido_pendiente(partida.estado)", ready)
-        self.assertIn("_abrir_ultimo_recurso_pendiente()", ready)
+        ready = bloque(DIA, "func _ready()", "## Luz y ambiente.")
+        self.assertIn("_ciclo_laboral.abrir_ultimo_recurso_pendiente(jornada)", ready)
+        self.assertIn("Acusacion.despido_pendiente(_partida.estado)", CICLO)
+        self.assertIn("func abrir_ultimo_recurso_pendiente(jornada: Dictionary)", CICLO)
 
         sello = bloque(
             VISOR,
