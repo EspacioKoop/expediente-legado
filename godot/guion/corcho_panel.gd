@@ -58,6 +58,8 @@ var _detalle_resumen: RichTextLabel
 func configurar(jornada: Dictionary, conceptos: Dictionary) -> void:
 	_jornada = jornada
 	_conceptos = conceptos
+	# La semántica accesible no debe depender de haber entrado ya al árbol.
+	accessibility_name = tr(TITULO)
 	_montar()
 	_montar_fichas()
 
