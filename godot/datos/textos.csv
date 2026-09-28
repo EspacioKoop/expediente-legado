@@ -349,6 +349,20 @@ VENTANILLA_NO_ATENDIDA,RECLAMACIÓN NO ATENDIDA. La racha vuelve a cero.
 VENTANILLA_SE_PRESENTA,%s se presenta en el mostrador.
 VENTANILLA_SIGUIENTE,Llamar al siguiente turno
 VENTANILLA_TITULO,SIGA-98  —  VENTANILLA DE RECLAMACIONES
+VENTANILLA_COOP_ABRIR,Cooperativo (experimental)
+VENTANILLA_COOP_TITULO,VENTANILLA COOPERATIVA · EXPERIMENTO
+VENTANILLA_COOP_ACTIVAR,Activar funciones online para este perfil
+VENTANILLA_COOP_DESACTIVADO,El cooperativo está desactivado. Activarlo crea únicamente un pseudónimo local.
+VENTANILLA_COOP_IDENTIDAD_ERROR,No se pudo preparar la identidad online.
+VENTANILLA_COOP_SIN_SERVICIO,No hay relay cooperativo configurado en esta build.
+VENTANILLA_COOP_LISTO,Introduce el mismo código de sala en ambos equipos. Entrar no modifica la campaña.
+VENTANILLA_COOP_SALA,Sala:
+VENTANILLA_COOP_SALA_EJEMPLO,SALA-98
+VENTANILLA_COOP_SALA_INVALIDA,"El código solo admite letras, números, guion y guion bajo."
+VENTANILLA_COOP_ENTRAR,Entrar
+VENTANILLA_COOP_CERRAR,Salir de la sala
+VENTANILLA_COOP_ERROR_RED,No se pudo abrir la sala. La Ventanilla normal sigue disponible.
+VENTANILLA_COOP_EN_SALA,Conectando a la sala %s · sin efectos sobre la campaña.
 VENTANILLA_SALIR,Salir a la calle
 VEREDICTO_EMPATE,ninguno cede
 VEREDICTO_JUGADOR,se impone su objeción
