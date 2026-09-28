@@ -271,13 +271,15 @@ func _probar() -> void:
 	_comprobar(raiz_sueno.get_child_count() == 3, "el sueño materializa solo tres ecos")
 	for hijo in raiz_sueno.get_children():
 		_comprobar(hijo is MeshInstance3D, "cada eco sigue siendo una malla barata")
+		var origen := String(hijo.get_meta("huella_eco_origen_959", ""))
 		_comprobar(
-			String(hijo.get_meta("huella_eco_origen_959", "")).begins_with(
-				String(hijo.get_meta("huella_eco_origen_959", "")).get_slice(":", 0)
-			),
-			"cada eco conserva una referencia interna al hecho de vigilia",
+			not origen.is_empty() and origen.get_slice(":", 0) in ["archivo", "trayecto", "casa"],
+			"cada eco conserva una referencia interna a un hecho de vigilia",
 		)
-		_comprobar(not hijo is Interactuable3D, "los ecos no son interactuables ni crean progreso")
+		_comprobar(
+			not (hijo is Interactuable3D),
+			"los ecos no son interactuables ni crean progreso",
+		)
 	_comprobar(
 		JSON.stringify(dia.partida.estado["huellas_ambientales"]) == estado_antes_ecos,
 		"entrar en sueño no muta ni duplica las huellas persistentes",
