@@ -67,6 +67,17 @@ class EmbudoPoolTest(unittest.TestCase):
         self.assertEqual(1, resultado["implementa_fuera_de_claim"])
         self.assertEqual(2, resultado["por_worker"]["gemini"]["workers"])
         self.assertEqual(0, resultado["por_worker"]["gemini"]["reserva"])
+        # Tasas de conversión sobre el total de workers.
+        self.assertAlmostEqual(0.6, resultado["reservation_rate"])
+        self.assertAlmostEqual(0.4, resultado["implementation_rate"])
+        self.assertAlmostEqual(0.2, resultado["pr_rate"])
+
+    def test_embudo_sin_workers_da_tasas_cero(self):
+        resultado = funnel.embudo([])
+        self.assertEqual(0, resultado["workers"])
+        self.assertEqual(0.0, resultado["reservation_rate"])
+        self.assertEqual(0.0, resultado["implementation_rate"])
+        self.assertEqual(0.0, resultado["pr_rate"])
 
     def test_nombres_de_pasos_existen_en_el_worker(self):
         # Si alguien renombra un paso, el embudo daría cero en silencio.
