@@ -52,6 +52,8 @@
     {
       "id": "desarrollo",
       "titulo": "Desarrolladores que han participado",
+      "fuente_registro": "#182",
+      "snapshot_registro": "2026-09-28",
       "entradas": [
         {
           "nombre": "eGurucharri",
@@ -63,20 +65,93 @@
         },
         {
           "nombre": "Odiseo",
-          "detalle": "GPT-5.6 Sol y Codex",
-          "tipo": "agente"
+          "detalle": "GPT-5.6 Sol, GPT-5.6, GPT y Codex",
+          "tipo": "agente",
+          "aliases_claim": [
+            "Odiseo",
+            "Odiseo(GPT-5.6-Sol)",
+            "Odiseo-Codex",
+            "Odiseo-Codex-GPT5",
+            "Odiseo-GPT",
+            "Odiseo-GPT-5.6",
+            "Odiseo-GPT-5.6-Sol",
+            "Odiseo-GPT5.6-Sol",
+            "VaroTv7-GPT-5.6-Sol"
+          ]
         },
         {
           "nombre": "Codex",
-          "tipo": "agente"
+          "detalle": "incluye variantes CI y GPT-6",
+          "tipo": "agente",
+          "aliases_claim": [
+            "Codex",
+            "Codex-142",
+            "Codex-CI-206",
+            "Codex-GPT-6"
+          ]
         },
         {
-          "nombre": "Claude Opus 5",
-          "tipo": "agente"
+          "nombre": "Claude Opus",
+          "detalle": "5 y 5.5",
+          "tipo": "agente",
+          "aliases_claim": [
+            "Claude-Opus-5",
+            "Claude-Opus-5.5",
+            "claude-opus-5",
+            "claude-opus-5.5"
+          ]
         },
         {
           "nombre": "Claude Sonnet 5",
-          "tipo": "agente"
+          "tipo": "agente",
+          "aliases_claim": [
+            "Claude-Sonnet-5"
+          ]
+        },
+        {
+          "nombre": "Claude Code",
+          "tipo": "agente",
+          "aliases_claim": [
+            "Claude",
+            "Claude-Code"
+          ]
+        },
+        {
+          "nombre": "ChatGPT",
+          "tipo": "agente",
+          "aliases_claim": [
+            "ChatGPT"
+          ]
+        },
+        {
+          "nombre": "ARQUIMEDES",
+          "tipo": "agente",
+          "aliases_claim": [
+            "ARQUIMEDES"
+          ]
+        },
+        {
+          "nombre": "Gemini Autopilot",
+          "tipo": "agente",
+          "aliases_claim": [
+            "Autopilot-gemini"
+          ]
+        },
+        {
+          "nombre": "Qwen Autopilot",
+          "tipo": "agente",
+          "aliases_claim": [
+            "Autopilot-qwen",
+            "Autopilot-qwen-followup",
+            "Pool-qwen"
+          ]
+        },
+        {
+          "nombre": "Hermes Agent",
+          "tipo": "agente",
+          "aliases_claim": [
+            "Hermes-Agent"
+          ]
         }
       ]
     },
