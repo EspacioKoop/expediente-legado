@@ -11,8 +11,8 @@ const RUTA_TEXTOS_DIFICULTAD := "res://datos/menu_dificultad_textos.json"
 ## Fuera de `textos.csv` como la dificultad: son nombres de máquinas con su
 ## detalle, y el selector los recorre en orden (#1270).
 const RUTA_TEXTOS_FILTRO := "res://datos/filtro_pantalla_textos.json"
-## El panel más alto (Opciones) se desplaza dentro de este alto en vez de salirse
-## de la pantalla a 1080p.
+## El panel más alto (Opciones) se desplaza dentro de este techo y además se
+## adapta al viewport para conservar margen seguro en resoluciones menores.
 const ALTO_MAXIMO_PANEL := 860.0
 const ANCHO_PANEL := 720.0
 const ALTO_BOTON := 44.0
@@ -161,7 +161,10 @@ func _montar() -> void:
 	_sellos_contenido(sellos)
 
 	_panel_historial = _crear_panel()
-	_panel_historial.custom_minimum_size = Vector2(760, 520)
+	_panel_historial.custom_minimum_size.y = minf(
+		520.0,
+		maxf(300.0, get_viewport().get_visible_rect().size.y - MARGEN_SEGURO_PANEL * 2.0)
+	)
 	_panel_historial.visible = false
 	centro.add_child(_panel_historial)
 	var historial := _caja(_panel_historial)
@@ -494,7 +497,7 @@ func _sellos_contenido(caja: VBoxContainer) -> void:
 		fila.name = "Sello_%s" % String(entrada.get("id", "sin-id"))
 		fila.text = _texto_sello(entrada)
 		fila.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		fila.custom_minimum_size.x = 560
+		fila.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		caja.add_child(fila)
 
 	_sellos_volver = Button.new()
@@ -565,7 +568,7 @@ func _refrescar_historial() -> void:
 		var fila := Label.new()
 		fila.text = _texto_evento_historial(evento)
 		fila.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		fila.custom_minimum_size.x = 640
+		fila.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		_historial_lista.add_child(fila)
 
 
