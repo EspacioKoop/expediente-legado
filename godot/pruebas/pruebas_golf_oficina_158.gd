@@ -10,11 +10,11 @@ class DiaFalso:
 	extends Node3D
 
 	var jornada: Dictionary = {}
+	var guardados := 0
 	var _mundo: Node3D
 	var _caminante: Node
 	var _hud_prioridades: CanvasLayer
 	var _pantalla: Variant = null
-	var guardados := 0
 
 	func _guardar_o_avisar(_mensaje: String) -> void:
 		guardados += 1
