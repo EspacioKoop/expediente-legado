@@ -217,6 +217,30 @@ class AgentPoolTest(unittest.TestCase):
             tasks,
         )
 
+    def test_slot_no_saludable_sale_de_rotacion_para_tarea_flexible(self):
+        workers = [
+            {"worker": "gemini", "provider": "gemini", "healthy": False},
+            {"worker": "qwen-primary", "provider": "qwen", "healthy": True},
+        ]
+        candidate = issue(58, "agent:auto", preferred="gemini")
+
+        tasks = mod.select_tasks([candidate], workers)
+
+        self.assertEqual(
+            [{"issue": 58, "provider": "qwen", "worker": "qwen-primary"}],
+            tasks,
+        )
+
+    def test_provider_explicito_no_salta_a_otro_provider_si_slot_no_saludable(self):
+        workers = [
+            {"worker": "gemini", "provider": "gemini", "healthy": False},
+            {"worker": "qwen-primary", "provider": "qwen", "healthy": True},
+        ]
+
+        tasks = mod.select_tasks([issue(59, "agent:gemini")], workers)
+
+        self.assertEqual([], tasks)
+
     def test_capacidad_provider_no_se_sobreasigna(self):
         workers = [{"worker": "gemini", "provider": "gemini"}]
         issues = [
@@ -254,6 +278,11 @@ class AgentPoolTest(unittest.TestCase):
         self.assertIn("preferredProvider", pool)
         self.assertIn("--json comments", pool)
         self.assertIn("AGENT_POOL_WORKER_FAILURE", worker)
+        self.assertIn("AGENT_POOL_SLOT_UNHEALTHY", worker)
+        self.assertIn("AGENT_PROVIDER_COOLDOWN_SECONDS", worker)
+        self.assertIn("gemini-client-error-", worker)
+        self.assertIn("AGENT_POOL_SLOT_UNHEALTHY", pool)
+        self.assertIn("healthy", pool)
         self.assertIn('maxSessionTurns":40', worker)
         self.assertIn("tailscale/github-action@v4", worker)
         self.assertIn("steps.omniroute.outputs.ready", worker)
