@@ -47,7 +47,7 @@ func _actor() -> CharacterBody3D:
 	return actor
 
 
-func _controlador(actor: Node3D) -> SuenoObjetivoVariedad3D:
+func _controlador() -> SuenoObjetivoVariedad3D:
 	var controlador := SuenoObjetivoVariedad3D.new()
 	root.add_child(controlador)
 	controlador.completado.connect(_al_completar)
@@ -60,7 +60,7 @@ func _probar_secuencia() -> void:
 	_rumbos.clear()
 	var actor := _actor()
 	actor.position = Vector3(8.0, 0.0, 0.0)
-	var controlador := _controlador(actor)
+	var controlador := _controlador()
 	var puntos := [Vector3.ZERO, Vector3(4.0, 0.0, 0.0)]
 	_comprobar(
 		"secuencia se configura",
@@ -106,7 +106,7 @@ func _probar_retorno() -> void:
 	var origen := Vector3(6.0, 0.0, 0.0)
 	var foco := Vector3.ZERO
 	actor.position = Vector3(10.0, 0.0, 0.0)
-	var controlador := _controlador(actor)
+	var controlador := _controlador()
 	_comprobar(
 		"retorno se configura",
 		(
@@ -142,7 +142,7 @@ func _probar_permanencia() -> void:
 	_rumbos.clear()
 	var actor := _actor()
 	actor.position = Vector3(5.0, 0.0, 0.0)
-	var controlador := _controlador(actor)
+	var controlador := _controlador()
 	_comprobar(
 		"permanencia se configura",
 		(
