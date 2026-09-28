@@ -298,7 +298,7 @@ class LimpiezaLabelsAgenteTest(unittest.TestCase):
         self.assertIn(
             (
                 "PATCH",
-                "/repos//issues/70",
+                f"/repos/{reservas.REPO}/issues/70",
                 {"labels": ["area:siga", "prioridad:P1"]},
             ),
             llamadas,
@@ -358,7 +358,10 @@ class LimpiezaLabelsAgenteTest(unittest.TestCase):
             retiradas = reservas.limpiar_labels_agente(72, dry_run=True)
 
         self.assertEqual(["agent:working"], retiradas)
-        self.assertEqual([("GET", "/repos//issues/72", None)], llamadas)
+        self.assertEqual(
+            [("GET", f"/repos/{reservas.REPO}/issues/72", None)],
+            llamadas,
+        )
 
 
 class AislamientoDeFallosTest(unittest.TestCase):
