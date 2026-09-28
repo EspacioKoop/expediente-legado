@@ -45,8 +45,9 @@ class CreditosInicioCinematicaTest(unittest.TestCase):
         self.assertIn("static var _apertura_creditos_mostrada := false", self.inicio)
         self.assertIn("func _iniciar_apertura_creditos() -> void:", self.inicio)
         self.assertIn("_apertura_creditos_mostrada = true", self.inicio)
+        self.assertIn("CreditosInicioCinematica.planos()", self.inicio)
         self.assertIn(
-            "CreditosInicioCinematica.planos(), CreditosInicioCinematica.ID",
+            "app.reproducir(rodaje, CreditosInicioCinematica.ID)",
             self.inicio,
         )
         self.assertNotIn("cinematicas_vistas", self.inicio)
