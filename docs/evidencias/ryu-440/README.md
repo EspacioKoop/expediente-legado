@@ -10,18 +10,22 @@ El workflow `Evidencia Ryū 440` monta un `Espacio3D` real de sueño, inserta `S
 
 - `normal_inicial.png`: estado inicial, tres compuertas opuestas al objetivo y lluvia completa;
 - `normal_resuelto.png`: mismo encuadre tras accionar las tres compuertas mediante `Interactuable3D.interactuar()`, con puente y ojo/luminaria reaccionados;
+- `normal_resuelto_kit.png`: el mismo estado resuelto con una **composición candidata de evidencia** del kit #1372 (`ToriiSuspendido`, `CascadaInvertida` y `FarolesDeLluvia`), sin conectar esas piezas al runtime;
 - `reducido_resuelto.png`: misma solución con `reduccion_movimiento`, menos lluvia y transición ya asentada;
 - `manifest.json`: forma, FOV, altura de cámara, escala, ancla, estado de compuertas, número de gotas y estado de resolución de cada captura.
 
 ## Qué revisar a mano
 
-Comparar las tres imágenes en el mismo artifact y comprobar:
+Comparar las imágenes en el mismo artifact. `normal_resuelto.png` y `normal_resuelto_kit.png` forman un A/B explícito: el segundo solo sirve para decidir si esas tres piezas mejoran la lectura antes de autorizar cualquier integración runtime.
+
+Comprobar:
 
 1. la silueta del dragón se reconoce sin texto y no se confunde con el cauce;
 2. compuertas, guías y continuidad del agua se entienden sin HUD;
 3. en el estado resuelto se perciben el ascenso del cauce y la reacción espacial de puente/luminaria;
 4. la reducción de movimiento conserva la misma solución y lectura, reduciendo densidad/movimiento sin vaciar la escena;
-5. desde el encuadre de jugador la criatura no tapa de forma dominante la ruta ni convierte su cuerpo en plataforma necesaria.
+5. desde el encuadre de jugador la criatura no tapa de forma dominante la ruta ni convierte su cuerpo en plataforma necesaria;
+6. el A/B del kit mejora profundidad/identidad sin ocultar compuertas, cauce ni silueta; si no lo hace, el runtime debe quedarse como está.
 
 Si una captura falla cualquiera de esos puntos, #440 sigue abierta con un fallo visual concreto que ya puede corregirse sin reabrir el framework.
 
