@@ -290,17 +290,19 @@ static func validar_historial_trayectorias(historial: Array) -> Array:
 			for posicion in hechos.size():
 				var hecho = hechos[posicion]
 				if typeof(hecho) != TYPE_DICTIONARY:
-					errores.append(
-					"%d.canales.%s[%d] no es un objeto" % [indice, canal, posicion]
-				)
+					errores.append("%d.canales.%s[%d] no es un objeto" % [indice, canal, posicion])
 					continue
 				if not evento_valido(hecho):
 					errores.append("%d.canales.%s[%d] inválido" % [indice, canal, posicion])
 					continue
 				if String(hecho.get("canal", "")) != canal:
-					errores.append("%d.canales.%s[%d] declara otro canal" % [indice, canal, posicion])
+					errores.append(
+						"%d.canales.%s[%d] declara otro canal" % [indice, canal, posicion]
+					)
 				if int(hecho.get("vuelta", -1)) != vuelta_id:
-					errores.append("%d.canales.%s[%d] pertenece a otra vuelta" % [indice, canal, posicion])
+					errores.append(
+						"%d.canales.%s[%d] pertenece a otra vuelta" % [indice, canal, posicion]
+					)
 	return errores
 
 
