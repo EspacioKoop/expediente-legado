@@ -76,6 +76,9 @@ jobs:
     timeout-minutes: 60
     env:
       GEMINI_CLI_TRUST_WORKSPACE: 'true'
+      HAS_TS_OAUTH: ${{ secrets.TS_OAUTH_CLIENT_ID != '' && secrets.TS_OAUTH_SECRET != '' }}
+      HAS_TS_OIDC: ${{ secrets.TS_OAUTH_CLIENT_ID != '' && secrets.TS_AUDIENCE != '' }}
+      HAS_OMNIROUTE: ${{ secrets.OMNIROUTE_API_KEY != '' && secrets.TS_OAUTH_CLIENT_ID != '' && (secrets.TS_OAUTH_SECRET != '' || secrets.TS_AUDIENCE != '') && vars.OMNIROUTE_BASE_URL != '' && vars.OMNIROUTE_MODEL != '' }}
     steps:
       - id: guard
         name: Validar issue y slot
