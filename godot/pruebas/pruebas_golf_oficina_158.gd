@@ -117,8 +117,12 @@ func _probar_abandono() -> void:
 	await process_frame
 
 	var resultado: Dictionary = dia.get_meta("ultimo_resultado_golf", {})
-	_comprobar(bool(resultado.get("abandonada", false)), "abandonar conserva un resultado explícito")
-	_comprobar(not bool(resultado.get("completa", true)), "abandonar no cuenta como partida completa")
+	_comprobar(
+		bool(resultado.get("abandonada", false)), "abandonar conserva un resultado explícito"
+	)
+	_comprobar(
+		not bool(resultado.get("completa", true)), "abandonar no cuenta como partida completa"
+	)
 	_comprobar(not FileAccess.file_exists(ruta), "abandonar no escribe el ranking")
 	_comprobar(dia._mundo.visible, "abandonar restaura la oficina")
 	_comprobar(not is_instance_valid(controller._golf), "abandonar cierra la sesión")
