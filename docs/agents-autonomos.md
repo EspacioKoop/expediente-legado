@@ -67,7 +67,7 @@ Si el equipo local, Tailscale u OmniRoute no están disponibles, el workflow con
 
 `.github/workflows/agent-provider-smoke.yml` valida cada slot sin crear trabajo ficticio ni dar permisos de escritura al modelo. El smoke usa Qwen Code únicamente con `read_file`, obliga a leer `AGENTS.md` y exige el marcador `AGENT_PROVIDER_SMOKE_OK file=AGENTS.md`.
 
-Al integrarse o modificarse el workflow, el push a `main` comprueba automáticamente `qwen-fallback-1`. Después puede ejecutarse manualmente desde **Actions → Agent provider smoke** indicando el **número** de slot (1-12). Esto valida conjuntamente secret, URL, modelo, compatibilidad OpenAI y tool-calling básico.
+Al integrarse o modificarse el workflow, el push a `main` comprueba automáticamente `qwen-fallback-1`. Después puede ejecutarse manualmente desde **Actions → Agent provider smoke** indicando el **número** de slot (1-12). Esto valida conjuntamente secret, URL, modelo, compatibilidad OpenAI y tool-calling básico. Un smoke verde cierra además el circuit breaker de ese slot en Deno KV, por lo que un backend recuperado vuelve a rotación sin esperar a que caduque su cooldown anterior.
 
 ### Cadena de fallback OpenAI-compatible
 
@@ -136,9 +136,11 @@ El dispatcher:
 - reúne hasta seis issues elegibles y usa como máximo un trabajo por slot/proveedor en cada tanda;
 - separa Qwen primario, Gemini y los slots OpenAI-compatible configurados;
 - consulta el **control-plane Deno KV** y excluye issues con un lease activo antes de construir la matrix;
+- consulta el health de workers en Deno KV y deja fuera slots en cooldown; solo si ese endpoint no responde reconstruye temporalmente el estado desde los marcadores históricos de #1713;
 - cada worker adquiere atómicamente un lease por issue antes de marcar `agent:working`; el lease dura 30 minutos y se renueva al entrar en planificación, implementación, validación y publicación;
 - mantiene `concurrency` por issue y los CLAIMs de #1713 como barreras redundantes durante la migración;
 - si Deno/OIDC no están disponibles, falla abierto al mecanismo histórico de GitHub; un HTTP 409 por lease vivo sí evita arrancar un duplicado;
+- los 429/503 abren un circuit breaker por worker con TTL configurable (mínimo 5 min, máximo 6 h); el marcador `AGENT_POOL_SLOT_UNHEALTHY` en #1713 queda únicamente como fallback si el reporte KV falla;
 - ejecuta context packer, memoria Deno y CI brain antes de abrir un PR draft;
 - ante cambios fuera del CLAIM, restaura el intento, libera la reserva y replantea hasta dos veces antes de escalar a `agent:needs-human`;
 - al terminar una tanda comprueba si siguen quedando issues elegibles y, si los hay, programa inmediatamente la siguiente tanda para mantener ocupados los slots.
