@@ -120,6 +120,17 @@ def _ruta_segura(root: Path, ruta: str) -> Path:
     return candidata
 
 
+def _podar_padres_vacios(root: Path, destino: Path) -> None:
+    raiz = root.resolve()
+    padre = destino.parent
+    while padre != raiz:
+        try:
+            padre.rmdir()
+        except OSError:
+            break
+        padre = padre.parent
+
+
 def restaurar_fuera_del_claim(root: Path, fuera: list[str]) -> None:
     for ruta in fuera:
         _ruta_segura(root, ruta)
@@ -129,8 +140,10 @@ def restaurar_fuera_del_claim(root: Path, fuera: list[str]) -> None:
         destino = root / ruta
         if destino.is_symlink() or destino.is_file():
             destino.unlink(missing_ok=True)
+            _podar_padres_vacios(root, destino)
         elif destino.is_dir():
             shutil.rmtree(destino)
+            _podar_padres_vacios(root, destino)
 
 
 def ejecutar(root: Path, plan: Path, *, restaurar: bool) -> dict[str, object]:
