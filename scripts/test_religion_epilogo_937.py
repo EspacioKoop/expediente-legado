@@ -50,10 +50,10 @@ class ReligionEpilogo937Test(unittest.TestCase):
         self.assertIn("tres módulos", self.doc.lower())
 
     def test_documenta_ausencia_y_contradiccion(self):
-        texto = self.doc.lower()
+        texto = " ".join(self.doc.lower().split())
         self.assertIn("sin declaración", texto)
         self.assertIn("contradic", texto)
-        self.assertIn("no bloquea", texto)
+        self.assertIn("no bloquea", texto.replace("**", ""))
         self.assertIn("final base", texto)
 
     def test_godot_contract(self):
