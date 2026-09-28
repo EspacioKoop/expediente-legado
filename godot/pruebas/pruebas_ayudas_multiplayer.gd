@@ -84,9 +84,7 @@ func _probar_catalogo_y_conocimiento() -> void:
 	var eco_fuera_de_umbral := eco_compania.duplicate(true)
 	eco_fuera_de_umbral["anchor_id"] = "suenio_figura"
 	eco_fuera_de_umbral["knowledge_gate"] = "figura_onirica"
-	var validacion_fuera := AyudaCatalogo.validar_payload(
-		eco_fuera_de_umbral, ["figura_onirica"]
-	)
+	var validacion_fuera := AyudaCatalogo.validar_payload(eco_fuera_de_umbral, ["figura_onirica"])
 	_comprobar(
 		"eco de compañía no puede revelar una figura",
 		validacion_fuera["reason"],
