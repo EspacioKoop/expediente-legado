@@ -1,0 +1,86 @@
+name: Deploy Deno feedback gateway
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'infra/feedback-deno/**'
+      - 'scripts/check_deno_production.py'
+      - '.github/workflows/feedback-deno-deploy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: feedback-deno-production-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      HAS_DENO_DEPLOY_TOKEN: ${{ secrets.DENO_DEPLOY_TOKEN != '' }}
+      PROD_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Instalar Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Validar gateway
+        working-directory: infra/feedback-deno
+        run: deno task check
+
+      - id: config
+        name: Comprobar configuración de despliegue
+        run: |
+          set -euo pipefail
+          if [[ "$HAS_DENO_DEPLOY_TOKEN" != true ]]; then
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Falta secrets.DENO_DEPLOY_TOKEN; se omite el autodeploy y el smoke de freshness seguirá detectando deriva."
+            exit 0
+          fi
+          echo "deploy=true" >> "$GITHUB_OUTPUT"
+          if [[ -n "${PROD_URL:-}" ]]; then
+            echo "verify=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "verify=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Falta vars.SIGA98_FEEDBACK_FALLBACK_URL; se desplegará pero no se podrá validar /health."
+          fi
+
+      - name: Desplegar a Deno Deploy
+        if: steps.config.outputs.deploy == 'true'
+        working-directory: infra/feedback-deno
+        env:
+          DENO_DEPLOY_TOKEN: ${{ secrets.DENO_DEPLOY_TOKEN }}
+        run: deno deploy --org expediente-legado --app siga98-feedback-deno --prod
+
+      - name: Esperar y validar freshness
+        if: steps.config.outputs.deploy == 'true' && steps.config.outputs.verify == 'true'
+        run: |
+          set -euo pipefail
+          base="${PROD_URL%/}"
+          base="${base%/api/report}"
+          for attempt in $(seq 1 12); do
+            if curl --fail --silent --show-error --max-time 15 \
+              "$base/health" -o /tmp/deno-production-health.json; then
+              cat /tmp/deno-production-health.json
+              if python3 scripts/check_deno_production.py \
+                --source infra/feedback-deno/main.ts \
+                --health-json /tmp/deno-production-health.json; then
+                exit 0
+              fi
+            fi
+            echo "Producción todavía no refleja main (intento $attempt/12); reintentando..."
+            sleep 5
+          done
+          echo "::error::Deno Deploy no alcanzó el contrato de main tras el despliegue."
+          exit 1
