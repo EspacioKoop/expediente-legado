@@ -93,13 +93,16 @@ func _evento(actor: String, antiguedad: int) -> Dictionary:
 
 
 func _antiguedad(actor: String) -> int:
-	return {
-		"alpha": 50,
-		"beta": 40,
-		"gamma": 30,
-		"delta": 20,
-		"epsilon": 10,
-	}.get(actor, 60)
+	return (
+		{
+			"alpha": 50,
+			"beta": 40,
+			"gamma": 30,
+			"delta": 20,
+			"epsilon": 10,
+		}
+		. get(actor, 60)
+	)
 
 
 func _actores(eventos: Array) -> Array:
