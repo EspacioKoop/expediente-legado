@@ -123,24 +123,16 @@ def eligible_issue(issue: dict[str, Any]) -> tuple[bool, str | None]:
     return True, provider
 
 
-def _ordered_eligible(
-    issues: list[dict[str, Any]],
-) -> list[tuple[dict[str, Any], str | None]]:
-    candidates: list[tuple[dict[str, Any], str | None]] = []
-    for issue in sorted(issues, key=_sort_key):
-        ok, requested_provider = eligible_issue(issue)
-        if ok:
-            candidates.append((issue, requested_provider))
-
-    # Reserva primero la capacidad exigida por labels explícitos. Dentro de
-    # cada grupo se conserva el orden determinista histórico.
-    candidates.sort(
-        key=lambda item: (
-            item[1] is None,
-            _sort_key(item[0]),
-        )
-    )
-    return candidates
+def _usable_indices(
+    workers: list[dict[str, str]],
+    issue: dict[str, Any],
+) -> list[int]:
+    avoided = _avoid_workers(issue)
+    return [
+        index
+        for index, worker in enumerate(workers)
+        if worker["worker"] not in avoided
+    ]
 
 
 def select_tasks(
@@ -154,43 +146,31 @@ def select_tasks(
         normalized for item in workers if (normalized := _worker(item))
     ]
     tasks: list[dict[str, Any]] = []
+    eligible: list[tuple[dict[str, Any], str | None]] = []
+    for issue in sorted(issues, key=_sort_key):
+        ok, requested_provider = eligible_issue(issue)
+        if ok:
+            eligible.append((issue, requested_provider))
 
-    for issue, requested_provider in _ordered_eligible(issues):
-        if not free_workers:
+    # Reserva primero la capacidad obligatoria. Así una tarea flexible más antigua
+    # no puede consumir el único slot de un proveedor exigido por otra tarea.
+    for issue, requested_provider in eligible:
+        if requested_provider is None:
+            continue
+        if len(tasks) >= limit or not free_workers:
             break
 
-        avoided = _avoid_workers(issue)
-        usable_indices = [
-            index
-            for index, worker in enumerate(free_workers)
-            if worker["worker"] not in avoided
-        ]
-        if not usable_indices:
+        usable = _usable_indices(free_workers, issue)
+        choice_index = next(
+            (
+                index
+                for index in usable
+                if free_workers[index]["provider"] == requested_provider
+            ),
+            None,
+        )
+        if choice_index is None:
             continue
-
-        preferred_provider = requested_provider or _preferred_provider(issue)
-        if requested_provider is not None:
-            choice_index = next(
-                (
-                    index
-                    for index in usable_indices
-                    if free_workers[index]["provider"] == requested_provider
-                ),
-                None,
-            )
-            if choice_index is None:
-                continue
-        elif preferred_provider is not None:
-            choice_index = next(
-                (
-                    index
-                    for index in usable_indices
-                    if free_workers[index]["provider"] == preferred_provider
-                ),
-                usable_indices[0],
-            )
-        else:
-            choice_index = usable_indices[0]
 
         worker = free_workers.pop(choice_index)
         tasks.append(
@@ -200,8 +180,40 @@ def select_tasks(
                 "worker": worker["worker"],
             }
         )
-        if len(tasks) >= limit:
+
+    # Las tareas flexibles consumen únicamente la capacidad que queda después de
+    # reservar los providers explícitos. Kev sigue siendo una preferencia blanda.
+    for issue, requested_provider in eligible:
+        if requested_provider is not None:
+            continue
+        if len(tasks) >= limit or not free_workers:
             break
+
+        usable = _usable_indices(free_workers, issue)
+        if not usable:
+            continue
+
+        preferred_provider = _preferred_provider(issue)
+        if preferred_provider is not None:
+            choice_index = next(
+                (
+                    index
+                    for index in usable
+                    if free_workers[index]["provider"] == preferred_provider
+                ),
+                usable[0],
+            )
+        else:
+            choice_index = usable[0]
+
+        worker = free_workers.pop(choice_index)
+        tasks.append(
+            {
+                "issue": int(issue["number"]),
+                "provider": worker["provider"],
+                "worker": worker["worker"],
+            }
+        )
 
     return tasks
 
