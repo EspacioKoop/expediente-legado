@@ -300,10 +300,13 @@ func _probar_companeros_con_memoria() -> void:
 		"un actor sin superficie no inventa conocimiento",
 	)
 	_comprobar(
-		DecisionIdeologicaExpediente.registrar_lectura_social(
-			estado,
-			DecisionIdeologicaExpediente.CASO_VERTICAL,
-			"telefono",
+		(
+			DecisionIdeologicaExpediente
+			. registrar_lectura_social(
+				estado,
+				DecisionIdeologicaExpediente.CASO_VERTICAL,
+				"telefono",
+			)
 		),
 		false,
 		"un actor no autorizado no adquiere la decisión por telepatía",
