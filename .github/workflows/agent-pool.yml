@@ -116,8 +116,11 @@ jobs:
 
           # #1600: credencial configurada no equivale a slot saludable. Los workers
           # que reportaron 429/503 de cuota quedan fuera solo hasta que expire su
-          # cooldown global registrado en #182.
-          gh issue view 182 --repo "$GITHUB_REPOSITORY" --json comments             --jq '[.comments[-100:][]? | {body:.body}]' > /tmp/provider-health.json
+          # cooldown global registrado en el registro de reservas. Tras el rollover
+          # (#1713) los marcadores nuevos van al registro activo: se lee el
+          # historial combinado, no el #182 congelado.
+          python3 scripts/gestionar_reservas_rollover.py --comments-output /tmp/registro-reservas.json
+          jq '[.[-200:][] | {body:.body}]' /tmp/registro-reservas.json > /tmp/provider-health.json
           NOW_EPOCH="$(date +%s)" python3 - <<'PY'
           import json, os, re
 

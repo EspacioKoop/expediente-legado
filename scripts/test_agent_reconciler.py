@@ -222,7 +222,7 @@ class AgentReconcilerTest(unittest.TestCase):
         # #1662: sin ventana de 300 comentarios ni parser propio de CLAIM.
         workflow = (ROOT / ".github" / "workflows" / "agent-reconciler.yml").read_text(encoding="utf-8")
         self.assertNotIn("comments[-300:]", workflow)
-        self.assertIn("--jq '.[]|{id,created_at,body}'", workflow)
+        self.assertIn("gestionar_reservas_rollover.py --comments-output", workflow)
         fuente = MODULE_PATH.read_text(encoding="utf-8")
         self.assertIn("reservas_registro.vigentes(", fuente)
         self.assertNotIn("CLAIM_RE", fuente)
