@@ -123,9 +123,28 @@ func _probar() -> void:
 	var descolgar := panel.find_child("Descolgar", true, false) as Button
 	var contestador := panel.find_child("Contestador", true, false) as Button
 	var cerrar := panel.find_child("CerrarTelefono", true, false) as Button
+	var estado_panel := panel.find_child("TelefonoEstado", true, false) as Label
+	var transcripcion := panel.find_child("TelefonoTranscript", true, false) as RichTextLabel
 	_comprobar(
 		descolgar != null and not descolgar.disabled,
 		"descolgar entra en la cadena de foco",
+	)
+	_comprobar(
+		descolgar != null and descolgar.accessibility_name == descolgar.text,
+		"descolgar expone el mismo nombre al lector de pantalla",
+	)
+	_comprobar(
+		estado_panel != null
+		and not estado_panel.accessibility_name.is_empty()
+		and estado_panel.accessibility_live == AccessibilityServer.LIVE_POLITE,
+		"el estado del teléfono es una región accesible actualizable",
+	)
+	_comprobar(
+		transcripcion != null
+		and transcripcion.focus_mode == Control.FOCUS_ALL
+		and transcripcion.selection_enabled
+		and not transcripcion.accessibility_name.is_empty(),
+		"la transcripción puede recibir foco y leerse",
 	)
 	_comprobar(
 		contestador != null and not contestador.disabled,
@@ -143,6 +162,17 @@ func _probar() -> void:
 		)
 	if cerrar != null:
 		_comprobar(not cerrar.focus_next.is_empty(), "cerrar cierra el ciclo de foco")
+		_comprobar(
+			cerrar.accessibility_name == cerrar.text,
+			"cerrar conserva nombre accesible explícito",
+		)
+	panel._al_descolgar()
+	_comprobar(
+		transcripcion != null
+		and not transcripcion.text.is_empty()
+		and transcripcion.accessibility_description == transcripcion.text,
+		"la transcripción anuncia exactamente el texto visible",
+	)
 	panel.queue_free()
 
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
