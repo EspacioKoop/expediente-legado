@@ -11,7 +11,7 @@ const BAJA := "BAJA"
 const MEDIA := "MEDIA"
 const ALTA := "ALTA"
 const RANGOS := [BAJA, MEDIA, ALTA]
-const VERSION_EVALUACION_ACTUAL := 2
+const VERSION_EVALUACION_ACTUAL := 3
 const CATEGORIAS_V1 := [
 	"productividad",
 	"precipitacion",
@@ -19,7 +19,8 @@ const CATEGORIAS_V1 := [
 	"liquidez",
 	"exploracion_onirica",
 ]
-const CATEGORIAS := CATEGORIAS_V1 + ["dependencia_dinero"]
+const CATEGORIAS_V2 := CATEGORIAS_V1 + ["dependencia_dinero"]
+const CATEGORIAS := CATEGORIAS_V2 + ["actividad_improductiva"]
 const CLAVE_HISTORIAL := "evaluaciones_desempeno"
 
 
@@ -40,6 +41,7 @@ static func calcular(partida: Dictionary, jornada_override: Dictionary = {}) -> 
 	var trabajillos: Dictionary = jornada.get("trabajillos", {})
 	var trabajos_extra := maxi(0, int(trabajillos.get("hechos", 0)))
 	var cerrados_vuelta := maxi(0, veredictos.size() - _veredictos_antes_de(partida, vuelta))
+	var actividad_improductiva := _actividad_improductiva(jornada)
 
 	return {
 		"productividad": _rango(cerrados_vuelta, 2, 6),
@@ -48,6 +50,7 @@ static func calcular(partida: Dictionary, jornada_override: Dictionary = {}) -> 
 		"liquidez": _rango(dinero, Jornada.PRECIO_COMIDA_GATO, Jornada.PRECIO_ALQUILER),
 		"exploracion_onirica": _rango(mapa.size(), 2, 6),
 		"dependencia_dinero": _rango(trabajos_extra, 1, 3),
+		"actividad_improductiva": _rango(actividad_improductiva, 1, 3),
 	}
 
 
@@ -113,7 +116,11 @@ static func validar_historial(historial_crudo: Array) -> Array:
 		if typeof(evaluacion) != TYPE_DICTIONARY:
 			errores.append("%d.evaluacion no es un objeto" % i)
 			continue
-		var requeridas := CATEGORIAS_V1 if version_evaluacion == 1 else CATEGORIAS
+		var requeridas := CATEGORIAS
+		if version_evaluacion == 1:
+			requeridas = CATEGORIAS_V1
+		elif version_evaluacion == 2:
+			requeridas = CATEGORIAS_V2
 		for categoria in requeridas:
 			if not evaluacion.has(categoria) or not RANGOS.has(evaluacion[categoria]):
 				errores.append("%d.evaluacion.%s inválida" % [i, categoria])
@@ -121,6 +128,38 @@ static func validar_historial(historial_crudo: Array) -> Array:
 			if evaluacion.has(categoria) and not RANGOS.has(evaluacion[categoria]):
 				errores.append("%d.evaluacion.%s inválida" % [i, categoria])
 	return errores
+
+
+## Cuenta únicamente conductas que el propio Bingo guardó como tipo
+## `improductivo` y que quedaron completadas al cerrar la jornada. El historial
+## vive dentro de Jornada, por lo que se reinicia con cada vida laboral y evita
+## contaminar una evaluación con hechos de vueltas anteriores.
+static func _actividad_improductiva(jornada: Dictionary) -> int:
+	var bingo: Variant = jornada.get(BingoSiga.CLAVE_ESTADO, {})
+	if not bingo is Dictionary:
+		return 0
+	var historial: Variant = (bingo as Dictionary).get("historial", [])
+	if not historial is Array:
+		return 0
+	var total := 0
+	for valor in historial as Array:
+		if not valor is Dictionary:
+			continue
+		var entrada := valor as Dictionary
+		var completados: Variant = entrada.get("completados", [])
+		var objetivos: Variant = entrada.get("objetivos", [])
+		if not completados is Array or not objetivos is Array:
+			continue
+		for objetivo in objetivos as Array:
+			if not objetivo is Dictionary:
+				continue
+			var dato := objetivo as Dictionary
+			if String(dato.get("tipo", "")) != "improductivo":
+				continue
+			var objetivo_id := String(dato.get("id", ""))
+			if not objetivo_id.is_empty() and (completados as Array).has(objetivo_id):
+				total += 1
+	return total
 
 
 static func _historial(partida: Dictionary) -> Array:
