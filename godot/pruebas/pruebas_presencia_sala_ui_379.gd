@@ -50,7 +50,9 @@ func _probar() -> void:
 	await process_frame
 
 	var boton := controlador.get_node_or_null("PresenciaCoopUI/AbrirPresenciaCoop") as Button
-	var panel := controlador.get_node_or_null("PresenciaCoopUI/PanelPresenciaCoop") as PresenciaSalaPanel
+	var panel := (
+		controlador.get_node_or_null("PresenciaCoopUI/PanelPresenciaCoop") as PresenciaSalaPanel
+	)
 	_comprobar("botón coop existe", boton != null, true)
 	_comprobar("botón solo aparece en trayecto", boton.visible, true)
 	_comprobar("panel empieza cerrado", panel.visible, false)
@@ -93,14 +95,17 @@ func _probar() -> void:
 	_comprobar("segundo cliente queda online", remoto.estado_transporte()["online"], true)
 	_comprobar("botón muestra sala", boton.text.contains(ROOM_ID), true)
 
-	var publicado := remoto.publicar_snapshot(
-		"test-379-ui",
-		Vector3(3.0, 0.0, -2.0),
-		0.4,
-		"walk",
-		"saludo",
-		AHORA,
-		"ui-remoto-0",
+	var publicado := (
+		remoto
+		. publicar_snapshot(
+			"test-379-ui",
+			Vector3(3.0, 0.0, -2.0),
+			0.4,
+			"walk",
+			"saludo",
+			AHORA,
+			"ui-remoto-0",
+		)
 	)
 	_comprobar("remoto publica presencia", publicado["ok"], true)
 	await _bombear(relay, controlador, remoto, 18)
@@ -125,7 +130,9 @@ func _probar() -> void:
 
 	panel.cerrar_solicitado.emit()
 	await process_frame
-	_comprobar("cerrar panel restaura caminante", host._caminante.process_mode, Node.PROCESS_MODE_INHERIT)
+	_comprobar(
+		"cerrar panel restaura caminante", host._caminante.process_mode, Node.PROCESS_MODE_INHERIT
+	)
 
 	host.jornada["fase"] = "casa"
 	controlador._sincronizar_ui()
