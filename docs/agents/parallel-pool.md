@@ -32,18 +32,21 @@ Después añade `agent:auto`. El worker (`scripts/agent_delegated_plan.py`) toma
 
 Sin plan delegado, el pool planifica como siempre.
 
-## Aislamiento
+## Aislamiento y control-plane
 
-`agent-worker.yml` usa `concurrency` por numero de issue. Dos issues distintos pueden correr a la vez, pero dos ejecuciones del pool no pueden trabajar simultaneamente sobre el mismo issue.
+Antes de marcar `agent:working`, cada worker intenta adquirir un **lease atómico** en el Deno KV compartido usando OIDC con audiencia `siga98-agent-pool`. El lease se identifica por issue + run, dura 30 minutos y se renueva al cambiar de fase (`planning`, `implementing`, `validating`, `publishing`). Si ya existe un lease vivo, el segundo worker termina sin tocar el estado visible de GitHub.
 
-El lock por issue no sustituye #182. Despues de planificar, cada worker publica un `CLAIM` con rutas concretas y vuelve a leer todas las reservas. Si detecta solape, libera su CLAIM y marca el issue para revision.
+El dispatcher consulta esos leases antes de construir la matrix. `agent-worker.yml` conserva además `concurrency` por número de issue, y los CLAIMs de #1713 siguen protegiendo solapes de **rutas** entre issues distintos. Son capas diferentes: lease para exclusión por issue, CLAIM para exclusión por rutas.
+
+Durante la migración el control-plane es fail-open cuando Deno u OIDC no están disponibles: se conserva el comportamiento anterior de labels + `concurrency` + CLAIM. Solo un 409 explícito de lease activo bloquea el arranque. Los labels son el espejo visible, no la fuente de locking.
 
 ## Activacion
 
 1. Configura al menos un proveedor: `QWEN_API_KEY`, `GEMINI_API_KEY`, o un `QWEN_FALLBACK_N_API_KEY` acompañado de `QWEN_FALLBACK_N_BASE_URL`.
 2. Añade `agent:auto` o `agent:pool`; usa `agent:qwen` / `agent:gemini` cuando el proveedor deba ser obligatorio.
-3. El evento de etiqueta lanza una tanda; además hay un barrido cada 15 minutos.
-4. El dispatcher usa hasta seis workers disponibles, deduplicando cada issue.
+3. El evento de etiqueta lanza una tanda; además hay un barrido cada 15 minutos como red de seguridad.
+4. El dispatcher usa hasta seis workers disponibles, deduplicando cada issue y excluyendo leases activos.
+5. Al terminar la tanda, si aún queda cola elegible, se lanza otra inmediatamente; no se espera al siguiente cron.
 
 ## Replan ante salidas del CLAIM
 
