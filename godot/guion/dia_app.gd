@@ -9,7 +9,6 @@ signal combate_real_terminado(objetivo_id: String, gano: bool, consecuencia: Dic
 
 ## Lo que se anda entre paso y paso. Una zancada de persona son unos setenta
 ## centímetros.
-const METROS_POR_ZANCADA := 0.72
 const SELLO_FIRMA_SIN_PRISA := "firma-sin-prisa"
 const SELLO_DESPERTAR_REGLAMENTARIO := "despertar-reglamentario"
 
@@ -43,9 +42,7 @@ var _ciclo_laboral: DiaCicloLaboralApp
 var _espacio_actual: Dictionary = {}
 var _ambiente: Environment
 var _sol: DirectionalLight3D
-var _voz: AudioStreamPlayer
-var _pisada: AudioStreamPlayer3D
-var _desde_paso := 0.0
+var _presentacion_app: DiaPresentacionApp
 ## Si lo que se lee ahora mismo es algo que dijo alguien. Lo que dice un
 ## compañero es de la oficina y del momento: llevárselo a la calle o al sueño
 ## lo convierte en una voz que te sigue.
@@ -76,6 +73,9 @@ func _ready() -> void:
 
 	_montar_entorno()
 	_montar_interfaz()
+	_presentacion_app = DiaPresentacionApp.new()
+	add_child(_presentacion_app)
+	_presentacion_app.configurar(_caminante)
 	_guardado_app = DiaGuardadoApp.new()
 	add_child(_guardado_app)
 	_guardado_app.configurar(partida, self, _nomina)
@@ -147,15 +147,6 @@ func _montar_entorno() -> void:
 	if cuerpo_jugador != null:
 		cuerpo_jugador.perfil = partida.estado.get("perfil_jugador", {})
 	add_child(_caminante)
-
-	# Dos voces: lo que pasa (una puerta, la nómina) y lo que haces tú (andar).
-	# La segunda va pegada al cuerpo, que es de donde salen los pasos.
-	_voz = AudioStreamPlayer.new()
-	add_child(_voz)
-	_pisada = AudioStreamPlayer3D.new()
-	_pisada.unit_size = 3.0
-	_caminante.add_child(_pisada)
-
 
 func _montar_interfaz() -> void:
 	var capa := CanvasLayer.new()
@@ -512,38 +503,17 @@ func _dar_de_comer() -> void:
 	_nomina.text = tr("DIA_GATO_COME") % [Jornada.PRECIO_COMIDA_GATO, jornada["dinero"]]
 
 
-## Los pasos. Suenan por DISTANCIA andada y no por tiempo: parado no se pisa,
-## y a la misma velocidad la zancada es siempre la misma. Con un temporizador,
-## quedarse quieto contra una pared seguiría sonando a alguien caminando.
+## Hooks históricos de presentación; la implementación vive en #1761.
 func _andar(delta: float) -> void:
-	if _pantalla != null or not _caminante.is_physics_processing():
-		return
-	var avance := Vector2(_caminante.velocity.x, _caminante.velocity.z).length() * delta
-	_desde_paso += avance
-	if _desde_paso < METROS_POR_ZANCADA:
-		return
-	_desde_paso = 0.0
-	_pisada.stream = Sonido.paso_sobre(_suelo_pisado())
-	_pisada.pitch_scale = randf_range(0.94, 1.06)
-	_pisada.play()
+	_presentacion_app.andar(delta, _pantalla != null, _suelo_pisado())
 
 
-## Qué se pisa: el suelo que declara el espacio, salvo que nieve en la calle. El
-## sueño no declara suelo y conserva los pasos genéricos.
 func _suelo_pisado() -> String:
-	if (
-		String(jornada.get("fase", "")) == "trayecto"
-		and Clima.estado(int(jornada.get("dia", 1))) == Clima.NIEVE
-	):
-		return Sonido.NIEVE
-	return String(_espacio_actual.get("textura_suelo", ""))
+	return DiaPresentacionApp.suelo_pisado(jornada, _espacio_actual)
 
 
 func _sonar(nombre: String) -> void:
-	var stream := Sonido.stream(nombre)
-	if stream != null:
-		_voz.stream = stream
-		_voz.play()
+	_presentacion_app.sonar(nombre)
 
 
 ## El expediente, encima del día y sin salir de él.
