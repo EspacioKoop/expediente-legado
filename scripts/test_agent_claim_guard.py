@@ -121,6 +121,8 @@ class AgentClaimGuardTest(unittest.TestCase):
         self.assertIn("continue-on-error: true", qwen)
         self.assertIn("continue-on-error: true", gemini)
         self.assertIn("observed_paths", workflow)
+        self.assertNotRegex(workflow, r"(?m)^La implementacion intento")
+        self.assertNotRegex(workflow, r"(?m)^Se agoto el limite")
 
 
 if __name__ == "__main__":
