@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "orden": [
+    "open_source",
+    "agradecimientos",
+    "desarrollo",
+    "direccion",
+    "titulo"
+  ],
+  "bloques": [
+    {
+      "id": "open_source",
+      "titulo": "Proyectos y tecnologías open source utilizados",
+      "entradas": [
+        {
+          "nombre": "Godot Engine",
+          "detalle": "4.7-stable",
+          "licencia": "MIT",
+          "fuente": ".godot-version"
+        },
+        {
+          "nombre": "SameBoy",
+          "detalle": "Core/ · núcleo CGB-E",
+          "licencia": "Expat",
+          "fuente": "godot/native/siga98_gb/deps.lock.json"
+        },
+        {
+          "nombre": "godot-cpp",
+          "detalle": "API 4.7",
+          "licencia": "MIT",
+          "fuente": "godot/native/siga98_gb/deps.lock.json"
+        }
+      ],
+      "catalogos": [
+        {
+          "tipo": "assets",
+          "ruta": "res://assets/procedencia.json",
+          "agrupar_por": [
+            "autor",
+            "licencia",
+            "fuente"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "agradecimientos",
+      "titulo": "Agradecimientos",
+      "entradas": [],
+      "pendiente": true
+    },
+    {
+      "id": "desarrollo",
+      "titulo": "Desarrolladores que han participado",
+      "entradas": [
+        {
+          "nombre": "eGurucharri",
+          "tipo": "persona"
+        },
+        {
+          "nombre": "VaroTv7",
+          "tipo": "persona"
+        },
+        {
+          "nombre": "Odiseo",
+          "detalle": "GPT-5.6 Sol y Codex",
+          "tipo": "agente"
+        },
+        {
+          "nombre": "Codex",
+          "tipo": "agente"
+        },
+        {
+          "nombre": "Claude Opus 5",
+          "tipo": "agente"
+        },
+        {
+          "nombre": "Claude Sonnet 5",
+          "tipo": "agente"
+        }
+      ]
+    },
+    {
+      "id": "direccion",
+      "titulo": "Dirección",
+      "entradas": [
+        {
+          "nombre": "Dirigido por Eloy Gurucharri"
+        }
+      ]
+    },
+    {
+      "id": "titulo",
+      "titulo": "Título",
+      "entradas": [
+        {
+          "nombre": "SIGA 98"
+        }
+      ]
+    }
+  ]
+}
