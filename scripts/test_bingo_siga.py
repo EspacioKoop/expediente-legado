@@ -61,6 +61,27 @@ class BingoSigaTest(unittest.TestCase):
         self.assertIn("var nueva_vida := nueva(", self.jornada)
         self.assertIn("for clave in nueva_vida:", self.jornada)
 
+    def test_resumen_historico_es_derivado_y_sin_estado_paralelo(self):
+        self.assertIn("static func resumen_historial(jornada: Dictionary)", self.codigo)
+        self.assertIn('"jornadas_registradas": 0', self.codigo)
+        self.assertIn('"objetivos_completados": 0', self.codigo)
+        self.assertIn('"tarjetas_completas": 0', self.codigo)
+        self.assertIn('"racha_actual": 0', self.codigo)
+        self.assertIn('completas_por_dia[dia] = completa', self.codigo)
+        self.assertIn('while esperado > 0 and bool(completas_por_dia.get(esperado, false))', self.codigo)
+        bloque = self.codigo[
+            self.codigo.index("static func resumen_historial"):
+            self.codigo.index("static func cerrar_jornada")
+        ]
+        for prohibido in (
+            'jornada["bingo_siga"] =',
+            "Partida.guardar",
+            "Sellos.registrar_sello",
+            'jornada["dinero"]',
+            'jornada["acciones"] =',
+        ):
+            self.assertNotIn(prohibido, bloque)
+
     def test_no_hay_recompensas_ni_persistencia_paralela(self):
         for prohibido in (
             "Partida.guardar",
