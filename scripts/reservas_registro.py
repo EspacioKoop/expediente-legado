@@ -123,22 +123,37 @@ def conflictos(
     return {"mine_found": True, "conflicts": choques}
 
 
+def rutas_de_rama(comentarios: list[dict[str, Any]], branch: str, ahora: datetime) -> dict[str, Any]:
+    """Reserva vigente más reciente de una rama (lo que necesita reparar su CI)."""
+
+    propias = [r for r in vigentes(comentarios, ahora) if r.reserva.branch == branch]
+    if not propias:
+        return {"found": False}
+    ultima = propias[-1]
+    return {"found": True, "issue": ultima.reserva.issue, "files": ultima.rutas}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="orden", required=True)
     c = sub.add_parser("conflictos", help="choques de un CLAIM recién publicado")
-    c.add_argument("--comments", type=Path, required=True)
     c.add_argument("--claim-id", type=int, required=True)
     c.add_argument("--issue", type=int, required=True)
-    c.add_argument("--branch", required=True)
-    c.add_argument("--now", help="ISO-8601; por defecto, ahora")
+    r = sub.add_parser("rutas", help="rutas de la reserva vigente de una rama")
+    for p in (c, r):
+        p.add_argument("--comments", type=Path, required=True)
+        p.add_argument("--branch", required=True)
+        p.add_argument("--now", help="ISO-8601; por defecto, ahora")
     args = parser.parse_args()
 
     comentarios = json.loads(args.comments.read_text(encoding="utf-8"))
     ahora = registro.parse_fecha(args.now) if args.now else datetime.now(timezone.utc)
-    resultado = conflictos(
-        comentarios, claim_id=args.claim_id, issue=args.issue, branch=args.branch, ahora=ahora
-    )
+    if args.orden == "rutas":
+        resultado = rutas_de_rama(comentarios, args.branch, ahora)
+    else:
+        resultado = conflictos(
+            comentarios, claim_id=args.claim_id, issue=args.issue, branch=args.branch, ahora=ahora
+        )
     json.dump(resultado, sys.stdout, ensure_ascii=False)
     print()
     return 0

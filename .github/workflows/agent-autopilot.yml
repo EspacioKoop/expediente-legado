@@ -398,31 +398,21 @@ jobs:
           claim="CLAIM issue=#$ISSUE agent=Autopilot-$PROVIDER branch=$BRANCH files=$files goal=$goal lease=48h"
           cid="$(gh api -X POST "repos/$GITHUB_REPOSITORY/issues/182/comments" -f body="$claim" --jq .id)"
           gh api --paginate "repos/$GITHUB_REPOSITORY/issues/182/comments?per_page=100" \
-            --jq '.[]|[.id,(.body|@base64)]|@tsv' > /tmp/reservas.tsv
-          CLAIM_ID="$cid" BRANCH="$BRANCH" python3 - <<'PY'
-          import base64,os,re
-          me=int(os.environ["CLAIM_ID"]); branch=os.environ["BRANCH"]; active={}; mine=None
-          cr=re.compile(r"^CLAIM\s+issue=#(\d+).*?\bbranch=([^\s]+).*?\bfiles=([^\s]+)",re.M)
-          rr=re.compile(r"^RELEASE\s+issue=#(\d+)(?:.*?\bbranch=([^\s]+))?",re.M)
-          def ov(a,b): a=a.rstrip("/"); b=b.rstrip("/"); return a==b or a.startswith(b+"/") or b.startswith(a+"/")
-          for line in open("/tmp/reservas.tsv",encoding="utf-8"):
-              sid,enc=line.rstrip("\n").split("\t",1); cid=int(sid); body=base64.b64decode(enc).decode("utf-8","replace")
-              for m in rr.finditer(body):
-                  issue,br=m.groups()
-                  for k in list(active):
-                      if active[k][0]==issue and (not br or br==k): del active[k]
-              for m in cr.finditer(body):
-                  issue,br,fs=m.groups(); item=(issue,cid,fs.split(",")); active[br]=item
-                  if cid==me: mine=item
-          if mine is None: raise SystemExit("CLAIM perdido")
-          conflicts=[]
-          for br,(issue,cid,fs) in active.items():
-              if cid>=me or br==branch: continue
-              if any(ov(a,b) for a in mine[2] for b in fs): conflicts.append(br)
-          out=open(os.environ["GITHUB_OUTPUT"],"a")
-          if conflicts: out.write("reserved=false\nreason=solape:"+",".join(conflicts)+"\n")
-          else: out.write("reserved=true\n")
-          PY
+            --jq '.[]|{id,created_at,body}' | jq -s '.' > /tmp/reservas.json
+          # Capa única de lectura de #182 (#1662), la misma que usa el worker.
+          python3 scripts/reservas_registro.py conflictos \
+            --comments /tmp/reservas.json --claim-id "$cid" --issue "$ISSUE" --branch "$BRANCH" \
+            > /tmp/reserva.json
+          if [[ "$(jq -r '.mine_found' /tmp/reserva.json)" != true ]]; then
+            echo "CLAIM perdido" >&2
+            exit 1
+          fi
+          if [[ "$(jq '.conflicts | length' /tmp/reserva.json)" -gt 0 ]]; then
+            echo "reserved=false" >> "$GITHUB_OUTPUT"
+            echo "reason=solape:$(jq -r '[.conflicts[].branch] | join(",")' /tmp/reserva.json)" >> "$GITHUB_OUTPUT"
+          else
+            echo "reserved=true" >> "$GITHUB_OUTPUT"
+          fi
 
           if grep -q '^reserved=false$' "$GITHUB_OUTPUT"; then
             gh issue comment 182 --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=colision-autopilot" >/dev/null || true
