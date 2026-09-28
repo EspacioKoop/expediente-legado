@@ -53,6 +53,17 @@ class EcosArchivoRuntimeTest(unittest.TestCase):
         self.assertNotIn("JOY_BUTTON_", self.vertical)
         self.assertNotIn("KEY_", self.vertical)
 
+    def test_confirmacion_tiene_affordance_y_progreso_visible(self):
+        self.assertIn('_confirmar.nombre_objeto = "Confirmar secuencia"', self.vertical)
+        self.assertIn("COLOR_CONFIRMAR_LISTO", self.vertical)
+        self.assertIn("COLOR_CONFIRMAR_INACTIVO", self.vertical)
+        self.assertIn("_refrescar_confirmacion(confirmacion_disponible)", self.vertical)
+        self.assertIn("EcosArchivo.CANTIDAD_FRAGMENTOS", self.vertical)
+        bloque = self.vertical.split("func _refrescar_confirmacion", 1)[1]
+        self.assertNotIn("Input.", bloque)
+        self.assertNotIn("presentacion.confirmar()", bloque)
+        self.assertNotIn("SuenoPuzzleSesion", bloque)
+
     def test_tres_ecos_no_crean_barrera_fisica(self):
         self.assertIn("POSICIONES_ECOS := [", self.vertical)
         inicio = self.vertical.find("POSICIONES_ECOS := [")

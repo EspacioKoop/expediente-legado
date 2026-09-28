@@ -21,6 +21,8 @@ const GIROS_ECOS := [-0.14, 0.0, 0.14]
 const COLOR_BASE := Color(0.13, 0.15, 0.20)
 const COLOR_SELECCION := Color(0.31, 0.35, 0.46)
 const COLOR_TEXTO := Color(0.82, 0.84, 0.88)
+const COLOR_CONFIRMAR_LISTO := Color(0.36, 0.44, 0.30)
+const COLOR_CONFIRMAR_INACTIVO := Color(0.12, 0.13, 0.15)
 const COLOR_HABITACION := Color(0.08, 0.09, 0.12, 0.68)
 
 var presentacion
@@ -97,6 +99,7 @@ func _montar() -> void:
 	_confirmar.name = "ConfirmarEcos"
 	_confirmar.position = Vector3(0.0, 0.0, 2.35)
 	_confirmar.verbo = Interactuable3D.Verbo.USAR
+	_confirmar.nombre_objeto = "Confirmar secuencia"
 	_confirmar.activado.connect(_al_confirmar)
 	add_child(_confirmar)
 	_montar_confirmacion(_confirmar)
@@ -243,6 +246,10 @@ func _montar_confirmacion(confirmar: Interactuable3D) -> void:
 	caja.size = Vector3(1.2, 0.22, 0.8)
 	base.mesh = caja
 	base.position = Vector3(0.0, 0.35, 0.0)
+	var material_base := StandardMaterial3D.new()
+	material_base.albedo_color = COLOR_CONFIRMAR_INACTIVO
+	material_base.roughness = 0.9
+	base.material_override = material_base
 	confirmar.add_child(base)
 
 	var etiqueta := Label3D.new()
@@ -367,7 +374,9 @@ func _sincronizar() -> void:
 		panel.material_override = material
 
 	if _confirmar != null:
-		_confirmar.habilitado = bool(vista.get("confirmacion_disponible", false))
+		var confirmacion_disponible := bool(vista.get("confirmacion_disponible", false))
+		_confirmar.habilitado = confirmacion_disponible
+		_refrescar_confirmacion(confirmacion_disponible)
 
 	if _estado != null:
 		if (
@@ -377,10 +386,28 @@ func _sincronizar() -> void:
 			_estado.text = _recompensa_texto
 		else:
 			_estado.text = (
-				"%d/%d · %s"
+				"%d/%d · %d/%d · %s"
 				% [
+					seleccion.size(),
+					EcosArchivo.CANTIDAD_FRAGMENTOS,
 					int(vista.get("intentos", 0)),
 					int(vista.get("max_intentos", 1)),
 					str(vista.get("estado", "activo")),
 				]
 			)
+
+
+func _refrescar_confirmacion(disponible: bool) -> void:
+	if _confirmar == null:
+		return
+	var base := _confirmar.get_node_or_null("Base") as MeshInstance3D
+	var indicador := _confirmar.get_node_or_null("Indicador") as Label3D
+	if base != null:
+		var material := StandardMaterial3D.new()
+		material.albedo_color = COLOR_CONFIRMAR_LISTO if disponible else COLOR_CONFIRMAR_INACTIVO
+		material.roughness = 0.9
+		base.material_override = material
+	if indicador != null:
+		indicador.modulate = (
+			COLOR_TEXTO if disponible else Color(COLOR_TEXTO.r, COLOR_TEXTO.g, COLOR_TEXTO.b, 0.28)
+		)
