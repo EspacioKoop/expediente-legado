@@ -15,6 +15,9 @@ const CELDA_TRANSITO := 1.25
 const PASADAS_PARA_MARCA := 3
 const META_TIPO_MARCA := "huella_tipo_959"
 const META_INTENSIDAD_MARCA := "huella_intensidad_959"
+const META_ECO_ORIGEN := "huella_eco_origen_959"
+const FASES_VIGILIA_ECO := ["archivo", "trayecto", "casa"]
+const MAX_ECOS_SUENO := 3
 
 var _mundo_id := 0
 var _conectados := {}
@@ -37,6 +40,7 @@ func _process(_delta: float) -> void:
 		_contexto_visual = ""
 		_asegurar_raiz(mundo)
 		_montar_transito_guardado(dia, mundo)
+		_montar_ecos_vigilia_en_sueno(dia, mundo)
 		_sembrar_celda_actual(dia)
 	_conectar_marcables(dia, mundo, mundo)
 	_registrar_transito(dia, mundo)
@@ -171,6 +175,75 @@ func _asegurar_raiz(mundo: Node3D) -> Node3D:
 	raiz.name = NOMBRE_RAIZ
 	mundo.add_child(raiz)
 	return raiz
+
+
+## #959/#79: las huellas de vigilia más insistentes reaparecen en sueño como
+## residuos abstractos cerca de la entrada. No trasladamos coordenadas entre
+## espacios incompatibles ni registramos una huella nueva: solo reutilizamos
+## tipo + intensidad de hechos ya persistidos.
+func _montar_ecos_vigilia_en_sueno(dia: Node, mundo: Node3D) -> void:
+	if String(dia.jornada.get("fase", "")) != "sueño":
+		return
+	var caminante = dia.get("_caminante")
+	if not caminante is Node3D or not is_instance_valid(caminante):
+		return
+
+	var ecos := _huellas_vigilia_destacadas(dia.partida.estado, MAX_ECOS_SUENO)
+	if ecos.is_empty():
+		return
+	var centro := (caminante as Node3D).global_position
+	var raiz := _asegurar_raiz(mundo)
+	for indice in ecos.size():
+		var entrada: Dictionary = ecos[indice]
+		var origen := String(entrada.get("id", ""))
+		var tipo := String(entrada.get("tipo", "uso"))
+		var eco_id := "eco:" + origen
+		var punto := centro + _offset_eco_sueno(indice)
+		_montar_marca_en(
+			dia,
+			mundo,
+			eco_id,
+			tipo,
+			punto,
+			float(entrada.get("intensidad", 0.0)),
+		)
+		var marca := raiz.get_node_or_null(_nombre_marca(eco_id)) as MeshInstance3D
+		if marca != null:
+			marca.set_meta(META_ECO_ORIGEN, origen)
+
+
+## Selección determinista: intensidad, usos y finalmente id. El sueño no
+## necesita saber qué interacción concreta ocurrió ni puede convertirla en pista.
+static func _huellas_vigilia_destacadas(
+	estado_partida: Dictionary, limite: int = MAX_ECOS_SUENO
+) -> Array:
+	var candidatas := []
+	for fase in FASES_VIGILIA_ECO:
+		for entrada in HuellasAmbientales.de_fase(estado_partida, fase):
+			candidatas.append(entrada)
+	candidatas.sort_custom(
+		func(a, b):
+			var intensidad_a := float(a.get("intensidad", 0.0))
+			var intensidad_b := float(b.get("intensidad", 0.0))
+			if not is_equal_approx(intensidad_a, intensidad_b):
+				return intensidad_a > intensidad_b
+			var usos_a := int(a.get("usos", 0))
+			var usos_b := int(b.get("usos", 0))
+			if usos_a != usos_b:
+				return usos_a > usos_b
+			return String(a.get("id", "")) < String(b.get("id", ""))
+	)
+	return candidatas.slice(0, clampi(limite, 0, MAX_ECOS_SUENO))
+
+
+static func _offset_eco_sueno(indice: int) -> Vector3:
+	match indice:
+		0:
+			return Vector3(-0.82, 0.0, -1.15)
+		1:
+			return Vector3(0.78, 0.0, -1.42)
+		_:
+			return Vector3(0.08, 0.0, -2.02)
 
 
 func _montar_o_actualizar_marca(

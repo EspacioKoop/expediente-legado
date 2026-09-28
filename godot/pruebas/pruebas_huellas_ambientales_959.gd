@@ -234,6 +234,62 @@ func _probar() -> void:
 		"reconstruir el mundo no suma una pasada fantasma",
 	)
 
+	# La vigilia puede reaparecer simbólicamente en sueño, pero el eco es solo
+	# presentación: selecciona hechos persistidos y no registra nada nuevo.
+	for _i in range(5):
+		HuellasAmbientales.registrar(dia.partida.estado, "casa:televisor", "equipo", "casa")
+	for _i in range(3):
+		HuellasAmbientales.registrar(dia.partida.estado, "trayecto:portal", "apertura", "trayecto")
+	for _i in range(2):
+		HuellasAmbientales.registrar(
+			dia.partida.estado, "archivo:archivador", "apertura", "archivo"
+		)
+	HuellasAmbientales.registrar(dia.partida.estado, "casa:silla", "roce", "casa")
+
+	var estado_antes_ecos := JSON.stringify(dia.partida.estado["huellas_ambientales"])
+	var destacadas: Array = controller._huellas_vigilia_destacadas(dia.partida.estado, 3)
+	_comprobar(destacadas.size() == 3, "el sueño limita los ecos a tres huellas")
+	_comprobar(
+		String(destacadas[0].get("id", "")) == "casa:televisor",
+		"la huella más intensa tiene prioridad onírica",
+	)
+	_comprobar(
+		float(destacadas[0].get("intensidad", 0.0)) >= float(destacadas[1].get("intensidad", 0.0)),
+		"los ecos se ordenan por intensidad",
+	)
+
+	dia.jornada["fase"] = "sueño"
+	dia.jornada["hora_minutos"] = 23 * 60
+	mundo_recargado.queue_free()
+	var mundo_sueno := Node3D.new()
+	mundo_sueno.name = "MundoSueno"
+	dia.add_child(mundo_sueno)
+	dia._mundo = mundo_sueno
+	dia._caminante.position = Vector3(2.0, 0.0, 3.0)
+	controller._process(0.0)
+	var raiz_sueno := mundo_sueno.get_node_or_null("HuellasAmbientales959")
+	_comprobar(raiz_sueno != null, "el sueño monta una raíz de ecos")
+	_comprobar(raiz_sueno.get_child_count() == 3, "el sueño materializa solo tres ecos")
+	for hijo in raiz_sueno.get_children():
+		_comprobar(hijo is MeshInstance3D, "cada eco sigue siendo una malla barata")
+		var origen := String(hijo.get_meta("huella_eco_origen_959", ""))
+		_comprobar(
+			not origen.is_empty() and origen.get_slice(":", 0) in ["archivo", "trayecto", "casa"],
+			"cada eco conserva una referencia interna a un hecho de vigilia",
+		)
+		_comprobar(
+			not (hijo is Interactuable3D),
+			"los ecos no son interactuables ni crean progreso",
+		)
+		var distancia_entrada := (hijo as Node3D).global_position.distance_to(
+			dia._caminante.global_position
+		)
+		_comprobar(distancia_entrada < 2.5, "los ecos quedan cerca de la entrada del sueño")
+	_comprobar(
+		JSON.stringify(dia.partida.estado["huellas_ambientales"]) == estado_antes_ecos,
+		"entrar en sueño no muta ni duplica las huellas persistentes",
+	)
+
 	dia.queue_free()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
