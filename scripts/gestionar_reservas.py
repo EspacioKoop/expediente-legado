@@ -335,13 +335,19 @@ def publicar_release(reserva: Reserva, motivo: str, pr: dict | None, dry_run: bo
     partes.append("auto=reservas.yml")
     body = " ".join(partes)
     print(body)
-    if motivo == "merge-detectado-automaticamente":
-        limpiar_labels_agente(reserva.issue, dry_run)
     if not dry_run:
         api_json("POST", f"/repos/{REPO}/issues/{REGISTRO_ISSUE}/comments", {"body": body})
     # También en dry-run: el estado es solo de esta ejecución, y así la
     # recuperación del modo --pr no vuelve a anunciar lo que ya se liberó.
     reserva.released = True
+    # La limpieza de labels es secundaria: va después del RELEASE y no puede
+    # fallar la liberación. Si fallara antes, un issue transferido o sin
+    # permisos dejaría la reserva viva y reservas.yml en rojo en cada barrido.
+    if motivo == "merge-detectado-automaticamente":
+        try:
+            limpiar_labels_agente(reserva.issue, dry_run)
+        except RuntimeError as exc:
+            print(f"AVISO: no se pudieron limpiar labels de agente en #{reserva.issue}: {exc}")
 
 
 def publicar_acciones(acciones: list[tuple[Reserva, str, dict | None]], dry_run: bool) -> int:
