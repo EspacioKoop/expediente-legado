@@ -54,7 +54,7 @@ class WorkflowsYamlTest(unittest.TestCase):
             texto = (ROOT / ".github" / "workflows" / nombre).read_text(encoding="utf-8")
             with self.subTest(workflow=nombre, action=accion):
                 self.assertIn(f"uses: {accion}@{sha}", texto)
-                self.assertNotRegex(texto, rf"uses:\\s*{re.escape(accion)}@v\\d+")
+                self.assertNotRegex(texto, rf"uses:\s*{re.escape(accion)}@v\d+")
 
 
 if __name__ == "__main__":
