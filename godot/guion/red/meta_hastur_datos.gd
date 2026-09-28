@@ -62,9 +62,15 @@ static func validar_snapshot(datos: Variant) -> Dictionary:
 		if not datos.has(campo):
 			return _invalido("missing_%s" % campo)
 
-	if int(datos["contract_version"]) != CONTRACT_VERSION:
+	var contrato := _entero_json(datos["contract_version"], "invalid_contract_version_type")
+	if not contrato["ok"]:
+		return _invalido(contrato["reason"])
+	if int(contrato["value"]) != CONTRACT_VERSION:
 		return _invalido("unsupported_contract_version")
-	if int(datos["rules_version"]) != RULES_VERSION:
+	var reglas := _entero_json(datos["rules_version"], "invalid_rules_version_type")
+	if not reglas["ok"]:
+		return _invalido(reglas["reason"])
+	if int(reglas["value"]) != RULES_VERSION:
 		return _invalido("unsupported_rules_version")
 
 	var season_id := String(datos["season_id"])
@@ -75,9 +81,10 @@ static func validar_snapshot(datos: Variant) -> Dictionary:
 	if not FASES.has(phase):
 		return _invalido("invalid_phase")
 
-	if typeof(datos["community_progress"]) != TYPE_INT:
-		return _invalido("invalid_progress_type")
-	var progress := int(datos["community_progress"])
+	var progreso_result := _entero_json(datos["community_progress"], "invalid_progress_type")
+	if not progreso_result["ok"]:
+		return _invalido(progreso_result["reason"])
+	var progress := int(progreso_result["value"])
 	if progress < 0:
 		return _invalido("invalid_progress")
 
@@ -88,15 +95,19 @@ static func validar_snapshot(datos: Variant) -> Dictionary:
 	if progress > int(thresholds[-1]):
 		return _invalido("progress_over_max")
 
-	if typeof(datos["contributors_approx"]) != TYPE_INT:
-		return _invalido("invalid_contributors_type")
-	var contributors_approx := int(datos["contributors_approx"])
+	var contributors_result := _entero_json(
+		datos["contributors_approx"], "invalid_contributors_type"
+	)
+	if not contributors_result["ok"]:
+		return _invalido(contributors_result["reason"])
+	var contributors_approx := int(contributors_result["value"])
 	if contributors_approx < 0:
 		return _invalido("invalid_contributors")
 
-	if typeof(datos["updated_at"]) != TYPE_INT:
-		return _invalido("invalid_updated_at_type")
-	var updated_at := int(datos["updated_at"])
+	var updated_result := _entero_json(datos["updated_at"], "invalid_updated_at_type")
+	if not updated_result["ok"]:
+		return _invalido(updated_result["reason"])
+	var updated_at := int(updated_result["value"])
 	if updated_at <= 0:
 		return _invalido("invalid_updated_at")
 
@@ -130,9 +141,15 @@ static func validar_contribucion(datos: Variant) -> Dictionary:
 		if not CAMPOS_CONTRIBUCION.has(String(clave)):
 			return _invalido("unexpected_%s" % String(clave))
 
-	if int(datos["contract_version"]) != CONTRACT_VERSION:
+	var contrato := _entero_json(datos["contract_version"], "invalid_contract_version_type")
+	if not contrato["ok"]:
+		return _invalido(contrato["reason"])
+	if int(contrato["value"]) != CONTRACT_VERSION:
 		return _invalido("unsupported_contract_version")
-	if int(datos["rules_version"]) != RULES_VERSION:
+	var reglas := _entero_json(datos["rules_version"], "invalid_rules_version_type")
+	if not reglas["ok"]:
+		return _invalido(reglas["reason"])
+	if int(reglas["value"]) != RULES_VERSION:
 		return _invalido("unsupported_rules_version")
 
 	for campo in ["season_id", "contribution_id", "actor_public_id", "source_event_id"]:
@@ -143,7 +160,8 @@ static func validar_contribucion(datos: Variant) -> Dictionary:
 	if not TIPOS_CONTRIBUCION.has(tipo):
 		return _invalido("invalid_type")
 
-	if typeof(datos["occurred_at"]) != TYPE_INT or int(datos["occurred_at"]) <= 0:
+	var ocurrido := _entero_json(datos["occurred_at"], "invalid_occurred_at")
+	if not ocurrido["ok"] or int(ocurrido["value"]) <= 0:
 		return _invalido("invalid_occurred_at")
 
 	return {
@@ -158,7 +176,7 @@ static func validar_contribucion(datos: Variant) -> Dictionary:
 			"actor_public_id": String(datos["actor_public_id"]),
 			"type": tipo,
 			"source_event_id": String(datos["source_event_id"]),
-			"occurred_at": int(datos["occurred_at"]),
+			"occurred_at": int(ocurrido["value"]),
 		},
 	}
 
@@ -228,14 +246,25 @@ static func _validar_thresholds(valor: Variant) -> Dictionary:
 	var anterior := 0
 	var normalizados: Array[int] = []
 	for item in thresholds:
-		if typeof(item) != TYPE_INT:
-			return _invalido("invalid_threshold_type")
-		var actual := int(item)
+		var entero := _entero_json(item, "invalid_threshold_type")
+		if not entero["ok"]:
+			return _invalido(entero["reason"])
+		var actual := int(entero["value"])
 		if actual <= anterior:
 			return _invalido("thresholds_not_increasing")
 		normalizados.append(actual)
 		anterior = actual
 	return {"ok": true, "reason": "", "thresholds": normalizados}
+
+
+static func _entero_json(valor: Variant, razon_tipo: String) -> Dictionary:
+	var tipo := typeof(valor)
+	if tipo != TYPE_INT and tipo != TYPE_FLOAT:
+		return {"ok": false, "reason": razon_tipo, "value": 0}
+	var numero := float(valor)
+	if numero != floor(numero):
+		return {"ok": false, "reason": razon_tipo, "value": 0}
+	return {"ok": true, "reason": "", "value": int(numero)}
 
 
 static func _id_valido(valor: String) -> bool:
