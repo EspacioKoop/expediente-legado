@@ -64,11 +64,14 @@ func _probar_secuencia() -> void:
 	var puntos := [Vector3.ZERO, Vector3(4.0, 0.0, 0.0)]
 	_comprobar(
 		"secuencia se configura",
-		controlador.configurar(
-			"escena:secuencia",
-			SuenoObjetivoVariedad3D.TIPO_SECUENCIA,
-			actor,
-			puntos,
+		(
+			controlador
+			. configurar(
+				"escena:secuencia",
+				SuenoObjetivoVariedad3D.TIPO_SECUENCIA,
+				actor,
+				puntos,
+			)
 		),
 		true,
 	)
@@ -106,11 +109,14 @@ func _probar_retorno() -> void:
 	var controlador := _controlador(actor)
 	_comprobar(
 		"retorno se configura",
-		controlador.configurar(
-			"escena:retorno",
-			SuenoObjetivoVariedad3D.TIPO_RETORNO,
-			actor,
-			[foco, origen],
+		(
+			controlador
+			. configurar(
+				"escena:retorno",
+				SuenoObjetivoVariedad3D.TIPO_RETORNO,
+				actor,
+				[foco, origen],
+			)
 		),
 		true,
 	)
@@ -139,11 +145,14 @@ func _probar_permanencia() -> void:
 	var controlador := _controlador(actor)
 	_comprobar(
 		"permanencia se configura",
-		controlador.configurar(
-			"escena:permanencia",
-			SuenoObjetivoVariedad3D.TIPO_PERMANENCIA,
-			actor,
-			[Vector3.ZERO],
+		(
+			controlador
+			. configurar(
+				"escena:permanencia",
+				SuenoObjetivoVariedad3D.TIPO_PERMANENCIA,
+				actor,
+				[Vector3.ZERO],
+			)
 		),
 		true,
 	)
