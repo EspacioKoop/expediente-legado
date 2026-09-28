@@ -97,11 +97,13 @@ const REGLAS := [
 		"id": "firma_catalogada_detectada",
 		"superficie": "software",
 		"evento": "firma_catalogada",
-		"causa": "El limpiador ficticio encontró una firma catalogada en un objeto del OS simulado.",
+		"causa":
+		"El limpiador ficticio encontró una firma catalogada en un objeto del OS simulado.",
 		"resolucion":
 		"Neutralizar la incidencia o cerrar el aviso sin modificar archivos del sistema real.",
 		"salida_segura": "cerrar_aviso",
-		"regla_normal": "El limpiador ficticio solo detecta firmas presentes en su catálogo interno.",
+		"regla_normal":
+		"El limpiador ficticio solo detecta firmas presentes en su catálogo interno.",
 		"fixture_anomalo": "firma_no_catalogada_detectada",
 		"refs": ["#668", "#539"],
 	},
@@ -169,13 +171,16 @@ static func escanear_limpiador(estado_os: Dictionary) -> Array[Dictionary]:
 		var firma := firma_limpiador(String(objeto.get("firma_id", "")))
 		if firma.is_empty():
 			continue
-		detecciones.append(
-			{
-				"objeto_id": String(objeto.get("id", "")),
-				"firma_id": String(firma.get("id", "")),
-				"nombre": String(firma.get("nombre", "")),
-				"tipo": String(firma.get("tipo", "")),
-			}
+		(
+			detecciones
+			. append(
+				{
+					"objeto_id": String(objeto.get("id", "")),
+					"firma_id": String(firma.get("id", "")),
+					"nombre": String(firma.get("nombre", "")),
+					"tipo": String(firma.get("tipo", "")),
+				}
+			)
 		)
 	detecciones.sort_custom(_orden_detecciones_limpiador)
 	return detecciones
