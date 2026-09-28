@@ -24,6 +24,7 @@ var _silueta: MeshInstance3D
 var _audio: AudioStreamPlayer3D
 var _tiempo := 0.0
 var _energia_base := 0.0
+var _silueta_y_base := 0.0
 
 
 func mostrar(evento: Dictionary, conocimiento: Array = [], ahora_unix: int = -1) -> bool:
@@ -82,7 +83,8 @@ func _montar_silueta(strength: String) -> void:
 	material.albedo_color = COLOR_COMPANIA
 	capsula.material = material
 	_silueta.mesh = capsula
-	_silueta.position = Vector3(0.0, capsula.height * 0.5, 0.0)
+	_silueta_y_base = capsula.height * 0.5
+	_silueta.position = Vector3(0.0, _silueta_y_base, 0.0)
 	add_child(_silueta)
 
 
@@ -108,7 +110,7 @@ func _process(delta: float) -> void:
 		var pulso := 0.72 + 0.28 * sin(_tiempo * TAU * 2.4)
 		_luz.light_energy = _energia_base * restante * pulso
 	if _silueta != null:
-		_silueta.position.y += sin(_tiempo * TAU * 0.85) * 0.0005
+		_silueta.position.y = _silueta_y_base + sin(_tiempo * TAU * 0.85) * 0.03
 		_silueta.transparency = 1.0 - restante
 	if _tiempo >= DURACION_SEGUNDOS:
 		set_process(false)
