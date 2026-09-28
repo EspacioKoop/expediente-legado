@@ -427,7 +427,7 @@ jobs:
 
           if grep -q '^reserved=false$' "$GITHUB_OUTPUT"; then
             gh issue comment 182 --repo "$GITHUB_REPOSITORY" --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=colision-agent-pool" >/dev/null || true
-            gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+          gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
               --remove-label agent:working --remove-label agent:needs-human \
               >/dev/null 2>&1 || true
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
@@ -578,6 +578,7 @@ jobs:
         run: |
           set -euo pipefail
           cp .agent-plan.json /tmp/plan.json
+          cp .agent-task.md /tmp/agent-task.md
           rm -f .agent-task.md .agent-plan.json .agent-context.md .agent-memory.json .agent-history.json .agent-platino-sha gha-creds-*.json
           rm -rf .agent-platino .agent-wiki .gemini .qwen gemini-artifacts qwen-artifacts
           git add -A
@@ -605,6 +606,63 @@ jobs:
           if [[ "$backend" == true ]]; then
             (cd backend && mvn test && npm ci && npm test)
           fi
+
+          git diff --cached --no-ext-diff --unified=3 > /tmp/agent-review.diff
+          python3 - <<'PY'
+          from pathlib import Path
+          task=Path("/tmp/agent-task.md").read_text(encoding="utf-8")[:12000]
+          plan=Path("/tmp/plan.json").read_text(encoding="utf-8")[:4000]
+          diff=Path("/tmp/agent-review.diff").read_text(encoding="utf-8")[:32000]
+          Path(".agent-review-input.md").write_text(
+              "# Reviewer input\n\n## Issue\n"+task+
+              "\n\n## Plan reservado\n"+plan+
+              "\n\n## Diff staged\n```diff\n"+diff+"\n```\n",
+              encoding="utf-8",
+          )
+          PY
+
+      - id: review_qwen
+        name: Reviewer acotado Qwen
+        if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true' && inputs.provider == 'qwen'
+        timeout-minutes: 3
+        continue-on-error: true
+        uses: QwenLM/qwen-code-action@v1
+        with:
+          openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || steps.qwen_config.outputs.credential == 'fallback-1' && secrets.QWEN_FALLBACK_1_API_KEY || steps.qwen_config.outputs.credential == 'fallback-2' && secrets.QWEN_FALLBACK_2_API_KEY || steps.qwen_config.outputs.credential == 'fallback-3' && secrets.QWEN_FALLBACK_3_API_KEY || secrets.QWEN_FALLBACK_4_API_KEY }}
+          openai_base_url: ${{ steps.qwen_config.outputs.url }}
+          openai_model: ${{ steps.qwen_config.outputs.model }}
+          qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
+          settings: '{"model":{"maxSessionTurns":4},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file"]}}'
+          prompt: 'Lee UNICAMENTE .agent-review-input.md. No abras otros archivos, no uses shell, no edites nada y no propongas refactors generales. Revisa solo incumplimiento del issue/plan, bug claro del diff, test imprescindible ausente o violacion evidente de seguridad inferible del input. Maximo 5 hallazgos, una frase cada uno. Termina inmediatamente con AGENT_REVIEW_BEGIN seguido de JSON {"verdict":"approve","findings":[]} o {"verdict":"findings","findings":["..."]} y AGENT_REVIEW_END.'
+
+      - id: review_gemini
+        name: Reviewer acotado Gemini
+        if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true' && inputs.provider == 'gemini'
+        timeout-minutes: 3
+        continue-on-error: true
+        uses: google-github-actions/run-gemini-cli@v0
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          gemini_model: ${{ vars.GEMINI_MODEL }}
+          gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
+          settings: '{"model":{"maxSessionTurns":4},"tools":{"core":["read_file"]}}'
+          prompt: 'Lee UNICAMENTE .agent-review-input.md. No abras otros archivos, no uses shell, no edites nada y no propongas refactors generales. Revisa solo incumplimiento del issue/plan, bug claro del diff, test imprescindible ausente o violacion evidente de seguridad inferible del input. Maximo 5 hallazgos, una frase cada uno. Termina inmediatamente con AGENT_REVIEW_BEGIN seguido de JSON {"verdict":"approve","findings":[]} o {"verdict":"findings","findings":["..."]} y AGENT_REVIEW_END.'
+
+      - id: review_contract
+        name: Normalizar reviewer no bloqueante
+        if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true'
+        env:
+          SUMMARY: ${{ steps.review_qwen.outputs.summary || steps.review_gemini.outputs.summary }}
+        run: |
+          set -euo pipefail
+          printf '%s' "${SUMMARY:-}" > /tmp/agent-review-summary.txt
+          python3 scripts/agent_review_contract.py \
+            --summary-file /tmp/agent-review-summary.txt \
+            --output /tmp/agent-review.json >/dev/null
+          echo "status=$(jq -r '.status' /tmp/agent-review.json)" >> "$GITHUB_OUTPUT"
+          echo "verdict=$(jq -r '.verdict // "skipped"' /tmp/agent-review.json)" >> "$GITHUB_OUTPUT"
+          rm -f .agent-review-input.md
+          rm -rf .gemini .qwen gemini-artifacts qwen-artifacts
 
       - name: Guardar memoria de trabajo
         if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true'
@@ -655,6 +713,8 @@ jobs:
           PROVIDER: ${{ inputs.provider }}
           WORKER: ${{ inputs.worker }}
           BRANCH: ${{ steps.guard.outputs.branch }}
+          REVIEW_STATUS: ${{ steps.review_contract.outputs.status || 'skipped' }}
+          REVIEW_VERDICT: ${{ steps.review_contract.outputs.verdict || 'skipped' }}
         run: |
           set -euo pipefail
           git config user.name "agent-pool[bot]"
@@ -667,7 +727,13 @@ jobs:
             --title "agent($PROVIDER): #$ISSUE $title" \
             --body "Refs #$ISSUE
 
-          Implementacion autonoma mediante worker \`$WORKER\`. Plan reservado en #182; cambios limitados al CLAIM; preflight ejecutado. PR draft, sin auto-merge.")"
+          Implementacion autonoma mediante worker \`$WORKER\`. Plan reservado en #182; cambios limitados al CLAIM; preflight ejecutado. Reviewer acotado: \`$REVIEW_STATUS/$REVIEW_VERDICT\`. PR draft, sin auto-merge.")"
+          if [[ -s /tmp/agent-review.json && "$(jq -r '.verdict // empty' /tmp/agent-review.json)" == findings ]]; then
+            findings="$(jq -r '.findings[] | "- " + .' /tmp/agent-review.json)"
+            gh pr comment "$url" --repo "$GITHUB_REPOSITORY" --body "Reviewer acotado (advisory; sin retries automaticos):
+
+          $findings" >/dev/null || true
+          fi
           gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
             --add-label agent:pr-open \
             --remove-label agent:working \
