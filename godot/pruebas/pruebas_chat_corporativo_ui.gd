@@ -24,7 +24,10 @@ func _probar() -> void:
 			senales["mensaje"] = mensaje_id
 			senales["opcion"] = opcion_id
 	)
-	chat.enlace_abierto.connect(func(recurso_id: String): senales["enlace"] = recurso_id)
+	chat.enlace_abierto.connect(
+		func(recurso_id: String):
+			senales["enlace"] = recurso_id
+	)
 	chat.configurar_contexto(_contexto(1, Jornada.ACCIONES_POR_DIA - 1))
 	get_root().add_child(chat)
 	await process_frame
@@ -34,10 +37,14 @@ func _probar() -> void:
 	var mensajes := chat.find_child("Mensajes", true, false) as ItemList
 	var detalle := chat.find_child("DetalleMensaje", true, false) as RichTextLabel
 	var enlace := chat.find_child("AbrirWeb98", true, false) as Button
-	_comprobar(canales != null and canales.item_count == 4, "la UI muestra los cuatro canales normales")
+	_comprobar(
+		canales != null and canales.item_count == 4, "la UI muestra los cuatro canales normales"
+	)
 	_comprobar(presencias != null, "la UI expone presencia por canal")
 	_comprobar(mensajes != null, "la UI expone historial seleccionable")
-	_comprobar(detalle != null and detalle.selection_enabled, "el texto del mensaje se puede seleccionar")
+	_comprobar(
+		detalle != null and detalle.selection_enabled, "el texto del mensaje se puede seleccionar"
+	)
 	_comprobar(canales.focus_mode == Control.FOCUS_ALL, "los canales aceptan foco de teclado/mando")
 	_comprobar(mensajes.focus_mode == Control.FOCUS_ALL, "los mensajes aceptan foco de teclado/mando")
 	_comprobar(not _contiene_entrada_libre(chat), "el primer corte no ofrece chat de texto libre")
@@ -59,7 +66,10 @@ func _probar() -> void:
 	var indice_cunado := _indice_por_id(mensajes, "cunado-cafe")
 	_seleccionar(mensajes, indice_cunado)
 	var respuestas := chat.find_child("Respuestas", true, false) as VBoxContainer
-	_comprobar(_botones(respuestas).size() == 2, "el mensaje ofrece exactamente sus dos respuestas cerradas")
+	_comprobar(
+		_botones(respuestas).size() == 2,
+		"el mensaje ofrece exactamente sus dos respuestas cerradas",
+	)
 	_botones(respuestas)[0].pressed.emit()
 	await process_frame
 	var guardadas := chat.respuestas_guardadas()
