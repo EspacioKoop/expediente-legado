@@ -72,6 +72,24 @@ class CompanerosIdleTest(unittest.TestCase):
         self.assertNotIn("AnimacionesUAL.reproducir(objetivo,", self.idle)
         self.assertIn("_reloj_actividad = fmod", self.idle)
 
+    def test_horario_cafeteria_solo_filtra_destino_ambiental(self):
+        self.assertIn(
+            'Jornada.servicio_disponible(dia.jornada, "cafeteria")',
+            self.controller,
+        )
+        self.assertIn(
+            "cafeteria_abierta: bool = true",
+            self.controller,
+        )
+        self.assertIn(
+            "destinos_recado(mundo, cafeteria_abierta)",
+            self.controller,
+        )
+        self.assertIn("if cafeteria_abierta:", self.controller)
+        self.assertIn('mundo.get_node_or_null(MAQUINA_CAFE)', self.controller)
+        self.assertNotIn("MaquinaCafeInteractiva3D", self.controller)
+        self.assertNotIn("Jornada.gastar", self.controller)
+
     def test_dia_monta_controller_hijo(self):
         self.assertIn("dia_companeros_idle_app.gd", self.dia)
         self.assertIn("CompanerosIdleController", self.dia)
