@@ -93,6 +93,8 @@ static func nueva() -> Dictionary:
 		# Vive en Partida para atravesar escenas, jornadas y reasignaciones sin
 		# convertir prácticas/exposición en una identidad o puntuación global.
 		ReligionEventos.CLAVE_ESTADO: ReligionEventos.nuevo(),
+		# #937: snapshots factuales por vida; no son identidad activa ni puntuación.
+		ReligionEventos.CLAVE_HISTORIAL: [],
 		# #1184: historial literario transversal persistente. Sobrevive a jornadas
 		# y reasignaciones; borrar/empezar una partida crea uno vacío.
 		LiteraturaEventos.CLAVE_ESTADO: LiteraturaEventos.nuevo(),
@@ -314,6 +316,14 @@ static func validar(guardado) -> Array:
 		else:
 			for error in ReligionEventos.validar(guardado[ReligionEventos.CLAVE_ESTADO]):
 				errores.append("%s.%s" % [ReligionEventos.CLAVE_ESTADO, error])
+	if guardado.has(ReligionEventos.CLAVE_HISTORIAL):
+		if typeof(guardado[ReligionEventos.CLAVE_HISTORIAL]) != TYPE_ARRAY:
+			errores.append("%s no es una lista" % ReligionEventos.CLAVE_HISTORIAL)
+		else:
+			for error in ReligionEventos.validar_historial_trayectorias(
+				guardado[ReligionEventos.CLAVE_HISTORIAL]
+			):
+				errores.append("%s.%s" % [ReligionEventos.CLAVE_HISTORIAL, error])
 	if guardado.has(LiteraturaEventos.CLAVE_ESTADO):
 		if typeof(guardado[LiteraturaEventos.CLAVE_ESTADO]) != TYPE_DICTIONARY:
 			errores.append("%s no es un objeto" % LiteraturaEventos.CLAVE_ESTADO)
