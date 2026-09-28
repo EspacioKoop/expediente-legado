@@ -60,7 +60,7 @@ class SuenoObjetivosTest(unittest.TestCase):
         # El progreso viaja en el mismo guardado que el catálogo: la llamada
         # ocurre antes del guardado condicional, no después.
         completar = self.reactivo.index("completar_objetivo_anomalia_documental(anomalia_id")
-        guardado = self.reactivo.index('dia._guardar_o_avisar("")')
+        guardado = self.reactivo.index('dia._guardar_o_avisar("")', completar)
         self.assertLess(completar, guardado)
 
     def test_la_plaza_documental_no_monta_una_zona_pisable(self):
