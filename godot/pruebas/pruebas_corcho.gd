@@ -156,10 +156,15 @@ func _probar_panel() -> void:
 		return
 	_comprobar(boton_a.focus_mode == Control.FOCUS_ALL, "las fichas se eligen con teclado y mando")
 	_comprobar(
-		boton_a.accessibility_name == boton_a.tooltip_text and not boton_a.accessibility_name.is_empty(),
+		(
+			boton_a.accessibility_name == boton_a.tooltip_text
+			and not boton_a.accessibility_name.is_empty()
+		),
 		"la ficha expone el mismo nombre visible al lector de pantalla",
 	)
-	_comprobar(not panel.accessibility_name.is_empty(), "el panel del corcho tiene nombre accesible")
+	_comprobar(
+		not panel.accessibility_name.is_empty(), "el panel del corcho tiene nombre accesible"
+	)
 	var cerrar := panel.get_node_or_null("Cerrar") as Button
 	_comprobar(
 		cerrar != null and cerrar.accessibility_name == cerrar.text and not cerrar.text.is_empty(),
