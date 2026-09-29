@@ -41,7 +41,9 @@ func _probar() -> void:
 	root.add_child(calle_lluvia)
 	var lluvia := DesvioRefugio3D.montar(calle_lluvia, {"dia": 1, "clima_forzado": Clima.LLUVIA})
 	_comprobar(bool(lluvia.get_meta("precipitacion", false)), "lluvia activa lectura de refugio")
-	_comprobar(\n\t\tlluvia.get_node_or_null("CharcoExterior") != null, "lluvia queda fuera del suelo seco"\n\t)
+	_comprobar(
+		lluvia.get_node_or_null("CharcoExterior") != null, "lluvia queda fuera del suelo seco"
+	)
 	_comprobar(lluvia.get_node_or_null("GoteoBorde2") != null, "lluvia gotea en el borde")
 
 	var calle_nieve := Node3D.new()
@@ -49,7 +51,9 @@ func _probar() -> void:
 	var nieve := DesvioRefugio3D.montar(calle_nieve, {"clima_forzado": Clima.NIEVE})
 	_comprobar(bool(nieve.get_meta("precipitacion", false)), "nieve activa lectura de refugio")
 	_comprobar(nieve.get_node_or_null("NieveBordeTecho") != null, "nieve se acumula en el borde")
-	_comprobar(\n\t\tnieve.get_node_or_null("CharcoExterior") == null, "nieve no reutiliza el charco de lluvia"\n\t)
+	_comprobar(
+		nieve.get_node_or_null("CharcoExterior") == null, "nieve no reutiliza el charco de lluvia"
+	)
 
 	calle.queue_free()
 	calle_lluvia.queue_free()
