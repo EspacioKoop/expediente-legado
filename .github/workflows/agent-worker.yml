@@ -20,6 +20,11 @@ on:
         required: false
         type: string
         default: ''
+      retry_hint:
+        description: 'Feedback acotado de un intento anterior del mismo worker'
+        required: false
+        type: string
+        default: ''
     secrets:
       QWEN_API_KEY:
         required: false
@@ -66,6 +71,11 @@ on:
           - qwen-fallback-2
           - qwen-fallback-3
           - qwen-fallback-4
+      retry_hint:
+        description: 'Feedback acotado de un intento anterior del mismo worker'
+        required: false
+        type: string
+        default: ''
 
 permissions:
   contents: write
@@ -518,6 +528,7 @@ jobs:
           PROVIDER: ${{ inputs.provider }}
           WORKER: ${{ inputs.worker }}
           MAX_FILES: ${{ vars.AGENT_POOL_MAX_FILES || '1' }}
+          RETRY_HINT: ${{ inputs.retry_hint || '' }}
         run: |
           set -euo pipefail
           base_sha="$(git rev-parse HEAD)"
@@ -536,6 +547,15 @@ jobs:
             --packet .agent-task-packet.json \
             --provider "$PROVIDER" \
             --output .agent-worker-prompt.md
+          if [[ -n "${RETRY_HINT:-}" ]]; then
+            {
+              echo
+              echo "## Feedback del intento anterior"
+              printf '%s\n' "$RETRY_HINT" | head -c 1200
+              echo
+              echo "Corrige únicamente esta causa manteniendo el mismo objetivo y fichero."
+            } >> .agent-worker-prompt.md
+          fi
           [[ "$(jq -r '.base_sha' .agent-task-packet.json)" == "$base_sha" ]]
           echo "task_id=$(jq -r '.task_id' .agent-task-packet.json)" >> "$GITHUB_OUTPUT"
 
@@ -766,7 +786,7 @@ jobs:
           # API) sus cambios están a medias y nunca deben llegar a una PR.
           if [[ "$IMPLEMENT_OUTCOME" != success ]]; then
             echo "retry_stage=implement" >> "$GITHUB_OUTPUT"
-            echo "::error::implementación incompleta (outcome=$IMPLEMENT_OUTCOME); se reintentará con otro worker" >&2
+            echo "::error::implementación incompleta (outcome=$IMPLEMENT_OUTCOME); la política decidirá retry/rotación" >&2
             exit 1
           fi
           cp .agent-plan.json /tmp/plan.json
@@ -779,7 +799,7 @@ jobs:
           git add -A
           if git diff --cached --quiet; then
             echo "retry_stage=no-changes" >> "$GITHUB_OUTPUT"
-            echo "::error::implementación terminó sin cambios; se reintentará con otro worker" >&2
+            echo "::error::implementación terminó sin cambios; se detendrá sin penalizar el worker" >&2
             exit 2
           fi
           python3 - <<'PY'
@@ -807,9 +827,18 @@ jobs:
           fi
           # Preflight dirigido (#1636): solo lo que toca el diff. La suite completa
           # necesita Godot y es trabajo del CI canónico que se lanza sobre la PR.
-          python3 scripts/agent_preflight.py --changed "${files[@]}" --report /tmp/agent-preflight.json
+          : > /tmp/agent-preflight-failure.log
+          if ! python3 scripts/agent_preflight.py --changed "${files[@]}" \
+            --report /tmp/agent-preflight.json 2>&1 | tee /tmp/agent-preflight-failure.log; then
+            echo "retry_stage=preflight" >> "$GITHUB_OUTPUT"
+            exit 3
+          fi
           if [[ "$backend" == true ]]; then
-            (cd backend && mvn test && npm ci && npm test)
+            if ! (cd backend && mvn test && npm ci && npm test) \
+              2>&1 | tee -a /tmp/agent-preflight-failure.log; then
+              echo "retry_stage=preflight" >> "$GITHUB_OUTPUT"
+              exit 3
+            fi
           fi
 
           git diff --cached --no-ext-diff --unified=3 > /tmp/agent-review.diff
@@ -1134,100 +1163,146 @@ jobs:
           fi
 
           if [[ -n "$retry_stage" ]]; then
-            quota_failure=false
-            # «overloaded»: NVIDIA responde «Service temporarily overloaded» y el
-            # slot se reintentaba en caliente hasta agotar turnos (#1881).
-            quota_pattern='(^|[^0-9])(429|503)([^0-9]|$)|Quota exceeded|TerminalQuotaError|RetryableQuotaError|RESOURCE_EXHAUSTED|rate.?limit|high demand|temporarily unavailable|overloaded'
             output_dir=/tmp/agent-output-implement
-            gemini_outcome="$IMPLEMENT_GEMINI_OUTCOME"
-            # stderr del CLI desde fichero: el summary por env superaba los
-            # 128 KB y este paso no llegaba a arrancar (#1881), dejando el issue
-            # en agent:working y el CLAIM sin liberar. Solo stderr: stdout lleva
-            # ficheros del repo leídos por el modelo y daría falsos 429/503.
+
+            policy_args=(--stage "$retry_stage" --job-status "$JOB_STATUS")
+            [[ "$retry_stage" == no-changes ]] && policy_args+=(--no-changes)
             shopt -s nullglob
-            outputs=("$output_dir"/stderr.log qwen-artifacts/stderr.log gemini-artifacts/stderr.log)
+            failure_files=(
+              "$output_dir"/stderr.log
+              /tmp/agent-preflight-failure.log
+              qwen-artifacts/stderr.log
+              gemini-artifacts/stderr.log
+              /tmp/gemini-client-error-*.json
+              "${RUNNER_TEMP:-/tmp}"/gemini-client-error-*.json
+            )
             shopt -u nullglob
-            for output in "${outputs[@]}"; do
-              if grep -Eiq "$quota_pattern" "$output"; then
-                quota_failure=true
-                break
-              fi
+            for failure_file in "${failure_files[@]}"; do
+              [[ -f "$failure_file" ]] && policy_args+=(--text-file "$failure_file")
             done
-            if [[ "$PROVIDER" == gemini && "${gemini_outcome:-}" != success ]]; then
-              shopt -s nullglob
-              reports=(/tmp/gemini-client-error-*.json "${RUNNER_TEMP:-/tmp}"/gemini-client-error-*.json)
-              for report in "${reports[@]}"; do
-                if [[ -f "$report" ]] && grep -Eiq "$quota_pattern" "$report"; then
-                  quota_failure=true
-                  break
-                fi
-              done
-              shopt -u nullglob
+
+            decision="$(python3 scripts/agent_failure_policy.py "${policy_args[@]}")"
+            category="$(jq -r '.category' <<<"$decision")"
+            action="$(jq -r '.action' <<<"$decision")"
+            echo "Failure policy: stage=$retry_stage category=$category action=$action"
+
+            release_reason="agent-pool-${category}-release"
+            if [[ "${RESERVED:-}" == true && -n "${BRANCH:-}" ]]; then
+              gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --repo "$GITHUB_REPOSITORY" \
+                --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=$release_reason" \
+                >/dev/null || true
             fi
+            gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+              --remove-label agent:working --remove-label agent:needs-human \
+              >/dev/null 2>&1 || true
 
-            if [[ "$quota_failure" == true ]]; then
-              cooldown="${AGENT_PROVIDER_COOLDOWN_SECONDS:-3600}"
-              [[ "$cooldown" =~ ^[0-9]+$ ]] || cooldown=3600
-              (( cooldown < 300 )) && cooldown=300
-              (( cooldown > 21600 )) && cooldown=21600
+            case "$action" in
+              stop_noop)
+                gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+                  --add-label agent:needs-human >/dev/null 2>&1 || true
+                gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
+                  "Agent pool: $WORKER terminó sin diff para la tarea mono-fichero. No se penaliza ni rota el worker; se pausa el issue para comprobar si ya estaba resuelto o si el corte necesita redefinirse." || true
+                exit 0
+                ;;
+              same_worker_fix|split_or_same_worker)
+                gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json comments \
+                  > /tmp/agent-same-worker-comments.json
+                previous="$(
+                  CATEGORY="$category" WORKER_ID="$WORKER" python3 - <<'PY'
+          import json, os
+          prefix=f"AGENT_POOL_SAME_WORKER_RETRY category={os.environ['CATEGORY']} worker={os.environ['WORKER_ID']} "
+          data=json.load(open("/tmp/agent-same-worker-comments.json",encoding="utf-8"))
+          count=0
+          for comment in data.get("comments",[]):
+              body=comment.get("body","") if isinstance(comment,dict) else ""
+              count += sum(1 for line in body.splitlines() if line.strip().startswith(prefix))
+          print(count)
+          PY
+                )"
+                if (( previous >= 1 )); then
+                  gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+                    --add-label agent:needs-human >/dev/null 2>&1 || true
+                  gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
+                    "Agent pool: $category se repitió con $WORKER. Se detiene sin penalizar el slot; requiere ajustar el corte o revisar el fallo antes de otro intento." || true
+                  exit 0
+                fi
 
-              health_reported=false
-              if [[ -n "${CONTROL_URL:-}" ]]; then
-                base="${CONTROL_URL%/}"
-                base="${base%/api/report}"
-                if oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-                  "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-pool")" &&
-                  oidc_token="$(jq -er '.value' <<<"$oidc_json")"; then
-                  payload="$(jq -nc --arg worker "$WORKER" --arg provider "$PROVIDER" \
-                    --argjson cooldown "$cooldown" \
-                    '{schema:1,worker:$worker,provider:$provider,status:"unhealthy",reason:"quota",cooldown_seconds:$cooldown}')"
-                  if curl -fsS -X POST "$base/api/agent-pool/worker-health/report" \
-                    -H "Authorization: Bearer $oidc_token" \
-                    -H 'Content-Type: application/json' --data "$payload" >/dev/null; then
-                    health_reported=true
+                retry_hint="Causa: $category durante $retry_stage."
+                if [[ -s /tmp/agent-preflight-failure.log ]]; then
+                  detail="$(
+                    grep -Ei 'FAIL|ERROR|Assertion|Traceback|Parse Error|SCRIPT ERROR|would reformat|gdlint' \
+                      /tmp/agent-preflight-failure.log | tail -n 8 | tr '\n' ' ' | head -c 800 || true
+                  )"
+                  [[ -n "$detail" ]] && retry_hint="$retry_hint Error observado: $detail"
+                elif [[ "$category" == timeout ]]; then
+                  retry_hint="$retry_hint El intento anterior agotó tiempo/turnos: evita exploración y aplica el cambio mínimo en el fichero asignado."
+                fi
+
+                gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
+                  "AGENT_POOL_SAME_WORKER_RETRY category=$category worker=$WORKER stage=$retry_stage run=$GITHUB_RUN_ID" \
+                  >/dev/null || true
+                gh workflow run agent-worker.yml --repo "$GITHUB_REPOSITORY" --ref main \
+                  -f issue="$ISSUE" -f provider="$PROVIDER" -f worker="$WORKER" \
+                  -f retry_hint="$retry_hint"
+                exit 0
+                ;;
+              rotate_provider)
+                if [[ "$category" == quota_or_overload ]]; then
+                  cooldown="${AGENT_PROVIDER_COOLDOWN_SECONDS:-3600}"
+                  [[ "$cooldown" =~ ^[0-9]+$ ]] || cooldown=3600
+                  (( cooldown < 300 )) && cooldown=300
+                  (( cooldown > 21600 )) && cooldown=21600
+
+                  health_reported=false
+                  if [[ -n "${CONTROL_URL:-}" ]]; then
+                    base="${CONTROL_URL%/}"
+                    base="${base%/api/report}"
+                    if oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+                      "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-pool")" &&
+                      oidc_token="$(jq -er '.value' <<<"$oidc_json")"; then
+                      payload="$(jq -nc --arg worker "$WORKER" --arg provider "$PROVIDER" \
+                        --argjson cooldown "$cooldown" \
+                        '{schema:1,worker:$worker,provider:$provider,status:"unhealthy",reason:"quota",cooldown_seconds:$cooldown}')"
+                      if curl -fsS -X POST "$base/api/agent-pool/worker-health/report" \
+                        -H "Authorization: Bearer $oidc_token" \
+                        -H 'Content-Type: application/json' --data "$payload" >/dev/null; then
+                        health_reported=true
+                      fi
+                    fi
+                  fi
+                  if [[ "$health_reported" != true ]]; then
+                    until_epoch=$(( $(date +%s) + cooldown ))
+                    gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --repo "$GITHUB_REPOSITORY" \
+                      --body "AGENT_POOL_SLOT_UNHEALTHY worker=$WORKER provider=$PROVIDER reason=quota until=$until_epoch run=$GITHUB_RUN_ID" \
+                      >/dev/null || true
                   fi
                 fi
-              fi
 
-              if [[ "$health_reported" != true ]]; then
-                until_epoch=$(( $(date +%s) + cooldown ))
-                gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --repo "$GITHUB_REPOSITORY" \
-                  --body "AGENT_POOL_SLOT_UNHEALTHY worker=$WORKER provider=$PROVIDER reason=quota until=$until_epoch run=$GITHUB_RUN_ID" \
-                  >/dev/null || true
-              fi
-            fi
+                marker="AGENT_POOL_WORKER_FAILURE worker=$WORKER provider=$PROVIDER stage=$retry_stage category=$category run=$GITHUB_RUN_ID"
+                gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "$marker" >/dev/null || true
 
-            marker="AGENT_POOL_WORKER_FAILURE worker=$WORKER provider=$PROVIDER stage=$retry_stage run=$GITHUB_RUN_ID"
-            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "$marker" >/dev/null || true
+                labels="$(gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json labels --jq '[.labels[].name]|join(" ")')"
+                available=()
+                qwen_allowed=true
+                gemini_allowed=true
+                [[ " $labels " == *" agent:qwen "* ]] && gemini_allowed=false
+                [[ " $labels " == *" agent:gemini "* ]] && qwen_allowed=false
+                if [[ "$qwen_allowed" == true ]]; then
+                  [[ "$HAS_QWEN" == true || "$HAS_OMNIROUTE" == true ]] && available+=(qwen-primary)
+                  if [[ -f scripts/agent_slots.py ]]; then
+                    while IFS= read -r fallback_worker; do
+                      [[ -n "$fallback_worker" ]] && available+=("$fallback_worker")
+                    done < <(FALLBACK_KEYS="$POOL_FALLBACK_KEYS" python3 scripts/agent_slots.py listar | jq -r '.[].worker' || true)
+                  fi
+                fi
+                if [[ "$gemini_allowed" == true && "$HAS_GEMINI" == true ]]; then
+                  available+=(gemini)
+                fi
 
-            release_reason="agent-pool-${retry_stage}-retry"
-            gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --repo "$GITHUB_REPOSITORY" \
-              --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=$release_reason" \
-              >/dev/null || true
-
-            labels="$(gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json labels --jq '[.labels[].name]|join(" ")')"
-            available=()
-            qwen_allowed=true
-            gemini_allowed=true
-            [[ " $labels " == *" agent:qwen "* ]] && gemini_allowed=false
-            [[ " $labels " == *" agent:gemini "* ]] && qwen_allowed=false
-
-            if [[ "$qwen_allowed" == true ]]; then
-              [[ "$HAS_QWEN" == true || "$HAS_OMNIROUTE" == true ]] && available+=(qwen-primary)
-              if [[ -f scripts/agent_slots.py ]]; then
-                while IFS= read -r fallback_worker; do
-                  [[ -n "$fallback_worker" ]] && available+=("$fallback_worker")
-                done < <(FALLBACK_KEYS="$POOL_FALLBACK_KEYS" python3 scripts/agent_slots.py listar | jq -r '.[].worker' || true)
-              fi
-            fi
-            if [[ "$gemini_allowed" == true && "$HAS_GEMINI" == true ]]; then
-              available+=(gemini)
-            fi
-
-            gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json comments > /tmp/agent-retry-comments.json
-            available_csv="$(IFS=,; echo "${available[*]}")"
-            exhausted="$(
-              AVAILABLE="$available_csv" python3 - <<'PY'
+                gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json comments > /tmp/agent-retry-comments.json
+                available_csv="$(IFS=,; echo "${available[*]}")"
+                exhausted="$(
+                  AVAILABLE="$available_csv" python3 - <<'PY'
           import json, os, re
           available={item for item in os.environ.get("AVAILABLE","").split(",") if item}
           failed=set()
@@ -1245,27 +1320,28 @@ jobs:
                       failed.add(match.group(1))
           print("true" if available and available.issubset(failed) else "false")
           PY
-            )"
-
-            if [[ "$exhausted" == true ]]; then
-              gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
-                --add-label agent:needs-human --remove-label agent:working \
-                >/dev/null 2>&1 || true
-              gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-                "Agent pool agotó los workers compatibles durante $retry_stage. Último fallo: $WORKER. Requiere revisión humana o AGENT_POOL_RETRY_RESET cuando cambie la disponibilidad." || true
-            else
-              gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
-                --remove-label agent:working --remove-label agent:needs-human \
-                >/dev/null 2>&1 || true
-              if [[ "$quota_failure" == true ]]; then
-                detalle=" El slot queda además fuera de rotación global durante el cooldown de cuota."
-              else
-                detalle=""
-              fi
-              gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-                "Agent pool reencolado tras fallo de $retry_stage en $WORKER; el siguiente dispatcher evitará ese worker para este issue.$detalle" || true
-            fi
-            exit 0
+                )"
+                if [[ "$exhausted" == true ]]; then
+                  gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+                    --add-label agent:needs-human >/dev/null 2>&1 || true
+                  gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
+                    "Agent pool agotó los workers compatibles tras $category. Último fallo: $WORKER. Requiere revisión humana o AGENT_POOL_RETRY_RESET." || true
+                else
+                  detalle=""
+                  [[ "$category" == quota_or_overload ]] && detalle=" El slot queda en cooldown de cuota."
+                  gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
+                    "Agent pool reencolado tras $category en $WORKER; solo esta clase de fallo rota worker/proveedor.$detalle" || true
+                fi
+                exit 0
+                ;;
+              human_review|*)
+                gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+                  --add-label agent:needs-human >/dev/null 2>&1 || true
+                gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
+                  "Agent pool no clasifica con seguridad el fallo de $retry_stage ($category); se detiene sin penalizar otro worker." || true
+                exit 0
+                ;;
+            esac
           fi
 
           gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
