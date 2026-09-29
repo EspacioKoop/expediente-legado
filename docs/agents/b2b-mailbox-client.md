@@ -45,6 +45,14 @@ python3 scripts/agent_b2b_mailbox.py ack \
 - no imprime el OIDC ni lo incluye en el cuerpo JSON;
 - limita evidencia a 8 entradas y deja que el servidor aplique TTL y tamaños definitivos.
 
-## Siguiente corte de wiring
+## Wiring en el worker
 
-Cuando el PR que modifica `agent-worker.yml` deje libre ese archivo, el wiring puede ser pequeño: materializar el inbox antes de implementer/reviewer, enviar `BLOCKER` o `QUESTION` cuando haya una dependencia real, transportar `EVIDENCE/HANDOFF` al reviewer y hacer ACK solo después de haber materializado el mensaje. El comentario GitHub compacto se mantiene como fallback visible para humanos, no como bus primario.
+El worker consume el mailbox en tres puntos:
+
+1. antes de planificar y antes de implementar, materializa el inbox dirigido al worker;
+2. tras preflight, publica `EVIDENCE` + `HANDOFF` hacia el reviewer y añade ese inbox al input acotado de revisión;
+3. después de normalizar el reviewer, publica `RESULT` + `REVIEW` al dispatcher y emite además `BLOCKER` cuando el ResultPacket termina bloqueado.
+
+Los ACK se hacen **después** de que la fase correspondiente haya consumido el mensaje. Un fallo del mailbox no invalida por sí solo un diff correcto: los pasos son best-effort y el issue/PR de GitHub sigue dejando un fallback compacto y legible por humanos. El mailbox no concede permisos, no amplía el CLAIM y no cambia la política de merge.
+
+Sigue siendo válido usar `QUESTION` para consultas dirigidas cuando una fase tenga una duda concreta; no se genera una pregunta artificial si el trabajo puede continuar con la evidencia disponible.
