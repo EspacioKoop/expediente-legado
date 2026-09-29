@@ -20,11 +20,34 @@ ROM binaria.
 No hay RNG, puntuación, economía, pistas ni recompensa del juego principal.
 Arrancar la ROM y cerrarla inmediatamente no constituye una interacción válida.
 
+## Cauce inverso
+
+Completar la campaña normal desbloquea un modo postgame persistente en la SRAM
+del propio cartucho. Desde el título, **B** entra en **Cauce inverso** cuando el
+desbloqueo existe; B no hace nada en una partida nueva.
+
+El modo reutiliza día, amanecer y noche pero cambia estados iniciales y
+soluciones:
+
+- día inverso: 3 pulsaciones mínimas;
+- amanecer inverso: 6 pulsaciones mínimas;
+- noche inversa: 7 pulsaciones mínimas y compuertas acopladas.
+
+El listón de dificultad no baja respecto a la campaña normal (3/6/6). No añade
+RNG y obliga a volver a leer las relaciones entre compuertas en vez de repetir
+la misma solución.
+
+El desbloqueo vive únicamente en la SRAM MBC5 de la ROM. **Cauce inverso no
+escribe el handshake de Ryū**: terminarlo no produce una segunda semilla ni
+ningún progreso externo. Tras una victoria normal también puede iniciarse con B
+desde la pantalla final; al reiniciar el cartucho sigue disponible.
+
 ## Contrato de finalización para #442
 
-Al completar de verdad el puzzle se escribe `0xA5` en la dirección WRAM fija
-`$C100` (`wRyuFlowCompletado`). Al iniciar o reiniciar una partida el byte vuelve
-a `0x00`.
+Al completar de verdad la **campaña normal** se escribe `0xA5` en la dirección
+WRAM fija `$C100` (`wRyuFlowCompletado`). Al iniciar o reiniciar una partida el
+byte vuelve a `0x00`. El postgame Cauce inverso conserva explícitamente ese byte
+a cero.
 
 Este byte es **solo un punto de integración futuro**: este corte no modifica
 Godot para registrar `semilla_onirica_ryu` ni conecta #440 al selector nocturno.
@@ -53,4 +76,4 @@ vigente del repositorio.
 La referencia visual del cartucho está en `docs/visuales/ryu-flow/` y no se
 copia dentro de la ROM.
 
-Refs #440 #442 #124 #181.
+Refs #440 #442 #124 #181 #808 #819 #1817.

@@ -48,9 +48,9 @@ def _fotogramas(nombre):
     return fotogramas
 
 
-def _niveles(source):
-    """Tabla Niveles: por nivel, (siguiente, acoplado, inicial, solución)."""
-    bloque = source.split("Niveles:", 1)[1].split("ColumnasCompuertaDMG:", 1)[0]
+def _leer_tabla_niveles(source, inicio, fin):
+    """Lee una tabla de niveles: (siguiente, acoplado, inicial, solución)."""
+    bloque = source.split(inicio, 1)[1].split(fin, 1)[0]
     estados = {"ABIERTA": 0, "MEDIA": 1, "CERRADA": 2}
     valores = []
     for linea in bloque.splitlines():
@@ -59,6 +59,14 @@ def _niveles(source):
             valores += [estados.get(v.strip(), None) if v.strip() in estados else int(v) for v in linea[3:].split(",")]
     return [(valores[k:k + 3], valores[k + 3], valores[k + 4:k + 7], valores[k + 7:k + 10])
             for k in range(0, len(valores), 10)]
+
+
+def _niveles(source):
+    return _leer_tabla_niveles(source, "Niveles:", "NivelesDesafio:")
+
+
+def _niveles_desafio(source):
+    return _leer_tabla_niveles(source, "NivelesDesafio:", "ColumnasCompuertaDMG:")
 
 
 def _pulsaciones_minimas(siguiente, acoplado, inicial, solucion):
@@ -89,6 +97,7 @@ class RyuFlowTest(unittest.TestCase):
     def setUpClass(cls):
         cls.source = SOURCE.read_text(encoding="utf-8")
         cls.niveles = _niveles(cls.source)
+        cls.desafios = _niveles_desafio(cls.source)
 
     def test_cada_nivel_arranca_con_las_tres_compuertas_incorrectas(self):
         self.assertEqual(len(self.niveles), 3)
@@ -103,6 +112,34 @@ class RyuFlowTest(unittest.TestCase):
         # el tercero cada compuerta arrastra a la de su derecha.
         self.assertEqual([nivel[1] for nivel in self.niveles], [0, 0, 1])
         self.assertNotIn(1, self.niveles[0][0][::2])
+
+    def test_cauce_inverso_tiene_tres_niveles_y_no_es_mas_facil(self):
+        self.assertEqual(len(self.desafios), 3)
+        base = [_pulsaciones_minimas(*nivel) for nivel in self.niveles]
+        desafio = [_pulsaciones_minimas(*nivel) for nivel in self.desafios]
+        self.assertEqual(base, [3, 6, 6])
+        self.assertEqual(desafio, [3, 6, 7])
+        self.assertTrue(all(d >= b for d, b in zip(desafio, base)))
+        for n, (_siguiente, _acoplado, inicial, solucion) in enumerate(self.desafios, start=1):
+            with self.subTest(nivel=n):
+                self.assertTrue(all(a != b for a, b in zip(inicial, solucion)))
+
+    def test_desbloqueo_postgame_usa_sram_y_no_redefine_el_handshake(self):
+        for literal in (
+            "DEF SRAM_MAGIC0           EQU $A000",
+            "DEF SRAM_DESAFIO          EQU $A004",
+            "call CargarProgreso",
+            "call DesbloquearDesafio",
+            "and KEY_B",
+            "ld [wModoDesafio], a",
+        ):
+            self.assertIn(literal, self.source)
+        normal = self.source.split("CompletarFlujo:", 1)[1].split("CompletarDesafio:", 1)[0]
+        desafio = self.source.split("CompletarDesafio:", 1)[1].split("MostrarFinal:", 1)[0]
+        self.assertIn("ld [wRyuFlowCompletado], a", normal)
+        self.assertIn("call DesbloquearDesafio", normal)
+        self.assertIn("ld [wRyuFlowCompletado], a", desafio)
+        self.assertNotIn("MARCA_COMPLETADO", desafio)
 
     def test_exige_manipular_las_tres_compuertas(self):
         self.assertIn("DEF TODAS_TOCADAS        EQU %00000111", self.source)
@@ -309,6 +346,35 @@ class PartidaTest(unittest.TestCase):
         self.pulsar(emulador, "a")
         self.assertEqual(self.leer(emulador, "wRyuFlowCompletado"), 0)
         self.assertEqual(self.leer(emulador, "wNivel"), 0)
+
+    def test_cauce_inverso_recorre_tres_niveles_sin_publicar_handshake(self):
+        emulador = self.arrancar(cgb=True)
+        # Sin desbloqueo, B no abandona el título.
+        emulador.memory[self.simbolos["wDesafioDesbloqueado"]] = 0
+        self.pulsar(emulador, "b")
+        self.assertEqual(self.leer(emulador, "wEstado"), 0)
+
+        # Simula un perfil que ya terminó la campaña normal.
+        emulador.memory[self.simbolos["wDesafioDesbloqueado"]] = 1
+        self.pulsar(emulador, "b")
+        self.assertEqual(self.leer(emulador, "wModoDesafio"), 1)
+        self.assertEqual(self.leer(emulador, "wRyuFlowCompletado"), 0)
+
+        self.cerrar_dialogo(emulador, 0)
+        self.jugar(emulador, ["a", "right", "a", "right", "a"])
+        emulador.tick(60, False)
+
+        self.cerrar_dialogo(emulador, 1)
+        self.jugar(emulador, ["a", "a", "right", "a", "a", "right", "a", "a"])
+        emulador.tick(60, False)
+
+        self.cerrar_dialogo(emulador, 2)
+        self.jugar(emulador, ["a", "a", "right", "a", "a", "right", "a", "a", "a"])
+        emulador.tick(10, False)
+
+        self.assertEqual(self.leer(emulador, "wEstado"), 2)
+        self.assertEqual(self.leer(emulador, "wModoDesafio"), 1)
+        self.assertEqual(self.leer(emulador, "wRyuFlowCompletado"), 0)
 
     def test_game_boy_clasica_conserva_la_version_de_texto(self):
         emulador = self.arrancar(cgb=False)
