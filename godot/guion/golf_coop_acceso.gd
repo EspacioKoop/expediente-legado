@@ -23,6 +23,7 @@ const INTERVALO_CONSULTA := 0.10
 var identidad_ruta := IdentidadOnline.RUTA
 var endpoint_override := ""
 var ahora_override := -1
+var ultimo_resultado: Dictionary = {}
 
 var _superficie: Node3D
 var _configuraciones: Array = []
@@ -41,7 +42,6 @@ var _session_id := ""
 var _actores := {}
 var _acumulado := 0.0
 var _hoyo_indice := -1
-var ultimo_resultado: Dictionary = {}
 
 
 func configurar(
