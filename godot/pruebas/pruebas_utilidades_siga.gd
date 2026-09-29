@@ -86,6 +86,8 @@ func _probar() -> void:
 		"el lector recibe exactamente el resultado visible",
 	)
 	calculadora.queue_free()
+	# Deja que Control/AccessibilityServer retiren los nodos antes de cerrar el SceneTree.
+	await process_frame
 
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
