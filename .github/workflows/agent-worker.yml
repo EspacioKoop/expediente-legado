@@ -634,6 +634,29 @@ jobs:
               fi
           fi
 
+      - id: b2b_task
+        name: Compilar TaskPacket B2B
+        if: steps.reserve.outputs.reserved == 'true'
+        env:
+          ISSUE: ${{ inputs.issue }}
+          PROVIDER: ${{ inputs.provider }}
+          WORKER: ${{ inputs.worker }}
+        run: |
+          set -euo pipefail
+          rules=QWEN.md
+          [[ "$PROVIDER" == gemini ]] && rules=GEMINI.md
+          python3 scripts/agent_b2b.py task \
+            --issue "$ISSUE" --provider "$PROVIDER" --worker "$WORKER" \
+            --task .agent-task.md --plan .agent-plan.json \
+            --context .agent-context.md --memory .agent-memory.json \
+            --history .agent-history.json --rules "$rules" \
+            --output .agent-task-packet.json >/dev/null
+          python3 scripts/agent_b2b.py prompt \
+            --role implement --provider "$PROVIDER" \
+            --task-packet .agent-task-packet.json \
+            --output .agent-implement-prompt.md
+          echo "type=$(jq -r '.type' .agent-task-packet.json)" >> "$GITHUB_OUTPUT"
+
       - name: Crear rama
         if: steps.reserve.outputs.reserved == 'true'
         env:
@@ -654,7 +677,7 @@ jobs:
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-context.md, .agent-memory.json, .agent-history.json y las Normas Platino actuales en .agent-platino. Repo/issue/#181/#182 y Normas Platino prevalecen siempre. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitio una ruta necesaria, no intentes saltarte el CLAIM: el orquestador restaurara el desvio y replanificara. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+          prompt: 'Lee primero .agent-implement-prompt.md y cumple el TaskPacket B2B que referencia. No ignores su jerarquia, scope, hashes ni condiciones de abortado.'
 
       - id: implement_gemini
         name: Implementar con Gemini
@@ -669,7 +692,22 @@ jobs:
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"tools":{"core":["read_file","write_file","replace","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-plan.json, .agent-context.md, .agent-memory.json, .agent-history.json y las Normas Platino actuales en .agent-platino. Repo/issue/#181/#182 y Normas Platino prevalecen siempre. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitio una ruta necesaria, no intentes saltarte el CLAIM: el orquestador restaurara el desvio y replanificara. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+          prompt: 'Lee primero .agent-implement-prompt.md y cumple el TaskPacket B2B que referencia. No ignores su jerarquia, scope, hashes ni condiciones de abortado.'
+
+      - id: b2b_result
+        name: Normalizar ResultPacket B2B
+        if: steps.reserve.outputs.reserved == 'true'
+        env:
+          SUMMARY: ${{ steps.implement_qwen.outputs.summary || steps.implement_gemini.outputs.summary }}
+        run: |
+          set -euo pipefail
+          printf '%s' "${SUMMARY:-}" > /tmp/agent-b2b-summary.txt
+          python3 scripts/agent_b2b.py result \
+            --summary-file /tmp/agent-b2b-summary.txt \
+            --task-packet .agent-task-packet.json \
+            --output /tmp/agent-result.json >/dev/null
+          echo "status=$(jq -r '.contract_status' /tmp/agent-result.json)" >> "$GITHUB_OUTPUT"
+          echo "coverage=$(jq -r '.coverage_percent' /tmp/agent-result.json)" >> "$GITHUB_OUTPUT"
 
       - id: claim_guard
         name: Normalizar cambios al CLAIM
@@ -773,7 +811,8 @@ jobs:
           fi
           cp .agent-plan.json /tmp/plan.json
           cp .agent-task.md /tmp/agent-task.md
-          rm -f .agent-task.md .agent-plan.json .agent-context.md .agent-memory.json .agent-history.json .agent-platino-sha gha-creds-*.json
+          cp .agent-task-packet.json /tmp/agent-task-packet.json
+          rm -f .agent-task.md .agent-plan.json .agent-context.md .agent-memory.json .agent-history.json .agent-task-packet.json .agent-implement-prompt.md .agent-platino-sha gha-creds-*.json
           rm -rf .agent-platino .agent-wiki .gemini .qwen gemini-artifacts qwen-artifacts
           git add -A
           if git diff --cached --quiet; then
@@ -817,13 +856,26 @@ jobs:
           task=Path("/tmp/agent-task.md").read_text(encoding="utf-8")[:12000]
           plan=Path("/tmp/plan.json").read_text(encoding="utf-8")[:4000]
           diff=Path("/tmp/agent-review.diff").read_text(encoding="utf-8")[:32000]
+          result=Path("/tmp/agent-result.json").read_text(encoding="utf-8")[:8000]
           Path(".agent-review-input.md").write_text(
               "# Reviewer input\n\n## Issue\n"+task+
               "\n\n## Plan reservado\n"+plan+
+              "\n\n## ResultPacket implementador\n```json\n"+result+"\n```"+
               "\n\n## Diff staged\n```diff\n"+diff+"\n```\n",
               encoding="utf-8",
           )
           PY
+
+      - name: Compilar prompt REVIEW B2B
+        if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true'
+        env:
+          PROVIDER: ${{ inputs.provider }}
+        run: |
+          python3 scripts/agent_b2b.py prompt \
+            --role review --provider "$PROVIDER" \
+            --task-packet /tmp/agent-task-packet.json \
+            --result-packet /tmp/agent-result.json \
+            --output .agent-review-prompt.md
 
       - id: review_qwen
         name: Reviewer acotado Qwen
@@ -837,7 +889,7 @@ jobs:
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":4},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file"]}}'
-          prompt: 'Lee UNICAMENTE .agent-review-input.md. No abras otros archivos, no uses shell, no edites nada y no propongas refactors generales. Revisa solo incumplimiento del issue/plan, bug claro del diff, test imprescindible ausente o violacion evidente de seguridad inferible del input. Maximo 5 hallazgos, una frase cada uno. Termina inmediatamente con AGENT_REVIEW_BEGIN seguido de JSON {"verdict":"approve","findings":[]} o {"verdict":"findings","findings":["..."]} y AGENT_REVIEW_END.'
+          prompt: 'Lee .agent-review-prompt.md y cumple ese contrato B2B. Despues lee unicamente .agent-review-input.md; no abras otras fuentes.'
 
       - id: review_gemini
         name: Reviewer acotado Gemini
@@ -850,7 +902,7 @@ jobs:
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":4},"tools":{"core":["read_file"]}}'
-          prompt: 'Lee UNICAMENTE .agent-review-input.md. No abras otros archivos, no uses shell, no edites nada y no propongas refactors generales. Revisa solo incumplimiento del issue/plan, bug claro del diff, test imprescindible ausente o violacion evidente de seguridad inferible del input. Maximo 5 hallazgos, una frase cada uno. Termina inmediatamente con AGENT_REVIEW_BEGIN seguido de JSON {"verdict":"approve","findings":[]} o {"verdict":"findings","findings":["..."]} y AGENT_REVIEW_END.'
+          prompt: 'Lee .agent-review-prompt.md y cumple ese contrato B2B. Despues lee unicamente .agent-review-input.md; no abras otras fuentes.'
 
       - id: review_contract
         name: Normalizar reviewer no bloqueante
@@ -863,9 +915,15 @@ jobs:
           python3 scripts/agent_review_contract.py \
             --summary-file /tmp/agent-review-summary.txt \
             --output /tmp/agent-review.json >/dev/null
+          python3 scripts/agent_b2b.py review \
+            --review /tmp/agent-review.json \
+            --task-packet /tmp/agent-task-packet.json \
+            --result-packet /tmp/agent-result.json \
+            --output /tmp/agent-review-b2b.json >/dev/null
           echo "status=$(jq -r '.status' /tmp/agent-review.json)" >> "$GITHUB_OUTPUT"
           echo "verdict=$(jq -r '.verdict // "skipped"' /tmp/agent-review.json)" >> "$GITHUB_OUTPUT"
-          rm -f .agent-review-input.md
+          echo "b2b_type=$(jq -r '.type' /tmp/agent-review-b2b.json)" >> "$GITHUB_OUTPUT"
+          rm -f .agent-review-input.md .agent-review-prompt.md
           rm -rf .gemini .qwen gemini-artifacts qwen-artifacts
 
       - name: Guardar memoria de trabajo
@@ -939,6 +997,9 @@ jobs:
           BRANCH: ${{ steps.guard.outputs.branch }}
           REVIEW_STATUS: ${{ steps.review_contract.outputs.status || 'skipped' }}
           REVIEW_VERDICT: ${{ steps.review_contract.outputs.verdict || 'skipped' }}
+          B2B_RESULT_STATUS: ${{ steps.b2b_result.outputs.status || 'missing' }}
+          B2B_RESULT_COVERAGE: ${{ steps.b2b_result.outputs.coverage || '0' }}
+          B2B_REVIEW_TYPE: ${{ steps.review_contract.outputs.b2b_type || 'REVIEW' }}
         run: |
           set -euo pipefail
           git config user.name "agent-pool[bot]"
@@ -951,7 +1012,7 @@ jobs:
             --title "agent($PROVIDER): #$ISSUE $title" \
             --body "Refs #$ISSUE
 
-          Implementacion autonoma mediante worker \`$WORKER\`. Plan reservado en #182; cambios limitados al CLAIM; preflight ejecutado. Reviewer acotado: \`$REVIEW_STATUS/$REVIEW_VERDICT\`. PR draft, sin auto-merge." 2>&1)"; then
+          Implementacion autonoma mediante worker \`$WORKER\`. Plan reservado en #1713; cambios limitados al CLAIM; preflight ejecutado. Reviewer acotado: \`$REVIEW_STATUS/$REVIEW_VERDICT\`. Handoff B2B v1: \`RESULT=$B2B_RESULT_STATUS/$B2B_RESULT_COVERAGE%\`, \`$B2B_REVIEW_TYPE\`. PR draft, sin auto-merge." 2>&1)"; then
             if grep -Eiq 'not permitted to create or approve pull requests|createPullRequest|Resource not accessible by integration' <<<"$pr_salida"; then
               gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
                 --add-label agent:needs-human \
