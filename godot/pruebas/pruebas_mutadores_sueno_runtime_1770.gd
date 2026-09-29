@@ -48,20 +48,37 @@ func _probar_cuatro_presentaciones() -> void:
 		)
 		match id:
 			MutadoresSueno.HUMEDAD:
-				_comprobar(capa.find_children("Charco*", "MeshInstance3D", true, false).size() == 3, "humedad crea charcos")
+				_comprobar(
+					capa.find_children("Charco*", "MeshInstance3D", true, false).size() == 3,
+					"humedad crea charcos"
+				)
 			MutadoresSueno.APAGONES:
-				_comprobar(capa.find_children("FuenteLocal*", "OmniLight3D", true, false).size() == 2, "apagones conserva luz local")
+				_comprobar(
+					capa.find_children("FuenteLocal*", "OmniLight3D", true, false).size() == 2,
+					"apagones conserva luz local"
+				)
 			MutadoresSueno.REPETICION:
 				var ecos := capa.find_children("EcoIdentidad*", "MeshInstance3D", true, false)
 				_comprobar(ecos.size() == 2, "repeticion duplica un elemento secundario")
 				_comprobar(
-					ecos.size() == 2
-					and ecos[0].get_meta("identidad_repetida", "") == ecos[1].get_meta("identidad_repetida", ""),
+					(
+						ecos.size() == 2
+						and (
+							ecos[0].get_meta("identidad_repetida", "")
+							== ecos[1].get_meta("identidad_repetida", "")
+						)
+					),
 					"las copias comparten identidad",
 				)
 			MutadoresSueno.DESFASE:
-				_comprobar(capa.get_node_or_null("PulsoOriginal") is AudioStreamPlayer3D, "desfase crea sonido original")
-				_comprobar(capa.get_node_or_null("PulsoDesfasado") is AudioStreamPlayer3D, "desfase crea eco sonoro")
+				_comprobar(
+					capa.get_node_or_null("PulsoOriginal") is AudioStreamPlayer3D,
+					"desfase crea sonido original"
+				)
+				_comprobar(
+					capa.get_node_or_null("PulsoDesfasado") is AudioStreamPlayer3D,
+					"desfase crea eco sonoro"
+				)
 		mundo.queue_free()
 		await process_frame
 
@@ -69,12 +86,8 @@ func _probar_cuatro_presentaciones() -> void:
 func _probar_idempotencia_y_reduccion() -> void:
 	var mundo := Node3D.new()
 	root.add_child(mundo)
-	var primera := SuenoMutadorPresentacion3D.montar(
-		mundo, _espacio(MutadoresSueno.APAGONES, true)
-	)
-	var segunda := SuenoMutadorPresentacion3D.montar(
-		mundo, _espacio(MutadoresSueno.APAGONES, true)
-	)
+	var primera := SuenoMutadorPresentacion3D.montar(mundo, _espacio(MutadoresSueno.APAGONES, true))
+	var segunda := SuenoMutadorPresentacion3D.montar(mundo, _espacio(MutadoresSueno.APAGONES, true))
 	_comprobar(primera == segunda, "remontar el mismo mutador no duplica capa")
 	_comprobar(mundo.get_child_count() == 1, "solo existe una capa por mundo")
 	_comprobar(not primera.is_processing(), "reduccion de movimiento apaga ciclo de luces")
