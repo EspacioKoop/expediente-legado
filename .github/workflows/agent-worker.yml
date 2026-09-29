@@ -524,6 +524,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           ISSUE: ${{ inputs.issue }}
           PROVIDER: ${{ inputs.provider }}
+          WORKER: ${{ inputs.worker }}
           BRANCH: ${{ steps.guard.outputs.branch }}
           SUMMARY: ${{ steps.delegated.outputs.summary || steps.plan_qwen.outputs.summary || steps.plan_gemini.outputs.summary }}
         run: |
@@ -596,7 +597,7 @@ jobs:
           else
             python3 scripts/agent_b2b.py event \
               --type CLAIM --issue "$ISSUE" --provider "$PROVIDER" \
-              --worker "Pool-$PROVIDER" --from-role orchestrator --to-role implementer \
+              --worker "$WORKER" --from-role orchestrator --to-role implementer \
               --summary "Reserva de rutas aceptada para implementación" \
               --ref "github-comment:$cid" --ref "branch:$BRANCH" \
               --output .agent-claim-packet.json >/dev/null
