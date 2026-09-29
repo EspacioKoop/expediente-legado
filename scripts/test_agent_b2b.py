@@ -28,6 +28,7 @@ class AgentB2BTests(unittest.TestCase):
                 "issue": 1866,
                 "provider": "qwen",
                 "worker": "qwen-primary",
+                "correlation_id": "agent/qwen-1866-123",
                 "summary": "reserva aceptada",
                 "ref": ["github-comment:123", "branch:agent/qwen-1866"],
                 "from_role": "orchestrator",
@@ -37,6 +38,7 @@ class AgentB2BTests(unittest.TestCase):
         packet = agent_b2b.build_event(args)
         self.assertEqual(packet["type"], "CLAIM")
         self.assertEqual(packet["handoff"], {"from": "orchestrator", "to": "implementer"})
+        self.assertEqual(packet["correlation_id"], "agent/qwen-1866-123")
         self.assertIn("github-comment:123", packet["refs"])
 
     def test_result_contract_is_advisory_and_measured(self):
@@ -57,6 +59,29 @@ class AgentB2BTests(unittest.TestCase):
         self.assertEqual(packet["type"], "RESULT")
         self.assertEqual(packet["contract_status"], "partial")
         self.assertEqual(packet["coverage_percent"], 50)
+
+    def test_result_and_review_keep_task_correlation(self):
+        task = {
+            "schema": 1,
+            "type": "TASK",
+            "issue": 1866,
+            "provider": "qwen",
+            "worker": "qwen-primary",
+            "correlation_id": "agent/qwen-1866-123",
+            "handoff": {"from": "planner", "to": "implementer"},
+        }
+        result = agent_b2b.parse_result(
+            'AGENT_RESULT_BEGIN {"facts":[],"assumptions":[],"evidence":[],'
+            '"unknowns":[],"changes":[],"next_action":"review"} AGENT_RESULT_END',
+            task,
+        )
+        review = agent_b2b.build_review(
+            {"status": "ok", "verdict": "approve", "findings": []},
+            task,
+            result,
+        )
+        self.assertEqual(result["correlation_id"], "agent/qwen-1866-123")
+        self.assertEqual(review["correlation_id"], "agent/qwen-1866-123")
 
     def test_missing_result_does_not_raise(self):
         task = {
