@@ -118,10 +118,11 @@ class GbcFixtureWorkflowTest(unittest.TestCase):
         self.assertIn("rBCPD", self.cgb_only)
 
     def test_roms_no_se_versionan_y_solo_salen_como_artefacto_corto(self):
-        self.assertIn(
-            "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+        self.assertRegex(
             self.texto,
+            r"uses: actions/upload-artifact@[0-9a-f]{40}\\s+# v\\d+",
         )
+        self.assertNotRegex(self.texto, r"actions/upload-artifact@v\\d")
         self.assertIn("retention-days: 7", self.texto)
         self.assertIn("SHA256SUMS", self.texto)
         self.assertNotIn("git add", self.texto)
