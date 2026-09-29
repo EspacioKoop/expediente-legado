@@ -74,6 +74,13 @@ class PerfilesTest(unittest.TestCase):
         self.assertEqual(llamada["id"], herramienta["tool_call_id"])
         self.assertNotIn("strict", body["tools"][0]["function"])
 
+    def test_mistral_completa_parameters_de_herramientas_sin_argumentos(self):
+        peticion = {"model": "m", "messages": [], "tools": [
+            {"type": "function", "function": {"name": "todo_read", "description": "d"}}
+        ]}
+        body, _ = mod.adapt("mistral", peticion)
+        self.assertEqual({"type": "object", "properties": {}}, body["tools"][0]["function"]["parameters"])
+
     def test_mistral_respeta_ids_ya_validos(self):
         self.assertEqual("abcDEF123", mod._mistral_id("abcDEF123"))
 

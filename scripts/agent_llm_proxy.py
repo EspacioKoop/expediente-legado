@@ -127,6 +127,9 @@ def _mistral_tool(tool: Any, dropped: set[str]) -> Any:
         clean["function"] = _keep(
             clean["function"], {"name", "description", "parameters"}, dropped, "tool.function"
         )
+        # El CLI declara herramientas sin argumentos omitiendo `parameters`;
+        # Mistral lo exige (422 «Field required»).
+        clean["function"].setdefault("parameters", {"type": "object", "properties": {}})
     return clean
 
 
