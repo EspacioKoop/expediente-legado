@@ -70,6 +70,7 @@ def _b2b_events(
             continue
         if expected_issue is not None and issue != expected_issue:
             continue
+        correlation = " ".join(str(data.get("correlation_id") or "").split())[:180]
         summary = " ".join(str(data.get("summary") or "").split())[:500]
         refs = data.get("refs")
         clean_refs = []
@@ -85,6 +86,7 @@ def _b2b_events(
                 "issue": issue,
                 "from": source.strip(),
                 "to": target.strip(),
+                "correlation_id": correlation,
                 "summary": summary,
                 "refs": clean_refs,
             }
@@ -136,6 +138,7 @@ def render_context(
                     (
                         f"- {event['type']} issue=#{event['issue']} "
                         f"{event['from']}→{event['to']} "
+                        f"correlation={event['correlation_id'] or '-'} "
                         f"summary={event['summary'] or '-'} refs={refs}"
                     ),
                 ]
