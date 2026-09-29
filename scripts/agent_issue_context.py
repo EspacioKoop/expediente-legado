@@ -38,7 +38,11 @@ def trusted(source: dict[str, Any]) -> bool:
     return _association(source) in TRUSTED_ASSOCIATIONS or login in TRUSTED_BOTS
 
 
-def _b2b_events(comment: dict[str, Any]) -> list[dict[str, Any]]:
+def _b2b_events(
+    comment: dict[str, Any],
+    *,
+    expected_issue: int | None = None,
+) -> list[dict[str, Any]]:
     if not trusted(comment):
         return []
     body = str(comment.get("body") or "")
@@ -63,6 +67,8 @@ def _b2b_events(comment: dict[str, Any]) -> list[dict[str, Any]]:
             continue
         issue = data.get("issue")
         if not isinstance(issue, int) or isinstance(issue, bool) or issue <= 0:
+            continue
+        if expected_issue is not None and issue != expected_issue:
             continue
         summary = " ".join(str(data.get("summary") or "").split())[:500]
         refs = data.get("refs")
@@ -107,8 +113,14 @@ def render_context(
 
     lines = ["# Issue", "", f"## {title}", "", body, "", "## Comentarios recientes"]
     events: list[dict[str, Any]] = []
+    issue_number = issue.get("number")
+    expected_issue = (
+        issue_number
+        if isinstance(issue_number, int) and not isinstance(issue_number, bool) and issue_number > 0
+        else None
+    )
     for comment in accepted:
-        events.extend(_b2b_events(comment))
+        events.extend(_b2b_events(comment, expected_issue=expected_issue))
         comment_body = _without_b2b_blocks(str(comment.get("body") or ""))
         if not comment_body:
             continue
