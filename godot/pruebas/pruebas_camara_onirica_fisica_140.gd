@@ -66,7 +66,9 @@ func _ejecutar() -> void:
 	var camara_objeto := dia._mundo.get_node_or_null("CamaraOniricaAdquirible") as CamaraOnirica3D
 	_comprobar("la cámara física aparece", camara_objeto != null, true)
 	if camara_objeto != null:
-		_comprobar("se recoge con verbo semántico", camara_objeto.verbo, Interactuable3D.Verbo.COGER)
+		_comprobar(
+			"se recoge con verbo semántico", camara_objeto.verbo, Interactuable3D.Verbo.COGER
+		)
 		_comprobar("tiene cuerpo visible", camara_objeto.get_node_or_null("Cuerpo") != null, true)
 		_comprobar("tiene colisión real", camara_objeto.get_node_or_null("Colision") != null, true)
 
@@ -86,7 +88,11 @@ func _ejecutar() -> void:
 	_comprobar("recoger inicializa cinta canónica", cinta.is_empty(), false)
 	_comprobar("la cinta tiene diez segundos", cinta.get("capacidad_segundos"), 10.0)
 	_comprobar("adquisición guarda una vez", dia.guardados, 1)
-	_comprobar("el objeto desaparece tras recoger", dia._mundo.get_node_or_null("CamaraOniricaAdquirible"), null)
+	_comprobar(
+		"el objeto desaparece tras recoger",
+		dia._mundo.get_node_or_null("CamaraOniricaAdquirible"),
+		null
+	)
 	_comprobar("HUD aparece tras adquirir", controlador._hud_camara != null, true)
 	_comprobar("HUD muestra metraje", "10.0" in controlador._hud_metraje.text, true)
 
