@@ -37,3 +37,19 @@ Este corte no añade puntuaciones, ranking, recompensas, logros ni contenido de
 tradiciones. Tampoco decide qué final principal ocurre. Su única salida es una
 capa descriptiva reproducible que permite a una UI o escena de cierre mencionar
 personas, lugares, fuentes y acciones que realmente sucedieron durante esa vida.
+
+
+## Presentación integrada en el cierre
+
+`FinalPolitico.resumen()` consume la misma fotografía factual de la vida actual
+mediante `ReligionEventos.resumen_trayectoria()` y entrega el resultado al panel
+de cierre. El panel muestra hasta cuatro hechos concretos antes de cualquier
+lectura global: canal, contexto y fuente/actor o declaración explícita. Si hay
+más, solo indica cuántos quedan archivados; no escoge una identidad dominante.
+
+Confirmar el cierre sella la trayectoria con motivo `final_narrativo` usando
+`ReligionEventos.archivar_trayectoria()`. La operación es idempotente por
+`vuelta`, por lo que recargar o confirmar de nuevo no duplica el historial.
+
+La presentación no escribe eventos, no cambia el final político, no concede
+logros religiosos y no convierte exposición o práctica en convicción.
