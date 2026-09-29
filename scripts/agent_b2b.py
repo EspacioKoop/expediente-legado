@@ -126,6 +126,9 @@ def build_task(args: argparse.Namespace) -> dict[str, Any]:
     files = plan.get("files", [])
     if not isinstance(files, list) or any(not isinstance(x, str) for x in files):
         raise ValueError("plan.files invalido")
+    unique_files = list(dict.fromkeys(files))
+    if len(unique_files) > 12:
+        raise ValueError("plan.files excede max_files=12")
     artifacts = _base_artifacts(args)
     artifacts["plan"] = _artifact(args.plan)
     if args.claim and args.claim.exists():
@@ -138,7 +141,7 @@ def build_task(args: argparse.Namespace) -> dict[str, Any]:
         "worker": args.worker,
         "phase": "implement",
         "goal": _clean_text(plan.get("goal"), 240),
-        "scope": {"files": list(dict.fromkeys(files)), "max_files": 12, "reserved": True},
+        "scope": {"files": unique_files, "max_files": 12, "reserved": True},
         "source_priority": ["repo", "issue", "#181", "#1713", "normas-platino", "wiki", "memory", "ci-history"],
         "abort_on": ["required_path_outside_claim", "authority_conflict", "unsafe_or_secret_request", "stale_handoff_artifact"],
         "artifacts": artifacts,
