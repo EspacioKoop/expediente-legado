@@ -75,7 +75,11 @@ jobs:
           fi
           state="$(gh issue view "$issue" --repo "$GITHUB_REPOSITORY" --json state --jq .state)"
           [[ "$state" == OPEN ]] || { echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
-          already="$(gh issue view "$issue" --repo "$GITHUB_REPOSITORY" --json comments --jq '[.comments[].body | select(startswith("AGENT_DECOMPOSED parent=#'"$issue"' "))] | length')"
+          already="$(
+            gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$issue/comments?per_page=100" --jq '.[]' |
+              jq -s --arg prefix "AGENT_DECOMPOSED parent=#$issue " \
+                '[.[] | select(.user.login == "github-actions[bot]" and ((.body // "") | startswith($prefix)))] | length'
+          )"
           [[ "$already" == 0 ]] || { echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
 
           labels="$(gh issue view "$issue" --repo "$GITHUB_REPOSITORY" --json labels --jq '[.labels[].name]|join(" ")')"
