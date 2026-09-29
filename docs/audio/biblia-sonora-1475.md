@@ -28,16 +28,21 @@ fuentes y silencios deliberados. Evitar que cada escena parezca otra banda sonor
 
 ## 2. Identidad de foley
 
-El banco inicial es **síntesis original**, no grabaciones: `sello`, `tecla`,
-`carro` y `red` describen conceptos, no objetos capturados. Sus WAV limpios se
-conservan junto al experimento ADPCM.
+**Decisión de Varo (29-09-2026): nada de foley grabado.** Todo el foley es
+**síntesis original** con carácter de chip: NES (pulso, triángulo, ruido LFSR y
+barridos de tono) y sampler de PSX (ADPCM a baja frecuencia, ADSR y reverb
+corta). Un efecto no reproduce el sonido real del objeto: evoca la acción y
+suena a videojuego. Ejemplo guía: el archivador al abrirse y cerrarse suena como
+un «bombeo», no como una chapa. `sello`, `tecla`, `carro` y `red` describen
+conceptos, no objetos capturados. Sus WAV limpios se conservan junto al
+experimento ADPCM.
 
-Cuando haya tomas propias: conservar original, seleccionar gesto, editar ruido/DC,
-afinar si tiene función musical, elegir loop/envolvente, generar variantes y
-comparar en contexto. Sustituir una fuente exige una receta/procedencia explícita,
-no renombrar una grabación para hacerla pasar por el sintetizador actual.
-Primera sesión propuesta: sello, teclado, cajón metálico y aparato eléctrico;
-varias intensidades y perspectivas. Nadie ha realizado todavía esa sesión.
+No se graban tomas con micro ni móvil ni se incorporan grabaciones como fuente
+de foley. Los OGG de Kenney que reproduce hoy `Sonido` son un respaldo
+provisional hasta que la síntesis los sustituya (#1813). Sustituir una fuente
+exige una receta y su procedencia en el repo; no se renombra una grabación para
+hacerla pasar por síntesis. La sesión de grabación que proponía este estudio
+(sello, teclado, cajón metálico y aparato eléctrico) queda descartada.
 
 ## 3. Ambientes
 
@@ -279,8 +284,8 @@ conserva función. Una capa nueva debe aportar fraseo, relación o transición.
 
 Reservar la deformación fuerte para fuentes cuya versión normal ya sea familiar.
 Un objeto puede ser percusión, nota y textura en distintas piezas, conservando
-su procedencia. Las grabaciones futuras no deben perder su identidad bajo una
-cadena de efectos antes de compararse con la síntesis actual.
+su procedencia. Una fuente sintética nueva se compara con la actual antes de
+deformarla con una cadena de efectos.
 
 ## 14. Diseño interactivo: propuesta compatible con los contratos actuales
 
