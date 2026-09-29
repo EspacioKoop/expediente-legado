@@ -146,7 +146,9 @@ func _montar(mundo: Node3D) -> void:
 	_impresora = Interactuable3D.new()
 	_impresora.name = "ImpresoraCompartidaIncidente"
 	_impresora.position = posicion_impresora
-	_impresora.sonido = Interactuable3D.SIN_SONIDO
+	# No fijar un sonido propio: Interactuable3D resuelve el gesto actual.
+	# EXAMINAR queda silencioso; ABRIR/COGER/CERRAR siguen el catálogo común,
+	# que #1813 puede migrar a síntesis chip sin acoplar este incidente a assets.
 	_impresora.activado.connect(_al_activar)
 	mundo.add_child(_impresora)
 
