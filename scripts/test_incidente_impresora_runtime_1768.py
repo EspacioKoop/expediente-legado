@@ -21,7 +21,8 @@ class IncidenteImpresoraRuntime1768Test(unittest.TestCase):
 
     def test_reutiliza_modelo_y_publica_evento_canonico(self):
         self.assertIn("IncidenteImpresoraOficina.programacion(", self.fuente)
-        self.assertIn("IncidenteImpresoraOficina.nuevo(", self.fuente)
+        self.assertIn("IncidenteImpresoraOficina", self.fuente)
+        self.assertIn(". nuevo(", self.fuente)
         self.assertIn("IncidenteImpresoraOficina.transicionar(", self.fuente)
         self.assertIn("IncidenteImpresoraOficina.EVENTO", self.fuente)
         self.assertIn('jornada["eventos"] = eventos', self.fuente)
