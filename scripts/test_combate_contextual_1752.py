@@ -45,6 +45,13 @@ class CombateContextual1752Test(unittest.TestCase):
         self.assertIn("SuenoCombate.resolver", self.controlador)
         self.assertNotIn("JuicioCombate3D.new()", bloque)
 
+    def test_host_contextual_conserva_partida_para_capa_simbolica(self):
+        self.assertIn("var partida: Partida", self.controlador)
+        self.assertIn("partida = partida_actual", self.controlador)
+        self.assertIn('partida.estado.get("perfil_jugador", {})', self.controlador)
+        self.assertIn("partida.estado,", self.controlador)
+        self.assertIn("\t\t\tpartida,\n", self.dia)
+
     def test_realidad_expone_entrada_autorizada_y_consecuencia(self):
         self.assertIn("func abrir_combate_real(objetivo: Dictionary) -> bool:", self.dia)
         self.assertIn("CombateContextual.PLANO_REALIDAD", self.dia)
