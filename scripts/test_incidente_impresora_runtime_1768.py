@@ -10,6 +10,7 @@ from scripts.godot_pruebas import importar_proyecto
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTROLLER = ROOT / "godot" / "guion" / "dia_incidente_impresora_app.gd"
+SCENE = ROOT / "godot" / "escenas" / "dia.tscn"
 PRUEBA = "res://pruebas/pruebas_incidente_impresora_runtime_1768.gd"
 RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
 
@@ -18,6 +19,7 @@ class IncidenteImpresoraRuntime1768Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.fuente = CONTROLLER.read_text(encoding="utf-8")
+        cls.scene = SCENE.read_text(encoding="utf-8")
 
     def test_reutiliza_modelo_y_publica_evento_canonico(self):
         self.assertIn("IncidenteImpresoraOficina.programacion(", self.fuente)
@@ -53,8 +55,12 @@ class IncidenteImpresoraRuntime1768Test(unittest.TestCase):
         self.assertNotIn('jornada["acciones"] =', self.fuente)
         self.assertNotIn("dinero", self.fuente.lower())
 
-    def test_no_toca_escena_compartida(self):
-        self.assertNotIn("dia.tscn", self.fuente)
+    def test_controller_esta_montado_en_escena_real(self):
+        self.assertIn('path="res://guion/dia_incidente_impresora_app.gd"', self.scene)
+        self.assertIn(
+            '[node name="IncidenteImpresora1768Controller" type="Node" parent="."]',
+            self.scene,
+        )
         self.assertNotIn("PackedScene", self.fuente)
 
     def test_contrato_godot(self):
