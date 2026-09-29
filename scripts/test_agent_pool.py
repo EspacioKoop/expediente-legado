@@ -373,7 +373,8 @@ class AgentPoolTest(unittest.TestCase):
 
         self.assertIn("python3 scripts/kev_router.py", pool)
         self.assertIn("preferredProvider", pool)
-        self.assertIn("--json comments", pool)
+        self.assertIn('issues/$issue/comments?per_page=100', pool)
+        self.assertIn("scripts/agent_delegated_plan.py", pool)
         self.assertIn("AGENT_POOL_WORKER_FAILURE", worker)
         self.assertIn("AGENT_POOL_SLOT_UNHEALTHY", worker)
         self.assertIn("AGENT_PROVIDER_COOLDOWN_SECONDS", worker)
