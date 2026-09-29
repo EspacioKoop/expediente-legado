@@ -30,7 +30,7 @@ class CamaraOniricaFisica140Test(unittest.TestCase):
         self.assertIn("CAPACIDAD_CINTA_SEGUNDOS := 10.0", self.controlador)
         self.assertNotIn('camara_onirica_adquirida"', self.controlador)
         self.assertNotIn('"camara_adquirida"', self.controlador)
-        self.assertEqual(self.estado.count('"cinta"'), self.estado.count('"cinta"'))
+        self.assertIn('const CLAVE_ESTADO := "grabacion_onirica"', self.estado)
 
     def test_grabacion_exige_adquisicion_y_conserva_runtime_existente(self):
         self.assertIn("ERROR_CAMARA_NO_ADQUIRIDA", self.controlador)
