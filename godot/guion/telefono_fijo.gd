@@ -101,7 +101,8 @@ const CONTACTOS := [
 		"id": "centro_comunitario",
 		"nombre": "Centro comunitario del barrio",
 		"numero": "555-0164",
-		"texto": (
+		"texto":
+		(
 			"Centro comunitario. Si llama por una actividad, consulte el tablón "
 			+ "del barrio o vuelva mañana por la tarde."
 		),
