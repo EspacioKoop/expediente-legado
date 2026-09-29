@@ -44,11 +44,14 @@ static func aplicar(pieza: Node3D, retrato: String) -> bool:
 
 	var antes := _ids_hijos(esqueleto)
 	var vestidor := VESTUARIO.new()
-	var aplicado := vestidor.vestir(
-		pieza,
-		(perfil as Dictionary).duplicate(true),
-		Color(COLORES[retrato]),
-		retrato,
+	var aplicado := (
+		vestidor
+		. vestir(
+			pieza,
+			(perfil as Dictionary).duplicate(true),
+			Color(COLORES[retrato]),
+			retrato,
+		)
 	)
 	vestidor.free()
 	if not aplicado:
@@ -122,16 +125,26 @@ static func auditar(pieza: Node3D) -> Dictionary:
 
 static func dentro_de_presupuesto(antes: Dictionary, despues: Dictionary) -> bool:
 	return (
-		int(despues.get("skeletons", 0)) - int(antes.get("skeletons", 0))
-		<= int(PRESUPUESTO_MAX["skeletons_extra"])
-		and int(despues.get("triangulos", 0)) - int(antes.get("triangulos", 0))
-		<= int(PRESUPUESTO_MAX["triangulos_extra"])
-		and int(despues.get("superficies", 0)) - int(antes.get("superficies", 0))
-		<= int(PRESUPUESTO_MAX["superficies_extra"])
-		and int(despues.get("materiales", 0)) - int(antes.get("materiales", 0))
-		<= int(PRESUPUESTO_MAX["materiales_extra"])
-		and int(despues.get("texturas", 0)) - int(antes.get("texturas", 0))
-		<= int(PRESUPUESTO_MAX["texturas_extra"])
+		(
+			int(despues.get("skeletons", 0)) - int(antes.get("skeletons", 0))
+			<= int(PRESUPUESTO_MAX["skeletons_extra"])
+		)
+		and (
+			int(despues.get("triangulos", 0)) - int(antes.get("triangulos", 0))
+			<= int(PRESUPUESTO_MAX["triangulos_extra"])
+		)
+		and (
+			int(despues.get("superficies", 0)) - int(antes.get("superficies", 0))
+			<= int(PRESUPUESTO_MAX["superficies_extra"])
+		)
+		and (
+			int(despues.get("materiales", 0)) - int(antes.get("materiales", 0))
+			<= int(PRESUPUESTO_MAX["materiales_extra"])
+		)
+		and (
+			int(despues.get("texturas", 0)) - int(antes.get("texturas", 0))
+			<= int(PRESUPUESTO_MAX["texturas_extra"])
+		)
 	)
 
 
@@ -206,7 +219,9 @@ static func _resoluciones(texturas: Dictionary) -> Array[String]:
 	for textura in texturas.values():
 		if not textura is Texture2D:
 			continue
-		var medida := "%dx%d" % [(textura as Texture2D).get_width(), (textura as Texture2D).get_height()]
+		var medida := (
+			"%dx%d" % [(textura as Texture2D).get_width(), (textura as Texture2D).get_height()]
+		)
 		if not resultado.has(medida):
 			resultado.append(medida)
 	resultado.sort()
