@@ -131,18 +131,18 @@ BuclePrincipal:
 
     ld a, [wEstado]
     cp ESTADO_TITULO
-    jr z, EstadoTitulo
+    jp z, EstadoTitulo
     cp ESTADO_HISTORIA
-    jr z, EstadoHistoria
+    jp z, EstadoHistoria
     cp ESTADO_PARTIDO
-    jr z, EstadoPartido
+    jp z, EstadoPartido
     cp ESTADO_DERROTA
-    jr z, EstadoDerrota
+    jp z, EstadoDerrota
     cp ESTADO_VICTORIA
-    jr z, EstadoVictoria
+    jp z, EstadoVictoria
     cp ESTADO_DESAFIOS
-    jr z, EstadoDesafios
-    jr EstadoDesafioFin
+    jp z, EstadoDesafios
+    jp EstadoDesafioFin
 
 EstadoTitulo:
     ld a, [wTeclasNuevas]
@@ -153,25 +153,25 @@ EstadoTitulo:
     ld [wDerrotasPartido], a
     ld [wAyuda], a
     call MostrarHistoria
-    jr BuclePrincipal
+    jp BuclePrincipal
 
 EstadoHistoria:
     ld a, [wTeclasNuevas]
     and KEY_A | KEY_START
     jr z, BuclePrincipal
     call IniciarPartido
-    jr BuclePrincipal
+    jp BuclePrincipal
 
 EstadoPartido:
     call ActualizarPartido
-    jr BuclePrincipal
+    jp BuclePrincipal
 
 EstadoDerrota:
     ld a, [wTeclasNuevas]
     and KEY_A | KEY_START
     jr z, BuclePrincipal
     call IniciarPartido
-    jr BuclePrincipal
+    jp BuclePrincipal
 
 EstadoVictoria:
     ld a, [wTeclasNuevas]
@@ -181,10 +181,10 @@ EstadoVictoria:
     and KEY_START
     jr z, BuclePrincipal
     call MostrarTitulo
-    jr BuclePrincipal
+    jp BuclePrincipal
 .desafios:
     call MostrarDesafios
-    jr BuclePrincipal
+    jp BuclePrincipal
 
 EstadoDesafios:
     ld a, [wTeclasNuevas]
@@ -200,7 +200,7 @@ EstadoDesafios:
 .guardar:
     ld [wDesafio], a
     call MostrarDesafios
-    jr BuclePrincipal
+    jp BuclePrincipal
 
 .derecha:
     ld a, [wTeclasNuevas]
@@ -214,7 +214,7 @@ EstadoDesafios:
 .guardar_derecha:
     ld [wDesafio], a
     call MostrarDesafios
-    jr BuclePrincipal
+    jp BuclePrincipal
 
 .jugar:
     ld a, [wTeclasNuevas]
@@ -223,27 +223,27 @@ EstadoDesafios:
     ld a, 1
     ld [wModoDesafio], a
     call IniciarPartido
-    jr BuclePrincipal
+    jp BuclePrincipal
 
 .salir:
     ld a, [wTeclasNuevas]
     and KEY_START
     jr z, BuclePrincipal
     call MostrarTitulo
-    jr BuclePrincipal
+    jp BuclePrincipal
 
 EstadoDesafioFin:
     ld a, [wTeclasNuevas]
     and KEY_A
     jr z, .titulo
     call MostrarDesafios
-    jr BuclePrincipal
+    jp BuclePrincipal
 .titulo:
     ld a, [wTeclasNuevas]
     and KEY_START
     jr z, BuclePrincipal
     call MostrarTitulo
-    jr BuclePrincipal
+    jp BuclePrincipal
 
 LeerControles:
     ld a, $20
