@@ -925,7 +925,7 @@ jobs:
           # API) sus cambios están a medias y nunca deben llegar a una PR.
           if [[ "$IMPLEMENT_OUTCOME" != success ]]; then
             echo "retry_stage=implement" >> "$GITHUB_OUTPUT"
-            echo "::error::implementación incompleta (outcome=$IMPLEMENT_OUTCOME); se reintentará con otro worker" >&2
+            echo "::error::implementación incompleta (outcome=$IMPLEMENT_OUTCOME); la política decidirá retry/rotación" >&2
             exit 1
           fi
           cp .agent-plan.json /tmp/plan.json
@@ -938,7 +938,7 @@ jobs:
           git add -A
           if git diff --cached --quiet; then
             echo "retry_stage=no-changes" >> "$GITHUB_OUTPUT"
-            echo "::error::implementación terminó sin cambios; se reintentará con otro worker" >&2
+            echo "::error::implementación terminó sin cambios; se detendrá sin penalizar el worker" >&2
             exit 2
           fi
           python3 - <<'PY'
