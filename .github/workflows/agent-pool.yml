@@ -68,6 +68,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REQUESTED_MAX: ${{ inputs.max_parallel || '6' }}
+          ACTIONS_BUDGET: ${{ vars.AGENT_POOL_ACTIONS_BUDGET || '12' }}
           HAS_QWEN: ${{ secrets.QWEN_API_KEY != '' }}
           HAS_OMNIROUTE: ${{ secrets.OMNIROUTE_API_KEY != '' && secrets.TS_OAUTH_CLIENT_ID != '' && (secrets.TS_OAUTH_SECRET != '' || secrets.TS_AUDIENCE != '') && vars.OMNIROUTE_BASE_URL != '' && vars.OMNIROUTE_MODEL != '' }}
           HAS_GEMINI: ${{ secrets.GEMINI_API_KEY != '' }}
@@ -274,7 +275,26 @@ jobs:
 
           has_qwen="$(jq -r 'any(.[]; .provider == "qwen" and (if has("healthy") then .healthy else true end))' /tmp/workers.json)"
           has_gemini="$(jq -r 'any(.[]; .provider == "gemini" and (if has("healthy") then .healthy else true end))' /tmp/workers.json)"
-          route_limit=$((REQUESTED_MAX * 2))
+
+          # #1902: no añadir más workers cuando Actions ya está saturado. Si la
+          # consulta falla, se conserva REQUESTED_MAX (fail-open).
+          effective_max="$REQUESTED_MAX"
+          queued_runs=0
+          active_runs=0
+          if queued_json="$(gh run list --repo "$GITHUB_REPOSITORY" --status queued --limit 100 --json databaseId 2>/dev/null)" &&
+             active_json="$(gh run list --repo "$GITHUB_REPOSITORY" --status in_progress --limit 100 --json databaseId 2>/dev/null)"; then
+            queued_runs="$(jq 'length' <<<"$queued_json")"
+            active_runs="$(jq 'length' <<<"$active_json")"
+            pressure="$(python3 scripts/agent_pool_backpressure.py \
+              --requested "$REQUESTED_MAX" \
+              --queued "$queued_runs" \
+              --in-progress "$active_runs" \
+              --budget "$ACTIONS_BUDGET")"
+            effective_max="$(jq -r '.capacity' <<<"$pressure")"
+          fi
+          echo "Backpressure Actions: requested=$REQUESTED_MAX effective=$effective_max queued=$queued_runs active=$active_runs budget=$ACTIONS_BUDGET"
+
+          route_limit=$((effective_max * 2))
           (( route_limit > 12 )) && route_limit=12
           mapfile -t candidates < <(
             jq -r --argjson limit "$route_limit" \
@@ -282,12 +302,27 @@ jobs:
           )
 
           for issue in "${candidates[@]}"; do
-            comments="$(gh issue view "$issue" --repo "$GITHUB_REPOSITORY" \
-              --json comments --jq '[.comments[-30:][]? | {body:.body}]')"
+            # Una lectura REST sirve para routing histórico y, cuando existe un
+            # AGENT_PLAN de una fuente de confianza, para afinidad de rutas.
+            planned='[]'
+            comments='[]'
+            if gh api "repos/$GITHUB_REPOSITORY/issues/$issue" > "/tmp/pool-issue-$issue.json" &&
+               gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$issue/comments?per_page=100" \
+                 --jq '.[]' | jq -s '.' > "/tmp/pool-comments-$issue.json"; then
+              jq -s '.[0] + {comments: .[1]}' \
+                "/tmp/pool-issue-$issue.json" "/tmp/pool-comments-$issue.json" \
+                > "/tmp/pool-context-$issue.json"
+              python3 scripts/agent_delegated_plan.py \
+                --issue "/tmp/pool-context-$issue.json" \
+                --output "/tmp/pool-plan-$issue.json" >/dev/null || true
+              planned="$(jq -c '.plan.files // []' "/tmp/pool-plan-$issue.json" 2>/dev/null || printf '[]')"
+              comments="$(jq -c '[.comments[-30:][]? | {body:(.body // "")}]' "/tmp/pool-context-$issue.json")"
+            fi
+
             tmp="$(mktemp)"
-            jq --argjson issue "$issue" --argjson comments "$comments" \
+            jq --argjson issue "$issue" --argjson comments "$comments" --argjson planned "$planned" \
               'map(if .number == $issue
-                   then . + {comments:$comments}
+                   then . + {comments:$comments,plannedFiles:$planned}
                    else . end)' \
               /tmp/issues.json > "$tmp"
             mv "$tmp" /tmp/issues.json
@@ -321,7 +356,7 @@ jobs:
           python3 scripts/agent_pool.py \
             --issues /tmp/issues.json \
             --workers /tmp/workers.json \
-            --max-parallel "$REQUESTED_MAX" \
+            --max-parallel "$effective_max" \
             --output /tmp/matrix.json >/dev/null
 
           matrix="$(cat /tmp/matrix.json)"
