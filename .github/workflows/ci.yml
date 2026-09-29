@@ -47,6 +47,13 @@ jobs:
           echo "Base CI: $base"
           python scripts/ci_scope.py --base "$base" --head HEAD --github-output "$GITHUB_OUTPUT"
 
+      - name: Preflight GDScript fail-fast
+        if: steps.scope.outputs.mode == 'full'
+        shell: bash
+        env:
+          SIGA98_GDSCRIPT_FAST: '1'
+        run: bash scripts/check_gdscript.sh
+
       - name: Preflight infra rápido
         if: steps.scope.outputs.mode == 'fast'
         shell: bash
