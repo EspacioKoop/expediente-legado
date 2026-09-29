@@ -60,8 +60,9 @@ class AgentIssueContextTest(unittest.TestCase):
         issue["number"] = 1866
         packet = (
             'AGENT_B2B_BEGIN\n'
-            '{"schema":1,"type":"BLOCKER","issue":1866,"summary":"scope incompleto",'
-            '"refs":["observed:a.py"],"handoff":{"from":"implementer","to":"planner"}}'
+            '{"schema":1,"type":"BLOCKER","issue":1866,"correlation_id":"agent/qwen-1866-1",'
+            '"summary":"scope incompleto","refs":["observed:a.py"],'
+            '"handoff":{"from":"implementer","to":"planner"}}'
             '\nAGENT_B2B_END'
         )
         rendered = mod.render_context(
@@ -71,6 +72,7 @@ class AgentIssueContextTest(unittest.TestCase):
         )
         self.assertIn("## Eventos B2B recientes", rendered)
         self.assertIn("BLOCKER issue=#1866 implementer→planner", rendered)
+        self.assertIn("correlation=agent/qwen-1866-1", rendered)
         self.assertIn("summary=scope incompleto", rendered)
         self.assertNotIn("AGENT_B2B_BEGIN", rendered)
 
