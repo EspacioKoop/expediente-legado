@@ -1,0 +1,18 @@
+{
+  "fmt": {
+    "lineWidth": 100
+  },
+  "tasks": {
+    "check": "deno check main.ts mando_test.ts",
+    "test": "deno test mando_test.ts",
+    "start": "deno run --allow-env=MANDO_TOKEN,GITHUB_TOKEN,GITHUB_REPOSITORY,MANDO_GATEWAY_URL --allow-net=0.0.0.0:8000,api.github.com,siga98-feedback-deno.expediente-legado.deno.net main.ts"
+  },
+  "deploy": {
+    "org": "siga-98",
+    "app": "siga98-mando",
+    "runtime": {
+      "type": "dynamic",
+      "entrypoint": "./main.ts"
+    }
+  }
+}

@@ -1,0 +1,94 @@
+name: Sala de mando Deno
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'infra/mando-deno/**'
+      - '.github/workflows/mando-deno.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'infra/mando-deno/**'
+      - '.github/workflows/mando-deno.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mando-deno-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.9.6
+      - name: Formato
+        working-directory: infra/mando-deno
+        run: deno fmt --check main.ts mando.ts mando_test.ts deno.json
+      - name: Tipos
+        working-directory: infra/mando-deno
+        run: deno task check
+      - name: Pruebas
+        working-directory: infra/mando-deno
+        run: deno task test
+
+  # Solo despliega desde main. La app vive en la org siga-98, aislada del
+  # gateway de producción (org expediente-legado) y sin KV propio.
+  deploy:
+    needs: check
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      HAS_TOKEN: ${{ secrets.DENO_DEPLOY_TOKEN_SIGA98 != '' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - id: config
+        name: Comprobar configuración de despliegue
+        run: |
+          set -euo pipefail
+          if [[ "$HAS_TOKEN" != true ]]; then
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Falta secrets.DENO_DEPLOY_TOKEN_SIGA98; se omite el despliegue de la sala de mando."
+            exit 0
+          fi
+          echo "deploy=true" >> "$GITHUB_OUTPUT"
+      - name: Desplegar a Deno Deploy
+        if: steps.config.outputs.deploy == 'true'
+        working-directory: infra/mando-deno
+        env:
+          DENO_DEPLOY_TOKEN: ${{ secrets.DENO_DEPLOY_TOKEN_SIGA98 }}
+        run: deno deploy --org siga-98 --app siga98-mando --prod
+      - name: Validar /health
+        if: steps.config.outputs.deploy == 'true'
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 12); do
+            if curl --fail --silent --show-error --max-time 15 \
+              https://siga98-mando.siga-98.deno.net/health -o /tmp/mando-health.json; then
+              cat /tmp/mando-health.json
+              if python3 -c 'import json,sys; d=json.load(open("/tmp/mando-health.json")); sys.exit(0 if d.get("service")=="siga98-mando" and d.get("configurado") else 1)'; then
+                exit 0
+              fi
+            fi
+            echo "La sala de mando aún no responde configurada (intento $attempt/12)"
+            sleep 5
+          done
+          echo "::error::La sala de mando no quedó sana tras el despliegue."
+          exit 1
