@@ -112,7 +112,7 @@ def test_runtime_conecta_estructura_y_cielo_sin_fuente_paralela() -> None:
     assert "SuenoEspacioSimbolico.montar(mundo, creadas, modificadores_simbolicos)" in utileria
     assert "IdeologiaSueno923" in cielo
     assert 'preload("res://guion/ideologia_sueno_923.gd")' not in cielo
-    assert "resultado.append_array(" in cielo
+    assert "resultado.append_array(" in "".join(cielo.split())
 
 
 def test_regresion_ejecutable_en_godot() -> None:
