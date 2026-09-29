@@ -485,9 +485,7 @@ func _estilizar_lista_web98(lista: ItemList, fondo: Color) -> void:
 	lista.add_theme_color_override("font_color", TINTA_WEB98)
 	lista.add_theme_color_override("font_selected_color", Color("#f7fbff"))
 	lista.add_theme_stylebox_override("panel", _caja_web98(fondo, BORDE_WEB98, 1, 1, 6.0, 5.0))
-	lista.add_theme_stylebox_override(
-		"focus", _caja_web98(fondo, FOCO_WEB98, 2, 1, 5.0, 4.0)
-	)
+	lista.add_theme_stylebox_override("focus", _caja_web98(fondo, FOCO_WEB98, 2, 1, 5.0, 4.0))
 
 
 func _caja_web98(
