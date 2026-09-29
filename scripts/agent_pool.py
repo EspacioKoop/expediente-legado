@@ -74,6 +74,29 @@ def _preferred_provider(issue: dict[str, Any]) -> str | None:
     return None
 
 
+def _planned_files(issue: dict[str, Any]) -> set[str]:
+    raw = issue.get("plannedFiles") or issue.get("planned_files") or []
+    if not isinstance(raw, list):
+        return set()
+    files: set[str] = set()
+    for item in raw:
+        if not isinstance(item, str):
+            continue
+        path = item.strip().replace("\\", "/")
+        if path and not path.startswith("/") and ".." not in path.split("/"):
+            files.add(path)
+    return files
+
+
+def _paths_overlap(issue: dict[str, Any], selected_paths: set[str]) -> bool:
+    planned = _planned_files(issue)
+    return bool(planned and selected_paths.intersection(planned))
+
+
+def _remember_paths(issue: dict[str, Any], selected_paths: set[str]) -> None:
+    selected_paths.update(_planned_files(issue))
+
+
 def _comment_bodies(issue: dict[str, Any]) -> list[str]:
     raw = issue.get("comments", [])
     if not isinstance(raw, list):
@@ -185,11 +208,14 @@ def select_tasks(
     *,
     max_parallel: int = MAX_ALLOWED_PARALLEL,
 ) -> list[dict[str, Any]]:
-    limit = max(1, min(int(max_parallel), MAX_ALLOWED_PARALLEL))
+    limit = max(0, min(int(max_parallel), MAX_ALLOWED_PARALLEL))
+    if limit == 0:
+        return []
     free_workers = [
         normalized for item in workers if (normalized := _worker(item))
     ]
     tasks: list[dict[str, Any]] = []
+    selected_paths: set[str] = set()
     eligible: list[tuple[dict[str, Any], str | None]] = []
     for issue in sorted(issues, key=_sort_key):
         ok, requested_provider = eligible_issue(issue)
@@ -203,6 +229,8 @@ def select_tasks(
             continue
         if len(tasks) >= limit or not free_workers:
             break
+        if _paths_overlap(issue, selected_paths):
+            continue
 
         usable = _usable_indices(free_workers, issue)
         choice_index = _best_index(
@@ -221,6 +249,7 @@ def select_tasks(
                 "worker": worker["worker"],
             }
         )
+        _remember_paths(issue, selected_paths)
 
     # Las tareas flexibles consumen únicamente la capacidad que queda después de
     # reservar los providers explícitos. Kev sigue siendo una preferencia blanda.
@@ -229,6 +258,8 @@ def select_tasks(
             continue
         if len(tasks) >= limit or not free_workers:
             break
+        if _paths_overlap(issue, selected_paths):
+            continue
 
         usable = _usable_indices(free_workers, issue)
         if not usable:
@@ -256,6 +287,7 @@ def select_tasks(
                 "worker": worker["worker"],
             }
         )
+        _remember_paths(issue, selected_paths)
 
     return tasks
 
