@@ -297,6 +297,16 @@ func _conversar_con_dependiente(
 			_enfocar_dialogo_actual(charla)
 			return
 
+	# #933: la primera charla conserva las ramas propias del dependiente. A partir
+	# de ahí puede aparecer una única reacción read-only por visita si Paco conoce
+	# un hecho religioso/cultural de la vuelta actual.
+	if not bool(charla.get_meta("religion_933_mostrada", false)):
+		var clave_religiosa := DialogoReligion933.resolver_clave(partida.estado, id_dependiente)
+		if not clave_religiosa.is_empty():
+			charla.set_meta("religion_933_mostrada", true)
+			_iniciar_conversacion(charla, actor, clave_religiosa)
+			return
+
 	_iniciar_conversacion(
 		charla, actor, DependientesTiendas3D.siguiente_frase(charla, jornada, clima)
 	)

@@ -9,11 +9,19 @@ extends RefCounted
 
 const ACTOR_CUNADO := "cunado"
 const ACTOR_CORRESPONDENCIA := "correspondencia"
+const ACTOR_PACO := "paco"
+const ACTOR_TELEFONO_COMUNITARIO := "telefono_comunitario"
 
 const CLAVE_CUNADO_EXPOSICION := "RELIGION_933_CUNADO_EXPOSICION"
 const CLAVE_CORRESPONDENCIA_PRACTICA := "RELIGION_933_CORRESPONDENCIA_PRACTICA"
 const CLAVE_CUNADO_CONVICCION := "RELIGION_933_CUNADO_CONVICCION"
 const CLAVE_CORRESPONDENCIA_CONVICCION := "RELIGION_933_CORRESPONDENCIA_CONVICCION"
+const CLAVE_PACO_EXPOSICION := "RELIGION_933_PACO_EXPOSICION"
+const CLAVE_PACO_PRACTICA := "RELIGION_933_PACO_PRACTICA"
+const CLAVE_PACO_CONVICCION := "RELIGION_933_PACO_CONVICCION"
+const CLAVE_TELEFONO_EXPOSICION := "RELIGION_933_TELEFONO_EXPOSICION"
+const CLAVE_TELEFONO_PRACTICA := "RELIGION_933_TELEFONO_PRACTICA"
+const CLAVE_TELEFONO_CONVICCION := "RELIGION_933_TELEFONO_CONVICCION"
 
 
 static func resolver_clave(estado: Dictionary, actor: String) -> String:
@@ -66,6 +74,27 @@ static func _prioridades_para(actor: String) -> Array:
 				{
 					"canal": ReligionEventos.CANAL_PRACTICA,
 					"clave": CLAVE_CORRESPONDENCIA_PRACTICA,
+				},
+			]
+		ACTOR_PACO:
+			return [
+				{"canal": ReligionEventos.CANAL_CONVICCION, "clave": CLAVE_PACO_CONVICCION},
+				{"canal": ReligionEventos.CANAL_PRACTICA, "clave": CLAVE_PACO_PRACTICA},
+				{"canal": ReligionEventos.CANAL_EXPOSICION, "clave": CLAVE_PACO_EXPOSICION},
+			]
+		ACTOR_TELEFONO_COMUNITARIO:
+			return [
+				{
+					"canal": ReligionEventos.CANAL_CONVICCION,
+					"clave": CLAVE_TELEFONO_CONVICCION,
+				},
+				{
+					"canal": ReligionEventos.CANAL_PRACTICA,
+					"clave": CLAVE_TELEFONO_PRACTICA,
+				},
+				{
+					"canal": ReligionEventos.CANAL_EXPOSICION,
+					"clave": CLAVE_TELEFONO_EXPOSICION,
 				},
 			]
 		_:

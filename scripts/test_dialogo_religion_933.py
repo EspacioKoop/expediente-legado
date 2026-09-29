@@ -10,6 +10,9 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 DIALOGO = ROOT / "godot" / "guion" / "dialogo_religion_933.gd"
 DIA = ROOT / "godot" / "guion" / "dia_clima_app.gd"
+TELEFONO = ROOT / "godot" / "guion" / "telefono_fijo.gd"
+TELEFONO_PANEL = ROOT / "godot" / "guion" / "telefono_fijo_panel.gd"
+DIA_TELEFONO = ROOT / "godot" / "guion" / "dia_telefono_fijo_app.gd"
 TEXTOS = ROOT / "godot" / "datos" / "textos.csv"
 PRUEBA_GODOT = "res://pruebas/pruebas_dialogo_religion_933.gd"
 
@@ -19,6 +22,9 @@ class DialogoReligion933Test(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.dialogo = DIALOGO.read_text(encoding="utf-8")
         cls.dia = DIA.read_text(encoding="utf-8")
+        cls.telefono = TELEFONO.read_text(encoding="utf-8")
+        cls.telefono_panel = TELEFONO_PANEL.read_text(encoding="utf-8")
+        cls.dia_telefono = DIA_TELEFONO.read_text(encoding="utf-8")
         with TEXTOS.open(encoding="utf-8", newline="") as archivo:
             cls.textos = {fila["clave"]: fila["es"] for fila in csv.DictReader(archivo)}
 
@@ -47,6 +53,25 @@ class DialogoReligion933Test(unittest.TestCase):
         self.assertIn("return clave_dialogo", self.dia)
         self.assertIn("DialogoIdeologico.SUPERFICIE_OFICINA_CUNADO", self.dia)
 
+    def test_paco_conserva_ramas_y_reaccion_religiosa_es_secundaria(self) -> None:
+        self.assertIn('ACTOR_PACO := "paco"', self.dialogo)
+        self.assertIn('get_meta("religion_933_mostrada", false)', self.dia)
+        self.assertIn("DialogoDependientesContextual.tiene_ramas(id_dependiente)", self.dia)
+        self.assertIn("DialogoReligion933.resolver_clave(partida.estado, id_dependiente)", self.dia)
+        self.assertLess(
+            self.dia.index("DialogoDependientesContextual.tiene_ramas(id_dependiente)"),
+            self.dia.index('get_meta("religion_933_mostrada", false)'),
+        )
+
+    def test_telefono_recibe_estado_read_only_y_solo_contextualiza_contacto_declarado(self) -> None:
+        self.assertIn('"id": "centro_comunitario"', self.telefono)
+        self.assertIn('"religion_actor": DialogoReligion933.ACTOR_TELEFONO_COMUNITARIO', self.telefono)
+        self.assertIn("var estado_partida: Dictionary = {}", self.telefono_panel)
+        self.assertIn("DialogoReligion933.resolver_clave(estado_partida, actor_religion)", self.telefono_panel)
+        self.assertIn("_panel.estado_partida = estado_partida as Dictionary", self.dia_telefono)
+        self.assertNotIn("ReligionEventos.registrar(", self.telefono_panel)
+        self.assertNotIn("ReligionEventos.registrar(", self.dia_telefono)
+
     def test_no_toca_progreso_ni_economia(self) -> None:
         combinado = self.dialogo
         for termino in (
@@ -65,6 +90,12 @@ class DialogoReligion933Test(unittest.TestCase):
             "RELIGION_933_CORRESPONDENCIA_PRACTICA",
             "RELIGION_933_CUNADO_CONVICCION",
             "RELIGION_933_CORRESPONDENCIA_CONVICCION",
+            "RELIGION_933_PACO_EXPOSICION",
+            "RELIGION_933_PACO_PRACTICA",
+            "RELIGION_933_PACO_CONVICCION",
+            "RELIGION_933_TELEFONO_EXPOSICION",
+            "RELIGION_933_TELEFONO_PRACTICA",
+            "RELIGION_933_TELEFONO_CONVICCION",
         ):
             self.assertIn(clave, self.textos)
             self.assertTrue(self.textos[clave].strip())
