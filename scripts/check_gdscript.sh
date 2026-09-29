@@ -79,7 +79,14 @@ fi
 
 find_gd | xargs -0 --no-run-if-empty gdlint
 
-"$PYTHON_BIN" -m unittest discover -s scripts -p 'test_*.py'
+if [[ "${CI:-}" == "true" ]]; then
+  # Verbose + unbuffered: si un test runtime agota su timeout, Actions deja
+  # visible cuál estaba ejecutándose en vez de terminar 25 minutos después con
+  # un "operation was canceled" sin pista accionable.
+  "$PYTHON_BIN" -u -m unittest discover -v -s scripts -p 'test_*.py'
+else
+  "$PYTHON_BIN" -m unittest discover -s scripts -p 'test_*.py'
+fi
 
 # El cierre siempre vuelve a comprobar formato para detectar cambios posteriores
 # y mantener una única condición de salida tanto para agentes como para Actions.
