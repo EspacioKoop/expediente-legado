@@ -129,21 +129,12 @@ func _process(delta: float) -> void:
 
 func iniciar_grabacion_anomalia(anomalia: AnomaliaSueno3D) -> Dictionary:
 	var dia := get_parent()
-	if dia == null or String(dia.jornada.get("fase", "")) != "sueño":
-		return {"ok": false, "error": "fuera_de_sueno"}
+	var error := _validar_inicio_grabacion(dia, anomalia)
+	if not error.is_empty():
+		return {"ok": false, "error": error}
+
 	var partida_actual = dia.get("partida")
-	if not partida_actual is Partida:
-		return {"ok": false, "error": "partida_no_disponible"}
-	if not _camara_disponible(dia):
-		return {"ok": false, "error": ERROR_CAMARA_NO_ADQUIRIDA}
-	if anomalia == null or not is_instance_valid(anomalia):
-		return {"ok": false, "error": GrabacionOniricaRuntime.ERROR_SUJETO_INVALIDO}
-
 	var documento := String(anomalia.get_meta("documento_origen", "")).strip_edges()
-	var leidos = dia.jornada.get("leido_hoy", [])
-	if documento.is_empty() or typeof(leidos) != TYPE_ARRAY or not leidos.has(documento):
-		return {"ok": false, "error": GrabacionOniricaRuntime.ERROR_ORIGINAL_DESCONOCIDO}
-
 	var contenedor := GrabacionOniricaEstado.asegurar_en_estado(partida_actual.estado)
 	var cinta = contenedor.get("cinta", {})
 	if typeof(cinta) != TYPE_DICTIONARY or cinta.is_empty():
@@ -157,6 +148,23 @@ func iniciar_grabacion_anomalia(anomalia: AnomaliaSueno3D) -> Dictionary:
 	if bool(inicio.get("ok", false)):
 		_anomalia_grabada = anomalia
 	return inicio
+
+
+func _validar_inicio_grabacion(dia: Node, anomalia: AnomaliaSueno3D) -> String:
+	if dia == null or String(dia.jornada.get("fase", "")) != "sueño":
+		return "fuera_de_sueno"
+	if not dia.get("partida") is Partida:
+		return "partida_no_disponible"
+	if not _camara_disponible(dia):
+		return ERROR_CAMARA_NO_ADQUIRIDA
+	if anomalia == null or not is_instance_valid(anomalia):
+		return GrabacionOniricaRuntime.ERROR_SUJETO_INVALIDO
+
+	var documento := String(anomalia.get_meta("documento_origen", "")).strip_edges()
+	var leidos = dia.jornada.get("leido_hoy", [])
+	if documento.is_empty() or typeof(leidos) != TYPE_ARRAY or not leidos.has(documento):
+		return GrabacionOniricaRuntime.ERROR_ORIGINAL_DESCONOCIDO
+	return ""
 
 
 func finalizar_grabacion(
