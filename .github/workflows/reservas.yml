@@ -29,6 +29,7 @@ jobs:
       # Incluso workflow_dispatch hace checkout fijo de main antes de usar issues:write.
       - uses: actions/checkout@v4
         with:
+          persist-credentials: false
           ref: main
 
       - uses: actions/setup-python@v5
