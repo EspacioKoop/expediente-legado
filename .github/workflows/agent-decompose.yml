@@ -14,7 +14,6 @@ permissions:
   contents: read
   issues: write
   actions: write
-  id-token: write
 
 concurrency:
   group: agent-decompose-${{ github.event.issue.number || inputs.issue }}
