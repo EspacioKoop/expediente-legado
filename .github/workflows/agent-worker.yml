@@ -830,7 +830,7 @@ jobs:
           fi
           cp .agent-plan.json /tmp/plan.json
           cp .agent-task.md /tmp/agent-task.md
-          rm -f .agent-task.md .agent-plan.json .agent-context.md .agent-memory.json .agent-history.json .agent-platino-sha gha-creds-*.json
+          rm -f .agent-task.md .agent-plan.json .agent-task-packet.json .agent-worker-prompt.md .agent-context.md .agent-memory.json .agent-history.json .agent-platino-sha gha-creds-*.json
           rm -rf .agent-platino .agent-wiki .gemini .qwen gemini-artifacts qwen-artifacts
           git add -A
           if git diff --cached --quiet; then
@@ -894,7 +894,7 @@ jobs:
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":4},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file"]}}'
-          prompt: 'Lee UNICAMENTE .agent-review-input.md. No abras otros archivos, no uses shell, no edites nada y no propongas refactors generales. Revisa solo incumplimiento del issue/plan, bug claro del diff, test imprescindible ausente o violacion evidente de seguridad inferible del input. Maximo 5 hallazgos, una frase cada uno. Termina inmediatamente con AGENT_REVIEW_BEGIN seguido de JSON {"verdict":"approve","findings":[]} o {"verdict":"findings","findings":["..."]} y AGENT_REVIEW_END.'
+          prompt: 'Lee UNICAMENTE .agent-review-input.md. No abras otros archivos, no uses shell, no edites nada y no propongas refactors generales. Revisa solo incumplimiento del issue/plan, bug claro del diff, test imprescindible ausente o violacion evidente de seguridad inferible del input. Maximo 5 hallazgos, una frase cada uno. Termina inmediatamente con AGENT_REVIEW_BEGIN seguido de JSON {"schema":1,"message_type":"REVIEW","verdict":"approve","findings":[]} o {"schema":1,"message_type":"REVIEW","verdict":"findings","findings":["..."]} y AGENT_REVIEW_END.'
 
       - id: review_gemini
         name: Reviewer acotado Gemini
@@ -907,7 +907,7 @@ jobs:
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":4},"tools":{"core":["read_file"]}}'
-          prompt: 'Lee UNICAMENTE .agent-review-input.md. No abras otros archivos, no uses shell, no edites nada y no propongas refactors generales. Revisa solo incumplimiento del issue/plan, bug claro del diff, test imprescindible ausente o violacion evidente de seguridad inferible del input. Maximo 5 hallazgos, una frase cada uno. Termina inmediatamente con AGENT_REVIEW_BEGIN seguido de JSON {"verdict":"approve","findings":[]} o {"verdict":"findings","findings":["..."]} y AGENT_REVIEW_END.'
+          prompt: 'Lee UNICAMENTE .agent-review-input.md. No abras otros archivos, no uses shell, no edites nada y no propongas refactors generales. Revisa solo incumplimiento del issue/plan, bug claro del diff, test imprescindible ausente o violacion evidente de seguridad inferible del input. Maximo 5 hallazgos, una frase cada uno. Termina inmediatamente con AGENT_REVIEW_BEGIN seguido de JSON {"schema":1,"message_type":"REVIEW","verdict":"approve","findings":[]} o {"schema":1,"message_type":"REVIEW","verdict":"findings","findings":["..."]} y AGENT_REVIEW_END.'
 
       - id: review_contract
         name: Normalizar reviewer no bloqueante
