@@ -205,6 +205,18 @@ Deno.test("BLOCKER fuerza blocking aunque el emisor lo omita", async () => {
   });
 });
 
+Deno.test("inbox exige task_id para no mezclar conversaciones", async () => {
+  await withKv(async (kv) => {
+    const response = await call(
+      kv,
+      "inbox",
+      { schema: 1, recipient: "reviewer" },
+      worker("run-reviewer"),
+    );
+    assertEquals(response.status, 400, "task_id obligatorio");
+  });
+});
+
 Deno.test("rechaza secretos obvios y schema incorrecto", async () => {
   await withKv(async (kv) => {
     const secret = await call(
