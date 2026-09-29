@@ -12,6 +12,7 @@ CREADOR = Path("godot/guion/creador_personaje_app.gd")
 NUEVA_VIDA = Path("godot/guion/auditorias_nueva_vida_app.gd")
 VISOR = Path("godot/guion/visor_expediente.gd")
 GATO = Path("godot/guion/dia_gato_app.gd")
+COMBATE_CONTEXTUAL = Path("godot/guion/dia_combate_contextual_app.gd")
 
 
 def texto() -> str:
@@ -188,12 +189,15 @@ class AuditoriasTest(unittest.TestCase):
         assert resolver_fallo in proceso
         assert proceso.index(resolver_fallo) < proceso.index(despertar_forzado)
     
-        duelo = dia.split("func _cerrar_duelo", 1)[1].split(
-            "func _cerrar_expediente", 1
+        combate = COMBATE_CONTEXTUAL.read_text(encoding="utf-8")
+        cierre = combate.split("func _cerrar(", 1)[1].split(
+            "func _preparar_mundo", 1
         )[0]
-        assert "if not gano:" in duelo
-        assert resolver_fallo in duelo
-        assert duelo.index(resolver_fallo) < duelo.index("SuenoCombate.resolver")
+        assert "if not gano:" in cierre
+        assert "Auditorias.resolver_fin_sueno(partida_estado, false)" in cierre
+        assert cierre.index("Auditorias.resolver_fin_sueno(partida_estado, false)") < cierre.index(
+            "SuenoCombate.resolver"
+        )
     
     
     def test_sueno_completo_recibe_un_hecho_y_no_duplica_sistemas(self):
