@@ -148,16 +148,21 @@ static func _lecturas_sociales(estado: Dictionary) -> Array:
 			continue
 		var reaccion_cruda = entrada.get("reaccion", "")
 		var etiquetas_crudas = entrada.get("etiquetas", [])
-		salida.append(
-			{
-				"actor": actor,
-				"evento_observado": evento,
-				"reaccion": String(reaccion_cruda) if typeof(reaccion_cruda) == TYPE_STRING else "",
-				"etiquetas": (
-					(etiquetas_crudas as Array).duplicate(true)
-					if typeof(etiquetas_crudas) == TYPE_ARRAY
-					else []
-				),
-			}
+		(
+			salida
+			. append(
+				{
+					"actor": actor,
+					"evento_observado": evento,
+					"reaccion":
+					String(reaccion_cruda) if typeof(reaccion_cruda) == TYPE_STRING else "",
+					"etiquetas":
+					(
+						(etiquetas_crudas as Array).duplicate(true)
+						if typeof(etiquetas_crudas) == TYPE_ARRAY
+						else []
+					),
+				}
+			)
 		)
 	return salida
