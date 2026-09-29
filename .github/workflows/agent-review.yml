@@ -1,0 +1,102 @@
+name: Agent review · Euriclea
+
+# Revisora independiente de los drafts del pool (#1802). Barre las PRs
+# `agent/*` y revisa cada SHA una vez con la cadena principal. Si nadie
+# responde, deja `revision:pendiente` para el respaldo local (el mismo script en
+# el PC, lanzado por el cron de Hermes) o para el nivel 2. Sin candidatas no
+# conecta Tailscale ni llama a ningún modelo: vigilar sale gratis.
+
+on:
+  schedule:
+    - cron: '7,37 * * * *'
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: 'PR concreta que revisar (aunque ya tenga revisión)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  id-token: write
+
+concurrency:
+  group: agent-review
+  cancel-in-progress: false
+
+jobs:
+  euriclea:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR: ${{ inputs.pr }}
+      HAS_OMNIROUTE: ${{ secrets.OMNIROUTE_API_KEY != '' && secrets.TS_OAUTH_CLIENT_ID != '' && (secrets.TS_OAUTH_SECRET != '' || secrets.TS_AUDIENCE != '') && vars.OMNIROUTE_BASE_URL != '' }}
+      HAS_TS_OAUTH: ${{ secrets.TS_OAUTH_CLIENT_ID != '' && secrets.TS_OAUTH_SECRET != '' }}
+      HAS_TS_OIDC: ${{ secrets.TS_OAUTH_CLIENT_ID != '' && secrets.TS_AUDIENCE != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: cand
+        name: Buscar drafts del pool sin revisar
+        run: |
+          set -euo pipefail
+          if [[ -n "$PR" ]]; then
+            echo "hay=true" >> "$GITHUB_OUTPUT"
+          else
+            python3 scripts/agent_euriclea.py candidatas --nivel principal --github-output "$GITHUB_OUTPUT"
+          fi
+
+      - name: Conectar a OmniRoute por Tailscale (OAuth)
+        if: steps.cand.outputs.hay == 'true' && env.HAS_OMNIROUTE == 'true' && env.HAS_TS_OAUTH == 'true'
+        continue-on-error: true
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:github-autopilot
+
+      - name: Conectar a OmniRoute por Tailscale (OIDC)
+        if: steps.cand.outputs.hay == 'true' && env.HAS_OMNIROUTE == 'true' && env.HAS_TS_OAUTH != 'true' && env.HAS_TS_OIDC == 'true'
+        continue-on-error: true
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          audience: ${{ secrets.TS_AUDIENCE }}
+          tags: tag:github-autopilot
+
+      - id: omniroute
+        name: Comprobar OmniRoute
+        if: steps.cand.outputs.hay == 'true' && env.HAS_OMNIROUTE == 'true'
+        continue-on-error: true
+        env:
+          OMNIROUTE_BASE_URL: ${{ vars.OMNIROUTE_BASE_URL }}
+          OMNIROUTE_API_KEY: ${{ secrets.OMNIROUTE_API_KEY }}
+        run: |
+          set -euo pipefail
+          code="$(curl -sS --max-time 12 -o /dev/null -w '%{http_code}' \
+            -H "Authorization: Bearer $OMNIROUTE_API_KEY" "${OMNIROUTE_BASE_URL%/}/models" || true)"
+          [[ "$code" == 200 ]]
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+
+      - name: Revisar
+        if: steps.cand.outputs.hay == 'true'
+        env:
+          OMNI_READY: ${{ steps.omniroute.outputs.ready || 'false' }}
+          OMNIROUTE_BASE_URL: ${{ vars.OMNIROUTE_BASE_URL }}
+          OMNIROUTE_API_KEY: ${{ secrets.OMNIROUTE_API_KEY }}
+          EURICLEA_MODELO: ${{ vars.EURICLEA_MODELO }}
+          QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
+          QWEN_BASE_URL: ${{ vars.QWEN_BASE_URL }}
+          QWEN_MODEL: ${{ vars.QWEN_MODEL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+        run: |
+          set -euo pipefail
+          if [[ -n "$PR" ]]; then
+            python3 scripts/agent_euriclea.py barrer --nivel principal --pr "$PR"
+          else
+            python3 scripts/agent_euriclea.py barrer --nivel principal --max 3
+          fi
