@@ -207,6 +207,7 @@ func _montar_rotulo_destino(archivador: ArchivadorInteractivo3D, destino: String
 
 func _archivar_en(actor: Node, host, archivador: ArchivadorInteractivo3D) -> void:
 	if not is_instance_valid(_carpeta_archivado):
+		_reordenar_archivador(host, archivador)
 		return
 	# Solo colocar si la carpeta ya fue cogida. Mirar/abrir un archivador antes
 	# de eso conserva exactamente la interacción de #283.
@@ -235,6 +236,17 @@ func _archivar_en(actor: Node, host, archivador: ArchivadorInteractivo3D) -> voi
 	_carpeta_archivado.queue_free()
 	_carpeta_archivado = null
 	refrescar(host)
+
+
+func _reordenar_archivador(host, archivador: ArchivadorInteractivo3D) -> void:
+	var destino := String(archivador.get_meta("destino_archivado", ""))
+	if destino.is_empty() or not ArchivadoBandeja.reorganizar_destino(_estado_archivado, destino):
+		return
+	_persistir(host)
+	_sincronizar_desorden_espacial(host)
+	_guardar(host)
+	host._nomina.text = _texto("archivador_reordenado") % destino
+	host._sonar("documento")
 
 
 func _caso_tiene_error_previo(caso_id: String) -> bool:
