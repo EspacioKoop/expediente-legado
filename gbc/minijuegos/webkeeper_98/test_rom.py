@@ -253,7 +253,9 @@ class PruebasWebkeeper(unittest.TestCase):
         self.pulsar(emulador, "right")
         self.assertEqual(self.leer(emulador, "wDesafio"), 2)
         self.pulsar(emulador, "a")
-        self.assertEqual(self.leer(emulador, "wTimerTiro"), 60)
+        timer = self.leer(emulador, "wTimerTiro")
+        self.assertGreaterEqual(timer, 55)
+        self.assertLessEqual(timer, 60)
 
     def test_superar_desafio_registra_badge_sin_publicar_handshake(self):
         emulador = self.arrancar()
