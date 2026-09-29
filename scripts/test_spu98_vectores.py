@@ -62,6 +62,37 @@ class SpuVectoresTest(unittest.TestCase):
                 salida = LAB.decodificar_adpcm(datos)
                 self.assertEqual(salida, [1] * cantidad + [0] * (-cantidad % 28))
 
+    def test_pitch_tasas_contra_vectores_documentales(self):
+        pitch = VECTORES["pitch"]
+        self.assertFalse(pitch["pmon"])
+        for caso in pitch["casos_tasa"]:
+            with self.subTest(registro=caso["registro"]):
+                self.assertEqual(LAB.paso_pitch_spu(caso["registro"]), caso["paso"])
+                self.assertEqual(
+                    LAB.tasa_pitch_spu(caso["registro"]), caso["tasa_consumo_hz"]
+                )
+
+    def test_pitch_trazas_contra_contadores_precalculados(self):
+        for caso in VECTORES["pitch"]["trazas"]:
+            with self.subTest(registro=caso["registro"]):
+                traza = LAB.trazar_pitch_spu(
+                    caso["registro"], caso["ticks"], caso["contador_inicial"]
+                )
+                self.assertEqual(traza["paso"], min(caso["registro"], 0x4000))
+                self.assertEqual(traza["contadores"], caso["contadores"])
+                self.assertEqual(traza["indices_muestra"], caso["indices_muestra"])
+                self.assertEqual(
+                    traza["indices_interpolacion"], caso["indices_interpolacion"]
+                )
+
+    def test_pitch_rechaza_estado_fuera_del_subconjunto_t07(self):
+        for registro in (-1, 0x10000, 1.5, True):
+            with self.subTest(registro=registro), self.assertRaises(ValueError):
+                LAB.paso_pitch_spu(registro)
+        for ticks in ([], [0], [2, 1], [1, 1], [1.5]):
+            with self.subTest(ticks=ticks), self.assertRaises(ValueError):
+                LAB.trazar_pitch_spu(0x1000, ticks)
+
     def test_cabeceras_fuera_del_perfil_se_rechazan(self):
         invalidas = [filtro << 4 for filtro in range(5, 16)]
         invalidas += [(filtro << 4) | shift for filtro in range(5) for shift in (13, 14, 15)]
