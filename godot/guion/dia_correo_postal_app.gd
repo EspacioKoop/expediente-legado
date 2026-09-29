@@ -51,12 +51,33 @@ func _al_recoger_correo(resultado: Dictionary, _actor: Node) -> void:
 	var dia := get_parent()
 	if dia == null:
 		return
-	# La pieza ya está en Jornada/Inventario. Persistimos antes de abrir el lector
-	# para que incluso cerrar el juego desde la lectura no duplique paquetes.
+	# La pieza ya está en Jornada/Inventario y el lector se abre inmediatamente:
+	# este gesto deliberado puede registrar exposición #919 antes del mismo guardado.
+	_registrar_exposicion_si_toca(dia, resultado)
 	if dia.has_method("_guardar_o_avisar"):
 		dia._guardar_o_avisar("")
 	dia.set_meta("ultimo_correo_postal", resultado.duplicate(true))
 	_abrir_resultado(resultado)
+
+
+func _registrar_exposicion_si_toca(dia: Node, resultado: Dictionary) -> bool:
+	var pieza = resultado.get("pieza", {})
+	if typeof(pieza) != TYPE_DICTIONARY:
+		return false
+	var id_superficie := String((pieza as Dictionary).get("ideologia_superficie_id", ""))
+	if id_superficie.is_empty():
+		return false
+	var partida = dia.get("partida")
+	if partida == null:
+		return false
+	var estado_partida = partida.get("estado")
+	if typeof(estado_partida) != TYPE_DICTIONARY:
+		return false
+	return IdeologiaCulturaCotidiana1883.registrar_exposicion(
+		estado_partida as Dictionary,
+		id_superficie,
+		int(dia.jornada.get("dia", 1)),
+	)
 
 
 func _al_buzon_vacio(_actor: Node) -> void:
