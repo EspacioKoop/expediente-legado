@@ -58,10 +58,23 @@ func _probar() -> void:
 		Inventario.guardar_en_casa(inventario, "palanca_kkryy"),
 		"la herramienta puede estar guardada en casa"
 	)
+	_comprobar(
+		persiana.herramienta_disponible().is_empty(),
+		"una herramienta guardada no cuenta como carried",
+	)
+	_comprobar(not persiana.interactuar(root), "home_storage no repara la persiana")
+	_comprobar(
+		Imprevistos.consecuencias(jornada).has("casa_persiana_atascada"),
+		"rechazar home_storage conserva la consecuencia",
+	)
+	_comprobar(
+		Inventario.sacar_de_casa(inventario, "palanca_kkryy"),
+		"la herramienta vuelve a carried",
+	)
 	var herramienta := persiana.herramienta_disponible()
 	_comprobar(
 		String(herramienta.get("id", "")) == "palanca_kkryy",
-		"la persiana encuentra la palanca por uso y no por UI paralela"
+		"la persiana resuelve por uso semántico dentro de carried",
 	)
 
 	_comprobar(persiana.interactuar(root), "la palanca permite forzar la persiana")

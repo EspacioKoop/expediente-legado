@@ -6,7 +6,7 @@
 class_name LinternaCasa680
 extends RefCounted
 
-const ITEM_ID := "linterna_kkryy"
+const USO_REQUERIDO := UsosHerramienta.ILUMINAR
 const CONSECUENCIA := "casa_luz_reducida"
 const NOMBRE_LUZ := "HazLinterna680"
 const ENERGIA := 2.2
@@ -19,20 +19,23 @@ static func firma(estado_ambiental: Dictionary, inventario: Dictionary) -> Strin
 		"%d|%d"
 		% [
 			int(_luz_reducida(estado_ambiental)),
-			int(_en_carried(inventario)),
+			int(not _herramienta(inventario).is_empty()),
 		]
 	)
 
 
 static func activa(estado_ambiental: Dictionary, inventario: Dictionary) -> bool:
-	return _luz_reducida(estado_ambiental) and _en_carried(inventario)
+	return _luz_reducida(estado_ambiental) and not _herramienta(inventario).is_empty()
 
 
 static func refrescar(
 	caminante: Node3D, estado_ambiental: Dictionary, inventario: Dictionary
 ) -> SpotLight3D:
 	limpiar(caminante)
-	if not activa(estado_ambiental, inventario):
+	if not _luz_reducida(estado_ambiental):
+		return null
+	var herramienta := _herramienta(inventario)
+	if herramienta.is_empty():
 		return null
 
 	var camara := caminante.get_node_or_null("Camara") as Camera3D
@@ -47,7 +50,8 @@ static func refrescar(
 	luz.spot_angle = ANGULO
 	luz.shadow_enabled = false
 	luz.position = Vector3(0.08, -0.06, -0.10)
-	luz.set_meta("prop_utilizable_id", ITEM_ID)
+	luz.set_meta("prop_utilizable_id", String(herramienta.get("id", "")))
+	luz.set_meta("uso_requerido", USO_REQUERIDO)
 	luz.set_meta("mitiga_consecuencia", CONSECUENCIA)
 	camara.add_child(luz)
 	return luz
@@ -71,9 +75,9 @@ static func _luz_reducida(estado_ambiental: Dictionary) -> bool:
 	return typeof(consecuencias) == TYPE_ARRAY and consecuencias.has(CONSECUENCIA)
 
 
-static func _en_carried(inventario: Dictionary) -> bool:
-	Inventario.completar(inventario)
-	for objeto in inventario[Inventario.CARRIED]:
-		if typeof(objeto) == TYPE_DICTIONARY and String(objeto.get("id", "")) == ITEM_ID:
-			return true
-	return false
+static func _herramienta(inventario: Dictionary) -> Dictionary:
+	var resultado := UsosHerramienta.resolver(inventario, USO_REQUERIDO)
+	if not bool(resultado.get("ok", false)):
+		return {}
+	var herramienta: Variant = resultado.get("herramienta", {})
+	return (herramienta as Dictionary).duplicate(true) if herramienta is Dictionary else {}

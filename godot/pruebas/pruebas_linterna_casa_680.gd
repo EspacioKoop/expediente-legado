@@ -87,6 +87,26 @@ func _probar() -> void:
 		LinternaCasa.refrescar(caminante, averia, inventario) == null,
 		"guardada en home_storage no ilumina"
 	)
+	var alternativa := {
+		"id": "luz_auxiliar_fixture",
+		"nombre": "luz auxiliar",
+		"usos": ["iluminar"],
+	}
+	_comprobar(
+		Inventario.recoger(inventario, alternativa), "otra herramienta semántica entra en carried"
+	)
+	var luz_alternativa := LinternaCasa.refrescar(caminante, averia, inventario)
+	_comprobar(
+		luz_alternativa != null, "cualquier herramienta con iluminar puede mitigar la oscuridad"
+	)
+	_comprobar(
+		(
+			luz_alternativa != null
+			and String(luz_alternativa.get_meta("prop_utilizable_id", "")) == "luz_auxiliar_fixture"
+		),
+		"el haz registra la herramienta compatible realmente elegida",
+	)
+	Inventario.retirar(inventario, "luz_auxiliar_fixture")
 	await process_frame
 
 	_comprobar(

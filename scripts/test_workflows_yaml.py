@@ -44,6 +44,18 @@ def backtick_peligroso(linea: str) -> bool:
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOWS = sorted((ROOT / ".github" / "workflows").glob("*.yml"))
+
+
+def workflow_privilegiado(texto: str) -> bool:
+    """Detecta workflows cuya cadena de confianza exige controles reforzados."""
+    return bool(
+        re.search(
+            r"(?m)^\s*(?:contents|issues|pull-requests|actions|checks|statuses|id-token):\s*write\s*$",
+            texto,
+        )
+        or "secrets." in texto
+        or "pull_request_target:" in texto
+    )
 # En columna 0 solo caben claves de primer nivel, comentarios o `---`.
 COLUMNA_CERO_VALIDA = re.compile(r"^(?:[A-Za-z_][\w-]*:|#|---\s*$)")
 
@@ -112,31 +124,18 @@ class WorkflowsYamlTest(unittest.TestCase):
 
 
     def test_checkout_privilegiado_no_persiste_credenciales(self):
-        """Los workflows con capacidad de escritura/OIDC no dejan el token en git."""
-        privilegiados = {
-            "agent-autopilot.yml",
-            "agent-worker.yml",
-            "agent-feeder.yml",
-            "agent-ci-repair.yml",
-            "agent-decompose.yml",
-            "agent-pool.yml",
-            "agent-reconciler.yml",
-            "agent-provider-smoke.yml",
-            "label-areas.yml",
-            "reservas.yml",
-            "alpha-playtest.yml",
-        }
+        """Todo workflow privilegiado deja el checkout sin credenciales persistidas."""
+        for ruta in WORKFLOWS:
+            texto_workflow = ruta.read_text(encoding="utf-8")
+            if not workflow_privilegiado(texto_workflow):
+                continue
 
-        for nombre in sorted(privilegiados):
-            ruta = ROOT / ".github" / "workflows" / nombre
-            lineas = ruta.read_text(encoding="utf-8").splitlines()
-            encontrados = 0
+            lineas = texto_workflow.splitlines()
             for indice, linea in enumerate(lineas):
                 match = re.match(r"^(\s*)(?:-\s*)?uses:\s*actions/checkout@", linea)
                 if not match:
                     continue
 
-                encontrados += 1
                 indentacion = len(match.group(1))
                 bloque = [linea]
                 for siguiente in lineas[indice + 1 :]:
@@ -146,15 +145,25 @@ class WorkflowsYamlTest(unittest.TestCase):
                         break
                     bloque.append(siguiente)
 
-                with self.subTest(workflow=nombre, checkout=indice + 1):
+                with self.subTest(workflow=ruta.name, checkout=indice + 1):
                     self.assertRegex(
                         "\n".join(bloque),
                         r"(?m)^\s*persist-credentials:\s*false\s*$",
-                        f"{nombre}:{indice + 1} debe usar persist-credentials: false",
+                        f"{ruta.name}:{indice + 1} debe usar persist-credentials: false",
                     )
 
-            with self.subTest(workflow=nombre):
-                self.assertGreater(encontrados, 0, f"{nombre} debería tener checkout")
+    def test_oidc_write_requiere_consumidor(self):
+        """No se concede id-token: write a jobs que no consumen OIDC."""
+        for ruta in WORKFLOWS:
+            texto = ruta.read_text(encoding="utf-8")
+            if not re.search(r"(?m)^\s*id-token:\s*write\s*$", texto):
+                continue
+            with self.subTest(workflow=ruta.name):
+                self.assertTrue(
+                    "ACTIONS_ID_TOKEN_REQUEST_URL" in texto
+                    or "tailscale/github-action@" in texto,
+                    f"{ruta.name} pide id-token: write sin un consumidor OIDC conocido",
+                )
 
     def test_pull_request_target_no_hace_checkout_del_head(self):
         """Un token privilegiado nunca debe ejecutar el head de una PR no confiable."""
@@ -185,47 +194,33 @@ class WorkflowsYamlTest(unittest.TestCase):
         self.assertIn('"$head_sha" != "$SHA"', texto)
 
 
-    def test_acciones_sensibles_usadas_por_sha(self):
-        """Los workflows privilegiados no ejecutan tags mutables de terceros."""
-        workflows = {
-            "agent-autopilot.yml",
-            "agent-worker.yml",
-            "agent-feeder.yml",
-            "agent-ci-repair.yml",
-            "agent-decompose.yml",
-            "agent-pool.yml",
-            "agent-reconciler.yml",
-            "agent-provider-smoke.yml",
-            "agent-omniroute-smoke.yml",
-            "label-areas.yml",
-            "reservas.yml",
-            "alpha-playtest.yml",
-            "cleanup-merged-branches.yml",
-        }
-        acciones = {
-            "actions/checkout",
-            "actions/setup-python",
-            "actions/upload-artifact",
-            "actions/download-artifact",
-            "actions/github-script",
-            "tailscale/github-action",
-            "QwenLM/qwen-code-action",
-            "google-github-actions/run-gemini-cli",
-            "softprops/action-gh-release",
-        }
-
-        patron = re.compile(r"uses:\s*([^\s@]+)@([^\s#]+)")
-        for nombre in sorted(workflows):
+    def test_deploys_deno_fijan_version_runtime(self):
+        """Los deploys con token no descargan una versión flotante de Deno."""
+        for nombre in ("mando-deno.yml", "feedback-deno-deploy.yml"):
             texto = (ROOT / ".github" / "workflows" / nombre).read_text(encoding="utf-8")
+            with self.subTest(workflow=nombre):
+                self.assertIn("deno-version: v2.9.6", texto)
+                self.assertNotIn("deno-version: v2.x", texto)
+
+
+    def test_acciones_sensibles_usadas_por_sha(self):
+        """Todo workflow privilegiado fija cualquier action externa por SHA completo."""
+        patron = re.compile(r"uses:\s*([^\s@]+)@([^\s#]+)")
+        for ruta in WORKFLOWS:
+            texto = ruta.read_text(encoding="utf-8")
+            if not workflow_privilegiado(texto):
+                continue
+
             for accion, referencia in patron.findall(texto):
-                if accion not in acciones:
+                if accion.startswith("./"):
                     continue
-                with self.subTest(workflow=nombre, action=accion):
+                with self.subTest(workflow=ruta.name, action=accion):
                     self.assertRegex(
                         referencia,
                         r"^[0-9a-f]{40}$",
-                        f"{nombre}: {accion} debe fijarse a un SHA completo, no {referencia!r}",
+                        f"{ruta.name}: {accion} debe fijarse a un SHA completo, no {referencia!r}",
                     )
+
 
 
 if __name__ == "__main__":
