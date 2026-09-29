@@ -7,6 +7,7 @@ func _init() -> void:
 	_probar_tres_modulos_sin_reetiquetar()
 	_probar_sin_declaracion()
 	_probar_final_base_estable()
+	_probar_integracion_final_visible()
 	_probar_snapshot_invalido()
 	print("pruebas religión epílogo #937: %d fallos" % fallos)
 	quit(1 if fallos > 0 else 0)
@@ -171,6 +172,54 @@ func _probar_final_base_estable() -> void:
 	var b := ReligionTrayectoria.derivar_epilogo("mismo_final", con_hecho)
 	_comprobar(a["final_base"] == b["final_base"], "trayectoria no sustituye el final")
 	_comprobar(a["religion"] != b["religion"], "hechos distintos producen capa distinta")
+
+
+func _probar_integracion_final_visible() -> void:
+	var estado := Partida.nueva()
+	var registro := ReligionEventos.asegurar_en_estado(estado)
+	_registrar(
+		registro,
+		"exp:final-visible",
+		ReligionEventos.CANAL_EXPOSICION,
+		"rom:archivo",
+		"casa:portatil",
+		1,
+		{},
+	)
+	_registrar(
+		registro,
+		"decl:final-visible",
+		ReligionEventos.CANAL_CONVICCION,
+		"dialogo:familia",
+		"casa:salon",
+		2,
+		{"declaracion": ReligionEventos.DECLARACION_DUDA},
+	)
+
+	var resumen := FinalPolitico.resumen(estado)
+	_comprobar(resumen.has("religion"), "el cierre político expone la capa religiosa")
+	_comprobar(resumen["religion"]["estado"] == "factual", "la capa visible usa hechos actuales")
+	_comprobar(
+		resumen["religion"]["modulos"].size() == 2,
+		"exposición y declaración permanecen separadas en el cierre",
+	)
+
+	_comprobar(
+		ReligionEventos.historial_trayectorias(estado).is_empty(),
+		"mostrar el resumen no sella ni muta el historial",
+	)
+	FinalPolitico.confirmar_cierre(estado)
+	var historial := ReligionEventos.historial_trayectorias(estado)
+	_comprobar(historial.size() == 1, "confirmar el cierre sella una trayectoria religiosa")
+	_comprobar(
+		historial[0]["motivo"] == "final_narrativo",
+		"el snapshot conserva el motivo de cierre",
+	)
+	FinalPolitico.confirmar_cierre(estado)
+	_comprobar(
+		ReligionEventos.historial_trayectorias(estado).size() == 1,
+		"confirmar dos veces no duplica la trayectoria",
+	)
 
 
 func _probar_snapshot_invalido() -> void:

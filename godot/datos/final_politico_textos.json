@@ -20,5 +20,21 @@
     "centrista": "centrismo radical del término medio",
     "socialdemocrata": "socialdemocracia de catálogo",
     "neoliberal": "neoliberalismo disruptivo"
+  },
+  "religion_titulo": "Trayectoria religiosa y cultural registrada:",
+  "religion_hecho_formato": "• %s · %s · %s",
+  "religion_mas": "… y %d hechos más archivados.",
+  "religion_sin_detalle": "sin detalle adicional",
+  "religion_canales": {
+    "exposicion": "exposición",
+    "practica": "práctica",
+    "conviccion_declarada": "declaración explícita",
+    "vinculo": "vínculo"
+  },
+  "religion_declaraciones": {
+    "afirmacion": "afirmación declarada",
+    "duda": "duda declarada",
+    "no_adscripcion": "no adscripción declarada",
+    "cambio": "cambio declarado"
   }
 }

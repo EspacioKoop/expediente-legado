@@ -23,6 +23,7 @@ static func resumen(estado: Dictionary, contrato: Dictionary = {}) -> Dictionary
 	var dominantes := Prometeo.ejes_dominantes(estado)
 	var patron := _patron(elecciones, dominantes)
 	var auditoria := Auditorias.resumen_narrativo(estado)
+	var religion := ReligionTrayectoria.resumir(ReligionEventos.resumen_trayectoria(estado))
 	var ejemplos := []
 
 	for evento in elecciones:
@@ -46,6 +47,7 @@ static func resumen(estado: Dictionary, contrato: Dictionary = {}) -> Dictionary
 		"elecciones": elecciones.size(),
 		"ejemplos": ejemplos,
 		"auditoria": auditoria,
+		"religion": religion,
 		"veredicto": String(contrato.get("veredicto", "")),
 	}
 
@@ -74,6 +76,7 @@ static func aplicar_logros(estado: Dictionary) -> Array:
 static func confirmar_cierre(estado: Dictionary) -> Array:
 	EvaluacionDesempeno.sellar(estado, "final_narrativo")
 	Prometeo.archivar_trayectoria_ideologica(estado, "final_narrativo")
+	ReligionEventos.archivar_trayectoria(estado, "final_narrativo")
 	estado["final_politico_mostrado"] = true
 	return aplicar_logros(estado)
 
