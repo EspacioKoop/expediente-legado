@@ -37,7 +37,9 @@ jobs:
       HAS_TS_OAUTH: ${{ secrets.TS_OAUTH_CLIENT_ID != '' && secrets.TS_OAUTH_SECRET != '' }}
       HAS_TS_OIDC: ${{ secrets.TS_OAUTH_CLIENT_ID != '' && secrets.TS_AUDIENCE != '' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
 
       - id: cand
         name: Buscar drafts del pool sin revisar
@@ -52,7 +54,7 @@ jobs:
       - name: Conectar a OmniRoute por Tailscale (OAuth)
         if: steps.cand.outputs.hay == 'true' && env.HAS_OMNIROUTE == 'true' && env.HAS_TS_OAUTH == 'true'
         continue-on-error: true
-        uses: tailscale/github-action@v4
+        uses: tailscale/github-action@d1b6cd204f8dceda5b3eaad7f1f767be390056cd # v4
         with:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
@@ -61,7 +63,7 @@ jobs:
       - name: Conectar a OmniRoute por Tailscale (OIDC)
         if: steps.cand.outputs.hay == 'true' && env.HAS_OMNIROUTE == 'true' && env.HAS_TS_OAUTH != 'true' && env.HAS_TS_OIDC == 'true'
         continue-on-error: true
-        uses: tailscale/github-action@v4
+        uses: tailscale/github-action@d1b6cd204f8dceda5b3eaad7f1f767be390056cd # v4
         with:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           audience: ${{ secrets.TS_AUDIENCE }}
