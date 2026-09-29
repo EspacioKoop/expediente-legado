@@ -8,6 +8,11 @@ extends "res://guion/dia_ascensor_app.gd"
 
 const DESTINO_ALQUILER := "alquiler"
 
+## Las decisiones políticas son las cargas de habilidad del duelo (#88, #419).
+## Vive aquí y no en dia_app desde que el duelo onírico pasó al combate 3D
+## (#1752): el del alquiler es el único que aún las necesita.
+var _historias: Historias
+
 
 ## Dormir sin vivienda conserva el mapa de esta vida laboral, pero no lo hace
 ## crecer: una sola escena repetida expresa el sueño degradado de #84.
@@ -168,7 +173,10 @@ func _abrir_duelo_alquiler() -> void:
 	duelo.raiz = int(jornada.get("raiz", _raiz()))
 	duelo.vuelta = int(jornada.get("vuelta", 1))
 	duelo.dia = int(jornada.get("dia", 1))
-	duelo.cargas = historias.cargas(partida.estado)
+	if _historias == null:
+		_historias = Historias.new()
+		_historias.cargar()
+	duelo.cargas = _historias.cargas(partida.estado)
 	duelo.terminado.connect(_cerrar_duelo_alquiler)
 	_pantalla.add_child(duelo)
 
