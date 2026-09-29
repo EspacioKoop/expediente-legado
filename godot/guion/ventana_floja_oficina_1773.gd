@@ -106,9 +106,7 @@ func _montar_visual() -> void:
 	_barra("MarcoDerecho", Vector3(0.055, 1.18, 0.055), Vector3(0.75, 0.0, 0.0), material)
 
 
-func _barra(
-	nombre: String, tam: Vector3, posicion: Vector3, material: StandardMaterial3D
-) -> void:
+func _barra(nombre: String, tam: Vector3, posicion: Vector3, material: StandardMaterial3D) -> void:
 	var malla := BoxMesh.new()
 	malla.size = tam
 	malla.material = material
