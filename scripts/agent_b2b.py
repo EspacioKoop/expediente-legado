@@ -94,6 +94,7 @@ def build_event(args: argparse.Namespace) -> dict[str, Any]:
         "issue": args.issue,
         "provider": args.provider or None,
         "worker": args.worker or None,
+        "correlation_id": _clean_text(args.correlation_id, 180) or f"issue:{args.issue}",
         "summary": _clean_text(args.summary, 500),
         "refs": _clean_list(args.ref or [], limit=16, item_limit=240),
         "handoff": {"from": args.from_role, "to": args.to_role},
@@ -109,6 +110,7 @@ def build_intake(args: argparse.Namespace) -> dict[str, Any]:
         "issue": args.issue,
         "provider": args.provider,
         "worker": args.worker,
+        "correlation_id": _clean_text(args.correlation_id, 180) or f"issue:{args.issue}",
         "phase": "plan",
         "goal": "",
         "scope": {"files": [], "max_files": 12, "reserved": False},
@@ -131,14 +133,22 @@ def build_task(args: argparse.Namespace) -> dict[str, Any]:
         raise ValueError("plan.files excede max_files=12")
     artifacts = _base_artifacts(args)
     artifacts["plan"] = _artifact(args.plan)
+    claim_packet: dict[str, Any] | None = None
     if args.claim and args.claim.exists():
         artifacts["claim"] = _artifact(args.claim)
+        claim_packet = _json(args.claim)
+        validate(claim_packet)
     packet = {
         "schema": SCHEMA,
         "type": "TASK",
         "issue": args.issue,
         "provider": args.provider,
         "worker": args.worker,
+        "correlation_id": (
+            _clean_text(claim_packet.get("correlation_id"), 180)
+            if claim_packet is not None
+            else _clean_text(args.correlation_id, 180)
+        ) or f"issue:{args.issue}",
         "phase": "implement",
         "goal": _clean_text(plan.get("goal"), 240),
         "scope": {"files": unique_files, "max_files": 12, "reserved": True},
@@ -168,6 +178,7 @@ def parse_result(raw: str, task_packet: dict[str, Any]) -> dict[str, Any]:
         "issue": int(task_packet["issue"]),
         "provider": task_packet.get("provider"),
         "worker": task_packet.get("worker"),
+        "correlation_id": task_packet.get("correlation_id"),
         "facts": _clean_list(parsed.get("facts")),
         "assumptions": _clean_list(parsed.get("assumptions")),
         "evidence": _clean_list(parsed.get("evidence")),
@@ -189,6 +200,7 @@ def build_review(review: dict[str, Any], task: dict[str, Any], result: dict[str,
         "issue": int(task["issue"]),
         "provider": task.get("provider"),
         "worker": task.get("worker"),
+        "correlation_id": task.get("correlation_id"),
         "status": review.get("status", "skipped"),
         "verdict": review.get("verdict"),
         "findings": _clean_list(review.get("findings"), limit=5, item_limit=240),
@@ -266,6 +278,7 @@ def main() -> int:
     p.add_argument("--issue", type=int, required=True)
     p.add_argument("--provider", choices=["qwen", "gemini"])
     p.add_argument("--worker")
+    p.add_argument("--correlation-id", default="")
     p.add_argument("--from-role", required=True)
     p.add_argument("--to-role", required=True)
     p.add_argument("--summary", required=True)
@@ -275,12 +288,14 @@ def main() -> int:
     p.add_argument("--issue", type=int, required=True)
     p.add_argument("--provider", choices=["qwen", "gemini"], required=True)
     p.add_argument("--worker", required=True)
+    p.add_argument("--correlation-id", default="")
     for name in ("task", "context", "memory", "history", "agents", "rules", "platino-sha", "output"):
         p.add_argument(f"--{name}", type=Path, required=True)
     p = sub.add_parser("task")
     p.add_argument("--issue", type=int, required=True)
     p.add_argument("--provider", choices=["qwen", "gemini"], required=True)
     p.add_argument("--worker", required=True)
+    p.add_argument("--correlation-id", default="")
     for name in ("task", "plan", "context", "memory", "history", "agents", "rules", "platino-sha", "output"):
         p.add_argument(f"--{name}", type=Path, required=True)
     p.add_argument("--claim", type=Path)
