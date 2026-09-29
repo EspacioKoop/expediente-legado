@@ -118,7 +118,10 @@ class GbcFixtureWorkflowTest(unittest.TestCase):
         self.assertIn("rBCPD", self.cgb_only)
 
     def test_roms_no_se_versionan_y_solo_salen_como_artefacto_corto(self):
-        self.assertIn("actions/upload-artifact@v4", self.texto)
+        self.assertIn(
+            "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+            self.texto,
+        )
         self.assertIn("retention-days: 7", self.texto)
         self.assertIn("SHA256SUMS", self.texto)
         self.assertNotIn("git add", self.texto)
@@ -127,6 +130,14 @@ class GbcFixtureWorkflowTest(unittest.TestCase):
     def test_hay_comprobacion_minima_de_rom_generada(self):
         self.assertIn("test -s \"$rom\"", self.texto)
         self.assertIn("test \"$size\" -ge 32768", self.texto)
+
+
+    def test_workflow_security_bounds(self):
+        self.assertIn("timeout-minutes: 45", self.texto)
+        self.assertIn("persist-credentials: false", self.texto)
+        self.assertIn("--proto '=https'", self.texto)
+        self.assertIn("--proto-redir '=https'", self.texto)
+        self.assertIn("--tlsv1.2", self.texto)
 
 
 if __name__ == "__main__":

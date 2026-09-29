@@ -24,6 +24,7 @@ jobs:
   gestionar:
     if: github.event_name != 'pull_request_target' || github.event.pull_request.base.ref == 'main'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       # pull_request_target es deliberado y no ejecuta código del head de la PR.
       # Incluso workflow_dispatch hace checkout fijo de main antes de usar issues:write.

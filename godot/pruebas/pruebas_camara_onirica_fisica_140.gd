@@ -115,8 +115,10 @@ func _ejecutar() -> void:
 
 	viewport.queue_free()
 	await process_frame
-	# Recoger la cámara suena (Sonido.sonar_en). El servidor de audio libera esa
-	# reproducción en su hilo de mezcla; damos margen real antes de salir (#1844).
+	# Recoger la cámara suena (Sonido.sonar_en). El servidor de audio suelta esa
+	# reproducción en su propio hilo de mezcla, no al ritmo de los frames: sin
+	# margen de tiempo real, quit() puede llegar antes y Godot la cuenta como
+	# fuga al salir (#1844).
 	await create_timer(0.1).timeout
 	print("Cámara onírica física 140: %d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)

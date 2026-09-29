@@ -14,6 +14,7 @@ El flujo humano sigue en [CONTRIBUTING.md](CONTRIBUTING.md), el contexto en [REA
 | Flujo de ramas y gates | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Estado general | [README.md](README.md) |
 | Paridad legado → Godot | [docs/paridad-expedientes.md](docs/paridad-expedientes.md) |
+| Reparto entre agentes | [docs/agents/doctrina.md](docs/agents/doctrina.md) |
 
 Lee también el issue concreto, sus comentarios, PRs relacionadas, reviews y CI. En este proyecto una decisión que evita duplicar trabajo suele estar en un comentario posterior al cuerpo original.
 
@@ -59,6 +60,8 @@ Usa `Closes #N` solo si el PR satisface el issue entero. Para entregas parciales
 - **Nivel 1:** @eGurucharri decide prioridad, integra y valida en playtest.
 - **Nivel 2:** agentes asistidos desde chat (Claude, ChatGPT, Codex, Odiseo…). Investigan, planifican, implementan cortes y **delegan** al pool.
 - **Nivel 3:** el pool autónomo (`agent-pool.yml`). Ejecuta issues delegados; no sustituye al nivel 2.
+
+El reparto detallado (dónde se ejecuta cada agente, qué capa de modelos usa, quién revisa los drafts del pool y qué pasa al agotarse una cuota) está en la [doctrina de agentes](docs/agents/doctrina.md). Si esa página contradice este archivo, manda este.
 
 Para delegar, el nivel 2 crea o prepara el issue con el plan (`AGENT_PLAN_BEGIN … AGENT_PLAN_END`, ver [docs/agents/parallel-pool.md](docs/agents/parallel-pool.md)) y le pone la label de cola **en el mismo momento**: un issue sin label parece libre y otro agente lo toma.
 

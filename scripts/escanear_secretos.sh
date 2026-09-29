@@ -70,7 +70,9 @@ resolver_gitleaks() {
   local tmp paquete
   tmp="$(mktemp -d)"
   paquete="$tmp/gitleaks.tar.gz"
-  curl -sSfL -o "$paquete" \
+  curl --fail --silent --show-error --location --retry 3 \
+    --proto '=https' --proto-redir '=https' --tlsv1.2 \
+    -o "$paquete" \
     "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_${plat}.tar.gz"
   if [[ "$(sha256_de "$paquete")" != "${GITLEAKS_SHA256[$plat]}" ]]; then
     echo "El SHA-256 de gitleaks $GITLEAKS_VERSION ($plat) no coincide con el fijado." >&2
