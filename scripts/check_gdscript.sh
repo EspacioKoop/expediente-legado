@@ -79,6 +79,13 @@ fi
 
 find_gd | xargs -0 --no-run-if-empty gdlint
 
+# #1904: el CI puede validar estilo antes de descargar/compilar toolchains
+# pesados. El preflight canónico completo se ejecuta después y sigue siendo
+# la autoridad para unittest/runtime.
+if [[ "${SIGA98_GDSCRIPT_FAST:-0}" == "1" ]]; then
+  exit 0
+fi
+
 if [[ "${CI:-}" == "true" ]]; then
   # Verbose + unbuffered: si un test runtime agota su timeout, Actions deja
   # visible cuál estaba ejecutándose en vez de terminar 25 minutos después con
