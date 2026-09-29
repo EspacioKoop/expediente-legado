@@ -38,6 +38,7 @@ class AgentProtocolTest(unittest.TestCase):
         self.assertEqual("TASK", packet["message_type"])
         self.assertEqual(12, packet["scope"]["max_files"])
         self.assertEqual(["scripts/a.py", "scripts/test_a.py"], packet["scope"]["allowed_files"])
+        self.assertIn("do_not_weaken_assertions_to_make_tests_green", packet["scope"]["domain_constraints"])
         self.assertEqual(2, len(packet["acceptance_from_issue"]))
 
     def test_prompt_lleva_scope_y_result_contract(self):
@@ -45,6 +46,7 @@ class AgentProtocolTest(unittest.TestCase):
         self.assertIn("scripts/a.py", prompt)
         self.assertIn("AGENT_RESULT_BEGIN", prompt)
         self.assertIn('"message_type": "RESULT"', prompt)
+        self.assertIn("read_file/grep_search", prompt)
         self.assertIn("No hagas commit, push, PR ni merge", prompt)
 
     def test_result_anidado_se_parsea_sin_regex_fragil(self):
@@ -84,8 +86,9 @@ AGENT_RESULT_END
         metrics = mod.result_metrics(packet, result, ["scripts/a.py"])
         self.assertEqual(100.0, metrics["handoff_loss_proxy_pct"])
 
-    def test_b2b_rechaza_tipo_desconocido(self):
+    def test_b2b_rechaza_tipo_desconocido_o_sin_schema(self):
         self.assertIsNone(mod.normalize_message({"schema": 1, "message_type": "CHAT"}))
+        self.assertIsNone(mod.normalize_message({"message_type": "QUESTION"}))
         self.assertEqual(
             "QUESTION",
             mod.normalize_message({"schema": 1, "message_type": "question"})["message_type"],
