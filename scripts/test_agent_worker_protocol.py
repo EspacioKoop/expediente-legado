@@ -74,6 +74,47 @@ class AgentWorkerProtocolTest(unittest.TestCase):
         self.assertIn(".outside[]", block)
         self.assertIn("AGENT_POOL_REPLAN", block)
 
+    def test_handoff_b2b_llega_al_reviewer_antes_de_revisar(self):
+        result = WORKFLOW.index("- id: result_contract\n")
+        handoff = WORKFLOW.index("- id: b2b_review_handoff\n")
+        review = WORKFLOW.index("- id: review_qwen\n")
+        self.assertLess(result, handoff)
+        self.assertLess(handoff, review)
+
+        block = step("- id: b2b_review_handoff\n")
+        self.assertIn("scripts/agent_b2b_mailbox.py send", block)
+        self.assertIn("--type EVIDENCE", block)
+        self.assertIn("--type HANDOFF", block)
+        self.assertIn("--recipient reviewer", block)
+        self.assertIn("inbox --recipient reviewer", block)
+        self.assertIn(".agent-review-input.md", block)
+        self.assertIn("idempotency-key", block)
+
+    def test_result_review_y_blocker_vuelven_al_dispatcher(self):
+        normalized = WORKFLOW.index("- id: review_contract\n")
+        publish = WORKFLOW.index("- id: b2b_review_publish\n")
+        memory = WORKFLOW.index("- name: Guardar memoria de trabajo\n")
+        self.assertLess(normalized, publish)
+        self.assertLess(publish, memory)
+
+        block = step("- id: b2b_review_publish\n")
+        self.assertIn("--type RESULT", block)
+        self.assertIn("--type REVIEW", block)
+        self.assertIn("--type BLOCKER", block)
+        self.assertIn("--recipient dispatcher", block)
+        self.assertIn('[[ "$RESULT_STATUS" == blocked ]]', block)
+        self.assertIn("scripts/agent_b2b_mailbox.py ack", block)
+        self.assertIn("--recipient reviewer", block)
+        self.assertIn("steps.review_contract.outputs.verdict", block)
+
+    def test_ack_reviewer_ocurre_despues_del_review_contract(self):
+        review_contract = WORKFLOW.index("- id: review_contract\n")
+        publish = WORKFLOW.index("- id: b2b_review_publish\n")
+        self.assertGreater(publish, review_contract)
+        block = step("- id: b2b_review_publish\n")
+        self.assertIn("/tmp/agent-b2b-reviewer-inbox.json", block)
+        self.assertIn(".messages[].message_id", block)
+
     def test_workers_consumen_el_prompt_compilado(self):
         for worker_step in ("implement_qwen", "implement_gemini"):
             with self.subTest(worker=worker_step):
