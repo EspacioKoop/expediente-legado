@@ -113,11 +113,14 @@ func _montar_religion_mundo_934() -> void:
 	vertical.position = Vector3(-4.35, 0.0, 7.4)
 	vertical.rotation_degrees.y = 90.0
 	_mundo.add_child(vertical)
-	vertical.configurar(
-		registro,
-		int(jornada.get("dia", 1)),
-		bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false)),
-		maxi(1, int(jornada.get("vuelta", 1))),
+	(
+		vertical
+		. configurar(
+			registro,
+			int(jornada.get("dia", 1)),
+			bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false)),
+			maxi(1, int(jornada.get("vuelta", 1))),
+		)
 	)
 	vertical.exposicion_registrada.connect(_al_registro_religion_934)
 	vertical.practica_registrada.connect(_al_registro_religion_934)
