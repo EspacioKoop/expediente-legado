@@ -716,6 +716,37 @@ jobs:
             echo "outside=[]" >> "$GITHUB_OUTPUT"
           fi
 
+      - id: result_contract
+        name: Normalizar ResultPacket y medir handoff
+        if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true'
+        continue-on-error: true
+        env:
+          SUMMARY: ${{ steps.implement_qwen.outputs.summary || steps.implement_gemini.outputs.summary }}
+        run: |
+          set -euo pipefail
+          printf '%s' "${SUMMARY:-}" > /tmp/agent-result-summary.txt
+          jq -r '.changed_allowed[]' /tmp/claim-guard.json > /tmp/agent-result-changed.txt
+          python3 scripts/agent_protocol.py result \
+            --summary-file /tmp/agent-result-summary.txt \
+            --packet .agent-task-packet.json \
+            --changed-files /tmp/agent-result-changed.txt \
+            --output /tmp/agent-result.json >/dev/null
+          valid="$(jq -r '.result.valid' /tmp/agent-result.json)"
+          status="$(jq -r '.result.status // "missing"' /tmp/agent-result.json)"
+          loss="$(jq -r '.metrics.handoff_loss_proxy_pct' /tmp/agent-result.json)"
+          coverage="$(jq -r '.metrics.contract_coverage_pct // 0' /tmp/agent-result.json)"
+          echo "valid=$valid" >> "$GITHUB_OUTPUT"
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          echo "handoff_loss=$loss" >> "$GITHUB_OUTPUT"
+          echo "coverage=$coverage" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Agent protocol v1"
+            echo "- ResultPacket valido: $valid"
+            echo "- Estado: $status"
+            echo "- Handoff loss proxy: $loss%"
+            echo "- Contract coverage: $coverage%"
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Renovar lease Deno · validating
         if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true' && steps.guard.outputs.control == 'deno'
         continue-on-error: true
