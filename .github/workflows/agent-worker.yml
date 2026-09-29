@@ -685,12 +685,6 @@ jobs:
               "- [\(.message_type)] \(.subject // "")\n  \(.body // "")\n  evidencia: \((.evidence // []) | join("; "))"'               /tmp/agent-b2b-inbox.json
           } > .agent-b2b-inbox.md
 
-          jq -c '.messages[]' /tmp/agent-b2b-inbox.json | while IFS= read -r message; do
-            message_id="$(jq -r '.message_id' <<<"$message")"
-            ack="$(jq -nc --arg task "$TASK_ID" --arg id "$message_id"               '{schema:1,recipient:"worker",task_id:$task,message_id:$id}')"
-            curl -fsS -X POST "$base/api/agent-pool/b2b/ack"               -H "Authorization: Bearer $oidc_token"               -H 'Content-Type: application/json'               --data "$ack" >/dev/null
-          done
-
       - name: Crear rama
         if: steps.reserve.outputs.reserved == 'true'
         env:
@@ -727,6 +721,28 @@ jobs:
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"tools":{"core":["read_file","write_file","replace","glob","grep_search","list_directory"]}}'
           prompt: 'Lee .agent-worker-prompt.md y ejecuta exactamente ese contrato. Usa .agent-task-packet.json como sobre TASK autoritativo del handoff. No sustituyas el ResultPacket por una narracion libre.'
+
+      - name: Confirmar inbox B2B consumido
+        if: >-
+          steps.reserve.outputs.reserved == 'true' &&
+          steps.guard.outputs.control == 'deno' &&
+          (steps.implement_qwen.outcome == 'success' || steps.implement_gemini.outcome == 'success')
+        continue-on-error: true
+        env:
+          CONTROL_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
+          TASK_ID: ${{ steps.protocol.outputs.task_id }}
+        run: |
+          set -euo pipefail
+          [[ -s /tmp/agent-b2b-inbox.json ]] || exit 0
+          base="${CONTROL_URL%/}"
+          base="${base%/api/report}"
+          oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN"             "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-pool")"
+          oidc_token="$(jq -er '.value' <<<"$oidc_json")"
+          jq -c '.messages[]' /tmp/agent-b2b-inbox.json | while IFS= read -r message; do
+            message_id="$(jq -r '.message_id' <<<"$message")"
+            ack="$(jq -nc --arg task "$TASK_ID" --arg id "$message_id"               '{schema:1,recipient:"worker",task_id:$task,message_id:$id}')"
+            curl -fsS -X POST "$base/api/agent-pool/b2b/ack"               -H "Authorization: Bearer $oidc_token"               -H 'Content-Type: application/json'               --data "$ack" >/dev/null
+          done
 
       - id: claim_guard
         name: Normalizar cambios al CLAIM
