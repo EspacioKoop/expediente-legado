@@ -42,6 +42,28 @@ CLAIM_RE = re.compile(
 HEARTBEAT_RE = re.compile(r"^HEARTBEAT issue=#(?P<issue>\d+) branch=(?P<branch>\S+)(?:\s|$)")
 PR_READY_RE = re.compile(r"^PR_READY issue=#(?P<issue>\d+) pr=#(?P<pr>\d+)(?P<rest>.*)$")
 RELEASE_RE = re.compile(r"^RELEASE issue=#(?P<issue>\d+)(?P<rest>.*)$")
+
+TRUSTED_ASSOCIATIONS = {"OWNER", "MEMBER", "COLLABORATOR"}
+TRUSTED_AUTOMATION_LOGINS = {"github-actions[bot]"}
+
+
+def comentario_confiable(comentario: dict) -> bool:
+    """Solo actores del repo o Actions pueden mutar el estado de reservas."""
+    asociacion = str(
+        comentario.get("author_association")
+        or comentario.get("authorAssociation")
+        or ""
+    ).strip().upper()
+    autor = comentario.get("user") or comentario.get("author") or {}
+    if isinstance(autor, dict):
+        login = str(autor.get("login") or "").strip()
+    else:
+        login = str(autor or "").strip()
+    return (
+        asociacion in TRUSTED_ASSOCIATIONS
+        or login in TRUSTED_AUTOMATION_LOGINS
+    )
+
 LEASE_RE = re.compile(r"\s+lease=(?P<hours>\d+)h\s*$")
 BRANCH_RE = re.compile(r"(?:^|\s)branch=(?P<branch>\S+)")
 
@@ -84,6 +106,8 @@ def eventos_de_comentario(body: str) -> list[tuple[str, re.Match[str]]]:
 def reconstruir_reservas(comentarios: list[dict]) -> dict[tuple[int, str], Reserva]:
     reservas: dict[tuple[int, str], Reserva] = {}
     for comentario in sorted(comentarios, key=lambda item: item["created_at"]):
+        if not comentario_confiable(comentario):
+            continue
         momento = parse_fecha(comentario["created_at"])
         for tipo, match in eventos_de_comentario(comentario.get("body") or ""):
             if tipo == "claim":

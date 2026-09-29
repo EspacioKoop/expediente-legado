@@ -106,6 +106,18 @@ jobs:
         run: |
           set -euo pipefail
           [[ "$ISSUE" =~ ^[0-9]+$ ]] || exit 2
+          issue_meta="$(gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE")"
+          association="$(jq -r '.author_association // ""' <<<"$issue_meta")"
+          author="$(jq -r '.user.login // ""' <<<"$issue_meta")"
+          if [[ "$author" != "github-actions[bot]" && ! "$association" =~ ^(OWNER|MEMBER|COLLABORATOR)$ ]]; then
+            echo "::warning::Issue #$ISSUE bloqueado: autor no confiable ($author/$association)."
+            for label in agent:auto agent:pool agent:qwen agent:gemini agent:decompose; do
+              gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --remove-label "$label" >/dev/null 2>&1 || true
+            done
+            gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human >/dev/null 2>&1 || true
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           case "$WORKER:$PROVIDER" in
             qwen-primary:qwen) [[ "$HAS_QWEN" == true || "$HAS_OMNIROUTE" == true ]] || exit 3 ;;
             qwen-fallback-[1-9]*:qwen)
@@ -342,9 +354,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           ISSUE: ${{ inputs.issue }}
         run: |
-          gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json title,body,comments \
-            --jq '"# Issue\n\n## " + .title + "\n\n" + (.body//"") + "\n\n## Comentarios recientes\n" + ((.comments[-20:]//[])|map("- "+.author.login+": "+.body)|join("\n\n"))' \
-            > .agent-task.md
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE" > /tmp/agent-issue.json
+          gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$ISSUE/comments?per_page=100" \
+            --jq '.[]' | jq -s '.' > /tmp/agent-comments.json
+          python3 scripts/agent_issue_context.py \
+            --issue /tmp/agent-issue.json \
+            --comments /tmp/agent-comments.json \
+            --output .agent-task.md \
+            --max-comments 20
           # Los planificadores ignoraban .agent-task.md («no se ha presentado ninguna
           # tarea», #667): la tarea va también en el propio prompt, acotada.
           delim="TAREA_$(openssl rand -hex 8)"
@@ -455,7 +473,7 @@ jobs:
         name: Plan Qwen
         if: steps.guard.outputs.run == 'true' && inputs.provider == 'qwen' && steps.delegated.outputs.found != 'true'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
+        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || secrets[steps.qwen_config.outputs.key_secret] }}
           openai_base_url: ${{ steps.qwen_config.outputs.url }}
@@ -629,7 +647,7 @@ jobs:
         # para liberar la reserva (#1695: Nemotron Super superó 40 min).
         timeout-minutes: 35
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
+        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || secrets[steps.qwen_config.outputs.key_secret] }}
           openai_base_url: ${{ steps.qwen_config.outputs.url }}
@@ -706,8 +724,8 @@ jobs:
           set -euo pipefail
           outside="$(jq -r '.outside | join(",")' /tmp/claim-guard.json)"
           previous="$(
-            gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json comments |
-              jq '[.comments[].body | select(startswith("AGENT_POOL_REPLAN "))] | length'
+            gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$ISSUE/comments?per_page=100" --jq '.[]' |
+              jq -s '[.[] | select(.user.login == "github-actions[bot]" and ((.body // "") | startswith("AGENT_POOL_REPLAN ")))] | length'
           )"
           attempt=$((previous + 1))
 
@@ -812,7 +830,7 @@ jobs:
         if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true' && inputs.provider == 'qwen'
         timeout-minutes: 3
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
+        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || secrets[steps.qwen_config.outputs.key_secret] }}
           openai_base_url: ${{ steps.qwen_config.outputs.url }}

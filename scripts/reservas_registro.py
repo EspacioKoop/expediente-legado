@@ -43,6 +43,8 @@ def _ids_de_claim(comentarios: list[dict[str, Any]]) -> dict[tuple[int, str], in
 
     ids: dict[tuple[int, str], int] = {}
     for comentario in sorted(comentarios, key=lambda c: (c["created_at"], int(c.get("id", 0)))):
+        if not registro.comentario_confiable(comentario):
+            continue
         for tipo, match in registro.eventos_de_comentario(comentario.get("body") or ""):
             if tipo == "claim":
                 ids[(int(match.group("issue")), match.group("branch"))] = int(comentario.get("id", 0))

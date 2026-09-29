@@ -14,10 +14,12 @@ class DenoDeployWorkflowTest(unittest.TestCase):
     def test_usa_cli_moderno_y_valida_antes_de_desplegar(self):
         # Fijado por SHA completo, sin exigir uno concreto: Dependabot lo sube.
         self.assertRegex(self.text, r"uses: denoland/setup-deno@[0-9a-f]{40} # v\d+")
-        self.assertIn("deno-version: v2.9.6", self.text)
+        self.assertRegex(self.text, r"deno-version: v\d+\.\d+\.\d+\n")
         self.assertNotIn("uses: denoland/setup-deno@v2", self.text)
         self.assertIn("run: deno task check", self.text)
-        self.assertIn("deno deploy --org expediente-legado --app siga98-feedback-deno --prod", self.text)
+        self.assertIn("run: deno deploy --prod", self.text)
+        self.assertNotIn("deno deploy --org", self.text)
+        self.assertNotIn("deno deploy --app", self.text)
         self.assertNotIn("deployctl", self.text)
 
     def test_token_real_solo_se_inyecta_en_el_paso_de_deploy(self):

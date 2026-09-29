@@ -72,6 +72,19 @@ jobs:
           issue="$INPUT_ISSUE"
           provider="${INPUT_PROVIDER:-auto}"
           [[ "$issue" =~ ^[0-9]+$ ]] || exit 2
+          ISSUE="$issue"
+          issue_meta="$(gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE")"
+          association="$(jq -r '.author_association // ""' <<<"$issue_meta")"
+          author="$(jq -r '.user.login // ""' <<<"$issue_meta")"
+          if [[ "$author" != "github-actions[bot]" && ! "$association" =~ ^(OWNER|MEMBER|COLLABORATOR)$ ]]; then
+            echo "::warning::Issue #$ISSUE bloqueado: autor no confiable ($author/$association)."
+            for label in agent:auto agent:pool agent:qwen agent:gemini agent:decompose; do
+              gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --remove-label "$label" >/dev/null 2>&1 || true
+            done
+            gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human >/dev/null 2>&1 || true
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
 
           labels="$(gh issue view "$issue" --repo "$GITHUB_REPOSITORY" --json labels --jq '[.labels[].name]|join(" ")')"
           if [[ "$provider" == auto ]]; then
@@ -192,9 +205,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           ISSUE: ${{ steps.select.outputs.issue }}
         run: |
-          gh issue view "$ISSUE" --json title,body,comments \
-            --jq '"# Issue\n\n## " + .title + "\n\n" + (.body//"") + "\n\n## Comentarios recientes\n" + ((.comments[-20:]//[])|map("- "+.author.login+": "+.body)|join("\n\n"))' \
-            > .agent-task.md
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE" > /tmp/agent-issue.json
+          gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$ISSUE/comments?per_page=100" \
+            --jq '.[]' | jq -s '.' > /tmp/agent-comments.json
+          python3 scripts/agent_issue_context.py \
+            --issue /tmp/agent-issue.json \
+            --comments /tmp/agent-comments.json \
+            --output .agent-task.md \
+            --max-comments 20
 
       - name: Cargar memoria histórica de CI
         if: steps.route.outputs.run == 'true'
@@ -259,7 +278,7 @@ jobs:
         name: Plan mediante OmniRoute
         if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.omniroute.outputs.ready == 'true'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
+        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ secrets.OMNIROUTE_API_KEY }}
           openai_base_url: ${{ vars.OMNIROUTE_BASE_URL }}
@@ -272,7 +291,7 @@ jobs:
         name: Plan Qwen (primario)
         if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && env.HAS_QWEN == 'true' && steps.plan_omniroute.outcome != 'success'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
+        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ secrets.QWEN_API_KEY }}
           openai_base_url: ${{ vars.QWEN_BASE_URL || steps.qwen.outputs.url }}
@@ -322,7 +341,7 @@ jobs:
         name: Plan Qwen (fallback dinámico 1)
         if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success' && steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_1 != ''
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
+        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_1] }}
           openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_1 }}
@@ -335,7 +354,7 @@ jobs:
         name: Plan Qwen (fallback dinámico 2)
         if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success' && steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_2 != '' && steps.plan_qwen_fallback_1.outcome != 'success'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
+        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_2] }}
           openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_2 }}
@@ -348,7 +367,7 @@ jobs:
         name: Plan Qwen (fallback dinámico 3)
         if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success' && steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_3 != '' && steps.plan_qwen_fallback_1.outcome != 'success' && steps.plan_qwen_fallback_2.outcome != 'success'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
+        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_3] }}
           openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_3 }}
@@ -361,7 +380,7 @@ jobs:
         name: Plan Qwen (fallback dinámico 4)
         if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success' && steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_4 != '' && steps.plan_qwen_fallback_1.outcome != 'success' && steps.plan_qwen_fallback_2.outcome != 'success' && steps.plan_qwen_fallback_3.outcome != 'success'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
+        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_4] }}
           openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_4 }}
@@ -514,7 +533,7 @@ jobs:
         name: Implementar mediante OmniRoute
         if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'qwen' && steps.omniroute.outputs.ready == 'true'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
+        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ secrets.OMNIROUTE_API_KEY }}
           openai_base_url: ${{ vars.OMNIROUTE_BASE_URL }}
@@ -527,7 +546,7 @@ jobs:
         name: Implementar con Qwen (primario)
         if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'qwen' && env.HAS_QWEN == 'true' && steps.implement_omniroute.outcome != 'success'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
+        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ secrets.QWEN_API_KEY }}
           openai_base_url: ${{ vars.QWEN_BASE_URL || steps.qwen.outputs.url }}
@@ -540,7 +559,7 @@ jobs:
         name: Implementar con Qwen (fallback dinámico 1)
         if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'qwen' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success' && steps.qwen_fallbacks.outputs.worker_1 != ''
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
+        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_1] }}
           openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_1 }}
@@ -553,7 +572,7 @@ jobs:
         name: Implementar con Qwen (fallback dinámico 2)
         if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'qwen' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success' && steps.qwen_fallbacks.outputs.worker_2 != '' && steps.implement_qwen_fallback_1.outcome != 'success'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
+        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_2] }}
           openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_2 }}
@@ -566,7 +585,7 @@ jobs:
         name: Implementar con Qwen (fallback dinámico 3)
         if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'qwen' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success' && steps.qwen_fallbacks.outputs.worker_3 != '' && steps.implement_qwen_fallback_1.outcome != 'success' && steps.implement_qwen_fallback_2.outcome != 'success'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
+        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_3] }}
           openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_3 }}
@@ -579,7 +598,7 @@ jobs:
         name: Implementar con Qwen (fallback dinámico 4)
         if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'qwen' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success' && steps.qwen_fallbacks.outputs.worker_4 != '' && steps.implement_qwen_fallback_1.outcome != 'success' && steps.implement_qwen_fallback_2.outcome != 'success' && steps.implement_qwen_fallback_3.outcome != 'success'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
+        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_4] }}
           openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_4 }}
@@ -632,8 +651,8 @@ jobs:
           set -euo pipefail
           outside="$(jq -r '.outside | join(",")' /tmp/claim-guard.json)"
           previous="$(
-            gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json comments |
-              jq '[.comments[].body | select(startswith("AUTOPILOT_REPLAN "))] | length'
+            gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$ISSUE/comments?per_page=100" --jq '.[]' |
+              jq -s '[.[] | select(.user.login == "github-actions[bot]" and ((.body // "") | startswith("AUTOPILOT_REPLAN ")))] | length'
           )"
           attempt=$((previous + 1))
 

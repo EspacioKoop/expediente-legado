@@ -222,8 +222,11 @@ class WorkflowsYamlTest(unittest.TestCase):
         for nombre in ("mando-deno.yml", "feedback-deno-deploy.yml"):
             texto = (ROOT / ".github" / "workflows" / nombre).read_text(encoding="utf-8")
             with self.subTest(workflow=nombre):
-                self.assertIn("deno-version: v2.9.6", texto)
+                self.assertRegex(texto, r"deno-version: v\d+\.\d+\.\d+\n")
                 self.assertNotIn("deno-version: v2.x", texto)
+                # 2.9.6 pasa dos veces los argumentos a `deno deploy` («Option
+                # "--prod" can only occur once»): los dos deploys fallaban.
+                self.assertNotIn("deno-version: v2.9.6", texto)
 
 
     def test_acciones_sensibles_usadas_por_sha(self):
