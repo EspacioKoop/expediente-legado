@@ -522,40 +522,22 @@ jobs:
           ISSUE: ${{ inputs.issue }}
           PROVIDER: ${{ inputs.provider }}
           BRANCH: ${{ steps.guard.outputs.branch }}
-          SUMMARY: ${{ steps.delegated.outputs.summary || steps.plan_qwen.outputs.summary || steps.plan_gemini.outputs.summary }}
         run: |
           set -euo pipefail
-          printf '%s' "$SUMMARY" > /tmp/summary.txt
-          python3 - <<'PY'
-          import json, os, re
-          raw=open("/tmp/summary.txt",encoding="utf-8").read()
-          pattern=r"AGENT_PLAN_BEGIN\s*(?:```(?:json)?\s*)?(\{.*?\})(?:\s*```)?\s*AGENT_PLAN_END"
-          match=re.search(pattern,raw,re.S|re.I)
-          if not match:
-              raise SystemExit("plan no parseable")
-          plan=json.loads(match.group(1))
-          files=plan.get("files",[])
-          if not isinstance(files,list) or len(files)>12:
-              raise SystemExit("plan invalido")
-          clean=[]
-          for item in files:
-              if not isinstance(item,str):
-                  raise SystemExit("ruta invalida")
-              item=item.strip().replace("\\","/")
-              if not item or item.startswith("/") or ".." in item.split("/") or any(c in item for c in "*?[]"):
-                  raise SystemExit("ruta invalida")
-              if item.startswith(".github/") or item.startswith(".agent-") or item in {
-                  "AGENTS.md","QWEN.md","GEMINI.md","docs/agents-autonomos.md"
-              }:
-                  raise SystemExit("ruta protegida")
-              clean.append(item)
-          normalized={"files":list(dict.fromkeys(clean)),"goal":str(plan.get("goal",""))[:180]}
-          open(".agent-plan.json","w",encoding="utf-8").write(json.dumps(normalized,ensure_ascii=False))
-          if not normalized["files"]:
-              open(os.environ["GITHUB_OUTPUT"],"a").write("reserved=false\nreason=sin-corte-seguro\n")
-          PY
+          # La salida del planificador se lee de fichero, nunca de env: con más
+          # de 128 KB el paso ni arrancaba («Argument list too long», #1881).
+          # La copia en /tmp sobrevive a la implementación, que pisa *-artifacts.
+          mkdir -p /tmp/agent-output-plan
+          cp qwen-artifacts/*.log gemini-artifacts/*.log /tmp/agent-output-plan/ 2>/dev/null || true
+          # Parser tolerante (#1881): marcadores en Markdown, bloque json sin
+          # marcadores o JSON truncado. Gana la primera fuente con plan.
+          python3 scripts/agent_plan_parse.py \
+            --source /tmp/delegado.json \
+            --source /tmp/agent-output-plan/stdout.log \
+            --output .agent-plan.json
 
           if grep -q '"files": \[\]' .agent-plan.json 2>/dev/null; then
+            printf 'reserved=false\nreason=sin-corte-seguro\n' >> "$GITHUB_OUTPUT"
             gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human --remove-label agent:working >/dev/null 2>&1 || true
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Agent pool ($PROVIDER): no encontro un corte seguro y concreto; requiere revision humana." || true
             exit 0
@@ -899,6 +881,10 @@ jobs:
           IMPLEMENT_OUTCOME: ${{ inputs.provider == 'qwen' && steps.implement_qwen.outcome || steps.implement_gemini.outcome }}
         run: |
           set -euo pipefail
+          # Copia para «Limpiar fallo»: detecta cuota/sobrecarga leyendo fichero,
+          # no el summary por env (#1881), y *-artifacts se borra más abajo.
+          mkdir -p /tmp/agent-output-implement
+          cp qwen-artifacts/*.log gemini-artifacts/*.log /tmp/agent-output-implement/ 2>/dev/null || true
           # La implementación usa continue-on-error: si se cortó (timeout, error de
           # API) sus cambios están a medias y nunca deben llegar a una PR.
           if [[ "$IMPLEMENT_OUTCOME" != success ]]; then
@@ -1224,10 +1210,8 @@ jobs:
           VARS_JSON: ${{ toJSON(vars) }}
           POOL_FALLBACK_KEYS: ${{ inputs.fallback_keys }}
           HAS_GEMINI: ${{ secrets.GEMINI_API_KEY != '' }}
-          PLAN_SUMMARY: ${{ steps.delegated.outputs.summary || steps.plan_qwen.outputs.summary || steps.plan_gemini.outputs.summary }}
           PLAN_QWEN_OUTCOME: ${{ steps.plan_qwen.outcome }}
           PLAN_GEMINI_OUTCOME: ${{ steps.plan_gemini.outcome }}
-          IMPLEMENT_SUMMARY: ${{ steps.implement_qwen.outputs.summary || steps.implement_gemini.outputs.summary }}
           IMPLEMENT_QWEN_OUTCOME: ${{ steps.implement_qwen.outcome }}
           IMPLEMENT_GEMINI_OUTCOME: ${{ steps.implement_gemini.outcome }}
           RETRY_STAGE: ${{ steps.validate_diff.outputs.retry_stage }}
@@ -1275,16 +1259,28 @@ jobs:
 
           if [[ -n "$retry_stage" ]]; then
             quota_failure=false
-            quota_pattern='(^|[^0-9])(429|503)([^0-9]|$)|Quota exceeded|TerminalQuotaError|RetryableQuotaError|RESOURCE_EXHAUSTED|rate.?limit|high demand|temporarily unavailable'
-            failure_summary="$PLAN_SUMMARY"
+            # «overloaded»: NVIDIA responde «Service temporarily overloaded» y el
+            # slot se reintentaba en caliente hasta agotar turnos (#1881).
+            quota_pattern='(^|[^0-9])(429|503)([^0-9]|$)|Quota exceeded|TerminalQuotaError|RetryableQuotaError|RESOURCE_EXHAUSTED|rate.?limit|high demand|temporarily unavailable|overloaded'
+            output_dir=/tmp/agent-output-plan
             gemini_outcome="$PLAN_GEMINI_OUTCOME"
             if [[ "$retry_stage" != plan ]]; then
-              failure_summary="$IMPLEMENT_SUMMARY"
+              output_dir=/tmp/agent-output-implement
               gemini_outcome="$IMPLEMENT_GEMINI_OUTCOME"
             fi
-            if [[ -n "${failure_summary:-}" ]] && grep -Eiq "$quota_pattern" <<<"$failure_summary"; then
-              quota_failure=true
-            fi
+            # stderr del CLI desde fichero: el summary por env superaba los
+            # 128 KB y este paso no llegaba a arrancar (#1881), dejando el issue
+            # en agent:working y el CLAIM sin liberar. Solo stderr: stdout lleva
+            # ficheros del repo leídos por el modelo y daría falsos 429/503.
+            shopt -s nullglob
+            outputs=("$output_dir"/stderr.log qwen-artifacts/stderr.log gemini-artifacts/stderr.log)
+            shopt -u nullglob
+            for output in "${outputs[@]}"; do
+              if grep -Eiq "$quota_pattern" "$output"; then
+                quota_failure=true
+                break
+              fi
+            done
             if [[ "$PROVIDER" == gemini && "${gemini_outcome:-}" != success ]]; then
               shopt -s nullglob
               reports=(/tmp/gemini-client-error-*.json "${RUNNER_TEMP:-/tmp}"/gemini-client-error-*.json)
