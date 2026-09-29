@@ -572,7 +572,7 @@ jobs:
           claim="CLAIM issue=#$ISSUE agent=Pool-$PROVIDER branch=$BRANCH files=$files goal=$goal lease=2h"
           cid="$(gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$(python3 scripts/gestionar_reservas_rollover.py --active)/comments" -f body="$claim" --jq .id)"
           python3 scripts/gestionar_reservas_rollover.py --comments-output /tmp/reservas.json
-          # Capa única de lectura de #182 (#1662): misma semántica que el barrido
+          # Capa única de lectura del registro activo #1713 (#1662): misma semántica que el barrido
           # (lease, HEARTBEAT, PR_READY, RELEASE por rama) y sin parser propio aquí,
           # que daba por vivos CLAIM no canónicos que nunca se liberan.
           python3 scripts/reservas_registro.py conflictos \
