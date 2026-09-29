@@ -1,0 +1,80 @@
+name: Agent Jules
+
+# Jules (Google) es un worker de nivel 3 externo: se activa al poner la label
+# `jules` a un issue y abre su propia PR (#1917). No publica reservas, así que
+# este puente las publica por él con las mismas reglas del pool: plan delegado
+# de confianza, un solo fichero y rutas no protegidas.
+
+on:
+  issues:
+    types: [labeled, unlabeled, closed]
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: agent-jules-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  reserva:
+    if: >-
+      (github.event.action == 'closed' && contains(github.event.issue.labels.*.name, 'jules')) ||
+      (github.event.action != 'closed' && github.event.label.name == 'jules')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+
+      - name: Publicar CLAIM o RELEASE de Jules
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ github.event.issue.number }}
+          ACTION: ${{ github.event.action }}
+          MAX_FILES: ${{ vars.AGENT_POOL_MAX_FILES || '1' }}
+        run: |
+          set -euo pipefail
+          branch="jules/issue-$ISSUE"
+          registro="$(python3 scripts/gestionar_reservas_rollover.py --active)"
+
+          if [[ "$ACTION" != labeled ]]; then
+            # Sin PR de Jules que cerrar, el RELEASE va por issue y rama sintética.
+            # Si nunca hubo CLAIM, un RELEASE de más es inocuo.
+            gh issue comment "$registro" --repo "$GITHUB_REPOSITORY" \
+              --body "RELEASE issue=#$ISSUE branch=$branch motivo=jules-$ACTION" >/dev/null
+            exit 0
+          fi
+
+          # Mismas herramientas que el pool: plan delegado de un autor de
+          # confianza y validación de rutas con el límite de ficheros vigente.
+          gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE" > /tmp/issue.json
+          gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$ISSUE/comments?per_page=100" \
+            --jq '.[]' | jq -s '.' > /tmp/comments.json
+          jq -s '.[0] + {comments: .[1]}' /tmp/issue.json /tmp/comments.json > /tmp/entrada.json
+          python3 scripts/agent_delegated_plan.py --issue /tmp/entrada.json --output /tmp/delegado.json >/dev/null
+
+          status=0
+          python3 scripts/agent_plan_parse.py \
+            --source /tmp/delegado.json \
+            --max-files "$MAX_FILES" \
+            --output /tmp/plan.json || status=$?
+          if (( status != 0 )) || [[ "$(jq -r '.found' /tmp/delegado.json)" != true ]] ||
+            [[ "$(jq '.files | length' /tmp/plan.json)" -eq 0 ]]; then
+            gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human >/dev/null 2>&1 || true
+            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
+              "Jules: este issue no tiene un \`AGENT_PLAN\` delegado válido de $MAX_FILES fichero(s), así que no se publica reserva. Jules puede empezar igualmente al ver la label: revisa su PR con cuidado o quita la label y añade el plan." || true
+            exit 0
+          fi
+
+          files="$(jq -r '.files | join(",")' /tmp/plan.json)"
+          goal="$(jq -r '.goal | gsub("[[:space:]]+"; "-")' /tmp/plan.json)"
+          gh issue comment "$registro" --repo "$GITHUB_REPOSITORY" --body \
+            "CLAIM issue=#$ISSUE agent=Jules branch=$branch files=$files goal=$goal lease=48h" >/dev/null
+          echo "CLAIM de Jules publicado en #$registro: $files"

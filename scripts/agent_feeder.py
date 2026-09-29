@@ -20,6 +20,8 @@ BLOCKING_LABELS = {
     "estado:validacion-humana",
     "prioridad:P0",
     "agent:no-auto",
+    # Cola de Jules (#1917): es nivel 3 externo, no hay que decomponerla.
+    "jules",
 }
 BLOCKING_PREFIXES = ("agent:",)
 BLOCKING_TITLE_PREFIXES = ("playtest:", "épica:", "epica:")

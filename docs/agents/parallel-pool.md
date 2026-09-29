@@ -32,6 +32,15 @@ Después añade `agent:auto`. El worker (`scripts/agent_delegated_plan.py`) toma
 
 Sin plan delegado, el pool planifica como siempre.
 
+## Jules (Google)
+
+Jules es un worker externo de nivel 3: se activa al poner la label `jules` a un issue, trabaja en una VM de Google y abre su propia PR. Nivel gratuito: 15 tareas al día, 3 a la vez.
+
+- Se prepara igual que un issue del pool: plan delegado `AGENT_PLAN_BEGIN … AGENT_PLAN_END` de **un fichero** y unas instrucciones que basten por sí solas. La label `jules` se pone en el mismo momento; es una label de cola, así que el nivel 2 no toma el issue y el feeder no lo propone.
+- `agent-jules.yml` publica por él el `CLAIM agent=Jules branch=jules/issue-N … lease=48h` en el registro activo, y el `RELEASE` al cerrar el issue o quitar la label. Sin plan válido no hay reserva: el issue pasa a `agent:needs-human`.
+- Su PR la integra @eGurucharri tras el CI canónico, como cualquier otra: `PR_READY` no autoriza merge.
+- Jules lee `AGENTS.md`, pero no publica reservas ni puede decidir prioridad: todo lo que necesita tiene que estar en el issue.
+
 ## Aislamiento y control-plane
 
 Antes de marcar `agent:working`, cada worker intenta adquirir un **lease atómico** en el Deno KV compartido usando OIDC con audiencia `siga98-agent-pool`. El lease se identifica por issue + run, dura 30 minutos y se renueva al cambiar de fase (`planning`, `implementing`, `validating`, `publishing`). Si ya existe un lease vivo, el segundo worker termina sin tocar el estado visible de GitHub.
