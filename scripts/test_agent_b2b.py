@@ -49,6 +49,23 @@ class AgentB2BTests(unittest.TestCase):
         self.assertEqual(packet["contract_status"], "missing")
         self.assertEqual(packet["coverage_percent"], 0)
 
+    def test_task_artifact_fingerprint_detects_stale_handoff(self):
+        with tempfile.TemporaryDirectory() as td:
+            artifact = Path(td) / "task.md"
+            artifact.write_text("uno", encoding="utf-8")
+            meta = agent_b2b._artifact(artifact)
+            packet = {
+                "schema": 1,
+                "type": "TASK",
+                "issue": 9,
+                "artifacts": {"task": meta},
+                "handoff": {"from": "planner", "to": "implementer"},
+            }
+            agent_b2b.verify_task_artifacts(packet)
+            artifact.write_text("dos", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "cambio despues del handoff"):
+                agent_b2b.verify_task_artifacts(packet)
+
     def test_review_is_typed_and_keeps_compatibility_fields(self):
         task = {
             "schema": 1,
