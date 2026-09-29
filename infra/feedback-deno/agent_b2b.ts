@@ -22,6 +22,11 @@ interface AgentB2BDedupe {
   recipient: "dispatcher" | "worker" | "reviewer";
 }
 
+interface AgentB2BIndexRef {
+  task_id: string;
+  message_id: string;
+}
+
 export interface AgentB2BMessage {
   schema: 1;
   message_id: string;
@@ -105,6 +110,14 @@ function inboxKey(
   messageId: string,
 ): Deno.KvKey {
   return ["agent_pool", "b2b", "inbox", recipient, taskId, createdMs, messageId];
+}
+
+function recipientInboxKey(
+  recipient: string,
+  createdMs: number,
+  messageId: string,
+): Deno.KvKey {
+  return ["agent_pool", "b2b", "recipient_inbox", recipient, createdMs, messageId];
 }
 
 function dedupeKey(
@@ -211,6 +224,11 @@ async function sendMessage(
       .check(existing)
       .set(messageKey(recipient, taskId, messageId), message, { expireIn: ttlMs })
       .set(inboxKey(recipient, taskId, now, messageId), messageId, { expireIn: ttlMs })
+      .set(
+        recipientInboxKey(recipient, now, messageId),
+        { task_id: taskId, message_id: messageId },
+        { expireIn: ttlMs },
+      )
       .set(dedupe, { message_id: messageId, recipient }, { expireIn: ttlMs })
       .commit();
 
@@ -241,7 +259,7 @@ async function inbox(
   if (
     input.schema !== 1 ||
     !B2B_RECIPIENTS.has(recipient) ||
-    !taskId
+    (!taskId && recipient !== "dispatcher")
   ) {
     return json({ ok: false, error: "invalid_request" }, 400);
   }
@@ -249,19 +267,27 @@ async function inbox(
     return json({ ok: false, error: "forbidden" }, 403);
   }
 
-  const prefix: Deno.KvKey = ["agent_pool", "b2b", "inbox", recipient, taskId];
+  const prefix: Deno.KvKey = taskId
+    ? ["agent_pool", "b2b", "inbox", recipient, taskId]
+    : ["agent_pool", "b2b", "recipient_inbox", recipient];
 
   const messages: AgentB2BMessage[] = [];
-  for await (const entry of kv.list<string>({ prefix }, { limit: limit * 2 })) {
-    const key = entry.key;
-    const indexedTask = String(key[4] ?? "");
-    const messageId = String(entry.value ?? "");
+  for await (const entry of kv.list<unknown>({ prefix }, { limit: limit * 2 })) {
+    let indexedTask = taskId;
+    let messageId = "";
+    if (taskId) {
+      messageId = typeof entry.value === "string" ? entry.value : "";
+    } else {
+      const ref = entry.value as AgentB2BIndexRef | null;
+      indexedTask = cleanToken(ref?.task_id, 240);
+      messageId = cleanToken(ref?.message_id, 120);
+    }
     if (!indexedTask || !messageId) continue;
     const current = await kv.get<AgentB2BMessage>(
       messageKey(recipient, indexedTask, messageId),
     );
     if (!current.value) {
-      await kv.delete(key);
+      await kv.delete(entry.key);
       continue;
     }
     messages.push(current.value);
@@ -309,6 +335,7 @@ async function acknowledge(
       .check(current)
       .delete(key)
       .delete(inboxKey(recipient, taskId, current.value.created_ms, messageId))
+      .delete(recipientInboxKey(recipient, current.value.created_ms, messageId))
       .commit();
     if (committed.ok) {
       return json({ ok: true, acknowledged: true });
