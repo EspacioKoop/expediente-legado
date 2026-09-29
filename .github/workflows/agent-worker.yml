@@ -588,11 +588,18 @@ jobs:
 
           if grep -q '^reserved=false$' "$GITHUB_OUTPUT"; then
             gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --repo "$GITHUB_REPOSITORY" --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=colision-agent-pool" >/dev/null || true
-          gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+            gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
               --remove-label agent:working --remove-label agent:needs-human \
               >/dev/null 2>&1 || true
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
               "Agent pool: $(grep '^reason=' "$GITHUB_OUTPUT"|cut -d= -f2-). Se reencola automáticamente; la colisión de CLAIM no requiere intervención humana." || true
+          else
+            python3 scripts/agent_b2b.py event \
+              --type CLAIM --issue "$ISSUE" --provider "$PROVIDER" \
+              --worker "Pool-$PROVIDER" --from-role orchestrator --to-role implementer \
+              --summary "Reserva de rutas aceptada para implementación" \
+              --ref "github-comment:$cid" --ref "branch:$BRANCH" \
+              --output .agent-claim-packet.json >/dev/null
           fi
 
       - name: Renovar lease Deno · implementing
@@ -673,7 +680,7 @@ jobs:
             --task .agent-task.md --plan .agent-plan.json \
             --context .agent-context.md --memory .agent-memory.json \
             --history .agent-history.json --agents AGENTS.md --rules "$rules" \
-            --platino-sha .agent-platino-sha \
+            --platino-sha .agent-platino-sha --claim .agent-claim-packet.json \
             --output .agent-task-packet.json >/dev/null
           python3 scripts/agent_b2b.py verify --packet .agent-task-packet.json
           python3 scripts/agent_b2b.py prompt \
@@ -837,7 +844,7 @@ jobs:
           cp .agent-plan.json /tmp/plan.json
           cp .agent-task.md /tmp/agent-task.md
           cp .agent-task-packet.json /tmp/agent-task-packet.json
-          rm -f .agent-task.md .agent-plan.json .agent-context.md .agent-memory.json .agent-history.json .agent-plan-task-packet.json .agent-plan-prompt.md .agent-task-packet.json .agent-implement-prompt.md .agent-platino-sha gha-creds-*.json
+          rm -f .agent-task.md .agent-plan.json .agent-context.md .agent-memory.json .agent-history.json .agent-plan-task-packet.json .agent-plan-prompt.md .agent-claim-packet.json .agent-task-packet.json .agent-implement-prompt.md .agent-platino-sha gha-creds-*.json
           rm -rf .agent-platino .agent-wiki .gemini .qwen gemini-artifacts qwen-artifacts
           git add -A
           if git diff --cached --quiet; then
