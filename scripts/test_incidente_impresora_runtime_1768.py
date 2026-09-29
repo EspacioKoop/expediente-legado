@@ -10,6 +10,7 @@ from scripts.godot_pruebas import importar_proyecto
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTROLLER = ROOT / "godot" / "guion" / "dia_incidente_impresora_app.gd"
+INTERACTUABLE = ROOT / "godot" / "guion" / "interactuable_3d.gd"
 SCENE = ROOT / "godot" / "escenas" / "dia.tscn"
 PRUEBA = "res://pruebas/pruebas_incidente_impresora_runtime_1768.gd"
 RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
@@ -19,6 +20,7 @@ class IncidenteImpresoraRuntime1768Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.fuente = CONTROLLER.read_text(encoding="utf-8")
+        cls.interactuable = INTERACTUABLE.read_text(encoding="utf-8")
         cls.scene = SCENE.read_text(encoding="utf-8")
 
     def test_reutiliza_modelo_y_publica_evento_canonico(self):
@@ -43,6 +45,18 @@ class IncidenteImpresoraRuntime1768Test(unittest.TestCase):
         self.assertIn("PapelAtascado", self.fuente)
         for verbo in ("EXAMINAR", "ABRIR", "COGER", "CERRAR"):
             self.assertIn(f"Interactuable3D.Verbo.{verbo}", self.fuente)
+
+    def test_audio_reutiliza_catalogo_comun_y_no_override_silencioso(self):
+        self.assertNotIn("Interactuable3D.SIN_SONIDO", self.fuente)
+        for contrato in (
+            'Verbo.ABRIR: "abrir"',
+            'Verbo.COGER: "coger"',
+            'Verbo.CERRAR: "cerrar"',
+        ):
+            self.assertIn(contrato, self.interactuable)
+        self.assertIn("nombre_sonido() == \"abrir\"", (ROOT / "godot" / "pruebas" / "pruebas_incidente_impresora_runtime_1768.gd").read_text(encoding="utf-8"))
+        self.assertIn("nombre_sonido() == \"coger\"", (ROOT / "godot" / "pruebas" / "pruebas_incidente_impresora_runtime_1768.gd").read_text(encoding="utf-8"))
+        self.assertIn("nombre_sonido() == \"cerrar\"", (ROOT / "godot" / "pruebas" / "pruebas_incidente_impresora_runtime_1768.gd").read_text(encoding="utf-8"))
 
     def test_no_consume_economia_ni_acciones(self):
         for llamada in (
