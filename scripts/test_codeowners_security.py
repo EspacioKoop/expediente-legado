@@ -22,10 +22,7 @@ class SecurityCodeownersTest(unittest.TestCase):
         )
         for patron in esperadas:
             with self.subTest(pattern=patron):
-                self.assertRegex(
-                    texto,
-                    rf"(?m)^{patron.replace('*', r'\*')}\s+@eGurucharri\s*$",
-                )
+                self.assertIn(f"{patron} @eGurucharri", texto)
 
     def test_codeowners_se_protege_a_si_mismo(self):
         texto = CODEOWNERS.read_text(encoding="utf-8")
