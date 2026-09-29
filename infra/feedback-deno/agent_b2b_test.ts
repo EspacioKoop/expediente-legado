@@ -187,6 +187,35 @@ Deno.test("roles aíslan inboxes y smoke no puede enviar", async () => {
   });
 });
 
+Deno.test("RESULT y REVIEW usan el mismo transporte dirigido", async () => {
+  await withKv(async (kv) => {
+    for (const [messageType, key] of [["RESULT", "result-1"], ["REVIEW", "review-1"]]) {
+      const sent = await call(
+        kv,
+        "send",
+        question({
+          message_type: messageType,
+          recipient: "dispatcher",
+          idempotency_key: key,
+          subject: messageType + " disponible",
+        }),
+        worker(),
+      );
+      assertEquals(sent.status, 201, messageType);
+      const message = sent.data.message as Record<string, unknown>;
+      assertEquals(message.message_type, messageType, "tipo " + messageType);
+    }
+
+    const inbox = await call(
+      kv,
+      "inbox",
+      { schema: 1, recipient: "dispatcher", task_id: question().task_id },
+      dispatcher(),
+    );
+    assertEquals((inbox.data.messages as unknown[]).length, 2, "dos mensajes");
+  });
+});
+
 Deno.test("BLOCKER fuerza blocking aunque el emisor lo omita", async () => {
   await withKv(async (kv) => {
     const sent = await call(
