@@ -19,12 +19,24 @@ def wrap(payload):
 
 
 class AgentDecomposeTest(unittest.TestCase):
-    def test_single_cut_no_crea_subtareas(self):
+    def test_single_cut_declara_plan_ejecutable_de_un_fichero(self):
         result = mod.parse_decomposition(
-            wrap({"fits_single_cut": True, "subtasks": [{"title": "ignorar"}]})
+            wrap(
+                {
+                    "fits_single_cut": True,
+                    "subtasks": [
+                        {
+                            "title": "Corte directo",
+                            "goal": "Modificar un fichero con alcance acotado.",
+                            "files": ["scripts/a.py"],
+                            "depends_on": [],
+                        }
+                    ],
+                }
+            )
         )
         self.assertTrue(result["fits_single_cut"])
-        self.assertEqual([], result["subtasks"])
+        self.assertEqual(["scripts/a.py"], result["subtasks"][0]["files"])
 
     def test_gate_humano_no_crea_subtareas(self):
         result = mod.parse_decomposition(
@@ -69,7 +81,7 @@ class AgentDecomposeTest(unittest.TestCase):
                         {
                             "title": "Integrar contrato",
                             "goal": "Consumir el contrato desde el selector.",
-                            "files": ["scripts/a.py", "scripts/b.py"],
+                            "files": ["scripts/a.py"],
                             "depends_on": [0],
                         },
                     ],
@@ -158,8 +170,8 @@ class AgentDecomposeTest(unittest.TestCase):
                 wrap({"fits_single_cut": False, "subtasks": subtasks})
             )
 
-    def test_rechaza_mas_de_ocho_rutas_por_corte(self):
-        with self.assertRaisesRegex(ValueError, "entre 1 y 8"):
+    def test_rechaza_mas_de_una_ruta_por_corte(self):
+        with self.assertRaisesRegex(ValueError, "exactamente 1"):
             mod.parse_decomposition(
                 wrap(
                     {
@@ -168,7 +180,7 @@ class AgentDecomposeTest(unittest.TestCase):
                             {
                                 "title": "Corte demasiado ancho",
                                 "goal": "Este corte intenta abarcar demasiadas rutas.",
-                                "files": [f"scripts/f_{i}.py" for i in range(9)],
+                                "files": ["scripts/a.py", "scripts/b.py"],
                                 "depends_on": [],
                             },
                             {
@@ -195,7 +207,7 @@ class AgentDecomposeTest(unittest.TestCase):
         self.assertIn("crea entre 2 y 6 subtareas pequeñas", workflow)
         self.assertIn("needs_human=true", workflow)
         self.assertIn("Gate humano", workflow)
-        self.assertIn("files concretos (max 8)", workflow)
+        self.assertIn("exactamente 1 ruta", workflow)
         self.assertIn("agent:decomposed", workflow)
         self.assertNotIn('gh issue close "$ISSUE"', workflow)
 
