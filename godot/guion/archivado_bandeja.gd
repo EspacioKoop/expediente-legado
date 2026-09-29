@@ -6,7 +6,7 @@
 class_name ArchivadoBandeja
 extends RefCounted
 
-const VERSION_GUARDADO := 1
+const VERSION_GUARDADO := 2
 const DEMORA_BUSQUEDA_POR_ERROR := 0.35
 const DEMORA_BUSQUEDA_MAX := 1.4
 
@@ -66,6 +66,7 @@ static func colocar(estado: Dictionary, caso: Dictionary, destino: String) -> bo
 		"caso": caso,
 		"destino": destino,
 		"folios_leidos": estado.get("folios_leidos", []).duplicate(),
+		"reordenada": false,
 	}
 	estado["colocaciones"].append(colocacion)
 	var correcta := destino == Archivado.destino_de(caso)
@@ -96,11 +97,46 @@ static func desorden_por_destino(estado: Dictionary) -> Dictionary:
 		var caso_id := String(caso.get("id", ""))
 		if not pendientes.has(caso_id):
 			continue
+		if bool(colocacion.get("reordenada", false)):
+			continue
 		var destino := String(colocacion.get("destino", ""))
 		if destino.is_empty() or destino == Archivado.destino_de(caso):
 			continue
 		resultado[destino] = int(resultado.get(destino, 0)) + 1
 	return resultado
+
+
+## Reorganiza un único error activo del archivador indicado sin borrar el
+## intento histórico. La precisión final sigue viendo la colocación original;
+## solo desaparecen su consecuencia espacial y su demora de búsqueda.
+static func reorganizar_destino(estado: Dictionary, destino: String) -> bool:
+	var limpio := destino.strip_edges()
+	if limpio.is_empty() or bool(estado.get("cerrada", false)):
+		return false
+
+	var pendientes := {}
+	for caso in estado.get("pendientes", []):
+		var caso_id := String(caso.get("id", ""))
+		if not caso_id.is_empty():
+			pendientes[caso_id] = true
+
+	var colocaciones: Array = estado.get("colocaciones", [])
+	for i in colocaciones.size():
+		var colocacion = colocaciones[i]
+		if typeof(colocacion) != TYPE_DICTIONARY or bool(colocacion.get("reordenada", false)):
+			continue
+		var caso: Dictionary = colocacion.get("caso", {})
+		var caso_id := String(caso.get("id", ""))
+		if not pendientes.has(caso_id):
+			continue
+		var colocado := String(colocacion.get("destino", ""))
+		if colocado != limpio or colocado == Archivado.destino_de(caso):
+			continue
+		colocacion["reordenada"] = true
+		colocaciones[i] = colocacion
+		estado["colocaciones"] = colocaciones
+		return true
+	return false
 
 
 static func demora_busqueda(estado: Dictionary) -> float:
@@ -151,6 +187,7 @@ static func serializar(estado: Dictionary) -> Dictionary:
 				{
 					"caso_id": caso_id,
 					"destino": String(colocacion.get("destino", "")),
+					"reordenada": bool(colocacion.get("reordenada", false)),
 				}
 			)
 		)
@@ -190,6 +227,7 @@ static func restaurar(guardado: Dictionary, catalogo: Array, folios_leidos: Arra
 					"caso": por_id[caso_id].duplicate(true),
 					"destino": String(colocacion.get("destino", "")),
 					"folios_leidos": folios_leidos.duplicate(),
+					"reordenada": bool(colocacion.get("reordenada", false)),
 				}
 			)
 		)
