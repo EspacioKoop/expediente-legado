@@ -140,8 +140,10 @@ func _probar_conviccion_explicita_conocida() -> void:
 		"correspondencia puede reaccionar de forma distinta al mismo hecho",
 	)
 	_comprobar(
-		DialogoReligion933.CLAVE_CUNADO_CONVICCION
-		!= DialogoReligion933.CLAVE_CORRESPONDENCIA_CONVICCION,
+		(
+			DialogoReligion933.CLAVE_CUNADO_CONVICCION
+			!= DialogoReligion933.CLAVE_CORRESPONDENCIA_CONVICCION
+		),
 		true,
 		"dos NPC no quedan reducidos a una voz única",
 	)
