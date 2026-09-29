@@ -34,11 +34,19 @@ class AgentWorkerProtocolTest(unittest.TestCase):
         self.assertLess(inbox, qwen)
         block = step("- id: b2b_inbox\n")
         self.assertIn("/api/agent-pool/b2b/inbox", block)
-        self.assertIn("/api/agent-pool/b2b/ack", block)
         self.assertIn('recipient:"worker"', block)
         self.assertIn("steps.protocol.outputs.task_id", block)
         self.assertIn(".agent-b2b-inbox.md", block)
         self.assertIn("continue-on-error: true", block)
+
+        ack = step("- name: Confirmar inbox B2B consumido\n")
+        self.assertIn("/api/agent-pool/b2b/ack", ack)
+        self.assertIn("steps.implement_qwen.outcome == 'success'", ack)
+        self.assertIn("steps.implement_gemini.outcome == 'success'", ack)
+        self.assertGreater(
+            WORKFLOW.index("- name: Confirmar inbox B2B consumido\n"),
+            WORKFLOW.index("- id: implement_gemini\n"),
+        )
 
     def test_claim_drift_envia_blocker_al_dispatcher_y_conserva_fallback(self):
         block = step("- id: replan\n")
