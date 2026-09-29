@@ -53,8 +53,9 @@ jobs:
             exit 0
           fi
 
-          gh issue list --repo "$GITHUB_REPOSITORY" --state open --limit 500 \
-            --json number,title,body,labels,createdAt,updatedAt > /tmp/feeder-issues.json
+          gh search issues --repo "$GITHUB_REPOSITORY" --state open --limit 500 \
+            --json number,title,body,labels,createdAt,updatedAt,authorAssociation \
+            > /tmp/feeder-issues.json
           gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 100 \
             --json number,body > /tmp/feeder-prs.json
 
