@@ -7,6 +7,7 @@ from scripts.godot_pruebas import ejecutar_script
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "godot/guion/navegador_siga.gd"
+STYLE = ROOT / "godot/guion/navegador_web98_estilo.gd"
 PRUEBA_GODOT = "res://pruebas/pruebas_navegador_identidad_791.gd"
 RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
 
@@ -15,6 +16,7 @@ class NavegadorIdentidad791Tests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.source = SOURCE.read_text(encoding="utf-8")
+        cls.style = STYLE.read_text(encoding="utf-8")
 
     def test_identidad_es_local_y_diferencia_shell_de_pagina(self):
         for token in (
@@ -22,12 +24,18 @@ class NavegadorIdentidad791Tests(unittest.TestCase):
             'const FONDO_DIRECCION := Color("#fff7d6")',
             'const FONDO_PAGINA := Color("#fbfaf2")',
             'const FONDO_LATERAL := Color("#e5eaf0")',
-            "_estilizar_boton_cromo(_atras)",
-            "_estilizar_linea_web98(_direccion)",
-            '_pagina.add_theme_stylebox_override(',
-            "_estilizar_lista_web98(_historial_lista, FONDO_LATERAL)",
+        ):
+            self.assertIn(token, self.style)
+
+        for token in (
+            'Web98Estilo.estilizar_boton_cromo(_atras, "Atras")',
+            "Web98Estilo.estilizar_linea_web98(_direccion)",
+            "Web98Estilo.estilizar_pagina(_pagina)",
+            "Web98Estilo.estilizar_lista_web98(_historial_lista, FONDO_LATERAL)",
         ):
             self.assertIn(token, self.source)
+
+        self.assertLessEqual(len(self.source.splitlines()), 1000)
 
     def test_no_cambia_modelos_red_o_persistencia(self):
         self.assertIn("Web98Indice.new()", self.source)
@@ -46,10 +54,10 @@ class NavegadorIdentidad791Tests(unittest.TestCase):
             "_direccion.text_submitted.connect",
             "_busqueda.text_submitted.connect(_mostrar_busqueda)",
             "_enlaces.item_activated.connect(_activar_enlace)",
-            '"focus", _caja_web98(FONDO_DIRECCION, FOCO_WEB98',
-            '"focus", _caja_web98(fondo, FOCO_WEB98',
+            '"focus", caja_web98(FONDO_DIRECCION, FOCO_WEB98',
+            '"focus", caja_web98(fondo, FOCO_WEB98',
         ):
-            self.assertIn(token, self.source)
+            self.assertIn(token, self.source + self.style)
 
     def test_flujo_real_en_godot(self):
         resultado = ejecutar_script(PRUEBA_GODOT)
