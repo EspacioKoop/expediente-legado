@@ -996,6 +996,9 @@ jobs:
           BRANCH: ${{ steps.guard.outputs.branch }}
           REVIEW_STATUS: ${{ steps.review_contract.outputs.status || 'skipped' }}
           REVIEW_VERDICT: ${{ steps.review_contract.outputs.verdict || 'skipped' }}
+          RESULT_VALID: ${{ steps.result_contract.outputs.valid || 'false' }}
+          RESULT_STATUS: ${{ steps.result_contract.outputs.status || 'missing' }}
+          HANDOFF_LOSS: ${{ steps.result_contract.outputs.handoff_loss || '100' }}
         run: |
           set -euo pipefail
           git config user.name "agent-pool[bot]"
@@ -1008,7 +1011,7 @@ jobs:
             --title "agent($PROVIDER): #$ISSUE $title" \
             --body "Refs #$ISSUE
 
-          Implementacion autonoma mediante worker \`$WORKER\`. Plan reservado en #182; cambios limitados al CLAIM; preflight ejecutado. Reviewer acotado: \`$REVIEW_STATUS/$REVIEW_VERDICT\`. PR draft, sin auto-merge." 2>&1)"; then
+          Implementacion autonoma mediante worker \`$WORKER\`. Plan reservado en #182; cambios limitados al CLAIM; preflight ejecutado. Reviewer acotado: \`$REVIEW_STATUS/$REVIEW_VERDICT\`. Protocolo v1: ResultPacket $RESULT_VALID/$RESULT_STATUS; handoff-loss proxy $HANDOFF_LOSS%. PR draft, sin auto-merge." 2>&1)"; then
             if grep -Eiq 'not permitted to create or approve pull requests|createPullRequest|Resource not accessible by integration' <<<"$pr_salida"; then
               gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
                 --add-label agent:needs-human \
