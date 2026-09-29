@@ -469,6 +469,29 @@ jobs:
             fi
           fi
 
+      - id: b2b_plan
+        name: Compilar intake B2B del planner
+        if: steps.guard.outputs.run == 'true' && steps.delegated.outputs.found != 'true'
+        env:
+          ISSUE: ${{ inputs.issue }}
+          PROVIDER: ${{ inputs.provider }}
+          WORKER: ${{ inputs.worker }}
+        run: |
+          set -euo pipefail
+          rules=QWEN.md
+          [[ "$PROVIDER" == gemini ]] && rules=GEMINI.md
+          python3 scripts/agent_b2b.py intake \
+            --issue "$ISSUE" --provider "$PROVIDER" --worker "$WORKER" \
+            --task .agent-task.md --context .agent-context.md \
+            --memory .agent-memory.json --history .agent-history.json \
+            --agents AGENTS.md --rules "$rules" --platino-sha .agent-platino-sha \
+            --output .agent-plan-task-packet.json >/dev/null
+          python3 scripts/agent_b2b.py verify --packet .agent-plan-task-packet.json
+          python3 scripts/agent_b2b.py prompt \
+            --role plan --provider "$PROVIDER" \
+            --task-packet .agent-plan-task-packet.json \
+            --output .agent-plan-prompt.md
+
       - id: plan_qwen
         name: Plan Qwen
         if: steps.guard.outputs.run == 'true' && inputs.provider == 'qwen' && steps.delegated.outputs.found != 'true'
@@ -480,7 +503,7 @@ jobs:
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'FASE DE PLAN (solo lectura): no edites nada ni pidas herramientas de edicion; tu unica salida util es el bloque AGENT_PLAN. TAREA ASIGNADA: ${{ steps.task.outputs.brief }} FIN DE LA TAREA. Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-context.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino. Jerarquia: repo/issue/#181/#182 y Normas Platino > contexto de wiki > memoria temporal Deno KV > memoria historica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integracion y sus tests: files debe incluir TODAS las rutas que una implementacion correcta podria necesitar. Si los comentarios recientes contienen AGENT_POOL_REPLAN, revisa explicitamente sus observed_paths y anadelas solo si son realmente necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Maximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+          prompt: 'Lee .agent-plan-prompt.md y cumple ese contrato B2B de planificación. No edites archivos ni solicites herramientas de edición.'
 
       - id: plan_gemini
         name: Plan Gemini
@@ -492,7 +515,7 @@ jobs:
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'FASE DE PLAN (solo lectura): no edites nada ni pidas herramientas de edicion; tu unica salida util es el bloque AGENT_PLAN. TAREA ASIGNADA: ${{ steps.task.outputs.brief }} FIN DE LA TAREA. Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-context.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino. Jerarquia: repo/issue/#181/#182 y Normas Platino > contexto de wiki > memoria temporal Deno KV > memoria historica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integracion y sus tests: files debe incluir TODAS las rutas que una implementacion correcta podria necesitar. Si los comentarios recientes contienen AGENT_POOL_REPLAN, revisa explicitamente sus observed_paths y anadelas solo si son realmente necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Maximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+          prompt: 'Lee .agent-plan-prompt.md y cumple ese contrato B2B de planificación. No edites archivos ni solicites herramientas de edición.'
 
       - id: reserve
         name: Validar plan y reservar rutas
@@ -814,7 +837,7 @@ jobs:
           cp .agent-plan.json /tmp/plan.json
           cp .agent-task.md /tmp/agent-task.md
           cp .agent-task-packet.json /tmp/agent-task-packet.json
-          rm -f .agent-task.md .agent-plan.json .agent-context.md .agent-memory.json .agent-history.json .agent-task-packet.json .agent-implement-prompt.md .agent-platino-sha gha-creds-*.json
+          rm -f .agent-task.md .agent-plan.json .agent-context.md .agent-memory.json .agent-history.json .agent-plan-task-packet.json .agent-plan-prompt.md .agent-task-packet.json .agent-implement-prompt.md .agent-platino-sha gha-creds-*.json
           rm -rf .agent-platino .agent-wiki .gemini .qwen gemini-artifacts qwen-artifacts
           git add -A
           if git diff --cached --quiet; then
