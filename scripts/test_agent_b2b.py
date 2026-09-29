@@ -83,6 +83,28 @@ class AgentB2BTests(unittest.TestCase):
         self.assertEqual(result["correlation_id"], "agent/qwen-1866-123")
         self.assertEqual(review["correlation_id"], "agent/qwen-1866-123")
 
+    def test_review_rechaza_resultado_de_otro_intento(self):
+        task = {
+            "schema": 1,
+            "type": "TASK",
+            "issue": 1866,
+            "correlation_id": "attempt-a",
+            "handoff": {"from": "planner", "to": "implementer"},
+        }
+        result = {
+            "schema": 1,
+            "type": "RESULT",
+            "issue": 1866,
+            "correlation_id": "attempt-b",
+            "handoff": {"from": "implementer", "to": "reviewer"},
+        }
+        with self.assertRaisesRegex(ValueError, "otro intento"):
+            agent_b2b.build_review(
+                {"status": "ok", "verdict": "approve", "findings": []},
+                task,
+                result,
+            )
+
     def test_missing_result_does_not_raise(self):
         task = {
             "schema": 1,
@@ -176,6 +198,24 @@ class AgentB2BTests(unittest.TestCase):
             )()
             with self.assertRaisesRegex(ValueError, "max_files=12"):
                 agent_b2b.build_task(args)
+
+    def test_prompt_rechaza_provider_distinto_del_task_packet(self):
+        with tempfile.TemporaryDirectory() as td:
+            packet = Path(td) / "task.json"
+            packet.write_text(
+                json.dumps(
+                    {
+                        "schema": 1,
+                        "type": "TASK",
+                        "issue": 9,
+                        "provider": "qwen",
+                        "handoff": {"from": "planner", "to": "implementer"},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ValueError, "provider"):
+                agent_b2b.compile_prompt("implement", "gemini", packet)
 
     def test_prompt_contains_scope_and_result_contract(self):
         with tempfile.TemporaryDirectory() as td:
