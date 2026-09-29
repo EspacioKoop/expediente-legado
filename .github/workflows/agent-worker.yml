@@ -374,6 +374,32 @@ jobs:
             echo "$delim"
           } >> "$GITHUB_OUTPUT"
 
+      - id: b2b_plan_inbox
+        name: Leer B2B antes de planificar
+        if: steps.guard.outputs.run == 'true' && steps.guard.outputs.control == 'deno'
+        continue-on-error: true
+        env:
+          CONTROL_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
+          ISSUE: ${{ inputs.issue }}
+        run: |
+          set -euo pipefail
+          base="${CONTROL_URL%/}"
+          base="${base%/api/report}"
+          base_sha="$(git rev-parse HEAD)"
+          task_id="$GITHUB_REPOSITORY#$ISSUE@${base_sha:0:12}"
+          echo "task_id=$task_id" >> "$GITHUB_OUTPUT"
+          oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN"             "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-pool")"
+          oidc_token="$(jq -er '.value' <<<"$oidc_json")"
+          payload="$(jq -nc --arg task "$task_id"             '{schema:1,recipient:"worker",task_id:$task,limit:20}')"
+          curl -fsS -X POST "$base/api/agent-pool/b2b/inbox"             -H "Authorization: Bearer $oidc_token"             -H 'Content-Type: application/json'             --data "$payload" -o /tmp/agent-b2b-plan-inbox.json
+          jq -e '.ok == true and (.messages | type == "array")' /tmp/agent-b2b-plan-inbox.json >/dev/null
+          {
+            echo "# Mensajes B2B dirigidos"
+            echo
+            jq -r '.messages[] |
+              "- [\(.message_type)] \(.subject // "")\n  \(.body // "")\n  evidencia: \((.evidence // []) | join("; "))"'               /tmp/agent-b2b-plan-inbox.json
+          } > .agent-b2b-inbox.md
+
       - id: delegated
         name: Buscar plan delegado por el nivel 2
         if: steps.guard.outputs.run == 'true'
@@ -480,7 +506,7 @@ jobs:
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'FASE DE PLAN (solo lectura): no edites nada ni pidas herramientas de edicion; tu unica salida util es el bloque AGENT_PLAN. TAREA ASIGNADA: ${{ steps.task.outputs.brief }} FIN DE LA TAREA. Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-context.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino. Jerarquia: repo/issue/#181/#182 y Normas Platino > contexto de wiki > memoria temporal Deno KV > memoria historica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integracion y sus tests: files debe incluir TODAS las rutas que una implementacion correcta podria necesitar. Si los comentarios recientes contienen AGENT_POOL_REPLAN, revisa explicitamente sus observed_paths y anadelas solo si son realmente necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Maximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+          prompt: 'FASE DE PLAN (solo lectura): no edites nada ni pidas herramientas de edicion; tu unica salida util es el bloque AGENT_PLAN. TAREA ASIGNADA: ${{ steps.task.outputs.brief }} FIN DE LA TAREA. Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-context.md, .agent-b2b-inbox.md si existe, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino. Jerarquia: repo/issue/#181/#182 y Normas Platino > contexto de wiki > memoria temporal Deno KV > memoria historica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integracion y sus tests: files debe incluir TODAS las rutas que una implementacion correcta podria necesitar. Si los comentarios recientes contienen AGENT_POOL_REPLAN o el inbox B2B contiene un BLOCKER de CLAIM, revisa explicitamente sus rutas/evidencia y anadelas solo si son realmente necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Maximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
 
       - id: plan_gemini
         name: Plan Gemini
@@ -492,7 +518,7 @@ jobs:
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'FASE DE PLAN (solo lectura): no edites nada ni pidas herramientas de edicion; tu unica salida util es el bloque AGENT_PLAN. TAREA ASIGNADA: ${{ steps.task.outputs.brief }} FIN DE LA TAREA. Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-context.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino. Jerarquia: repo/issue/#181/#182 y Normas Platino > contexto de wiki > memoria temporal Deno KV > memoria historica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integracion y sus tests: files debe incluir TODAS las rutas que una implementacion correcta podria necesitar. Si los comentarios recientes contienen AGENT_POOL_REPLAN, revisa explicitamente sus observed_paths y anadelas solo si son realmente necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Maximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+          prompt: 'FASE DE PLAN (solo lectura): no edites nada ni pidas herramientas de edicion; tu unica salida util es el bloque AGENT_PLAN. TAREA ASIGNADA: ${{ steps.task.outputs.brief }} FIN DE LA TAREA. Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-context.md, .agent-b2b-inbox.md si existe, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino. Jerarquia: repo/issue/#181/#182 y Normas Platino > contexto de wiki > memoria temporal Deno KV > memoria historica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integracion y sus tests: files debe incluir TODAS las rutas que una implementacion correcta podria necesitar. Si los comentarios recientes contienen AGENT_POOL_REPLAN, revisa explicitamente sus observed_paths y anadelas solo si son realmente necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Maximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
 
       - id: reserve
         name: Validar plan y reservar rutas
@@ -843,10 +869,12 @@ jobs:
               oidc_token="$(jq -er '.value' <<<"$oidc_json")"; then
               mapfile -t observed < <(jq -r '.outside[]' /tmp/claim-guard.json)
               evidence="$(printf '%s\n' "${observed[@]}" | jq -Rsc 'split("\n") | map(select(length > 0))')"
-              payload="$(jq -nc                 --arg task "$TASK_ID"                 --arg key "claim-drift-${GITHUB_RUN_ID}-$attempt"                 --arg subject "CLAIM incompleto en #$ISSUE"                 --arg body "El worker detectó rutas necesarias fuera del CLAIM; el siguiente plan debe reinspeccionarlas antes de reservar."                 --argjson evidence "$evidence"                 '{schema:1,task_id:$task,message_type:"BLOCKER",recipient:"dispatcher",
-                  idempotency_key:$key,correlation_id:$task,subject:$subject,body:$body,
-                  evidence:$evidence,blocking:true}')"
-              curl -fsS --max-time 12 -X POST "$base/api/agent-pool/b2b/send"                 -H "Authorization: Bearer $oidc_token"                 -H 'Content-Type: application/json' --data "$payload" >/dev/null || true
+              for recipient in dispatcher worker; do
+                payload="$(jq -nc                   --arg task "$TASK_ID"                   --arg recipient "$recipient"                   --arg key "claim-drift-${GITHUB_RUN_ID}-$attempt-$recipient"                   --arg subject "CLAIM incompleto en #$ISSUE"                   --arg body "El worker detectó rutas necesarias fuera del CLAIM; el siguiente plan debe reinspeccionarlas antes de reservar."                   --argjson evidence "$evidence"                   '{schema:1,task_id:$task,message_type:"BLOCKER",recipient:$recipient,
+                    idempotency_key:$key,correlation_id:$task,subject:$subject,body:$body,
+                    evidence:$evidence,blocking:true}')"
+                curl -fsS --max-time 12 -X POST "$base/api/agent-pool/b2b/send"                   -H "Authorization: Bearer $oidc_token"                   -H 'Content-Type: application/json' --data "$payload" >/dev/null || true
+              done
             fi
           fi
 
