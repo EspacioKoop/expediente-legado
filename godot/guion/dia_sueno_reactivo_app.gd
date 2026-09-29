@@ -360,9 +360,10 @@ func _actualizar_hud_camara(dia: Node) -> void:
 	var contenedor := GrabacionOniricaEstado.asegurar_en_estado(partida_actual.estado)
 	var cinta: Dictionary = contenedor.get("cinta", {})
 	var restante := maxf(float(cinta.get("metraje_restante", 0.0)), 0.0)
-	_hud_metraje.text = TranslationServer.translate("CAMARA_ONIRICA_METRAJE") % [
-		"●" if grabacion_activa() else "○", restante
-	]
+	_hud_metraje.text = (
+		TranslationServer.translate("CAMARA_ONIRICA_METRAJE")
+		% ["●" if grabacion_activa() else "○", restante]
+	)
 
 
 func _al_observar_anomalia(
