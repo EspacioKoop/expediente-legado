@@ -125,6 +125,11 @@ class WorkflowsYamlTest(unittest.TestCase):
             "label-areas.yml",
             "reservas.yml",
             "alpha-playtest.yml",
+            "ci.yml",
+            "ci-brain.yml",
+            "mando-deno.yml",
+            "feedback-deno.yml",
+            "feedback-deno-deploy.yml",
         }
 
         for nombre in sorted(privilegiados):
@@ -185,6 +190,15 @@ class WorkflowsYamlTest(unittest.TestCase):
         self.assertIn('"$head_sha" != "$SHA"', texto)
 
 
+    def test_deploys_deno_fijan_version_runtime(self):
+        """Los deploys con token no descargan una versión flotante de Deno."""
+        for nombre in ("mando-deno.yml", "feedback-deno-deploy.yml"):
+            texto = (ROOT / ".github" / "workflows" / nombre).read_text(encoding="utf-8")
+            with self.subTest(workflow=nombre):
+                self.assertIn("deno-version: v2.9.6", texto)
+                self.assertNotIn("deno-version: v2.x", texto)
+
+
     def test_acciones_sensibles_usadas_por_sha(self):
         """Los workflows privilegiados no ejecutan tags mutables de terceros."""
         workflows = {
@@ -201,6 +215,11 @@ class WorkflowsYamlTest(unittest.TestCase):
             "reservas.yml",
             "alpha-playtest.yml",
             "cleanup-merged-branches.yml",
+            "ci.yml",
+            "ci-brain.yml",
+            "mando-deno.yml",
+            "feedback-deno.yml",
+            "feedback-deno-deploy.yml",
         }
         acciones = {
             "actions/checkout",
@@ -212,6 +231,7 @@ class WorkflowsYamlTest(unittest.TestCase):
             "QwenLM/qwen-code-action",
             "google-github-actions/run-gemini-cli",
             "softprops/action-gh-release",
+            "denoland/setup-deno",
         }
 
         patron = re.compile(r"uses:\s*([^\s@]+)@([^\s#]+)")
