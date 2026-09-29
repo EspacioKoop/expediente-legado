@@ -3,7 +3,6 @@
 ## Puede montarse como hijo de Dia sin modificar su orquestador. La impresora
 ## física existe durante archivo; la incidencia se materializa al alcanzar el
 ## umbral determinista y persiste en Jornada durante ese día.
-class_name DiaIncidenteImpresoraApp
 extends Node
 
 const CLAVE_ESTADO := "incidente_impresora"
