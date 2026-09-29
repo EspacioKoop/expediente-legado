@@ -9,9 +9,11 @@ El esquema actual es `schema: 1` y reserva los tipos `TASK`, `CLAIM`,
 `EVIDENCE`, `BLOCKER`, `QUESTION`, `RESULT`, `REVIEW` y `HANDOFF`.
 Todos los mensajes incluyen `issue` y `handoff.from/to`.
 
-- **TaskPacket (`TASK`)**: materializa objetivo, scope reservado, jerarquía de
-  fuentes, condiciones de abortado y hashes SHA-256 de los artefactos que recibe
-  el implementador. El CLAIM y el lease siguen siendo la autoridad de exclusión.
+- **TaskPacket (`TASK`)**: existe tanto para el handoff `orchestrator → planner`
+  (scope todavía no reservado) como para `planner → implementer` tras aceptar el
+  CLAIM. Materializa objetivo/scope, jerarquía de fuentes, condiciones de abortado
+  y hashes SHA-256 de los artefactos. El CLAIM y el lease siguen siendo la autoridad
+  de exclusión.
 - **ResultPacket (`RESULT`)**: normaliza hechos, supuestos, evidencia,
   incógnitas, cambios y siguiente acción. Su cobertura es advisory: un modelo
   antiguo que no emita el bloque obtiene `missing/0%`, pero no invalida por sí
@@ -23,7 +25,7 @@ Todos los mensajes incluyen `issue` y `handoff.from/to`.
 ## Prompt compiler
 
 `scripts/agent_b2b.py prompt` genera prompts por rol y proveedor. El workflow
-usa el compilador para implementación y review; así Qwen y Gemini comparten la
+lo usa ya en planner, implementación y review; así Qwen y Gemini comparten la
 misma jerarquía, scope y condiciones de abortado y solo difieren en su fichero
 de reglas específico.
 
@@ -37,6 +39,14 @@ AGENT_RESULT_END
 
 Se conserva además `AGENT_MEMORY_BEGIN/END` para la memoria Deno existente.
 
+## Eventos de coordinación
+
+`agent_b2b.py event` construye envelopes pequeños y sanitizados para `CLAIM`,
+`EVIDENCE`, `BLOCKER`, `QUESTION` y `HANDOFF`. El worker genera un `CLAIM` tipado
+solo después de que la reserva real haya sido aceptada y lo correlaciona mediante
+`github-comment:<id>` y `branch:<rama>`. Ese envelope viaja como artefacto dentro
+del TaskPacket de implementación; no reemplaza el comentario ni el lease.
+
 ## Seguridad y autoridad
 
 El paquete no concede permisos. La jerarquía sigue siendo repo/issue, #181,
@@ -49,6 +59,6 @@ prompts o secretos mientras se valida el protocolo.
 
 ## CLI
 
-`agent_b2b.py` ofrece `task`, `result`, `review`, `prompt`, `validate` y
-`verify`. `verify` recalcula SHA-256 y tamaño antes de entregar el TaskPacket al worker. El parser limita listas/textos y el reviewer mantiene compatibilidad
+`agent_b2b.py` ofrece `event`, `intake`, `task`, `result`, `review`, `prompt`,
+`validate` y `verify`. `verify` recalcula SHA-256 y tamaño antes de entregar el TaskPacket al worker. El parser limita listas/textos y el reviewer mantiene compatibilidad
 con `scripts/agent_review_contract.py`.
