@@ -85,7 +85,9 @@ def build_task(args: argparse.Namespace) -> dict[str, Any]:
         "context": args.context,
         "memory": args.memory,
         "history": args.history,
+        "agents": args.agents,
         "rules": args.rules,
+        "platino_sha": args.platino_sha,
     }.items():
         if path.exists():
             artifacts[name] = _artifact(path)
@@ -166,7 +168,7 @@ def compile_prompt(role: str, provider: str, task_path: Path, result_path: Path 
 Rol: implementer
 Proveedor: {provider}
 
-Lee primero `.agent-task-packet.json` y verifica los hashes de los artefactos que vayas a consumir. Después lee `AGENTS.md`, `{rules}` y los artefactos declarados por el paquete.
+Lee primero `.agent-task-packet.json`. El workflow ya verificó sus fingerprints; trátalos como identidad del handoff. Después lee `AGENTS.md`, `{rules}`, los artefactos declarados por el paquete y obligatoriamente las Normas Platino actuales en `.agent-platino/README.md`, `.agent-platino/docs/FUENTE_DE_VERDAD.md`, `.agent-platino/docs/COOPERACION_AUTONOMA.md`, `.agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md` y `.agent-platino/docs/PRO_CONSUMIDOR.md`.
 
 Jerarquía: repo/issue/#181/#1713/Normas Platino > wiki > memoria > histórico CI.
 Scope reservado: {files}. No edites fuera de ese scope. Si necesitas otra ruta, aborta sin saltarte el CLAIM. No hagas commit, push, PR ni merge.
@@ -208,7 +210,7 @@ def main() -> int:
     p.add_argument("--issue", type=int, required=True)
     p.add_argument("--provider", choices=["qwen", "gemini"], required=True)
     p.add_argument("--worker", required=True)
-    for name in ("task", "plan", "context", "memory", "history", "rules", "output"):
+    for name in ("task", "plan", "context", "memory", "history", "agents", "rules", "platino-sha", "output"):
         p.add_argument(f"--{name}", type=Path, required=True)
     p = sub.add_parser("result")
     p.add_argument("--summary-file", type=Path, required=True)
