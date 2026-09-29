@@ -118,16 +118,13 @@ static func estado(jornada: Dictionary) -> Dictionary:
 
 
 static func catalogo() -> Array[Dictionary]:
-	var salida: Array[Dictionary] = []
-	for pieza in CATALOGO:
-		salida.append(pieza.duplicate(true))
-	return salida
+	return _catalogo_completo()
 
 
 static func disponibles(jornada: Dictionary) -> Array[Dictionary]:
 	var recogidos: Array = estado(jornada)[RECOGIDOS]
 	var salida: Array[Dictionary] = []
-	for base in CATALOGO:
+	for base in _catalogo_completo():
 		var id_pieza := String(base.get("id", ""))
 		if id_pieza.is_empty() or recogidos.has(id_pieza) or not _cumple(base, jornada):
 			continue
@@ -176,6 +173,14 @@ static func recoger_siguiente(jornada: Dictionary, inventario: Dictionary) -> Di
 	if pieza.is_empty():
 		return _fallo("", "buzon_vacio")
 	return recoger(jornada, inventario, String(pieza["id"]))
+
+
+static func _catalogo_completo() -> Array[Dictionary]:
+	var salida: Array[Dictionary] = []
+	for pieza in CATALOGO:
+		salida.append(pieza.duplicate(true))
+	salida.append(IdeologiaCulturaCotidiana1883.pieza_postal())
+	return salida
 
 
 static func _buscar_disponible(jornada: Dictionary, pieza_id: String) -> Dictionary:
