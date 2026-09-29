@@ -31,6 +31,7 @@ def issue(number, title, labels=(), body="Contexto suficiente " * 10, updated="2
         "labels": [{"name": label} for label in labels],
         "createdAt": f"2026-09-{number % 20 + 1:02d}T00:00:00Z",
         "updatedAt": updated,
+        "authorAssociation": "MEMBER",
     }
 
 
@@ -56,6 +57,13 @@ class AgentFeederTest(unittest.TestCase):
         self.assertEqual(8, result["selected"]["number"])
         self.assertEqual(1, result["eligible"])
         self.assertEqual(1, result["rejected"]["gate-humano"])
+
+    def test_excluye_autor_no_confiable(self):
+        externo = issue(14, "Bug externo", ["bug"])
+        externo["authorAssociation"] = "NONE"
+        result = mod.select_candidate([externo], [], now=NOW)
+        self.assertIsNone(result["selected"])
+        self.assertEqual(1, result["rejected"]["autor-no-confiable"])
 
     def test_excluye_issue_activo_recientemente(self):
         result = mod.select_candidate(
@@ -113,6 +121,8 @@ class AgentFeederTest(unittest.TestCase):
         self.assertIn("agent:decompose", workflow)
         self.assertIn("queued > 0", workflow)
         self.assertIn("python3 scripts/agent_feeder.py", workflow)
+        self.assertIn("gh search issues", workflow)
+        self.assertIn("authorAssociation", workflow)
         self.assertIn("gh workflow run agent-decompose.yml", workflow)
         self.assertNotIn("--add-label agent:auto", workflow)
 
