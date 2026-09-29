@@ -54,6 +54,16 @@ formato. El CLAIM, el preflight, el diff y CI siguen siendo gates reales.
 No son una evaluación de calidad del código. Sirven para detectar workers/adaptadores
 que pierden contexto o producen handoffs incompletos.
 
+El dispatcher agrega además telemetría histórica desde metadatos compactos de PRs
+generados por el pool: promedio de handoff loss, tasa de ResultPacket válido, tasa de
+reviews con findings y un `rework_rate_pct` proxy. Este último se activa cuando el
+reviewer reportó findings o el PR necesitó más de un commit; por tanto no debe
+interpretarse como una medida definitiva de calidad.
+
+La ventana usa como máximo los 50 PRs más recientes por worker. En v1 estas señales se
+adjuntan al inventario del dispatcher y se registran, pero **no modifican el score de
+routing**: primero deben acumular evidencia suficiente y demostrar estabilidad.
+
 ## Coordinación
 
 Los leases de Deno KV y el registro central de reservas de rutas siguen siendo la
