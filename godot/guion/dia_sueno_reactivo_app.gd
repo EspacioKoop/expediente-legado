@@ -402,10 +402,13 @@ func _refrescar_selector_tomas(dia: Node, contenedor: Dictionary) -> void:
 		var estado := String((evaluacion as Dictionary).get("estado", ""))
 		var boton := Button.new()
 		boton.name = "Toma%d" % (indice + 1)
-		boton.text = "%d%s" % [
-			indice + 1,
-			"✓" if estado == GrabacionOniricaContrato.ESTADO_VALIDA else "~",
-		]
+		boton.text = (
+			"%d%s"
+			% [
+				indice + 1,
+				"✓" if estado == GrabacionOniricaContrato.ESTADO_VALIDA else "~",
+			]
+		)
 		boton.toggle_mode = true
 		boton.button_pressed = indice == seleccionada
 		boton.disabled = grabacion_activa()
