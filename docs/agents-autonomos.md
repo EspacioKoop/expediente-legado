@@ -127,6 +127,27 @@ Kev recibe únicamente título, cuerpo y labels del issue. No recibe `GITHUB_TOK
 
 El autopilot y el pool usan además `scripts/agent_context_pack.py`: generan un `.agent-context.md` acotado desde la wiki antes del plan y lo regeneran tras el CLAIM incorporando las rutas reservadas. La wiki completa queda como respaldo local; el pack nunca desplaza al repositorio, issue, #181/#1713 ni a las Normas Platino como fuentes de autoridad.
 
+### Contrato de handoff B2B v1
+
+Antes de entregar trabajo al modelo final, `scripts/agent_protocol.py` compila un
+`TaskPacket` versionado en `.agent-task-packet.json` y un prompt mínimo en
+`.agent-worker-prompt.md`. El paquete fija tarea, SHA base, versión de Normas
+Platino, provider/worker, prioridad de fuentes, capas L0/L1/L2, rutas del CLAIM,
+presupuesto de scope, criterios de aceptación y condiciones de abortado. El worker
+no vuelve a reconstruir esa intención a partir de prosa dispersa.
+
+La salida del worker usa un `ResultPacket` con `RESULT` y separa `facts`,
+`assumptions`, `verified` y `unknowns`, además de cambios, evidencia, pendientes y
+siguiente acción. El rollout v1 mide `contract_coverage_pct` y
+`handoff_loss_proxy_pct` sin convertir todavía un error de formato del ResultPacket
+en un gate de publicación; CLAIM, preflight, diff y CI siguen siendo las barreras
+autoritativas.
+
+Los sobres B2B admitidos son `TASK`, `CLAIM`, `EVIDENCE`, `BLOCKER`, `QUESTION`,
+`RESULT`, `REVIEW` y `HANDOFF`. Los leases Deno KV y el registro de reservas siguen
+siendo los locks técnicos; el protocolo describe intención y evidencia, no intenta
+reemplazarlos. Véase [`agent-protocol.md`](agent-protocol.md).
+
 ### Pool paralelo
 
 El dispatcher documentado en [`agents/parallel-pool.md`](agents/parallel-pool.md) es la cola operativa común para `agent:auto`, `agent:pool`, `agent:qwen` y `agent:gemini`. `agent:pool` se conserva como alias compatible y ya puede coexistir con `agent:auto`: el selector deduplica por issue.
