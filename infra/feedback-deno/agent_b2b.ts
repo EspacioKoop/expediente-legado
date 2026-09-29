@@ -10,6 +10,11 @@ export interface AgentB2BActor {
   run_id: string;
 }
 
+interface AgentB2BDedupe {
+  message_id: string;
+  recipient: "dispatcher" | "worker" | "reviewer";
+}
+
 export interface AgentB2BMessage {
   schema: 1;
   message_id: string;
@@ -150,14 +155,23 @@ async function sendMessage(
   const dedupe = dedupeKey(sender, taskId, idempotency);
 
   for (let attempt = 0; attempt < 5; attempt += 1) {
-    const existing = await kv.get<string>(dedupe);
+    const existing = await kv.get<AgentB2BDedupe>(dedupe);
     if (existing.value) {
+      if (existing.value.recipient !== recipient) {
+        return json({ ok: false, error: "idempotency_conflict" }, 409);
+      }
       const current = await kv.get<AgentB2BMessage>(
-        messageKey(recipient, taskId, existing.value),
+        messageKey(recipient, taskId, existing.value.message_id),
       );
       if (current.value) {
         return json({ ok: true, deduplicated: true, message: current.value });
       }
+      return json({
+        ok: true,
+        deduplicated: true,
+        acknowledged: true,
+        message_id: existing.value.message_id,
+      });
     }
 
     const now = Date.now();
@@ -184,7 +198,7 @@ async function sendMessage(
       .check(existing)
       .set(messageKey(recipient, taskId, messageId), message, { expireIn: ttlMs })
       .set(inboxKey(recipient, taskId, now, messageId), messageId, { expireIn: ttlMs })
-      .set(dedupe, messageId, { expireIn: ttlMs })
+      .set(dedupe, { message_id: messageId, recipient }, { expireIn: ttlMs })
       .commit();
 
     if (committed.ok) {
