@@ -394,27 +394,27 @@ class AgentPoolTest(unittest.TestCase):
         self.assertNotIn("\n  schedule:\n", autopilot)
         self.assertNotIn("\n  issues:\n", autopilot)
 
-    def test_fallo_de_implementacion_es_reintentable_por_otro_worker(self):
+    def test_fallo_se_clasifica_antes_de_decidir_retry_o_rotacion(self):
         worker = (ROOT / ".github" / "workflows" / "agent-worker.yml").read_text(
             encoding="utf-8"
         )
         self.assertIn("id: validate_diff", worker)
         self.assertIn('echo "retry_stage=implement" >> "$GITHUB_OUTPUT"', worker)
         self.assertIn('echo "retry_stage=no-changes" >> "$GITHUB_OUTPUT"', worker)
+        self.assertIn('echo "retry_stage=preflight" >> "$GITHUB_OUTPUT"', worker)
         self.assertIn("RETRY_STAGE: ${{ steps.validate_diff.outputs.retry_stage }}", worker)
-        self.assertIn("stage=$retry_stage", worker)
-        self.assertIn("agent-pool-${retry_stage}-retry", worker)
-        self.assertIn("reencolado tras fallo de $retry_stage", worker)
-        self.assertIn("agotó los workers compatibles durante $retry_stage", worker)
 
         cleanup = worker.split("- name: Limpiar fallo o cancelacion", 1)[1]
         self.assertIn('if [[ "${RESERVED:-}" == true', cleanup)
         self.assertIn('retry_stage="$RETRY_STAGE"', cleanup)
-        # Un fallo de preflight real, sin retry_stage, conserva la escalada humana.
-        self.assertIn(
-            '"Agent pool ($WORKER) se detuvo después de reservar/implementar:',
-            cleanup,
-        )
+        self.assertIn("scripts/agent_failure_policy.py", cleanup)
+        self.assertIn("same_worker_fix|split_or_same_worker", cleanup)
+        self.assertIn("rotate_provider)", cleanup)
+        self.assertIn("stop_noop)", cleanup)
+        self.assertIn("AGENT_POOL_SAME_WORKER_RETRY", cleanup)
+        self.assertIn("-f retry_hint=", cleanup)
+        self.assertIn("AGENT_POOL_WORKER_FAILURE", cleanup)
+        self.assertIn("solo esta clase de fallo rota worker/proveedor", cleanup)
 
     def test_worker_cancelado_libera_estado_sin_penalizar_slot(self):
         worker = (ROOT / ".github" / "workflows" / "agent-worker.yml").read_text(
