@@ -122,6 +122,34 @@ class AgentB2BTests(unittest.TestCase):
             self.assertIn("files=[]", prompt)
             self.assertIn("#1713", prompt)
 
+    def test_task_rechaza_planes_que_exceden_max_files(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            paths = {}
+            for name in ("task", "context", "memory", "history", "agents", "rules", "platino_sha"):
+                path = root / f"{name}.txt"
+                path.write_text(name, encoding="utf-8")
+                paths[name] = path
+            plan = root / "plan.json"
+            plan.write_text(
+                json.dumps({"files": [f"scripts/f{i}.py" for i in range(13)], "goal": "demasiado scope"}),
+                encoding="utf-8",
+            )
+            args = type(
+                "Args",
+                (),
+                {
+                    "issue": 1866,
+                    "provider": "qwen",
+                    "worker": "qwen-primary",
+                    "plan": plan,
+                    "claim": None,
+                    **paths,
+                },
+            )()
+            with self.assertRaisesRegex(ValueError, "max_files=12"):
+                agent_b2b.build_task(args)
+
     def test_prompt_contains_scope_and_result_contract(self):
         with tempfile.TemporaryDirectory() as td:
             packet = Path(td) / "task.json"
