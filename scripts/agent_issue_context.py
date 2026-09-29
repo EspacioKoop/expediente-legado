@@ -13,7 +13,7 @@ TRUSTED_ASSOCIATIONS = {"OWNER", "MEMBER", "COLLABORATOR"}
 TRUSTED_BOTS = {"github-actions[bot]"}
 B2B_TYPES = {"TASK", "CLAIM", "EVIDENCE", "BLOCKER", "QUESTION", "RESULT", "REVIEW", "HANDOFF"}
 B2B_RE = re.compile(
-    r"AGENT_B2B_BEGIN\s*(?:```(?:json)?\s*)?(\{.*?\})(?:\s*```)?\s*AGENT_B2B_END",
+    r"AGENT_B2B_BEGIN\s*(?:```(?:json)?\s*)?(.+?)(?:\s*```)?\s*AGENT_B2B_END",
     re.IGNORECASE | re.DOTALL,
 )
 
