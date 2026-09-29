@@ -28,6 +28,20 @@ const ESCALA_TEXTO_MIN := 0.8
 const ESCALA_TEXTO_MAX := 1.6
 const ESCALA_TEXTO_PASO := 0.2
 
+# Identidad local Web98 (#791). El shell sigue siendo el mismo Control del
+# escritorio, pero el navegador se lee como software de red de finales de los
+# noventa: cromo gris cálido, campos marfil, página clara y laterales fríos.
+const FONDO_CROMO := Color("#d7d1c4")
+const FONDO_CROMO_HOVER := Color("#eee9de")
+const FONDO_CROMO_PULSADO := Color("#c2bbad")
+const FONDO_DIRECCION := Color("#fff7d6")
+const FONDO_PAGINA := Color("#fbfaf2")
+const FONDO_LATERAL := Color("#e5eaf0")
+const BORDE_WEB98 := Color("#6f6a5e")
+const FOCO_WEB98 := Color("#315d91")
+const TINTA_WEB98 := Color("#27251f")
+const TINTA_SECUNDARIA_WEB98 := Color("#52606e")
+
 var _indice := Web98Indice.new()
 var _prensa := Web98Prensa.new()
 var _bbs := Bbs98Modelo.new()
@@ -232,58 +246,78 @@ func _construir_interfaz() -> void:
 	add_child(barra)
 
 	_atras = Button.new()
+	_atras.name = "Atras"
 	_atras.text = "<"
 	_atras.tooltip_text = tr("NAVEGADOR_ATRAS")
+	_estilizar_boton_cromo(_atras)
 	_atras.pressed.connect(ir_atras)
 	barra.add_child(_atras)
 
 	_adelante = Button.new()
+	_adelante.name = "Adelante"
 	_adelante.text = ">"
 	_adelante.tooltip_text = tr("NAVEGADOR_ADELANTE")
+	_estilizar_boton_cromo(_adelante)
 	_adelante.pressed.connect(ir_adelante)
 	barra.add_child(_adelante)
 
 	var boton_recargar := Button.new()
+	boton_recargar.name = "Recargar"
 	boton_recargar.text = tr("NAVEGADOR_RECARGAR")
 	boton_recargar.tooltip_text = tr("NAVEGADOR_ATAJO_RECARGAR")
+	_estilizar_boton_cromo(boton_recargar)
 	boton_recargar.pressed.connect(recargar)
 	barra.add_child(boton_recargar)
 
 	var inicio := Button.new()
+	inicio.name = "Inicio"
 	inicio.text = tr("NAVEGADOR_INICIO")
+	_estilizar_boton_cromo(inicio)
 	inicio.pressed.connect(func() -> void: navegar(URL_INICIO))
 	barra.add_child(inicio)
 
 	_direccion = LineEdit.new()
+	_direccion.name = "Direccion"
 	_direccion.placeholder_text = tr("NAVEGADOR_DIRECCION")
 	_direccion.tooltip_text = tr("NAVEGADOR_ATAJO_DIRECCION")
 	_direccion.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_estilizar_linea_web98(_direccion)
 	_direccion.text_submitted.connect(func(texto: String) -> void: navegar(texto))
 	barra.add_child(_direccion)
 
 	var ir := Button.new()
+	ir.name = "Ir"
 	ir.text = tr("NAVEGADOR_IR")
+	_estilizar_boton_cromo(ir)
 	ir.pressed.connect(func() -> void: navegar(_direccion.text))
 	barra.add_child(ir)
 
 	_favorito = Button.new()
+	_favorito.name = "Favorito"
 	_favorito.text = tr("NAVEGADOR_FAVORITO")
+	_estilizar_boton_cromo(_favorito)
 	_favorito.pressed.connect(alternar_favorito_actual)
 	barra.add_child(_favorito)
 
 	var texto_menos := Button.new()
+	texto_menos.name = "TextoMenos"
 	texto_menos.text = tr("NAVEGADOR_TEXTO_MENOS")
+	_estilizar_boton_cromo(texto_menos)
 	texto_menos.pressed.connect(func() -> void: ajustar_escala_texto(-ESCALA_TEXTO_PASO))
 	barra.add_child(texto_menos)
 
 	var texto_mas := Button.new()
+	texto_mas.name = "TextoMas"
 	texto_mas.text = tr("NAVEGADOR_TEXTO_MAS")
+	_estilizar_boton_cromo(texto_mas)
 	texto_mas.pressed.connect(func() -> void: ajustar_escala_texto(ESCALA_TEXTO_PASO))
 	barra.add_child(texto_mas)
 
 	_cache = Button.new()
+	_cache.name = "Cache"
 	_cache.text = tr("NAVEGADOR_CACHE")
 	_cache.visible = false
+	_estilizar_boton_cromo(_cache)
 	_cache.pressed.connect(_abrir_cache_actual)
 	barra.add_child(_cache)
 
@@ -293,18 +327,23 @@ func _construir_interfaz() -> void:
 	etiqueta.text = tr("NAVEGADOR_BUSCAR_ETIQUETA")
 	barra_busqueda.add_child(etiqueta)
 	_busqueda = LineEdit.new()
+	_busqueda.name = "Busqueda"
 	_busqueda.tooltip_text = tr("NAVEGADOR_ATAJO_BUSCAR")
 	_busqueda.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_estilizar_linea_web98(_busqueda)
 	_busqueda.text_submitted.connect(_mostrar_busqueda)
 	barra_busqueda.add_child(_busqueda)
 	var boton_buscar := Button.new()
+	boton_buscar.name = "Buscar"
 	boton_buscar.text = tr("NAVEGADOR_BUSCAR")
+	_estilizar_boton_cromo(boton_buscar)
 	boton_buscar.pressed.connect(func() -> void: _mostrar_busqueda(_busqueda.text))
 	barra_busqueda.add_child(boton_buscar)
 
 	_directorio_boton = Button.new()
 	_directorio_boton.name = "DirectorioWeb98"
 	_directorio_boton.text = tr("NAVEGADOR_DIRECTORIO")
+	_estilizar_boton_cromo(_directorio_boton)
 	_directorio_boton.pressed.connect(abrir_directorio)
 	barra_busqueda.add_child(_directorio_boton)
 
@@ -357,16 +396,26 @@ func _construir_interfaz() -> void:
 	principal.add_child(_decoracion_web)
 
 	_pagina = RichTextLabel.new()
+	_pagina.name = "Pagina"
 	_pagina.bbcode_enabled = true
 	_pagina.fit_content = false
 	_pagina.selection_enabled = true
 	_pagina.focus_mode = Control.FOCUS_ALL
 	_pagina.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_pagina.add_theme_color_override("default_color", TINTA_WEB98)
+	_pagina.add_theme_color_override("selection_color", Color("#b8cce5"))
+	_pagina.add_theme_stylebox_override(
+		"normal", _caja_web98(FONDO_PAGINA, BORDE_WEB98, 1, 1, 9.0, 7.0)
+	)
+	_pagina.add_theme_stylebox_override(
+		"focus", _caja_web98(FONDO_PAGINA, FOCO_WEB98, 2, 1, 8.0, 6.0)
+	)
 	principal.add_child(_pagina)
 
 	_descargar_software = Button.new()
 	_descargar_software.name = "DescargarSoftware"
 	_descargar_software.visible = false
+	_estilizar_boton_cromo(_descargar_software)
 	_descargar_software.pressed.connect(_obtener_software_actual)
 	principal.add_child(_descargar_software)
 
@@ -374,7 +423,9 @@ func _construir_interfaz() -> void:
 	etiqueta_enlaces.text = tr("NAVEGADOR_ENLACES")
 	principal.add_child(etiqueta_enlaces)
 	_enlaces = ItemList.new()
+	_enlaces.name = "Enlaces"
 	_enlaces.custom_minimum_size = Vector2(0, 110)
+	_estilizar_lista_web98(_enlaces, FONDO_PAGINA)
 	_enlaces.item_activated.connect(_activar_enlace)
 	principal.add_child(_enlaces)
 
@@ -385,16 +436,84 @@ func _construir_interfaz() -> void:
 	etiqueta_historial.text = tr("NAVEGADOR_HISTORIAL")
 	lateral.add_child(etiqueta_historial)
 	_historial_lista = ItemList.new()
+	_historial_lista.name = "Historial"
 	_historial_lista.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_estilizar_lista_web98(_historial_lista, FONDO_LATERAL)
 	_historial_lista.item_activated.connect(_activar_historial)
 	lateral.add_child(_historial_lista)
 	var etiqueta_favoritos := Label.new()
 	etiqueta_favoritos.text = tr("NAVEGADOR_FAVORITOS")
 	lateral.add_child(etiqueta_favoritos)
 	_favoritos_lista = ItemList.new()
+	_favoritos_lista.name = "Favoritos"
 	_favoritos_lista.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_estilizar_lista_web98(_favoritos_lista, FONDO_LATERAL)
 	_favoritos_lista.item_activated.connect(_activar_favorito)
 	lateral.add_child(_favoritos_lista)
+
+
+func _estilizar_boton_cromo(boton: Button) -> void:
+	boton.add_theme_color_override("font_color", TINTA_WEB98)
+	boton.add_theme_color_override("font_focus_color", TINTA_WEB98)
+	boton.add_theme_stylebox_override(
+		"normal", _caja_web98(FONDO_CROMO, BORDE_WEB98, 1, 1, 7.0, 4.0)
+	)
+	boton.add_theme_stylebox_override(
+		"hover", _caja_web98(FONDO_CROMO_HOVER, BORDE_WEB98, 1, 1, 7.0, 4.0)
+	)
+	boton.add_theme_stylebox_override(
+		"pressed", _caja_web98(FONDO_CROMO_PULSADO, BORDE_WEB98, 1, 1, 7.0, 4.0)
+	)
+	boton.add_theme_stylebox_override(
+		"focus", _caja_web98(FONDO_CROMO_HOVER, FOCO_WEB98, 2, 1, 6.0, 3.0)
+	)
+
+
+func _estilizar_linea_web98(linea: LineEdit) -> void:
+	linea.add_theme_color_override("font_color", TINTA_WEB98)
+	linea.add_theme_color_override("caret_color", FOCO_WEB98)
+	linea.add_theme_color_override("selection_color", Color("#b8cce5"))
+	linea.add_theme_stylebox_override(
+		"normal", _caja_web98(FONDO_DIRECCION, BORDE_WEB98, 1, 1, 7.0, 4.0)
+	)
+	linea.add_theme_stylebox_override(
+		"focus", _caja_web98(FONDO_DIRECCION, FOCO_WEB98, 2, 1, 6.0, 3.0)
+	)
+
+
+func _estilizar_lista_web98(lista: ItemList, fondo: Color) -> void:
+	lista.add_theme_color_override("font_color", TINTA_WEB98)
+	lista.add_theme_color_override("font_selected_color", Color("#f7fbff"))
+	lista.add_theme_stylebox_override("panel", _caja_web98(fondo, BORDE_WEB98, 1, 1, 6.0, 5.0))
+	lista.add_theme_stylebox_override(
+		"focus", _caja_web98(fondo, FOCO_WEB98, 2, 1, 5.0, 4.0)
+	)
+
+
+func _caja_web98(
+	fondo: Color,
+	borde: Color,
+	ancho: int,
+	radio: int,
+	margen_horizontal: float,
+	margen_vertical: float
+) -> StyleBoxFlat:
+	var caja := StyleBoxFlat.new()
+	caja.bg_color = fondo
+	caja.border_color = borde
+	caja.border_width_left = ancho
+	caja.border_width_top = ancho
+	caja.border_width_right = ancho
+	caja.border_width_bottom = ancho
+	caja.corner_radius_top_left = radio
+	caja.corner_radius_top_right = radio
+	caja.corner_radius_bottom_left = radio
+	caja.corner_radius_bottom_right = radio
+	caja.content_margin_left = margen_horizontal
+	caja.content_margin_top = margen_vertical
+	caja.content_margin_right = margen_horizontal
+	caja.content_margin_bottom = margen_vertical
+	return caja
 
 
 func _resolver_sin_historial(url: String) -> void:
