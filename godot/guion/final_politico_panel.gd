@@ -15,18 +15,22 @@ var _figura_vida: Array = []
 var _textos: Dictionary = {}
 var _boton: Button
 
+
 func configurar(resumen: Dictionary, figura_vida: Array = []) -> void:
 	_resumen = resumen.duplicate(true)
 	_figura_vida = figura_vida.duplicate(true)
+
 
 func _ready() -> void:
 	_textos = _cargar_textos()
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_construir()
 
+
 func bloquear(bloqueado: bool) -> void:
 	if is_instance_valid(_boton):
 		_boton.disabled = bloqueado
+
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("cancelar"):
@@ -38,8 +42,10 @@ static func _cargar_textos() -> Dictionary:
 	var datos: Variant = JSON.parse_string(FileAccess.get_file_as_string(RUTA_TEXTOS))
 	return (datos as Dictionary).duplicate(true) if datos is Dictionary else {}
 
+
 func _t(clave: String, fallback: String = "") -> String:
 	return String(_textos.get(clave, fallback if not fallback.is_empty() else clave))
+
 
 func _construir() -> void:
 	var fondo := ColorRect.new()
@@ -98,6 +104,7 @@ func _construir() -> void:
 	_boton.grab_focus()
 
 
+
 func _montar_religion(caja: VBoxContainer) -> void:
 	var resumen_crudo = _resumen.get("religion", {})
 	if typeof(resumen_crudo) != TYPE_DICTIONARY:
@@ -134,6 +141,7 @@ func _montar_religion(caja: VBoxContainer) -> void:
 	if hechos.size() > limite:
 		caja.add_child(_etiqueta(_t("religion_mas") % (hechos.size() - limite)))
 
+
 func _texto_hecho_religion(hecho: Dictionary) -> String:
 	var canal := String(hecho.get("canal", ""))
 	var canales = _textos.get("religion_canales", {})
@@ -155,11 +163,13 @@ func _texto_hecho_religion(hecho: Dictionary) -> String:
 
 	return _t("religion_hecho_formato") % [nombre_canal, contexto, detalle]
 
+
 func _legible(valor: String) -> String:
 	var limpio := valor.strip_edges()
 	if limpio.is_empty():
 		return _t("religion_sin_detalle")
 	return limpio.replace(":", " · ").replace("_", " ").replace("-", " ").capitalize()
+
 
 func _montar_auditorias(caja: VBoxContainer) -> void:
 	var resumen_crudo = _resumen.get("auditoria", {})
@@ -184,6 +194,7 @@ func _montar_auditorias(caja: VBoxContainer) -> void:
 		var linea := _etiqueta(tr("AUDITORIAS_FINAL_LINEA") % [nombre, estado])
 		linea.name = "Auditoria_%s" % id
 		caja.add_child(linea)
+
 
 func _montar_vida(caja: VBoxContainer) -> void:
 	if _figura_vida.is_empty():
@@ -211,6 +222,7 @@ func _montar_vida(caja: VBoxContainer) -> void:
 		marca.color = color_crudo
 		lienzo.add_child(marca)
 
+
 func _texto_estado_auditoria(estado: String) -> String:
 	match estado:
 		"activa":
@@ -222,6 +234,7 @@ func _texto_estado_auditoria(estado: String) -> String:
 		_:
 			return tr("AUDITORIAS_FINAL_ESTADO_PENDIENTE")
 
+
 func _texto_dominantes(dominantes: Array) -> String:
 	if dominantes.is_empty():
 		return _t("dominantes_vacio")
@@ -232,16 +245,19 @@ func _texto_dominantes(dominantes: Array) -> String:
 		return _t("dominante_uno") % nombres[0]
 	return _t("dominante_plural") % ", ".join(nombres)
 
+
 func _texto_ejemplo(ejemplo: Dictionary) -> String:
 	var contexto := String(ejemplo.get("contexto", "")).replace("-", " ").capitalize()
 	var eje := _nombre_eje(String(ejemplo.get("eje", "")))
 	return _t("hecho_formato") % [contexto, eje]
+
 
 func _nombre_eje(eje: String) -> String:
 	var ejes = _textos.get("ejes", {})
 	if ejes is Dictionary:
 		return String((ejes as Dictionary).get(eje, eje))
 	return eje
+
 
 func _etiqueta(texto: String) -> Label:
 	var marca := Label.new()
