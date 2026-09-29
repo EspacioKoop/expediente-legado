@@ -87,6 +87,7 @@ func _crear_zona(indice: int, punto: Vector3) -> void:
 	zona.position = punto
 	zona.collision_layer = 0
 	zona.collision_mask = 1
+	zona.monitoring = indice == 0
 	zona.set_meta("paso", indice)
 
 	var colision := CollisionShape3D.new()
