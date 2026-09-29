@@ -73,6 +73,10 @@ func _probar_superficies_3d() -> void:
 	var registro := Eventos.nuevo()
 	var escena := Mundo3D.new()
 	get_root().add_child(escena)
+	var exposiciones_emitidas := []
+	var practicas_emitidas := []
+	escena.exposicion_registrada.connect(func(id): exposiciones_emitidas.append(id))
+	escena.practica_registrada.connect(func(id): practicas_emitidas.append(id))
 	escena.configurar(registro, Mundo.DIA_ACTO_MEMORIA)
 	_comprobar(
 		escena.get_node_or_null("CulturaMaterial/TablonCalendario/Corcho") != null,
@@ -87,6 +91,14 @@ func _probar_superficies_3d() -> void:
 	escena.tablon_interactuable().interactuar(null)
 	escena.practica_interactuable().interactuar(null)
 	_comprobar(
+		exposiciones_emitidas == ["tablon_calendario"],
+		"la superficie avisa solo cuando registra una exposición nueva"
+	)
+	_comprobar(
+		practicas_emitidas == ["silencio_memoria"],
+		"la superficie avisa solo cuando registra una práctica nueva"
+	)
+	_comprobar(
 		Eventos.eventos(registro, Eventos.CANAL_EXPOSICION).size() == 1,
 		"la interacción 3D registra exposición"
 	)
@@ -98,6 +110,10 @@ func _probar_superficies_3d() -> void:
 		Eventos.eventos(registro, Eventos.CANAL_CONVICCION).is_empty(),
 		"el componente 3D tampoco asigna convicción"
 	)
+	escena.tablon_interactuable().interactuar(null)
+	escena.practica_interactuable().interactuar(null)
+	_comprobar(exposiciones_emitidas.size() == 1, "reexaminar no pide otro guardado")
+	_comprobar(practicas_emitidas.size() == 1, "repetir la práctica no pide otro guardado")
 	escena.free()
 
 

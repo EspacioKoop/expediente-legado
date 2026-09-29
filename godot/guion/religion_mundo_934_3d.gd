@@ -6,6 +6,7 @@
 class_name ReligionMundo9343D
 extends Node3D
 
+signal exposicion_registrada(id_superficie: String)
 signal practica_registrada(id_practica: String)
 
 const Mundo = preload("res://guion/religion_mundo_934.gd")
@@ -110,7 +111,8 @@ func _montar_mesa(padre: Node3D) -> void:
 
 
 func _on_tablon_activado(_actor: Node) -> void:
-	Mundo.registrar_exposicion(_registro, "tablon_calendario", _dia, _vuelta)
+	if Mundo.registrar_exposicion(_registro, "tablon_calendario", _dia, _vuelta):
+		exposicion_registrada.emit("tablon_calendario")
 
 
 func _on_practica_activada(_actor: Node) -> void:
