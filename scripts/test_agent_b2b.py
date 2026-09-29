@@ -180,6 +180,8 @@ class AgentB2BTests(unittest.TestCase):
         self.assertIn(".agent-claim-packet.json", text)
         self.assertIn("agent_b2b.py result", text)
         self.assertIn("agent_b2b.py review", text)
+        self.assertIn("--type EVIDENCE", text)
+        self.assertIn("EvidencePacket validador", text)
         self.assertIn(".agent-task-packet.json", text)
         self.assertIn(".agent-implement-prompt.md", text)
         self.assertIn(".agent-review-prompt.md", text)
