@@ -148,7 +148,8 @@ class AgentClaimGuardTest(unittest.TestCase):
         self.assertIn("MAX_REPLANS: '2'", workflow)
         self.assertIn("gh workflow run agent-autopilot.yml", workflow)
         self.assertIn("motivo=autopilot-replan-claim-incompleto", workflow)
-        self.assertIn('startswith("AUTOPILOT_REPLAN ")', workflow)\n        self.assertIn('.user.login == "github-actions[bot]"', workflow)
+        self.assertIn('startswith("AUTOPILOT_REPLAN ")', workflow)
+        self.assertIn('.user.login == "github-actions[bot]"', workflow)
         gemini = workflow.split("name: Implementar con Gemini", 1)[1].split(
             "uses: google-github-actions/run-gemini-cli@v0", 1
         )[0]
@@ -164,7 +165,8 @@ class AgentClaimGuardTest(unittest.TestCase):
         self.assertIn("MAX_REPLANS: '2'", workflow)
         self.assertIn("gh workflow run agent-worker.yml", workflow)
         self.assertIn("motivo=agent-pool-replan-claim-incompleto", workflow)
-        self.assertIn('startswith("AGENT_POOL_REPLAN ")', workflow)\n        self.assertIn('.user.login == "github-actions[bot]"', workflow)
+        self.assertIn('startswith("AGENT_POOL_REPLAN ")', workflow)
+        self.assertIn('.user.login == "github-actions[bot]"', workflow)
         self.assertIn("steps.claim_guard.outputs.drift == 'true'", workflow)
         self.assertIn("steps.claim_guard.outputs.drift != 'true'", workflow)
         qwen = workflow.split("name: Implementar con Qwen", 1)[1].split(
