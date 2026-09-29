@@ -27,13 +27,18 @@ class DialogoReligion933Test(unittest.TestCase):
         self.assertIn("ACTOR_CORRESPONDENCIA", self.dialogo)
         self.assertIn("ReligionEventos.CANAL_EXPOSICION", self.dialogo)
         self.assertIn("ReligionEventos.CANAL_PRACTICA", self.dialogo)
-        self.assertNotIn("ReligionEventos.CANAL_CONVICCION", self.dialogo)
+        self.assertIn("ReligionEventos.CANAL_CONVICCION", self.dialogo)
         self.assertNotIn("ReligionEventos.CANAL_VINCULO", self.dialogo)
 
     def test_conocimiento_es_explicito_y_limitado_a_la_vuelta(self) -> None:
         self.assertIn('evento.get("publico", false)', self.dialogo)
         self.assertIn('evento.get("conocido_por", [])', self.dialogo)
         self.assertIn("ReligionEventos.eventos_de_vuelta(", self.dialogo)
+
+    def test_conviccion_tiene_variantes_por_interlocutor(self) -> None:
+        self.assertIn("CLAVE_CUNADO_CONVICCION", self.dialogo)
+        self.assertIn("CLAVE_CORRESPONDENCIA_CONVICCION", self.dialogo)
+        self.assertIn("_prioridades_para(", self.dialogo)
 
     def test_oficina_propaga_id_estable_y_conserva_dialogo_base(self) -> None:
         self.assertIn('companero.set_meta("id_companero"', self.dia)
@@ -58,6 +63,8 @@ class DialogoReligion933Test(unittest.TestCase):
         for clave in (
             "RELIGION_933_CUNADO_EXPOSICION",
             "RELIGION_933_CORRESPONDENCIA_PRACTICA",
+            "RELIGION_933_CUNADO_CONVICCION",
+            "RELIGION_933_CORRESPONDENCIA_CONVICCION",
         ):
             self.assertIn(clave, self.textos)
             self.assertTrue(self.textos[clave].strip())

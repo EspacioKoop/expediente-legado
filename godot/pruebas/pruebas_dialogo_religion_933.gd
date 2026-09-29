@@ -13,7 +13,7 @@ func _ejecutar() -> void:
 	_probar_exposicion_del_cunado()
 	_probar_practica_de_correspondencia()
 	_probar_frontera_de_conocimiento()
-	_probar_conviccion_no_inferida()
+	_probar_conviccion_explicita_conocida()
 	_probar_vuelta_actual()
 	print("dialogo_religion_933: %d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos > 0 else 0)
@@ -30,8 +30,11 @@ func _registrar(
 	vuelta: int,
 	publico: bool = false,
 	conocido_por: Array = [],
+	metadatos: Dictionary = {},
 ) -> void:
 	var registro: Dictionary = estado[ReligionEventos.CLAVE_ESTADO]
+	var datos := metadatos.duplicate(true)
+	datos["vuelta"] = vuelta
 	var evento := (
 		ReligionEventos
 		. crear_evento(
@@ -45,7 +48,7 @@ func _registrar(
 			[],
 			publico,
 			conocido_por,
-			{"vuelta": vuelta},
+			datos,
 		)
 	)
 	ReligionEventos.registrar(registro, evento)
@@ -115,7 +118,7 @@ func _probar_frontera_de_conocimiento() -> void:
 	)
 
 
-func _probar_conviccion_no_inferida() -> void:
+func _probar_conviccion_explicita_conocida() -> void:
 	var estado := _estado()
 	_registrar(
 		estado,
@@ -124,16 +127,46 @@ func _probar_conviccion_no_inferida() -> void:
 		1,
 		true,
 		["cunado", "correspondencia"],
+		{"declaracion": ReligionEventos.DECLARACION_DUDA},
 	)
 	_comprobar(
 		DialogoReligion933.resolver_clave(estado, "cunado"),
-		"",
-		"este corte no convierte convicción en reacción",
+		DialogoReligion933.CLAVE_CUNADO_CONVICCION,
+		"el cuñado reacciona a una declaración explícita conocida",
 	)
 	_comprobar(
 		DialogoReligion933.resolver_clave(estado, "correspondencia"),
+		DialogoReligion933.CLAVE_CORRESPONDENCIA_CONVICCION,
+		"correspondencia puede reaccionar de forma distinta al mismo hecho",
+	)
+	_comprobar(
+		(
+			DialogoReligion933.CLAVE_CUNADO_CONVICCION
+			!= DialogoReligion933.CLAVE_CORRESPONDENCIA_CONVICCION
+		),
+		true,
+		"dos NPC no quedan reducidos a una voz única",
+	)
+
+	var privada := _estado()
+	_registrar(
+		privada,
+		"declaracion-privada",
+		ReligionEventos.CANAL_CONVICCION,
+		1,
+		false,
+		["correspondencia"],
+		{"declaracion": ReligionEventos.DECLARACION_AFIRMACION},
+	)
+	_comprobar(
+		DialogoReligion933.resolver_clave(privada, "cunado"),
 		"",
-		"la conversación externa tampoco infiere identidad",
+		"una declaración privada ajena no se filtra al cuñado",
+	)
+	_comprobar(
+		DialogoReligion933.resolver_clave(privada, "correspondencia"),
+		DialogoReligion933.CLAVE_CORRESPONDENCIA_CONVICCION,
+		"solo el interlocutor conocedor consume la declaración privada",
 	)
 
 
