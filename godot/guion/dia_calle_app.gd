@@ -166,9 +166,7 @@ func _resolver_encuentro_real_1889(
 		return
 	if not _encuentro_real_1889.resolver_resultado(objetivo_id, gano, consecuencia):
 		return
-	_nomina.text = tr(
-		"ENCUENTRO_REAL_1889_VICTORIA" if gano else "ENCUENTRO_REAL_1889_DERROTA"
-	)
+	_nomina.text = tr("ENCUENTRO_REAL_1889_VICTORIA" if gano else "ENCUENTRO_REAL_1889_DERROTA")
 
 
 ## El Coliseo de #43 se juega en su propia pantalla; desde la calle se abre
