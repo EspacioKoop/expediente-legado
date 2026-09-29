@@ -71,6 +71,14 @@ function simulador(): { fetch: typeof fetch; llamadas: Llamada[] } {
         {
           body: "CLAIM issue=#5 agent=Atenea branch=feature/5 files=a",
           created_at: "2026-09-28T20:00:00Z",
+          author_association: "MEMBER",
+          user: { login: "atenea" },
+        },
+        {
+          body: "RELEASE issue=#5 motivo=falso",
+          created_at: "2026-09-28T21:00:00Z",
+          author_association: "NONE",
+          user: { login: "externo" },
         },
       ]));
     }
@@ -250,16 +258,44 @@ Deno.test("las órdenes inválidas se rechazan sin llamar a GitHub", async () =>
 
 Deno.test("reservasVivas se queda con la última entrada por issue", () => {
   const vivas = reservasVivas([
-    { body: "CLAIM issue=#1 agent=A branch=b1 files=x", created_at: "2026-09-28T10:00:00Z" },
-    { body: "RELEASE issue=#1 motivo=hecho", created_at: "2026-09-28T11:00:00Z" },
-    { body: "CLAIM issue=#2 agent=B branch=b2 files=y", created_at: "2026-09-28T12:00:00Z" },
-    { body: "PR_READY issue=#2 pr=#20 sha=abc", created_at: "2026-09-28T13:00:00Z" },
+    {
+      body: "CLAIM issue=#1 agent=A branch=b1 files=x",
+      created_at: "2026-09-28T10:00:00Z",
+      author_association: "OWNER",
+    },
+    {
+      body: "RELEASE issue=#1 motivo=hecho",
+      created_at: "2026-09-28T11:00:00Z",
+      author_association: "COLLABORATOR",
+    },
+    {
+      body: "CLAIM issue=#2 agent=B branch=b2 files=y",
+      created_at: "2026-09-28T12:00:00Z",
+      author_association: "MEMBER",
+    },
+    {
+      body: "PR_READY issue=#2 pr=#20 sha=abc",
+      created_at: "2026-09-28T13:00:00Z",
+      user: { login: "github-actions[bot]" },
+    },
     { body: "comentario suelto sin formato", created_at: "2026-09-28T14:00:00Z" },
   ]);
   assertEquals(vivas.length, 1, "solo #2 sigue viva");
   assertEquals(vivas[0].tipo, "PR_READY", "último estado");
   assertEquals(vivas[0].agente, "B", "hereda el agente del CLAIM");
   assertEquals(vivas[0].pr, "20", "PR asociada");
+});
+
+Deno.test("comentarios externos no crean ni liberan reservas visibles", () => {
+  const vivas = reservasVivas([
+    { body: "CLAIM issue=#7 agent=Real branch=feature/7", author_association: "OWNER" },
+    { body: "RELEASE issue=#7", author_association: "NONE", user: { login: "externo" } },
+    { body: "CLAIM issue=#8 agent=Falso branch=feature/8", author_association: "CONTRIBUTOR" },
+    { body: "CLAIM issue=#9 agent=SinMetadatos branch=feature/9" },
+    { body: "CLAIM issue=#10 agent=Bot branch=feature/10", user: { login: "github-actions[bot]" } },
+    { body: "RELEASE issue=#10", author_association: "NONE", user: { login: "otro[bot]" } },
+  ]);
+  assertEquals(vivas.map((r) => r.issue).join(","), "7,10", "solo humanos autorizados y Actions");
 });
 
 Deno.test("esc neutraliza los caracteres de HTML", () => {
