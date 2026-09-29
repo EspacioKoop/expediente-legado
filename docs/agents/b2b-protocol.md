@@ -7,7 +7,8 @@ reviewer y publicador sin sustituir los locks existentes.
 
 El esquema actual es `schema: 1` y reserva los tipos `TASK`, `CLAIM`,
 `EVIDENCE`, `BLOCKER`, `QUESTION`, `RESULT`, `REVIEW` y `HANDOFF`.
-Todos los mensajes incluyen `issue` y `handoff.from/to`.
+Todos los mensajes incluyen `issue` y `handoff.from/to`; los generados por el
+worker comparten además un `correlation_id` derivado de la rama/run del intento.
 
 - **TaskPacket (`TASK`)**: existe tanto para el handoff `orchestrator → planner`
   (scope todavía no reservado) como para `planner → implementer` tras aceptar el
@@ -44,7 +45,9 @@ Se conserva además `AGENT_MEMORY_BEGIN/END` para la memoria Deno existente.
 `agent_b2b.py event` construye envelopes pequeños y sanitizados para `CLAIM`,
 `EVIDENCE`, `BLOCKER`, `QUESTION` y `HANDOFF`. El worker genera un `CLAIM` tipado
 solo después de que la reserva real haya sido aceptada y lo correlaciona mediante
-`github-comment:<id>` y `branch:<rama>`. Ese envelope viaja como artefacto dentro
+`github-comment:<id>` y `branch:<rama>`, y comparte `correlation_id` con el
+TaskPacket, ResultPacket, EvidencePacket, REVIEW y cualquier BLOCKER del mismo
+intento. Ese envelope viaja como artefacto dentro
 del TaskPacket de implementación; no reemplaza el comentario ni el lease.
 
 Tras superar el preflight dirigido, el validador genera además un `EVIDENCE`
