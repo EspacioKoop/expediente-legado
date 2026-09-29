@@ -48,6 +48,33 @@ class AgentDelegatedPlanTest(unittest.TestCase):
         issue = source(block(), association="MEMBER", login="robot", __typename="Bot")
         self.assertIsNone(mod.select_delegated_plan(issue))
 
+    def test_acepta_plan_sellado_del_decomposer(self):
+        issue = source(
+            "<!-- agent-delegated-plan:v1 -->\n" + block(goal="maquina"),
+            association="NONE",
+            login="github-actions[bot]",
+            __typename="Bot",
+        )
+        selected = mod.select_delegated_plan(issue)
+        self.assertEqual("maquina", selected["plan"]["goal"])
+        self.assertEqual("github-actions[bot]", selected["author"])
+
+    def test_bot_sin_sello_o_bot_ajeno_no_es_confiable(self):
+        sin_sello = source(
+            block(goal="no"),
+            association="NONE",
+            login="github-actions[bot]",
+            __typename="Bot",
+        )
+        self.assertIsNone(mod.select_delegated_plan(sin_sello))
+        ajeno = source(
+            "<!-- agent-delegated-plan:v1 -->\n" + block(goal="no"),
+            association="MEMBER",
+            login="otro[bot]",
+            __typename="Bot",
+        )
+        self.assertIsNone(mod.select_delegated_plan(ajeno))
+
     def test_acepta_json_cercado_dentro_de_marcadores(self):
         issue = source(
             "AGENT_PLAN_BEGIN\n"
