@@ -246,7 +246,7 @@ class CiBrainTest(unittest.TestCase):
         self.assertIn("python3 scripts/ci_brain.py sync-turso", texto)
         self.assertIn("vars.TURSO_DATABASE_URL", texto)
         self.assertIn("secrets.TURSO_AUTH_TOKEN", texto)
-        self.assertIn("actions/upload-artifact@v4", texto)
+        # v4 fijado por SHA completo; el comentario conserva la versión auditable.\n        self.assertRegex(texto, r"actions/upload-artifact@[0-9a-f]{40} # v4\\b")
         self.assertNotIn("pull_request:", texto)
 
 
