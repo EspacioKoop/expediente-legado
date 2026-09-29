@@ -121,6 +121,8 @@ class AgentB2BTests(unittest.TestCase):
             self.assertIn("AGENT_PLAN_BEGIN", prompt)
             self.assertIn("files=[]", prompt)
             self.assertIn("#1713", prompt)
+            self.assertIn("Eventos B2B recientes", prompt)
+            self.assertIn("BLOCKER/QUESTION/HANDOFF", prompt)
 
     def test_task_rechaza_planes_que_exceden_max_files(self):
         with tempfile.TemporaryDirectory() as td:
@@ -182,6 +184,8 @@ class AgentB2BTests(unittest.TestCase):
         self.assertIn("agent_b2b.py review", text)
         self.assertIn("--type EVIDENCE", text)
         self.assertIn("EvidencePacket validador", text)
+        self.assertIn("--type BLOCKER", text)
+        self.assertIn("AGENT_B2B_BEGIN", text)
         self.assertIn(".agent-task-packet.json", text)
         self.assertIn(".agent-implement-prompt.md", text)
         self.assertIn(".agent-review-prompt.md", text)
