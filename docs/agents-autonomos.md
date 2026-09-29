@@ -125,16 +125,17 @@ En la cola unificada, el dispatcher consulta `scripts/kev_router.py` para obtene
 
 Kev recibe únicamente título, cuerpo y labels del issue. No recibe `GITHUB_TOKEN`, secretos de proveedores, logs completos ni memorias sin filtrar.
 
-El autopilot y el pool usan además `scripts/agent_context_pack.py`: generan un `.agent-context.md` acotado desde la wiki antes del plan y lo regeneran tras el CLAIM incorporando las rutas reservadas. La wiki completa queda como respaldo local; el pack nunca desplaza al repositorio, issue, #181/#1713 ni a las Normas Platino como fuentes de autoridad.
+El autopilot manual conserva `scripts/agent_context_pack.py` para sus ejecuciones autónomas. El **pool paralelo** separa esa responsabilidad: `agent-decompose.yml` es el nivel 2 que lee issue, normas y repositorio, y materializa un `AGENT_PLAN` sellado de un solo fichero. `agent-worker.yml` es nivel 3 y no vuelve a cargar wiki, memoria ni contexto de planificación: si no recibe un plan delegado válido, devuelve el issue a `agent:decompose` sin invocar al implementer.
 
 ### Contrato de handoff B2B v1
 
 Antes de entregar trabajo al modelo final, `scripts/agent_protocol.py` compila un
 `TaskPacket` versionado en `.agent-task-packet.json` y un prompt mínimo en
 `.agent-worker-prompt.md`. El paquete fija tarea, SHA base, versión de Normas
-Platino, provider/worker, prioridad de fuentes, capas L0/L1/L2, rutas del CLAIM,
-presupuesto de scope, criterios de aceptación y condiciones de abortado. El worker
-no vuelve a reconstruir esa intención a partir de prosa dispersa.
+Platino, provider/worker, objetivo e instrucciones ya destiladas, la única ruta del
+CLAIM, presupuesto de scope, criterios de aceptación y condiciones de abortado. En
+el pool, el worker final solo lee el prompt compilado y el fichero asignado; no vuelve
+a reconstruir intención leyendo AGENTS, wiki, memorias o artefactos de planificación.
 
 La salida del worker usa un `ResultPacket` con `RESULT` y separa `facts`,
 `assumptions`, `verified` y `unknowns`, además de cambios, evidencia, pendientes y
@@ -158,12 +159,13 @@ El dispatcher:
 - separa Qwen primario, Gemini y los slots OpenAI-compatible configurados;
 - consulta el **control-plane Deno KV** y excluye issues con un lease activo antes de construir la matrix;
 - consulta el health de workers en Deno KV y deja fuera slots en cooldown; solo si ese endpoint no responde reconstruye temporalmente el estado desde los marcadores históricos de #1713;
-- cada worker adquiere atómicamente un lease por issue antes de marcar `agent:working`; el lease dura 30 minutos y se renueva al entrar en planificación, implementación, validación y publicación;
+- cada worker adquiere atómicamente un lease por issue antes de marcar `agent:working`; el lease dura 30 minutos y se renueva al entrar en implementación, validación y publicación;
 - mantiene `concurrency` por issue y los CLAIMs de #1713 como barreras redundantes durante la migración;
 - si Deno/OIDC no están disponibles, falla abierto al mecanismo histórico de GitHub; un HTTP 409 por lease vivo sí evita arrancar un duplicado;
 - los 429/503 abren un circuit breaker por worker con TTL configurable (mínimo 5 min, máximo 6 h); el marcador `AGENT_POOL_SLOT_UNHEALTHY` en #1713 queda únicamente como fallback si el reporte KV falla;
-- ejecuta context packer, memoria Deno y CI brain antes de abrir un PR draft;
-- ante cambios fuera del CLAIM, restaura el intento, libera la reserva y replantea hasta dos veces antes de escalar a `agent:needs-human`;
+- exige un `AGENT_PLAN` delegado de nivel 2 antes de reservar; si falta, devuelve el issue a `agent:decompose` sin gastar un slot de implementación;
+- cada tarea del pool modifica un único fichero por defecto; el TaskPacket y el parser comparten `AGENT_POOL_MAX_FILES`;
+- ante cambios fuera del CLAIM, restaura el intento y publica un BLOCKER para que la coordinación decida el siguiente corte;
 - al terminar una tanda comprueba si siguen quedando issues elegibles y, si los hay, programa inmediatamente la siguiente tanda para mantener ocupados los slots.
 
 El barrido cada 15 minutos queda como red de seguridad; el drenado tras cada tanda evita esperar al siguiente cron cuando aún hay cola. `agent-autopilot.yml` ya no hace polling ni escucha labels: queda únicamente como ejecución manual.
@@ -178,7 +180,7 @@ El feeder ejecuta `agent-decompose.yml` mediante `workflow_dispatch` porque los 
 
 ## Normas Platino, wiki y memoria
 
-Cada ejecución carga una copia fresca de `EspacioKoop/normas_platino` y debe leer sus fuentes operativas antes de planificar o reparar. Si esa carga falla, el agente no continúa: las reglas son obligatorias y no se sustituyen por memoria.
+La planificación de nivel 2 y las reparaciones cargan una copia fresca de `EspacioKoop/normas_platino` y leen sus fuentes operativas. El executor de nivel 3 no relee ese repositorio: recibe las restricciones ya compiladas en el TaskPacket y sella el SHA actual de Normas Platino para trazabilidad. Las reglas siguen siendo obligatorias y no se sustituyen por memoria.
 
 La jerarquía de contexto es:
 
@@ -210,14 +212,14 @@ La URL de memoria y del control-plane se deriva de la variable ya existente `SIG
 
 ## Flujo de seguridad y coordinación
 
-1. El worker adquiere un lease atómico del issue en Deno KV; si otro run lo posee, termina sin tocar labels ni código.
-2. El proveedor lee el issue y sus comentarios recientes.
-3. Hace una fase de planificación **solo lectura** y propone como máximo 12 rutas concretas.
-4. El workflow publica el `CLAIM` en #1713.
-5. Relee #1713 y rechaza el trabajo si una reserva anterior solapa alguna ruta.
-6. Solo entonces crea la rama `agent/<proveedor>-<issue>-<run>`.
-7. El modelo recibe herramientas de archivos, pero no shell, GitHub API ni credenciales Git.
-8. El workflow rechaza cualquier modificación fuera de las rutas del `CLAIM`.
+1. `agent-decompose.yml` (nivel 2) inspecciona el issue y produce un corte de exactamente un fichero o varias subtareas de un fichero con dependencias explícitas.
+2. El nivel 2 publica un `AGENT_PLAN` máquina sellado; si solo queda un gate humano, no encola implementación.
+3. El worker reusable adquiere un lease atómico del issue en Deno KV; si otro run lo posee, termina sin tocar código.
+4. Si falta un plan delegado válido, el worker devuelve el issue a `agent:decompose` y termina sin invocar Qwen/Gemini como implementer.
+5. El workflow valida el plan, publica el `CLAIM` en #1713 y rechaza solapes.
+6. Compila TaskPacket + prompt mínimo y crea la rama `agent/<proveedor>-<issue>-<run>`.
+7. El modelo final recibe una tarea ya concreta: solo el fichero asignado y, si es imprescindible, búsquedas puntuales de símbolos; no vuelve a planificar.
+8. El workflow restaura cualquier modificación fuera del `CLAIM`, normaliza ResultPacket y pasa diff/evidencia al reviewer.
 9. Ejecuta preflight proporcional.
 10. El workflow hace commit/push y abre un PR **draft** con `Refs #N`, lanza `CI` y libera el lease al terminar el job. Nunca hay auto-merge.
 
