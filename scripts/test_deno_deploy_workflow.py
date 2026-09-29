@@ -19,7 +19,9 @@ class DenoDeployWorkflowTest(unittest.TestCase):
         self.assertIn("deno-version: v2.9.6", self.text)
         self.assertNotIn("uses: denoland/setup-deno@v2", self.text)
         self.assertIn("run: deno task check", self.text)
-        self.assertIn("deno deploy --org expediente-legado --app siga98-feedback-deno --prod", self.text)
+        self.assertIn("run: deno deploy --prod", self.text)
+        self.assertNotIn("deno deploy --org", self.text)
+        self.assertNotIn("deno deploy --app", self.text)
         self.assertNotIn("deployctl", self.text)
 
     def test_token_real_solo_se_inyecta_en_el_paso_de_deploy(self):
