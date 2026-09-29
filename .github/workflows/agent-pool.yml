@@ -41,6 +41,8 @@ jobs:
       requested_max: ${{ steps.select.outputs.requested_max }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Crear etiquetas de cola
         env:
