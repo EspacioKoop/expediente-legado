@@ -296,7 +296,7 @@ con JSON válido de esta forma:
 }}
 
 Después puedes emitir 'AGENT_MEMORY_BEGIN' seguido de JSON
-{"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]}
+{{"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]}}
 y 'AGENT_MEMORY_END' para conservar la memoria histórica existente.
 No incluyas secretos, razonamiento interno ni texto sensible en ninguno de los dos
 bloques.
