@@ -833,6 +833,9 @@ jobs:
         if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true'
         env:
           IMPLEMENT_OUTCOME: ${{ inputs.provider == 'qwen' && steps.implement_qwen.outcome || steps.implement_gemini.outcome }}
+          ISSUE: ${{ inputs.issue }}
+          PROVIDER: ${{ inputs.provider }}
+          WORKER: ${{ inputs.worker }}
         run: |
           set -euo pipefail
           # La implementación usa continue-on-error: si se cortó (timeout, error de
@@ -884,16 +887,24 @@ jobs:
           fi
 
           git diff --cached --no-ext-diff --unified=3 > /tmp/agent-review.diff
+          python3 scripts/agent_b2b.py event \
+            --type EVIDENCE --issue "$ISSUE" --provider "$PROVIDER" --worker "$WORKER" \
+            --from-role validator --to-role reviewer \
+            --summary "Preflight dirigido superado y diff staged preparado" \
+            --ref "preflight:/tmp/agent-preflight.json" --ref "diff:/tmp/agent-review.diff" \
+            --output /tmp/agent-evidence.json >/dev/null
           python3 - <<'PY'
           from pathlib import Path
           task=Path("/tmp/agent-task.md").read_text(encoding="utf-8")[:12000]
           plan=Path("/tmp/plan.json").read_text(encoding="utf-8")[:4000]
           diff=Path("/tmp/agent-review.diff").read_text(encoding="utf-8")[:32000]
           result=Path("/tmp/agent-result.json").read_text(encoding="utf-8")[:8000]
+          evidence=Path("/tmp/agent-evidence.json").read_text(encoding="utf-8")[:4000]
           Path(".agent-review-input.md").write_text(
               "# Reviewer input\n\n## Issue\n"+task+
               "\n\n## Plan reservado\n"+plan+
               "\n\n## ResultPacket implementador\n```json\n"+result+"\n```"+
+              "\n\n## EvidencePacket validador\n```json\n"+evidence+"\n```"+
               "\n\n## Diff staged\n```diff\n"+diff+"\n```\n",
               encoding="utf-8",
           )
