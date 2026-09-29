@@ -26,7 +26,7 @@ Reglas de reparto de trabajo entre los agentes del proyecto: quién hace qué, d
 
 ## Artículos
 
-**I. El mando revisa.** Ningún draft del pool pasa a `PR_READY` sin la revisión de un agente de nivel 2 que no sea su autor. La revisión mira el diff contra el plan del issue y deja constancia en la PR. El contrato automático de `scripts/agent_review_contract.py` ayuda, pero no sustituye esta revisión.
+**I. El mando revisa.** Ningún draft del pool pasa a `PR_READY` sin una revisión independiente: la de [Euriclea](euriclea.md) en su nivel principal (`revision:ok`) o la de un agente de nivel 2 que no sea su autor. El respaldo local de Euriclea solo filtra: puede señalar hallazgos, pero una PR en `revision:pendiente` sigue esperando al nivel principal o al nivel 2. La autorrevisión del propio worker (`scripts/agent_review_contract.py`) informa, pero no cuenta como revisión.
 
 **II. El trabajo pesado, fuera.** Suites largas, builds y lotes del pool van a Actions. La máquina local se reserva para lo que solo ella puede hacer: GPU, playtest y lo que no debe salir de casa.
 
