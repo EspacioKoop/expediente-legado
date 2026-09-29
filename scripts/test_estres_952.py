@@ -11,6 +11,8 @@ ESTRES = ROOT / "godot" / "guion" / "estres.gd"
 MARCADORES = ROOT / "godot" / "guion" / "dia_marcadores_mundo_app.gd"
 VISOR = ROOT / "godot" / "guion" / "visor_expediente.gd"
 DIA = ROOT / "godot" / "guion" / "dia_clima_app.gd"
+DIA_SUENO = ROOT / "godot" / "guion" / "dia_sueno_app.gd"
+ESCUELA = ROOT / "godot" / "guion" / "sueno_escuela_3d.gd"
 HUD = ROOT / "godot" / "guion" / "dia_hud_fases_app.gd"
 INDICADOR = ROOT / "godot" / "guion" / "estres_hud_indicador.gd"
 ENTORNO = ROOT / "godot" / "guion" / "estres_ambiental.gd"
@@ -27,6 +29,8 @@ class Estres952Test(unittest.TestCase):
         cls.marcadores = MARCADORES.read_text(encoding="utf-8")
         cls.visor = VISOR.read_text(encoding="utf-8")
         cls.dia = DIA.read_text(encoding="utf-8")
+        cls.dia_sueno = DIA_SUENO.read_text(encoding="utf-8")
+        cls.escuela = ESCUELA.read_text(encoding="utf-8")
         cls.hud = HUD.read_text(encoding="utf-8")
         cls.indicador = INDICADOR.read_text(encoding="utf-8")
         cls.entorno = ENTORNO.read_text(encoding="utf-8")
@@ -136,6 +140,18 @@ class Estres952Test(unittest.TestCase):
         self.assertIn('Estres.aplicar(host.jornada, "fallo_critico")', bloque)
         self.assertIn("if not correcta and registrada and primer_error:", bloque)
         self.assertIn("func _caso_tiene_error_previo", self.archivado)
+
+    def test_timbre_escolar_es_productor_diegetico_idempotente(self):
+        self.assertIn("static func registrar_sonido_inquietante(", self.estres)
+        self.assertIn("CAMPO_SONIDOS_INQUIETANTES", self.estres)
+        self.assertIn('ID_SONIDO_INQUIETANTE := "escuela:timbre_fuera_horario"', self.escuela)
+        self.assertIn("sonido_inquietante.emit(ID_SONIDO_INQUIETANTE)", self.escuela)
+        self.assertIn("escuela.sonido_inquietante.connect(_al_sonido_inquietante_sueno)", self.dia_sueno)
+        self.assertIn(
+            "Estres.registrar_sonido_inquietante(jornada, sonido_id)",
+            self.dia_sueno,
+        )
+        self.assertNotIn('Estres.aplicar(jornada, "sonido_inquietante")', self.dia_sueno)
 
     def test_smoke_godot(self):
         motor = os.environ.get("GODOT_BIN", "godot4")

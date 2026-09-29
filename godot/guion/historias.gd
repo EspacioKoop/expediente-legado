@@ -28,6 +28,7 @@ const TOPE_CARGAS := 2
 # contador por carta y un diario cronológico de acciones.
 const CLAVE_CONTEO_POSPUESTAS := "historias_pospuestas_conteo"
 const CLAVE_HISTORIAL := "historial_decisiones"
+const CLAVE_PRESION_ONIRICA := "presion_indecision_onirica"
 const UMBRAL_REITERACION := 2
 const UMBRAL_ACUMULACION := 3
 
@@ -130,6 +131,7 @@ func postergar(estado: Dictionary, carta_id: String) -> bool:
 	conteos[carta_id] = conteo
 	estado[CLAVE_CONTEO_POSPUESTAS] = conteos
 	_registrar_historial(estado, carta_id, "pospuesta", "", conteo)
+	_sincronizar_presion_onirica(estado)
 	return true
 
 
@@ -167,6 +169,18 @@ func presion_indecision(estado: Dictionary) -> Dictionary:
 		"reiteradas": reiteradas,
 		"maximo": maximo,
 	}
+
+
+## Proyecta únicamente el nivel descriptivo sobre Jornada. El sueño no conoce
+## historias políticas ni ejes: recibe un 0..2 ya resuelto y decide cómo
+## representarlo. No se copian cartas, elecciones ni contadores al ciclo diario.
+func _sincronizar_presion_onirica(estado: Dictionary) -> void:
+	var jornada_cruda = estado.get("jornada", {})
+	if typeof(jornada_cruda) != TYPE_DICTIONARY:
+		return
+	var jornada: Dictionary = jornada_cruda
+	jornada[CLAVE_PRESION_ONIRICA] = int(presion_indecision(estado).get("nivel", 0))
+	estado["jornada"] = jornada
 
 
 ## Diario de decisiones del corte político. En guardados anteriores a #954 no
@@ -238,6 +252,9 @@ func resolver(estado: Dictionary, carta_id: String, eje: String) -> Dictionary:
 		_registrar_historial(estado, carta_id, "resuelta", eje, veces_pospuesta(estado, carta_id))
 		_quitar_pospuesta(estado, carta_id)
 
+	# También migra partidas de #954 anteriores a la conexión onírica cuando
+	# vuelven a interactuar con una historia ya aplazada.
+	_sincronizar_presion_onirica(estado)
 	return vista(estado, carta_id)
 
 

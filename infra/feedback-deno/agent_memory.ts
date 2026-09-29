@@ -3,8 +3,27 @@ const AGENT_MEMORY_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const AGENT_MEMORY_SCAN_LIMIT = 50;
 const AGENT_MEMORY_RETURN_LIMIT = 8;
 const AGENT_MEMORY_MAX_SUMMARY = 1200;
+// Las lecciones no caducan, así que se escanean más que los episodios del pool.
+const AGENT_MEMORY_LESSON_SCAN_LIMIT = 100;
+const AGENT_MEMORY_MAX_QUERY_WORDS = 8;
+// Variable de entorno de Deno Deploy, no secret de GitHub. Sin ella (o si es
+// corta) el nivel 2 queda deshabilitado: fail-closed.
+const AGENT_MEMORY_NIVEL2_TOKEN_ENV = "AGENT_MEMORY_NIVEL2_TOKEN";
+const AGENT_MEMORY_NIVEL2_MIN_TOKEN = 32;
 const GITHUB_OIDC_ISSUER = "https://token.actions.githubusercontent.com";
 const GITHUB_OIDC_JWKS = "https://token.actions.githubusercontent.com/.well-known/jwks";
+
+const POOL_PROVIDERS = ["qwen", "gemini"] as const;
+const NIVEL2_AGENTS = ["claude", "codex", "hermes", "odiseo"] as const;
+type AgentMemoryProvider = typeof POOL_PROVIDERS[number] | typeof NIVEL2_AGENTS[number];
+
+// `episodio`: lo que pasó en un issue concreto, caduca a los 30 días.
+// `leccion`: conocimiento estable que escribe el nivel 2 y lee todo el mundo.
+type AgentMemoryKind = "episodio" | "leccion";
+
+type AgentIdentity =
+  | { level: "pool"; claims: OidcClaims }
+  | { level: "nivel2" };
 
 interface OidcJwk extends JsonWebKey {
   kid?: string;
@@ -24,14 +43,17 @@ interface OidcClaims {
 export interface AgentMemoryRecord {
   schema: 1;
   id: string;
+  // Ausente en los registros anteriores a #1756: se leen como episodio.
+  kind?: AgentMemoryKind;
+  // 0 en lecciones que no nacen de un issue concreto.
   issue: number;
-  provider: "qwen" | "gemini";
+  provider: AgentMemoryProvider;
   summary: string;
   tags: string[];
   paths: string[];
   source: string;
   created_at: string;
-  expires_at: string;
+  expires_at: string | null;
 }
 
 let oidcJwksCache: { expiresAt: number; keys: OidcJwk[] } | null = null;
@@ -163,9 +185,8 @@ async function authenticateAgentRequest(
   ];
   const workerPrefix = repository + "/.github/workflows/agent-worker.yml@";
   const poolPrefix = repository + "/.github/workflows/agent-pool.yml@";
-  const directAllowed = allowedWorkflows.some((prefix) =>
-    workflowRef.startsWith(prefix)
-  ) || workflowRef.startsWith(workerPrefix);
+  const directAllowed = allowedWorkflows.some((prefix) => workflowRef.startsWith(prefix)) ||
+    workflowRef.startsWith(workerPrefix);
   const reusableAllowed = workflowRef.startsWith(poolPrefix) &&
     jobWorkflowRef.startsWith(workerPrefix);
   if (!directAllowed && !reusableAllowed) {
@@ -173,6 +194,41 @@ async function authenticateAgentRequest(
   }
 
   return claims;
+}
+
+async function sha256(value: string): Promise<Uint8Array> {
+  return new Uint8Array(
+    await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value)),
+  );
+}
+
+// Compara resúmenes de igual longitud para no filtrar el token por tiempo.
+async function nivel2TokenMatches(token: string): Promise<boolean> {
+  const expected = Deno.env.get(AGENT_MEMORY_NIVEL2_TOKEN_ENV) ?? "";
+  if (expected.length < AGENT_MEMORY_NIVEL2_MIN_TOKEN || !token) return false;
+
+  const [given, wanted] = await Promise.all([sha256(token), sha256(expected)]);
+  let diff = 0;
+  for (let index = 0; index < wanted.length; index++) {
+    diff |= given[index] ^ wanted[index];
+  }
+  return diff === 0;
+}
+
+async function authenticateAgent(
+  request: Request,
+  repository: string,
+): Promise<AgentIdentity | null> {
+  const authorization = request.headers.get("authorization") ?? "";
+  if (!authorization.startsWith("Bearer ")) return null;
+  const token = authorization.slice("Bearer ".length).trim();
+
+  // Un JWT solo puede ser OIDC del pool: nunca se prueba como token de nivel 2.
+  if (token.split(".").length === 3) {
+    const claims = await authenticateAgentRequest(request, repository);
+    return claims ? { level: "pool", claims } : null;
+  }
+  return await nivel2TokenMatches(token) ? { level: "nivel2" } : null;
 }
 
 async function readJsonBody(request: Request, maxBytes = 8192): Promise<unknown> {
@@ -189,11 +245,13 @@ async function readJsonBody(request: Request, maxBytes = 8192): Promise<unknown>
 function cleanMemoryTags(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
 
-  return [...new Set(
-    value
-      .map((tag) => cleanTitle(tag, 40).toLowerCase())
-      .filter((tag) => /^[a-z0-9áéíóúüñ_.:/-]+$/i.test(tag)),
-  )].slice(0, 8);
+  return [
+    ...new Set(
+      value
+        .map((tag) => cleanTitle(tag, 40).toLowerCase())
+        .filter((tag) => /^[a-z0-9áéíóúüñ_.:/-]+$/i.test(tag)),
+    ),
+  ].slice(0, 8);
 }
 
 function cleanMemoryPaths(value: unknown): string[] {
@@ -216,6 +274,18 @@ function cleanMemoryPaths(value: unknown): string[] {
     if (clean.length >= 12) break;
   }
   return clean;
+}
+
+// Palabras de 4 letras o más: lo bastante largas para no casar con todo.
+function cleanQueryWords(value: unknown): string[] {
+  return [
+    ...new Set(
+      cleanTitle(value, 200)
+        .toLowerCase()
+        .split(/[^a-z0-9áéíóúüñ_]+/i)
+        .filter((word) => word.length >= 4),
+    ),
+  ].slice(0, AGENT_MEMORY_MAX_QUERY_WORDS);
 }
 
 function pathsOverlap(left: string, right: string): boolean {
@@ -241,30 +311,41 @@ async function searchAgentMemory(
   const issue = Number(input.issue);
   const paths = cleanMemoryPaths(input.paths);
   const tags = cleanMemoryTags(input.tags);
+  const words = cleanQueryWords(input.query);
   const scored: Array<{ score: number; memory: AgentMemoryRecord }> = [];
 
-  const iterator = kv.list<AgentMemoryRecord>(
-    { prefix: ["agent_memory", "record"] },
-    { reverse: true, limit: AGENT_MEMORY_SCAN_LIMIT },
-  );
-  for await (const entry of iterator) {
-    const memory = entry.value;
-    if (!memory || memory.schema !== 1) continue;
+  const sources: Array<[string, number]> = [
+    ["record", AGENT_MEMORY_SCAN_LIMIT],
+    ["leccion", AGENT_MEMORY_LESSON_SCAN_LIMIT],
+  ];
+  for (const [prefix, limit] of sources) {
+    const iterator = kv.list<AgentMemoryRecord>(
+      { prefix: ["agent_memory", prefix] },
+      { reverse: true, limit },
+    );
+    for await (const entry of iterator) {
+      const memory = entry.value;
+      if (!memory || memory.schema !== 1) continue;
 
-    let score = 0;
-    if (Number.isInteger(issue) && issue > 0 && memory.issue === issue) {
-      score += 100;
-    }
-    for (const path of paths) {
-      if (memory.paths.some((candidate) => pathsOverlap(path, candidate))) {
-        score += 30;
+      let score = 0;
+      if (Number.isInteger(issue) && issue > 0 && memory.issue === issue) {
+        score += 100;
       }
-    }
-    for (const tag of tags) {
-      if (memory.tags.includes(tag)) score += 10;
-    }
+      for (const path of paths) {
+        if (memory.paths.some((candidate) => pathsOverlap(path, candidate))) {
+          score += 30;
+        }
+      }
+      for (const tag of tags) {
+        if (memory.tags.includes(tag)) score += 10;
+      }
+      const summary = memory.summary.toLowerCase();
+      for (const word of words) {
+        if (summary.includes(word)) score += 5;
+      }
 
-    if (score > 0) scored.push({ score, memory });
+      if (score > 0) scored.push({ score, memory });
+    }
   }
 
   scored.sort((left, right) =>
@@ -280,20 +361,28 @@ async function searchAgentMemory(
 async function rememberAgentMemory(
   kv: Deno.Kv,
   raw: unknown,
-  claims: OidcClaims,
+  identity: AgentIdentity,
 ): Promise<AgentMemoryRecord | null> {
   if (!raw || typeof raw !== "object") return null;
 
   const input = raw as Record<string, unknown>;
   if (input.schema !== 1) return null;
 
-  const issue = Number(input.issue);
+  const kind: AgentMemoryKind = input.kind === "leccion" ? "leccion" : "episodio";
+  const issue = Number(input.issue ?? 0);
   const provider = cleanText(input.provider, 16);
   const summary = cleanText(input.summary, AGENT_MEMORY_MAX_SUMMARY);
+  const allowedProviders: readonly string[] = identity.level === "pool"
+    ? POOL_PROVIDERS
+    : NIVEL2_AGENTS;
+  // Solo el nivel 2 fija lecciones: el pool deja episodios que caducan.
+  const lessonAllowed = kind === "episodio" || identity.level === "nivel2";
+  const issueValid = Number.isInteger(issue) &&
+    (kind === "leccion" ? issue >= 0 : issue > 0);
   if (
-    !Number.isInteger(issue) ||
-    issue <= 0 ||
-    !["qwen", "gemini"].includes(provider) ||
+    !lessonAllowed ||
+    !issueValid ||
+    !allowedProviders.includes(provider) ||
     summary.length < 20 ||
     containsPotentialSecret(summary)
   ) {
@@ -304,26 +393,51 @@ async function rememberAgentMemory(
   const paths = cleanMemoryPaths(input.paths);
   const now = Date.now();
   const id = String(now) + "-" + crypto.randomUUID();
+  const source = identity.level === "pool"
+    ? "github-actions:" + (cleanTitle(identity.claims.run_id, 80) || "unknown")
+    : "nivel2:" + provider;
 
   const memory: AgentMemoryRecord = {
     schema: 1,
     id,
+    kind,
     issue,
-    provider: provider as "qwen" | "gemini",
+    provider: provider as AgentMemoryProvider,
     summary,
     tags,
     paths,
-    source: "github-actions:" + (cleanTitle(claims.run_id, 80) || "unknown"),
+    source,
     created_at: new Date(now).toISOString(),
-    expires_at: new Date(now + AGENT_MEMORY_TTL_MS).toISOString(),
+    expires_at: kind === "leccion" ? null : new Date(now + AGENT_MEMORY_TTL_MS).toISOString(),
   };
 
-  await kv.set(
-    ["agent_memory", "record", now, id],
-    memory,
-    { expireIn: AGENT_MEMORY_TTL_MS },
-  );
+  if (kind === "leccion") {
+    await kv.set(["agent_memory", "leccion", now, id], memory);
+  } else {
+    await kv.set(
+      ["agent_memory", "record", now, id],
+      memory,
+      { expireIn: AGENT_MEMORY_TTL_MS },
+    );
+  }
   return memory;
+}
+
+// Las lecciones no caducan: sin `forget` un error quedaría para siempre.
+async function forgetAgentLesson(kv: Deno.Kv, raw: unknown): Promise<boolean> {
+  if (!raw || typeof raw !== "object") return false;
+
+  const input = raw as Record<string, unknown>;
+  const id = cleanText(input.id, 80);
+  const match = /^(\d{13})-[0-9a-f-]{36}$/.exec(id);
+  if (input.schema !== 1 || !match) return false;
+
+  const key = ["agent_memory", "leccion", Number(match[1]), id];
+  const existing = await kv.get<AgentMemoryRecord>(key);
+  if (!existing.value) return false;
+
+  await kv.delete(key);
+  return true;
 }
 
 export async function handleAgentMemory(
@@ -336,14 +450,14 @@ export async function handleAgentMemory(
     return json({ ok: false, error: "method_not_allowed" }, 405);
   }
 
-  let claims: OidcClaims | null;
+  let identity: AgentIdentity | null;
   try {
-    claims = await authenticateAgentRequest(request, repository);
+    identity = await authenticateAgent(request, repository);
   } catch (error) {
     console.error("Agent memory OIDC failure", error);
     return json({ ok: false, error: "service_unavailable" }, 503);
   }
-  if (!claims) {
+  if (!identity) {
     return json({ ok: false, error: "unauthorized" }, 401);
   }
 
@@ -366,11 +480,21 @@ export async function handleAgentMemory(
   }
 
   if (url.pathname === "/api/agent-memory/remember") {
-    const memory = await rememberAgentMemory(kv, raw, claims);
+    const memory = await rememberAgentMemory(kv, raw, identity);
     if (!memory) {
       return json({ ok: false, error: "invalid_memory" }, 400);
     }
     return json({ ok: true, memory }, 201);
+  }
+
+  if (url.pathname === "/api/agent-memory/forget") {
+    if (identity.level !== "nivel2") {
+      return json({ ok: false, error: "forbidden" }, 403);
+    }
+    if (!await forgetAgentLesson(kv, raw)) {
+      return json({ ok: false, error: "not_found" }, 404);
+    }
+    return json({ ok: true });
   }
 
   return json({ ok: false, error: "not_found" }, 404);

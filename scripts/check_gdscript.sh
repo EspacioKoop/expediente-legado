@@ -80,8 +80,10 @@ fi
 find_gd | xargs -0 --no-run-if-empty gdlint
 
 if [[ "${CI:-}" == "true" ]]; then
-  echo "== unittest: inicio verbose con watchdog 12m =="
-  timeout 12m "$PYTHON_BIN" -u -m unittest discover -v -s scripts -p 'test_*.py'
+  # Verbose + unbuffered: si un test runtime agota su timeout, Actions deja
+  # visible cuál estaba ejecutándose en vez de terminar 25 minutos después con
+  # un "operation was canceled" sin pista accionable.
+  "$PYTHON_BIN" -u -m unittest discover -v -s scripts -p 'test_*.py'
 else
   "$PYTHON_BIN" -m unittest discover -s scripts -p 'test_*.py'
 fi

@@ -46,7 +46,12 @@ func _process(delta: float) -> void:
 	var id := mundo.get_instance_id()
 	if id == _mundo_id:
 		_vigilar_conversacion(dia)
-		_seguir_recados(mundo, delta, Jornada.franja_horaria(dia.jornada))
+		_seguir_recados(
+			mundo,
+			delta,
+			Jornada.franja_horaria(dia.jornada),
+			Jornada.servicio_disponible(dia.jornada, "cafeteria"),
+		)
 		return
 	_mundo_id = id
 	_limpiar()
@@ -146,7 +151,9 @@ func huir_de(origen_global: Vector3) -> void:
 
 ## Lanza el siguiente recado cuando toca y mantiene el volumen conversable
 ## encima del cuerpo que anda: hablar con alguien es hablar donde está.
-func _seguir_recados(mundo: Node3D, delta: float, franja: String = "manana") -> void:
+func _seguir_recados(
+	mundo: Node3D, delta: float, franja: String = "manana", cafeteria_abierta: bool = true
+) -> void:
 	for idle in _conversables:
 		if not is_instance_valid(idle) or not is_instance_valid(_conversables[idle]):
 			continue
@@ -161,7 +168,7 @@ func _seguir_recados(mundo: Node3D, delta: float, franja: String = "manana") -> 
 		return
 	_reloj_recados = 0.0
 	_proximo_recado = espera_recado(franja, false)
-	lanzar_recado(mundo)
+	lanzar_recado(mundo, cafeteria_abierta)
 
 
 ## #963: la hora solo modula densidad ambiental. No oculta compañeros ni
@@ -177,14 +184,14 @@ static func espera_recado(franja: String, primero: bool) -> float:
 
 ## Manda al siguiente compañero sentado a por el siguiente destino. Público
 ## para las pruebas; en partida lo llama el reloj de recados.
-func lanzar_recado(mundo: Node3D) -> RecadoCompanero3D:
+func lanzar_recado(mundo: Node3D, cafeteria_abierta: bool = true) -> RecadoCompanero3D:
 	if _hay_recado() or not is_instance_valid(_navegacion):
 		return null
 	var candidatos: Array[CompaneroIdle3D] = []
 	for idle in _idles:
 		if is_instance_valid(idle) and idle.sentado and not idle.esta_conversando():
 			candidatos.append(idle)
-	var destinos := destinos_recado(mundo)
+	var destinos := destinos_recado(mundo, cafeteria_abierta)
 	if candidatos.is_empty() or destinos.is_empty():
 		return null
 	var idle := candidatos[_recados_hechos % candidatos.size()]
@@ -202,13 +209,14 @@ func lanzar_recado(mundo: Node3D) -> RecadoCompanero3D:
 
 ## Dónde se puede ir: cada archivador del catálogo y la máquina de café. El
 ## punto de llegada queda delante del mueble, hacia el centro de la sala.
-static func destinos_recado(mundo: Node3D) -> Array:
+static func destinos_recado(mundo: Node3D, cafeteria_abierta: bool = true) -> Array:
 	var destinos := []
-	var cafe := mundo.get_node_or_null(MAQUINA_CAFE) as Node3D
 	for bulto in EspaciosCatalogo.OFICINA.get("bultos", []):
 		if String(bulto.get("modelo", "")) != "bookcaseClosed":
 			continue
 		destinos.append(_destino(bulto["pos"], bulto["tam"]))
+	if cafeteria_abierta:
+		var cafe := mundo.get_node_or_null(MAQUINA_CAFE) as Node3D
 		if cafe != null:
 			destinos.append(_destino(cafe.position, Vector3.ONE * TAM_MAQUINA_CAFE))
 	return destinos

@@ -64,6 +64,13 @@ class TelefonoFijoTest(unittest.TestCase):
         self.assertIn("TelefonoFijo.llamar", panel)
         self.assertIn("TelefonoFijo.descolgar", panel)
         self.assertIn("TelefonoFijo.colgar", panel)
+        self.assertIn('accessibility_name = "Estado del teléfono"', panel)
+        self.assertIn("AccessibilityServer.LIVE_POLITE", panel)
+        self.assertIn('accessibility_name = "Transcripción del teléfono"', panel)
+        self.assertIn("_contenido.focus_mode = Control.FOCUS_ALL", panel)
+        self.assertIn("_contenido.selection_enabled = true", panel)
+        self.assertIn("boton.accessibility_name = boton.text", panel)
+        self.assertIn("_contenido.accessibility_description = _contenido.text", panel)
 
 
 if __name__ == "__main__":

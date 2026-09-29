@@ -60,7 +60,7 @@ class SuenoObjetivosTest(unittest.TestCase):
         # El progreso viaja en el mismo guardado que el catálogo: la llamada
         # ocurre antes del guardado condicional, no después.
         completar = self.reactivo.index("completar_objetivo_anomalia_documental(anomalia_id")
-        guardado = self.reactivo.index('dia._guardar_o_avisar("")')
+        guardado = self.reactivo.index('dia._guardar_o_avisar("")', completar)
         self.assertLess(completar, guardado)
 
     def test_la_plaza_documental_no_monta_una_zona_pisable(self):
@@ -114,7 +114,7 @@ class SuenoObjetivosTest(unittest.TestCase):
         self.assertIn('extends "res://guion/dia_trabajillos_app.gd"', self.gato)
         self.assertIn('extends "res://guion/dia_alquiler_app.gd"', self.trabajillos)
         self.assertIn('espacio.get("salidas", [])', self.gato)
-        self.assertIn('_salida_guia = _objetivos_espacio[0].get("pos", _entrada_guia)', self.gato)
+        self.assertIn('_salida_guia = _objetivos_espacio[0].get("guia_pos", _entrada_guia)', self.gato)
         self.assertIn("_hay_rumbo_guia = true", self.gato)
 
     def test_la_escena_conserva_la_capa_raiz_del_gato(self):

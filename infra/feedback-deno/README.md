@@ -111,14 +111,23 @@ antes de promocionar. La CLI puede reescribir `deno.json` al desplegar; pasa
 La CLI autentica mediante el flujo de Deno Deploy y guarda su token de
 autenticación en el keyring del sistema.
 
-### Redeploy tras cambiar el gateway
+### Deploy tras cambiar el gateway
 
-`feedback-deno.yml` solo comprueba formato y tipos: **no despliega**. Tras
-integrar en `main` cualquier cambio de `main.ts`, `agent_memory.ts` o `agent_pool_state.ts`, vuelve a
-desplegar con `--prod` y compara el `/health` de producción con el de
-`main.ts`. Si no coinciden, producción sigue sirviendo una versión antigua; así
-se produjo el 404 de `/api/agent-memory/search` de #1606, con producción aún en
-`version: 1` y el repo ya en `version: 2`.
+`feedback-deno.yml` **no despliega**: sigue siendo el check de formato/tipos del gateway. El despliegue queda aislado en el workflow de producción para no exponer credenciales en PRs.
+
+`.github/workflows/feedback-deno-deploy.yml` se dispara al integrar en `main`
+cambios bajo `infra/feedback-deno/` y también admite `workflow_dispatch`. Primero
+ejecuta `deno task check`; después, si existe `secrets.DENO_DEPLOY_TOKEN`, usa el
+CLI moderno `deno deploy` para publicar `siga98-feedback-deno` en producción.
+
+El token puede ser un token de organización de Deno Deploy y solo se inyecta en
+el paso de despliegue. Si falta, el workflow deja un warning y termina sin
+romper el resto del repositorio; el smoke periódico seguirá señalando la deriva.
+
+Tras desplegar, si `SIGA98_FEEDBACK_FALLBACK_URL` está configurada, el workflow
+espera hasta un minuto a que `/health` refleje el contrato declarado por
+`main.ts` y lo valida con `scripts/check_deno_production.py`. Esto evita que un
+merge correcto deje silenciosamente producción en una versión antigua.
 
 ## Freshness de producción
 

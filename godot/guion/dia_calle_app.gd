@@ -14,6 +14,7 @@ const VENTANILLA := preload("res://escenas/ventanilla.tscn")
 
 var _ventanas_vivas: CalleVentanasVivas = null
 var _viento: VientoAmbiental = null
+var _religion_mundo_934: ReligionMundo9343D = null
 
 
 func _espacio_de(fase: String) -> Dictionary:
@@ -45,6 +46,7 @@ func _entrar_en(fase: String) -> void:
 		CalleLocalesComerciales3D.montar(self, calle)
 		Bit98Dressing.montar(calle)
 		ComercioBarrio3D.montar(self, calle)
+		_montar_religion_mundo_934()
 		var ventanilla := calle.find_child("EntrarVentanillaReclamaciones", true, false)
 		if (
 			ventanilla != null
@@ -89,11 +91,44 @@ func _montar_animacion_ambiental(calle: Node3D) -> void:
 ## Las piezas de la calle mueren con la fase; el animador que las reparte vive
 ## por encima y lo limpia la capa del sueño.
 func _soltar_capas_calle() -> void:
-	for capa in [_ventanas_vivas, _viento]:
+	for capa in [_ventanas_vivas, _viento, _religion_mundo_934]:
 		if capa != null and is_instance_valid(capa):
 			capa.queue_free()
 	_ventanas_vivas = null
 	_viento = null
+	_religion_mundo_934 = null
+
+
+## #934: el tablón y la mesa se materializan en el recorrido real sin crear
+## otra autoridad. La calle solo monta la presentación y persiste cuando el
+## componente confirma que ReligionEventos aceptó un hecho nuevo.
+func _montar_religion_mundo_934() -> void:
+	if _mundo == null or _religion_mundo_934 != null:
+		return
+	var registro := ReligionEventos.asegurar_en_estado(partida.estado)
+	var vertical := ReligionMundo9343D.new()
+	vertical.name = "ReligionMundo934Recorrido"
+	# El conjunto queda sobre la acera izquierda, paralelo a la fachada y fuera
+	# del eje principal de paso. Sus mallas no añaden colisión de mundo.
+	vertical.position = Vector3(-4.35, 0.0, 7.4)
+	vertical.rotation_degrees.y = 90.0
+	_mundo.add_child(vertical)
+	(
+		vertical
+		. configurar(
+			registro,
+			int(jornada.get("dia", 1)),
+			bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false)),
+			maxi(1, int(jornada.get("vuelta", 1))),
+		)
+	)
+	vertical.exposicion_registrada.connect(_al_registro_religion_934)
+	vertical.practica_registrada.connect(_al_registro_religion_934)
+	_religion_mundo_934 = vertical
+
+
+func _al_registro_religion_934(_id_evento: String) -> void:
+	_guardar_o_avisar("")
 
 
 ## El Coliseo de #43 se juega en su propia pantalla; desde la calle se abre

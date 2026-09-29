@@ -43,6 +43,11 @@ func abrir(
 	return apertura
 
 
+func procesar(delta: float) -> void:
+	if _transporte != null and _transporte.has_method("procesar"):
+		_transporte.call("procesar", delta)
+
+
 func publicar_eleccion(
 	ronda: int, action: String, game_build: String, ahora_unix: int, event_id: String = ""
 ) -> Dictionary:

@@ -90,6 +90,23 @@ class HuellasAmbientales959Test(unittest.TestCase):
         self.assertIn("cambiar de franja no muta la persistencia", self.godot_test)
         self.assertIn("la precipitación hace más legible el desgaste de paso", self.godot_test)
 
+    def test_huellas_de_vigilia_reaparecen_como_ecos_oniricos(self):
+        self.assertIn("const MAX_ECOS_SUENO := 3", self.controller)
+        self.assertIn('FASES_VIGILIA_ECO := ["archivo", "trayecto", "casa"]', self.controller)
+        self.assertIn("_montar_ecos_vigilia_en_sueno(dia, mundo)", self.controller)
+        self.assertIn("static func _huellas_vigilia_destacadas(", self.controller)
+        self.assertIn('var eco_id := "eco:" + origen', self.controller)
+        self.assertIn("marca.set_meta(META_ECO_ORIGEN, origen)", self.controller)
+        self.assertIn("el sueño materializa solo tres ecos", self.godot_test)
+        self.assertIn("entrar en sueño no muta ni duplica las huellas persistentes", self.godot_test)
+
+        bloque = self.controller.split("func _montar_ecos_vigilia_en_sueno", 1)[1].split(
+            "\n\n## Selección determinista", 1
+        )[0]
+        self.assertNotIn("HuellasAmbientales.registrar", bloque)
+        self.assertNotIn("_guardar_o_avisar", bloque)
+        self.assertNotIn("pistas_descubiertas", bloque)
+
     def test_no_convierte_huellas_en_progreso(self):
         for forbidden in ("Sellos.", "Prometeo.", "Economia.", "Acusacion."):
             self.assertNotIn(forbidden, self.controller)

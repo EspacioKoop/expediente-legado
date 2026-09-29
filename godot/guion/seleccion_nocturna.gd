@@ -8,6 +8,7 @@ class_name SeleccionNocturna
 extends RefCounted
 
 const MAX_DOCUMENTOS := 3
+const CLAVE_PRESION_INDECISION := "presion_indecision_onirica"
 
 
 ## Devuelve errores descriptivos sin modificar estado.
@@ -59,4 +60,11 @@ static func opciones_sueno(jornada: Dictionary, base: Dictionary = {}) -> Dictio
 	opciones["seleccion_nocturna"] = normalizar(
 		jornada.get("leido_hoy", []), jornada.get("seleccion_nocturna", [])
 	)
+
+	# #954: la presión de aplazamientos solo cambia la composición del sueño.
+	# No altera cantidad, memoria elegida, progreso ni una política más fuerte
+	# como el sueño degradado que ya haya pedido priorizar vistas.
+	var nivel := clampi(int(jornada.get(CLAVE_PRESION_INDECISION, 0)), 0, 2)
+	if nivel > 0:
+		opciones["rumiacion_indecision"] = maxi(nivel, int(opciones.get("rumiacion_indecision", 0)))
 	return opciones

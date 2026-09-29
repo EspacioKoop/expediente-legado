@@ -18,6 +18,7 @@ func _ejecutar() -> void:
 	_probar_entorno()
 	_probar_autocuidado_aviones()
 	_probar_resolucion()
+	_probar_sonido_inquietante_idempotente()
 	_probar_persistencia_json()
 	print("issue_952: %d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos > 0 else 0)
@@ -130,6 +131,22 @@ func _probar_resolucion() -> void:
 		"resolver un puzzle aplica la recuperación canónica",
 	)
 	_comprobar_cerca(Estres.valor(jornada), 16.0, "la resolución deja el nuevo valor persistido")
+
+
+func _probar_sonido_inquietante_idempotente() -> void:
+	var jornada := {"dia": 8, "vuelta": 1, "fase": "sueño"}
+	_comprobar(
+		Estres.registrar_sonido_inquietante(jornada, "escuela:timbre_fuera_horario"),
+		true,
+		"el primer timbre diegético se registra",
+	)
+	_comprobar_cerca(Estres.valor(jornada), 3.0, "el primer timbre aplica la tensión canónica")
+	_comprobar(
+		Estres.registrar_sonido_inquietante(jornada, "escuela:timbre_fuera_horario"),
+		false,
+		"repetir el mismo timbre no vuelve a registrar",
+	)
+	_comprobar_cerca(Estres.valor(jornada), 3.0, "repetir el timbre no farmea tensión")
 
 
 func _probar_persistencia_json() -> void:

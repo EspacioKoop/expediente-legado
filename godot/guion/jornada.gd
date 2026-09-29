@@ -144,6 +144,10 @@ static func nueva(raiz: int = 0, vuelta: int = 1) -> Dictionary:
 		# noche. Vive en Jornada para que guardar/recargar conserve la misma
 		# preparación y se borra al despertar o al empezar otra vida laboral.
 		"seleccion_nocturna": [],
+		# #954: snapshot descriptivo de la presión acumulada por aplazamientos.
+		# Persiste entre días de la misma vida laboral y vuelve a cero con Jornada.nueva().
+		# No concede ni retira recursos; solo permite que el sueño module su orden.
+		"presion_indecision_onirica": 0,
 		# Tarjeta diaria del Bingo SIGA y su histórico de esta vida laboral.
 		# Va en Jornada para usar el mismo guardado y reiniciarse al reasignar.
 		"bingo_siga": {"actual": {}, "historial": []},

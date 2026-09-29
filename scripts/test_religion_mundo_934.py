@@ -9,6 +9,7 @@ import unittest
 RAIZ = Path(__file__).resolve().parents[1]
 MUNDO = RAIZ / "godot/guion/religion_mundo_934.gd"
 MUNDO_3D = RAIZ / "godot/guion/religion_mundo_934_3d.gd"
+DIA_CALLE = RAIZ / "godot/guion/dia_calle_app.gd"
 PRUEBA = RAIZ / "godot/pruebas/pruebas_religion_mundo_934.gd"
 PRUEBA_GODOT = "res://pruebas/pruebas_religion_mundo_934.gd"
 
@@ -39,6 +40,20 @@ class ReligionMundo934Test(unittest.TestCase):
         self.assertIn("practica_interactuable", escena)
         for simbolo in ("CanvasLayer", "Popup", "Window", "Button.new()"):
             self.assertNotIn(simbolo, escena)
+
+    def test_vertical_se_monta_en_el_trayecto_y_persiste_el_contrato_comun(self) -> None:
+        dia = DIA_CALLE.read_text(encoding="utf-8")
+        escena = MUNDO_3D.read_text(encoding="utf-8")
+
+        self.assertIn("_montar_religion_mundo_934()", dia)
+        self.assertIn("ReligionMundo9343D.new()", dia)
+        self.assertIn("ReligionEventos.asegurar_en_estado(partida.estado)", dia)
+        self.assertIn("vertical.exposicion_registrada.connect(_al_registro_religion_934)", dia)
+        self.assertIn("vertical.practica_registrada.connect(_al_registro_religion_934)", dia)
+        self.assertIn('_guardar_o_avisar("")', dia)
+        self.assertIn("signal exposicion_registrada(id_superficie: String)", escena)
+        self.assertIn("signal practica_registrada(id_practica: String)", escena)
+        self.assertNotIn("ReligionEventos.CANAL_CONVICCION", dia)
 
     def test_regresion_runtime_standalone(self) -> None:
         motor = os.environ.get("GODOT_BIN") or shutil.which("godot4")

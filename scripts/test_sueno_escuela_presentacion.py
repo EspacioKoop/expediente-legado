@@ -52,6 +52,8 @@ class SuenoEscuelaPresentacionTest(unittest.TestCase):
         self.assertIn("_numeros[i].text = str(", self.presentacion)
         self.assertIn("_pupitres[i].rotation_degrees.y", self.presentacion)
         self.assertIn("_timbre.play()", self.presentacion)
+        self.assertIn('ID_SONIDO_INQUIETANTE := "escuela:timbre_fuera_horario"', self.presentacion)
+        self.assertIn("sonido_inquietante.emit(ID_SONIDO_INQUIETANTE)", self.presentacion)
 
     def test_reloj_y_dibujo_tienen_anomalia_temporal_y_objeto(self):
         self.assertIn('reloj.name = "RelojTresAgujas"', self.presentacion)
