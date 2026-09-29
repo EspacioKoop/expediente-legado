@@ -67,7 +67,14 @@ func _espacio_de(fase: String) -> Dictionary:
 			MemoriaNocturnaContradicciones.todas(),
 		)
 	)
-	return MemoriaNocturnaPresentacion.aplicar(espacio, seleccion, memoria)
+	espacio = MemoriaNocturnaPresentacion.aplicar(espacio, seleccion, memoria)
+
+	# #1770: una vez fijados forma, contenido y memoria, el mutador secundario
+	# solo añade presentación. La elección se deriva de la Jornada ya vivida y
+	# nunca vuelve a seleccionar sala, objetivo o ruta.
+	var mutador := MutadoresSueno.seleccionar(jornada, int(jornada.get("raiz", 0)))
+	var reducir := bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false))
+	return MutadoresSueno.aplicar(espacio, mutador, reducir)
 
 
 ## Las presentaciones específicas se montan DESPUÉS del espacio jugable. Así la
@@ -88,6 +95,7 @@ func _entrar_en(fase: String) -> void:
 	var escuela := SuenoEscuela3D.montar(_mundo, _espacio_actual) as SuenoEscuela3D
 	if escuela != null:
 		escuela.sonido_inquietante.connect(_al_sonido_inquietante_sueno)
+	SuenoMutadorPresentacion3D.montar(_mundo, _espacio_actual)
 	_montar_respiracion_sueno()
 
 
