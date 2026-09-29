@@ -21,7 +21,7 @@ class AgentProtocolTest(unittest.TestCase):
             "title": "Mejorar handoff",
             "body": "- [ ] conserva scope\n- [x] emite evidencia",
         }
-        plan = {"files": ["scripts/a.py", "scripts/test_a.py"], "goal": "hacer contrato"}
+        plan = {"files": ["scripts/a.py"], "goal": "hacer contrato"}
         return mod.build_task_packet(
             issue,
             plan,
@@ -36,10 +36,45 @@ class AgentProtocolTest(unittest.TestCase):
         packet = self.packet()
         self.assertEqual(1, packet["schema"])
         self.assertEqual("TASK", packet["message_type"])
-        self.assertEqual(12, packet["scope"]["max_files"])
-        self.assertEqual(["scripts/a.py", "scripts/test_a.py"], packet["scope"]["allowed_files"])
+        self.assertEqual(1, packet["scope"]["max_files"])
+        self.assertEqual(["scripts/a.py"], packet["scope"]["allowed_files"])
         self.assertIn("do_not_weaken_assertions_to_make_tests_green", packet["scope"]["domain_constraints"])
         self.assertEqual(2, len(packet["acceptance_from_issue"]))
+        self.assertTrue(packet["context_policy"]["read_allowed_files_only"])
+        self.assertIn(".agent-context.md", packet["context_policy"]["forbidden_context_files"])
+
+    def test_task_packet_rechaza_mas_de_un_fichero_por_defecto(self):
+        issue = {"number": 1901, "title": "Executor", "body": "instrucciones"}
+        with self.assertRaisesRegex(ValueError, "plan excede max_files"):
+            mod.build_task_packet(
+                issue,
+                {"files": ["scripts/a.py", "scripts/b.py"], "goal": "dos"},
+                repository="EspacioKoop/expediente-legado",
+                base_sha="a" * 40,
+                policy_sha="b" * 40,
+                provider="qwen",
+                worker="qwen-primary",
+            )
+
+    def test_instrucciones_eliminan_agent_plan(self):
+        issue = {
+            "number": 1901,
+            "title": "Executor",
+            "body": "Antes\nAGENT_PLAN_BEGIN\n{\"files\":[\"x\"]}\nAGENT_PLAN_END\nDespués",
+        }
+        packet = mod.build_task_packet(
+            issue,
+            {"files": ["scripts/a.py"], "goal": "uno"},
+            repository="EspacioKoop/expediente-legado",
+            base_sha="a" * 40,
+            policy_sha="b" * 40,
+            provider="qwen",
+            worker="qwen-primary",
+        )
+        instructions = packet["objective"]["instructions"]
+        self.assertIn("Antes", instructions)
+        self.assertIn("Después", instructions)
+        self.assertNotIn("AGENT_PLAN", instructions)
 
     def test_prompt_lleva_scope_y_result_contract(self):
         prompt = mod.render_worker_prompt(self.packet(), "qwen")
@@ -47,7 +82,10 @@ class AgentProtocolTest(unittest.TestCase):
         self.assertIn("AGENT_RESULT_BEGIN", prompt)
         self.assertIn('"message_type": "RESULT"', prompt)
         self.assertIn("read_file/grep_search", prompt)
-        self.assertIn("No hagas commit, push, PR ni merge", prompt)
+        self.assertIn("NO planifiques de nuevo", prompt)
+        self.assertIn("No leas AGENTS.md", prompt)
+        self.assertNotIn("Para detalle consulta", prompt)
+        self.assertIn("No hagas", prompt)
 
     def test_result_anidado_se_parsea_sin_regex_fragil(self):
         packet = self.packet()
