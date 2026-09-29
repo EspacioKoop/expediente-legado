@@ -273,7 +273,7 @@ jobs:
         name: Reparar mediante OmniRoute
         if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && steps.omniroute.outputs.ready == 'true'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
+        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ secrets.OMNIROUTE_API_KEY }}
           openai_base_url: ${{ vars.OMNIROUTE_BASE_URL }}
@@ -286,7 +286,7 @@ jobs:
         name: Reparar con Qwen (primario)
         if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && env.HAS_QWEN == 'true' && steps.repair_omniroute.outcome != 'success'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
+        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ secrets.QWEN_API_KEY }}
           openai_base_url: ${{ vars.QWEN_BASE_URL || steps.qwen.outputs.url }}
@@ -336,7 +336,7 @@ jobs:
         name: Reparar con Qwen (fallback dinámico 1)
         if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_1 != ''
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
+        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_1] }}
           openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_1 }}
@@ -349,7 +349,7 @@ jobs:
         name: Reparar con Qwen (fallback dinámico 2)
         if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_2 != '' && steps.repair_qwen_fallback_1.outcome != 'success'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
+        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_2] }}
           openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_2 }}
@@ -362,7 +362,7 @@ jobs:
         name: Reparar con Qwen (fallback dinámico 3)
         if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_3 != '' && steps.repair_qwen_fallback_1.outcome != 'success' && steps.repair_qwen_fallback_2.outcome != 'success'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
+        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_3] }}
           openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_3 }}
@@ -375,7 +375,7 @@ jobs:
         name: Reparar con Qwen (fallback dinámico 4)
         if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_4 != '' && steps.repair_qwen_fallback_1.outcome != 'success' && steps.repair_qwen_fallback_2.outcome != 'success' && steps.repair_qwen_fallback_3.outcome != 'success'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
+        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_4] }}
           openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_4 }}
