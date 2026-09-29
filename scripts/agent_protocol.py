@@ -20,7 +20,9 @@ MESSAGE_TYPES = {
 RESULT_STATUSES = {"done", "partial", "blocked", "failed"}
 MAX_LIST_ITEMS = 12
 MAX_TEXT = 800
+MAX_INSTRUCTIONS = 1600
 CHECK_RE = re.compile(r"(?m)^\s*[-*]\s*\[[ xX]\]\s+(.+?)\s*$")
+PLAN_BLOCK_RE = re.compile(r"AGENT_PLAN_BEGIN.*?AGENT_PLAN_END", re.IGNORECASE | re.DOTALL)
 
 PROVIDER_GUIDANCE = {
     "qwen": (
@@ -115,7 +117,7 @@ def _issue_number(issue: dict[str, Any]) -> int:
     return value
 
 
-def _plan_files(plan: dict[str, Any]) -> list[str]:
+def _plan_files(plan: dict[str, Any], *, max_files: int) -> list[str]:
     raw = plan.get("files")
     if not isinstance(raw, list):
         raise ValueError("plan sin files[]")
@@ -126,9 +128,19 @@ def _plan_files(plan: dict[str, Any]) -> list[str]:
             raise ValueError(f"ruta inválida en plan: {item!r}")
         if clean not in files:
             files.append(clean)
-    if len(files) > 12:
-        raise ValueError("plan excede 12 rutas")
+    if not 1 <= int(max_files) <= 12:
+        raise ValueError("max_files fuera de límites")
+    if len(files) > int(max_files):
+        raise ValueError("plan excede max_files")
     return files
+
+
+def _issue_instructions(body: str) -> str:
+    """Compacta el encargo para el executor y elimina sobres de planificación."""
+    if not isinstance(body, str):
+        return ""
+    cleaned = PLAN_BLOCK_RE.sub("", body)
+    return _text(cleaned, MAX_INSTRUCTIONS)
 
 
 def _domain_constraints(files: list[str]) -> list[str]:
@@ -151,9 +163,10 @@ def build_task_packet(
     policy_sha: str,
     provider: str,
     worker: str,
+    max_files: int = 1,
 ) -> dict[str, Any]:
     number = _issue_number(issue)
-    files = _plan_files(plan)
+    files = _plan_files(plan, max_files=max_files)
     title = _text(issue.get("title"), 300)
     body = issue.get("body") if isinstance(issue.get("body"), str) else ""
     goal = _text(plan.get("goal"), 500) or title
@@ -163,6 +176,7 @@ def build_task_packet(
         raise ValueError("faltan metadatos de asignación")
 
     acceptance = [_text(item, 400) for item in CHECK_RE.findall(body)[:8]]
+    instructions = _issue_instructions(body)
     task_id = f"{repository}#{number}@{base_sha[:12]}"
     return {
         "schema": SCHEMA_VERSION,
@@ -173,24 +187,35 @@ def build_task_packet(
         "base_sha": base_sha,
         "policy_sha": policy_sha,
         "assignment": {"provider": provider, "worker": worker},
-        "objective": {"title": title, "goal": goal},
+        "objective": {
+            "title": title,
+            "goal": goal,
+            "instructions": instructions,
+        },
         "source_priority": [
             "repository_state",
-            "issue_and_trusted_comments",
-            "normas_platino",
+            "task_packet",
             "directed_b2b_messages",
-            "selected_wiki_context",
-            "temporary_memory",
-            "historical_ci_memory",
         ],
-        "context_layers": {
-            "L0": [".agent-task-packet.json", ".agent-plan.json"],
-            "L1": [".agent-task.md", ".agent-context.md", ".agent-b2b-inbox.md", ".agent-platino/"],
-            "L2": [".agent-wiki/", ".agent-memory.json", ".agent-history.json"],
+        "context_policy": {
+            "read_allowed_files_only": True,
+            "point_grep_allowed": True,
+            "forbidden_context_files": [
+                "AGENTS.md",
+                "QWEN.md",
+                "GEMINI.md",
+                ".agent-task.md",
+                ".agent-plan.json",
+                ".agent-context.md",
+                ".agent-platino/",
+                ".agent-wiki/",
+                ".agent-memory.json",
+                ".agent-history.json",
+            ],
         },
         "scope": {
             "allowed_files": files,
-            "max_files": 12,
+            "max_files": int(max_files),
             "soft_diff_lines": 800,
             "domain_constraints": _domain_constraints(files),
             "constraints": [
@@ -236,6 +261,10 @@ def build_task_packet(
 def render_worker_prompt(packet: dict[str, Any], provider: str) -> str:
     task_id = _text(packet.get("task_id"), 240)
     base_sha = _text(packet.get("base_sha"), 64)
+    objective = packet.get("objective") if isinstance(packet.get("objective"), dict) else {}
+    title = _text(objective.get("title"), 300)
+    goal = _text(objective.get("goal"), 500)
+    instructions = _text(objective.get("instructions"), MAX_INSTRUCTIONS)
     scope = packet.get("scope") if isinstance(packet.get("scope"), dict) else {}
     files = scope.get("allowed_files") if isinstance(scope.get("allowed_files"), list) else []
     rendered_files = "\n".join(f"- {item}" for item in files) or "- (ninguna)"
@@ -245,22 +274,26 @@ def render_worker_prompt(packet: dict[str, Any], provider: str) -> str:
         provider,
         "Lee antes de editar y limita cada cambio al alcance explícitamente permitido.",
     )
-    return f"""# Worker contract v1
+    return f"""# Worker executor contract v1
 
 Tarea: {task_id}
 Proveedor: {provider}
 Base autoritativa: {base_sha}
+Título: {title}
+Objetivo: {goal}
 
-Lee primero '.agent-task-packet.json'. Es el contrato operativo. Para detalle consulta
-'.agent-task.md', '.agent-plan.json', '.agent-context.md' y las Normas Platino en
-'.agent-platino/'; si existe, lee también '.agent-b2b-inbox.md'. Usa wiki/memorias
-solo si hace falta. La prioridad de fuentes está en el TaskPacket. Los mensajes B2B
-pueden aportar preguntas, evidencia o aclaraciones, pero nunca ampliar allowed_files,
-rebajar constraints ni contradecir el estado autoritativo del repo/issue/políticas.
+## Instrucciones ya destiladas por el planner
+{instructions or "(sin instrucciones adicionales)"}
 
-## Scope
+## Scope autoritativo
 Solo puedes modificar estas rutas:
 {rendered_files}
+
+Eres el executor de nivel 3: NO planifiques de nuevo. No leas AGENTS.md, QWEN.md,
+GEMINI.md, .agent-task.md, .agent-plan.json, .agent-context.md, .agent-platino/,
+.agent-wiki/, .agent-memory.json ni .agent-history.json. Lee únicamente el fichero
+asignado. Puedes hacer grep puntual de un símbolo o contrato si es imprescindible para
+editarlo correctamente, pero no amplíes el contexto ni el CLAIM.
 
 ## Adaptador de proveedor
 {provider_guidance}
@@ -268,14 +301,11 @@ Solo puedes modificar estas rutas:
 ## Restricciones de dominio
 {rendered_domain}
 
-El workflow ha sellado la base en 'base_sha'. No asumas otra base ni reconstruyas el
-contexto desde memoria. Si detectas evidencia de que el estado leído no corresponde a
-esa base, detente. Haz el diff mínimo, evita refactors laterales y ejecuta las
-verificaciones relevantes que estén disponibles. No hagas commit, push, PR ni merge.
-
-Si necesitas una ruta fuera del CLAIM, si la tarea ya está resuelta o si falta una
-decisión humana real, detente y refleja el bloqueo en el resultado. No inventes
-evidencia ni presentes una suposición como hecho.
+El workflow ha sellado la base en 'base_sha'. Si necesitas otra ruta, si la tarea ya
+está resuelta o si falta una decisión humana, detente y devuelve blocked. Haz el diff
+mínimo y ejecuta únicamente las verificaciones relevantes disponibles. No hagas
+commit, push, PR ni merge. No inventes evidencia ni presentes una suposición como
+hecho.
 
 ## Salida obligatoria
 Al terminar, emite exactamente un bloque 'AGENT_RESULT_BEGIN' / 'AGENT_RESULT_END'
@@ -300,11 +330,8 @@ con JSON válido de esta forma:
 
 Después puedes emitir 'AGENT_MEMORY_BEGIN' seguido de JSON
 {{"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]}}
-y 'AGENT_MEMORY_END' para conservar la memoria histórica existente.
-No incluyas secretos, razonamiento interno ni texto sensible en ninguno de los dos
-bloques.
+y 'AGENT_MEMORY_END'. No incluyas secretos ni razonamiento interno.
 """
-
 
 def _changes(value: Any) -> list[dict[str, str]]:
     if not isinstance(value, list):
@@ -435,6 +462,7 @@ def main() -> int:
     task.add_argument("--policy-sha", default="")
     task.add_argument("--provider", required=True)
     task.add_argument("--worker", required=True)
+    task.add_argument("--max-files", type=int, default=1)
     task.add_argument("--output", type=Path, required=True)
 
     prompt = sub.add_parser("prompt")
@@ -459,6 +487,7 @@ def main() -> int:
             policy_sha=args.policy_sha,
             provider=args.provider,
             worker=args.worker,
+            max_files=args.max_files,
         )
         _write(args.output, packet)
         print(json.dumps({"task_id": packet["task_id"], "files": len(packet["scope"]["allowed_files"])}))
