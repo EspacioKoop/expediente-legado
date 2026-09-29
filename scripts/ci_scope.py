@@ -12,7 +12,9 @@ from typing import Iterable
 FAST_PREFIXES = (
     ".github/workflows/agent-",
     ".github/workflows/feedback-deno",
+    ".github/workflows/mando-deno",
     "infra/feedback-deno/",
+    "infra/mando-deno/",
     "docs/agents/",
     "scripts/agent_",
     "scripts/test_agent_",

@@ -38,6 +38,16 @@ class CiScopeTest(unittest.TestCase):
         )
         self.assertEqual("fast", result["mode"])
 
+    def test_sala_de_mando_deno_es_fast(self):
+        # #1778: app Deno aparte con su propio workflow de fmt/check/test.
+        result = mod.classify(
+            [
+                "infra/mando-deno/mando.ts",
+                ".github/workflows/mando-deno.yml",
+            ]
+        )
+        self.assertEqual("fast", result["mode"])
+
     def test_runtime_o_script_generico_fuerza_full(self):
         for path in (
             "godot/main.gd",
