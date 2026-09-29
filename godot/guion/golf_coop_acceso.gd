@@ -290,11 +290,14 @@ func _asegurar_autoridad() -> void:
 	jugadores.sort()
 	jugadores = jugadores.slice(0, 2)
 	var configuraciones := _configuraciones_para_autoridad()
-	_autoridad = MinijuegoGolfAutoridad.new(
-		_room_id,
-		_session_id,
-		jugadores,
-		configuraciones,
+	_autoridad = (
+		MinijuegoGolfAutoridad
+		. new(
+			_room_id,
+			_session_id,
+			jugadores,
+			configuraciones,
+		)
 	)
 	if not _autoridad.valida():
 		_autoridad = null
