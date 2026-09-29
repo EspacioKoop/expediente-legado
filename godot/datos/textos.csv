@@ -843,6 +843,8 @@ DEPEND_KIKE_SUENO_3,"Game over, tronco. Aquí no se acaban las fichas: se acaban
 DEPEND_KIKE_SUENO_EXTRANO,Nunca vienes a la tienda. Da igual: aquí dentro todos jugamos la misma partida.
 RELIGION_933_CUNADO_EXPOSICION,"Eso ya lo había visto circular por aquí. Cada mesa lo cuenta de una manera."
 RELIGION_933_CORRESPONDENCIA_PRACTICA,"Conocerlo es una cosa. Haber estado allí es otra."
+RELIGION_933_CUNADO_CONVICCION,"Si eso lo has dicho tú, prefiero discutírtelo a ti y no a una etiqueta."
+RELIGION_933_CORRESPONDENCIA_CONVICCION,"Lo que declares tú no convierte a los demás en una fila del mismo formulario."
 DIALOGO_DEP_OPCION_PRAGMATICA,"Solo venía a resolver lo mío."
 DIALOGO_DEP_OPCION_CURIOSIDAD,"¿Y tú cómo ves el barrio últimamente?"
 DIALOGO_DEP_OPCION_CLIENTE,"¿Te acuerdas de lo que me llevé la otra vez?"
