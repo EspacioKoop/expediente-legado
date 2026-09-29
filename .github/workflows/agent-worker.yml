@@ -634,6 +634,32 @@ jobs:
               fi
           fi
 
+      - id: protocol
+        name: Compilar TaskPacket y prompt del worker
+        if: steps.reserve.outputs.reserved == 'true'
+        env:
+          PROVIDER: ${{ inputs.provider }}
+          WORKER: ${{ inputs.worker }}
+        run: |
+          set -euo pipefail
+          base_sha="$(git rev-parse HEAD)"
+          policy_sha="$(tr -d '\r\n' < .agent-platino-sha)"
+          python3 scripts/agent_protocol.py task \
+            --issue-json /tmp/agent-issue.json \
+            --plan .agent-plan.json \
+            --repo "$GITHUB_REPOSITORY" \
+            --base-sha "$base_sha" \
+            --policy-sha "$policy_sha" \
+            --provider "$PROVIDER" \
+            --worker "$WORKER" \
+            --output .agent-task-packet.json
+          python3 scripts/agent_protocol.py prompt \
+            --packet .agent-task-packet.json \
+            --provider "$PROVIDER" \
+            --output .agent-worker-prompt.md
+          [[ "$(jq -r '.base_sha' .agent-task-packet.json)" == "$base_sha" ]]
+          echo "task_id=$(jq -r '.task_id' .agent-task-packet.json)" >> "$GITHUB_OUTPUT"
+
       - name: Crear rama
         if: steps.reserve.outputs.reserved == 'true'
         env:
