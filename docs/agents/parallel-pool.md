@@ -28,7 +28,7 @@ AGENT_PLAN_BEGIN
 AGENT_PLAN_END
 ```
 
-Después añade `agent:auto`. El worker (`scripts/agent_delegated_plan.py`) toma el plan válido más reciente de cuentas `OWNER`/`MEMBER`/`COLLABORATOR` que no sean bots, **omite el planificador** y sigue el circuito normal: validación de rutas, CLAIM en #182, implementación, guard, preflight y PR draft. Para corregir el plan basta un comentario nuevo. Si el plan se queda corto de rutas, el replan acaba en `agent:needs-human` y el nivel 2 lo amplía.
+Después añade `agent:auto`. El worker (`scripts/agent_delegated_plan.py`) toma el plan válido más reciente de cuentas `OWNER`/`MEMBER`/`COLLABORATOR` que no sean bots, **omite el planificador** y sigue el circuito normal: validación de rutas contra #182 + #1713, CLAIM nuevo en #1713, implementación, guard, preflight y PR draft. Para corregir el plan basta un comentario nuevo. Si el plan se queda corto de rutas, el replan acaba en `agent:needs-human` y el nivel 2 lo amplía.
 
 Sin plan delegado, el pool planifica como siempre.
 
@@ -66,7 +66,7 @@ Después de la implementación, el worker ejecuta un guard provider-agnostic. Si
 1. restaura esas rutas antes de preflight, memoria, commit o push;
 2. libera la reserva del intento descartado;
 3. publica `AGENT_POOL_REPLAN` con las rutas observadas;
-4. reejecuta el mismo issue/proveedor para que el planner amplíe el corte y vuelva a comprobar #182.
+4. reejecuta el mismo issue/proveedor para que el planner amplíe el corte y vuelva a comprobar #182 + #1713.
 
 Se permiten como máximo **dos replans** por issue. Si el modelo vuelve a salir del alcance, el issue pasa a `agent:needs-human`. Este mecanismo recupera errores de planificación; no autoriza a saltarse una reserva existente.
 
@@ -78,7 +78,7 @@ La rama conserva el formato `agent/qwen-ISSUE-RUN` o `agent/gemini-ISSUE-RUN`, p
 
 ## Contexto y memoria
 
-Cada worker conserva la jerarquia vigente: repositorio/issue/#181/#182/Normas Platino > contexto seleccionado de wiki > Deno KV > CI brain SQLite/Turso.
+Cada worker conserva la jerarquia vigente: repositorio/issue/#181/#1713 + histórico #182/Normas Platino > contexto seleccionado de wiki > Deno KV > CI brain SQLite/Turso.
 
 El context packer limita la wiki antes de planificar y se vuelve a ejecutar con las rutas reservadas antes de implementar.
 
