@@ -36,5 +36,8 @@
     "duda": "duda declarada",
     "no_adscripcion": "no adscripción declarada",
     "cambio": "cambio declarado"
-  }
+  },
+  "ecos_titulo": "Ecos sociales registrados:",
+  "eco_social_formato": "• %s reaccionó a una decisión registrada.",
+  "eco_social_formato_detallado": "• %s dejó registrada esta reacción: %s."
 }
