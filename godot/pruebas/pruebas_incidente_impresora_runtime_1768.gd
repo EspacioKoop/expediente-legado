@@ -1,5 +1,7 @@
 extends SceneTree
 
+const DiaIncidenteImpresoraApp = preload("res://guion/dia_incidente_impresora_app.gd")
+
 
 class HostFalso:
 	extends Node3D
