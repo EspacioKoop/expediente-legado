@@ -138,7 +138,7 @@ class AgentMemoryContractTest(unittest.TestCase):
             self.assertIn("Normas Platino", doc)
             self.assertIn("wiki", doc.lower())
             self.assertIn("memoria Deno KV", doc)
-            self.assertIn("repositorio/issue/#181/#182 + Normas Platino", doc)
+            self.assertIn("repositorio/issue/#181/#1713 + histórico #182 + Normas Platino", doc)
 
         self.assertIn("Normas Platino, wiki y memoria", self.agents_doc)
         self.assertIn("no necesita un secret nuevo", self.agents_doc)

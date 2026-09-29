@@ -4,7 +4,7 @@ Lee y respeta `AGENTS.md` antes de modificar el repositorio.
 
 ## Reservas
 
-Antes de editar publica en #182 un `CLAIM` con `lease=48h` al final:
+Antes de editar publica en #1713 un `CLAIM` con `lease=48h` al final. Durante el rollover, consulta #182 + #1713 para detectar reservas heredadas; los eventos nuevos se escriben solo en #1713:
 
 ```text
 CLAIM issue=#N agent=<nombre> branch=<rama> files=<rutas> goal=<objetivo> lease=48h

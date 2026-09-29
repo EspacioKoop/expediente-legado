@@ -52,7 +52,7 @@ El flujo de lanzamiento es:
 
 1. El workflow lee el issue, sus comentarios recientes y `.agent-task.md`.
 2. Inicia Qwen Code con `openai_base_url` apuntando a FreeInference y `openai_model` al valor de `QWEN_MODEL` (o `qwen3-coder-plus`).
-3. El modelo inspecciona sin editar, propone un plan como JSON, y el workflow valida y reserva las rutas en #182.
+3. El modelo inspecciona sin editar, propone un plan como JSON, y el workflow valida las rutas contra #182 + #1713 y publica la reserva nueva en #1713.
 4. Tras la reserva, se relanza Qwen Code con herramientas de escritura para implementar solo el plan.
 
 ### Requisitos de permisos
@@ -65,9 +65,9 @@ El workflow nunca aprueba ni fusiona PRs; el ajuste solo permite crear el draft.
 
 ## Señales esperadas
 
-### #182 (Registro único de reservas)
+### #1713 (registro activo de reservas)
 
-Durante la ejecución, el workflow publicará comentarios en #182 con este formato:
+Durante la ejecución, el workflow publicará comentarios nuevos en #1713 con este formato:
 
 ```text
 CLAIM issue=#1545 agent=Autopilot-qwen branch=agent/qwen-1545-12345 files=docs/agents/qwen-freeinference.md goal=runbook-Qwen-via-FreeInference lease=48h
@@ -91,7 +91,7 @@ RELEASE issue=#1545 branch=agent/qwen-1545-12345 motivo=colision-autopilot
 El workflow crea un PR **draft** a `main` con:
 
 - Título: `agent(qwen): #1545 <título-del-issue>`
-- Cuerpo: `Refs #1545` + mención al plan en #182 y al preflight ejecutado.
+- Cuerpo: `Refs #1545` + mención al plan en #1713 y al preflight ejecutado.
 - **Sin auto-merge**: el PR queda draft para revisión humana.
 
 ### CI
@@ -123,7 +123,7 @@ Tras publicar la rama, el workflow lanza `CI` explícitamente sobre ella. Nunca 
 | CI no se lanza sobre la rama | Workflow `agent-autopilot.yml` no disparó | Verificar que el issue tiene label `agent:qwen`; revisar `Actions` para ver el historial del runner. |
 | Plan no parseable en el workflow | El modelo no generó `AGENT_PLAN_BEGIN ... AGENT_PLAN_END` | Revisar `.agent-task.md` y el prompt; asegurarse de que el modelo responde con el formato JSON requerido. |
 | `sin-corte-seguro` | El modelo generó `files: []` | El workflow aplica `agent:needs-human`; revisar manualmente el issue. |
-| `solape` en reserva | Otra reserva activa protege una ruta del plan | Publicar `RELEASE` en #182 o acordar con el titular de la reserva activa según las Normas Platino. |
+| `solape` en reserva | Otra reserva activa protege una ruta del plan | Publicar `RELEASE` en #1713 o acordar con el titular de la reserva activa según las Normas Platino. |
 | CI falla tras 2 reparaciones | `agent-ci-repair` agotó intentos | El workflow aplica `agent:needs-human`; revisión humana obligatoria. |
 | PR no se crea (push ok, PR falla) | Permisos `GITHUB_TOKEN` insuficientes | Activar "Allow GitHub Actions to create and approve pull requests" en Settings → Actions. |
 
@@ -133,7 +133,7 @@ Este issue (#1545) sirve como primera validación end-to-end de Qwen vía FreeIn
 
 1. Verificar que `QWEN_BASE_URL` apunta a FreeInference.
 2. Etiquetar con `agent:qwen` y observar el flujo completo.
-3. Comprobar el CLAIM en #182, el PR draft y CI verde.
+3. Comprobar el CLAIM en #1713, el PR draft y CI verde.
 4. Confirmar que no se modificaron rutas fuera del plan.
 
 Si todo pasa, este documento queda como referencia para futuras ejecuciones con FreeInference.
@@ -144,5 +144,5 @@ Si todo pasa, este documento queda como referencia para futuras ejecuciones con 
 - [CONTRIBUTING.md](../../CONTRIBUTING.md) — Flujo de ramas y gates.
 - [AGENTS.md](../../AGENTS.md) — Instrucciones para agentes.
 - [QWEN.md](../../QWEN.md) — Contrato del autopilot Qwen Code.
-- Issue #182 — Registro único de reservas.
+- Issue #1713 — Registro activo de reservas; #182 queda como histórico de transición.
 - Issue #181 — Plan maestro y prioridad.

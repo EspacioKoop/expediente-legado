@@ -6,7 +6,7 @@ Este documento resume cómo los agentes de IA pueden contribuir al proyecto **Ex
 
 1. **Fuentes de verdad** (consultar en orden):
    - Prioridad y punto de control: [Plan maestro #181](https://github.com/EspacioKoop/expediente-legado/issues/181)
-   - Reservas activas: [Registro único #182](https://github.com/EspacioKoop/expediente-legado/issues/182)
+   - Reservas activas: [Registro central v2 #1713](https://github.com/EspacioKoop/expediente-legado/issues/1713); #182 es histórico durante el rollover
    - Fases y versiones: [`ROADMAP.md`](ROADMAP.md)
    - Flujo de ramas y gates: [`CONTRIBUTING.md`](CONTRIBUTING.md)
    - Estado general: [`README.md`](README.md)
@@ -18,18 +18,18 @@ Este documento resume cómo los agentes de IA pueden contribuir al proyecto **Ex
 
 1. **Comprobar `main`, PR abiertos, issue, comentarios, plan maestro y reservas.**
 2. **Elegir un pendiente prioritario libre**. No abrir un segundo corte si ya hay una PR activa que cubre el mismo hueco.
-3. **Publicar un CLAIM en #182** antes de modificar archivos:
+3. **Publicar un CLAIM en #1713** antes de modificar archivos:
 
    ```text
    CLAIM issue=#N agent=<nombre> branch=<rama> files=<rutas> goal=<objetivo> lease=48h
    ```
 
-4. **Releer inmediatamente #182**. Se gana la reserva activa anterior por fecha de GitHub; en empate, el comentario con ID menor. Si hay solape, no editar esos archivos; la reserva **no bloquea la cooperación**: revisar, proponer, entregar parches al titular y trabajar rutas no reservadas del mismo issue con CLAIM propio sigue permitido. Editar lo reservado exige acuerdo del titular en #182.
+4. **Releer inmediatamente #182 + #1713**. Se gana la reserva activa anterior por fecha de GitHub; en empate, el comentario con ID menor. Si hay solape, no editar esos archivos; la reserva **no bloquea la cooperación**: revisar, proponer, entregar parches al titular y trabajar rutas no reservadas del mismo issue con CLAIM propio sigue permitido. Editar lo reservado exige acuerdo del titular en #1713.
 5. **Trabajar en rama propia desde `main` actualizado**: `feature/NN-slug`, `fix/NN-slug` o `docs/NN-slug`.
 6. **Mantener el corte pequeño**. Trabajar por verticales, no con una reescritura total de un paraguas grande.
 7. **Añadir regresión ejecutable** cuando cambie comportamiento (test de contrato real si Godot lo permite).
 8. **Pasar las pruebas canónicas** y revisar el diff final.
-9. **Abrir PR a `main`** y registrar en #182:
+9. **Abrir PR a `main`** y registrar en #1713:
 
    ```text
    PR_READY issue=#N pr=#M sha=<sha> pruebas=<qué pasó> limites=<qué no cubre>
@@ -40,7 +40,7 @@ Este documento resume cómo los agentes de IA pueden contribuir al proyecto **Ex
 
 ## Archivos compartidos (declarar explícitamente en el CLAIM)
 
-Los siguientes archivos son considerados compartidos y deben reservarse expresamente en #182 si se van a tocar:
+Los siguientes archivos son considerados compartidos y deben reservarse expresamente en #1713 si se van a tocar:
 
 - `README.md`, `AGENTS.md`, `CONTRIBUTING.md`, `ROADMAP.md`
 - `godot/datos/textos.csv`, `godot/datos/casos.json`

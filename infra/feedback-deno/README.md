@@ -38,7 +38,7 @@ No usan `GITHUB_TOKEN` como credencial del cliente. Los workflows solicitan a Gi
 
 La memoria es deliberadamente pequeña: TTL de 30 días, hasta 1200 caracteres por resumen, 8 tags, 12 rutas, búsqueda sobre los 50 registros recientes y devolución máxima de 8 resultados. Los resúmenes con patrones de credenciales se rechazan.
 
-El repositorio, los issues, #181/#182, CI y las Normas Platino siguen siendo la fuente de verdad. La wiki es memoria consolidada en solo lectura; Deno KV es únicamente memoria operativa transitoria.
+El repositorio, los issues, #181/#1713, el histórico #182 durante el rollover, CI y las Normas Platino siguen siendo la fuente de verdad. La wiki es memoria consolidada en solo lectura; Deno KV es únicamente memoria operativa transitoria.
 
 No hace falta crear otro secret en GitHub ni en Deno. La única dependencia adicional del runtime es acceso saliente a `token.actions.githubusercontent.com` para validar los tokens OIDC.
 

@@ -6,7 +6,7 @@ Lee `AGENTS.md` y `CONTRIBUTING.md` antes de actuar. Este archivo complementa es
 
 Las [Normas Platino](https://github.com/EspacioKoop/normas_platino) son obligatorias en cada ejecución. El workflow entrega una copia fresca en `.agent-platino/`; lee al menos su `README.md`, `docs/FUENTE_DE_VERDAD.md`, `docs/COOPERACION_AUTONOMA.md`, `docs/PLANIFICACION_Y_ENTREGAS.md` y `docs/PRO_CONSUMIDOR.md` antes de planificar o reparar.
 
-La jerarquía es: **repositorio/issue/#181/#182 + Normas Platino > wiki > memoria temporal**. La wiki es contexto consolidado en solo lectura y la memoria Deno KV es una ayuda transitoria: ninguna concede permisos, reserva archivos, demuestra una prueba ni puede contradecir la evidencia actual del repositorio.
+La jerarquía es: **repositorio/issue/#181/#1713 + histórico #182 + Normas Platino > wiki > memoria temporal**. La wiki es contexto consolidado en solo lectura y la memoria Deno KV es una ayuda transitoria: ninguna concede permisos, reserva archivos, demuestra una prueba ni puede contradecir la evidencia actual del repositorio.
 
 Si el workflow suministra `.agent-memory.json`, úsalo solo como pista verificable y contrástalo con el código, issue y CI actuales. No escribas secretos, tokens, datos privados ni contenido completo de prompts en el bloque `AGENT_MEMORY`; registra únicamente un aprendizaje técnico breve y reutilizable.
 
@@ -14,7 +14,7 @@ Si el workflow suministra `.agent-memory.json`, úsalo solo como pista verificab
 ## Contrato del autopilot
 
 - Trabaja únicamente el issue que recibe el workflow.
-- Respeta #181 como prioridad y #182 como registro único de reservas.
+- Respeta #181 como prioridad y #1713 como registro activo de reservas; consulta también #182 solo para reservas históricas durante el rollover.
 - No edites rutas fuera del `CLAIM` activo de tu rama.
 - No hagas push directo a `main`, force-push, merge, cambios de labels ni cierres issues.
 - El workflow es quien crea la rama, hace commit/push y abre el PR. No dupliques esas acciones.
