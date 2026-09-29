@@ -19,7 +19,7 @@ def texto() -> str:
 
 
 class AuditoriasTest(unittest.TestCase):
-    def test_catalogo_minimo_y_determinista():
+    def test_catalogo_minimo_y_determinista(self):
         contenido = texto()
         for identificador in (
             '"sin_releer"',
@@ -32,7 +32,7 @@ class AuditoriasTest(unittest.TestCase):
         assert ".sort()" in contenido
     
     
-    def test_estado_guardable_sin_recompensas_de_juego():
+    def test_estado_guardable_sin_recompensas_de_juego(self):
         contenido = texto()
         assert '"activas"' in contenido
         assert '"fallidas"' in contenido
@@ -41,27 +41,27 @@ class AuditoriasTest(unittest.TestCase):
             assert termino not in contenido
     
     
-    def test_no_se_acopla_a_jornada_ni_ui():
+    def test_no_se_acopla_a_jornada_ni_ui(self):
         contenido = texto()
         for termino in ("Jornada.", "Partida.", "Control", "Button", "Label"):
             assert termino not in contenido
     
     
-    def test_fallo_y_completado_son_terminales():
+    def test_fallo_y_completado_son_terminales(self):
         contenido = texto()
         assert 'estado(auditoria, id) != "activa"' in contenido
         assert 'return "fallida"' in contenido
         assert 'return "completada"' in contenido
     
     
-    def test_persistencia_y_migracion_viven_en_partida():
+    def test_persistencia_y_migracion_viven_en_partida(self):
         partida = PARTIDA.read_text(encoding="utf-8")
         assert "Auditorias.CLAVE_ESTADO: Auditorias.nueva()" in partida
         assert "Auditorias.validar(guardado[Auditorias.CLAVE_ESTADO])" in partida
         assert "Auditorias.asegurar_en_estado(fusionado)" in partida
     
     
-    def test_accion_sobrante_se_evalua_antes_de_fichar_en_ambas_rutas():
+    def test_accion_sobrante_se_evalua_antes_de_fichar_en_ambas_rutas(self):
         llamada = "Auditorias.resolver_fin_archivo(partida.estado)"
         fichar = "Jornada.fichar_salida(jornada)"
         for ruta in (DIA, ASCENSOR):
@@ -70,12 +70,12 @@ class AuditoriasTest(unittest.TestCase):
             assert contenido.index(llamada) < contenido.index(fichar)
     
     
-    def test_reasignacion_limpia_la_condicion_de_la_vuelta():
+    def test_reasignacion_limpia_la_condicion_de_la_vuelta(self):
         prometeo = PROMETEO.read_text(encoding="utf-8")
         assert "Auditorias.reiniciar_vuelta(estado)" in prometeo
     
     
-    def test_el_predicado_no_bloquea_ni_recompensa():
+    def test_el_predicado_no_bloquea_ni_recompensa(self):
         contenido = texto()
         assert '"sin_accion_al_fichar"' in contenido
         assert "resolver_fin_archivo" in contenido
@@ -83,7 +83,7 @@ class AuditoriasTest(unittest.TestCase):
             assert termino not in contenido
     
     
-    def test_seleccion_de_vuelta_tiene_estado_persistible_y_unico():
+    def test_seleccion_de_vuelta_tiene_estado_persistible_y_unico(self):
         contenido = texto()
         assert 'const CLAVE_SELECCION_RESUELTA := "seleccion_resuelta"' in contenido
         assert "static func seleccion_pendiente(" in contenido
@@ -91,7 +91,7 @@ class AuditoriasTest(unittest.TestCase):
         assert "nueva([], historial_previo, false)" in contenido
     
     
-    def test_alta_y_reasignacion_resuelven_antes_de_empezar():
+    def test_alta_y_reasignacion_resuelven_antes_de_empezar(self):
         creador = CREADOR.read_text(encoding="utf-8")
         dia = DIA.read_text(encoding="utf-8")
         assert "Auditorias.resolver_seleccion(_partida.estado, _auditorias.seleccion())" in creador
@@ -106,7 +106,7 @@ class AuditoriasTest(unittest.TestCase):
         )
     
     
-    def test_modal_de_reasignacion_solo_emite_intencion():
+    def test_modal_de_reasignacion_solo_emite_intencion(self):
         contenido = NUEVA_VIDA.read_text(encoding="utf-8")
         assert "signal seleccion_confirmada(seleccion: Array)" in contenido
         assert "AuditoriasSiga.new()" in contenido
@@ -114,7 +114,7 @@ class AuditoriasTest(unittest.TestCase):
             assert prohibido not in contenido
     
     
-    def test_gato_diario_se_evalua_antes_de_dormir_en_ambas_rutas():
+    def test_gato_diario_se_evalua_antes_de_dormir_en_ambas_rutas(self):
         llamada = "Auditorias.resolver_fin_casa(partida.estado)"
         dormir = "Jornada.dormir(jornada)"
         for ruta in (DIA, SUENO):
@@ -123,7 +123,7 @@ class AuditoriasTest(unittest.TestCase):
             assert contenido.index(llamada) < contenido.index(dormir)
     
     
-    def test_gato_diario_usa_solo_estado_existente_y_no_recompensa():
+    def test_gato_diario_usa_solo_estado_existente_y_no_recompensa(self):
         contenido = texto()
         bloque = contenido.split("static func resolver_fin_casa", 1)[1].split(
             "static func validar", 1
@@ -135,7 +135,7 @@ class AuditoriasTest(unittest.TestCase):
             assert termino not in bloque
     
     
-    def test_sin_releer_se_evalua_solo_tras_una_apertura_admitida():
+    def test_sin_releer_se_evalua_solo_tras_una_apertura_admitida(self):
         visor = VISOR.read_text(encoding="utf-8")
         bloque = visor.split("func _al_elegir_documento", 1)[1].split(
             "func _mostrar_registro", 1
@@ -150,7 +150,7 @@ class AuditoriasTest(unittest.TestCase):
         assert "or auditoria_mutada" in bloque
     
     
-    def test_sin_releer_no_bloquea_ni_duplica_reglas_de_jornada():
+    def test_sin_releer_no_bloquea_ni_duplica_reglas_de_jornada(self):
         contenido = texto()
         bloque = contenido.split("static func resolver_apertura_documento", 1)[1].split(
             "static func validar", 1
@@ -161,7 +161,7 @@ class AuditoriasTest(unittest.TestCase):
             assert termino not in bloque
     
     
-    def test_sueno_completo_distingue_salidas_normales_y_forzadas():
+    def test_sueno_completo_distingue_salidas_normales_y_forzadas(self):
         dia = DIA.read_text(encoding="utf-8")
         gato = GATO.read_text(encoding="utf-8")
     
@@ -196,7 +196,7 @@ class AuditoriasTest(unittest.TestCase):
         assert duelo.index(resolver_fallo) < duelo.index("SuenoCombate.resolver")
     
     
-    def test_sueno_completo_recibe_un_hecho_y_no_duplica_sistemas():
+    def test_sueno_completo_recibe_un_hecho_y_no_duplica_sistemas(self):
         contenido = texto()
         bloque = contenido.split("static func resolver_fin_sueno", 1)[1].split(
             "static func validar", 1
@@ -217,7 +217,7 @@ class AuditoriasTest(unittest.TestCase):
             assert termino not in bloque
     
     
-    def test_resumen_narrativo_es_puro_y_prefiere_historial_de_la_vuelta():
+    def test_resumen_narrativo_es_puro_y_prefiere_historial_de_la_vuelta(self):
         contenido = texto()
         bloque = contenido.split("static func resumen_narrativo", 1)[1].split(
             "static func _condiciones_de_registro", 1
