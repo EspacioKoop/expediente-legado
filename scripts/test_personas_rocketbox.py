@@ -19,11 +19,31 @@ PRUEBA_GODOT = "pruebas/pruebas_personas_rocketbox.gd"
 RESUMEN_GODOT = re.compile(r"(\d+) pasadas, 0 fallos")
 
 
+
+
+def _objeto_sin_claves_duplicadas(pares):
+    objeto = {}
+    for clave, valor in pares:
+        if clave in objeto:
+            raise ValueError(f"clave JSON duplicada en procedencia: {clave}")
+        objeto[clave] = valor
+    return objeto
+
 def _avatares():
     return sorted(CARPETA.glob("*.glb"))
 
 
 class PersonasRocketboxTest(unittest.TestCase):
+    def test_procedencia_no_tiene_claves_json_duplicadas(self):
+        # json.loads() acepta claves repetidas y conserva solo la última. Eso
+        # puede borrar silenciosamente la ficha de un avatar aunque el JSON sea
+        # sintácticamente válido.
+        datos = json.loads(
+            PROCEDENCIA.read_text(encoding="utf-8"),
+            object_pairs_hook=_objeto_sin_claves_duplicadas,
+        )
+        self.assertIsInstance(datos["assets"], list)
+
     def test_cada_companero_apunta_a_un_avatar_versionado(self):
         # Compañeros de oficina, dependientes de tienda y cuerpos elegibles del
         # protagonista: entre los tres usan todos los avatares del repositorio
