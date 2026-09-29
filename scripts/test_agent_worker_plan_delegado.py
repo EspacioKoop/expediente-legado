@@ -60,5 +60,17 @@ class CableadoPlanDelegadoTest(unittest.TestCase):
                 )
 
 
+    def test_limpieza_clasifica_sobrecarga_leyendo_fichero(self):
+        inicio = self.worker.index("name: Limpiar fallo o cancelacion")
+        paso = self.worker[inicio:]
+        policy = (ROOT / "scripts" / "agent_failure_policy.py").read_text(encoding="utf-8")
+        self.assertIn("scripts/agent_failure_policy.py", paso)
+        self.assertIn("--text-file", paso)
+        self.assertIn("overloaded", policy)
+        self.assertNotIn("/tmp/agent-output-plan", paso)
+        self.assertIn("/tmp/agent-output-implement", paso)
+        self.assertIn("/tmp/agent-output-implement", self._paso("validate_diff"))
+
+
 if __name__ == "__main__":
     unittest.main()
