@@ -886,7 +886,7 @@ func _abrir_combate_hack_slash(objetivo: Dictionary, zona: Area3D = null) -> boo
 			_mundo,
 			_hud,
 			_ambiente,
-			partida.estado,
+			partida,
 			jornada,
 			_raiz(),
 		)
