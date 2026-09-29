@@ -34,10 +34,11 @@ DEF KEY_RIGHT   EQU $10
 DEF KEY_LEFT    EQU $20
 DEF KEY_START_A EQU $09
 
-DEF ESTADO_TITULO  EQU 0
-DEF ESTADO_CARRERA EQU 1
-DEF ESTADO_META    EQU 2
-DEF ESTADO_WRECK   EQU 3
+DEF ESTADO_TITULO     EQU 0
+DEF ESTADO_CARRERA    EQU 1
+DEF ESTADO_META       EQU 2
+DEF ESTADO_WRECK      EQU 3
+DEF ESTADO_ENTREMANGA EQU 4
 
 ; Tiles de fondo/HUD.
 DEF TILE_ROAD       EQU 1
@@ -123,6 +124,7 @@ Inicio:
     ld [wFrame], a
     ld [wInv], a
     ld [wTurbo], a
+    ld [wManga], a
 
     ld a, 1
     ldh [rIE], a
@@ -165,6 +167,8 @@ BuclePrincipal:
     jp z, EstadoTitulo
     cp ESTADO_CARRERA
     jp z, EstadoCarrera
+    cp ESTADO_ENTREMANGA
+    jp z, EstadoEntreManga
     jp EstadoFinal
 
 RenderVBlank:
@@ -197,7 +201,7 @@ EstadoTitulo:
     ld a, [wNewKeys]
     and KEY_START_A
     jp z, BuclePrincipal
-    call IniciarCarrera
+    call IniciarCampeonato
     jp BuclePrincipal
 
 EstadoCarrera:
@@ -211,11 +215,18 @@ EstadoCarrera:
     call ComprobarColisiones
     jp BuclePrincipal
 
+EstadoEntreManga:
+    ld a, [wNewKeys]
+    and KEY_START_A
+    jp z, BuclePrincipal
+    call IniciarManga
+    jp BuclePrincipal
+
 EstadoFinal:
     ld a, [wNewKeys]
     and KEY_START_A
     jp z, BuclePrincipal
-    call IniciarCarrera
+    call IniciarCampeonato
     jp BuclePrincipal
 
 PrepararTitulo:
@@ -263,7 +274,17 @@ PrepararTitulo:
     ld [BG_MAP + (13 * 32) + 9], a
     ret
 
+IniciarCampeonato:
+    xor a
+    ld [wManga], a
+    ld [wScore], a
+    jp IniciarManga
+
 IniciarCarrera:
+    ; Alias histórico usado por pruebas/herramientas.
+    jp IniciarCampeonato
+
+IniciarManga:
     call ApagarLCDSeguro
     call BorrarOAMParcial
     call LimpiarBG
@@ -275,7 +296,6 @@ IniciarCarrera:
     ld [wPlayerLane], a
     ld [wDistance], a
     ld [wDistanceTick], a
-    ld [wScore], a
     ld [wStage], a
     ld [wInv], a
     ld [wTurbo], a
@@ -287,9 +307,7 @@ IniciarCarrera:
     ld [wDraft], a
     ld [wDraftDirty], a
 
-    ld a, 3
-    ld [wLives], a
-    ld [wNitro], a
+    call ConfigurarRecursosManga
 
     xor a
     ld [wR1Lane], a
@@ -395,10 +413,24 @@ AvanzarCarrera:
     ld [wHudDirty], a
     call ActualizarEtapa
 
+    call ObjetivoDistanciaActual
+    ld c, a
     ld a, [wDistance]
-    cp 90
+    cp c
     ret c
 
+    ld a, [wManga]
+    cp 2
+    jr z, .campeonato_completo
+    inc a
+    ld [wManga], a
+    ld a, ESTADO_ENTREMANGA
+    ld [wEstado], a
+    call SonidoMeta
+    call PrepararIntermedio
+    ret
+
+.campeonato_completo:
     ld a, ESTADO_META
     ld [wEstado], a
     call SonidoMeta
@@ -515,12 +547,23 @@ MoverObstaculo:
     ret
 
 ElegirCambioCarril:
-    ; A=carril del rival. Devuelve A=0, 1 o $FF: un carril hacia el jugador.
-    ; Los bits 1-2 del frame dan variedad (~75%) sin PRNG adicional.
+    ; A=carril del rival. La manga decide la agresividad sin PRNG nuevo:
+    ; clasificatoria ~50 %, Nilo ~75 %, final persigue siempre si hay hueco.
     ld b, a
+    ld a, [wManga]
+    cp 2
+    jr z, .perseguir
+    or a
+    jr z, .conservador
     ld a, [wFrame]
     and %110
     jr z, .quieto
+    jr .perseguir
+.conservador:
+    ld a, [wFrame]
+    and %010
+    jr z, .quieto
+.perseguir:
     ld a, [wPlayerLane]
     cp b
     jr z, .quieto
@@ -713,6 +756,34 @@ Golpe:
     call PrepararFinal
     ret
 
+PrepararIntermedio:
+    call ApagarLCDSeguro
+    call BorrarOAMParcial
+    call LimpiarBG
+
+    ; Bandera sin trofeo: la manga terminó, el campeonato no.
+    ld a, TILE_FINISH
+    ld [BG_MAP + (6 * 32) + 9], a
+
+    ld a, TILE_R
+    ld [BG_MAP + (9 * 32) + 6], a
+    ld a, [wManga]
+    inc a
+    add DIGIT_BASE
+    ld [BG_MAP + (9 * 32) + 8], a
+
+    ld a, TILE_S
+    ld [BG_MAP + (11 * 32) + 6], a
+    ld a, [wScore]
+    ld de, BG_MAP + (11 * 32) + 8
+    call EscribirDosDigitos
+
+    ld a, TILE_ARROW
+    ld [BG_MAP + (14 * 32) + 9], a
+    ld a, $93
+    ldh [rLCDC], a
+    ret
+
 PrepararFinal:
     call ApagarLCDSeguro
     call BorrarOAMParcial
@@ -753,6 +824,14 @@ DibujarHUD:
     ld de, BG_MAP + 1
     call EscribirDosDigitos
 
+    ; R1/R2/R3 deja visible la manga sin gastar sprites.
+    ld a, TILE_R
+    ld [BG_MAP + 3], a
+    ld a, [wManga]
+    inc a
+    add DIGIT_BASE
+    ld [BG_MAP + 4], a
+
     ld a, TILE_S
     ld [BG_MAP + 5], a
     ld a, [wScore]
@@ -792,6 +871,30 @@ DibujarRebufo:
     ld [hli], a
     dec c
     jr nz, .segmento
+    ret
+
+ObjetivoDistanciaActual:
+    ld a, [wManga]
+    ld e, a
+    ld d, 0
+    ld hl, DistanciasManga
+    add hl, de
+    ld a, [hl]
+    ret
+
+ConfigurarRecursosManga:
+    ld a, [wManga]
+    ld e, a
+    ld d, 0
+    ld hl, VidasManga
+    add hl, de
+    ld a, [hl]
+    ld [wLives], a
+
+    ld hl, NitroManga
+    add hl, de
+    ld a, [hl]
+    ld [wNitro], a
     ret
 
 EscribirDosDigitos:
@@ -1308,6 +1411,13 @@ SonidoMeta:
     ret
 
 SECTION "Datos", ROM0
+DistanciasManga:
+    db 60, 75, 90
+VidasManga:
+    db 3, 3, 2
+NitroManga:
+    db 3, 2, 2
+
 Tiles:
     ; 0 vacio
     rept 8
@@ -1458,3 +1568,4 @@ wR1Dir:        ds 1
 wR2Dir:        ds 1
 wDraft:        ds 1
 wDraftDirty:   ds 1
+wManga:        ds 1

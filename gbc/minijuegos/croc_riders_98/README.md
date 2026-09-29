@@ -30,6 +30,18 @@ La primera versión compilable resultaba difícil de leer y mostraba parpadeo. L
 - el cocodrilo se redibuja con hocico largo, ojos, cuerpo verde, depósito rojo y rueda/cola más claros;
 - el tráfico rota entre **taxi**, **barrera de obra** y **autobús**, cada uno con silueta y paleta propias.
 
+## Campeonato
+
+La partida ya no es una única carrera de 90 unidades. El torneo encadena tres mangas y conserva la puntuación entre ellas:
+
+1. **Clasificatoria** — 60 unidades, 3 escamas y 3 nitros. Los rivales cambian de carril de forma conservadora (~50 % de las oportunidades).
+2. **Nilo** — 75 unidades, 3 escamas y 2 nitros. La agresividad vuelve al ~75 % del segundo pase.
+3. **Final de Cairo** — 90 unidades, 2 escamas y 2 nitros. Si el jugador ocupa otro carril, el rival intenta cerrarlo siempre que llega a su ventana de cambio.
+
+Distancia, tráfico, rebufo, turbo e invulnerabilidad se reinician al empezar cada manga; **la puntuación no**. Entre mangas aparece una pantalla de checkpoint sin trofeo. Solo completar la tercera muestra la meta final.
+
+El HUD usa `R1`/`R2`/`R3` para indicar la manga actual sin añadir sprites.
+
 ## Mecánica
 
 - **Izquierda / Derecha**: cambiar de carril.
@@ -43,8 +55,9 @@ La primera versión compilable resultaba difícil de leer y mostraba parpadeo. L
 - **Rebufo:** ir detrás de un rival en su mismo carril, antes de la zona de choque, carga el medidor de rebufo (cuatro segmentos). Un choque lo vacía.
 - **Nitro con rebufo:** si el rebufo está lleno al pulsar A, el nitro lo consume y el turbo dura 150 frames en lugar de 90. Sin rebufo lleno, el nitro dura lo de siempre y el rebufo se conserva.
 - La distancia activa automáticamente los cuatro decorados/checkpoints.
-- Al llegar a 90 unidades se muestra el trofeo; al perder las 3 escamas aparece la pantalla de choque.
-- **A / Start** inicia y reinicia la carrera.
+- Cada manga termina en 60/75/90 unidades; solo la tercera muestra el trofeo.
+- Perder todas las escamas muestra la pantalla de choque y reinicia el campeonato completo.
+- **A / Start** inicia el campeonato, continúa entre mangas y reinicia tras meta/choque.
 
 El HUD se mantiene deliberadamente compacto: `D` indica distancia, `S` puntuación, el icono de escama muestra resistencia, el icono de nitro las cargas restantes y los cuatro segmentos de la derecha el rebufo. El medidor es fondo, no sprites, y se redibuja en su propio VBlank para no apurar el frame en que se pinta el HUD.
 
@@ -105,6 +118,10 @@ vaivén y cambia un carril hacia el jugador antes de la zona de choque (y a
 veces no cambia); el rebufo se carga detrás de un rival, se redibuja en
 VBlank, prolonga el nitro al gastarse lleno y se pierde con un golpe; y los
 adelantamientos en turbo puntúan doble sin pasar de 99.
+
+El campeonato (#1811) añade pruebas de progresión 60/75/90, recursos
+3/3 → 3/2 → 2/2, puntuación acumulada, pantalla intermedia y agresividad
+diferenciada por manga, manteniendo las regresiones de VBlank existentes.
 
 PyBoy es solo una dependencia de pruebas, no se distribuye con la ROM.
 El workflow GBC compila el cartucho; la regresión se ejecuta explícitamente
