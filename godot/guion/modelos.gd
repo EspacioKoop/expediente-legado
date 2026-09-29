@@ -61,6 +61,7 @@ const ALTO_PERSONA := 1.75
 ## Subcarpeta de `RUTA` con los avatares fotorrealistas (#275).
 const CARPETA_REALISTAS := "rocketbox/"
 const IDENTIDAD_ROCKETBOX := preload("res://guion/identidad_historica_rocketbox.gd")
+const ROCKETBOX_SILUETAS := preload("res://guion/rocketbox_siluetas_modulares.gd")
 
 const PERFILES_FACIALES := {
 	"emperador":
@@ -145,6 +146,7 @@ static func persona(cuerpo: Node3D, nombre: String, color: Color, retrato: Strin
 		_adaptar_realista(pieza)
 		if not retrato.is_empty():
 			IDENTIDAD_ROCKETBOX.aplicar(pieza, retrato)
+			ROCKETBOX_SILUETAS.aplicar(pieza, retrato)
 		AnimacionesUAL.preparar_base(pieza)
 		_animar(pieza)
 		return true
