@@ -97,6 +97,17 @@ class CiScopeTest(unittest.TestCase):
         self.assertIn("steps.scope.outputs.mode == 'fast'", workflow)
         self.assertIn("git lfs pull", workflow)
 
+    def test_pull_request_usa_merge_base_actual_y_no_payload_stale(self):
+        workflow = CI.read_text(encoding="utf-8")
+        scope = workflow.split("- id: scope", 1)[1].split(
+            "- name: Preflight infra rápido", 1
+        )[0]
+        self.assertIn('if [[ "$EVENT_NAME" == pull_request ]]', scope)
+        self.assertIn("git fetch origin main --no-tags", scope)
+        self.assertIn('base="$(git merge-base HEAD origin/main)"', scope)
+        self.assertNotIn("PR_BASE_SHA", scope)
+        self.assertNotIn("github.event.pull_request.base.sha", scope)
+
 
 if __name__ == "__main__":
     unittest.main()
