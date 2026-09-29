@@ -16,7 +16,7 @@ const GhostRemoto3D = preload("res://guion/red/ghost_remoto_3d.gd")
 const GhostServicio = preload("res://guion/red/ghost_servicio.gd")
 const IdentidadOnline = preload("res://guion/red/identidad_online.gd")
 const TransporteNulo = preload("res://guion/red/transporte_nulo.gd")
-const TransporteWebSocket = preload("res://guion/red/transporte_websocket.gd")
+const TransporteOnlineFactory = preload("res://guion/red/transporte_online_factory.gd")
 
 const AJUSTE_ENDPOINT := "multiplayer/ghosts/websocket_url"
 const ROOM_ID_DEFECTO := "GHOSTS-98"
@@ -184,7 +184,10 @@ func _configurar_desde_identidad() -> void:
 	var actor := identidad.actor_public_id()
 	if actor.is_empty():
 		return
-	configurar_transporte(TransporteWebSocket.new(endpoint), actor)
+	var transporte := TransporteOnlineFactory.crear(endpoint, false)
+	if transporte == null:
+		return
+	configurar_transporte(transporte, actor)
 
 
 func _sincronizar_contexto(ahora_unix: int) -> void:
