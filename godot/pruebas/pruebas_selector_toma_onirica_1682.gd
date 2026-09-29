@@ -28,11 +28,15 @@ func _ejecutar() -> void:
 	dia.partida.estado = Partida.nueva()
 	GrabacionOniricaEstado.iniciar_cinta(dia.partida.estado, 10.0)
 	_comprobar(
-		bool(GrabacionOniricaEstado.registrar_toma(dia.partida.estado, _toma("doc-a", 0.8)).get("ok")),
+		bool(
+			GrabacionOniricaEstado.registrar_toma(dia.partida.estado, _toma("doc-a", 0.8)).get("ok")
+		),
 		"primera toma entra en cinta",
 	)
 	_comprobar(
-		bool(GrabacionOniricaEstado.registrar_toma(dia.partida.estado, _toma("doc-b", 0.2)).get("ok")),
+		bool(
+			GrabacionOniricaEstado.registrar_toma(dia.partida.estado, _toma("doc-b", 0.2)).get("ok")
+		),
 		"segunda toma entra en cinta",
 	)
 	_comprobar(
@@ -56,8 +60,12 @@ func _ejecutar() -> void:
 	_comprobar(selector.get_child_count() == 2, "muestra exactamente las dos tomas")
 	var primera := selector.get_child(0) as Button
 	var segunda := selector.get_child(1) as Button
-	_comprobar(primera != null and primera.text == "1✓", "la toma válida se identifica sin copy nuevo")
-	_comprobar(segunda != null and segunda.text == "2~", "la contaminada se distingue sin reinterpretarla")
+	_comprobar(
+		primera != null and primera.text == "1✓", "la toma válida se identifica sin copy nuevo"
+	)
+	_comprobar(
+		segunda != null and segunda.text == "2~", "la contaminada se distingue sin reinterpretarla"
+	)
 	_comprobar(
 		primera != null and primera.focus_mode == Control.FOCUS_ALL,
 		"botones admiten foco de teclado o mando",
@@ -66,7 +74,9 @@ func _ejecutar() -> void:
 		segunda != null and segunda.focus_mode == Control.FOCUS_ALL,
 		"segunda toma admite foco de teclado o mando",
 	)
-	_comprobar(not primera.button_pressed and not segunda.button_pressed, "no hay selección implícita")
+	_comprobar(
+		not primera.button_pressed and not segunda.button_pressed, "no hay selección implícita"
+	)
 
 	var contenedor := GrabacionOniricaEstado.asegurar_en_estado(dia.partida.estado)
 	var tomas_antes := JSON.stringify((contenedor["cinta"] as Dictionary).get("tomas", []))
@@ -82,8 +92,10 @@ func _ejecutar() -> void:
 		"seleccionar no reevalúa ni modifica las tomas",
 	)
 	_comprobar(
-		String(GrabacionOniricaEstado.seleccion_actual(dia.partida.estado).get("estado", ""))
-		== GrabacionOniricaContrato.ESTADO_VALIDA,
+		(
+			String(GrabacionOniricaEstado.seleccion_actual(dia.partida.estado).get("estado", ""))
+			== GrabacionOniricaContrato.ESTADO_VALIDA
+		),
 		"estado seleccionado procede de la evaluación persistida",
 	)
 
@@ -95,8 +107,10 @@ func _ejecutar() -> void:
 	)
 	_comprobar(dia.guardados == 2, "cambiar selección persiste una vez")
 	_comprobar(
-		String(GrabacionOniricaEstado.seleccion_actual(dia.partida.estado).get("estado", ""))
-		== GrabacionOniricaContrato.ESTADO_CONTAMINADA,
+		(
+			String(GrabacionOniricaEstado.seleccion_actual(dia.partida.estado).get("estado", ""))
+			== GrabacionOniricaContrato.ESTADO_CONTAMINADA
+		),
 		"también puede elegirse una toma contaminada sin ocultarla",
 	)
 
@@ -106,7 +120,9 @@ func _ejecutar() -> void:
 	selector = controlador._hud_tomas
 	primera = selector.get_child(0) as Button
 	segunda = selector.get_child(1) as Button
-	_comprobar(not primera.button_pressed and segunda.button_pressed, "HUD refleja la selección persistida")
+	_comprobar(
+		not primera.button_pressed and segunda.button_pressed, "HUD refleja la selección persistida"
+	)
 
 	_terminar(dia)
 
