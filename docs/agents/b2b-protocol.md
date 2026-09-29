@@ -49,6 +49,6 @@ prompts o secretos mientras se valida el protocolo.
 
 ## CLI
 
-`agent_b2b.py` ofrece `task`, `result`, `review`, `prompt` y
-`validate`. El parser limita listas/textos y el reviewer mantiene compatibilidad
+`agent_b2b.py` ofrece `task`, `result`, `review`, `prompt`, `validate` y
+`verify`. `verify` recalcula SHA-256 y tamaño antes de entregar el TaskPacket al worker. El parser limita listas/textos y el reviewer mantiene compatibilidad
 con `scripts/agent_review_contract.py`.
