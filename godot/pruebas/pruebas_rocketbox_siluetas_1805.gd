@@ -51,27 +51,21 @@ func _probar_variante(retrato: String, cuerpo_id: String) -> Dictionary:
 	await process_frame
 	var despues := Siluetas.auditar(pieza)
 	_comprobar(aplicado, "%s recibe el kit modular" % retrato)
-	_comprobar(
-		int(despues["skeletons"]) == esqueletos_antes, "%s no añade Skeleton3D" % retrato
-	)
+	_comprobar(int(despues["skeletons"]) == esqueletos_antes, "%s no añade Skeleton3D" % retrato)
 	_comprobar(
 		int(despues["overlay_piezas"]) >= 4, "%s cambia contorno con varias piezas" % retrato
 	)
 	_comprobar(
 		int(despues["texturas"]) == int(antes["texturas"]), "%s no duplica texturas" % retrato
 	)
-	_comprobar(
-		Siluetas.dentro_de_presupuesto(antes, despues), "%s respeta presupuesto" % retrato
-	)
+	_comprobar(Siluetas.dentro_de_presupuesto(antes, despues), "%s respeta presupuesto" % retrato)
 	_comprobar(
 		pieza.find_child("IdentidadHistorica275", true, false) == identidad,
 		"%s no sustituye sus rasgos históricos" % retrato,
 	)
 
 	for clip in ["idle", "walk", "telefono", "conversar"]:
-		_comprobar(
-			AnimacionesUAL.reproducir(pieza, clip, 0.2), "%s mantiene %s" % [retrato, clip]
-		)
+		_comprobar(AnimacionesUAL.reproducir(pieza, clip, 0.2), "%s mantiene %s" % [retrato, clip])
 		var reproductor := Modelos._reproductor(pieza)
 		_comprobar(
 			reproductor != null and String(reproductor.current_animation).begins_with("rocketbox/"),
