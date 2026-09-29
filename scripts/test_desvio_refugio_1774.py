@@ -38,7 +38,7 @@ class DesvioRefugio1774Test(unittest.TestCase):
     def test_lluvia_y_nieve_tienen_presentacion_distinta(self):
         self.assertIn("Clima.LLUVIA", self.refugio)
         self.assertIn('"CharcoExterior"', self.refugio)
-        self.assertIn('"GoteoBorde_%s"', self.refugio)
+        self.assertIn('"GoteoBorde%d"', self.refugio)
         self.assertIn("Clima.NIEVE", self.refugio)
         self.assertIn('"NieveBordeTecho"', self.refugio)
 
