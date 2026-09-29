@@ -80,6 +80,28 @@ class AgentB2BTests(unittest.TestCase):
         self.assertEqual(packet["verdict"], "findings")
         self.assertEqual(packet["findings"], ["falta test"])
 
+    def test_planner_prompt_uses_unreserved_intake(self):
+        with tempfile.TemporaryDirectory() as td:
+            packet = Path(td) / "intake.json"
+            packet.write_text(
+                json.dumps(
+                    {
+                        "schema": 1,
+                        "type": "TASK",
+                        "issue": 1866,
+                        "phase": "plan",
+                        "scope": {"files": [], "reserved": False, "max_files": 12},
+                        "handoff": {"from": "orchestrator", "to": "planner"},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            prompt = agent_b2b.compile_prompt("plan", "gemini", packet)
+            self.assertIn("Rol: planner", prompt)
+            self.assertIn("AGENT_PLAN_BEGIN", prompt)
+            self.assertIn("files=[]", prompt)
+            self.assertIn("#1713", prompt)
+
     def test_prompt_contains_scope_and_result_contract(self):
         with tempfile.TemporaryDirectory() as td:
             packet = Path(td) / "task.json"
@@ -103,6 +125,9 @@ class AgentB2BTests(unittest.TestCase):
     def test_worker_wires_task_result_review_handoffs(self):
         text = WORKER.read_text(encoding="utf-8")
         self.assertIn("Compilar TaskPacket B2B", text)
+        self.assertIn("Compilar intake B2B del planner", text)
+        self.assertIn(".agent-plan-task-packet.json", text)
+        self.assertIn(".agent-plan-prompt.md", text)
         self.assertIn("agent_b2b.py result", text)
         self.assertIn("agent_b2b.py review", text)
         self.assertIn(".agent-task-packet.json", text)
