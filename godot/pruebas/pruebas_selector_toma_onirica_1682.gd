@@ -87,6 +87,11 @@ func _ejecutar() -> void:
 		"pulsar 1 selecciona explícitamente la primera",
 	)
 	_comprobar(dia.guardados == 1, "selección explícita guarda una vez")
+	# Seleccionar reconstruye el HUD y libera los botones anteriores al siguiente frame.
+	# Relee las referencias antes de emitir otra pulsación para no usar un nodo ya liberado.
+	selector = controlador._hud_tomas
+	primera = selector.get_child(0) as Button
+	segunda = selector.get_child(1) as Button
 	_comprobar(
 		JSON.stringify((contenedor["cinta"] as Dictionary).get("tomas", [])) == tomas_antes,
 		"seleccionar no reevalúa ni modifica las tomas",
