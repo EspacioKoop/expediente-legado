@@ -90,6 +90,7 @@ func _construir() -> void:
 		for ejemplo in ejemplos:
 			caja.add_child(_etiqueta(_texto_ejemplo(ejemplo)))
 
+	_montar_religion(caja)
 	_montar_auditorias(caja)
 	_montar_vida(caja)
 
@@ -101,6 +102,73 @@ func _construir() -> void:
 	_boton.pressed.connect(func(): continuar_solicitado.emit())
 	caja.add_child(_boton)
 	_boton.grab_focus()
+
+
+
+func _montar_religion(caja: VBoxContainer) -> void:
+	var resumen_crudo = _resumen.get("religion", {})
+	if typeof(resumen_crudo) != TYPE_DICTIONARY:
+		return
+	var resumen: Dictionary = resumen_crudo
+	if String(resumen.get("estado", "")) != "factual":
+		return
+
+	var modulos_crudos = resumen.get("modulos", [])
+	if typeof(modulos_crudos) != TYPE_ARRAY:
+		return
+	var hechos := []
+	for modulo_crudo in modulos_crudos:
+		if typeof(modulo_crudo) != TYPE_DICTIONARY:
+			continue
+		var hechos_crudos = (modulo_crudo as Dictionary).get("hechos", [])
+		if typeof(hechos_crudos) != TYPE_ARRAY:
+			continue
+		for hecho_crudo in hechos_crudos:
+			if typeof(hecho_crudo) == TYPE_DICTIONARY:
+				hechos.append((hecho_crudo as Dictionary).duplicate(true))
+	if hechos.is_empty():
+		return
+
+	var titulo := _etiqueta(_t("religion_titulo"))
+	titulo.name = "ReligionTitulo"
+	caja.add_child(titulo)
+
+	var limite := mini(4, hechos.size())
+	for indice in range(limite):
+		var linea := _etiqueta(_texto_hecho_religion(hechos[indice]))
+		linea.name = "ReligionHecho%d" % indice
+		caja.add_child(linea)
+	if hechos.size() > limite:
+		caja.add_child(_etiqueta(_t("religion_mas") % (hechos.size() - limite)))
+
+
+func _texto_hecho_religion(hecho: Dictionary) -> String:
+	var canal := String(hecho.get("canal", ""))
+	var canales = _textos.get("religion_canales", {})
+	var nombre_canal := canal
+	if canales is Dictionary:
+		nombre_canal = String((canales as Dictionary).get(canal, canal))
+
+	var contexto := _legible(String(hecho.get("contexto", "")))
+	var detalle := _legible(String(hecho.get("fuente", "")))
+	if canal == ReligionEventos.CANAL_CONVICCION:
+		var declaraciones = _textos.get("religion_declaraciones", {})
+		var declaracion := String(hecho.get("declaracion", ""))
+		if declaraciones is Dictionary and not declaracion.is_empty():
+			detalle = String((declaraciones as Dictionary).get(declaracion, declaracion))
+	elif canal == ReligionEventos.CANAL_VINCULO:
+		var actor := String(hecho.get("actor", ""))
+		if not actor.is_empty():
+			detalle = _legible(actor)
+
+	return _t("religion_hecho_formato") % [nombre_canal, contexto, detalle]
+
+
+func _legible(valor: String) -> String:
+	var limpio := valor.strip_edges()
+	if limpio.is_empty():
+		return _t("religion_sin_detalle")
+	return limpio.replace(":", " · ").replace("_", " ").replace("-", " ").capitalize()
 
 
 func _montar_auditorias(caja: VBoxContainer) -> void:
