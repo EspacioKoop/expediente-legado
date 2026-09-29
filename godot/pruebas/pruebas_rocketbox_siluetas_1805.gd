@@ -1,6 +1,7 @@
 extends SceneTree
 
 const Siluetas := preload("res://guion/rocketbox_siluetas_modulares.gd")
+const Identidad := preload("res://guion/identidad_historica_rocketbox.gd")
 
 const CASOS := {
 	"emperador": "rocketbox/business_male_02",
@@ -38,7 +39,7 @@ func _probar_variante(retrato: String, cuerpo_id: String) -> Dictionary:
 	var pieza := escena.instantiate() as Node3D
 	root.add_child(pieza)
 	Modelos._adaptar_realista(pieza)
-	IdentidadHistoricaRocketboxFixture.aplicar(pieza, retrato)
+	Identidad.aplicar(pieza, retrato)
 	await process_frame
 
 	var antes := Siluetas.auditar(pieza)
@@ -85,11 +86,3 @@ func _comprobar(condicion: bool, mensaje: String) -> void:
 		return
 	_fallos += 1
 	push_error(mensaje)
-
-
-## Alias local para que el smoke use exactamente la misma implementación del
-## runtime sin depender del nombre de autoload.
-class IdentidadHistoricaRocketboxFixture:
-	static func aplicar(pieza: Node3D, retrato: String) -> void:
-		var identidad := preload("res://guion/identidad_historica_rocketbox.gd")
-		identidad.aplicar(pieza, retrato)
