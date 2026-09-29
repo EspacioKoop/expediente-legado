@@ -40,6 +40,9 @@ func _probar_variante(retrato: String, cuerpo_id: String) -> Dictionary:
 	root.add_child(pieza)
 	Modelos._adaptar_realista(pieza)
 	Identidad.aplicar(pieza, retrato)
+	# Replica la preparación que Modelos.persona aplica al avatar real antes de animarlo.
+	AnimacionesUAL.preparar_base(pieza)
+	Modelos._animar(pieza)
 	await process_frame
 
 	var antes := Siluetas.auditar(pieza)
