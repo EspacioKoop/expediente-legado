@@ -228,7 +228,7 @@ async function inbox(
   if (
     input.schema !== 1 ||
     !B2B_RECIPIENTS.has(recipient) ||
-    (input.task_id !== undefined && !taskId)
+    !taskId
   ) {
     return json({ ok: false, error: "invalid_request" }, 400);
   }
@@ -236,9 +236,7 @@ async function inbox(
     return json({ ok: false, error: "forbidden" }, 403);
   }
 
-  const prefix: Deno.KvKey = taskId
-    ? ["agent_pool", "b2b", "inbox", recipient, taskId]
-    : ["agent_pool", "b2b", "inbox", recipient];
+  const prefix: Deno.KvKey = ["agent_pool", "b2b", "inbox", recipient, taskId];
 
   const messages: AgentB2BMessage[] = [];
   for await (const entry of kv.list<string>({ prefix }, { limit: limit * 2 })) {
