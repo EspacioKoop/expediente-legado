@@ -8,7 +8,7 @@ extends VBoxContainer
 ## se integran en un corte posterior sobre esta misma superficie.
 
 const IdentidadOnline = preload("res://guion/red/identidad_online.gd")
-const TransporteWebSocket = preload("res://guion/red/transporte_websocket.gd")
+const TransporteOnlineFactory = preload("res://guion/red/transporte_online_factory.gd")
 const CombateCoopServicio = preload("res://guion/red/combate_coop_servicio.gd")
 const CombateCoop = preload("res://guion/combate_coop.gd")
 
@@ -187,7 +187,7 @@ func _entrar_sala() -> void:
 	if _servicio != null:
 		_servicio.cerrar()
 	var transporte: RefCounted = (
-		transporte_override if transporte_override != null else TransporteWebSocket.new(endpoint)
+		transporte_override if transporte_override != null else TransporteOnlineFactory.crear(endpoint, false)
 	)
 	_servicio = CombateCoopServicio.new(transporte)
 	var apertura := (
@@ -355,7 +355,7 @@ func _endpoint() -> String:
 
 
 func _endpoint_valido(endpoint: String) -> bool:
-	return endpoint.begins_with("ws://") or endpoint.begins_with("wss://")
+	return TransporteOnlineFactory.endpoint_valido(endpoint)
 
 
 func _sala_valida(valor: String) -> bool:
