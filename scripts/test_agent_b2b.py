@@ -19,6 +19,26 @@ class AgentB2BTests(unittest.TestCase):
             {"TASK", "CLAIM", "EVIDENCE", "BLOCKER", "QUESTION", "RESULT", "REVIEW", "HANDOFF"},
         )
 
+    def test_claim_event_is_typed_and_correlated(self):
+        args = type(
+            "Args",
+            (),
+            {
+                "type": "CLAIM",
+                "issue": 1866,
+                "provider": "qwen",
+                "worker": "qwen-primary",
+                "summary": "reserva aceptada",
+                "ref": ["github-comment:123", "branch:agent/qwen-1866"],
+                "from_role": "orchestrator",
+                "to_role": "implementer",
+            },
+        )()
+        packet = agent_b2b.build_event(args)
+        self.assertEqual(packet["type"], "CLAIM")
+        self.assertEqual(packet["handoff"], {"from": "orchestrator", "to": "implementer"})
+        self.assertIn("github-comment:123", packet["refs"])
+
     def test_result_contract_is_advisory_and_measured(self):
         task = {
             "schema": 1,
@@ -128,6 +148,8 @@ class AgentB2BTests(unittest.TestCase):
         self.assertIn("Compilar intake B2B del planner", text)
         self.assertIn(".agent-plan-task-packet.json", text)
         self.assertIn(".agent-plan-prompt.md", text)
+        self.assertIn("agent_b2b.py event", text)
+        self.assertIn(".agent-claim-packet.json", text)
         self.assertIn("agent_b2b.py result", text)
         self.assertIn("agent_b2b.py review", text)
         self.assertIn(".agent-task-packet.json", text)
