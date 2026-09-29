@@ -59,12 +59,15 @@ func _preparar_ecos(resumen: Dictionary) -> Array:
 		var evento := String(lectura.get("evento_observado", "")).strip_edges()
 		if actor.is_empty() or evento.is_empty():
 			continue
-		candidatos.append(
-			{
-				"tipo": "social",
-				"id": "%s:%s" % [actor, evento],
-				"detalle": (lectura as Dictionary).duplicate(true),
-			}
+		(
+			candidatos
+			. append(
+				{
+					"tipo": "social",
+					"id": "%s:%s" % [actor, evento],
+					"detalle": (lectura as Dictionary).duplicate(true),
+				}
+			)
 		)
 
 	candidatos.sort_custom(func(a, b): return String(a["id"]) < String(b["id"]))
