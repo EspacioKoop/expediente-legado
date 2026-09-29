@@ -21,8 +21,11 @@ class GrabacionOniricaRuntime1682Test(unittest.TestCase):
         self.assertIn("_sujeto.global_position", self.runtime)
         self.assertIn('get_node_or_null("Camara")', self.controlador)
         self.assertIn('jornada.get("leido_hoy", [])', self.controlador)
-        combinado = self.runtime + self.controlador
-        self.assertNotIn("seleccionar_toma", combinado)
+        self.assertNotIn("seleccionar_toma", self.runtime)
+        self.assertIn(
+            "GrabacionOniricaEstado.seleccionar_toma(partida_actual.estado, indice)",
+            self.controlador,
+        )
         # #1682 sigue sin poseer adquisición: el runtime jamás crea cinta.
         # #140 sí puede iniciarla desde el controller al recoger la cámara física.
         self.assertNotIn("iniciar_cinta", self.runtime)
