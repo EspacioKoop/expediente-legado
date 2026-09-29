@@ -29,13 +29,13 @@ jobs:
       HAS_QWEN: ${{ secrets.QWEN_API_KEY != '' }}
       HAS_GEMINI: ${{ secrets.GEMINI_API_KEY != '' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
           ref: main
           fetch-depth: 1
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: '3.12'
 
@@ -120,7 +120,7 @@ jobs:
         if: steps.select.outputs.run == 'true' && env.HAS_QWEN == 'true'
         timeout-minutes: 5
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@v1
+        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
         with:
           openai_api_key: ${{ secrets.QWEN_API_KEY }}
           openai_base_url: ${{ steps.qwen_config.outputs.url }}
@@ -134,7 +134,7 @@ jobs:
         if: steps.select.outputs.run == 'true' && env.HAS_GEMINI == 'true' && (env.HAS_QWEN != 'true' || steps.plan_qwen.outcome != 'success')
         timeout-minutes: 5
         continue-on-error: true
-        uses: google-github-actions/run-gemini-cli@v0
+        uses: google-github-actions/run-gemini-cli@f77273f4c914e4bf38440cf36a0369cb64a37489 # v0.1.22
         with:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           gemini_model: ${{ vars.GEMINI_MODEL }}
