@@ -13,7 +13,7 @@ from pathlib import Path
 import re
 from typing import Any
 
-BLOCKING_LABELS = {"agent:working", "agent:pr-open", "agent:needs-human"}
+BLOCKING_LABELS = {"agent:working", "agent:pr-open", "agent:needs-human", "agent:decompose"}
 QUEUE_LABELS = {"agent:auto", "agent:pool", "agent:qwen", "agent:gemini"}
 PROVIDER_LABELS = {"agent:qwen": "qwen", "agent:gemini": "gemini"}
 MAX_ALLOWED_PARALLEL = 6
