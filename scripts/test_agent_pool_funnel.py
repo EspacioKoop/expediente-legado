@@ -42,6 +42,41 @@ class EmbudoPoolTest(unittest.TestCase):
         replan = job("w", IMPLEMENTA + ["Replanificar pool tras desvio de CLAIM"])
         self.assertEqual("implementa_fuera_de_claim", funnel.fase_alcanzada(replan))
 
+    def test_origen_plan_delegado(self):
+        delegado = job("w", PLAN, extra=[("Plan Qwen", "skipped")])
+        delegado["steps"].append({"name": "Buscar plan delegado por el nivel 2", "conclusion": "success"})
+        self.assertEqual("delegado", funnel.origen_plan(delegado))
+
+    def test_origen_plan_generado(self):
+        self.assertEqual("generado", funnel.origen_plan(job("w", PLAN)))
+        fallido = job("w", PLAN, extra=[("Plan Qwen", "failure")])
+        self.assertEqual("generado", funnel.origen_plan(fallido))
+
+    def test_origen_plan_nulo_si_no_llega(self):
+        self.assertIsNone(funnel.origen_plan(job("w", ["Validar issue y slot"])))
+        # Planificador omitido sin búsqueda delegada exitosa: no llegó a planificar.
+        omitido = job("w", ARRANCA, extra=[("Plan Gemini", "skipped")])
+        self.assertIsNone(funnel.origen_plan(omitido))
+
+    def test_embudo_separa_por_origen_del_plan(self):
+        delegado = job("w", COMPLETO)
+        delegado["steps"].append({"name": "Buscar plan delegado por el nivel 2", "conclusion": "success"})
+        delegado["steps"].append({"name": "Plan Qwen", "conclusion": "skipped"})
+        generado = job("w", PLAN, provider="gemini")
+        resultado = funnel.embudo([delegado, generado])
+        self.assertEqual(1, resultado["por_origen"]["delegado"]["pr_draft"])
+        self.assertEqual(0, resultado["por_origen"]["generado"]["pr_draft"])
+        self.assertEqual(1, resultado["por_origen"]["generado"]["plan_parseado"])
+
+    def test_tabla_muestra_linea_por_origen(self):
+        delegado = job("w", COMPLETO)
+        delegado["steps"].append({"name": "Buscar plan delegado por el nivel 2", "conclusion": "success"})
+        delegado["steps"].append({"name": "Plan Qwen", "conclusion": "skipped"})
+        resultado = funnel.embudo([delegado])
+        texto = funnel.tabla(resultado)
+        self.assertIn("Plan delegado: 1 workers, 1 PR (100%).", texto)
+        self.assertNotIn("Plan generado:", texto)
+
     def test_embudo_acumulado_y_por_worker(self):
         jobs = [
             job("qwen-primary", COMPLETO),
