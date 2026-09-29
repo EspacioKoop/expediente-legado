@@ -179,6 +179,23 @@ Deno.test("los POST de otro origen se rechazan (CSRF)", async () => {
   );
 });
 
+Deno.test("un navegador que manda Origin: null pero es same-origin puede entrar", async () => {
+  const handler = crearHandler(config());
+  const navegador = await handler(
+    post("/entrar", { token: TOKEN }, { origin: "null", "sec-fetch-site": "same-origin" }),
+  );
+  assertEquals(navegador.status, 303, "login desde la propia página");
+  const cruzado = await handler(
+    post("/entrar", { token: TOKEN }, { origin: ORIGEN, "sec-fetch-site": "cross-site" }),
+  );
+  assertEquals(cruzado.status, 403, "sec-fetch-site cross-site manda sobre Origin");
+  assertEquals(
+    (await handler(post("/entrar", { token: TOKEN }, { origin: "null" }))).status,
+    403,
+    "Origin null sin sec-fetch-site",
+  );
+});
+
 Deno.test("crear una orden normal no pone labels de cola", async () => {
   const sim = simulador();
   const handler = crearHandler(config({ fetch: sim.fetch }));

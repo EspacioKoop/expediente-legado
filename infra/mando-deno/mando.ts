@@ -66,7 +66,8 @@ function html(body: string, status = 200, headers: Record<string, string> = {}):
       "content-type": "text/html; charset=utf-8",
       "cache-control": "no-store",
       "x-content-type-options": "nosniff",
-      "referrer-policy": "no-referrer",
+      // same-origin y no no-referrer: con no-referrer el formulario llega con Origin: null.
+      "referrer-policy": "same-origin",
       "x-frame-options": "DENY",
       "content-security-policy":
         "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'",
@@ -138,11 +139,14 @@ function cookieSesion(valor: string, maxAge: number): string {
   return `${COOKIE}=${valor}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${maxAge}`;
 }
 
-// Un POST solo vale si viene de esta misma web (CSRF).
+// Un POST solo vale si viene de esta misma web (CSRF). Sec-Fetch-Site manda
+// cuando existe: con algunas políticas de referrer el navegador envía
+// `Origin: null` incluso desde la propia página.
 function mismoOrigen(request: Request): boolean {
+  const sitio = request.headers.get("sec-fetch-site");
+  if (sitio) return sitio === "same-origin";
   const origin = request.headers.get("origin");
-  if (origin) return origin === new URL(request.url).origin;
-  return request.headers.get("sec-fetch-site") === "same-origin";
+  return origin !== null && origin !== "null" && origin === new URL(request.url).origin;
 }
 
 // ------------------------------------------------------------------- GitHub
