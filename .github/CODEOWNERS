@@ -1,0 +1,14 @@
+# Superficie de infraestructura y automatización con capacidad de afectar
+# credenciales, despliegues, coordinación de agentes o publicación.
+/.github/CODEOWNERS @eGurucharri
+/.github/workflows/ @eGurucharri
+/.github/dependabot.yml @eGurucharri
+
+/scripts/agent_*.py @eGurucharri
+/scripts/gestionar_reservas*.py @eGurucharri
+/scripts/reservas_registro.py @eGurucharri
+/scripts/escanear_secretos.sh @eGurucharri
+/scripts/preflight_pr.sh @eGurucharri
+
+/infra/feedback-deno/ @eGurucharri
+/infra/mando-deno/ @eGurucharri
