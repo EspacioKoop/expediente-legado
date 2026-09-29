@@ -44,6 +44,16 @@ class AgentPoolControlPlaneContractTest(unittest.TestCase):
         for state in ("planning", "implementing", "validating", "publishing"):
             self.assertIn(f'"{state}"', self.deno_pool)
 
+    def test_lease_transporta_rutas_de_forma_retrocompatible(self):
+        self.assertIn("files: string[];", self.deno_pool)
+        self.assertIn("function cleanFiles(value: unknown): string[]", self.deno_pool)
+        self.assertIn("const files = cleanFiles(input.files);", self.deno_pool)
+        self.assertIn("files,", self.deno_pool)
+        self.assertIn('Object.hasOwn(input, "files")', self.deno_pool)
+        self.assertIn("files: lease.files ?? []", self.deno_pool)
+        self.assertIn("value.slice(0, 12)", self.deno_pool)
+        self.assertIn('path.split("/").includes("..")', self.deno_pool)
+
     def test_gateway_anuncia_control_plane(self):
         self.assertIn('import { handleAgentPool } from "./agent_pool_state.ts";', self.deno_main)
         self.assertIn('url.pathname.startsWith("/api/agent-pool/")', self.deno_main)

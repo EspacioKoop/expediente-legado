@@ -51,6 +51,7 @@ export interface AgentPoolLease {
   worker: string;
   provider: "qwen" | "gemini";
   branch: string;
+  files: string[];
   state: string;
   generation: number;
   acquired_at: string;
@@ -254,6 +255,24 @@ function cleanBranch(value: unknown): string {
   return /^[A-Za-z0-9._/-]+$/.test(branch) && !branch.includes("..") ? branch : "";
 }
 
+function cleanFiles(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  const files: string[] = [];
+  for (const item of value.slice(0, 12)) {
+    const path = cleanText(item, 240).replace(/\\/g, "/");
+    if (
+      !path ||
+      path.startsWith("/") ||
+      path.split("/").includes("..") ||
+      !/^[A-Za-z0-9._/@+ -]+$/.test(path)
+    ) {
+      continue;
+    }
+    if (!files.includes(path)) files.push(path);
+  }
+  return files;
+}
+
 function leaseKey(issue: number): Deno.KvKey {
   return ["agent_pool", "lease", issue];
 }
@@ -263,7 +282,7 @@ function eventKey(now: number): Deno.KvKey {
 }
 
 function publicLease(lease: AgentPoolLease): AgentPoolLease {
-  return { ...lease };
+  return { ...lease, files: lease.files ?? [] };
 }
 
 function newEvent(
@@ -307,6 +326,7 @@ async function acquireLease(
   const worker = cleanWorker(input.worker);
   const provider = cleanProvider(input.provider);
   const branch = cleanBranch(input.branch);
+  const files = cleanFiles(input.files);
   const runId = cleanText(actor.claims.run_id, 80);
   if (!issue || !worker || !provider || !branch || !runId) {
     return json({ ok: false, error: "invalid_request" }, 400);
@@ -331,6 +351,7 @@ async function acquireLease(
       worker,
       provider,
       branch,
+      files,
       state: "leased",
       generation: 1,
       acquired_at: new Date(now).toISOString(),
@@ -393,8 +414,10 @@ async function transitionLease(
     }
 
     const now = Date.now();
+    const nextFiles = Object.hasOwn(input, "files") ? cleanFiles(input.files) : lease.files ?? [];
     const next: AgentPoolLease = {
       ...lease,
+      files: nextFiles,
       state,
       generation: lease.generation + 1,
       updated_at: new Date(now).toISOString(),
