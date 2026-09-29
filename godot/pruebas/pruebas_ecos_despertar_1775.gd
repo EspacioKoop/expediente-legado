@@ -64,7 +64,10 @@ func _probar_persistencia_y_consumo() -> void:
 	_comprobar(bool(aceptado["estado"]["consumido"]), "confirmar marca consumido")
 	var repetido := EcosDespertar.aceptar(aceptado["estado"], id, 9)
 	_comprobar(not bool(repetido["ok"]), "el mismo eco no se consume dos veces")
-	_comprobar(EcosDespertar.oferta(aceptado["estado"], 9).is_empty(), "consumido ya no se vuelve a ofrecer")
+	_comprobar(
+		EcosDespertar.oferta(aceptado["estado"], 9).is_empty(),
+		"consumido ya no se vuelve a ofrecer"
+	)
 	var equivocado := EcosDespertar.aceptar(releido, "otro-id", 9)
 	_comprobar(not bool(equivocado["ok"]), "un consumidor no puede aceptar otro id")
 	_comprobar(not bool(equivocado["estado"]["consumido"]), "id incorrecto no muta estado")
