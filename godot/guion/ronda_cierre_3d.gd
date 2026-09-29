@@ -27,7 +27,7 @@ const NOMBRES := {
 	"cerrar_puerta": "puerta auxiliar",
 	"revisar_bandeja": "bandeja de entrada",
 	"devolver_carpeta": "carpeta de clasificación",
-	"comprobar_tablon": "tablón de anuncios",
+	"comprobar_tablon": "tablón: circular de horario",
 }
 
 var _estado: Dictionary = {}
@@ -92,6 +92,13 @@ func _crear_interactuable(id_punto: String) -> Interactuable3D:
 	punto.verbo = _verbo(id_punto)
 	punto.nombre_objeto = _nombre(id_punto)
 	punto.set_meta("ronda_cierre_punto", id_punto)
+	if id_punto == "comprobar_tablon":
+		var tratamiento := IdeologiaCulturaCotidiana1883.superficie(
+			IdeologiaCulturaCotidiana1883.SUPERFICIE_CIRCULAR
+		)
+		punto.set_meta("ideologia_superficie_id", IdeologiaCulturaCotidiana1883.SUPERFICIE_CIRCULAR)
+		punto.set_meta("evento_base", String(tratamiento.get("evento_base", "")))
+		punto.set_meta("tratamiento", String(tratamiento.get("tratamiento", "")))
 
 	var colision := CollisionShape3D.new()
 	var forma := BoxShape3D.new()

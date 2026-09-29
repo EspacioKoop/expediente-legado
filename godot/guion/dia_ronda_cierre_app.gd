@@ -92,7 +92,7 @@ func _cunado_presente(mundo: Node3D) -> bool:
 	return false
 
 
-func _al_completar_punto(_id_punto: String) -> void:
+func _al_completar_punto(id_punto: String) -> void:
 	var dia := get_parent()
 	if dia == null:
 		return
@@ -100,11 +100,30 @@ func _al_completar_punto(_id_punto: String) -> void:
 	if typeof(estado_var) != TYPE_DICTIONARY:
 		return
 	var estado: Dictionary = estado_var
+	if id_punto == "comprobar_tablon":
+		_registrar_exposicion_tablon(dia)
 	if bool(RondaCierre.progreso(estado).get("completa", false)):
 		_finalizar_y_recompensar(dia, estado)
 	if is_instance_valid(_capa):
 		_capa.refrescar()
 	_guardar(dia)
+
+
+func _registrar_exposicion_tablon(dia: Node) -> bool:
+	var partida = dia.get("partida")
+	if partida == null:
+		return false
+	var estado_partida = partida.get("estado")
+	if typeof(estado_partida) != TYPE_DICTIONARY:
+		return false
+	return (
+		IdeologiaCulturaCotidiana1883
+		. registrar_exposicion(
+			estado_partida as Dictionary,
+			IdeologiaCulturaCotidiana1883.SUPERFICIE_CIRCULAR,
+			int(dia.jornada.get("dia", 1)),
+		)
+	)
 
 
 func _finalizar_y_recompensar(dia, estado: Dictionary) -> String:
