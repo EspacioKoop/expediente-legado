@@ -1,5 +1,7 @@
 extends SceneTree
 
+const FOCO = preload("res://guion/menu_foco_navegacion.gd")
+
 var _pasadas := 0
 var _fallos := 0
 
@@ -23,13 +25,13 @@ func _probar() -> void:
 	menu._panel_incidencias.visible = false
 	await process_frame
 
-	var principal: Array[Control] = menu._encadenar_foco_panel(menu._panel_principal)
+	var principal: Array[Control] = FOCO.encadenar(menu._panel_principal)
 	_comprobar(principal.size() >= 5, "el panel principal expone una cadena completa")
 	_probar_cadena(principal, "principal")
 
 	menu._mostrar_opciones()
 	await process_frame
-	var opciones: Array[Control] = menu._controles_foco(menu._panel_opciones)
+	var opciones: Array[Control] = FOCO.controles(menu._panel_opciones)
 	_comprobar(opciones.size() >= 8, "Opciones incluye controles navegables de ajustes y remapeo")
 	_probar_cadena(opciones, "opciones")
 	_comprobar(
