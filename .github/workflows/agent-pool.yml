@@ -242,12 +242,15 @@ jobs:
             --output /tmp/worker-scores.json >/dev/null || true
 
           # #1871: telemetría compacta de los PRs v1. No se guardan prompts ni
-          # memorias; solo el worker, ResultPacket/reviewer y número de commits.
+          # memorias; solo handoff/reviewer, ventana temporal y checks CI del PR.
+          # Los fallos de cuota/guard sin PR quedan fuera y siguen en worker-health.
           printf '{}\n' > /tmp/handoff-metrics.json
           if gh pr list --repo "$GITHUB_REPOSITORY" --state all --limit 100 \
-            --json number,title,body,commits > /tmp/agent-prs.json 2>/dev/null; then
+            --json number,title,body,commits,updatedAt,statusCheckRollup \
+            > /tmp/agent-prs.json 2>/dev/null; then
             python3 scripts/agent_handoff_metrics.py \
               --prs /tmp/agent-prs.json \
+              --window-days 30 \
               --output /tmp/handoff-metrics.json >/dev/null || true
           fi
 
@@ -260,10 +263,14 @@ jobs:
               handoff_loss_proxy_pct: (($handoff[0][.worker].handoff_loss_proxy_pct) // null),
               rework_rate_pct: (($handoff[0][.worker].rework_rate_pct) // null),
               contract_valid_rate_pct: (($handoff[0][.worker].contract_valid_rate_pct) // null),
+              ci_success_rate_pct: (($handoff[0][.worker].ci_success_rate_pct) // null),
+              ci_failure_rate_pct: (($handoff[0][.worker].ci_failure_rate_pct) // null),
+              ci_pending_samples: (($handoff[0][.worker].ci_pending_samples) // 0),
+              telemetry_window_days: (($handoff[0][.worker].window_days) // 30),
               telemetry_samples: (($handoff[0][.worker].samples) // 0)
             })' /tmp/workers.json > "$tmp"
           mv "$tmp" /tmp/workers.json
-          jq -r '.[] | "worker-score \(.worker)=\(.score) samples=\(.score_samples) handoff=\(.handoff_loss_proxy_pct // "n/a") rework=\(.rework_rate_pct // "n/a") telemetry=\(.telemetry_samples)"' /tmp/workers.json
+          jq -r '.[] | "worker-score \(.worker)=\(.score) samples=\(.score_samples) handoff=\(.handoff_loss_proxy_pct // "n/a") rework=\(.rework_rate_pct // "n/a") ci_ok=\(.ci_success_rate_pct // "n/a") ci_fail=\(.ci_failure_rate_pct // "n/a") window=\(.telemetry_window_days)d telemetry=\(.telemetry_samples)"' /tmp/workers.json
 
           has_qwen="$(jq -r 'any(.[]; .provider == "qwen" and (if has("healthy") then .healthy else true end))' /tmp/workers.json)"
           has_gemini="$(jq -r 'any(.[]; .provider == "gemini" and (if has("healthy") then .healthy else true end))' /tmp/workers.json)"
