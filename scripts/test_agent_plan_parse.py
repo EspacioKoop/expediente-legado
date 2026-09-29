@@ -139,7 +139,7 @@ class FuentesTest(unittest.TestCase):
 class ValidacionTest(unittest.TestCase):
     def test_normaliza_y_deduplica(self):
         plan = {"files": [" godot\\a.gd ", "godot/a.gd"], "goal": "x" * 500}
-        normalized = mod.normalize(plan)
+        normalized = mod.normalize(plan, max_files=2)
         self.assertEqual(["godot/a.gd"], normalized["files"])
         self.assertEqual(mod.MAX_GOAL, len(normalized["goal"]))
 
@@ -157,9 +157,25 @@ class ValidacionTest(unittest.TestCase):
                     mod.normalize({"files": [ruta], "goal": "x"})
 
     def test_rechaza_demasiadas_rutas(self):
-        files = [f"godot/f{i}.gd" for i in range(mod.MAX_FILES + 1)]
-        with self.assertRaisesRegex(mod.PlanError, "plan invalido"):
-            mod.normalize({"files": files, "goal": "x"})
+        files = [f"godot/f{i}.gd" for i in range(mod.HARD_MAX_FILES + 1)]
+        with self.assertRaisesRegex(mod.PlanError, "plan excede max_files"):
+            mod.normalize({"files": files, "goal": "x"}, max_files=mod.HARD_MAX_FILES)
+
+    def test_por_defecto_un_plan_es_un_fichero(self):
+        with self.assertRaisesRegex(mod.PlanError, "plan excede max_files"):
+            mod.normalize({"files": ["godot/a.gd", "godot/b.gd"], "goal": "x"})
+        self.assertEqual(
+            ["godot/a.gd"],
+            mod.normalize({"files": ["godot/a.gd"], "goal": "x"})["files"],
+        )
+
+    def test_presupuesto_configurable_no_supera_limite_duro(self):
+        self.assertEqual(
+            2,
+            len(mod.normalize({"files": ["godot/a.gd", "godot/b.gd"], "goal": "x"}, max_files=2)["files"]),
+        )
+        with self.assertRaisesRegex(mod.PlanError, "max_files fuera de límites"):
+            mod.normalize({"files": ["godot/a.gd"], "goal": "x"}, max_files=99)
 
 
 class CliTest(unittest.TestCase):
@@ -182,6 +198,7 @@ class CliTest(unittest.TestCase):
                 "--source", str(delegado),
                 "--source", str(stdout),
                 "--output", str(output),
+                "--max-files", "2",
             ]
         )
         self.assertEqual(mod.EXIT_OK, code)
@@ -194,7 +211,7 @@ class CliTest(unittest.TestCase):
         stdout.write_text(SALIDA_935_DECORADA_Y_TRUNCADA, encoding="utf-8")
         output = self.dir / ".agent-plan.json"
         self.assertEqual(
-            mod.EXIT_OK, mod.main(["--source", str(stdout), "--output", str(output)])
+            mod.EXIT_OK, mod.main(["--source", str(stdout), "--output", str(output), "--max-files", "2"])
         )
         # El worker detecta «sin corte seguro» con grep '"files": \[\]'.
         self.assertIn('"files": []', output.read_text(encoding="utf-8"))
