@@ -464,9 +464,13 @@ func _ocultar_golf_local(oculto: bool) -> void:
 func _hoyo_local() -> GolfHoyoApp:
 	if _superficie == null:
 		return null
-	var candidato = _superficie.get("hoyo_actual")
-	if candidato is GolfHoyoApp and candidato != _hoyo:
-		return candidato
+	for propiedad in _superficie.get_property_list():
+		if String(propiedad.get("name", "")) != "hoyo_actual":
+			continue
+		var candidato = _superficie.get("hoyo_actual")
+		if candidato is GolfHoyoApp and candidato != _hoyo:
+			return candidato
+		break
 	return null
 
 
@@ -474,7 +478,8 @@ func _turno_local() -> bool:
 	if _autoridad == null:
 		return false
 	var snapshot := _autoridad.snapshot()
-	var actual := String(snapshot.get("state", {}).get("current_player", ""))
+	var estado: Dictionary = snapshot.get("state", {})
+	var actual := String(estado.get("current_player", ""))
 	return actual == _actor_id()
 
 
@@ -516,5 +521,7 @@ func _ahora() -> int:
 
 
 func _game_build() -> String:
-	var version := String(ProjectSettings.get_setting("application/config/version", "dev")).strip_edges()
+	var version := (
+		String(ProjectSettings.get_setting("application/config/version", "dev")).strip_edges()
+	)
 	return version if not version.is_empty() else "dev"
