@@ -800,6 +800,14 @@ jobs:
           )"
           attempt=$((previous + 1))
 
+          python3 scripts/agent_b2b.py event \
+            --type BLOCKER --issue "$ISSUE" --provider "$PROVIDER" --worker "$WORKER" \
+            --from-role implementer --to-role planner \
+            --summary "La implementación intentó modificar rutas fuera del CLAIM; requiere replan" \
+            --ref "observed-paths:$outside" --ref "attempt:$attempt" \
+            --output /tmp/agent-blocker.json >/dev/null
+          blocker="$(jq -c . /tmp/agent-blocker.json)"
+
           gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --repo "$GITHUB_REPOSITORY" \
             --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=agent-pool-replan-claim-incompleto" \
             >/dev/null || true
@@ -811,7 +819,11 @@ jobs:
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
               "AGENT_POOL_REPLAN attempt=$attempt provider=$PROVIDER worker=$WORKER observed_paths=$outside
 
-              La implementacion intento modificar rutas fuera del CLAIM. El worker ya restauro esos cambios y no publicara nada de este intento. El proximo plan debe reinspeccionar la integracion, incluir las rutas observadas solo si son realmente necesarias y volver a comprobar #182."
+              La implementacion intento modificar rutas fuera del CLAIM. El worker ya restauro esos cambios y no publicara nada de este intento. El proximo plan debe reinspeccionar la integracion, incluir las rutas observadas solo si son realmente necesarias y volver a comprobar #1713.
+
+              AGENT_B2B_BEGIN
+              $blocker
+              AGENT_B2B_END"
             gh workflow run agent-worker.yml --repo "$GITHUB_REPOSITORY" --ref main \
               -f issue="$ISSUE" -f provider="$PROVIDER" -f worker="$WORKER"
             echo "scheduled=true" >> "$GITHUB_OUTPUT"
@@ -821,7 +833,11 @@ jobs:
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
               "AGENT_POOL_REPLAN attempt=$attempt provider=$PROVIDER worker=$WORKER observed_paths=$outside
 
-              Se agoto el limite de $MAX_REPLANS replans automaticos del pool. Los cambios fuera del CLAIM fueron restaurados y no se publico ningun PR."
+              Se agoto el limite de $MAX_REPLANS replans automaticos del pool. Los cambios fuera del CLAIM fueron restaurados y no se publico ningun PR.
+
+              AGENT_B2B_BEGIN
+              $blocker
+              AGENT_B2B_END"
             echo "scheduled=false" >> "$GITHUB_OUTPUT"
           fi
 
