@@ -52,6 +52,12 @@ tipado con referencias al informe y al diff staged. El reviewer recibe ese envel
 junto al ResultPacket y el diff, de forma que puede distinguir evidencia de
 implementación de afirmaciones del propio modelo.
 
+Cuando el claim guard detecta una ruta fuera del scope, el replan publica también
+un `BLOCKER` B2B dentro de marcadores `AGENT_B2B_BEGIN/END`. En la siguiente
+ejecución, `agent_issue_context.py` extrae únicamente eventos de comentarios de
+confianza y los presenta en `## Eventos B2B recientes`; el planner los consume como
+coordinación tipada, pero nunca como autoridad superior al repo/issue/#181/#1713.
+
 ## Seguridad y autoridad
 
 El paquete no concede permisos. La jerarquía sigue siendo repo/issue, #181,
