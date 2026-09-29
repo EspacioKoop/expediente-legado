@@ -33,20 +33,25 @@ func _probar_hostigador() -> void:
 		unidad, 0.01, {"distancia": 6.0, "rumbo_objetivo": 1.25}
 	)
 	unidad = paso["unidad"]
-	_comprobar(String(unidad["estado"]) == JuicioCombateArquetipos.TELEGRAFIAR, "hostigador telegrafía")
-	var rumbo := float(unidad["rumbo_bloqueado"])
-	paso = JuicioCombateArquetipos.avanzar(
-		unidad, 0.30, {"distancia": 6.0, "rumbo_objetivo": 2.75}
+	_comprobar(
+		String(unidad["estado"]) == JuicioCombateArquetipos.TELEGRAFIAR, "hostigador telegrafía"
 	)
+	var rumbo := float(unidad["rumbo_bloqueado"])
+	paso = JuicioCombateArquetipos.avanzar(unidad, 0.30, {"distancia": 6.0, "rumbo_objetivo": 2.75})
 	unidad = paso["unidad"]
 	_comprobar(float(unidad["rumbo_bloqueado"]) == rumbo, "telegraph congela el rumbo")
 	_comprobar(not bool(paso["ventana_respuesta"]), "telegraph aún no es ventana")
 	paso = JuicioCombateArquetipos.avanzar(unidad, 0.40, {"distancia": 6.0})
 	unidad = paso["unidad"]
-	_comprobar(String(unidad["estado"]) == JuicioCombateArquetipos.DISPARAR_LINEA, "dispara tras aviso")
+	_comprobar(
+		String(unidad["estado"]) == JuicioCombateArquetipos.DISPARAR_LINEA, "dispara tras aviso"
+	)
 	paso = JuicioCombateArquetipos.avanzar(unidad, 0.10, {"distancia": 6.0})
 	unidad = paso["unidad"]
-	_comprobar(String(unidad["estado"]) == JuicioCombateArquetipos.VULNERABLE, "disparo siempre abre ventana")
+	_comprobar(
+		String(unidad["estado"]) == JuicioCombateArquetipos.VULNERABLE,
+		"disparo siempre abre ventana"
+	)
 	_comprobar(bool(paso["ventana_respuesta"]), "ventana del hostigador es explícita")
 
 
@@ -58,10 +63,16 @@ func _probar_bloqueador() -> void:
 	_comprobar(bool(paso["ventana_respuesta"]), "la apertura permite respuesta")
 	var flanco := JuicioCombateArquetipos.nuevo(JuicioCombateArquetipos.BLOQUEADOR, 1771, 2)
 	paso = JuicioCombateArquetipos.avanzar(flanco, 0.01, {"flanqueado": true})
-	_comprobar(String(paso["unidad"]["estado"]) == JuicioCombateArquetipos.APERTURA, "flanquear fuerza apertura")
+	_comprobar(
+		String(paso["unidad"]["estado"]) == JuicioCombateArquetipos.APERTURA,
+		"flanquear fuerza apertura"
+	)
 	var rota := JuicioCombateArquetipos.nuevo(JuicioCombateArquetipos.BLOQUEADOR, 1771, 3)
 	paso = JuicioCombateArquetipos.avanzar(rota, 0.01, {"guardia_rota": true})
-	_comprobar(String(paso["unidad"]["estado"]) == JuicioCombateArquetipos.APERTURA, "romper guardia fuerza apertura")
+	_comprobar(
+		String(paso["unidad"]["estado"]) == JuicioCombateArquetipos.APERTURA,
+		"romper guardia fuerza apertura"
+	)
 
 
 func _probar_enjambre() -> void:
@@ -80,7 +91,9 @@ func _probar_enjambre() -> void:
 	_comprobar(activos == 2, "dos unidades reservan el presupuesto común")
 	var paso_c := JuicioCombateArquetipos.avanzar(c, 0.01, {"atacantes_activos": activos})
 	c = paso_c["unidad"]
-	_comprobar(String(c["estado"]) == JuicioCombateArquetipos.ESPERA, "tercera unidad espera presupuesto")
+	_comprobar(
+		String(c["estado"]) == JuicioCombateArquetipos.ESPERA, "tercera unidad espera presupuesto"
+	)
 	_comprobar(String(paso_c["intencion"]) == "rodear", "esperar no congela el movimiento")
 
 
