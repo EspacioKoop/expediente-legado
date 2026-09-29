@@ -73,10 +73,13 @@ func _registrar_exposicion_si_toca(dia: Node, resultado: Dictionary) -> bool:
 	var estado_partida = partida.get("estado")
 	if typeof(estado_partida) != TYPE_DICTIONARY:
 		return false
-	return IdeologiaCulturaCotidiana1883.registrar_exposicion(
-		estado_partida as Dictionary,
-		id_superficie,
-		int(dia.jornada.get("dia", 1)),
+	return (
+		IdeologiaCulturaCotidiana1883
+		. registrar_exposicion(
+			estado_partida as Dictionary,
+			id_superficie,
+			int(dia.jornada.get("dia", 1)),
+		)
 	)
 
 
