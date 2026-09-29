@@ -2,7 +2,6 @@ extends SceneTree
 
 var fallos := 0
 
-
 func _init() -> void:
 	_probar_tres_modulos_sin_reetiquetar()
 	_probar_sin_declaracion()
@@ -11,7 +10,6 @@ func _init() -> void:
 	_probar_snapshot_invalido()
 	print("pruebas religión epílogo #937: %d fallos" % fallos)
 	quit(1 if fallos > 0 else 0)
-
 
 func _probar_tres_modulos_sin_reetiquetar() -> void:
 	var estado := Partida.nueva()
@@ -106,7 +104,6 @@ func _probar_tres_modulos_sin_reetiquetar() -> void:
 	for prohibido in ["identidad", "puntuacion", "ranking", "ganador"]:
 		_comprobar(not serializado.contains(prohibido), "epílogo no serializa %s" % prohibido)
 
-
 func _probar_sin_declaracion() -> void:
 	var estado := Partida.nueva()
 	var registro := ReligionEventos.asegurar_en_estado(estado)
@@ -131,7 +128,6 @@ func _probar_sin_declaracion() -> void:
 		not JSON.stringify(resumen).contains(ReligionEventos.DECLARACION_NO_ADSCRIPCION),
 		"ausencia de declaración no inventa no adscripción",
 	)
-
 
 func _probar_final_base_estable() -> void:
 	var vacio := {
@@ -172,7 +168,6 @@ func _probar_final_base_estable() -> void:
 	var b := ReligionTrayectoria.derivar_epilogo("mismo_final", con_hecho)
 	_comprobar(a["final_base"] == b["final_base"], "trayectoria no sustituye el final")
 	_comprobar(a["religion"] != b["religion"], "hechos distintos producen capa distinta")
-
 
 
 func _probar_integracion_final_visible() -> void:
@@ -222,12 +217,10 @@ func _probar_integracion_final_visible() -> void:
 		"confirmar dos veces no duplica la trayectoria",
 	)
 
-
 func _probar_snapshot_invalido() -> void:
 	var resumen := ReligionTrayectoria.resumir({"vuelta": 3, "canales": "roto"})
 	_comprobar(resumen["estado"] == "ausente", "snapshot inválido degrada a ausencia")
 	_comprobar(resumen["modulos"].is_empty(), "snapshot inválido no inventa módulos")
-
 
 func _registrar(
 	registro: Dictionary,
@@ -258,7 +251,6 @@ func _registrar(
 		)
 	)
 	_comprobar(ReligionEventos.registrar(registro, evento), "registra %s" % id_evento)
-
 
 func _comprobar(condicion: bool, mensaje: String) -> void:
 	if not condicion:
