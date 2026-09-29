@@ -33,7 +33,7 @@ static func evaluar(fase: String, objetivo: Dictionary, estado: Dictionary) -> D
 		}
 
 	var consecuencia = objetivo.get("consecuencia_combate", {})
-	var consecuencia_valida := consecuencia is Dictionary and not consecuencia.is_empty()
+	var consecuencia_valida: bool = consecuencia is Dictionary and not consecuencia.is_empty()
 	var autorizado := bool(objetivo.get("combate_autorizado", false)) and consecuencia_valida
 	if autorizado:
 		return {
