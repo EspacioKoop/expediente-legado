@@ -74,6 +74,24 @@ class AgentIssueContextTest(unittest.TestCase):
         self.assertIn("summary=scope incompleto", rendered)
         self.assertNotIn("AGENT_B2B_BEGIN", rendered)
 
+    def test_ignora_evento_b2b_de_otro_issue(self):
+        issue = source(body="cuerpo")
+        issue["title"] = "Issue B2B"
+        issue["number"] = 1866
+        packet = (
+            'AGENT_B2B_BEGIN\n'
+            '{"schema":1,"type":"BLOCKER","issue":999,"summary":"otro issue",'
+            '"handoff":{"from":"implementer","to":"planner"}}'
+            '\nAGENT_B2B_END'
+        )
+        rendered = mod.render_context(
+            issue,
+            [source(login="github-actions[bot]", association="NONE", body=packet)],
+            max_comments=20,
+        )
+        self.assertNotIn("Eventos B2B recientes", rendered)
+        self.assertNotIn("otro issue", rendered)
+
     def test_ignora_evento_b2b_de_comentario_no_confiable(self):
         issue = source(body="cuerpo")
         issue["title"] = "Issue B2B"
