@@ -385,7 +385,7 @@ static func _luz(raiz: Node3D, luz: Dictionary) -> void:
 	# cajas; hoy hay mesas, sillas y figuras humanas, y sin sombra de contacto
 	# nada apoya en el suelo: la sala entera se lee como calcomanías pegadas.
 	# El sesgo evita el acné de sombra en superficies casi paralelas a la luz.
-	punto.shadow_enabled = true
+	punto.shadow_enabled = bool(luz.get("sombras", true))
 	punto.shadow_bias = 0.04
 	punto.shadow_normal_bias = 1.4
 	# Paraboloide dual o cubo, y no es una preferencia: MEDIDO en #789 sobre la
@@ -398,11 +398,12 @@ static func _luz(raiz: Node3D, luz: Dictionary) -> void:
 	# Solo lo pide el sitio que puede enseñarla: donde la envolvente se pinta con
 	# el shader canónico, la luz va por vértice y el material descarta la sombra
 	# llegue como llegue, así que pagar el cubo allí sería pagar por nada.
-	punto.omni_shadow_mode = (
-		OmniLight3D.SHADOW_CUBE
-		if _shader_del_sitio == SHADER_PSX_LUZ_PIXEL
-		else OmniLight3D.SHADOW_DUAL_PARABOLOID
-	)
+	if punto.shadow_enabled:
+		punto.omni_shadow_mode = (
+			OmniLight3D.SHADOW_CUBE
+			if _shader_del_sitio == SHADER_PSX_LUZ_PIXEL
+			else OmniLight3D.SHADOW_DUAL_PARABOLOID
+		)
 	raiz.add_child(punto)
 
 	if not luz.get("carcasa", true):
