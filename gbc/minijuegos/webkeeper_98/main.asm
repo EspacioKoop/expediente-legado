@@ -147,7 +147,7 @@ BuclePrincipal:
 EstadoTitulo:
     ld a, [wTeclasNuevas]
     and KEY_A | KEY_START
-    jr z, BuclePrincipal
+    jp z, BuclePrincipal
     xor a
     ld [wPartido], a
     ld [wDerrotasPartido], a
@@ -158,7 +158,7 @@ EstadoTitulo:
 EstadoHistoria:
     ld a, [wTeclasNuevas]
     and KEY_A | KEY_START
-    jr z, BuclePrincipal
+    jp z, BuclePrincipal
     call IniciarPartido
     jp BuclePrincipal
 
@@ -169,7 +169,7 @@ EstadoPartido:
 EstadoDerrota:
     ld a, [wTeclasNuevas]
     and KEY_A | KEY_START
-    jr z, BuclePrincipal
+    jp z, BuclePrincipal
     call IniciarPartido
     jp BuclePrincipal
 
@@ -179,7 +179,7 @@ EstadoVictoria:
     jr nz, .desafios
     ld a, [wTeclasNuevas]
     and KEY_START
-    jr z, BuclePrincipal
+    jp z, BuclePrincipal
     call MostrarTitulo
     jp BuclePrincipal
 .desafios:
@@ -228,7 +228,7 @@ EstadoDesafios:
 .salir:
     ld a, [wTeclasNuevas]
     and KEY_START
-    jr z, BuclePrincipal
+    jp z, BuclePrincipal
     call MostrarTitulo
     jp BuclePrincipal
 
@@ -241,7 +241,7 @@ EstadoDesafioFin:
 .titulo:
     ld a, [wTeclasNuevas]
     and KEY_START
-    jr z, BuclePrincipal
+    jp z, BuclePrincipal
     call MostrarTitulo
     jp BuclePrincipal
 
