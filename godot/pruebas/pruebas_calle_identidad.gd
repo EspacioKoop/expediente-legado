@@ -231,7 +231,9 @@ func _probar_tienda(dia, calle: Node3D) -> void:
 	if disponibles.is_empty():
 		puerta.interactuar(dia._caminante)
 		await process_frame
-		_comprobar(TiendaVideojuegos.compras(dia.jornada).is_empty(), "sin existencias no se compra")
+		_comprobar(
+			TiendaVideojuegos.compras(dia.jornada).is_empty(), "sin existencias no se compra"
+		)
 		_comprobar(int(dia.jornada["dinero"]) == saldo_inicial, "sin existencias no cobra")
 		_comprobar(
 			puerta.nombre_objeto == TranslationServer.translate("CALLE_TIENDA_FALLO_SIN_STOCK"),
@@ -255,7 +257,9 @@ func _probar_tienda(dia, calle: Node3D) -> void:
 				"no compra la ROM ausente " + String(entrada["id"])
 			)
 
-	_comprobar(int(dia.jornada["dinero"]) == saldo_inicial - gastado, "cobra solo el stock disponible")
+	_comprobar(
+		int(dia.jornada["dinero"]) == saldo_inicial - gastado, "cobra solo el stock disponible"
+	)
 	_comprobar(
 		TiendaVideojuegos.consola_trucos_desbloqueada(dia.jornada),
 		"completar el stock disponible desbloquea el manual de servicio"
@@ -268,7 +272,9 @@ func _probar_tienda(dia, calle: Node3D) -> void:
 	# Un uso extra no cobra de nuevo ni queda bloqueado por ROMs ausentes.
 	puerta.interactuar(dia._caminante)
 	await process_frame
-	_comprobar(TiendaVideojuegos.compras(dia.jornada).size() == disponibles.size(), "no duplica compras")
+	_comprobar(
+		TiendaVideojuegos.compras(dia.jornada).size() == disponibles.size(), "no duplica compras"
+	)
 	_comprobar(int(dia.jornada["dinero"]) == saldo_inicial - gastado, "no cobra dos veces")
 
 
