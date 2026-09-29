@@ -22,7 +22,7 @@ class GatoPersistencia787Test(unittest.TestCase):
         self.assertIn("not GatoAyuda.guia_visible(gato)", guia)
 
         objetivos = dia.split("func _montar_objetivos_sueno() -> void:", 1)[1].split(
-            "\nfunc _al_pisar_objetivo", 1
+            "\nfunc _montar_zona_objetivo", 1
         )[0]
         self.assertNotIn("GatoAyuda", objetivos)
         self.assertNotIn("_gato_guia", objetivos)

@@ -21,6 +21,7 @@ var _entrada_guia := Vector3.ZERO
 var _salida_guia := Vector3.ZERO
 var _hay_rumbo_guia := false
 var _objetivos_espacio: Array = []
+var _objetivos_variedad: Dictionary = {}
 var _objetivo_escena := ""
 var _resolviendo_objetivos := false
 var _asistente_siga_caja: VBoxContainer
@@ -35,6 +36,7 @@ func _espacio_de(fase: String) -> Dictionary:
 	var espacio: Dictionary = super._espacio_de(fase)
 	_hay_rumbo_guia = false
 	_objetivos_espacio = []
+	_objetivos_variedad = {}
 	_objetivo_escena = ""
 	if fase != "sueño":
 		return espacio
@@ -52,20 +54,31 @@ func _espacio_de(fase: String) -> Dictionary:
 	espacio["salidas"] = []
 
 	var posiciones: Array = _posiciones_objetivo(espacio, foco)
+	_entrada_guia = espacio.get("entrada", Vector3.ZERO)
+	var tipos: Array = SuenoObjetivosVariedad.tipos_para(
+		int(jornada.get("dia", 0)), _objetivo_escena
+	)
 	for i in SuenoObjetivos.POSIBLES_PRIMER_CORTE:
+		var tipo := String(tipos[i])
+		var posicion: Vector3 = posiciones[i]
+		var guia_pos := posicion
+		if tipo == SuenoObjetivoVariedad3D.TIPO_SECUENCIA:
+			guia_pos = SuenoObjetivosVariedad.punto_inicial_secuencia(_entrada_guia, posicion)
 		(
 			_objetivos_espacio
 			. append(
 				{
 					"id": "%s:%d" % [_objetivo_escena, i],
-					"pos": posiciones[i],
+					"pos": posicion,
+					"guia_pos": guia_pos,
+					"tipo": tipo,
+					"condicion": SuenoObjetivosVariedad.condicion(tipo),
 				}
 			)
 		)
 
 	if not _objetivos_espacio.is_empty():
-		_entrada_guia = espacio.get("entrada", Vector3.ZERO)
-		_salida_guia = _objetivos_espacio[0].get("pos", _entrada_guia)
+		_salida_guia = _objetivos_espacio[0].get("guia_pos", _entrada_guia)
 		_hay_rumbo_guia = true
 	return espacio
 
@@ -144,8 +157,12 @@ func _estado_objetivos_actual() -> Dictionary:
 	var estados: Dictionary = jornada["sueno_objetivos"]
 	var clave: String = _clave_objetivos_actual()
 	if not estados.has(clave):
-		var ids: Array = _objetivos_espacio.map(func(objetivo): return objetivo["id"])
-		estados[clave] = SuenoObjetivos.nuevo(ids)
+		var descriptores: Array = []
+		for objetivo in _objetivos_espacio:
+			descriptores.append(SuenoObjetivosVariedad.descriptor(objetivo))
+		estados[clave] = SuenoObjetivos.nuevo(descriptores)
+	else:
+		SuenoObjetivosVariedad.sincronizar_descriptores(estados[clave], _objetivos_espacio)
 	return estados[clave]
 
 
@@ -164,19 +181,91 @@ func _montar_objetivos_sueno() -> void:
 		# pisarla: montarle una zona daría dos condiciones al mismo objetivo.
 		if bool(objetivo.get("solo_guia", false)):
 			continue
-		var zona := Area3D.new()
-		zona.name = "ObjetivoSueno_%s" % objetivo_id
-		zona.position = objetivo["pos"]
-		zona.set_meta("objetivo", objetivo_id)
-		var colision := CollisionShape3D.new()
-		var caja := BoxShape3D.new()
-		caja.size = TAM_OBJETIVO
-		colision.shape = caja
-		zona.add_child(colision)
-		_mundo.add_child(zona)
-		zona.body_entered.connect(_al_pisar_objetivo.bind(zona))
+		var tipo := String(objetivo.get("tipo", SuenoObjetivoVariedad3D.TIPO_RECORRIDO))
+		if (
+			(
+				tipo
+				in [
+					SuenoObjetivoVariedad3D.TIPO_SECUENCIA,
+					SuenoObjetivoVariedad3D.TIPO_PERMANENCIA,
+					SuenoObjetivoVariedad3D.TIPO_RETORNO,
+				]
+			)
+			and _montar_objetivo_variedad(objetivo)
+		):
+			continue
+		_montar_zona_objetivo(objetivo)
 	if SuenoObjetivos.resuelto(estado):
 		call_deferred("_resolver_objetivos_sueno")
+
+
+func _montar_zona_objetivo(objetivo: Dictionary) -> void:
+	var objetivo_id := String(objetivo.get("id", ""))
+	var zona := Area3D.new()
+	zona.name = "ObjetivoSueno_%s" % objetivo_id
+	zona.position = objetivo["pos"]
+	zona.set_meta("objetivo", objetivo_id)
+	var colision := CollisionShape3D.new()
+	var caja := BoxShape3D.new()
+	caja.size = TAM_OBJETIVO
+	colision.shape = caja
+	zona.add_child(colision)
+	_mundo.add_child(zona)
+	zona.body_entered.connect(_al_pisar_objetivo.bind(zona))
+
+
+func _montar_objetivo_variedad(objetivo: Dictionary) -> bool:
+	var objetivo_id := String(objetivo.get("id", ""))
+	var tipo := String(objetivo.get("tipo", ""))
+	if objetivo_id.is_empty() or not is_instance_valid(_caminante):
+		return false
+	var puntos: Array = [objetivo.get("pos", Vector3.ZERO)]
+	if tipo == SuenoObjetivoVariedad3D.TIPO_SECUENCIA:
+		puntos = [
+			objetivo.get("guia_pos", objetivo.get("pos", Vector3.ZERO)),
+			objetivo.get("pos", Vector3.ZERO),
+		]
+	elif tipo == SuenoObjetivoVariedad3D.TIPO_RETORNO:
+		puntos = [
+			objetivo.get("pos", Vector3.ZERO),
+			_entrada_guia,
+		]
+	var controlador := SuenoObjetivoVariedad3D.new()
+	controlador.name = "VariedadObjetivo_%s" % objetivo_id
+	_mundo.add_child(controlador)
+	controlador.completado.connect(_al_completar_objetivo_variedad)
+	controlador.rumbo_cambiado.connect(_al_rumbo_objetivo_variedad.bind(objetivo_id))
+	if not controlador.configurar(objetivo_id, tipo, _caminante, puntos):
+		controlador.queue_free()
+		return false
+	_objetivos_variedad[objetivo_id] = controlador
+	return true
+
+
+func _al_completar_objetivo_variedad(objetivo_id: String) -> void:
+	if jornada.get("fase", "") != "sueño" or _pantalla != null:
+		return
+	var estado: Dictionary = _estado_objetivos_actual()
+	if not SuenoObjetivos.completar(estado, objetivo_id):
+		return
+	_objetivos_variedad.erase(objetivo_id)
+	_tras_cambio_objetivo(estado, true)
+
+
+func _al_rumbo_objetivo_variedad(posicion: Vector3, objetivo_id: String) -> void:
+	if jornada.get("fase", "") != "sueño":
+		return
+	var estado: Dictionary = _estado_objetivos_actual()
+	var completados: Array = estado.get("completados", [])
+	for objetivo in _objetivos_espacio:
+		var pendiente_id := String(objetivo.get("id", ""))
+		if completados.has(pendiente_id) or not _objetivo_puntuable(estado, pendiente_id):
+			continue
+		if pendiente_id == objetivo_id:
+			_salida_guia = posicion
+			_hay_rumbo_guia = true
+			_orientar_gato_guia()
+		return
 
 
 func _al_pisar_objetivo(cuerpo: Node3D, zona: Area3D) -> void:
@@ -223,7 +312,11 @@ func _actualizar_rumbo_guia_pendiente(estado: Dictionary) -> void:
 		var objetivo_id := String(objetivo.get("id", ""))
 		if completados.has(objetivo_id) or not _objetivo_puntuable(estado, objetivo_id):
 			continue
-		_salida_guia = objetivo.get("pos", _entrada_guia)
+		var controlador = _objetivos_variedad.get(objetivo_id)
+		if controlador is SuenoObjetivoVariedad3D and is_instance_valid(controlador):
+			_salida_guia = controlador.punto_actual()
+		else:
+			_salida_guia = objetivo.get("guia_pos", objetivo.get("pos", _entrada_guia))
 		_hay_rumbo_guia = true
 		return
 
@@ -336,6 +429,10 @@ func registrar_objetivo_puzzle_onirico(nucleo) -> bool:
 
 
 func _retirar_objetivo_espacial(objetivo_id: String) -> void:
+	var variante = _objetivos_variedad.get(objetivo_id)
+	if variante is SuenoObjetivoVariedad3D and is_instance_valid(variante):
+		variante.queue_free()
+	_objetivos_variedad.erase(objetivo_id)
 	for indice in range(_objetivos_espacio.size() - 1, -1, -1):
 		if String(_objetivos_espacio[indice].get("id", "")) == objetivo_id:
 			_objetivos_espacio.remove_at(indice)

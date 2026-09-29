@@ -114,7 +114,7 @@ class SuenoObjetivosTest(unittest.TestCase):
         self.assertIn('extends "res://guion/dia_trabajillos_app.gd"', self.gato)
         self.assertIn('extends "res://guion/dia_alquiler_app.gd"', self.trabajillos)
         self.assertIn('espacio.get("salidas", [])', self.gato)
-        self.assertIn('_salida_guia = _objetivos_espacio[0].get("pos", _entrada_guia)', self.gato)
+        self.assertIn('_salida_guia = _objetivos_espacio[0].get("guia_pos", _entrada_guia)', self.gato)
         self.assertIn("_hay_rumbo_guia = true", self.gato)
 
     def test_la_escena_conserva_la_capa_raiz_del_gato(self):
