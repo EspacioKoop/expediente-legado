@@ -37,6 +37,43 @@ def limitar16(valor: int) -> int:
     return max(-32768, min(32767, valor))
 
 
+def paso_pitch_spu(registro: int) -> int:
+    """Paso lógico del contador PITCH sin PMON; no produce PCM interpolado."""
+    if type(registro) is not int or not 0 <= registro <= 0xFFFF:
+        raise ValueError("PITCH debe ser un registro unsigned de 16 bits")
+    return min(registro, 0x4000)
+
+
+def tasa_pitch_spu(registro: int) -> float:
+    """Consumo teórico de muestras fuente por segundo con DAC fijo a 44,1 kHz."""
+    return SR * paso_pitch_spu(registro) / 0x1000
+
+
+def trazar_pitch_spu(
+    registro: int,
+    ticks: list[int],
+    contador_inicial: int = 0,
+) -> dict:
+    """Traza T07 sin interpolación PCM ni estado completo de voz."""
+    paso = paso_pitch_spu(registro)
+    if type(contador_inicial) is not int or contador_inicial < 0:
+        raise ValueError("contador_inicial debe ser entero no negativo")
+    if (
+        not ticks
+        or any(type(tick) is not int or tick <= 0 for tick in ticks)
+        or ticks != sorted(set(ticks))
+    ):
+        raise ValueError("ticks debe contener enteros positivos, únicos y crecientes")
+
+    contadores = [contador_inicial + tick * paso for tick in ticks]
+    return {
+        "paso": paso,
+        "contadores": contadores,
+        "indices_muestra": [contador >> 12 for contador in contadores],
+        "indices_interpolacion": [(contador >> 4) & 0xFF for contador in contadores],
+    }
+
+
 def pcm16(muestras) -> bytes:
     if any(not math.isfinite(x) or abs(x) >= 1 for x in muestras):
         raise ValueError("PCM no finito o sin margen; no se recorta silenciosamente")

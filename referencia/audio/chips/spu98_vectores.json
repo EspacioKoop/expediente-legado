@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "perfil": "laboratorio-1475-adpcm-v1",
   "estado": "perfil documental; no validación de hardware",
   "procedencia": "Datos sintéticos propios y resultados literales calculados por aritmética, sin extraer audio ni usar el decodificador bajo prueba para obtenerlos.",
@@ -178,7 +178,7 @@
     }
   ],
   "pitch": {
-    "estado": "pendiente de implementación T07; no ejecutado por test_spu98_vectores.py",
+    "estado": "T07 contador lógico ejecutado por test_spu98_vectores.py; interpolación PCM, PMON y voz completa pendientes",
     "pmon": false,
     "casos_tasa": [
       {
