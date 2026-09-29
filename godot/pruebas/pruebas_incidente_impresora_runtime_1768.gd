@@ -119,7 +119,9 @@ func _probar_secuencia_y_recarga() -> void:
 		controller._impresora.verbo == Interactuable3D.Verbo.ABRIR,
 		"después ofrece abrir bandeja",
 	)
-	_comprobar(controller._impresora.nombre_sonido() == "abrir", "abrir usa audio común")
+	_comprobar(
+		controller._impresora.nombre_sonido() == "abrir", "abrir usa audio común"
+	)
 
 	controller._al_activar(null)
 	estado = host.jornada[controller.CLAVE_ESTADO]
@@ -128,8 +130,13 @@ func _probar_secuencia_y_recarga() -> void:
 		"segunda interacción abre bandeja",
 	)
 	_comprobar(controller._papel.visible, "al abrir se ve el papel atascado")
-	_comprobar(controller._impresora.verbo == Interactuable3D.Verbo.COGER, "después ofrece coger papel")
-	_comprobar(controller._impresora.nombre_sonido() == "coger", "retirar papel usa audio común")
+	_comprobar(
+		controller._impresora.verbo == Interactuable3D.Verbo.COGER,
+		"después ofrece coger papel",
+	)
+	_comprobar(
+		controller._impresora.nombre_sonido() == "coger", "retirar papel usa audio común"
+	)
 
 	var guardado: Dictionary = (host.jornada[controller.CLAVE_ESTADO] as Dictionary).duplicate(true)
 	controller.queue_free()
@@ -150,8 +157,13 @@ func _probar_secuencia_y_recarga() -> void:
 		"tercera interacción retira papel",
 	)
 	_comprobar(not recargado._papel.visible, "retirar oculta el papel")
-	_comprobar(recargado._impresora.verbo == Interactuable3D.Verbo.CERRAR, "después ofrece cerrar")
-	_comprobar(recargado._impresora.nombre_sonido() == "cerrar", "cerrar usa audio común")
+	_comprobar(
+		recargado._impresora.verbo == Interactuable3D.Verbo.CERRAR,
+		"después ofrece cerrar",
+	)
+	_comprobar(
+		recargado._impresora.nombre_sonido() == "cerrar", "cerrar usa audio común"
+	)
 	recargado._al_activar(null)
 	estado = host.jornada[recargado.CLAVE_ESTADO]
 	_comprobar(bool(estado["resuelta"]), "cuarta interacción resuelve")
