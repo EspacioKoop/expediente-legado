@@ -83,9 +83,9 @@ Deno.test("send e inbox conservan identidad, tipo y correlación", async () => {
 Deno.test("idempotency key no duplica mensajes", async () => {
   await withKv(async (kv) => {
     const first = await call(kv, "send", question(), worker());
-    const second = await call(kv, "send", question(), worker());
+    const second = await call(kv, "send", question(), worker("run-worker-retry"));
     assertEquals(first.status, 201, "primer send");
-    assertEquals(second.status, 200, "retry idempotente");
+    assertEquals(second.status, 200, "retry idempotente incluso en otro run");
     const one = first.data.message as Record<string, unknown>;
     const two = second.data.message as Record<string, unknown>;
     assertEquals(one.message_id, two.message_id, "mismo id");
@@ -184,6 +184,24 @@ Deno.test("roles aíslan inboxes y smoke no puede enviar", async () => {
       { role: "smoke", run_id: "smoke-run" },
     );
     assertEquals(smoke.status, 403, "smoke no envía");
+  });
+});
+
+Deno.test("BLOCKER fuerza blocking aunque el emisor lo omita", async () => {
+  await withKv(async (kv) => {
+    const sent = await call(
+      kv,
+      "send",
+      question({
+        message_type: "BLOCKER",
+        idempotency_key: "blocker-1",
+        blocking: false,
+      }),
+      worker(),
+    );
+    assertEquals(sent.status, 201, "blocker");
+    const message = sent.data.message as Record<string, unknown>;
+    assertEquals(message.blocking, true, "blocking semántico");
   });
 });
 
