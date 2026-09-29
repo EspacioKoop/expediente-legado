@@ -1,3 +1,5 @@
+import { handleAgentB2B } from "./agent_b2b.ts";
+
 const AGENT_POOL_AUDIENCE = "siga98-agent-pool";
 const AGENT_POOL_LEASE_TTL_MS = 30 * 60 * 1000;
 const AGENT_POOL_EVENT_TTL_MS = 7 * 24 * 60 * 60 * 1000;
@@ -620,6 +622,13 @@ export async function handleAgentPool(
       { ok: false, error: tooLarge ? "payload_too_large" : "invalid_json" },
       tooLarge ? 413 : 400,
     );
+  }
+
+  if (url.pathname.startsWith("/api/agent-pool/b2b/")) {
+    return await handleAgentB2B(url, kv, raw, {
+      role: actor.role,
+      run_id: cleanText(actor.claims.run_id, 80),
+    });
   }
 
   if (url.pathname === "/api/agent-pool/acquire") {

@@ -202,6 +202,7 @@ async function handler(
       agent_memory: true,
       agent_pool_control: true,
       agent_pool_worker_health: true,
+      agent_b2b: true,
     });
   }
 

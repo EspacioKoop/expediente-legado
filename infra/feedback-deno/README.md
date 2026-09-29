@@ -61,6 +61,25 @@ Durante la migración (#1728) los workflows son deliberadamente fail-open si el 
 
 Los circuit breakers de workers se almacenan con TTL. El cliente puede solicitar cooldown, pero el servidor lo limita a **5 minutos–6 horas**. Un fallo de cuota reportado por `agent-worker.yml` abre el circuito; un `agent-provider-smoke.yml` verde lo cierra inmediatamente. El smoke usa OIDC y solo recibe `id-token: write`, no permisos de escritura sobre Contents, Issues ni PRs.
 
+### Mailbox B2B
+
+El control-plane expone también un buzón dirigido para comunicación entre fases:
+
+- `POST /api/agent-pool/b2b/send`: publica `QUESTION`, `BLOCKER`, `EVIDENCE`, `HANDOFF`, `RESULT` o `REVIEW`;
+- `POST /api/agent-pool/b2b/inbox`: lee mensajes para `dispatcher`, `worker` o `reviewer`;
+- `POST /api/agent-pool/b2b/ack`: consume un mensaje leído.
+
+Los mensajes llevan `schema: 1`, `task_id`, `idempotency_key`, destinatario y contenido
+acotado. Los inboxes de worker/reviewer exigen `task_id`; el dispatcher dispone además de un inbox global cronológico para drenar handoffs de varias tareas. El emisor real se deriva del OIDC (`role` + `run_id`), no del JSON del cliente.
+La idempotencia sobrevive al ACK durante el TTL para que reintentos de otro run no
+recreen un mensaje ya consumido. Los TTL se limitan a 5 minutos–24 horas y los payloads
+con patrones evidentes de credenciales se rechazan.
+
+`worker` puede leer los buzones lógicos `worker` y `reviewer`; `dispatcher` solo su
+propio buzón; el workflow de smoke no puede publicar. El mailbox no sustituye leases
+ni CLAIMs: coordina preguntas, bloqueos, evidencia y handoffs, mientras los locks
+siguen en el control-plane y en el registro de reservas.
+
 ## Despliegue
 
 Usa el Deno Deploy actual en `https://console.deno.com`, no Deploy Classic.
@@ -152,7 +171,8 @@ Debe responder con:
   "kv_configured": true,
   "agent_memory": true,
   "agent_pool_control": true,
-  "agent_pool_worker_health": true
+  "agent_pool_worker_health": true,
+  "agent_b2b": true
 }
 ```
 
