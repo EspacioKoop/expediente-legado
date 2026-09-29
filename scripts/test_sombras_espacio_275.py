@@ -32,6 +32,10 @@ class SombrasEspacio275Test(unittest.TestCase):
         # cosa: encenderlas sin este renderer sería pedir lo que no hay.
         self.assertIn('renderer/rendering_method="forward_plus"', self.proyecto)
 
+    def test_una_luz_puede_desactivar_sombra_sin_cambiar_el_default(self):
+        self.assertIn('luz.get("sombras", true)', self.espacio)
+        self.assertIn("if punto.shadow_enabled:", self.espacio)
+
     def test_la_carcasa_no_se_hace_sombra_a_si_misma(self):
         self.assertIn("_no_proyecta_sombra(cuerpo)", self.espacio)
         self.assertIn("SHADOW_CASTING_SETTING_OFF", self.espacio)

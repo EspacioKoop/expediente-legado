@@ -46,6 +46,7 @@ func _ejecutar() -> void:
 	var dia_modelo = DIA_CALLE.new()
 	var espacio: Dictionary = dia_modelo.call("_espacio_de", "trayecto")
 	dia_modelo.free()
+	espacio = _espacio_sin_sombras(espacio)
 	Espacio3D.construir(mundo, espacio)
 	_montar_iluminacion(mundo, espacio)
 
@@ -190,6 +191,13 @@ func _leer_metricas() -> Dictionary:
 		"process_ms": Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
 		"static_memory_bytes": Performance.get_monitor(Performance.MEMORY_STATIC),
 	}
+
+
+func _espacio_sin_sombras(espacio: Dictionary) -> Dictionary:
+	var copia := espacio.duplicate(true)
+	for luz in copia.get("luces", []):
+		luz["sombras"] = false
+	return copia
 
 
 func _montar_iluminacion(mundo: Node3D, espacio: Dictionary) -> void:

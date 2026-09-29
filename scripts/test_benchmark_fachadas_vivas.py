@@ -10,6 +10,9 @@ import unittest
 from pathlib import Path
 from typing import Any
 
+ROOT = Path(__file__).resolve().parents[1]
+BENCHMARK_GDSCRIPT = ROOT / "godot" / "pruebas" / "benchmark_fachadas_vivas.gd"
+
 REQUIRED_METRICS = (
     "draw_calls",
     "objects",
@@ -236,6 +239,19 @@ class BenchmarkFachadasComparisonTest(unittest.TestCase):
             },
             "gpu_frame_ms_note": "N/D",
         }
+
+    def test_benchmark_apaga_sombras_antes_de_construir_la_base(self) -> None:
+        source = BENCHMARK_GDSCRIPT.read_text(encoding="utf-8")
+        disable = source.index("espacio = _espacio_sin_sombras(espacio)")
+        build = source.index("Espacio3D.construir(mundo, espacio)")
+        lighting = source.index("_montar_iluminacion(mundo, espacio)")
+        self.assertLess(disable, build)
+        self.assertLess(build, lighting)
+        helper = source.split("func _espacio_sin_sombras", 1)[1].split(
+            "func _montar_iluminacion", 1
+        )[0]
+        self.assertIn('espacio.duplicate(true)', helper)
+        self.assertIn('luz["sombras"] = false', helper)
 
     def test_budget_accepts_delta_under_ten_percent(self) -> None:
         summary = compare_reports(self._fixture("baseline", 3.0), self._fixture("full", 3.25))
