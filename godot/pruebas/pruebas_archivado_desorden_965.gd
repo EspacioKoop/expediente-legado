@@ -33,12 +33,39 @@ func _initialize() -> void:
 		"dos errores añaden una demora breve y determinista",
 	)
 	_comprobar(desorden.get("1970-CERRADO-GENERAL", 0) == 1, "cada destino conserva su pila")
+	var resultado_antes := Bandeja.resultado(estado)
+	_comprobar(resultado_antes["errores"] == 2, "los dos intentos incorrectos cuentan en precisión")
+	_comprobar(
+		Bandeja.reorganizar_destino(estado, "1980-ABIERTO-GENERAL"),
+		"interactuar con el archivador puede retirar un error activo",
+	)
+	desorden = Bandeja.desorden_por_destino(estado)
+	_comprobar(
+		not desorden.has("1980-ABIERTO-GENERAL") and desorden.get("1970-CERRADO-GENERAL", 0) == 1,
+		"reordenar limpia solo la pila elegida",
+	)
+	_comprobar(
+		is_equal_approx(Bandeja.demora_busqueda(estado), 0.35),
+		"reordenar reduce la demora sin borrar el resto del desorden",
+	)
+	_comprobar(
+		Bandeja.resultado(estado)["errores"] == 2,
+		"reordenar conserva el historial y la precisión de los intentos",
+	)
+	_comprobar(
+		not Bandeja.reorganizar_destino(estado, "1980-ABIERTO-GENERAL"),
+		"un archivador ya ordenado no inventa otra corrección",
+	)
 
 	var serializado := Bandeja.serializar(estado)
 	var restaurado := Bandeja.restaurar(serializado, [caso], ["F-1998-001"])
 	_comprobar(
 		Bandeja.desorden_por_destino(restaurado) == desorden,
 		"recargar reconstruye el mismo desorden desde decisiones guardadas",
+	)
+	_comprobar(
+		Bandeja.resultado(restaurado)["errores"] == 2,
+		"recargar conserva también los intentos ya reordenados",
 	)
 
 	_comprobar(Bandeja.colocar(estado, caso, correcto), "el destino correcto resuelve el caso")
