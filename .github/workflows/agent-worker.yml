@@ -680,7 +680,7 @@ jobs:
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-context.md, .agent-memory.json, .agent-history.json y las Normas Platino actuales en .agent-platino. Repo/issue/#181/#182 y Normas Platino prevalecen siempre. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitio una ruta necesaria, no intentes saltarte el CLAIM: el orquestador restaurara el desvio y replanificara. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+          prompt: 'Lee .agent-worker-prompt.md y ejecuta exactamente ese contrato. Usa .agent-task-packet.json como sobre TASK autoritativo del handoff. No sustituyas el ResultPacket por una narracion libre.'
 
       - id: implement_gemini
         name: Implementar con Gemini
@@ -695,7 +695,7 @@ jobs:
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"tools":{"core":["read_file","write_file","replace","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-plan.json, .agent-context.md, .agent-memory.json, .agent-history.json y las Normas Platino actuales en .agent-platino. Repo/issue/#181/#182 y Normas Platino prevalecen siempre. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitio una ruta necesaria, no intentes saltarte el CLAIM: el orquestador restaurara el desvio y replanificara. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+          prompt: 'Lee .agent-worker-prompt.md y ejecuta exactamente ese contrato. Usa .agent-task-packet.json como sobre TASK autoritativo del handoff. No sustituyas el ResultPacket por una narracion libre.'
 
       - id: claim_guard
         name: Normalizar cambios al CLAIM
