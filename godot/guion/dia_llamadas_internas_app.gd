@@ -122,11 +122,14 @@ func _atender(actor: Node, dia: Node) -> void:
 	if caminante == null:
 		caminante = dia.get("_caminante") as Node3D
 	if hud != null and caminante != null and is_instance_valid(_hablante):
-		var panel := DialogoDiegetico.mostrar(
-			hud,
-			caminante,
-			_hablante,
-			String(resultado.get("respuesta", "")),
+		var panel := (
+			DialogoDiegetico
+			. mostrar(
+				hud,
+				caminante,
+				_hablante,
+				String(resultado.get("respuesta", "")),
+			)
 		)
 		dia.set("_dialogo_actual", panel)
 	_retirar_telefono()
