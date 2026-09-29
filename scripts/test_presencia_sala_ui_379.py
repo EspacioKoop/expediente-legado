@@ -20,7 +20,8 @@ class PresenciaSalaUi379Test(unittest.TestCase):
         self.assertIn('AJUSTE_ENDPOINT := "multiplayer/presencia/websocket_url"', fuente)
         self.assertIn("ProjectSettings.get_setting(AJUSTE_ENDPOINT", fuente)
         self.assertIn("IdentidadOnline.new()", fuente)
-        self.assertIn("TransporteWebSocket.new(endpoint)", fuente)
+        self.assertIn("TransporteOnlineFactory.crear(endpoint, false)", fuente)
+        self.assertNotIn("TransporteWebSocket", fuente)
         self.assertNotIn("Partida.guardar", fuente)
         self.assertNotIn('jornada["multiplayer"', fuente)
 

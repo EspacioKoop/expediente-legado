@@ -13,7 +13,7 @@ const PresenciaServicio = preload("res://guion/red/presencia_servicio.gd")
 const PresenciaRemota3D = preload("res://guion/red/presencia_remota_3d.gd")
 const PresenciaSalaPanel = preload("res://guion/red/presencia_sala_panel.gd")
 const TransporteNulo = preload("res://guion/red/transporte_nulo.gd")
-const TransporteWebSocket = preload("res://guion/red/transporte_websocket.gd")
+const TransporteOnlineFactory = preload("res://guion/red/transporte_online_factory.gd")
 
 const AJUSTE_ENDPOINT := "multiplayer/presencia/websocket_url"
 const FASE_COMPARTIDA := "trayecto"
@@ -143,7 +143,12 @@ func conectar_codigo(codigo: String) -> Dictionary:
 			return habilitada
 
 	var actor_id := identidad.actor_public_id()
-	var resultado := activar_sala(normalizado, TransporteWebSocket.new(endpoint), actor_id)
+	var transporte := TransporteOnlineFactory.crear(endpoint, false)
+	if transporte == null:
+		var invalido_endpoint := {"ok": false, "status": "unconfigured"}
+		_mostrar_estado_sala(invalido_endpoint)
+		return invalido_endpoint
+	var resultado := activar_sala(normalizado, transporte, actor_id)
 	_mostrar_estado_sala(resultado)
 	return resultado
 
