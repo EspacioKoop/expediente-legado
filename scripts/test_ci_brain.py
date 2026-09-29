@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import re
 import sqlite3
 import tempfile
 import unittest
@@ -246,7 +247,11 @@ class CiBrainTest(unittest.TestCase):
         self.assertIn("python3 scripts/ci_brain.py sync-turso", texto)
         self.assertIn("vars.TURSO_DATABASE_URL", texto)
         self.assertIn("secrets.TURSO_AUTH_TOKEN", texto)
-        self.assertIn("actions/upload-artifact@v4", texto)
+        self.assertRegex(
+            texto,
+            re.compile(r"uses: actions/upload-artifact@[0-9a-f]{40}\s+# v4"),
+        )
+        self.assertNotIn("actions/upload-artifact@v4", texto)
         self.assertNotIn("pull_request:", texto)
 
 
