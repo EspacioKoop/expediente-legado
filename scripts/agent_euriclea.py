@@ -96,7 +96,11 @@ class Decision:
 
 
 def es_del_pool(pr: Mapping[str, Any]) -> bool:
-    return bool(RAMA_POOL.match(str(pr.get("headRefName", ""))))
+    """Solo revisa ramas agent/* del propio repositorio, nunca forks."""
+    return (
+        not bool(pr.get("isCrossRepository", False))
+        and bool(RAMA_POOL.match(str(pr.get("headRefName", ""))))
+    )
 
 
 def etiquetas_de(pr: Mapping[str, Any]) -> set[str]:
@@ -380,13 +384,13 @@ def repo_actual() -> str:
 
 
 def listar_prs(repo: str) -> list[dict[str, Any]]:
-    campos = "number,title,body,headRefName,headRefOid,labels"
+    campos = "number,title,body,headRefName,headRefOid,labels,isCrossRepository"
     salida = gh("pr", "list", "--repo", repo, "--state", "open", "--limit", "100", "--json", campos)
     return [pr for pr in json.loads(salida) if es_del_pool(pr)]
 
 
 def pr_concreta(repo: str, numero: int) -> dict[str, Any]:
-    campos = "number,title,body,headRefName,headRefOid,labels"
+    campos = "number,title,body,headRefName,headRefOid,labels,isCrossRepository"
     return dict(json.loads(gh("pr", "view", str(numero), "--repo", repo, "--json", campos)))
 
 
