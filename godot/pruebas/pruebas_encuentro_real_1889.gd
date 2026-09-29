@@ -19,7 +19,9 @@ func _probar() -> void:
 
 	_comprobar(encuentro.zona_interactiva() != null, "el encuentro monta una interaccion real")
 	_comprobar(not encuentro.resuelto(), "el encuentro empieza pendiente")
-	_comprobar(jornada.get(Encuentro.CLAVE_ESTADO, {}).is_empty(), "no aplica consecuencia al montar")
+	_comprobar(
+		jornada.get(Encuentro.CLAVE_ESTADO, {}).is_empty(), "no aplica consecuencia al montar"
+	)
 
 	var objetivo := encuentro.objetivo()
 	var decision := CombateContextual.evaluar("trayecto", objetivo, {})
@@ -40,30 +42,39 @@ func _probar() -> void:
 		"sin autorizacion no se abre arena",
 	)
 	_comprobar(
-		not encuentro.resolver_resultado(
-			Encuentro.ID_OBJETIVO,
-			true,
-			{"tipo": "otra_consecuencia"},
+		not (
+			encuentro
+			. resolver_resultado(
+				Encuentro.ID_OBJETIVO,
+				true,
+				{"tipo": "otra_consecuencia"},
+			)
 		),
 		"una consecuencia ajena no muta la jornada",
 	)
 	_comprobar(jornada.get(Encuentro.CLAVE_ESTADO, {}).is_empty(), "el rechazo deja estado intacto")
 
 	_comprobar(
-		encuentro.resolver_resultado(
-			Encuentro.ID_OBJETIVO,
-			true,
-			{"tipo": Encuentro.TIPO_CONSECUENCIA},
+		(
+			encuentro
+			. resolver_resultado(
+				Encuentro.ID_OBJETIVO,
+				true,
+				{"tipo": Encuentro.TIPO_CONSECUENCIA},
+			)
 		),
 		"el resultado autorizado se consume",
 	)
 	_comprobar(encuentro.estado() == "victoria", "la victoria queda acotada a la jornada")
 	_comprobar(encuentro.resuelto(), "el encuentro queda resuelto")
 	_comprobar(
-		not encuentro.resolver_resultado(
-			Encuentro.ID_OBJETIVO,
-			false,
-			{"tipo": Encuentro.TIPO_CONSECUENCIA},
+		not (
+			encuentro
+			. resolver_resultado(
+				Encuentro.ID_OBJETIVO,
+				false,
+				{"tipo": Encuentro.TIPO_CONSECUENCIA},
+			)
 		),
 		"el resultado es idempotente",
 	)
@@ -73,10 +84,13 @@ func _probar() -> void:
 	get_root().add_child(derrota)
 	derrota.configurar(jornada_derrota)
 	_comprobar(
-		derrota.resolver_resultado(
-			Encuentro.ID_OBJETIVO,
-			false,
-			{"tipo": Encuentro.TIPO_CONSECUENCIA},
+		(
+			derrota
+			. resolver_resultado(
+				Encuentro.ID_OBJETIVO,
+				false,
+				{"tipo": Encuentro.TIPO_CONSECUENCIA},
+			)
 		),
 		"la derrota tambien se consume por el mismo contrato",
 	)
