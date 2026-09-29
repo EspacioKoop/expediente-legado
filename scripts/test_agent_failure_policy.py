@@ -59,6 +59,8 @@ class AgentFailurePolicyTest(unittest.TestCase):
     def test_fallo_de_test_conserva_worker(self):
         for text in (
             "AssertionError: expected true",
+            "1 test failed",
+            "workflow failure",
             "would reformat godot/guion/x.gd",
             "gdlint: max-returns",
         ):
