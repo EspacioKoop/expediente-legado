@@ -499,7 +499,7 @@ jobs:
           openai_base_url: ${{ steps.qwen_config.outputs.url }}
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
-          settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
+          settings: '{"model":{"maxSessionTurns":16},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
           prompt: 'FASE DE PLAN (solo lectura): no edites nada ni pidas herramientas de edicion; tu unica salida util es el bloque AGENT_PLAN. TAREA ASIGNADA: ${{ steps.task.outputs.brief }} FIN DE LA TAREA. Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-context.md, .agent-b2b-inbox.md si existe, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino. Jerarquia: repo/issue/#181/#182 y Normas Platino > contexto de wiki > memoria temporal Deno KV > memoria historica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integracion y sus tests: files debe incluir TODAS las rutas que una implementacion correcta podria necesitar. Si los comentarios recientes contienen AGENT_POOL_REPLAN o el inbox B2B contiene un BLOCKER de CLAIM, revisa explicitamente sus rutas/evidencia y anadelas solo si son realmente necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Maximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
 
       - id: plan_gemini
@@ -511,7 +511,7 @@ jobs:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
-          settings: '{"model":{"maxSessionTurns":40},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
+          settings: '{"model":{"maxSessionTurns":16},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
           prompt: 'FASE DE PLAN (solo lectura): no edites nada ni pidas herramientas de edicion; tu unica salida util es el bloque AGENT_PLAN. TAREA ASIGNADA: ${{ steps.task.outputs.brief }} FIN DE LA TAREA. Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-context.md, .agent-b2b-inbox.md si existe, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino. Jerarquia: repo/issue/#181/#182 y Normas Platino > contexto de wiki > memoria temporal Deno KV > memoria historica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integracion y sus tests: files debe incluir TODAS las rutas que una implementacion correcta podria necesitar. Si los comentarios recientes contienen AGENT_POOL_REPLAN o el inbox B2B contiene un BLOCKER de CLAIM, revisa explicitamente sus rutas/evidencia y anadelas solo si son realmente necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Maximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
 
       - id: reserve
