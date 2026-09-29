@@ -20,13 +20,20 @@ APRUEBA = 'AGENT_REVIEW_BEGIN {"verdict":"approve","findings":[]} AGENT_REVIEW_E
 HALLAZGO = 'AGENT_REVIEW_BEGIN {"verdict":"findings","findings":["falta la prueba"]} AGENT_REVIEW_END'
 
 
-def pr(rama="agent/qwen-1743-36487739473", etiquetas=(), sha=SHA, cuerpo="Refs #1743"):
+def pr(
+    rama="agent/qwen-1743-36487739473",
+    etiquetas=(),
+    sha=SHA,
+    cuerpo="Refs #1743",
+    cross_repo=False,
+):
     return {
         "number": 9,
         "title": "agent(qwen): #1743",
         "body": cuerpo,
         "headRefName": rama,
         "headRefOid": sha,
+        "isCrossRepository": cross_repo,
         "labels": [{"name": e} for e in etiquetas],
     }
 
@@ -40,6 +47,9 @@ class SeleccionTest(unittest.TestCase):
         self.assertTrue(mod.es_del_pool(pr()))
         self.assertFalse(mod.es_del_pool(pr(rama="feature/1802-euriclea")))
         self.assertFalse(mod.es_del_pool(pr(rama="agent/sin-issue")))
+
+    def test_fork_con_nombre_agent_no_entra(self):
+        self.assertFalse(mod.es_del_pool(pr(cross_repo=True)))
 
     def test_principal_revisa_cada_sha_una_vez(self):
         self.assertTrue(mod.necesita_revision(pr(), [], mod.PRINCIPAL))
