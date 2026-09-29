@@ -15,6 +15,7 @@ const VENTANILLA := preload("res://escenas/ventanilla.tscn")
 var _ventanas_vivas: CalleVentanasVivas = null
 var _viento: VientoAmbiental = null
 var _religion_mundo_934: ReligionMundo9343D = null
+var _encuentro_real_1889: DiaEncuentroReal1889App = null
 
 
 func _espacio_de(fase: String) -> Dictionary:
@@ -48,6 +49,7 @@ func _entrar_en(fase: String) -> void:
 		ComercioBarrio3D.montar(self, calle)
 		DesvioRefugio3D.montar(calle, jornada)
 		_montar_religion_mundo_934()
+		_montar_encuentro_real_1889()
 		var ventanilla := calle.find_child("EntrarVentanillaReclamaciones", true, false)
 		if (
 			ventanilla != null
@@ -92,12 +94,13 @@ func _montar_animacion_ambiental(calle: Node3D) -> void:
 ## Las piezas de la calle mueren con la fase; el animador que las reparte vive
 ## por encima y lo limpia la capa del sueño.
 func _soltar_capas_calle() -> void:
-	for capa in [_ventanas_vivas, _viento, _religion_mundo_934]:
+	for capa in [_ventanas_vivas, _viento, _religion_mundo_934, _encuentro_real_1889]:
 		if capa != null and is_instance_valid(capa):
 			capa.queue_free()
 	_ventanas_vivas = null
 	_viento = null
 	_religion_mundo_934 = null
+	_encuentro_real_1889 = null
 
 
 ## #934: el tablón y la mesa se materializan en el recorrido real sin crear
@@ -130,6 +133,42 @@ func _montar_religion_mundo_934() -> void:
 
 func _al_registro_religion_934(_id_evento: String) -> void:
 	_guardar_o_avisar("")
+
+
+## #1889: un unico encuentro real y opt-in valida la frontera contextual sin
+## convertir el trayecto en un espacio donde se pueda atacar libremente.
+func _montar_encuentro_real_1889() -> void:
+	if _mundo == null or _encuentro_real_1889 != null:
+		return
+	var encuentro := DiaEncuentroReal1889App.new()
+	encuentro.name = "EncuentroReal1889Recorrido"
+	# Fuera del eje principal y del conjunto de #934: se puede ignorar y seguir.
+	encuentro.position = Vector3(4.65, 0.0, 4.2)
+	_mundo.add_child(encuentro)
+	encuentro.configurar(jornada)
+	encuentro.combate_solicitado.connect(_abrir_encuentro_real_1889)
+	if not combate_real_terminado.is_connected(_resolver_encuentro_real_1889):
+		combate_real_terminado.connect(_resolver_encuentro_real_1889)
+	_encuentro_real_1889 = encuentro
+
+
+func _abrir_encuentro_real_1889(objetivo: Dictionary) -> void:
+	if _encuentro_real_1889 == null:
+		return
+	var abierto := abrir_combate_real(objetivo)
+	_encuentro_real_1889.marcar_combate_abierto(abierto)
+
+
+func _resolver_encuentro_real_1889(
+	objetivo_id: String, gano: bool, consecuencia: Dictionary
+) -> void:
+	if _encuentro_real_1889 == null:
+		return
+	if not _encuentro_real_1889.resolver_resultado(objetivo_id, gano, consecuencia):
+		return
+	_nomina.text = tr(
+		"ENCUENTRO_REAL_1889_VICTORIA" if gano else "ENCUENTRO_REAL_1889_DERROTA"
+	)
 
 
 ## El Coliseo de #43 se juega en su propia pantalla; desde la calle se abre
