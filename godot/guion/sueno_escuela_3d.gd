@@ -7,11 +7,14 @@
 class_name SuenoEscuela3D
 extends Node3D
 
+signal sonido_inquietante(id: String)
+
 const ESCENA_PUPITRE := preload("res://escenas/suenos/props_284/pupitre_escolar.tscn")
 const ESCENA_TAQUILLAS := preload("res://escenas/suenos/props_284/taquillas_escolares.tscn")
 const ESCENA_RELOJ := preload("res://escenas/suenos/props_284/reloj_escolar_anomalo.tscn")
 const ALTURA := 2.8
 const INTERVALO_TIMBRE := 7.5
+const ID_SONIDO_INQUIETANTE := "escuela:timbre_fuera_horario"
 # Se iluminan varios hitos del contorno fragmentado. La evidencia sin HUD de
 # #282 mostró que dejar los quads autoiluminados sin luz local hunde la utilería
 # cercana en sombra y hace leer la sala como vacío.
@@ -68,6 +71,7 @@ func _process(delta: float) -> void:
 	_aplicar_variante()
 	if _timbre != null:
 		_timbre.play()
+		sonido_inquietante.emit(ID_SONIDO_INQUIETANTE)
 
 
 func _ocultar_arquitectura_base() -> void:

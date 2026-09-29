@@ -9,6 +9,7 @@ class_name Estres
 extends RefCounted
 
 const CAMPO_JORNADA := "estres_dinamico"
+const CAMPO_SONIDOS_INQUIETANTES := "sonidos_inquietantes_registrados"
 const VALOR_MAXIMO := 100.0
 const INTENSIDAD_MAXIMA := 2.0
 
@@ -39,6 +40,28 @@ static func aplicar(jornada: Dictionary, evento: String, intensidad: float = 1.0
 	estado["valor"] = nuevo
 	jornada[CAMPO_JORNADA] = estado
 	return nuevo - anterior
+
+
+## Registra un sonido diegético concreto una sola vez por Jornada. El id vive
+## dentro del mismo estado canónico de estrés para sobrevivir guardado/recarga
+## sin crear flags paralelos en la escena que lo reproduce.
+static func registrar_sonido_inquietante(
+	jornada: Dictionary, sonido_id: String, intensidad: float = 1.0
+) -> bool:
+	var id := sonido_id.strip_edges()
+	if id.is_empty():
+		return false
+
+	var estado := _asegurar(jornada)
+	var crudo: Variant = estado.get(CAMPO_SONIDOS_INQUIETANTES, [])
+	var registrados: Array = crudo if crudo is Array else []
+	if registrados.has(id):
+		return false
+	registrados.append(id)
+	estado[CAMPO_SONIDOS_INQUIETANTES] = registrados
+	jornada[CAMPO_JORNADA] = estado
+	aplicar(jornada, "sonido_inquietante", intensidad)
+	return true
 
 
 ## Valor interno 0..100. Se conserva para autoría y depuración, pero no debe
