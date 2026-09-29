@@ -27,7 +27,7 @@ class VentanaFloja1773Test(unittest.TestCase):
     def test_controller_usa_inventario_real_y_ventana_real(self):
         self.assertIn('partida.estado.get("inventario", {})', self.controller)
         self.assertIn('EspaciosCatalogo.OFICINA.get("ventanas", [])', self.controller)
-        self.assertIn('== "archivo"', self.controller)
+        self.assertIn('jornada.get("fase", "")', self.controller)\n        self.assertIn('!= "archivo"', self.controller)
         self.assertNotIn("Inventario.HOME_STORAGE", self.controller)
         self.assertNotIn("Inventario.recoger", self.controller)
         self.assertNotIn("Inventario.vender", self.controller)
