@@ -57,17 +57,18 @@ static func pieza_postal() -> Dictionary:
 	}
 
 
-static func registrar_exposicion(
-	estado: Dictionary, id_superficie: String, jornada: int
-) -> bool:
+static func registrar_exposicion(estado: Dictionary, id_superficie: String, jornada: int) -> bool:
 	var datos := superficie(id_superficie)
 	if datos.is_empty():
 		return false
-	return Prometeo.registrar_exposicion_ideologica(
-		estado,
-		String(datos.get("id", "")),
-		String(datos.get("fuente", "")),
-		String(datos.get("eje", "")),
-		jornada,
-		["cultura_cotidiana", EVENTO_BASE, id_superficie],
+	return (
+		Prometeo
+		. registrar_exposicion_ideologica(
+			estado,
+			String(datos.get("id", "")),
+			String(datos.get("fuente", "")),
+			String(datos.get("eje", "")),
+			jornada,
+			["cultura_cotidiana", EVENTO_BASE, id_superficie],
+		)
 	)
