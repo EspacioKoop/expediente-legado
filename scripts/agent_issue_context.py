@@ -6,10 +6,16 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import re
 from typing import Any
 
 TRUSTED_ASSOCIATIONS = {"OWNER", "MEMBER", "COLLABORATOR"}
 TRUSTED_BOTS = {"github-actions[bot]"}
+B2B_TYPES = {"TASK", "CLAIM", "EVIDENCE", "BLOCKER", "QUESTION", "RESULT", "REVIEW", "HANDOFF"}
+B2B_RE = re.compile(
+    r"AGENT_B2B_BEGIN\s*(?:```(?:json)?\s*)?(\{.*?\})(?:\s*```)?\s*AGENT_B2B_END",
+    re.IGNORECASE | re.DOTALL,
+)
 
 
 def _login(source: dict[str, Any]) -> str:
@@ -32,6 +38,58 @@ def trusted(source: dict[str, Any]) -> bool:
     return _association(source) in TRUSTED_ASSOCIATIONS or login in TRUSTED_BOTS
 
 
+def _b2b_events(comment: dict[str, Any]) -> list[dict[str, Any]]:
+    if not trusted(comment):
+        return []
+    body = str(comment.get("body") or "")
+    events: list[dict[str, Any]] = []
+    for match in B2B_RE.finditer(body):
+        try:
+            data = json.loads(match.group(1))
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(data, dict) or data.get("schema") != 1:
+            continue
+        if data.get("type") not in B2B_TYPES:
+            continue
+        handoff = data.get("handoff")
+        if not isinstance(handoff, dict):
+            continue
+        source = handoff.get("from")
+        target = handoff.get("to")
+        if not isinstance(source, str) or not source.strip():
+            continue
+        if not isinstance(target, str) or not target.strip():
+            continue
+        issue = data.get("issue")
+        if not isinstance(issue, int) or isinstance(issue, bool) or issue <= 0:
+            continue
+        summary = " ".join(str(data.get("summary") or "").split())[:500]
+        refs = data.get("refs")
+        clean_refs = []
+        if isinstance(refs, list):
+            clean_refs = [
+                " ".join(item.split())[:240]
+                for item in refs[:16]
+                if isinstance(item, str) and item.strip()
+            ]
+        events.append(
+            {
+                "type": data["type"],
+                "issue": issue,
+                "from": source.strip(),
+                "to": target.strip(),
+                "summary": summary,
+                "refs": clean_refs,
+            }
+        )
+    return events
+
+
+def _without_b2b_blocks(body: str) -> str:
+    return B2B_RE.sub("", body).strip()
+
+
 def render_context(
     issue: dict[str, Any],
     comments: list[dict[str, Any]],
@@ -48,11 +106,28 @@ def render_context(
         accepted = accepted[-max_comments:] if max_comments else []
 
     lines = ["# Issue", "", f"## {title}", "", body, "", "## Comentarios recientes"]
+    events: list[dict[str, Any]] = []
     for comment in accepted:
-        comment_body = str(comment.get("body") or "").strip()
+        events.extend(_b2b_events(comment))
+        comment_body = _without_b2b_blocks(str(comment.get("body") or ""))
         if not comment_body:
             continue
         lines.extend(["", f"- {_login(comment)}: {comment_body}"])
+
+    if events:
+        lines.extend(["", "## Eventos B2B recientes"])
+        for event in events:
+            refs = ",".join(event["refs"]) if event["refs"] else "-"
+            lines.extend(
+                [
+                    "",
+                    (
+                        f"- {event['type']} issue=#{event['issue']} "
+                        f"{event['from']}→{event['to']} "
+                        f"summary={event['summary'] or '-'} refs={refs}"
+                    ),
+                ]
+            )
     lines.append("")
     return "\n".join(lines)
 
