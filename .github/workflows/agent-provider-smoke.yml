@@ -26,6 +26,8 @@ jobs:
       SLOT: ${{ format('qwen-fallback-{0}', github.event_name == 'push' && 1 || inputs.slot) }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - id: slot
         name: Secret del slot
