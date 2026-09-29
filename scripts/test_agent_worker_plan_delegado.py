@@ -38,10 +38,26 @@ class CableadoPlanDelegadoTest(unittest.TestCase):
                 self.assertIn("steps.delegated.outputs.found != 'true'", self._paso(paso_id))
 
     def test_toda_lectura_del_plan_prioriza_el_delegado(self):
-        lecturas = re.findall(r"\$\{\{ [^}]*steps\.plan_qwen\.outputs\.summary[^}]*\}\}", self.worker)
-        self.assertEqual(2, len(lecturas))
-        for lectura in lecturas:
-            self.assertTrue(lectura.startswith("${{ steps.delegated.outputs.summary ||"), lectura)
+        paso = self._paso("reserve")
+        fuentes = re.findall(r"--source\s+(\S+)", paso)
+        self.assertIn("python3 scripts/agent_plan_parse.py", paso)
+        self.assertEqual("/tmp/delegado.json", fuentes[0])
+        self.assertGreater(len(fuentes), 1)
+
+    def test_la_salida_del_planificador_no_viaja_por_env(self):
+        # >128 KB en una variable: «Argument list too long» y el paso ni
+        # arranca, tampoco el de limpieza, que deja el CLAIM colgado (#1881).
+        for step in ("plan_qwen", "plan_gemini", "delegated"):
+            with self.subTest(step=step):
+                self.assertNotRegex(self.worker, rf"steps\.{step}\.outputs\.summary")
+
+    def test_limpieza_detecta_sobrecarga_leyendo_fichero(self):
+        inicio = self.worker.index("name: Limpiar fallo o cancelacion")
+        paso = self.worker[inicio:]
+        self.assertIn("overloaded", paso)
+        self.assertIn("/tmp/agent-output-plan", paso)
+        self.assertIn("/tmp/agent-output-implement", paso)
+        self.assertIn("/tmp/agent-output-implement", self._paso("validate_diff"))
 
 
 if __name__ == "__main__":
