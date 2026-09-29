@@ -149,8 +149,6 @@ func _probar_sonido_inquietante_idempotente() -> void:
 	_comprobar_cerca(Estres.valor(jornada), 3.0, "repetir el timbre no farmea tensión")
 
 
-
-
 func _probar_persistencia_json() -> void:
 	var jornada := {"dia": 7, "vuelta": 2}
 	Estres.aplicar(jornada, "fallo_critico")
