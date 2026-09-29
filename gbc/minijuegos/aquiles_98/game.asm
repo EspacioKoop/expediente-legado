@@ -35,9 +35,10 @@ DEF VRAM_TILES EQU $8000
 DEF BG_MAP     EQU $9800
 DEF OAM_BASE   EQU $FE00
 
-DEF ESTADO_TITULO   EQU 0
-DEF ESTADO_DUELO    EQU 1
-DEF ESTADO_VICTORIA EQU 2
+DEF ESTADO_TITULO     EQU 0
+DEF ESTADO_DUELO      EQU 1
+DEF ESTADO_VICTORIA   EQU 2
+DEF ESTADO_INTERLUDIO EQU 3
 
 DEF KEY_RIGHT  EQU %00000001
 DEF KEY_LEFT   EQU %00000010
@@ -121,6 +122,8 @@ Inicio:
     ld [wTeclasPrevias], a
     ld [wTeclasNuevas], a
     ld [wFalloTimer], a
+    ld [wRival], a
+    ld [wPasoPatron], a
 
     call ActivarLCD
 
@@ -132,18 +135,20 @@ Bucle:
 
     ld a, [wEstado]
     or a
-    jr z, EstadoTitulo
+    jp z, EstadoTitulo
     cp ESTADO_DUELO
-    jr z, EstadoDuelo
-    jr EstadoVictoria
+    jp z, EstadoDuelo
+    cp ESTADO_VICTORIA
+    jp z, EstadoVictoria
+    jp EstadoInterludio
 
 EstadoTitulo:
     ld a, [wTeclasNuevas]
     and KEY_A | KEY_START
-    jr z, Bucle
+    jp z, Bucle
     call SonidoInicio
     call IniciarDuelo
-    jr Bucle
+    jp Bucle
 
 EstadoDuelo:
     call MoverMira
@@ -151,15 +156,23 @@ EstadoDuelo:
     call ActualizarLectura
     call IntentarGolpe
     call TickFallo
-    jr Bucle
+    jp Bucle
 
 EstadoVictoria:
     ld a, [wTeclasNuevas]
     and KEY_A | KEY_START
-    jr z, Bucle
+    jp z, Bucle
     call SonidoInicio
     call IniciarDuelo
-    jr Bucle
+    jp Bucle
+
+EstadoInterludio:
+    ld a, [wTeclasNuevas]
+    and KEY_A | KEY_START
+    jp z, Bucle
+    call SonidoInicio
+    call IniciarRival
+    jp Bucle
 
 ; Lee cruceta y botones. Los cuatro bits bajos son direcciones y los cuatro
 ; altos son A/B/Select/Start. Tambien calcula pulsaciones nuevas.
@@ -197,6 +210,12 @@ LeerControles:
     ret
 
 IniciarDuelo:
+    xor a
+    ld [wRival], a
+    ld [wImpactos], a
+    jp IniciarRival
+
+IniciarRival:
     call DesactivarLCD
     call LimpiarOAM
     call LimpiarFondo
@@ -204,11 +223,11 @@ IniciarDuelo:
 
     xor a
     ld [wMira], a
-    ld [wFase], a
+    ld [wPasoPatron], a
     ld [wMascaraLectura], a
     ld [wLeido], a
-    ld [wImpactos], a
     ld [wFalloTimer], a
+    call CargarFasePatron
     call DuracionFase
     ld [wFaseTimer], a
 
@@ -244,12 +263,30 @@ TickFase:
     ld [wFaseTimer], a
     ret nz
 
-    ld a, [wFase]
+    ld a, [wPasoPatron]
     inc a
     and 3
-    ld [wFase], a
+    ld [wPasoPatron], a
+    call CargarFasePatron
     call DuracionFase
     ld [wFaseTimer], a
+    ret
+
+CargarFasePatron:
+    ; Cada rival recorre las mismas cuatro guardias en un orden distinto.
+    ; La fase 3 sigue siendo la unica apertura vulnerable.
+    ld a, [wRival]
+    sla a
+    sla a
+    ld e, a
+    ld a, [wPasoPatron]
+    add e
+    ld e, a
+    ld d, 0
+    ld hl, PatronesGuardia
+    add hl, de
+    ld a, [hl]
+    ld [wFase], a
     ret
 
 ; La lectura exige mantener B durante el ciclo entero. Soltar B antes de
@@ -327,13 +364,11 @@ GolpeValido:
     cp IMPACTOS_META
     jr nc, MostrarVictoria
 
-    ; Cada impacto obliga a volver a leer el patron y acelera el siguiente.
-    xor a
-    ld [wLeido], a
-    ld [wMascaraLectura], a
-    ld [wFase], a
-    call DuracionFase
-    ld [wFaseTimer], a
+    ; Un impacto vence al rival actual. El siguiente conserva el progreso
+    ; total, pero obliga a aprender un patron nuevo desde cero.
+    ld hl, wRival
+    inc [hl]
+    call MostrarInterludio
     ret
 
 TickFallo:
@@ -344,9 +379,10 @@ TickFallo:
     ld [wFalloTimer], a
     ret
 
-; Primer ciclo pausado, segundo mas tenso, tercero claramente rapido.
+; Cada rival tiene su propio tempo: el tercero exige leer mas deprisa,
+; pero nunca cambia el orden a mitad de un ciclo ni introduce RNG.
 DuracionFase:
-    ld a, [wImpactos]
+    ld a, [wRival]
     or a
     jr z, .lenta
     cp 1
@@ -358,6 +394,16 @@ DuracionFase:
     ret
 .lenta:
     ld a, 45
+    ret
+
+MostrarInterludio:
+    call DesactivarLCD
+    call LimpiarOAM
+    call LimpiarFondo
+    call DibujarInterludio
+    ld a, ESTADO_INTERLUDIO
+    ld [wEstado], a
+    call ActivarLCD
     ret
 
 MostrarVictoria:
@@ -434,7 +480,9 @@ RenderOAM:
     ld [OAM_BASE + 5], a
     ld a, TILE_ESCUDO
     ld [OAM_BASE + 6], a
-    ld a, 1
+    ; La guardia cambia de paleta por rival: rojo, amarillo y cian.
+    ld a, [wRival]
+    inc a
     ld [OAM_BASE + 7], a
 
 .punto_debil:
@@ -582,6 +630,25 @@ DibujarArena:
     ld [hli], a
     dec b
     jr nz, .suelo
+    ret
+
+DibujarInterludio:
+    call DibujarTitulo
+    ; Gramática visual del relevo: escudo -> ojo, con pips acumulados.
+    ld a, TILE_ESCUDO
+    ld [BG_MAP + (10 * 32) + 7], a
+    ld a, TILE_FLECHA
+    ld [BG_MAP + (10 * 32) + 9], a
+    ld a, TILE_OJO
+    ld [BG_MAP + (10 * 32) + 11], a
+
+    ld a, TILE_PIP
+    ld [BG_MAP + (12 * 32) + 8], a
+    ld a, [wImpactos]
+    cp 2
+    ret c
+    ld a, TILE_PIP
+    ld [BG_MAP + (12 * 32) + 10], a
     ret
 
 DibujarVictoria:
@@ -733,6 +800,13 @@ GuardiaY:
 BitsFase:
     db 1, 2, 4, 8
 
+; Ordenes deterministas de guardia por rival. Todos contienen las cuatro fases,
+; pero fuerzan a releer el movimiento en vez de memorizar un unico bucle.
+PatronesGuardia:
+    db 0, 1, 2, 3
+    db 2, 0, 1, 3
+    db 1, 2, 0, 3
+
 ; BGR555 little-endian.
 PaletaFondo:
     ; El color 1 es el de las figuras y el suelo (#805): en gris claro casi no
@@ -813,3 +887,5 @@ wMascaraLectura: ds 1
 wLeido:          ds 1
 wImpactos:       ds 1
 wFalloTimer:     ds 1
+wRival:          ds 1
+wPasoPatron:     ds 1
