@@ -5,7 +5,7 @@ evitar que cada capa vuelva a reinterpretar la tarea desde cero.
 
 ## Sobres admitidos
 
-Todo mensaje entre capas lleva 'schema: 1' y un 'message_type' de esta lista:
+Todo mensaje entre capas debe llevar explícitamente 'schema: 1' y un 'message_type' de esta lista:
 'TASK', 'CLAIM', 'EVIDENCE', 'BLOCKER', 'QUESTION', 'RESULT', 'REVIEW' o
 'HANDOFF'. El texto libre puede acompañar al sobre, pero no sustituye sus campos
 cuando el consumidor espera un contrato.
@@ -24,8 +24,10 @@ Las capas son:
 - **L1:** issue/contexto seleccionado/Normas Platino. Se consulta para implementar.
 - **L2:** wiki completa y memorias. Solo cuando L0+L1 no bastan.
 
-El prompt final se compila desde el TaskPacket. Qwen, Gemini u otro backend pueden
-tener adaptadores distintos sin cambiar el contrato canónico.
+El prompt final se compila desde el TaskPacket. Qwen y Gemini reciben adaptadores de
+edición distintos sin cambiar el contrato canónico; además se añaden restricciones de
+dominio derivadas de las rutas (por ejemplo Godot 4.x, no rebajar assertions de tests
+o no registrar secretos en backend/infra).
 
 ## ResultPacket
 
