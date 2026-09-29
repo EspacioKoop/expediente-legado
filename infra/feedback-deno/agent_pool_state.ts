@@ -282,7 +282,7 @@ function eventKey(now: number): Deno.KvKey {
 }
 
 function publicLease(lease: AgentPoolLease): AgentPoolLease {
-  return { ...lease };
+  return { ...lease, files: lease.files ?? [] };
 }
 
 function newEvent(
