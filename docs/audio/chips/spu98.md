@@ -6,7 +6,8 @@ y el laboratorio integrado en #1478/#1485. La dirección musical sigue en la
 el siguiente corte técnico; no aprueba D1–D15 ni sustituye la escucha de la cata.
 
 **Estado:** once vectores ADPCM manuales ejecutables contra el decoder offline;
-casos de pitch preparados para T07; control de voces e interpolación pendientes.
+T07 ejecuta además siete casos de tasa y dos trazas del contador de pitch sin PMON;
+control de voces, PMON e interpolación PCM siguen pendientes.
 No hay núcleo C++ ni integración nueva en Godot en este corte. T02 completo
 requiere todavía D9, las especificaciones restantes y revisión humana.
 
@@ -90,14 +91,14 @@ otro devuelve 56 muestras. También comprueban el encoder para 1, 28 y 29
 muestras: al repetir, el relleno hasta múltiplo de 28 forma parte del período.
 Verificar esos bytes no valida las trazas anteriores.
 
-## Pitch: datos preparados, implementación pendiente
+## Pitch: contador lógico T07 ejecutado; interpolación pendiente
 
 S1 documenta `PITCH=0x1000` como avance de una muestra fuente por tick de salida;
 sin PMON, el paso se limita a `0x4000`. La salida conserva 44,1 kHz.
 El índice de interpolación usa bits 4–11; los cuatro bits inferiores se acumulan.
 
-El JSON guarda siete casos de tasa y dos trazas con estado **pendiente T07**.
-`test_spu98_vectores.py` no los ejecuta: el laboratorio no tiene ese contador.
+El JSON guarda siete casos de tasa y dos trazas que `test_spu98_vectores.py`
+ejecuta ahora contra `paso_pitch_spu`, `tasa_pitch_spu` y `trazar_pitch_spu`.
 Con paso `0x1800`, cuatro ticks producen contadores `0x1800,0x3000,0x4800,0x6000`
 e índices fuente `1,3,4,6`. Esto no describe la salida PCM interpolada.
 Con paso 1, 16 ticks acumulan `0x10`; 4096 ticks, `0x1000`.
@@ -147,11 +148,11 @@ Desde la raíz, solo Python estándar:
 python3 -m unittest -v scripts/test_spu98_vectores.py
 ```
 
-Son cinco pruebas, con once vectores PCM y casos de contrato offline. La suite
-canónica Python los descubre por nombre. Un futuro T06 puede consumir el mismo
-JSON: comparar sus tramos literales antes de usar el laboratorio como contraste
-adicional. T07 debe implementar las trazas de voz/pitch por separado y registrar
-qué pasa realmente. La CI en verde no promueve los casos pendientes.
+Son ocho pruebas: once vectores PCM, contratos offline y los casos T07 del
+contador de pitch. La suite canónica Python los descubre por nombre. Un futuro
+T06 puede consumir el mismo JSON para contrastar los tramos ADPCM. Las trazas de
+voz, PMON e interpolación siguen separadas y pendientes; una CI verde del
+contador no certifica PCM interpolado ni comportamiento completo de hardware.
 
 Para cerrar T02: resolver D9, completar los apartados pendientes, añadir la
 evidencia independiente necesaria y registrar revisión humana. Las observaciones
