@@ -341,7 +341,7 @@ class AgentPoolTest(unittest.TestCase):
         self.assertIn("AGENT_POOL_SLOT_UNHEALTHY", pool)
         self.assertIn("healthy", pool)
         self.assertIn('maxSessionTurns":40', worker)
-        self.assertIn("tailscale/github-action@v4", worker)
+        self.assertRegex(worker, r"tailscale/github-action@[0-9a-f]{40}")
         self.assertIn("steps.omniroute.outputs.ready", worker)
         self.assertNotIn("\n  schedule:\n", autopilot)
         self.assertNotIn("\n  issues:\n", autopilot)

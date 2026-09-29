@@ -154,6 +154,7 @@ Estas ya han provocado fallos reales.
 - **Cinemáticas**: guarda el estado antes de una cinemática saltables si el hallazgo debe persistir. Usa el reproductor/contrato común, no un ritmo paralelo.
 - **Interacción**: usa acciones semánticas (`interactuar`, `cancelar`, etc.) y `PreferenciasSiga`; no hardcodees `E`, Escape o botones de mando en sistemas nuevos.
 - **Audio**: `Sonido` = efectos puntuales; `Musica` = momentos dramáticos; ambiente continuo = #119. No mezcles responsabilidades para resolver un sonido concreto.
+- **Foley: solo síntesis, nada grabado** (orden de Varo, 29-09-2026). Los efectos no se graban del objeto real: se sintetizan con carácter de chip NES/PSX y evocan la acción con sonido de videojuego (el archivador suena a «bombeo», no a chapa). No se graban tomas con micro ni móvil ni se añaden grabaciones como fuente de foley. Los OGG de Kenney actuales solo son respaldo provisional hasta que la síntesis los sustituya. Ver `docs/audio/biblia-sonora-1475.md` §2 y #1813.
 - **Sueño**: la progresión normal desde #281 es por objetivos oníricos. No reintroduzcas una salida física invisible como requisito de terminación.
 - **Investigación**: combinar, anotar, examinar anexos o recompensar un puzzle no puede inventar hechos. Consume únicamente datos catalogados y conocidos por el jugador.
 - **Assets**: los binarios se rigen por `.gitattributes`, Git LFS y `godot/assets/procedencia.json`. No crees un puntero LFS si no puedes subir también el objeto al almacén LFS.

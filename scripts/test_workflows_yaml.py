@@ -44,6 +44,18 @@ def backtick_peligroso(linea: str) -> bool:
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOWS = sorted((ROOT / ".github" / "workflows").glob("*.yml"))
+
+
+def workflow_privilegiado(texto: str) -> bool:
+    """Detecta workflows cuya cadena de confianza exige controles reforzados."""
+    return bool(
+        re.search(
+            r"(?m)^\s*(?:contents|issues|pull-requests|actions|checks|statuses|id-token):\s*write\s*$",
+            texto,
+        )
+        or "secrets." in texto
+        or "pull_request_target:" in texto
+    )
 # En columna 0 solo caben claves de primer nivel, comentarios o `---`.
 COLUMNA_CERO_VALIDA = re.compile(r"^(?:[A-Za-z_][\w-]*:|#|---\s*$)")
 
@@ -109,6 +121,106 @@ class WorkflowsYamlTest(unittest.TestCase):
             with self.subTest(workflow=nombre, action=accion):
                 self.assertIn(f"uses: {accion}@{sha}", texto)
                 self.assertNotRegex(texto, rf"uses:\s*{re.escape(accion)}@v\d+")
+
+
+    def test_checkout_privilegiado_no_persiste_credenciales(self):
+        """Todo workflow privilegiado deja el checkout sin credenciales persistidas."""
+        for ruta in WORKFLOWS:
+            texto_workflow = ruta.read_text(encoding="utf-8")
+            if not workflow_privilegiado(texto_workflow):
+                continue
+
+            lineas = texto_workflow.splitlines()
+            for indice, linea in enumerate(lineas):
+                match = re.match(r"^(\s*)(?:-\s*)?uses:\s*actions/checkout@", linea)
+                if not match:
+                    continue
+
+                indentacion = len(match.group(1))
+                bloque = [linea]
+                for siguiente in lineas[indice + 1 :]:
+                    texto = siguiente.strip()
+                    indentacion_siguiente = len(siguiente) - len(siguiente.lstrip())
+                    if texto.startswith("- ") and indentacion_siguiente <= indentacion:
+                        break
+                    bloque.append(siguiente)
+
+                with self.subTest(workflow=ruta.name, checkout=indice + 1):
+                    self.assertRegex(
+                        "\n".join(bloque),
+                        r"(?m)^\s*persist-credentials:\s*false\s*$",
+                        f"{ruta.name}:{indice + 1} debe usar persist-credentials: false",
+                    )
+
+    def test_oidc_write_requiere_consumidor(self):
+        """No se concede id-token: write a jobs que no consumen OIDC."""
+        for ruta in WORKFLOWS:
+            texto = ruta.read_text(encoding="utf-8")
+            if not re.search(r"(?m)^\s*id-token:\s*write\s*$", texto):
+                continue
+            with self.subTest(workflow=ruta.name):
+                self.assertTrue(
+                    "ACTIONS_ID_TOKEN_REQUEST_URL" in texto
+                    or "tailscale/github-action@" in texto,
+                    f"{ruta.name} pide id-token: write sin un consumidor OIDC conocido",
+                )
+
+    def test_pull_request_target_no_hace_checkout_del_head(self):
+        """Un token privilegiado nunca debe ejecutar el head de una PR no confiable."""
+        for ruta in WORKFLOWS:
+            texto = ruta.read_text(encoding="utf-8")
+            if "pull_request_target:" not in texto:
+                continue
+            with self.subTest(workflow=ruta.name):
+                self.assertNotRegex(
+                    texto,
+                    r"ref:\s*\$\{\{\s*github\.event\.pull_request\.head\.(?:sha|ref)",
+                )
+
+
+    def test_ci_repair_workflow_run_atado_a_repo_y_sha(self):
+        """El workflow privilegiado no puede reparar una ejecución de un fork o SHA distinto."""
+        texto = (
+            ROOT / ".github" / "workflows" / "agent-ci-repair.yml"
+        ).read_text(encoding="utf-8")
+        self.assertGreaterEqual(
+            texto.count(
+                "github.event.workflow_run.head_repository.full_name == github.repository"
+            ),
+            2,
+        )
+        self.assertIn("RUN_SHA: ${{ github.event.workflow_run.head_sha }}", texto)
+        self.assertIn('"$head_sha" != "$RUN_SHA"', texto)
+        self.assertIn('"$head_sha" != "$SHA"', texto)
+
+
+    def test_deploys_deno_fijan_version_runtime(self):
+        """Los deploys con token no descargan una versión flotante de Deno."""
+        for nombre in ("mando-deno.yml", "feedback-deno-deploy.yml"):
+            texto = (ROOT / ".github" / "workflows" / nombre).read_text(encoding="utf-8")
+            with self.subTest(workflow=nombre):
+                self.assertIn("deno-version: v2.9.6", texto)
+                self.assertNotIn("deno-version: v2.x", texto)
+
+
+    def test_acciones_sensibles_usadas_por_sha(self):
+        """Todo workflow privilegiado fija cualquier action externa por SHA completo."""
+        patron = re.compile(r"uses:\s*([^\s@]+)@([^\s#]+)")
+        for ruta in WORKFLOWS:
+            texto = ruta.read_text(encoding="utf-8")
+            if not workflow_privilegiado(texto):
+                continue
+
+            for accion, referencia in patron.findall(texto):
+                if accion.startswith("./"):
+                    continue
+                with self.subTest(workflow=ruta.name, action=accion):
+                    self.assertRegex(
+                        referencia,
+                        r"^[0-9a-f]{40}$",
+                        f"{ruta.name}: {accion} debe fijarse a un SHA completo, no {referencia!r}",
+                    )
+
 
 
 if __name__ == "__main__":

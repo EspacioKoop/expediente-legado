@@ -14,6 +14,18 @@ La historia se cuenta en tres partidos cortos:
 
 Perder no reinicia el torneo: se repite **solo el partido actual**. Tras dos derrotas en el mismo partido el juego activa una ayuda y deja de ocultar el destino real durante los amagos.
 
+## Desafíos post-torneo
+
+Ganar la final abre una capa opcional de rejugabilidad que reutiliza el mismo motor de portero con reglas distintas:
+
+1. **Muro sin red** — 6 tiros, hacen falta 5 paradas y el botón B queda deshabilitado: hay que leer carril y altura y comprometer la estirada.
+2. **Engaño total** — 8 tiros, hacen falta 5 paradas y todos los lanzamientos tienen amago; la secuencia es determinista y siempre termina revelando el destino real.
+3. **Ráfaga final** — 9 tiros, hacen falta 6 paradas y el telegraph baja de 90 a 60 frames para exigir una lectura más rápida sin introducir RNG.
+
+Izquierda/derecha recorre los desafíos, A inicia el seleccionado y Start vuelve al título. Superar uno deja una marca **solo durante la sesión del cartucho** para que el menú pueda mostrarlo como completado. Perder vuelve al menú de desafíos y no reinicia el torneo.
+
+Estos retos no escriben el handshake de Anansi: `$C100 = 0xA5` sigue perteneciendo exclusivamente a completar la final normal. Tampoco exportan dinero, pistas, acciones, desbloqueos ni progreso a SIGA-98.
+
 ## Controles
 
 - **Izquierda / derecha**: mover a Kwaku entre tres carriles.

@@ -48,6 +48,7 @@ DEF ESTADO_DIALOGO EQU 3
 DEF KEY_RIGHT EQU %00000001
 DEF KEY_LEFT  EQU %00000010
 DEF KEY_A     EQU %00010000
+DEF KEY_B     EQU %00100000
 DEF KEY_START EQU %10000000
 
 DEF TILE_VACIO       EQU 0
@@ -91,6 +92,16 @@ DEF NIVEL_INICIAL        EQU 4
 DEF NIVEL_SOLUCION       EQU 7
 DEF ESPERA_NIVEL         EQU 45
 DEF MARCA_COMPLETADO     EQU $A5
+
+; Progreso estrictamente interno de la ROM. El cartucho común ya aporta
+; MBC5 + 8 KiB de SRAM con batería (#819).
+DEF SRAM_MAGIC0           EQU $A000
+DEF SRAM_MAGIC1           EQU $A001
+DEF SRAM_MAGIC2           EQU $A002
+DEF SRAM_VERSION          EQU $A003
+DEF SRAM_DESAFIO          EQU $A004
+DEF SRAM_CHECKSUM         EQU $A005
+DEF SRAM_VERSION_ACTUAL   EQU 1
 
 ; Arte de la lámina en Game Boy Color (#808).
 DEF PRIMER_TILE_SPRITE EQU 240 ; banco 1 de VRAM, tras los tiles de la pantalla
@@ -141,6 +152,7 @@ Inicio:
     di
     ld sp, $DFFF
     call IniciarCartucho
+    call CargarProgreso
     xor a
     ld [wPantallaCGB], a
 
@@ -188,6 +200,16 @@ Bucle:
 
 EstadoTitulo:
     ld a, [wTeclasNuevas]
+    and KEY_B
+    jr z, .normal
+    ld a, [wDesafioDesbloqueado]
+    or a
+    jp z, Bucle
+    call SonidoInicio
+    call IniciarDesafio
+    jp Bucle
+.normal:
+    ld a, [wTeclasNuevas]
     and KEY_A | KEY_START
     jp z, Bucle
     call SonidoInicio
@@ -232,6 +254,16 @@ EstadoFin:
     or a
     call nz, ActualizarRugidoCGB
     ld a, [wTeclasNuevas]
+    and KEY_B
+    jr z, .normal
+    ld a, [wDesafioDesbloqueado]
+    or a
+    jp z, Bucle
+    call SonidoInicio
+    call IniciarDesafio
+    jp Bucle
+.normal:
+    ld a, [wTeclasNuevas]
     and KEY_A | KEY_START
     jp z, Bucle
     call SonidoInicio
@@ -272,6 +304,15 @@ LeerControles:
     ret
 
 IniciarJuego:
+    xor a
+    ld [wModoDesafio], a
+    ld [wNivel], a
+    ld [wRyuFlowCompletado], a
+    jp IniciarNivel
+
+IniciarDesafio:
+    ld a, 1
+    ld [wModoDesafio], a
     xor a
     ld [wNivel], a
     ld [wRyuFlowCompletado], a
@@ -331,6 +372,11 @@ PunteroNivel:
     add hl, hl
     add hl, de
     ld de, Niveles
+    ld a, [wModoDesafio]
+    or a
+    jr z, .tabla
+    ld de, NivelesDesafio
+.tabla:
     add hl, de
     ret
 
@@ -446,12 +492,28 @@ ComprobarSolucion:
     ld [wNivel], a
     jp IniciarNivel
 .final:
+    ld a, [wModoDesafio]
+    or a
+    jr nz, .desafio
     call CompletarFlujo
+    ret
+.desafio:
+    call CompletarDesafio
     ret
 
 CompletarFlujo:
     ld a, MARCA_COMPLETADO
     ld [wRyuFlowCompletado], a
+    call DesbloquearDesafio
+    jp MostrarFinal
+
+CompletarDesafio:
+    ; El postgame es contenido interno: no vuelve a publicar el handshake.
+    xor a
+    ld [wRyuFlowCompletado], a
+    ; sigue en MostrarFinal
+
+MostrarFinal:
     call SonidoExito
 
     call DesactivarLCD
@@ -1313,6 +1375,67 @@ TextoGira:
 TextoFlowOk:
     db TILE_F, TILE_L, TILE_O, TILE_W, TILE_VACIO, TILE_O, TILE_K, $FF
 
+; Progreso postgame: solo habilita el modo Cauce inverso dentro de esta ROM.
+CargarProgreso:
+    xor a
+    ld [wDesafioDesbloqueado], a
+    call HabilitarSRAM
+    ld a, [SRAM_MAGIC0]
+    cp $52 ; R
+    jr nz, .fin
+    ld a, [SRAM_MAGIC1]
+    cp $59 ; Y
+    jr nz, .fin
+    ld a, [SRAM_MAGIC2]
+    cp $55 ; U
+    jr nz, .fin
+    ld a, [SRAM_VERSION]
+    cp SRAM_VERSION_ACTUAL
+    jr nz, .fin
+    ld a, [SRAM_DESAFIO]
+    cp 1
+    jr nz, .fin
+    ld b, a
+    xor $A5
+    ld c, a
+    ld a, [SRAM_CHECKSUM]
+    cp c
+    jr nz, .fin
+    ld a, b
+    ld [wDesafioDesbloqueado], a
+.fin:
+    jp ProtegerSRAM
+
+DesbloquearDesafio:
+    ld a, 1
+    ld [wDesafioDesbloqueado], a
+    call HabilitarSRAM
+    ld a, $52
+    ld [SRAM_MAGIC0], a
+    ld a, $59
+    ld [SRAM_MAGIC1], a
+    ld a, $55
+    ld [SRAM_MAGIC2], a
+    ld a, SRAM_VERSION_ACTUAL
+    ld [SRAM_VERSION], a
+    ld a, 1
+    ld [SRAM_DESAFIO], a
+    xor $A5
+    ld [SRAM_CHECKSUM], a
+    jp ProtegerSRAM
+
+HabilitarSRAM:
+    ld a, $0A
+    ld [rRAMG], a
+    xor a
+    ld [rRAMB], a
+    ret
+
+ProtegerSRAM:
+    xor a
+    ld [rRAMG], a
+    ret
+
 ; Por nivel: siguiente estado desde abierta, media y cerrada; si pulsar arrastra
 ; a la compuerta de la derecha; estados iniciales y solución.
 Niveles:
@@ -1329,6 +1452,22 @@ Niveles:
     db MEDIA, CERRADA, ABIERTA, 1
     db CERRADA, CERRADA, CERRADA
     db MEDIA, ABIERTA, ABIERTA
+
+; Cauce inverso: reutiliza las reglas conocidas con objetivos nuevos. Los
+; mínimos son 3, 6 y 7 pulsaciones frente a 3, 6 y 6 de la campaña normal.
+NivelesDesafio:
+    ; Día invertido.
+    db CERRADA, CERRADA, ABIERTA, 0
+    db ABIERTA, CERRADA, ABIERTA
+    db CERRADA, ABIERTA, CERRADA
+    ; Amanecer: dos pasos por cada compuerta.
+    db MEDIA, CERRADA, ABIERTA, 0
+    db ABIERTA, ABIERTA, ABIERTA
+    db CERRADA, CERRADA, CERRADA
+    ; Noche inversa acoplada.
+    db MEDIA, CERRADA, ABIERTA, 1
+    db ABIERTA, ABIERTA, ABIERTA
+    db CERRADA, MEDIA, CERRADA
 
 ; Columnas del mapa de las tres compuertas en Game Boy clásica.
 ColumnasCompuertaDMG:
@@ -1458,6 +1597,8 @@ wTocados:       ds 1
 wTeclas:        ds 1
 wTeclasPrevias: ds 1
 wTeclasNuevas:  ds 1
+wModoDesafio:    ds 1
+wDesafioDesbloqueado: ds 1
 
 ; Contrato estable para futura integracion con #442. La ROM lo escribe solo al
 ; completar la interaccion; este corte no conecta aun ese byte con Godot.

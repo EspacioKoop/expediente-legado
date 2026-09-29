@@ -9,6 +9,11 @@ from pyboy import PyBoy
 
 RAIZ = Path(__file__).resolve().parent
 
+ESTADO_CARRERA = 1
+ESTADO_META = 2
+ESTADO_WRECK = 3
+ESTADO_ENTREMANGA = 4
+
 
 class PruebasROM(unittest.TestCase):
     @classmethod
@@ -98,7 +103,8 @@ class PruebasROM(unittest.TestCase):
                 for distancia, etapa in ((24, 1), (46, 2), (68, 3)):
                     for nombre, valor in {"wDistance": distancia - 1,
                                           "wDistanceTick": 7, "wScore": 99,
-                                          "wTurbo": 90, "wInv": 200}.items():
+                                          "wTurbo": 90, "wInv": 200,
+                                          "wManga": 2}.items():
                         emulador.memory[self.simbolos[nombre]] = valor
                     observadas.clear()
                     # El checkpoint real debe terminar decorado y HUD sin
@@ -148,6 +154,88 @@ class PruebasROM(unittest.TestCase):
 
     def leer(self, emulador, nombre):
         return emulador.memory[self.simbolos[nombre]]
+
+    def forzar_meta_manga(self, emulador, distancia_objetivo, score):
+        self.poner(
+            emulador,
+            wDistance=distancia_objetivo - 1,
+            wDistanceTick=7,
+            wScore=score,
+            wTurbo=60,
+            wInv=255,
+            wR1Y=20,
+            wR2Y=8,
+            wHazY=32,
+        )
+        emulador.tick(1, False)
+
+    def test_campeonato_encadena_tres_mangas_y_conserva_score(self):
+        emulador = self.iniciar_carrera()
+        self.assertEqual(self.leer(emulador, "wManga"), 0)
+        self.assertEqual(self.leer(emulador, "wLives"), 3)
+        self.assertEqual(self.leer(emulador, "wNitro"), 3)
+
+        self.forzar_meta_manga(emulador, 60, 11)
+        self.assertEqual(self.leer(emulador, "wEstado"), ESTADO_ENTREMANGA)
+        self.assertEqual(self.leer(emulador, "wManga"), 1)
+        self.assertEqual(self.leer(emulador, "wScore"), 11)
+
+        self.pulsar(emulador, "a")
+        self.assertEqual(self.leer(emulador, "wEstado"), ESTADO_CARRERA)
+        self.assertEqual(self.leer(emulador, "wDistance"), 0)
+        self.assertEqual(self.leer(emulador, "wLives"), 3)
+        self.assertEqual(self.leer(emulador, "wNitro"), 2)
+        self.assertEqual(self.leer(emulador, "wScore"), 11)
+
+        self.forzar_meta_manga(emulador, 75, 22)
+        self.assertEqual(self.leer(emulador, "wEstado"), ESTADO_ENTREMANGA)
+        self.assertEqual(self.leer(emulador, "wManga"), 2)
+        self.assertEqual(self.leer(emulador, "wScore"), 22)
+
+        self.pulsar(emulador, "a")
+        self.assertEqual(self.leer(emulador, "wEstado"), ESTADO_CARRERA)
+        self.assertEqual(self.leer(emulador, "wLives"), 2)
+        self.assertEqual(self.leer(emulador, "wNitro"), 2)
+        self.assertEqual(self.leer(emulador, "wScore"), 22)
+
+        self.forzar_meta_manga(emulador, 90, 33)
+        self.assertEqual(self.leer(emulador, "wEstado"), ESTADO_META)
+        self.assertEqual(self.leer(emulador, "wManga"), 2)
+        self.assertEqual(self.leer(emulador, "wScore"), 33)
+
+    def test_agresividad_rival_crece_por_manga(self):
+        # Con el mismo frame, la clasificatoria se queda quieta y la final
+        # persigue siempre que jugador y rival estén en carriles distintos.
+        emulador = self.iniciar_carrera()
+        self.poner(
+            emulador,
+            wInv=255,
+            wPlayerLane=2,
+            wR1Lane=0,
+            wR1Y=71,
+            wR1Dir=0,
+            wR2Lane=2,
+            wR2Y=8,
+            wHazLane=2,
+            wHazY=32,
+            wFrame=0,
+            wManga=0,
+            wTurbo=60,
+        )
+        emulador.tick(1, False)
+        self.assertEqual(self.leer(emulador, "wR1Dir"), 0)
+
+        self.poner(
+            emulador,
+            wR1Lane=0,
+            wR1Y=71,
+            wR1Dir=0,
+            wFrame=0,
+            wManga=2,
+            wTurbo=60,
+        )
+        emulador.tick(1, False)
+        self.assertEqual(self.leer(emulador, "wR1Dir"), 1)
 
     def test_rival_avisa_antes_de_cambiar_hacia_el_jugador(self):
         cambios = quietos = 0

@@ -14,15 +14,19 @@ concurrency:
 
 jobs:
   finalize:
-    if: github.event.workflow_run.conclusion == 'success' && startsWith(github.event.workflow_run.head_branch, 'agent/')
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      startsWith(github.event.workflow_run.head_branch, 'agent/')
     runs-on: ubuntu-latest
     permissions:
       contents: read
       issues: write
       pull-requests: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
+          persist-credentials: false
           ref: main
 
       - name: Registrar PR_READY
@@ -35,8 +39,12 @@ jobs:
           if [[ ! "$BRANCH" =~ ^agent/(qwen|gemini)-([0-9]+)-([0-9]+)$ ]]; then exit 0; fi
           provider="${BASH_REMATCH[1]}"
           issue="${BASH_REMATCH[2]}"
-          pr="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --head "$BRANCH" --json number --jq '.[0].number // empty')"
-          [[ -z "$pr" ]] && exit 0
+          owner="${GITHUB_REPOSITORY%%/*}"
+          pr_json="$(gh api -X GET "repos/$GITHUB_REPOSITORY/pulls" -f state=open -f head="$owner:$BRANCH")"
+          pr="$(jq -r '.[0].number // empty' <<<"$pr_json")"
+          head_repo="$(jq -r '.[0].head.repo.full_name // empty' <<<"$pr_json")"
+          head_sha="$(jq -r '.[0].head.sha // empty' <<<"$pr_json")"
+          [[ -z "$pr" || "$head_repo" != "$GITHUB_REPOSITORY" || "$head_sha" != "$SHA" ]] && exit 0
           marker="PR_READY issue=#$issue pr=#$pr sha=$SHA"
           python3 scripts/gestionar_reservas_rollover.py --comments-output /tmp/reservas-ready.json
           if ! jq -r '.[].body' /tmp/reservas-ready.json | grep -Fq "$marker"; then
@@ -46,7 +54,10 @@ jobs:
           gh issue comment "$issue" --repo "$GITHUB_REPOSITORY" --body "Agent autopilot: CI verde en $SHA; PR #$pr queda draft para revisión humana." || true
 
   repair:
-    if: github.event.workflow_run.conclusion == 'failure' && startsWith(github.event.workflow_run.head_branch, 'agent/')
+    if: >-
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      startsWith(github.event.workflow_run.head_branch, 'agent/')
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
@@ -69,6 +80,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           BRANCH: ${{ github.event.workflow_run.head_branch }}
+          RUN_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           set -euo pipefail
           if [[ ! "$BRANCH" =~ ^agent/(qwen|gemini)-([0-9]+)-([0-9]+)$ ]]; then
@@ -77,8 +89,10 @@ jobs:
           provider="${BASH_REMATCH[1]}"
           issue="${BASH_REMATCH[2]}"
           owner="${GITHUB_REPOSITORY%%/*}"
-          head_repo="$(gh api -X GET "repos/$GITHUB_REPOSITORY/pulls" -f state=open -f head="$owner:$BRANCH" --jq '.[0].head.repo.full_name // empty')"
-          if [[ "$head_repo" != "$GITHUB_REPOSITORY" ]]; then
+          pr_json="$(gh api -X GET "repos/$GITHUB_REPOSITORY/pulls" -f state=open -f head="$owner:$BRANCH")"
+          head_repo="$(jq -r '.[0].head.repo.full_name // empty' <<<"$pr_json")"
+          head_sha="$(jq -r '.[0].head.sha // empty' <<<"$pr_json")"
+          if [[ "$head_repo" != "$GITHUB_REPOSITORY" || "$head_sha" != "$RUN_SHA" ]]; then
             echo "run=false" >> "$GITHUB_OUTPUT"; exit 0
           fi
           if [[ "$provider" == qwen && "$HAS_QWEN_ANY" != true ]] || [[ "$provider" == gemini && "$HAS_GEMINI" != true ]]; then
@@ -93,7 +107,7 @@ jobs:
       - name: Conectar a OmniRoute por Tailscale (OAuth)
         if: steps.meta.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && env.HAS_OMNIROUTE == 'true' && env.HAS_TS_OAUTH == 'true'
         continue-on-error: true
-        uses: tailscale/github-action@v4
+        uses: tailscale/github-action@d1b6cd204f8dceda5b3eaad7f1f767be390056cd # v4
         with:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
@@ -102,7 +116,7 @@ jobs:
       - name: Conectar a OmniRoute por Tailscale (OIDC fallback)
         if: steps.meta.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && env.HAS_OMNIROUTE == 'true' && env.HAS_TS_OAUTH != 'true' && env.HAS_TS_OIDC == 'true'
         continue-on-error: true
-        uses: tailscale/github-action@v4
+        uses: tailscale/github-action@d1b6cd204f8dceda5b3eaad7f1f767be390056cd # v4
         with:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           audience: ${{ secrets.TS_AUDIENCE }}
@@ -126,7 +140,7 @@ jobs:
 
       - name: Checkout de la rama
         if: steps.meta.outputs.run == 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: ${{ github.event.workflow_run.head_branch }}
           fetch-depth: 0
@@ -259,7 +273,7 @@ jobs:
         name: Reparar mediante OmniRoute
         if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && steps.omniroute.outputs.ready == 'true'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@v1
+        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
         with:
           openai_api_key: ${{ secrets.OMNIROUTE_API_KEY }}
           openai_base_url: ${{ vars.OMNIROUTE_BASE_URL }}
@@ -272,7 +286,7 @@ jobs:
         name: Reparar con Qwen (primario)
         if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && env.HAS_QWEN == 'true' && steps.repair_omniroute.outcome != 'success'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@v1
+        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
         with:
           openai_api_key: ${{ secrets.QWEN_API_KEY }}
           openai_base_url: ${{ vars.QWEN_BASE_URL || steps.qwen.outputs.url }}
@@ -322,7 +336,7 @@ jobs:
         name: Reparar con Qwen (fallback dinámico 1)
         if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_1 != ''
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@v1
+        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
         with:
           openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_1] }}
           openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_1 }}
@@ -335,7 +349,7 @@ jobs:
         name: Reparar con Qwen (fallback dinámico 2)
         if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_2 != '' && steps.repair_qwen_fallback_1.outcome != 'success'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@v1
+        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
         with:
           openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_2] }}
           openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_2 }}
@@ -348,7 +362,7 @@ jobs:
         name: Reparar con Qwen (fallback dinámico 3)
         if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_3 != '' && steps.repair_qwen_fallback_1.outcome != 'success' && steps.repair_qwen_fallback_2.outcome != 'success'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@v1
+        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
         with:
           openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_3] }}
           openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_3 }}
@@ -361,7 +375,7 @@ jobs:
         name: Reparar con Qwen (fallback dinámico 4)
         if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_4 != '' && steps.repair_qwen_fallback_1.outcome != 'success' && steps.repair_qwen_fallback_2.outcome != 'success' && steps.repair_qwen_fallback_3.outcome != 'success'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@v1
+        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
         with:
           openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_4] }}
           openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_4 }}
@@ -373,7 +387,7 @@ jobs:
       - id: repair_gemini
         name: Reparar con Gemini
         if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'gemini'
-        uses: google-github-actions/run-gemini-cli@v0
+        uses: google-github-actions/run-gemini-cli@f77273f4c914e4bf38440cf36a0369cb64a37489 # v0.1.22
         with:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           gemini_model: ${{ vars.GEMINI_MODEL }}

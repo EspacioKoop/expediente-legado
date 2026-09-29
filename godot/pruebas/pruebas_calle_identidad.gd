@@ -213,48 +213,69 @@ func _probar_tienda(dia, calle: Node3D) -> void:
 	if puerta == null:
 		return
 	_comprobar(puerta.global_position.x > 4.0, "se compra desde la acera derecha")
-	var catalogo := TiendaVideojuegos.catalogo()
+
+	var catalogo := TiendaVideojuegos.listar(dia.jornada)
+	var disponibles: Array[Dictionary] = []
 	var gastado := 0
 	for entrada in catalogo:
-		gastado += int(entrada["precio"])
-	# El fixture debe poder comprar todo el catálogo aunque crezca: deja 10 de margen
-	# para comprobar además que el último intento no vuelve a cobrar.
+		if bool(entrada.get("disponible", false)):
+			disponibles.append(entrada)
+			gastado += int(entrada["precio"])
+
+	# El fixture se adapta al stock real de la build: puede haber todas, ninguna
+	# o solo parte de las ROMs compiladas. Deja 10 de margen para verificar que
+	# un uso adicional no vuelve a cobrar.
 	var saldo_inicial := gastado + 10
 	dia.jornada["dinero"] = saldo_inicial
-	var primera: Dictionary = catalogo[0]
-	var hay_stock := FileAccess.file_exists(String(primera["ruta"]))
-	puerta.interactuar(dia._caminante)
-	await process_frame
-	var compradas := TiendaVideojuegos.compras(dia.jornada)
-	if hay_stock:
-		_comprobar(compradas.size() == 1, "comprar añade el cartucho a la jornada")
+
+	if disponibles.is_empty():
+		puerta.interactuar(dia._caminante)
+		await process_frame
 		_comprobar(
-			int(dia.jornada["dinero"]) == saldo_inicial - int(primera["precio"]), "cobra el precio"
+			TiendaVideojuegos.compras(dia.jornada).is_empty(), "sin existencias no se compra"
 		)
-		# Cada uso compra el siguiente cartucho pendiente; cuando no queda nada,
-		# se avisa y ya no se cobra.
-		for i in catalogo.size():
-			puerta.interactuar(dia._caminante)
-		_comprobar(
-			TiendaVideojuegos.compras(dia.jornada).size() == catalogo.size(),
-			"se puede comprar todo el catálogo"
-		)
-		_comprobar(int(dia.jornada["dinero"]) == saldo_inicial - gastado, "no cobra dos veces")
-		_comprobar(
-			TiendaVideojuegos.consola_trucos_desbloqueada(dia.jornada),
-			"completar el catálogo desbloquea el manual de servicio"
-		)
-		_comprobar(
-			puerta.nombre_objeto == TranslationServer.translate("CALLE_TIENDA_MANUAL_SERVICIO"),
-			"Bit 98 anuncia el manual de servicio"
-		)
-	else:
-		_comprobar(compradas.is_empty(), "sin existencias no se compra")
 		_comprobar(int(dia.jornada["dinero"]) == saldo_inicial, "sin existencias no cobra")
 		_comprobar(
 			puerta.nombre_objeto == TranslationServer.translate("CALLE_TIENDA_FALLO_SIN_STOCK"),
 			"avisa de que no hay existencias"
 		)
+		return
+
+	for _i in disponibles.size():
+		puerta.interactuar(dia._caminante)
+		await process_frame
+
+	var compradas := TiendaVideojuegos.compras(dia.jornada)
+	var ids_disponibles := disponibles.map(func(e): return String(e["id"]))
+	_comprobar(compradas.size() == disponibles.size(), "compra todo el stock disponible")
+	for id_rom in ids_disponibles:
+		_comprobar(compradas.has(id_rom), "compra la ROM disponible " + id_rom)
+	for entrada in catalogo:
+		if not bool(entrada.get("disponible", false)):
+			_comprobar(
+				not compradas.has(String(entrada["id"])),
+				"no compra la ROM ausente " + String(entrada["id"])
+			)
+
+	_comprobar(
+		int(dia.jornada["dinero"]) == saldo_inicial - gastado, "cobra solo el stock disponible"
+	)
+	_comprobar(
+		TiendaVideojuegos.consola_trucos_desbloqueada(dia.jornada),
+		"completar el stock disponible desbloquea el manual de servicio"
+	)
+	_comprobar(
+		puerta.nombre_objeto == TranslationServer.translate("CALLE_TIENDA_MANUAL_SERVICIO"),
+		"Bit 98 anuncia el manual de servicio"
+	)
+
+	# Un uso extra no cobra de nuevo ni queda bloqueado por ROMs ausentes.
+	puerta.interactuar(dia._caminante)
+	await process_frame
+	_comprobar(
+		TiendaVideojuegos.compras(dia.jornada).size() == disponibles.size(), "no duplica compras"
+	)
+	_comprobar(int(dia.jornada["dinero"]) == saldo_inicial - gastado, "no cobra dos veces")
 
 
 func _probar_coliseo(dia, calle: Node3D) -> void:

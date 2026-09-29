@@ -812,18 +812,21 @@ static func _comprar_cartucho(_actor: Node, puerta: Interactuable3D) -> void:
 		return
 	var jornada: Dictionary = dia.get("jornada")
 	var pendiente := ""
+	var queda_sin_stock := false
 	for entrada in TiendaVideojuegos.listar(jornada):
-		if not entrada["comprada"]:
+		if entrada["comprada"]:
+			continue
+		if bool(entrada.get("disponible", false)):
 			pendiente = String(entrada["id"])
 			break
+		queda_sin_stock = true
 	if pendiente.is_empty():
-		puerta.nombre_objeto = tr_clave(
-			(
-				"CALLE_TIENDA_MANUAL_SERVICIO"
-				if TiendaVideojuegos.consola_trucos_desbloqueada(jornada)
-				else "CALLE_TIENDA_TODO_COMPRADO"
-			)
-		)
+		if TiendaVideojuegos.consola_trucos_desbloqueada(jornada):
+			puerta.nombre_objeto = tr_clave("CALLE_TIENDA_MANUAL_SERVICIO")
+		elif queda_sin_stock:
+			puerta.nombre_objeto = tr_clave("CALLE_TIENDA_FALLO_SIN_STOCK")
+		else:
+			puerta.nombre_objeto = tr_clave("CALLE_TIENDA_TODO_COMPRADO")
 		return
 	var resultado := TiendaVideojuegos.comprar(jornada, pendiente)
 	var nombre := String(TiendaVideojuegos._buscar(pendiente).get("nombre", pendiente))
