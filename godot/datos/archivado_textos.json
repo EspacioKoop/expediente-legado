@@ -3,5 +3,6 @@
   "destino_incorrecto": "Destino incorrecto · la carpeta sigue en tu mano",
   "carpeta_archivada": "Carpeta archivada · %s",
   "bandeja_completa": "Bandeja completada · %d%% de precisión · rango %s",
-  "buscando_carpeta": "Buscando la siguiente carpeta entre el desorden…"
+  "buscando_carpeta": "Buscando la siguiente carpeta entre el desorden…",
+  "archivador_reordenado": "Archivador reordenado · %s · el intento sigue registrado"
 }
