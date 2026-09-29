@@ -19,13 +19,25 @@ Un ataque solo cuenta si se cumplen a la vez las tres condiciones:
 2. la mira está en la zona baja;
 3. el rival está en la fase abierta.
 
-Atacar antes de tiempo, a otra altura o sin haber observado **borra la lectura**. No es rentable aporrear A hasta acertar. Tres impactos válidos completan el duelo y, después de cada uno, el ciclo se acelera.
+Atacar antes de tiempo, a otra altura o sin haber observado **borra la lectura**. No es rentable aporrear A hasta acertar.
+
+## Campaña de tres rivales
+
+El cartucho ya no repite un único bucle hasta sumar tres golpes. La campaña encadena **tres guardias** y cada una exige volver a observar:
+
+1. **Rival 1** — patrón `0 → 1 → 2 → 3`, 45 frames por fase.
+2. **Rival 2** — patrón `2 → 0 → 1 → 3`, 36 frames por fase.
+3. **Rival 3** — patrón `1 → 2 → 0 → 3`, 28 frames por fase.
+
+La fase `3` continúa siendo la única apertura vulnerable, pero cambia el recorrido previo que hay que aprender. Cada rival requiere **un impacto válido**; tras los dos primeros aparece un interludio breve y el siguiente guardia cambia de color. Los tres impactos totales siguen funcionando como progreso de la campaña.
+
+No hay RNG: los patrones son deterministas y legibles. El aumento de dificultad viene del orden de guardias y del ritmo, no de ocultar información.
 
 ## Lenguaje visual
 
 La ROM usa pixel-art propio y muy contenido:
 
-- escudo rojo móvil = guardia activa;
+- escudo móvil = guardia activa; cambia de rojo → amarillo → cian entre rivales;
 - mira verde = zona seleccionada;
 - ojo cian = patrón comprendido;
 - estrella amarilla = vulnerabilidad visible;
@@ -38,7 +50,7 @@ No hay flash de pantalla ni sacudida. La lectura depende de posición, ritmo y c
 
 La ROM ensaya en pequeño la gramática del sueño de Aquiles: **presencia aparentemente invulnerable → observación deliberada → vulnerabilidad puntual → transformación/derrota**.
 
-La victoria está conectada al contrato común de vigilia mediante `Aquiles98Vigilia`. El observer comprueba primero que la ROM activa tenga cabecera `MYRMIDON98` y después lee `wEstado`, el primer byte de la única sección WRAM0 de la ROM (`$C000`). Solo el valor `ESTADO_VICTORIA = 2`, alcanzado tras tres impactos válidos, registra `semilla_onirica_aquiles` con la fuente estable `rom:aquiles_98`.
+La victoria está conectada al contrato común de vigilia mediante `Aquiles98Vigilia`. El observer comprueba primero que la ROM activa tenga cabecera `MYRMIDON98` y después lee `wEstado`, el primer byte de la única sección WRAM0 de la ROM (`$C000`). Solo el valor `ESTADO_VICTORIA = 2`, alcanzado tras vencer los tres rivales, registra `semilla_onirica_aquiles` con la fuente estable `rom:aquiles_98`.
 
 Comprar, insertar o arrancar el cartucho **no** activa la semilla. Empezar un duelo tampoco. El trigger exige completar deliberadamente el patrón jugable y llegar a la pantalla de victoria.
 
