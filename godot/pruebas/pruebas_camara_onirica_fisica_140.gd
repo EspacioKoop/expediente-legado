@@ -114,6 +114,7 @@ func _ejecutar() -> void:
 	)
 
 	viewport.queue_free()
+	await process_frame
 	print("Cámara onírica física 140: %d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 
