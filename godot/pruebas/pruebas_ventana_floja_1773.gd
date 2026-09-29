@@ -64,7 +64,9 @@ func _probar_home_storage_no_cuenta() -> void:
 		_herramienta("guardada", "Herramienta guardada", ["estabilizar"])
 	)
 	var ventana := _ventana(inventario)
-	_comprobar(ventana.herramienta_disponible().is_empty(), "home_storage no resuelve fuera de casa")
+	_comprobar(
+		ventana.herramienta_disponible().is_empty(), "home_storage no resuelve fuera de casa"
+	)
 	_comprobar(not ventana.interactuar(ventana), "una herramienta guardada no se teletransporta")
 	ventana.queue_free()
 
