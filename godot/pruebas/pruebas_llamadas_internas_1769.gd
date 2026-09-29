@@ -9,7 +9,7 @@ func _initialize() -> void:
 
 
 func _probar() -> void:
-	var dia_uno := {"dia": 1, "fase": "archivo", "hora_minutos": 9 * 60, "acciones": 4, "dinero": 80}
+	var dia_uno := {\n\t\t"dia": 1, "fase": "archivo", "hora_minutos": 9 * 60, "acciones": 4, "dinero": 80\n\t}
 	var plan_a := LlamadasInternas.plan(dia_uno)
 	var plan_b := LlamadasInternas.plan(dia_uno.duplicate(true))
 	_comprobar(plan_a == plan_b, "el plan es determinista")
@@ -34,7 +34,7 @@ func _probar() -> void:
 	var plan := LlamadasInternas.plan(jornada)
 	jornada["hora_minutos"] = int(plan[0]["desde"])
 	var siguiente := LlamadasInternas.siguiente(jornada)
-	_comprobar(String(siguiente.get("id", "")) == String(plan[0]["id"]), "activa la llamada de su ventana")
+	_comprobar(\n\t\tString(siguiente.get("id", "")) == String(plan[0]["id"]), "activa la llamada de su ventana"\n\t)
 	_comprobar(LlamadasInternas.iniciar(jornada, siguiente), "la llamada arranca una sola vez")
 	_comprobar(not LlamadasInternas.iniciar(jornada, siguiente), "no duplica una llamada activa")
 	var resultado := LlamadasInternas.resolver(jornada, siguiente, "atender")
@@ -52,9 +52,9 @@ func _probar() -> void:
 		"hora_minutos": 18 * 60,
 		"acciones": 2,
 	}
-	_comprobar(LlamadasInternas.siguiente(perdida).is_empty(), "una ventana pasada no deja objetivo oculto")
+	_comprobar(\n\t\tLlamadasInternas.siguiente(perdida).is_empty(), "una ventana pasada no deja objetivo oculto"\n\t)
 	var estado: Dictionary = LlamadasInternas.estado(perdida)
-	_comprobar(not (estado["resueltas"] as Dictionary).is_empty(), "las llamadas pasadas quedan ignoradas")
+	_comprobar(\n\t\tnot (estado["resueltas"] as Dictionary).is_empty(), "las llamadas pasadas quedan ignoradas"\n\t)
 
 	var fuera := {"dia": 3, "fase": "casa", "hora_minutos": int(plan[0]["desde"])}
 	_comprobar(LlamadasInternas.siguiente(fuera).is_empty(), "fuera de oficina no suena")
