@@ -14,6 +14,7 @@ func _ejecutar() -> void:
 	_probar_practica_de_correspondencia()
 	_probar_frontera_de_conocimiento()
 	_probar_conviccion_explicita_conocida()
+	_probar_personajes_externos()
 	_probar_vuelta_actual()
 	print("dialogo_religion_933: %d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos > 0 else 0)
@@ -167,6 +168,68 @@ func _probar_conviccion_explicita_conocida() -> void:
 		DialogoReligion933.resolver_clave(privada, "correspondencia"),
 		DialogoReligion933.CLAVE_CORRESPONDENCIA_CONVICCION,
 		"solo el interlocutor conocedor consume la declaración privada",
+	)
+
+
+func _probar_personajes_externos() -> void:
+	var exposicion := _estado()
+	_registrar(exposicion, "expo-barrio", ReligionEventos.CANAL_EXPOSICION, 1, true)
+	_comprobar(
+		DialogoReligion933.resolver_clave(exposicion, DialogoReligion933.ACTOR_PACO),
+		DialogoReligion933.CLAVE_PACO_EXPOSICION,
+		"Paco puede reconocer una exposición pública",
+	)
+	_comprobar(
+		DialogoReligion933.resolver_clave(
+			exposicion, DialogoReligion933.ACTOR_TELEFONO_COMUNITARIO
+		),
+		DialogoReligion933.CLAVE_TELEFONO_EXPOSICION,
+		"el contacto telefónico también puede reconocer un hecho público",
+	)
+
+	var practica := _estado()
+	_registrar(
+		practica,
+		"practica-conocida",
+		ReligionEventos.CANAL_PRACTICA,
+		1,
+		false,
+		[DialogoReligion933.ACTOR_TELEFONO_COMUNITARIO],
+	)
+	_comprobar(
+		DialogoReligion933.resolver_clave(practica, DialogoReligion933.ACTOR_PACO),
+		"",
+		"Paco no conoce una práctica privada ajena",
+	)
+	_comprobar(
+		DialogoReligion933.resolver_clave(
+			practica, DialogoReligion933.ACTOR_TELEFONO_COMUNITARIO
+		),
+		DialogoReligion933.CLAVE_TELEFONO_PRACTICA,
+		"el contacto reacciona a una práctica que conoce",
+	)
+
+	var conviccion := _estado()
+	_registrar(
+		conviccion,
+		"declaracion-a-paco",
+		ReligionEventos.CANAL_CONVICCION,
+		1,
+		false,
+		[DialogoReligion933.ACTOR_PACO],
+		{"declaracion": ReligionEventos.DECLARACION_DUDA},
+	)
+	_comprobar(
+		DialogoReligion933.resolver_clave(conviccion, DialogoReligion933.ACTOR_PACO),
+		DialogoReligion933.CLAVE_PACO_CONVICCION,
+		"Paco solo reacciona a la convicción declarada que conoce",
+	)
+	_comprobar(
+		DialogoReligion933.resolver_clave(
+			conviccion, DialogoReligion933.ACTOR_TELEFONO_COMUNITARIO
+		),
+		"",
+		"la declaración privada a Paco no se filtra por teléfono",
 	)
 
 
