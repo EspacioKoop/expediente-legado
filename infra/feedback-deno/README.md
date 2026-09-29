@@ -70,7 +70,7 @@ El control-plane expone también un buzón dirigido para comunicación entre fas
 - `POST /api/agent-pool/b2b/ack`: consume un mensaje leído.
 
 Los mensajes llevan `schema: 1`, `task_id`, `idempotency_key`, destinatario y contenido
-acotado. El emisor real se deriva del OIDC (`role` + `run_id`), no del JSON del cliente.
+acotado. El inbox exige `task_id` para no mezclar conversaciones de tareas distintas. El emisor real se deriva del OIDC (`role` + `run_id`), no del JSON del cliente.
 La idempotencia sobrevive al ACK durante el TTL para que reintentos de otro run no
 recreen un mensaje ya consumido. Los TTL se limitan a 5 minutos–24 horas y los payloads
 con patrones evidentes de credenciales se rechazan.
