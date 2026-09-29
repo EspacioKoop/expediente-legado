@@ -29,7 +29,7 @@ class RocketboxSiluetas1805Test(unittest.TestCase):
     def test_reutiliza_rig_y_vocabulario_existentes(self):
         self.assertIn('preload("res://guion/vestuario_humano_3d.gd")', self.modulo)
         self.assertIn("VESTUARIO.PERFILES_PERSONAJE", self.modulo)
-        self.assertIn("vestidor.vestir(", self.modulo)
+        self.assertRegex(self.modulo, r"vestidor\s*\.\s*vestir\(")
         self.assertNotIn("Skeleton3D.new()", self.modulo)
         self.assertNotIn("Skin.new()", self.modulo)
 
