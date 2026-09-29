@@ -123,6 +123,19 @@ class WorkflowsYamlTest(unittest.TestCase):
                 self.assertNotRegex(texto, rf"uses:\s*{re.escape(accion)}@v\d+")
 
 
+    def test_gate_secretos_blinda_bootstrap(self):
+        """El gate que busca credenciales no depende de un checkout mutable."""
+        texto = (
+            ROOT / ".github" / "workflows" / "secretos.yml"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            "uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+            texto,
+        )
+        self.assertIn("persist-credentials: false", texto)
+        self.assertNotIn("uses: actions/checkout@v4", texto)
+
+
     def test_checkout_privilegiado_no_persiste_credenciales(self):
         """Todo workflow privilegiado deja el checkout sin credenciales persistidas."""
         for ruta in WORKFLOWS:
