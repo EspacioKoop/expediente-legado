@@ -82,10 +82,11 @@ func _montar_base() -> void:
 
 func _montar_contexto_clima(clima: String) -> void:
 	if clima == Clima.LLUVIA:
-		for z in [-1.12, -0.56, 0.0, 0.56, 1.12]:
+		var posiciones_goteo := [-1.12, -0.56, 0.0, 0.56, 1.12]
+		for indice in posiciones_goteo.size():
 			_caja(
-				"GoteoBorde_%s" % str(z).replace(".", "_"),
-				Vector3(1.12, 1.70, z),
+				"GoteoBorde%d" % indice,
+				Vector3(1.12, 1.70, posiciones_goteo[indice]),
 				Vector3(0.025, 1.05, 0.025),
 				Color(0.45, 0.62, 0.70),
 			)
