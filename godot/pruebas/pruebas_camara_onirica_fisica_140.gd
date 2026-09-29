@@ -115,6 +115,9 @@ func _ejecutar() -> void:
 
 	viewport.queue_free()
 	await process_frame
+	# Recoger la cámara suena (Sonido.sonar_en). El servidor de audio libera esa
+	# reproducción en su hilo de mezcla; damos margen real antes de salir (#1844).
+	await create_timer(0.1).timeout
 	print("Cámara onírica física 140: %d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 
