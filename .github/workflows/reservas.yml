@@ -38,7 +38,9 @@ jobs:
           python-version: '3.11'
 
       - name: Regresión del gestor de reservas
-        run: python -m unittest discover -s scripts -p 'test_gestionar_reservas*.py'
+        run: |
+          python -m unittest discover -s scripts -p 'test_gestionar_reservas*.py'
+          python scripts/test_check_reservas_capacity.py
 
       - name: Liberar reserva de PR cerrada
         if: github.event_name == 'pull_request_target'
@@ -55,3 +57,9 @@ jobs:
           python scripts/gestionar_reservas_rollover.py
           --sweep
           --legacy-cutoff 2026-09-15T04:06:30Z
+
+      - name: Vigilar capacidad del registro activo
+        if: github.event_name != 'pull_request_target'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/check_reservas_capacity.py
