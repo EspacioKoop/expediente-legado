@@ -9,7 +9,7 @@ extends Interactuable3D
 signal reparada(herramienta_id: String)
 
 const CONSECUENCIA := "casa_persiana_atascada"
-const USO_REQUERIDO := "forzar"
+const USO_REQUERIDO := UsosHerramienta.FORZAR
 
 var _jornada: Dictionary = {}
 var _inventario: Dictionary = {}
@@ -34,14 +34,13 @@ func configurar(jornada: Dictionary, inventario: Dictionary) -> void:
 func herramienta_disponible() -> Dictionary:
 	if _inventario.is_empty():
 		return {}
-	for objeto in Inventario.visibles(_inventario, true):
-		if typeof(objeto) != TYPE_DICTIONARY:
-			continue
-		var usos = objeto.get("usos", [])
-		if typeof(usos) != TYPE_ARRAY or not usos.has(USO_REQUERIDO):
-			continue
-		return objeto.duplicate(true)
-	return {}
+	var resultado := UsosHerramienta.resolver(_inventario, USO_REQUERIDO)
+	if not bool(resultado.get("ok", false)):
+		return {}
+	var herramienta: Variant = resultado.get("herramienta", {})
+	if not herramienta is Dictionary:
+		return {}
+	return (herramienta as Dictionary).duplicate(true)
 
 
 func interactuar(actor: Node) -> bool:
