@@ -89,7 +89,7 @@ jobs:
 
       - name: Checkout
         if: steps.select.outputs.run == 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: main
           fetch-depth: 0
@@ -142,7 +142,7 @@ jobs:
       - name: Conectar a OmniRoute por Tailscale (OAuth)
         if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && env.HAS_OMNIROUTE == 'true' && env.HAS_TS_OAUTH == 'true'
         continue-on-error: true
-        uses: tailscale/github-action@v4
+        uses: tailscale/github-action@d1b6cd204f8dceda5b3eaad7f1f767be390056cd # v4
         with:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
@@ -151,7 +151,7 @@ jobs:
       - name: Conectar a OmniRoute por Tailscale (OIDC fallback)
         if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && env.HAS_OMNIROUTE == 'true' && env.HAS_TS_OAUTH != 'true' && env.HAS_TS_OIDC == 'true'
         continue-on-error: true
-        uses: tailscale/github-action@v4
+        uses: tailscale/github-action@d1b6cd204f8dceda5b3eaad7f1f767be390056cd # v4
         with:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           audience: ${{ secrets.TS_AUDIENCE }}
@@ -259,7 +259,7 @@ jobs:
         name: Plan mediante OmniRoute
         if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.omniroute.outputs.ready == 'true'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@v1
+        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
         with:
           openai_api_key: ${{ secrets.OMNIROUTE_API_KEY }}
           openai_base_url: ${{ vars.OMNIROUTE_BASE_URL }}
@@ -272,7 +272,7 @@ jobs:
         name: Plan Qwen (primario)
         if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && env.HAS_QWEN == 'true' && steps.plan_omniroute.outcome != 'success'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@v1
+        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
         with:
           openai_api_key: ${{ secrets.QWEN_API_KEY }}
           openai_base_url: ${{ vars.QWEN_BASE_URL || steps.qwen.outputs.url }}
@@ -322,7 +322,7 @@ jobs:
         name: Plan Qwen (fallback dinámico 1)
         if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success' && steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_1 != ''
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@v1
+        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
         with:
           openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_1] }}
           openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_1 }}
@@ -335,7 +335,7 @@ jobs:
         name: Plan Qwen (fallback dinámico 2)
         if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success' && steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_2 != '' && steps.plan_qwen_fallback_1.outcome != 'success'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@v1
+        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
         with:
           openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_2] }}
           openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_2 }}
@@ -348,7 +348,7 @@ jobs:
         name: Plan Qwen (fallback dinámico 3)
         if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success' && steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_3 != '' && steps.plan_qwen_fallback_1.outcome != 'success' && steps.plan_qwen_fallback_2.outcome != 'success'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@v1
+        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
         with:
           openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_3] }}
           openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_3 }}
@@ -361,7 +361,7 @@ jobs:
         name: Plan Qwen (fallback dinámico 4)
         if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success' && steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_4 != '' && steps.plan_qwen_fallback_1.outcome != 'success' && steps.plan_qwen_fallback_2.outcome != 'success' && steps.plan_qwen_fallback_3.outcome != 'success'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@v1
+        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
         with:
           openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_4] }}
           openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_4 }}
@@ -373,7 +373,7 @@ jobs:
       - id: plan_gemini
         name: Plan Gemini
         if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'gemini'
-        uses: google-github-actions/run-gemini-cli@v0
+        uses: google-github-actions/run-gemini-cli@f77273f4c914e4bf38440cf36a0369cb64a37489 # v0.1.22
         with:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           gemini_model: ${{ vars.GEMINI_MODEL }}
@@ -514,7 +514,7 @@ jobs:
         name: Implementar mediante OmniRoute
         if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'qwen' && steps.omniroute.outputs.ready == 'true'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@v1
+        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
         with:
           openai_api_key: ${{ secrets.OMNIROUTE_API_KEY }}
           openai_base_url: ${{ vars.OMNIROUTE_BASE_URL }}
@@ -527,7 +527,7 @@ jobs:
         name: Implementar con Qwen (primario)
         if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'qwen' && env.HAS_QWEN == 'true' && steps.implement_omniroute.outcome != 'success'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@v1
+        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
         with:
           openai_api_key: ${{ secrets.QWEN_API_KEY }}
           openai_base_url: ${{ vars.QWEN_BASE_URL || steps.qwen.outputs.url }}
@@ -540,7 +540,7 @@ jobs:
         name: Implementar con Qwen (fallback dinámico 1)
         if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'qwen' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success' && steps.qwen_fallbacks.outputs.worker_1 != ''
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@v1
+        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
         with:
           openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_1] }}
           openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_1 }}
@@ -553,7 +553,7 @@ jobs:
         name: Implementar con Qwen (fallback dinámico 2)
         if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'qwen' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success' && steps.qwen_fallbacks.outputs.worker_2 != '' && steps.implement_qwen_fallback_1.outcome != 'success'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@v1
+        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
         with:
           openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_2] }}
           openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_2 }}
@@ -566,7 +566,7 @@ jobs:
         name: Implementar con Qwen (fallback dinámico 3)
         if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'qwen' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success' && steps.qwen_fallbacks.outputs.worker_3 != '' && steps.implement_qwen_fallback_1.outcome != 'success' && steps.implement_qwen_fallback_2.outcome != 'success'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@v1
+        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
         with:
           openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_3] }}
           openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_3 }}
@@ -579,7 +579,7 @@ jobs:
         name: Implementar con Qwen (fallback dinámico 4)
         if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'qwen' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success' && steps.qwen_fallbacks.outputs.worker_4 != '' && steps.implement_qwen_fallback_1.outcome != 'success' && steps.implement_qwen_fallback_2.outcome != 'success' && steps.implement_qwen_fallback_3.outcome != 'success'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@v1
+        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
         with:
           openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_4] }}
           openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_4 }}
@@ -592,7 +592,7 @@ jobs:
         name: Implementar con Gemini
         if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'gemini'
         continue-on-error: true
-        uses: google-github-actions/run-gemini-cli@v0
+        uses: google-github-actions/run-gemini-cli@f77273f4c914e4bf38440cf36a0369cb64a37489 # v0.1.22
         with:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           gemini_model: ${{ vars.GEMINI_MODEL }}
