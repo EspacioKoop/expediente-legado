@@ -30,6 +30,8 @@ class ArchivadoDesorden965Test(unittest.TestCase):
         self.assertIn("DEMORA_BUSQUEDA_POR_ERROR := 0.35", self.bandeja)
         self.assertIn("DEMORA_BUSQUEDA_MAX := 1.4", self.bandeja)
         self.assertIn("static func demora_busqueda", self.bandeja)
+        self.assertIn("static func reorganizar_destino", self.bandeja)
+        self.assertIn('"reordenada": bool(', self.bandeja)
         self.assertIn("create_timer(demora)", self.controlador)
         self.assertIn('_texto("buscando_carpeta")', self.controlador)
         self.assertIn("_cancelar_busqueda()", self.controlador)
@@ -38,6 +40,8 @@ class ArchivadoDesorden965Test(unittest.TestCase):
     def test_controlador_reconstruye_y_actualiza_el_espacio(self):
         self.assertIn("_sincronizar_desorden_espacial(host)", self.controlador)
         self.assertIn("ArchivadoBandeja.desorden_por_destino", self.controlador)
+        self.assertIn("ArchivadoBandeja.reorganizar_destino", self.controlador)
+        self.assertIn('_texto("archivador_reordenado")', self.controlador)
         self.assertIn("ArchivadoDesorden3D.aplicar", self.controlador)
         bloque = self.controlador.split("func _archivar_en", 1)[1].split(
             "func _sincronizar_desorden_espacial", 1
