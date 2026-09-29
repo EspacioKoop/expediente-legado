@@ -23,6 +23,7 @@ IGNORED_EXACT = {
     ".agent-context.md",
     ".agent-task-packet.json",
     ".agent-worker-prompt.md",
+    ".agent-b2b-inbox.md",
     ".agent-review-input.md",
     ".agent-memory.json",
     ".agent-history.json",
