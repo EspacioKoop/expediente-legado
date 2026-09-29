@@ -651,8 +651,8 @@ jobs:
           set -euo pipefail
           outside="$(jq -r '.outside | join(",")' /tmp/claim-guard.json)"
           previous="$(
-            gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json comments |
-              jq '[.comments[].body | select(startswith("AUTOPILOT_REPLAN "))] | length'
+            gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$ISSUE/comments?per_page=100" --jq '.[]' |
+              jq -s '[.[] | select(.user.login == "github-actions[bot]" and ((.body // "") | startswith("AUTOPILOT_REPLAN ")))] | length'
           )"
           attempt=$((previous + 1))
 
