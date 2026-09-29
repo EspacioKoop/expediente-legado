@@ -476,12 +476,14 @@ jobs:
           ISSUE: ${{ inputs.issue }}
           PROVIDER: ${{ inputs.provider }}
           WORKER: ${{ inputs.worker }}
+          BRANCH: ${{ steps.guard.outputs.branch }}
         run: |
           set -euo pipefail
           rules=QWEN.md
           [[ "$PROVIDER" == gemini ]] && rules=GEMINI.md
           python3 scripts/agent_b2b.py intake \
             --issue "$ISSUE" --provider "$PROVIDER" --worker "$WORKER" \
+            --correlation-id "$BRANCH" \
             --task .agent-task.md --context .agent-context.md \
             --memory .agent-memory.json --history .agent-history.json \
             --agents AGENTS.md --rules "$rules" --platino-sha .agent-platino-sha \
@@ -597,7 +599,8 @@ jobs:
           else
             python3 scripts/agent_b2b.py event \
               --type CLAIM --issue "$ISSUE" --provider "$PROVIDER" \
-              --worker "$WORKER" --from-role orchestrator --to-role implementer \
+              --worker "$WORKER" --correlation-id "$BRANCH" \
+              --from-role orchestrator --to-role implementer \
               --summary "Reserva de rutas aceptada para implementación" \
               --ref "github-comment:$cid" --ref "branch:$BRANCH" \
               --output .agent-claim-packet.json >/dev/null
@@ -672,12 +675,14 @@ jobs:
           ISSUE: ${{ inputs.issue }}
           PROVIDER: ${{ inputs.provider }}
           WORKER: ${{ inputs.worker }}
+          BRANCH: ${{ steps.guard.outputs.branch }}
         run: |
           set -euo pipefail
           rules=QWEN.md
           [[ "$PROVIDER" == gemini ]] && rules=GEMINI.md
           python3 scripts/agent_b2b.py task \
             --issue "$ISSUE" --provider "$PROVIDER" --worker "$WORKER" \
+            --correlation-id "$BRANCH" \
             --task .agent-task.md --plan .agent-plan.json \
             --context .agent-context.md --memory .agent-memory.json \
             --history .agent-history.json --agents AGENTS.md --rules "$rules" \
@@ -802,7 +807,7 @@ jobs:
 
           python3 scripts/agent_b2b.py event \
             --type BLOCKER --issue "$ISSUE" --provider "$PROVIDER" --worker "$WORKER" \
-            --from-role implementer --to-role planner \
+            --correlation-id "$BRANCH" --from-role implementer --to-role planner \
             --summary "La implementación intentó modificar rutas fuera del CLAIM; requiere replan" \
             --ref "observed-paths:$outside" --ref "attempt:$attempt" \
             --output /tmp/agent-blocker.json >/dev/null
@@ -852,6 +857,7 @@ jobs:
           ISSUE: ${{ inputs.issue }}
           PROVIDER: ${{ inputs.provider }}
           WORKER: ${{ inputs.worker }}
+          BRANCH: ${{ steps.guard.outputs.branch }}
         run: |
           set -euo pipefail
           # La implementación usa continue-on-error: si se cortó (timeout, error de
@@ -905,7 +911,7 @@ jobs:
           git diff --cached --no-ext-diff --unified=3 > /tmp/agent-review.diff
           python3 scripts/agent_b2b.py event \
             --type EVIDENCE --issue "$ISSUE" --provider "$PROVIDER" --worker "$WORKER" \
-            --from-role validator --to-role reviewer \
+            --correlation-id "$BRANCH" --from-role validator --to-role reviewer \
             --summary "Preflight dirigido superado y diff staged preparado" \
             --ref "preflight:/tmp/agent-preflight.json" --ref "diff:/tmp/agent-review.diff" \
             --output /tmp/agent-evidence.json >/dev/null
