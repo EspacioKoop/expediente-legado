@@ -207,9 +207,22 @@ class AgentDecomposeTest(unittest.TestCase):
         self.assertIn("crea entre 2 y 6 subtareas pequeñas", workflow)
         self.assertIn("needs_human=true", workflow)
         self.assertIn("Gate humano", workflow)
-        self.assertIn("files concretos (max 8)", workflow)
+        self.assertIn("exactamente 1 ruta", workflow)
         self.assertIn("agent:decomposed", workflow)
+        self.assertIn("agent-delegated-plan:v1", workflow)
+        self.assertIn("AGENT_PLAN_BEGIN", workflow)
+        self.assertIn("worker de nivel 3 ejecuta el TaskPacket", workflow)
         self.assertNotIn('gh issue close "$ISSUE"', workflow)
+
+    def test_single_cut_materializa_plan_maquina(self):
+        workflow = (
+            ROOT / ".github" / "workflows" / "agent-decompose.yml"
+        ).read_text(encoding="utf-8")
+        normalizar = workflow.split("- id: normalize", 1)[1].split("- name: Crear subtareas", 1)[0]
+        self.assertIn("jq -c '{files:.files,goal:.goal}'", normalizar)
+        self.assertIn("agent-delegated-plan:v1", normalizar)
+        self.assertIn("AGENT_PLAN_BEGIN", normalizar)
+        self.assertIn("gh workflow run agent-pool.yml", normalizar)
 
     def test_desbloqueo_depende_de_cierre_real(self):
         workflow = (
