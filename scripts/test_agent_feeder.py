@@ -41,6 +41,7 @@ class AgentFeederTest(unittest.TestCase):
         candidates = [
             issue(1, "Bug normal", ["estado:validacion-humana"]),
             issue(2, "Bug normal", ["agent:no-auto"]),
+            issue(10, "Bug para Jules", ["jules"]),
             issue(3, "Bug normal", ["agent:pr-open"]),
             issue(4, "Bug P0", ["prioridad:P0"]),
             issue(5, "Playtest: validar algo", ["bug"]),
