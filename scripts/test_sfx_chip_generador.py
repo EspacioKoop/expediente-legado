@@ -1,11 +1,23 @@
 import hashlib
 import importlib.util
+import json
 from pathlib import Path
 import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
 GENERADOR = ROOT / "tools" / "sfx_chip" / "generar.py"
+ASSETS = ROOT / "godot" / "assets"
+PROCEDENCIA = ASSETS / "procedencia.json"
+SONIDO = ROOT / "godot" / "guion" / "sonido.gd"
+RUNTIME = {
+    "archivador_abrir_01.ogg": "b690530a0e8f5774cb55dbb1ec26c338ef0f025a01a74064b495c99fabe70574",
+    "archivador_abrir_02.ogg": "09239eba37382e39e676a847e374bac1d35bc3700984d2f1c17653f016d77a8a",
+    "archivador_abrir_03.ogg": "2c8fff670229b3b387818844af7c5268d2b1fe821d88f70cb90df5b9d55a6074",
+    "archivador_cerrar_01.ogg": "5dc7cdb111692b1f58e30f457d4595433d365f54aa789158fe461c4a0a4fdff4",
+    "archivador_cerrar_02.ogg": "d7ec8cd0de8f6a6afd9f2662994c73e06aa572ef30d8f729ccf6602743ed6bcf",
+    "archivador_cerrar_03.ogg": "b7597fcb04a74189035809268b47a2c1821e9482489e06cda450cda2fe83a277",
+}
 
 spec = importlib.util.spec_from_file_location("sfx_chip_generar", GENERADOR)
 generador = importlib.util.module_from_spec(spec)
@@ -45,6 +57,38 @@ class SfxChipGeneradorTest(unittest.TestCase):
         self.assertEqual(len(cerrar), 3)
         self.assertEqual(len({generador.RECETAS[n]["seed"] for n in abrir}), 3)
         self.assertEqual(len({generador.RECETAS[n]["seed"] for n in cerrar}), 3)
+
+
+    def test_ogg_runtime_tienen_hash_procedencia_y_presupuesto(self):
+        sonido = SONIDO.read_text(encoding="utf-8")
+        fichas = {
+            ficha["ruta"]: ficha
+            for ficha in json.loads(PROCEDENCIA.read_text(encoding="utf-8"))["assets"]
+        }
+        for nombre, esperado in RUNTIME.items():
+            ruta = ASSETS / "audio" / "chip" / nombre
+            self.assertTrue(ruta.exists(), nombre)
+            self.assertLess(ruta.stat().st_size, 30_000, nombre)
+            real = hashlib.sha256(ruta.read_bytes()).hexdigest()
+            self.assertEqual(real, esperado, nombre)
+            ficha = fichas.get(f"audio/chip/{nombre}")
+            self.assertIsNotNone(ficha, nombre)
+            self.assertEqual(ficha["sha256"], esperado, nombre)
+            self.assertEqual(ficha["autor"], "SIGA-98 · síntesis propia", nombre)
+            self.assertEqual(ficha["licencia"], "CC0-1.0", nombre)
+            self.assertEqual(ficha["fuente"], "tools/sfx_chip/generar.py", nombre)
+            self.assertIn(f"chip/{nombre}", sonido)
+
+    def test_runtime_conserva_kenney_como_fallback(self):
+        sonido = SONIDO.read_text(encoding="utf-8")
+        self.assertIn("const FAMILIAS_RESPALDO :=", sonido)
+        for muestra in (
+            "impactMetal_light_000.ogg",
+            "impactMetal_light_001.ogg",
+            "impactMetal_medium_000.ogg",
+        ):
+            self.assertIn(muestra, sonido)
+        self.assertIn("ResourceLoader.exists", sonido)
 
 
 if __name__ == "__main__":

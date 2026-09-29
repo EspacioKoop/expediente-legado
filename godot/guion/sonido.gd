@@ -4,10 +4,10 @@
 ## que suene un paso pide `"paso"` y no sabe qué fichero es. Cambiar el sonido
 ## de una cosa se hace aquí, y una sola vez.
 ##
-## Todo lo que hay son assets **CC0 de Kenney**, con su ficha en
-## `assets/procedencia.json` (autor, licencia, la página que declara la licencia
-## y sha256) y con la prueba que lo exige en las dos direcciones. Nada entra sin
-## ficha, y eso no es higiene: con destino comercial (#99) es lo que protege.
+## El catálogo combina assets **CC0 de Kenney** con foley sintetizado propio
+## reproducible (#1813). Todo fichero runtime conserva ficha y sha256 en
+## `assets/procedencia.json`; las familias chip mantienen los Kenney como
+## respaldo para poder revertir una escucha A/B sin abrir otra arquitectura.
 ##
 ## **Lo que todavía NO hay es ambiente** —el zumbido del fluorescente del
 ## archivo, la calle de noche, el silencio raro del sueño—: Kenney no tiene
@@ -82,13 +82,28 @@ const CATALOGO := {
 }
 
 ## Gestos físicos que se repiten mucho —abrir el mismo archivador diez veces al
-## día—. Cada uno es una familia de tomas de **Impact Sounds** de Kenney: el
-## `AudioStreamRandomizer` alterna toma y tono para que la décima vez no sea un
-## calco de la primera.
+## día—. Abrir/cerrar usan síntesis propia reproducible con tres variaciones
+## realmente distintas; `coger` conserva Impact Sounds. Los Kenney de metal
+## siguen declarados como respaldo para una reversión barata si el gate A/B no
+## aprueba todavía el carácter chip.
 const FAMILIAS := {
+	"abrir":
+	[
+		"chip/archivador_abrir_01.ogg",
+		"chip/archivador_abrir_02.ogg",
+		"chip/archivador_abrir_03.ogg",
+	],
+	"cerrar":
+	[
+		"chip/archivador_cerrar_01.ogg",
+		"chip/archivador_cerrar_02.ogg",
+		"chip/archivador_cerrar_03.ogg",
+	],
+	"coger": ["impactSoft_medium_000.ogg", "impactSoft_medium_001.ogg"],
+}
+const FAMILIAS_RESPALDO := {
 	"abrir": ["impactMetal_light_000.ogg", "impactMetal_light_001.ogg"],
 	"cerrar": ["impactMetal_medium_000.ogg"],
-	"coger": ["impactSoft_medium_000.ogg", "impactSoft_medium_001.ogg"],
 }
 const VARIACION_TONO := 1.08
 
@@ -109,10 +124,25 @@ static func _familia(nombre: String) -> AudioStreamRandomizer:
 	var familia := AudioStreamRandomizer.new()
 	familia.random_pitch = VARIACION_TONO
 	familia.playback_mode = AudioStreamRandomizer.PLAYBACK_RANDOM_NO_REPEATS
-	for fichero in FAMILIAS[nombre]:
-		familia.add_stream(-1, load(RUTA + fichero))
+	var ficheros: Array = FAMILIAS[nombre]
+	if not _familia_disponible(ficheros) and FAMILIAS_RESPALDO.has(nombre):
+		ficheros = FAMILIAS_RESPALDO[nombre]
+	for fichero in ficheros:
+		var ruta := RUTA + String(fichero)
+		if not ResourceLoader.exists(ruta):
+			continue
+		var pista := load(ruta)
+		if pista != null:
+			familia.add_stream(-1, pista)
 	_familias[nombre] = familia
 	return familia
+
+
+static func _familia_disponible(ficheros: Array) -> bool:
+	for fichero in ficheros:
+		if not ResourceLoader.exists(RUTA + String(fichero)):
+			return false
+	return true
 
 
 ## Un paso, el que toque. [param cual] hace la elección determinista para quien
@@ -207,6 +237,10 @@ static func ficheros() -> Array:
 		todos.append(CATALOGO[nombre])
 	for nombre in FAMILIAS:
 		todos.append_array(FAMILIAS[nombre])
+	for nombre in FAMILIAS_RESPALDO:
+		for fichero in FAMILIAS_RESPALDO[nombre]:
+			if not todos.has(fichero):
+				todos.append(fichero)
 	for suelo in PASOS_POR_SUELO:
 		for fichero in PASOS_POR_SUELO[suelo]:
 			if not todos.has(fichero):

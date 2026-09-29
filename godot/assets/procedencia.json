@@ -2280,6 +2280,54 @@
       "origen": "generado_por_script",
       "receta": "referencia/arte/cuadros_piramidales/piramide-03.json",
       "generador": "scripts/generar_cuadros_piramidales.py"
+    },
+    {
+      "ruta": "audio/chip/archivador_abrir_01.ogg",
+      "titulo": "Foley chip · archivador abrir 01",
+      "autor": "SIGA-98 · síntesis propia",
+      "licencia": "CC0-1.0",
+      "fuente": "tools/sfx_chip/generar.py",
+      "sha256": "b690530a0e8f5774cb55dbb1ec26c338ef0f025a01a74064b495c99fabe70574"
+    },
+    {
+      "ruta": "audio/chip/archivador_abrir_02.ogg",
+      "titulo": "Foley chip · archivador abrir 02",
+      "autor": "SIGA-98 · síntesis propia",
+      "licencia": "CC0-1.0",
+      "fuente": "tools/sfx_chip/generar.py",
+      "sha256": "09239eba37382e39e676a847e374bac1d35bc3700984d2f1c17653f016d77a8a"
+    },
+    {
+      "ruta": "audio/chip/archivador_abrir_03.ogg",
+      "titulo": "Foley chip · archivador abrir 03",
+      "autor": "SIGA-98 · síntesis propia",
+      "licencia": "CC0-1.0",
+      "fuente": "tools/sfx_chip/generar.py",
+      "sha256": "2c8fff670229b3b387818844af7c5268d2b1fe821d88f70cb90df5b9d55a6074"
+    },
+    {
+      "ruta": "audio/chip/archivador_cerrar_01.ogg",
+      "titulo": "Foley chip · archivador cerrar 01",
+      "autor": "SIGA-98 · síntesis propia",
+      "licencia": "CC0-1.0",
+      "fuente": "tools/sfx_chip/generar.py",
+      "sha256": "5dc7cdb111692b1f58e30f457d4595433d365f54aa789158fe461c4a0a4fdff4"
+    },
+    {
+      "ruta": "audio/chip/archivador_cerrar_02.ogg",
+      "titulo": "Foley chip · archivador cerrar 02",
+      "autor": "SIGA-98 · síntesis propia",
+      "licencia": "CC0-1.0",
+      "fuente": "tools/sfx_chip/generar.py",
+      "sha256": "d7ec8cd0de8f6a6afd9f2662994c73e06aa572ef30d8f729ccf6602743ed6bcf"
+    },
+    {
+      "ruta": "audio/chip/archivador_cerrar_03.ogg",
+      "titulo": "Foley chip · archivador cerrar 03",
+      "autor": "SIGA-98 · síntesis propia",
+      "licencia": "CC0-1.0",
+      "fuente": "tools/sfx_chip/generar.py",
+      "sha256": "b7597fcb04a74189035809268b47a2c1821e9482489e06cda450cda2fe83a277"
     }
   ]
 }
