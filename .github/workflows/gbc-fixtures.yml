@@ -49,9 +49,12 @@ jobs:
   build-fixtures:
     name: Build GBC fixtures and SIGA-98 ROMs
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - name: Checkout SIGA-98
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
 
       - name: Validate workflow contract
         run: python -m unittest scripts.test_gbc_fixture_workflow scripts.test_inspect_gb_rom
@@ -61,7 +64,8 @@ jobs:
         run: |
           set -euo pipefail
           url="https://github.com/gbdev/rgbds/releases/download/${RGBDS_VERSION}/rgbds-linux-x86_64.tar.xz"
-          curl --fail --location --retry 3 --output rgbds.tar.xz "$url"
+          curl --fail --location --retry 3 --proto '=https' --proto-redir '=https' --tlsv1.2 \
+            --output rgbds.tar.xz "$url"
           echo "${RGBDS_SHA256}  rgbds.tar.xz" | sha256sum --check --strict
           mkdir rgbds
           tar -xJf rgbds.tar.xz -C rgbds
@@ -137,7 +141,8 @@ jobs:
           tag_sha="$(git ls-remote "$UCITY_REPO" "refs/tags/${UCITY_TAG}" | cut -f1)"
           test "$tag_sha" = "$UCITY_COMMIT"
           mkdir -p external-fixtures
-          curl --fail --location --retry 3 --output external-fixtures/ucity.gbc "$UCITY_URL"
+          curl --fail --location --retry 3 --proto '=https' --proto-redir '=https' --tlsv1.2 \
+            --output external-fixtures/ucity.gbc "$UCITY_URL"
           echo "${UCITY_SHA256}  external-fixtures/ucity.gbc" | sha256sum --check --strict
           test "$(stat -c %s external-fixtures/ucity.gbc)" -eq 131072
           test "$(od -An -tx1 -j 323 -N 1 external-fixtures/ucity.gbc | tr -d ' \n')" = "c0"
@@ -270,7 +275,7 @@ jobs:
           test "$(od -An -tx1 -j 323 -N 1 gbc-fixtures/cgb_only_smoke.gbc | tr -d ' \n')" = "c0"
 
       - name: Upload ephemeral GBC ROMs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: gbc-roms-${{ github.sha }}
           path: |
