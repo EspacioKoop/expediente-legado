@@ -25,6 +25,7 @@ static func resumen(estado: Dictionary, contrato: Dictionary = {}) -> Dictionary
 	var auditoria := Auditorias.resumen_narrativo(estado)
 	var religion := ReligionTrayectoria.resumir(ReligionEventos.resumen_trayectoria(estado))
 	var ejemplos := []
+	var lecturas_sociales := _lecturas_sociales(estado)
 
 	for evento in elecciones:
 		if ejemplos.size() >= 4:
@@ -48,6 +49,7 @@ static func resumen(estado: Dictionary, contrato: Dictionary = {}) -> Dictionary
 		"ejemplos": ejemplos,
 		"auditoria": auditoria,
 		"religion": religion,
+		"lecturas_sociales": lecturas_sociales,
 		"veredicto": String(contrato.get("veredicto", "")),
 	}
 
@@ -123,3 +125,44 @@ static func _desbloquear_logros(estado: Dictionary, ids: Array) -> Array:
 		logro["desbloqueado"] = true
 		nuevos.append(String(logro.get("id", "")))
 	return nuevos
+
+
+## Devuelve las lecturas sociales ya registradas en el estado (#920).
+## Solo copia datos persistidos por su owner; no crea un segundo registro de epílogo.
+static func _lecturas_sociales(estado: Dictionary) -> Array:
+	var valor = estado.get(Prometeo.CLAVE_LECTURAS_SOCIALES, [])
+	if typeof(valor) != TYPE_ARRAY:
+		return []
+	var salida := []
+	for lectura in valor:
+		if typeof(lectura) != TYPE_DICTIONARY:
+			continue
+		var entrada: Dictionary = lectura
+		var actor_crudo = entrada.get("actor")
+		var evento_crudo = entrada.get("evento_observado")
+		if typeof(actor_crudo) != TYPE_STRING or typeof(evento_crudo) != TYPE_STRING:
+			continue
+		var actor := String(actor_crudo).strip_edges()
+		var evento := String(evento_crudo).strip_edges()
+		if actor.is_empty() or evento.is_empty():
+			continue
+		var reaccion_cruda = entrada.get("reaccion", "")
+		var etiquetas_crudas = entrada.get("etiquetas", [])
+		(
+			salida
+			. append(
+				{
+					"actor": actor,
+					"evento_observado": evento,
+					"reaccion":
+					String(reaccion_cruda) if typeof(reaccion_cruda) == TYPE_STRING else "",
+					"etiquetas":
+					(
+						(etiquetas_crudas as Array).duplicate(true)
+						if typeof(etiquetas_crudas) == TYPE_ARRAY
+						else []
+					),
+				}
+			)
+		)
+	return salida
