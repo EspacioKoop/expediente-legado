@@ -587,8 +587,14 @@ func _abrir_duelo(quien: Dictionary, zona: Area3D) -> void:
 	super._abrir_duelo(quien, zona)
 
 
-func _cerrar_duelo(gano: bool, quien: Dictionary, zona: Area3D) -> void:
-	super._cerrar_duelo(gano, quien, zona)
+func _cerrar_combate_hack_slash(
+	gano: bool,
+	objetivo: Dictionary,
+	zona: Area3D,
+	decision: Dictionary,
+	resultado: Dictionary,
+) -> void:
+	super._cerrar_combate_hack_slash(gano, objetivo, zona, decision, resultado)
 	if _hud_prioridades != null:
 		_hud_prioridades.desactivar(HUDLayer.MODAL)
 
