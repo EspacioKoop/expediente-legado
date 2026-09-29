@@ -24,16 +24,16 @@ jobs:
       HAS_DENO_DEPLOY_TOKEN: ${{ secrets.DENO_DEPLOY_TOKEN != '' }}
       PROD_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: main
           fetch-depth: 1
           persist-credentials: false
 
       - name: Instalar Deno
-        uses: denoland/setup-deno@v2
+        uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2
         with:
-          deno-version: v2.x
+          deno-version: v2.9.6
 
       - name: Validar gateway
         working-directory: infra/feedback-deno

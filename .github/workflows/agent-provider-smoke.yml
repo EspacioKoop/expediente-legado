@@ -25,7 +25,9 @@ jobs:
       SLOT_N: ${{ github.event_name == 'push' && 1 || inputs.slot }}
       SLOT: ${{ format('qwen-fallback-{0}', github.event_name == 'push' && 1 || inputs.slot) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
 
       - id: slot
         name: Secret del slot
@@ -56,7 +58,7 @@ jobs:
 
       - id: smoke
         name: Smoke del slot
-        uses: QwenLM/qwen-code-action@v1
+        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
         with:
           openai_api_key: ${{ secrets[steps.slot.outputs.secret] }}
           openai_base_url: ${{ steps.config.outputs.url }}

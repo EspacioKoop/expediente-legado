@@ -1,4 +1,4 @@
-[gd_scene load_steps=64 format=3]
+[gd_scene load_steps=65 format=3]
 
 [ext_resource type="Script" path="res://guion/dia_clima_app.gd" id="1"]
 [ext_resource type="Script" path="res://guion/dia_corcho_app.gd" id="2"]
@@ -63,6 +63,7 @@
 [ext_resource type="Script" path="res://guion/dia_ghosts_app.gd" id="61"]
 [ext_resource type="Script" path="res://guion/pasaporte_inspeccion_runtime.gd" id="62"]
 [ext_resource type="Script" path="res://guion/dia_golf_pasillo_app.gd" id="63"]
+[ext_resource type="Script" path="res://guion/dia_llamadas_internas_app.gd" id="64"]
 
 [node name="Dia" type="Node3D"]
 script = ExtResource("1")
@@ -108,6 +109,9 @@ script = ExtResource("9")
 
 [node name="CompanerosIdleController" type="Node" parent="."]
 script = ExtResource("10")
+
+[node name="LlamadasInternasController" type="Node" parent="."]
+script = ExtResource("64")
 
 [node name="HUDFasesController" type="Node" parent="."]
 script = ExtResource("11")

@@ -23,7 +23,10 @@ class GrabacionOniricaRuntime1682Test(unittest.TestCase):
         self.assertIn('jornada.get("leido_hoy", [])', self.controlador)
         combinado = self.runtime + self.controlador
         self.assertNotIn("seleccionar_toma", combinado)
-        self.assertNotIn("iniciar_cinta", combinado)
+        # #1682 sigue sin poseer adquisición: el runtime jamás crea cinta.
+        # #140 sí puede iniciarla desde el controller al recoger la cámara física.
+        self.assertNotIn("iniciar_cinta", self.runtime)
+        self.assertIn("GrabacionOniricaEstado.iniciar_cinta(", self.controlador)
 
     def test_captura_runtime_en_godot(self):
         salida = comprobar_contrato(
