@@ -3,15 +3,21 @@
 ## Presenta hechos de la vuelta antes de sintetizar el patrón. No anima ni
 ## bloquea el teclado: el botón recibe foco y la acción semántica cancelar
 ## también permite continuar.
+##
+## Consume hasta dos ecos opcionales ya registrados por #920/#922/#923
+## (_ecos_sueno, _ecos_despertar, _huellas_vigilia) sin crear estado paralelo.
+## Si no hay ecos compatibles, el cierre queda byte-semánticamente equivalente.
 class_name FinalPoliticoPanel
 extends Control
 
 signal continuar_solicitado
 
 const RUTA_TEXTOS := "res://datos/final_politico_textos.json"
+const MAX_ECOS := 2
 
 var _resumen: Dictionary = {}
 var _figura_vida: Array = []
+var _ecos: Array = []
 var _textos: Dictionary = {}
 var _boton: Button
 
@@ -19,6 +25,7 @@ var _boton: Button
 func configurar(resumen: Dictionary, figura_vida: Array = []) -> void:
 	_resumen = resumen.duplicate(true)
 	_figura_vida = figura_vida.duplicate(true)
+	_ecos = _preparar_ecos(resumen)
 
 
 func _ready() -> void:
@@ -36,6 +43,71 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("cancelar"):
 		get_viewport().set_input_as_handled()
 		continuar_solicitado.emit()
+
+
+func _preparar_ecos(resumen: Dictionary) -> Array:
+	var candidatos: Array = []
+
+	# Ecos sociales de #920: lecturas sociales ya registradas.
+	var lecturas = resumen.get("lecturas_sociales", [])
+	if typeof(lecturas) == TYPE_ARRAY:
+		for lectura in lecturas:
+			if typeof(lectura) != TYPE_DICTIONARY:
+				continue
+			(
+				candidatos
+				. append(
+					{
+						"tipo": "social",
+						"prioridad": 10,
+						"id": String(lectura.get("actor", "")),
+						"detalle": lectura,
+					}
+				)
+			)
+
+	# Ecos de despertar de #922/#923: pendientes de EcosDespertar.
+	var despertar = resumen.get("eco_despertar", {})
+	if typeof(despertar) == TYPE_DICTIONARY and not despertar.is_empty():
+		(
+			candidatos
+			. append(
+				{
+					"tipo": "despertar",
+					"prioridad": 5,
+					"id": String(despertar.get("id", "")),
+					"detalle": despertar,
+				}
+			)
+		)
+
+	# Huellas ambientales de #922: marcas de uso deliberado.
+	var huellas = resumen.get("huellas_resumidas", [])
+	if typeof(huellas) == TYPE_ARRAY:
+		for huella in huellas:
+			if typeof(huella) != TYPE_DICTIONARY:
+				continue
+			(
+				candidatos
+				. append(
+					{
+						"tipo": "huella",
+						"prioridad": 3,
+						"id": String(huella.get("id", "")),
+						"detalle": huella,
+					}
+				)
+			)
+
+	# Orden determinista: prioridad descendente, luego id estable ascendente.
+	candidatos.sort_custom(
+		func(a, b):
+			if a["prioridad"] != b["prioridad"]:
+				return a["prioridad"] > b["prioridad"]
+			return String(a["id"]) < String(b["id"])
+	)
+
+	return candidatos.slice(0, MAX_ECOS)
 
 
 static func _cargar_textos() -> Dictionary:
@@ -90,6 +162,7 @@ func _construir() -> void:
 		for ejemplo in ejemplos:
 			caja.add_child(_etiqueta(_texto_ejemplo(ejemplo)))
 
+	_montar_ecos(caja)
 	_montar_religion(caja)
 	_montar_auditorias(caja)
 	_montar_vida(caja)
@@ -102,6 +175,71 @@ func _construir() -> void:
 	_boton.pressed.connect(func(): continuar_solicitado.emit())
 	caja.add_child(_boton)
 	_boton.grab_focus()
+
+
+func _montar_ecos(caja: VBoxContainer) -> void:
+	if _ecos.is_empty():
+		return
+
+	var titulo := _etiqueta(_t("ecos_titulo"))
+	titulo.name = "EcosTitulo"
+	caja.add_child(titulo)
+
+	for indice in range(_ecos.size()):
+		var eco = _ecos[indice]
+		var linea := _etiqueta(_texto_eco(eco))
+		linea.name = "Eco%s" % indice
+		caja.add_child(linea)
+
+
+func _texto_eco(eco: Dictionary) -> String:
+	var tipo := String(eco.get("tipo", ""))
+	var detalle: Dictionary = eco.get("detalle", {})
+	if typeof(detalle) != TYPE_DICTIONARY:
+		detalle = {}
+
+	match tipo:
+		"social":
+			return _eco_social(detalle)
+		"despertar":
+			return _eco_despertar(detalle)
+		"huella":
+			return _eco_huella(detalle)
+		_:
+			return ""
+
+
+func _eco_social(detalle: Dictionary) -> String:
+	var actor := String(detalle.get("actor", ""))
+	if actor.is_empty():
+		return ""
+	var evento := String(detalle.get("evento_observado", ""))
+	if evento.is_empty():
+		return _t("eco_social_formato") % actor
+	var reaccion := String(detalle.get("reaccion", ""))
+	if reaccion.is_empty():
+		return _t("eco_social_formato") % actor
+	var etiqueta := _legible(reaccion)
+	return _t("eco_social_formato_detallado") % [actor, etiqueta]
+
+
+func _eco_despertar(detalle: Dictionary) -> String:
+	var tipo_eco := String(detalle.get("tipo", ""))
+	var origen := String(detalle.get("origen_id", "")).strip_edges()
+	if tipo_eco.is_empty() or origen.is_empty():
+		return ""
+	return _t("eco_despertar_formato") % [_t("eco_tipo_%s" % tipo_eco), _legible(origen)]
+
+
+func _eco_huella(detalle: Dictionary) -> String:
+	var id_huella := String(detalle.get("id", ""))
+	if id_huella.is_empty():
+		return ""
+	var fase := String(detalle.get("fase", ""))
+	var tipo := String(detalle.get("tipo", "uso"))
+	if fase.is_empty():
+		return _t("eco_huella_formato") % [_legible(id_huella)]
+	return _t("eco_huella_formato_doble") % [_legible(id_huella), _legible(fase)]
 
 
 func _montar_religion(caja: VBoxContainer) -> void:

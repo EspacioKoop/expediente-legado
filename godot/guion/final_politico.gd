@@ -25,6 +25,8 @@ static func resumen(estado: Dictionary, contrato: Dictionary = {}) -> Dictionary
 	var auditoria := Auditorias.resumen_narrativo(estado)
 	var religion := ReligionTrayectoria.resumir(ReligionEventos.resumen_trayectoria(estado))
 	var ejemplos := []
+	var lecturas_sociales := _lecturas_sociales(estado)
+	var eco_despertar := _eco_despertar(estado)
 
 	for evento in elecciones:
 		if ejemplos.size() >= 4:
@@ -48,6 +50,8 @@ static func resumen(estado: Dictionary, contrato: Dictionary = {}) -> Dictionary
 		"ejemplos": ejemplos,
 		"auditoria": auditoria,
 		"religion": religion,
+		"lecturas_sociales": lecturas_sociales,
+		"eco_despertar": eco_despertar,
 		"veredicto": String(contrato.get("veredicto", "")),
 	}
 
@@ -123,3 +127,45 @@ static func _desbloquear_logros(estado: Dictionary, ids: Array) -> Array:
 		logro["desbloqueado"] = true
 		nuevos.append(String(logro.get("id", "")))
 	return nuevos
+
+
+## Devuelve las lecturas sociales ya registradas en el estado (#920).
+## Solo copia datos ya existentes: actor, evento_observado, reaccion y etiquetas.
+static func _lecturas_sociales(estado: Dictionary) -> Array:
+	var valor = estado.get(Prometeo.CLAVE_LECTURAS_SOCIALES, [])
+	if typeof(valor) != TYPE_ARRAY:
+		return []
+	var salida := []
+	for lectura in valor:
+		if typeof(lectura) != TYPE_DICTIONARY:
+			continue
+		var entrada: Dictionary = lectura.duplicate(true)
+		# Solo campos seguros; no añadimos nada nuevo al estado.
+		var actor := String(entrada.get("actor", ""))
+		if actor.is_empty():
+			continue
+		(
+			salida
+			. append(
+				{
+					"actor": actor,
+					"evento_observado": String(entrada.get("evento_observado", "")),
+					"reaccion": String(entrada.get("reaccion", "")),
+					"etiquetas": entrada.get("etiquetas", []),
+				}
+			)
+		)
+	return salida
+
+
+## Devuelve el eco de despertar ya registrado (#922/#923).
+## Si `eco_despertar` es un Dictionary con campos válidos, se pasa tal cual.
+static func _eco_despertar(estado: Dictionary) -> Dictionary:
+	var valor = estado.get("eco_despertar", {})
+	if typeof(valor) != TYPE_DICTIONARY:
+		return {}
+	var eco: Dictionary = valor
+	# Validación básica: debe tener id, tipo y origen_id.
+	if eco.get("tipo", "").is_empty() or eco.get("origen_id", "").is_empty():
+		return {}
+	return eco
