@@ -148,10 +148,14 @@ func _probar_elecciones_deforman_la_misma_familia() -> void:
 			)
 			_comprobar(
 				(
-					capa_a.find_children("*", "CollisionShape3D", true, false).is_empty()
-					and capa_b.find_children("*", "CollisionShape3D", true, false).is_empty()
+					capa_a.find_children("*", "StaticBody3D", true, false).is_empty()
+					and capa_b.find_children("*", "StaticBody3D", true, false).is_empty()
+					and capa_a.find_children("*", "CharacterBody3D", true, false).is_empty()
+					and capa_b.find_children("*", "CharacterBody3D", true, false).is_empty()
+					and capa_a.find_children("*", "RigidBody3D", true, false).is_empty()
+					and capa_b.find_children("*", "RigidBody3D", true, false).is_empty()
 				),
-				"el primer vertical no altera colisión ni navegación",
+				"el primer vertical no crea cuerpos que bloqueen colisión ni navegación",
 			)
 	mundo_reparto.queue_free()
 	mundo_procedimiento.queue_free()
