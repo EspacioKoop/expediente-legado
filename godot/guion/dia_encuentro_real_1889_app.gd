@@ -31,12 +31,15 @@ func configurar(jornada_actual: Dictionary) -> void:
 
 
 func objetivo() -> Dictionary:
-	return CombateContextual.autorizar_realidad(
-		{
-			"id": ID_OBJETIVO,
-			"nombre": "ENCUENTRO_REAL_1889_RIVAL",
-		},
-		{"tipo": TIPO_CONSECUENCIA},
+	return (
+		CombateContextual
+		. autorizar_realidad(
+			{
+				"id": ID_OBJETIVO,
+				"nombre": "ENCUENTRO_REAL_1889_RIVAL",
+			},
+			{"tipo": TIPO_CONSECUENCIA},
+		)
 	)
 
 
@@ -47,9 +50,7 @@ func marcar_combate_abierto(abierto: bool) -> void:
 		_zona.habilitado = not abierto and not resuelto()
 
 
-func resolver_resultado(
-	objetivo_id: String, gano: bool, consecuencia: Dictionary
-) -> bool:
+func resolver_resultado(objetivo_id: String, gano: bool, consecuencia: Dictionary) -> bool:
 	if objetivo_id != ID_OBJETIVO:
 		return false
 	if String(consecuencia.get("tipo", "")) != TIPO_CONSECUENCIA:
