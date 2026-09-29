@@ -98,6 +98,7 @@ func _ejecutar() -> void:
 
 	var inicio := controlador.iniciar_grabacion_anomalia(anomalia)
 	_comprobar("con cámara adquirida puede iniciar toma", inicio.get("ok"), true)
+	controlador._process(0.4)
 	controlador.interrumpir_grabacion()
 	var cierre := controlador.finalizar_grabacion(false, false)
 	_comprobar("una toma interrumpida entra en la cinta", cierre.get("ok"), true)
