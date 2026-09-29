@@ -54,6 +54,7 @@ class AgentWorkerProtocolTest(unittest.TestCase):
         validate = step("- id: validate_diff\n")
         self.assertIn(".agent-task-packet.json", validate)
         self.assertIn(".agent-worker-prompt.md", validate)
+        self.assertIn(".agent-b2b-inbox.md", WORKFLOW)
 
     def test_review_es_un_mensaje_b2b_tipado(self):
         self.assertGreaterEqual(WORKFLOW.count('"message_type":"REVIEW"'), 2)
