@@ -20,7 +20,7 @@ PROVIDER_RE = re.compile(
     re.I,
 )
 TEST_RE = re.compile(
-    r"failed|failure|assertionerror|traceback|parse error|"
+    r"\bfailed\b|\bfailure\b|assertionerror|traceback|parse error|"
     r"script error|would reformat|gdlint|unittest",
     re.I,
 )
