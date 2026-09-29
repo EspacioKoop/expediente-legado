@@ -379,7 +379,7 @@ func _actualizar_hud_camara(dia: Node) -> void:
 	_refrescar_selector_tomas(dia, contenedor)
 
 
-func _refrescar_selector_tomas(dia: Node, contenedor: Dictionary) -> void:
+func _refrescar_selector_tomas(_dia: Node, contenedor: Dictionary) -> void:
 	if not is_instance_valid(_hud_tomas):
 		return
 	var cinta: Dictionary = contenedor.get("cinta", {})
