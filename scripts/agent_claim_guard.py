@@ -26,6 +26,8 @@ IGNORED_EXACT = {
     ".agent-history.json",
     ".agent-platino-sha",
     # Handoffs B2B efimeros (#1866): son contexto del worker, no producto.
+    ".agent-plan-task-packet.json",
+    ".agent-plan-prompt.md",
     ".agent-task-packet.json",
     ".agent-implement-prompt.md",
     ".agent-review-prompt.md",
