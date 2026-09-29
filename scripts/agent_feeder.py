@@ -14,6 +14,8 @@ from pathlib import Path
 import re
 from typing import Any
 
+TRUSTED_ASSOCIATIONS = {"OWNER", "MEMBER", "COLLABORATOR"}
+
 BLOCKING_LABELS = {
     "estado:validacion-humana",
     "prioridad:P0",
@@ -80,6 +82,12 @@ def eligible(
         return False, "numero-invalido"
     if number in open_pr_refs:
         return False, "pr-abierto"
+
+    association = str(
+        issue.get("authorAssociation") or issue.get("author_association") or ""
+    ).strip().upper()
+    if association not in TRUSTED_ASSOCIATIONS:
+        return False, "autor-no-confiable"
 
     labels = _labels(issue)
     if labels & BLOCKING_LABELS:
