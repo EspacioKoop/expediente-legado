@@ -37,8 +37,10 @@ func _probar_programacion() -> void:
 func _probar_orden_fisico() -> void:
 	var incidente := IncidenteImpresoraOficina.nuevo(4, 2)
 	_comprobar(
-		IncidenteImpresoraOficina.secuencia_completa()
-		== ["inspeccionar", "abrir_bandeja", "retirar_papel", "cerrar_bandeja"],
+		(
+			IncidenteImpresoraOficina.secuencia_completa()
+			== ["inspeccionar", "abrir_bandeja", "retirar_papel", "cerrar_bandeja"]
+		),
 		"la secuencia física es explícita",
 	)
 
@@ -48,7 +50,9 @@ func _probar_orden_fisico() -> void:
 	_comprobar(bool(paso["ok"]), "inspeccionar inicia la resolución")
 	incidente = paso["estado"]
 	_comprobar(bool(incidente["inspeccionada"]), "queda constancia de la inspección")
-	_comprobar(String(incidente["estado"]) == IncidenteImpresoraOficina.ATASCADA, "aún está atascada")
+	_comprobar(
+		String(incidente["estado"]) == IncidenteImpresoraOficina.ATASCADA, "aún está atascada"
+	)
 
 	paso = IncidenteImpresoraOficina.transicionar(
 		incidente, IncidenteImpresoraOficina.ABRIR_BANDEJA
@@ -76,7 +80,9 @@ func _probar_orden_fisico() -> void:
 	_comprobar(bool(paso["ok"]), "cerrar completa el incidente")
 	incidente = paso["estado"]
 	_comprobar(bool(paso["resuelta"]), "el resultado marca resolución")
-	_comprobar(String(incidente["estado"]) == IncidenteImpresoraOficina.RESUELTA, "estado final estable")
+	_comprobar(
+		String(incidente["estado"]) == IncidenteImpresoraOficina.RESUELTA, "estado final estable"
+	)
 
 
 func _probar_invalidos_e_idempotencia() -> void:
