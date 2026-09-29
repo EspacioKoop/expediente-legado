@@ -44,6 +44,29 @@ class AgentPoolControlPlaneContractTest(unittest.TestCase):
         for state in ("planning", "implementing", "validating", "publishing"):
             self.assertIn(f'"{state}"', self.deno_pool)
 
+    def test_lease_transporta_rutas_de_forma_retrocompatible(self):
+        self.assertIn("files: string[];", self.deno_pool)
+        self.assertIn("function cleanFiles(value: unknown): string[]", self.deno_pool)
+        self.assertIn("const files = cleanFiles(input.files);", self.deno_pool)
+        self.assertIn("files,", self.deno_pool)
+        self.assertIn('Object.hasOwn(input, "files")', self.deno_pool)
+        self.assertIn("files: lease.files ?? []", self.deno_pool)
+        self.assertIn("value.slice(0, 12)", self.deno_pool)
+        self.assertIn('path.split("/").includes("..")', self.deno_pool)
+
+    def test_deno_bloquea_rutas_entre_leases_y_libera_solo_propias(self):
+        self.assertIn('["agent_pool", "file_lock", path]', self.deno_pool)
+        self.assertIn("interface AgentPoolFileLock", self.deno_pool)
+        self.assertIn("function ownsFileLock(", self.deno_pool)
+        self.assertIn("function liveForeignLock(", self.deno_pool)
+        self.assertIn('error: "file_conflict"', self.deno_pool)
+        self.assertIn("kv.get<AgentPoolFileLock>(fileLockKey(path))", self.deno_pool)
+        self.assertIn(".set(fileLockKey(files[index]), fileLock(lease, files[index], now)", self.deno_pool)
+        self.assertIn("const lockPaths = [...new Set([...previousFiles, ...nextFiles])]", self.deno_pool)
+        self.assertIn("atomic.delete(fileLockKey(path))", self.deno_pool)
+        self.assertIn("ownsFileLock(entry.value, lease)", self.deno_pool)
+        self.assertIn("expireIn: AGENT_POOL_LEASE_TTL_MS", self.deno_pool)
+
     def test_gateway_anuncia_control_plane(self):
         self.assertIn('import { handleAgentPool } from "./agent_pool_state.ts";', self.deno_main)
         self.assertIn('url.pathname.startsWith("/api/agent-pool/")', self.deno_main)

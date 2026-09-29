@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from pathlib import Path
 import re
 
 QUOTA_RE = re.compile(
@@ -20,7 +21,7 @@ PROVIDER_RE = re.compile(
     re.I,
 )
 TEST_RE = re.compile(
-    r"failed|failure|assertionerror|traceback|parse error|"
+    r"\bfailed\b|\bfailure\b|assertionerror|traceback|parse error|"
     r"script error|would reformat|gdlint|unittest",
     re.I,
 )
@@ -35,6 +36,22 @@ ACTIONS = {
     "provider_or_transport": "rotate_provider",
     "unknown": "human_review",
 }
+
+
+def read_text_files(paths: list[Path], *, max_bytes: int = 65536) -> str:
+    """Lee logs acotados sin meter salidas grandes en argv/env (#1881)."""
+    chunks: list[str] = []
+    remaining = max(0, int(max_bytes))
+    for path in paths:
+        if remaining <= 0:
+            break
+        try:
+            data = path.read_bytes()[:remaining]
+        except OSError:
+            continue
+        remaining -= len(data)
+        chunks.append(data.decode("utf-8", "replace"))
+    return "\n".join(chunks)
 
 
 def classify_failure(
@@ -83,14 +100,20 @@ def main() -> int:
     parser.add_argument("--claim-drift", action="store_true")
     parser.add_argument("--no-changes", action="store_true")
     parser.add_argument("--text", default="")
+    parser.add_argument("--text-file", type=Path, action="append", default=[])
     args = parser.parse_args()
+
+    text = args.text
+    file_text = read_text_files(args.text_file)
+    if file_text:
+        text = text + ("\n" if text else "") + file_text
 
     result = classify_failure(
         stage=args.stage,
         job_status=args.job_status,
         claim_drift=args.claim_drift,
         no_changes=args.no_changes,
-        text=args.text,
+        text=text,
     )
     print(json.dumps(result, ensure_ascii=False, separators=(",", ":")))
     return 0

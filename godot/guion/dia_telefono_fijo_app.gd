@@ -69,6 +69,11 @@ func _asegurar_panel(dia: Node) -> void:
 		return
 	_panel = TelefonoFijoPanel.new()
 	_panel.name = "TelefonoFijoPanel"
+	var partida = dia.get("partida")
+	if partida != null:
+		var estado_partida = partida.get("estado")
+		if typeof(estado_partida) == TYPE_DICTIONARY:
+			_panel.estado_partida = estado_partida as Dictionary
 	_panel.cerrada.connect(_cerrar_panel)
 	_panel.estado_cambiado.connect(_al_cambiar_estado)
 	dia.add_child(_panel)

@@ -33,11 +33,14 @@ jobs:
         env:
           EVENT_NAME: ${{ github.event_name }}
           EVENT_BEFORE: ${{ github.event.before }}
-          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           set -euo pipefail
-          if [[ "$EVENT_NAME" == pull_request && -n "${PR_BASE_SHA:-}" ]]; then
-            base="$PR_BASE_SHA"
+          if [[ "$EVENT_NAME" == pull_request ]]; then
+            # El merge ref puede haberse refrescado contra un main más nuevo que
+            # el payload original del PR. El merge-base actual aísla el diff del
+            # PR y evita ejecutar Godot por merges ajenos.
+            git fetch origin main --no-tags
+            base="$(git merge-base HEAD origin/main)"
           elif [[ "$EVENT_NAME" == push && -n "${EVENT_BEFORE:-}" && ! "$EVENT_BEFORE" =~ ^0+$ ]]; then
             base="$EVENT_BEFORE"
           else
@@ -46,6 +49,13 @@ jobs:
           fi
           echo "Base CI: $base"
           python scripts/ci_scope.py --base "$base" --head HEAD --github-output "$GITHUB_OUTPUT"
+
+      - name: Preflight GDScript fail-fast
+        if: steps.scope.outputs.mode == 'full'
+        shell: bash
+        env:
+          SIGA98_GDSCRIPT_FAST: '1'
+        run: bash scripts/check_gdscript.sh
 
       - name: Preflight infra rápido
         if: steps.scope.outputs.mode == 'fast'

@@ -23,7 +23,7 @@ Lee también el issue concreto, sus comentarios, PRs relacionadas, reviews y CI.
 ## Ciclo obligatorio
 
 1. Comprueba `main`, PR abiertos, issue, comentarios, plan maestro y reservas.
-2. Elige un pendiente prioritario **libre**. No abras un segundo corte si ya hay una PR activa que cubre el mismo hueco. Un issue con `agent:auto`, `agent:pool`, `agent:qwen` o `agent:gemini` **no está libre**: está delegado al pool (ver «Niveles de trabajo»).
+2. Elige un pendiente prioritario **libre**. No abras un segundo corte si ya hay una PR activa que cubre el mismo hueco. Un issue con `agent:auto`, `agent:pool`, `agent:qwen`, `agent:gemini` o `jules` **no está libre**: está delegado al nivel 3 (ver «Niveles de trabajo»).
 3. Antes de modificar archivos publica en #1713:
 
    ```text
@@ -59,7 +59,7 @@ Usa `Closes #N` solo si el PR satisface el issue entero. Para entregas parciales
 
 - **Nivel 1:** @eGurucharri decide prioridad, integra y valida en playtest.
 - **Nivel 2:** agentes asistidos desde chat (Claude, ChatGPT, Codex, Odiseo…). Investigan, planifican, implementan cortes y **delegan** al pool.
-- **Nivel 3:** el pool autónomo (`agent-pool.yml`). Ejecuta issues delegados; no sustituye al nivel 2.
+- **Nivel 3:** el pool autónomo (`agent-pool.yml`) y Jules (label `jules`, `agent-jules.yml`). Ejecutan issues delegados de **un solo fichero**, con el contexto dentro del issue; no sustituyen al nivel 2.
 
 El reparto detallado (dónde se ejecuta cada agente, qué capa de modelos usa, quién revisa los drafts del pool y qué pasa al agotarse una cuota) está en la [doctrina de agentes](docs/agents/doctrina.md). Si esa página contradice este archivo, manda este.
 

@@ -10,6 +10,7 @@ signal cerrada
 signal estado_cambiado
 
 var jornada: Dictionary = {}
+var estado_partida: Dictionary = {}
 var _estado: Label
 var _contenido: RichTextLabel
 var _descolgar: Button
@@ -296,13 +297,15 @@ func _al_llamar(contacto_id: String) -> void:
 		_mostrar_error(resultado)
 		return
 	var contacto = resultado.get("contacto", {})
+	var texto := String(resultado.get("texto", ""))
+	var actor_religion := String(contacto.get("religion_actor", ""))
+	if not actor_religion.is_empty() and not estado_partida.is_empty():
+		var clave_religiosa := DialogoReligion933.resolver_clave(estado_partida, actor_religion)
+		if not clave_religiosa.is_empty():
+			texto = tr(clave_religiosa)
 	_contenido.text = (
 		"Llamada saliente · %s · %s\n\n%s"
-		% [
-			contacto.get("nombre", "Contacto"),
-			contacto.get("numero", ""),
-			resultado.get("texto", ""),
-		]
+		% [contacto.get("nombre", "Contacto"), contacto.get("numero", ""), texto]
 	)
 	_estado_cambio()
 

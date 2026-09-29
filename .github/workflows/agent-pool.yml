@@ -302,21 +302,74 @@ jobs:
           )
 
           for issue in "${candidates[@]}"; do
-            # Una lectura REST sirve para routing histórico y, cuando existe un
-            # AGENT_PLAN de una fuente de confianza, para afinidad de rutas.
+            # Una lectura REST resuelve el handoff L2 antes de gastar un worker.
+            # Si GitHub o el parser fallan, se conserva fail-open y el worker
+            # mantiene su guard defensivo.
             planned='[]'
             comments='[]'
+            context_ok=false
+            plan_ok=false
             if gh api "repos/$GITHUB_REPOSITORY/issues/$issue" > "/tmp/pool-issue-$issue.json" &&
                gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$issue/comments?per_page=100" \
                  --jq '.[]' | jq -s '.' > "/tmp/pool-comments-$issue.json"; then
+              context_ok=true
               jq -s '.[0] + {comments: .[1]}' \
                 "/tmp/pool-issue-$issue.json" "/tmp/pool-comments-$issue.json" \
                 > "/tmp/pool-context-$issue.json"
+              comments="$(jq -c '[.comments[-30:][]? | {body:(.body // "")}]' "/tmp/pool-context-$issue.json")"
+
+              plan_status=0
               python3 scripts/agent_delegated_plan.py \
                 --issue "/tmp/pool-context-$issue.json" \
-                --output "/tmp/pool-plan-$issue.json" >/dev/null || true
-              planned="$(jq -c '.plan.files // []' "/tmp/pool-plan-$issue.json" 2>/dev/null || printf '[]')"
-              comments="$(jq -c '[.comments[-30:][]? | {body:(.body // "")}]' "/tmp/pool-context-$issue.json")"
+                --output "/tmp/pool-plan-$issue.json" >/dev/null || plan_status=$?
+              if (( plan_status == 0 )); then
+                plan_ok=true
+                found="$(jq -r '.found // false' "/tmp/pool-plan-$issue.json")"
+                if [[ "$found" == true ]]; then
+                  planned="$(jq -c '.plan.files // []' "/tmp/pool-plan-$issue.json")"
+                  if [[ "$(jq 'length' <<<"$planned")" -eq 0 ]]; then
+                    for label in agent:auto agent:pool agent:qwen agent:gemini agent:decompose; do
+                      gh issue edit "$issue" --repo "$GITHUB_REPOSITORY" --remove-label "$label" \
+                        >/dev/null 2>&1 || true
+                    done
+                    gh issue edit "$issue" --repo "$GITHUB_REPOSITORY" \
+                      --add-label agent:needs-human >/dev/null 2>&1 || true
+                    gh issue comment "$issue" --repo "$GITHUB_REPOSITORY" --body \
+                      "Agent pool: el AGENT_PLAN delegado no contiene rutas; se detiene antes de asignar worker para evitar un bucle sin corte ejecutable." \
+                      >/dev/null || true
+                    tmp="$(mktemp)"
+                    jq --argjson issue "$issue" 'map(select(.number != $issue))' \
+                      /tmp/issues.json > "$tmp"
+                    mv "$tmp" /tmp/issues.json
+                    continue
+                  fi
+                else
+                  already_decompose="$(
+                    jq --argjson issue "$issue" \
+                      '[.[] | select(.number == $issue) | .labels[].name] | index("agent:decompose") != null' \
+                      /tmp/issues.json
+                  )"
+                  if [[ "$already_decompose" != true ]]; then
+                    # Conservamos agent:qwen/agent:gemini para que el decomposer
+                    # pueda mantener la preferencia explícita antes de limpiar cola.
+                    gh issue edit "$issue" --repo "$GITHUB_REPOSITORY" \
+                      --add-label agent:decompose >/dev/null
+                    gh issue comment "$issue" --repo "$GITHUB_REPOSITORY" --body \
+                      "Agent pool: no hay AGENT_PLAN delegado; se deriva a nivel 2 antes de asignar un worker executor." \
+                      >/dev/null || true
+                    # Los eventos generados con GITHUB_TOKEN no encadenan workflows.
+                    gh workflow run agent-decompose.yml --repo "$GITHUB_REPOSITORY" \
+                      --ref main -f issue="$issue"
+                  fi
+                  tmp="$(mktemp)"
+                  jq --argjson issue "$issue" 'map(select(.number != $issue))' \
+                    /tmp/issues.json > "$tmp"
+                  mv "$tmp" /tmp/issues.json
+                  continue
+                fi
+              else
+                echo "::warning::No se pudo validar AGENT_PLAN de #$issue; fail-open al guard del worker."
+              fi
             fi
 
             tmp="$(mktemp)"

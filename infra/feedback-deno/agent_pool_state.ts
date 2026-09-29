@@ -51,10 +51,21 @@ export interface AgentPoolLease {
   worker: string;
   provider: "qwen" | "gemini";
   branch: string;
+  files: string[];
   state: string;
   generation: number;
   acquired_at: string;
   updated_at: string;
+  expires_at: string;
+}
+
+interface AgentPoolFileLock {
+  schema: 1;
+  path: string;
+  issue: number;
+  lease_id: string;
+  run_id: string;
+  worker: string;
   expires_at: string;
 }
 
@@ -254,8 +265,58 @@ function cleanBranch(value: unknown): string {
   return /^[A-Za-z0-9._/-]+$/.test(branch) && !branch.includes("..") ? branch : "";
 }
 
+function cleanFiles(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  const files: string[] = [];
+  for (const item of value.slice(0, 12)) {
+    const path = cleanText(item, 240).replace(/\\/g, "/");
+    if (
+      !path ||
+      path.startsWith("/") ||
+      path.split("/").includes("..") ||
+      !/^[A-Za-z0-9._/@+ -]+$/.test(path)
+    ) {
+      continue;
+    }
+    if (!files.includes(path)) files.push(path);
+  }
+  return files;
+}
+
 function leaseKey(issue: number): Deno.KvKey {
   return ["agent_pool", "lease", issue];
+}
+
+function fileLockKey(path: string): Deno.KvKey {
+  return ["agent_pool", "file_lock", path];
+}
+
+function ownsFileLock(lock: AgentPoolFileLock, lease: AgentPoolLease): boolean {
+  return lock.issue === lease.issue &&
+    lock.lease_id === lease.lease_id &&
+    lock.run_id === lease.run_id;
+}
+
+function fileLock(lease: AgentPoolLease, path: string, now: number): AgentPoolFileLock {
+  return {
+    schema: 1,
+    path,
+    issue: lease.issue,
+    lease_id: lease.lease_id,
+    run_id: lease.run_id,
+    worker: lease.worker,
+    expires_at: new Date(now + AGENT_POOL_LEASE_TTL_MS).toISOString(),
+  };
+}
+
+function liveForeignLock(
+  entry: Deno.KvEntryMaybe<AgentPoolFileLock>,
+  lease: AgentPoolLease,
+  now: number,
+): AgentPoolFileLock | null {
+  const lock = entry.value;
+  if (!lock || ownsFileLock(lock, lease)) return null;
+  return Date.parse(lock.expires_at) > now ? lock : null;
 }
 
 function eventKey(now: number): Deno.KvKey {
@@ -263,7 +324,7 @@ function eventKey(now: number): Deno.KvKey {
 }
 
 function publicLease(lease: AgentPoolLease): AgentPoolLease {
-  return { ...lease };
+  return { ...lease, files: lease.files ?? [] };
 }
 
 function newEvent(
@@ -307,6 +368,7 @@ async function acquireLease(
   const worker = cleanWorker(input.worker);
   const provider = cleanProvider(input.provider);
   const branch = cleanBranch(input.branch);
+  const files = cleanFiles(input.files);
   const runId = cleanText(actor.claims.run_id, 80);
   if (!issue || !worker || !provider || !branch || !runId) {
     return json({ ok: false, error: "invalid_request" }, 400);
@@ -331,6 +393,7 @@ async function acquireLease(
       worker,
       provider,
       branch,
+      files,
       state: "leased",
       generation: 1,
       acquired_at: new Date(now).toISOString(),
@@ -338,9 +401,34 @@ async function acquireLease(
       expires_at: new Date(now + AGENT_POOL_LEASE_TTL_MS).toISOString(),
     };
     const event = newEvent(lease, "leased", "acquire", now);
+    const lockEntries = await Promise.all(
+      files.map((path) => kv.get<AgentPoolFileLock>(fileLockKey(path))),
+    );
+    for (let index = 0; index < files.length; index += 1) {
+      const conflict = liveForeignLock(lockEntries[index], lease, now);
+      if (conflict) {
+        return json(
+          {
+            ok: false,
+            error: "file_conflict",
+            path: files[index],
+            issue: conflict.issue,
+            worker: conflict.worker,
+          },
+          409,
+        );
+      }
+    }
 
-    const committed = await kv.atomic()
-      .check(current)
+    const atomic = kv.atomic().check(current);
+    for (let index = 0; index < files.length; index += 1) {
+      atomic
+        .check(lockEntries[index])
+        .set(fileLockKey(files[index]), fileLock(lease, files[index], now), {
+          expireIn: AGENT_POOL_LEASE_TTL_MS,
+        });
+    }
+    const committed = await atomic
       .set(key, lease, { expireIn: AGENT_POOL_LEASE_TTL_MS })
       .set(eventKey(now), event, { expireIn: AGENT_POOL_EVENT_TTL_MS })
       .commit();
@@ -393,16 +481,54 @@ async function transitionLease(
     }
 
     const now = Date.now();
+    const previousFiles = lease.files ?? [];
+    const nextFiles = Object.hasOwn(input, "files") ? cleanFiles(input.files) : previousFiles;
     const next: AgentPoolLease = {
       ...lease,
+      files: nextFiles,
       state,
       generation: lease.generation + 1,
       updated_at: new Date(now).toISOString(),
       expires_at: new Date(now + AGENT_POOL_LEASE_TTL_MS).toISOString(),
     };
+    const lockPaths = [...new Set([...previousFiles, ...nextFiles])];
+    const lockEntries = await Promise.all(
+      lockPaths.map((path) => kv.get<AgentPoolFileLock>(fileLockKey(path))),
+    );
+    for (const path of nextFiles) {
+      const index = lockPaths.indexOf(path);
+      const conflict = liveForeignLock(lockEntries[index], next, now);
+      if (conflict) {
+        return json(
+          {
+            ok: false,
+            error: "file_conflict",
+            path,
+            issue: conflict.issue,
+            worker: conflict.worker,
+          },
+          409,
+        );
+      }
+    }
+
     const event = newEvent(next, state, reason || "transition", now);
-    const committed = await kv.atomic()
-      .check(current)
+    const atomic = kv.atomic().check(current);
+    for (let index = 0; index < lockPaths.length; index += 1) {
+      const path = lockPaths[index];
+      const entry = lockEntries[index];
+      atomic.check(entry);
+      if (!nextFiles.includes(path)) {
+        if (entry.value && ownsFileLock(entry.value, lease)) {
+          atomic.delete(fileLockKey(path));
+        }
+        continue;
+      }
+      atomic.set(fileLockKey(path), fileLock(next, path, now), {
+        expireIn: AGENT_POOL_LEASE_TTL_MS,
+      });
+    }
+    const committed = await atomic
       .set(key, next, { expireIn: AGENT_POOL_LEASE_TTL_MS })
       .set(eventKey(now), event, { expireIn: AGENT_POOL_EVENT_TTL_MS })
       .commit();
@@ -447,14 +573,25 @@ async function releaseLease(
     }
 
     const now = Date.now();
+    const files = lease.files ?? [];
+    const lockEntries = await Promise.all(
+      files.map((path) => kv.get<AgentPoolFileLock>(fileLockKey(path))),
+    );
     const event = newEvent(
       { ...lease, generation: lease.generation + 1 },
       "released",
       reason,
       now,
     );
-    const committed = await kv.atomic()
-      .check(current)
+    const atomic = kv.atomic().check(current);
+    for (let index = 0; index < files.length; index += 1) {
+      const entry = lockEntries[index];
+      atomic.check(entry);
+      if (entry.value && ownsFileLock(entry.value, lease)) {
+        atomic.delete(fileLockKey(files[index]));
+      }
+    }
+    const committed = await atomic
       .delete(key)
       .set(eventKey(now), event, { expireIn: AGENT_POOL_EVENT_TTL_MS })
       .commit();

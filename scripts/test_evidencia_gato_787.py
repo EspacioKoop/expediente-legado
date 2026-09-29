@@ -47,7 +47,7 @@ class EvidenciaGato787Test(unittest.TestCase):
         self.assertIn("xvfb-run -a godot4", self.workflow)
         self.assertIn("for captura in casa sueno; do", self.workflow)
         self.assertIn("manifest.json", self.workflow)
-        self.assertIn("actions/upload-artifact@", self.workflow)
+        self.assertIn("uses: ./.github/actions/upload-artifact", self.workflow)
         self.assertIn("evidencia-gato-787-${{ github.sha }}", self.workflow)
         self.assertIn('casos["sueno"]["gato_top_level"] is not True', self.workflow)
 
