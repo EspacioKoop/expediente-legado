@@ -12,8 +12,12 @@ class DenoDeployWorkflowTest(unittest.TestCase):
         cls.text = WORKFLOW.read_text(encoding="utf-8")
 
     def test_usa_cli_moderno_y_valida_antes_de_desplegar(self):
-        # v2 fijado por SHA completo (#1825): el comentario conserva la versión.
-        self.assertRegex(self.text, r"uses: denoland/setup-deno@[0-9a-f]{40} # v2\b")
+        self.assertIn(
+            "uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed",
+            self.text,
+        )
+        self.assertIn("deno-version: v2.9.6", self.text)
+        self.assertNotIn("uses: denoland/setup-deno@v2", self.text)
         self.assertIn("run: deno task check", self.text)
         self.assertIn("deno deploy --org expediente-legado --app siga98-feedback-deno --prod", self.text)
         self.assertNotIn("deployctl", self.text)
