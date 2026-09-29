@@ -340,9 +340,10 @@ class AgentPoolTest(unittest.TestCase):
         self.assertIn("gemini-client-error-", worker)
         self.assertIn("AGENT_POOL_SLOT_UNHEALTHY", pool)
         self.assertIn("healthy", pool)
-        self.assertIn('maxSessionTurns":16', worker)
+        self.assertNotIn('maxSessionTurns":16', worker)
         self.assertIn('maxSessionTurns":40', worker)
-        self.assertEqual(2, worker.count('maxSessionTurns":16'))
+        self.assertNotIn("- id: plan_qwen\n", worker)
+        self.assertNotIn("- id: plan_gemini\n", worker)
         self.assertRegex(worker, r"tailscale/github-action@[0-9a-f]{40}")
         self.assertIn("steps.omniroute.outputs.ready", worker)
         self.assertNotIn("\n  schedule:\n", autopilot)
@@ -362,7 +363,7 @@ class AgentPoolTest(unittest.TestCase):
         self.assertIn("agotó los workers compatibles durante $retry_stage", worker)
 
         cleanup = worker.split("- name: Limpiar fallo o cancelacion", 1)[1]
-        self.assertIn('elif [[ "${RESERVED:-}" == true', cleanup)
+        self.assertIn('if [[ "${RESERVED:-}" == true', cleanup)
         self.assertIn('retry_stage="$RETRY_STAGE"', cleanup)
         # Un fallo de preflight real, sin retry_stage, conserva la escalada humana.
         self.assertIn(
@@ -382,7 +383,7 @@ class AgentPoolTest(unittest.TestCase):
         self.assertNotIn("en `$WORKER`", worker)
 
         cancel_block = worker.split('if [[ "$JOB_STATUS" == cancelled ]]', 1)[1].split(
-            'if [[ "${RESERVED:-}" != true && -z "$pr" ]]', 1
+            'retry_stage=""', 1
         )[0]
         self.assertNotIn("AGENT_POOL_WORKER_FAILURE", cancel_block)
         self.assertNotIn("AGENT_POOL_SLOT_UNHEALTHY", cancel_block)
