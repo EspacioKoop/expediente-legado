@@ -69,7 +69,7 @@ jobs:
 
       - name: Adjuntar capturas para revisión humana
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: evidencia-sueno-786-${{ github.sha }}
           path: evidencia-sueno-786/

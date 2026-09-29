@@ -106,7 +106,7 @@ jobs:
 
       - name: Adjuntar evidencia visual de #676
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: evidencia-comercios-676-${{ github.sha }}
           path: evidencia-comercios-676/

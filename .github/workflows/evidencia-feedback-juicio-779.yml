@@ -79,7 +79,7 @@ jobs:
           done
 
       - name: Publicar PNG originales como artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: evidencia-feedback-juicio-779
           path: ${{ runner.temp }}/juicio-779-feedback/*.png

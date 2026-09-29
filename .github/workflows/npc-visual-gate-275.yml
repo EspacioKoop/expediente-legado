@@ -99,7 +99,7 @@ jobs:
           test "$cantidad" -ge 30
 
       - name: Adjuntar capturas visuales NPC #275
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: SIGA-98-npc-visual-gate-275-${{ github.sha }}
           path: dist/capturas-npc-275

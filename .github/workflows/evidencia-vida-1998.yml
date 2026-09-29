@@ -134,7 +134,7 @@ jobs:
 
       - name: Adjuntar evidencia visual de vida 1998
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: evidencia-vida-1998-${{ github.sha }}
           path: evidencia-vida-1998/

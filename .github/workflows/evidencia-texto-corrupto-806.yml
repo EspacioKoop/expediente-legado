@@ -96,7 +96,7 @@ jobs:
 
       - name: Adjuntar evidencia visual de #806
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: evidencia-texto-corrupto-806-${{ github.sha }}
           path: evidencia-texto-corrupto-806/

@@ -115,7 +115,7 @@ jobs:
 
       - name: Adjuntar evidencia visual de #227
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: evidencia-hogar-227-${{ github.sha }}
           path: evidencia-hogar-227/

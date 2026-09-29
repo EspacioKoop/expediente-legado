@@ -101,7 +101,7 @@ jobs:
 
       - name: Adjuntar evidencia visual
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: evidencia-simurgh-658-${{ github.sha }}
           path: evidencia-simurgh-658/
