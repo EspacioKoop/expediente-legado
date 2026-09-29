@@ -150,7 +150,7 @@ jobs:
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":8},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, .agent-decompose-input.md y las Normas Platino en .agent-platino. Inspecciona el repo solo para decidir el siguiente corte seguro; no edites nada. Si el pendiente restante es exclusivamente un gate/playtest humano, requiere hardware físico o no justifica ningún cambio de código, devuelve needs_human=true, fits_single_cut=false, reason concreto y subtasks=[]. Si cabe en un corte seguro de <=8 rutas, devuelve fits_single_cut=true y needs_human=false. Si no, crea entre 2 y 6 subtareas pequeñas; cada una con title, goal, files concretos (max 8) y depends_on con indices anteriores. Si dos subtareas comparten ruta, la posterior DEBE depender de la anterior. Termina con AGENT_DECOMPOSE_BEGIN seguido de JSON {"fits_single_cut":false,"needs_human":false,"reason":"","subtasks":[{"title":"...","goal":"...","files":["ruta"],"depends_on":[]}]} y AGENT_DECOMPOSE_END.'
+          prompt: 'Lee AGENTS.md, .agent-decompose-input.md y las Normas Platino en .agent-platino. Inspecciona el repo solo para decidir cortes ejecutables; no edites nada. Cada tarea de nivel 3 debe modificar exactamente 1 ruta. Si el pendiente restante es exclusivamente un gate/playtest humano, requiere hardware físico o no justifica código, devuelve needs_human=true, fits_single_cut=false, reason concreto y subtasks=[]. Si cabe en un único fichero, devuelve fits_single_cut=true, needs_human=false y exactamente una subtarea con title, goal, files=["ruta"] y depends_on=[]. Si no, crea entre 2 y 6 subtareas pequeñas; cada una con exactamente 1 ruta y depends_on con indices anteriores. Si dos subtareas tocan la misma ruta, la posterior DEBE depender de la anterior. Termina con AGENT_DECOMPOSE_BEGIN seguido de JSON {"fits_single_cut":false,"needs_human":false,"reason":"","subtasks":[{"title":"...","goal":"...","files":["ruta"],"depends_on":[]}]} y AGENT_DECOMPOSE_END.'
 
       - id: plan_gemini
         name: Descomponer con Gemini
@@ -163,7 +163,7 @@ jobs:
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":8},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, .agent-decompose-input.md y las Normas Platino en .agent-platino. Inspecciona el repo solo para decidir el siguiente corte seguro; no edites nada. Si el pendiente restante es exclusivamente un gate/playtest humano, requiere hardware físico o no justifica ningún cambio de código, devuelve needs_human=true, fits_single_cut=false, reason concreto y subtasks=[]. Si cabe en un corte seguro de <=8 rutas, devuelve fits_single_cut=true y needs_human=false. Si no, crea entre 2 y 6 subtareas pequeñas; cada una con title, goal, files concretos (max 8) y depends_on con indices anteriores. Si dos subtareas comparten ruta, la posterior DEBE depender de la anterior. Termina con AGENT_DECOMPOSE_BEGIN seguido de JSON {"fits_single_cut":false,"needs_human":false,"reason":"","subtasks":[{"title":"...","goal":"...","files":["ruta"],"depends_on":[]}]} y AGENT_DECOMPOSE_END.'
+          prompt: 'Lee AGENTS.md, .agent-decompose-input.md y las Normas Platino en .agent-platino. Inspecciona el repo solo para decidir cortes ejecutables; no edites nada. Cada tarea de nivel 3 debe modificar exactamente 1 ruta. Si el pendiente restante es exclusivamente un gate/playtest humano, requiere hardware físico o no justifica código, devuelve needs_human=true, fits_single_cut=false, reason concreto y subtasks=[]. Si cabe en un único fichero, devuelve fits_single_cut=true, needs_human=false y exactamente una subtarea con title, goal, files=["ruta"] y depends_on=[]. Si no, crea entre 2 y 6 subtareas pequeñas; cada una con exactamente 1 ruta y depends_on con indices anteriores. Si dos subtareas tocan la misma ruta, la posterior DEBE depender de la anterior. Termina con AGENT_DECOMPOSE_BEGIN seguido de JSON {"fits_single_cut":false,"needs_human":false,"reason":"","subtasks":[{"title":"...","goal":"...","files":["ruta"],"depends_on":[]}]} y AGENT_DECOMPOSE_END.'
 
       - id: normalize
         name: Validar descomposicion
@@ -191,11 +191,14 @@ jobs:
               "Agent decompose: no hay un corte de código autónomo justificado. Gate humano: $reason" >/dev/null
             echo "create=false" >> "$GITHUB_OUTPUT"
           elif [[ "$fits" == true ]]; then
+            task="$(jq -c '.subtasks[0]' /tmp/agent-decompose.json)"
+            plan="$(jq -c '{files:.files,goal:.goal}' <<<"$task")"
             queue_label=agent:auto
             [[ "$REQUESTED_PROVIDER" == qwen ]] && queue_label=agent:qwen
             [[ "$REQUESTED_PROVIDER" == gemini ]] && queue_label=agent:gemini
+            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "$(printf '<!-- agent-delegated-plan:v1 -->\nAGENT_PLAN_BEGIN\n%s\nAGENT_PLAN_END\n' "$plan")" >/dev/null
             gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --remove-label agent:decompose --remove-label agent:needs-human --add-label "$queue_label" >/dev/null
-            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Agent decompose: el issue ya cabe en un corte seguro; se retira agent:decompose y vuelve a la cola como $queue_label sin crear subissues." >/dev/null
+            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Agent decompose: plan de un fichero materializado; vuelve a la cola como $queue_label y el nivel 3 lo ejecutará sin replanificar." >/dev/null
             gh workflow run agent-pool.yml --repo "$GITHUB_REPOSITORY" --ref main -f max_parallel=6
             echo "create=false" >> "$GITHUB_OUTPUT"
           else
@@ -242,6 +245,7 @@ jobs:
             fi
 
             files="$(jq -r '.files[] | "- "+.' <<<"$task")"
+            plan="$(jq -c '{files:.files,goal:.goal}' <<<"$task")"
             cat > /tmp/subissue.md <<EOF
           Subtarea generada automáticamente desde #$ISSUE.
 
@@ -257,8 +261,13 @@ jobs:
           <!-- agent-parent: #$ISSUE -->
           <!-- agent-depends-on: $dep_marker -->
           <!-- agent-provider: $REQUESTED_PROVIDER -->
+          <!-- agent-delegated-plan:v1 -->
 
-          El CLAIM real lo decidirá el worker al planificar; estas rutas son el corte esperado, no una reserva.
+          AGENT_PLAN_BEGIN
+          $plan
+          AGENT_PLAN_END
+
+          El planner de nivel 2 ya fijó este corte. El worker de nivel 3 ejecuta el TaskPacket y no vuelve a planificar.
           EOF
             url="$(gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body-file /tmp/subissue.md --label "$queue_label")"
             number="${url##*/}"
