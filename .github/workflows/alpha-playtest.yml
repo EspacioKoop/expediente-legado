@@ -116,7 +116,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Recuperar boot ROM CGB
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: siga98-gbc-boot-rom-${{ github.sha }}
           path: godot/native/siga98_gb/.deps/bootroms
@@ -145,7 +145,7 @@ jobs:
           python-version: '3.11'
 
       - name: Recuperar núcleo GB de Windows
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: siga98-gb-windows-${{ github.sha }}
           path: godot/addons/siga98_gb/bin/windows
@@ -329,7 +329,7 @@ jobs:
           sparse-checkout-cone-mode: false
 
       - name: Recoger los artefactos exportados
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: SIGA-98-godot-alpha-*
           merge-multiple: true
@@ -465,7 +465,7 @@ jobs:
       contents: write
     steps:
       - name: Recoger los artefactos exportados
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: SIGA-98-godot-alpha-*
           merge-multiple: true
