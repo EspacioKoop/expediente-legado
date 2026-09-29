@@ -48,11 +48,11 @@ func _probar_cuatro_presentaciones() -> void:
 		)
 		match id:
 			MutadoresSueno.HUMEDAD:
-				_comprobar(capa.find_children("Charco*", "MeshInstance3D").size() == 3, "humedad crea charcos")
+				_comprobar(capa.find_children("Charco*", "MeshInstance3D", true, false).size() == 3, "humedad crea charcos")
 			MutadoresSueno.APAGONES:
-				_comprobar(capa.find_children("FuenteLocal*", "OmniLight3D").size() == 2, "apagones conserva luz local")
+				_comprobar(capa.find_children("FuenteLocal*", "OmniLight3D", true, false).size() == 2, "apagones conserva luz local")
 			MutadoresSueno.REPETICION:
-				var ecos := capa.find_children("EcoIdentidad*", "MeshInstance3D")
+				var ecos := capa.find_children("EcoIdentidad*", "MeshInstance3D", true, false)
 				_comprobar(ecos.size() == 2, "repeticion duplica un elemento secundario")
 				_comprobar(
 					ecos.size() == 2
@@ -78,7 +78,7 @@ func _probar_idempotencia_y_reduccion() -> void:
 	_comprobar(primera == segunda, "remontar el mismo mutador no duplica capa")
 	_comprobar(mundo.get_child_count() == 1, "solo existe una capa por mundo")
 	_comprobar(not primera.is_processing(), "reduccion de movimiento apaga ciclo de luces")
-	for luz in primera.find_children("FuenteLocal*", "OmniLight3D"):
+	for luz in primera.find_children("FuenteLocal*", "OmniLight3D", true, false):
 		_comprobar(float(luz.light_energy) > 0.0, "la ruta conserva fuentes locales estaticas")
 	mundo.queue_free()
 	await process_frame
