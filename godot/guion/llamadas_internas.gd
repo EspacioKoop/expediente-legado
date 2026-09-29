@@ -40,16 +40,19 @@ static func plan(jornada: Dictionary) -> Array[Dictionary]:
 	for indice in cantidad:
 		var tipo: Dictionary = TIPOS[(dia + indice) % TIPOS.size()]
 		var desde := primera + indice * 125
-		salida.append(
-			{
-				"id": "d%d-%d" % [dia, indice],
-				"tipo": String(tipo["id"]),
-				"prompt": String(tipo["prompt"]),
-				"respuesta": String(tipo["respuesta"]),
-				"reaccion_companero": bool(tipo["reaccion_companero"]),
-				"desde": desde,
-				"hasta": desde + DURACION_VENTANA_MIN,
-			}
+		(
+			salida
+			. append(
+				{
+					"id": "d%d-%d" % [dia, indice],
+					"tipo": String(tipo["id"]),
+					"prompt": String(tipo["prompt"]),
+					"respuesta": String(tipo["respuesta"]),
+					"reaccion_companero": bool(tipo["reaccion_companero"]),
+					"desde": desde,
+					"hasta": desde + DURACION_VENTANA_MIN,
+				}
+			)
 		)
 	return salida
 
