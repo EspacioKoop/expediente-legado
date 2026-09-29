@@ -19,6 +19,8 @@ ESTADO_HISTORIA = 1
 ESTADO_PARTIDO = 2
 ESTADO_DERROTA = 3
 ESTADO_VICTORIA = 4
+ESTADO_DESAFIOS = 5
+ESTADO_DESAFIO_FIN = 6
 
 
 class CabeceraROM(unittest.TestCase):
@@ -75,6 +77,11 @@ class PruebasWebkeeper(unittest.TestCase):
         self.assertEqual(self.leer(emulador, "wEstado"), ESTADO_HISTORIA)
         self.pulsar(emulador, "a")
         self.assertEqual(self.leer(emulador, "wEstado"), ESTADO_PARTIDO)
+
+    def entrar_desafios(self, emulador):
+        self.poner(emulador, "wEstado", ESTADO_VICTORIA)
+        self.pulsar(emulador, "a")
+        self.assertEqual(self.leer(emulador, "wEstado"), ESTADO_DESAFIOS)
 
     def resolver_ultimo_como_parada(self, emulador, total, necesarias):
         self.poner(emulador, "wTiro", total - 1)
@@ -210,6 +217,69 @@ class PruebasWebkeeper(unittest.TestCase):
         self.resolver_ultimo_como_parada(emulador, 9, 5)
         self.assertEqual(self.leer(emulador, "wEstado"), ESTADO_VICTORIA)
         self.assertEqual(emulador.memory[0xC100], 0xA5)
+
+        self.pulsar(emulador, "a")
+        self.assertEqual(self.leer(emulador, "wEstado"), ESTADO_DESAFIOS)
+        self.assertEqual(self.leer(emulador, "wModoDesafio"), 0)
+
+    def test_muro_sin_red_deshabilita_telarana(self):
+        emulador = self.arrancar()
+        self.entrar_desafios(emulador)
+        self.assertEqual(self.leer(emulador, "wDesafio"), 0)
+        self.pulsar(emulador, "a")
+        self.assertEqual(self.leer(emulador, "wEstado"), ESTADO_PARTIDO)
+        self.assertEqual(self.leer(emulador, "wModoDesafio"), 1)
+        self.pulsar(emulador, "b")
+        self.assertEqual(self.leer(emulador, "wVentanaRed"), 0)
+        self.assertEqual(self.leer(emulador, "wRecargaRed"), 0)
+
+    def test_engano_total_usa_secuencia_de_amagos(self):
+        emulador = self.arrancar()
+        self.entrar_desafios(emulador)
+        self.pulsar(emulador, "right")
+        self.assertEqual(self.leer(emulador, "wDesafio"), 1)
+        self.pulsar(emulador, "a")
+        self.assertEqual(self.leer(emulador, "wEstado"), ESTADO_PARTIDO)
+        self.assertEqual(self.leer(emulador, "wTiroAmago"), 1)
+        self.poner(emulador, "wTiro", 1)
+        self.poner(emulador, "wTimerTiro", 0)
+        emulador.tick(1, False)
+        self.assertEqual(self.leer(emulador, "wTiroAmago"), 1)
+
+    def test_rafaga_reduce_el_telegraph(self):
+        emulador = self.arrancar()
+        self.entrar_desafios(emulador)
+        self.pulsar(emulador, "right")
+        self.pulsar(emulador, "right")
+        self.assertEqual(self.leer(emulador, "wDesafio"), 2)
+        self.pulsar(emulador, "a")
+        self.assertEqual(self.leer(emulador, "wTimerTiro"), 60)
+
+    def test_superar_desafio_registra_badge_sin_publicar_handshake(self):
+        emulador = self.arrancar()
+        self.poner(emulador, "wModoDesafio", 1)
+        self.poner(emulador, "wDesafio", 2)
+        self.poner(emulador, "wEstado", ESTADO_HISTORIA)
+        self.pulsar(emulador, "a")
+        self.resolver_ultimo_como_parada(emulador, 9, 6)
+        self.assertEqual(self.leer(emulador, "wEstado"), ESTADO_DESAFIO_FIN)
+        self.assertEqual(self.leer(emulador, "wDesafioResultado"), 1)
+        self.assertEqual(self.leer(emulador, "wDesafiosSuperados"), 0b00000100)
+        self.assertEqual(emulador.memory[0xC100], 0)
+
+    def test_perder_desafio_vuelve_al_menu_sin_tocar_torneo(self):
+        emulador = self.arrancar()
+        self.poner(emulador, "wModoDesafio", 1)
+        self.poner(emulador, "wDesafio", 0)
+        self.poner(emulador, "wEstado", ESTADO_HISTORIA)
+        self.pulsar(emulador, "a")
+        self.resolver_ultimo_como_gol(emulador, 6)
+        self.assertEqual(self.leer(emulador, "wEstado"), ESTADO_DESAFIO_FIN)
+        self.assertEqual(self.leer(emulador, "wDesafioResultado"), 0)
+        self.assertEqual(self.leer(emulador, "wDesafiosSuperados"), 0)
+        self.assertEqual(emulador.memory[0xC100], 0)
+        self.pulsar(emulador, "a")
+        self.assertEqual(self.leer(emulador, "wEstado"), ESTADO_DESAFIOS)
 
 
 if __name__ == "__main__":
