@@ -7,6 +7,16 @@ ROOT = Path(__file__).resolve().parents[1]
 WRAPPER = ROOT / ".github" / "actions" / "upload-artifact" / "action.yml"
 GBC = ROOT / ".github" / "workflows" / "gbc-fixtures.yml"
 CI_BRAIN = ROOT / ".github" / "workflows" / "ci-brain.yml"
+FAMILIA_EVIDENCIA = [
+    ROOT / ".github" / "workflows" / nombre
+    for nombre in (
+        "evidencia-calle-277.yml",
+        "evidencia-casa-133.yml",
+        "evidencia-hogar-227.yml",
+        "evidencia-gato-787.yml",
+        "evidencia-vida-1998.yml",
+    )
+]
 
 
 class UploadArtifactWrapper1888Test(unittest.TestCase):
@@ -15,6 +25,7 @@ class UploadArtifactWrapper1888Test(unittest.TestCase):
         cls.wrapper = WRAPPER.read_text(encoding="utf-8")
         cls.gbc = GBC.read_text(encoding="utf-8")
         cls.ci_brain = CI_BRAIN.read_text(encoding="utf-8")
+        cls.familia = [ruta.read_text(encoding="utf-8") for ruta in FAMILIA_EVIDENCIA]
 
     def test_wrapper_fija_upstream_por_sha_y_version(self):
         self.assertRegex(
@@ -29,7 +40,7 @@ class UploadArtifactWrapper1888Test(unittest.TestCase):
             self.assertIn("$" + "{{ inputs." + nombre + " }}", self.wrapper)
 
     def test_workflows_smoke_usan_wrapper_sin_pin_duplicado(self):
-        for workflow in (self.gbc, self.ci_brain):
+        for workflow in (self.gbc, self.ci_brain, *self.familia):
             self.assertIn("uses: ./.github/actions/upload-artifact", workflow)
             self.assertNotIn("actions/upload-artifact@", workflow)
             self.assertLess(
@@ -37,8 +48,10 @@ class UploadArtifactWrapper1888Test(unittest.TestCase):
                 workflow.index("uses: ./.github/actions/upload-artifact"),
             )
 
-    def test_gbc_reacciona_a_cambios_del_wrapper(self):
+    def test_workflows_migrados_reaccionan_a_cambios_del_wrapper(self):
         self.assertIn('".github/actions/upload-artifact/**"', self.gbc)
+        for workflow in self.familia:
+            self.assertIn(".github/actions/upload-artifact/**", workflow)
 
 
 if __name__ == "__main__":

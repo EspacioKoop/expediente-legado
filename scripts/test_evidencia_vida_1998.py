@@ -67,7 +67,7 @@ class EvidenciaVida1998Test(unittest.TestCase):
             self.workflow,
         )
         self.assertIn("evidencia-vida-1998/manifest.json", self.workflow)
-        self.assertIn("actions/upload-artifact@", self.workflow)
+        self.assertIn("uses: ./.github/actions/upload-artifact", self.workflow)
         self.assertIn("evidencia-vida-1998-${{ github.sha }}", self.workflow)
         self.assertIn("len(set(hashes)) != 4", self.workflow)
         self.assertIn("len(set(origenes)) != 3", self.workflow)
