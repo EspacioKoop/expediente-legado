@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import tempfile
@@ -28,15 +29,24 @@ class IdeologiaCultura1883Test(unittest.TestCase):
         self.assertIn('EVENTO_BASE := "turnos-atencion-planta4"', self.modelo)
         self.assertIn('SUPERFICIE_CIRCULAR := "circular_oficina"', self.modelo)
         self.assertIn('SUPERFICIE_POSTAL := "aviso_postal"', self.modelo)
-        self.assertEqual(self.modelo.count('"evento_base": EVENTO_BASE'), 2)
-        self.assertIn("Prometeo.registrar_exposicion_ideologica(", self.modelo)
+        superficies = self.modelo.split("const SUPERFICIES := {", 1)[1].split(
+            "static func superficie", 1
+        )[0]
+        self.assertEqual(superficies.count('"evento_base": EVENTO_BASE'), 2)
+        self.assertRegex(
+            self.modelo,
+            r"Prometeo\s*\.\s*registrar_exposicion_ideologica\(",
+        )
         self.assertNotIn("registrar_eleccion_ideologica(", self.modelo)
         self.assertNotIn('["elecciones_ideologicas_run"] =', self.modelo)
 
     def test_tablon_registra_solo_al_completar_interaccion(self):
         self.assertIn('if id_punto == "comprobar_tablon":', self.ronda)
         self.assertIn("_registrar_exposicion_tablon(dia)", self.ronda)
-        self.assertIn("IdeologiaCulturaCotidiana1883.registrar_exposicion(", self.ronda)
+        self.assertRegex(
+            self.ronda,
+            r"IdeologiaCulturaCotidiana1883\s*\.\s*registrar_exposicion\(",
+        )
         self.assertIn('punto.set_meta("ideologia_superficie_id"', self.ronda_3d)
         self.assertIn('punto.set_meta("evento_base"', self.ronda_3d)
         self.assertNotIn("registrar_eleccion_ideologica(", self.ronda)
@@ -48,7 +58,10 @@ class IdeologiaCultura1883Test(unittest.TestCase):
         guardado = self.correo_app.index('dia._guardar_o_avisar("")')
         self.assertLess(registro, guardado)
         self.assertIn('get("ideologia_superficie_id", "")', self.correo_app)
-        self.assertIn("IdeologiaCulturaCotidiana1883.registrar_exposicion(", self.correo_app)
+        self.assertRegex(
+            self.correo_app,
+            r"IdeologiaCulturaCotidiana1883\s*\.\s*registrar_exposicion\(",
+        )
         self.assertNotIn("registrar_eleccion_ideologica(", self.correo_app)
 
     def test_smoke_godot(self):
