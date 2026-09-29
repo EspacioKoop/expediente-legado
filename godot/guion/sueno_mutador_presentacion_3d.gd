@@ -79,7 +79,6 @@ func configurar(meta: Dictionary, espacio: Dictionary) -> void:
 			_montar_desfase(espacio)
 
 
-
 func _process(delta: float) -> void:
 	_tiempo += delta
 	if _id == MutadoresSueno.APAGONES and _animar:
