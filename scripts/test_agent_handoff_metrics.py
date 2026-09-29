@@ -159,7 +159,7 @@ class AgentHandoffMetricsTest(unittest.TestCase):
     def test_dispatcher_carga_ci_y_ventana_sin_reemplazar_score_historico(self):
         self.assertIn("scripts/agent_handoff_metrics.py", POOL_WORKFLOW)
         self.assertIn(
-            "--json number,title,body,commits,updatedAt,statusCheckRollup",
+            "--json number,title,body,commits,createdAt,updatedAt,closedAt,mergedAt,statusCheckRollup",
             POOL_WORKFLOW,
         )
         self.assertIn("--window-days 30", POOL_WORKFLOW)
