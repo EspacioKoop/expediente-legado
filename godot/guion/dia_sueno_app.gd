@@ -85,8 +85,17 @@ func _entrar_en(fase: String) -> void:
 	SuenoCastillo3D.montar(_mundo, _espacio_actual)
 	SuenoMontana3D.montar(_mundo, _espacio_actual)
 	SuenoDesierto3D.montar(_mundo, _espacio_actual)
-	SuenoEscuela3D.montar(_mundo, _espacio_actual)
+	var escuela := SuenoEscuela3D.montar(_mundo, _espacio_actual)
+	if escuela != null:
+		escuela.sonido_inquietante.connect(_al_sonido_inquietante_sueno)
 	_montar_respiracion_sueno()
+
+
+func _al_sonido_inquietante_sueno(sonido_id: String) -> void:
+	if not Estres.registrar_sonido_inquietante(jornada, sonido_id):
+		return
+	_guardar_o_avisar("")
+
 
 
 ## El animador ambiental vigente, listo para recibir piezas. Lo usan las capas
