@@ -5,6 +5,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/gbc-fixtures.yml"
+      - ".github/actions/upload-artifact/**"
       - "scripts/test_gbc_fixture_workflow.py"
       - "scripts/inspect_gb_rom.py"
       - "scripts/test_inspect_gb_rom.py"
@@ -275,7 +276,7 @@ jobs:
           test "$(od -An -tx1 -j 323 -N 1 gbc-fixtures/cgb_only_smoke.gbc | tr -d ' \n')" = "c0"
 
       - name: Upload ephemeral GBC ROMs
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: ./.github/actions/upload-artifact
         with:
           name: gbc-roms-${{ github.sha }}
           path: |
