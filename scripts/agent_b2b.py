@@ -94,7 +94,7 @@ def build_event(args: argparse.Namespace) -> dict[str, Any]:
         "issue": args.issue,
         "provider": args.provider or None,
         "worker": args.worker or None,
-        "correlation_id": _clean_text(args.correlation_id, 180) or f"issue:{args.issue}",
+        "correlation_id": _clean_text(getattr(args, "correlation_id", ""), 180) or f"issue:{args.issue}",
         "summary": _clean_text(args.summary, 500),
         "refs": _clean_list(args.ref or [], limit=16, item_limit=240),
         "handoff": {"from": args.from_role, "to": args.to_role},
@@ -147,7 +147,7 @@ def build_task(args: argparse.Namespace) -> dict[str, Any]:
         "correlation_id": (
             _clean_text(claim_packet.get("correlation_id"), 180)
             if claim_packet is not None
-            else _clean_text(args.correlation_id, 180)
+            else _clean_text(getattr(args, "correlation_id", ""), 180)
         ) or f"issue:{args.issue}",
         "phase": "implement",
         "goal": _clean_text(plan.get("goal"), 240),
