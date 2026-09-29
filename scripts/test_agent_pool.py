@@ -19,6 +19,7 @@ def issue(
     created="2026-09-28T00:00:00Z",
     preferred=None,
     comments=None,
+    planned_files=None,
 ):
     result = {
         "number": number,
@@ -29,6 +30,8 @@ def issue(
         result["preferredProvider"] = preferred
     if comments is not None:
         result["comments"] = [{"body": body} for body in comments]
+    if planned_files is not None:
+        result["plannedFiles"] = planned_files
     return result
 
 
@@ -307,6 +310,43 @@ class AgentPoolTest(unittest.TestCase):
         tasks = mod.select_tasks(issues, workers)
         self.assertEqual(1, len(tasks))
         self.assertEqual("gemini", tasks[0]["worker"])
+
+    def test_no_selecciona_dos_issues_con_ruta_planificada_solapada(self):
+        issues = [
+            issue(62, "agent:auto", planned_files=["godot/guion/dia.gd"]),
+            issue(63, "agent:auto", planned_files=["godot/guion/dia.gd"]),
+            issue(64, "agent:auto", planned_files=["godot/guion/casa.gd"]),
+        ]
+
+        tasks = mod.select_tasks(issues, self.workers, max_parallel=3)
+
+        self.assertEqual([62, 64], [task["issue"] for task in tasks])
+
+    def test_plan_sin_rutas_no_bloquea_paralelismo(self):
+        issues = [
+            issue(65, "agent:auto", planned_files=[]),
+            issue(66, "agent:auto", planned_files=[]),
+        ]
+
+        tasks = mod.select_tasks(issues, self.workers, max_parallel=2)
+
+        self.assertEqual([65, 66], [task["issue"] for task in tasks])
+
+    def test_rutas_invalidas_no_entran_en_afinidad(self):
+        candidate = issue(
+            67,
+            "agent:auto",
+            planned_files=["../escape", "/absoluta", "godot/guion/segura.gd"],
+        )
+        self.assertEqual({"godot/guion/segura.gd"}, mod._planned_files(candidate))
+
+    def test_max_parallel_cero_aplica_backpressure_total(self):
+        tasks = mod.select_tasks(
+            [issue(68, "agent:auto")],
+            self.workers,
+            max_parallel=0,
+        )
+        self.assertEqual([], tasks)
 
     def test_max_parallel_no_puede_superar_seis(self):
         issues = [issue(n, "agent:auto") for n in range(70, 80)]
