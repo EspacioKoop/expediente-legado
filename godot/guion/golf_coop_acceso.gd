@@ -256,7 +256,7 @@ func _abrir_sala(codigo: String) -> void:
 		return
 
 	_panel.mostrar_estado("online", {"room_id": _room_id})
-	_estado.text = "Esperando a la otra persona…"
+	_estado.text = tr("Esperando a la otra persona…")
 	_abrir.disabled = true
 	_bloquear_golf_local(true)
 
@@ -354,7 +354,7 @@ func _aplicar_snapshot(snapshot: Dictionary) -> void:
 	if String(snapshot.get("phase", "")) == "finished":
 		ultimo_resultado = (snapshot.get("result", {}) as Dictionary).duplicate(true)
 		sesion_terminada.emit(ultimo_resultado.duplicate(true))
-		_estado.text = "Golf cooperativo finalizado."
+		_estado.text = tr("Golf cooperativo finalizado.")
 		_cerrar_coop(false, true)
 		return
 
