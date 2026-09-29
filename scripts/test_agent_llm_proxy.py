@@ -188,6 +188,19 @@ class ProxyIntegracionTest(unittest.TestCase):
         self.assertIn("extra_forbidden", self.log.getvalue())
 
 
+class CableadoWorkerTest(unittest.TestCase):
+    def test_worker_usa_el_proxy_en_implementar_y_revisar(self):
+        texto = (ROOT / ".github" / "workflows" / "agent-worker.yml").read_text(encoding="utf-8")
+        self.assertIn("- id: qwen_proxy\n", texto)
+        self.assertLess(texto.index("- id: qwen_config\n"), texto.index("- id: qwen_proxy\n"))
+        self.assertIn("scripts/agent_llm_proxy.py detect", texto)
+        self.assertNotIn("openai_base_url: ${{ steps.qwen_config.outputs.url }}", texto)
+        self.assertEqual(
+            2, texto.count("openai_base_url: ${{ steps.qwen_proxy.outputs.url || steps.qwen_config.outputs.url }}")
+        )
+        self.assertIn("/tmp/agent-llm-proxy.log", texto)
+
+
 class CableadoSmokeTest(unittest.TestCase):
     def test_smoke_arranca_proxy_segun_perfil_y_vuelca_log(self):
         texto = SMOKE.read_text(encoding="utf-8")
