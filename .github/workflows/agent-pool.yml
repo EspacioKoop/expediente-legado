@@ -240,14 +240,30 @@ jobs:
           python3 scripts/agent_worker_score.py \
             --jobs /tmp/worker-jobs.json \
             --output /tmp/worker-scores.json >/dev/null || true
+
+          # #1871: telemetría compacta de los PRs v1. No se guardan prompts ni
+          # memorias; solo el worker, ResultPacket/reviewer y número de commits.
+          printf '{}\n' > /tmp/handoff-metrics.json
+          if gh pr list --repo "$GITHUB_REPOSITORY" --state all --limit 100 \
+            --json number,title,body,commits > /tmp/agent-prs.json 2>/dev/null; then
+            python3 scripts/agent_handoff_metrics.py \
+              --prs /tmp/agent-prs.json \
+              --output /tmp/handoff-metrics.json >/dev/null || true
+          fi
+
           tmp="$(mktemp)"
           jq --slurpfile scores /tmp/worker-scores.json \
+             --slurpfile handoff /tmp/handoff-metrics.json \
             'map(. + {
               score: (($scores[0][.worker].score) // 50),
-              score_samples: (($scores[0][.worker].samples) // 0)
+              score_samples: (($scores[0][.worker].samples) // 0),
+              handoff_loss_proxy_pct: (($handoff[0][.worker].handoff_loss_proxy_pct) // null),
+              rework_rate_pct: (($handoff[0][.worker].rework_rate_pct) // null),
+              contract_valid_rate_pct: (($handoff[0][.worker].contract_valid_rate_pct) // null),
+              telemetry_samples: (($handoff[0][.worker].samples) // 0)
             })' /tmp/workers.json > "$tmp"
           mv "$tmp" /tmp/workers.json
-          jq -r '.[] | "worker-score \(.worker)=\(.score) samples=\(.score_samples)"' /tmp/workers.json
+          jq -r '.[] | "worker-score \(.worker)=\(.score) samples=\(.score_samples) handoff=\(.handoff_loss_proxy_pct // "n/a") rework=\(.rework_rate_pct // "n/a") telemetry=\(.telemetry_samples)"' /tmp/workers.json
 
           has_qwen="$(jq -r 'any(.[]; .provider == "qwen" and (if has("healthy") then .healthy else true end))' /tmp/workers.json)"
           has_gemini="$(jq -r 'any(.[]; .provider == "gemini" and (if has("healthy") then .healthy else true end))' /tmp/workers.json)"

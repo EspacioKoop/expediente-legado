@@ -634,6 +634,32 @@ jobs:
               fi
           fi
 
+      - id: protocol
+        name: Compilar TaskPacket y prompt del worker
+        if: steps.reserve.outputs.reserved == 'true'
+        env:
+          PROVIDER: ${{ inputs.provider }}
+          WORKER: ${{ inputs.worker }}
+        run: |
+          set -euo pipefail
+          base_sha="$(git rev-parse HEAD)"
+          policy_sha="$(tr -d '\r\n' < .agent-platino-sha)"
+          python3 scripts/agent_protocol.py task \
+            --issue-json /tmp/agent-issue.json \
+            --plan .agent-plan.json \
+            --repo "$GITHUB_REPOSITORY" \
+            --base-sha "$base_sha" \
+            --policy-sha "$policy_sha" \
+            --provider "$PROVIDER" \
+            --worker "$WORKER" \
+            --output .agent-task-packet.json
+          python3 scripts/agent_protocol.py prompt \
+            --packet .agent-task-packet.json \
+            --provider "$PROVIDER" \
+            --output .agent-worker-prompt.md
+          [[ "$(jq -r '.base_sha' .agent-task-packet.json)" == "$base_sha" ]]
+          echo "task_id=$(jq -r '.task_id' .agent-task-packet.json)" >> "$GITHUB_OUTPUT"
+
       - name: Crear rama
         if: steps.reserve.outputs.reserved == 'true'
         env:
@@ -654,7 +680,7 @@ jobs:
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-context.md, .agent-memory.json, .agent-history.json y las Normas Platino actuales en .agent-platino. Repo/issue/#181/#182 y Normas Platino prevalecen siempre. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitio una ruta necesaria, no intentes saltarte el CLAIM: el orquestador restaurara el desvio y replanificara. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+          prompt: 'Lee .agent-worker-prompt.md y ejecuta exactamente ese contrato. Usa .agent-task-packet.json como sobre TASK autoritativo del handoff. No sustituyas el ResultPacket por una narracion libre.'
 
       - id: implement_gemini
         name: Implementar con Gemini
@@ -669,7 +695,7 @@ jobs:
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"tools":{"core":["read_file","write_file","replace","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-plan.json, .agent-context.md, .agent-memory.json, .agent-history.json y las Normas Platino actuales en .agent-platino. Repo/issue/#181/#182 y Normas Platino prevalecen siempre. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitio una ruta necesaria, no intentes saltarte el CLAIM: el orquestador restaurara el desvio y replanificara. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+          prompt: 'Lee .agent-worker-prompt.md y ejecuta exactamente ese contrato. Usa .agent-task-packet.json como sobre TASK autoritativo del handoff. No sustituyas el ResultPacket por una narracion libre.'
 
       - id: claim_guard
         name: Normalizar cambios al CLAIM
@@ -689,6 +715,37 @@ jobs:
             echo "drift=false" >> "$GITHUB_OUTPUT"
             echo "outside=[]" >> "$GITHUB_OUTPUT"
           fi
+
+      - id: result_contract
+        name: Normalizar ResultPacket y medir handoff
+        if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true'
+        continue-on-error: true
+        env:
+          SUMMARY: ${{ steps.implement_qwen.outputs.summary || steps.implement_gemini.outputs.summary }}
+        run: |
+          set -euo pipefail
+          printf '%s' "${SUMMARY:-}" > /tmp/agent-result-summary.txt
+          jq -r '.changed_allowed[]' /tmp/claim-guard.json > /tmp/agent-result-changed.txt
+          python3 scripts/agent_protocol.py result \
+            --summary-file /tmp/agent-result-summary.txt \
+            --packet .agent-task-packet.json \
+            --changed-files /tmp/agent-result-changed.txt \
+            --output /tmp/agent-result.json >/dev/null
+          valid="$(jq -r '.result.valid' /tmp/agent-result.json)"
+          status="$(jq -r '.result.status // "missing"' /tmp/agent-result.json)"
+          loss="$(jq -r '.metrics.handoff_loss_proxy_pct' /tmp/agent-result.json)"
+          coverage="$(jq -r '.metrics.contract_coverage_pct // 0' /tmp/agent-result.json)"
+          echo "valid=$valid" >> "$GITHUB_OUTPUT"
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          echo "handoff_loss=$loss" >> "$GITHUB_OUTPUT"
+          echo "coverage=$coverage" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Agent protocol v1"
+            echo "- ResultPacket valido: $valid"
+            echo "- Estado: $status"
+            echo "- Handoff loss proxy: $loss%"
+            echo "- Contract coverage: $coverage%"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Renovar lease Deno · validating
         if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true' && steps.guard.outputs.control == 'deno'
@@ -773,7 +830,7 @@ jobs:
           fi
           cp .agent-plan.json /tmp/plan.json
           cp .agent-task.md /tmp/agent-task.md
-          rm -f .agent-task.md .agent-plan.json .agent-context.md .agent-memory.json .agent-history.json .agent-platino-sha gha-creds-*.json
+          rm -f .agent-task.md .agent-plan.json .agent-task-packet.json .agent-worker-prompt.md .agent-b2b-inbox.md .agent-context.md .agent-memory.json .agent-history.json .agent-platino-sha gha-creds-*.json
           rm -rf .agent-platino .agent-wiki .gemini .qwen gemini-artifacts qwen-artifacts
           git add -A
           if git diff --cached --quiet; then
@@ -837,7 +894,7 @@ jobs:
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":4},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file"]}}'
-          prompt: 'Lee UNICAMENTE .agent-review-input.md. No abras otros archivos, no uses shell, no edites nada y no propongas refactors generales. Revisa solo incumplimiento del issue/plan, bug claro del diff, test imprescindible ausente o violacion evidente de seguridad inferible del input. Maximo 5 hallazgos, una frase cada uno. Termina inmediatamente con AGENT_REVIEW_BEGIN seguido de JSON {"verdict":"approve","findings":[]} o {"verdict":"findings","findings":["..."]} y AGENT_REVIEW_END.'
+          prompt: 'Lee UNICAMENTE .agent-review-input.md. No abras otros archivos, no uses shell, no edites nada y no propongas refactors generales. Revisa solo incumplimiento del issue/plan, bug claro del diff, test imprescindible ausente o violacion evidente de seguridad inferible del input. Maximo 5 hallazgos, una frase cada uno. Termina inmediatamente con AGENT_REVIEW_BEGIN seguido de JSON {"schema":1,"message_type":"REVIEW","verdict":"approve","findings":[]} o {"schema":1,"message_type":"REVIEW","verdict":"findings","findings":["..."]} y AGENT_REVIEW_END.'
 
       - id: review_gemini
         name: Reviewer acotado Gemini
@@ -850,7 +907,7 @@ jobs:
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":4},"tools":{"core":["read_file"]}}'
-          prompt: 'Lee UNICAMENTE .agent-review-input.md. No abras otros archivos, no uses shell, no edites nada y no propongas refactors generales. Revisa solo incumplimiento del issue/plan, bug claro del diff, test imprescindible ausente o violacion evidente de seguridad inferible del input. Maximo 5 hallazgos, una frase cada uno. Termina inmediatamente con AGENT_REVIEW_BEGIN seguido de JSON {"verdict":"approve","findings":[]} o {"verdict":"findings","findings":["..."]} y AGENT_REVIEW_END.'
+          prompt: 'Lee UNICAMENTE .agent-review-input.md. No abras otros archivos, no uses shell, no edites nada y no propongas refactors generales. Revisa solo incumplimiento del issue/plan, bug claro del diff, test imprescindible ausente o violacion evidente de seguridad inferible del input. Maximo 5 hallazgos, una frase cada uno. Termina inmediatamente con AGENT_REVIEW_BEGIN seguido de JSON {"schema":1,"message_type":"REVIEW","verdict":"approve","findings":[]} o {"schema":1,"message_type":"REVIEW","verdict":"findings","findings":["..."]} y AGENT_REVIEW_END.'
 
       - id: review_contract
         name: Normalizar reviewer no bloqueante
@@ -939,6 +996,9 @@ jobs:
           BRANCH: ${{ steps.guard.outputs.branch }}
           REVIEW_STATUS: ${{ steps.review_contract.outputs.status || 'skipped' }}
           REVIEW_VERDICT: ${{ steps.review_contract.outputs.verdict || 'skipped' }}
+          RESULT_VALID: ${{ steps.result_contract.outputs.valid || 'false' }}
+          RESULT_STATUS: ${{ steps.result_contract.outputs.status || 'missing' }}
+          HANDOFF_LOSS: ${{ steps.result_contract.outputs.handoff_loss || '100' }}
         run: |
           set -euo pipefail
           git config user.name "agent-pool[bot]"
@@ -951,7 +1011,7 @@ jobs:
             --title "agent($PROVIDER): #$ISSUE $title" \
             --body "Refs #$ISSUE
 
-          Implementacion autonoma mediante worker \`$WORKER\`. Plan reservado en #182; cambios limitados al CLAIM; preflight ejecutado. Reviewer acotado: \`$REVIEW_STATUS/$REVIEW_VERDICT\`. PR draft, sin auto-merge." 2>&1)"; then
+          Implementacion autonoma mediante worker \`$WORKER\`. Plan reservado en #182; cambios limitados al CLAIM; preflight ejecutado. Reviewer acotado: \`$REVIEW_STATUS/$REVIEW_VERDICT\`. Protocolo v1: ResultPacket $RESULT_VALID/$RESULT_STATUS; handoff-loss proxy $HANDOFF_LOSS%. PR draft, sin auto-merge." 2>&1)"; then
             if grep -Eiq 'not permitted to create or approve pull requests|createPullRequest|Resource not accessible by integration' <<<"$pr_salida"; then
               gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
                 --add-label agent:needs-human \

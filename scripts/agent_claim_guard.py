@@ -21,6 +21,9 @@ IGNORED_EXACT = {
     # Los genera el propio worker (context packer y reviewer); sin ellos aquí,
     # toda implementación salía «fuera del CLAIM» y se replanificaba (#1657).
     ".agent-context.md",
+    ".agent-task-packet.json",
+    ".agent-worker-prompt.md",
+    ".agent-b2b-inbox.md",
     ".agent-review-input.md",
     ".agent-memory.json",
     ".agent-history.json",
