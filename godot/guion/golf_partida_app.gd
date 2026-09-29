@@ -10,6 +10,7 @@ signal cerrado
 signal partida_terminada(resultado: Dictionary)
 
 const HOYO_SCENE: PackedScene = preload("res://escenas/golf_hoyo_standalone.tscn")
+const COOP_ACCESO := preload("res://guion/golf_coop_acceso.gd")
 const JUGADOR := "jugador"
 const LANZADORES := ["jugador", "prudente", "agresiva", "absurda"]
 const PLAN_COMPANEROS := {
@@ -54,6 +55,7 @@ const CONFIGURACIONES := [
 var estado: Dictionary = {}
 var resultado_final: Dictionary = {}
 var hoyo_actual: GolfHoyoApp
+var coop_acceso: GolfCoopAcceso
 var _companeros_visual: Array[Node3D] = []
 var _idles_companeros: Array[CompaneroIdle3D] = []
 
@@ -61,7 +63,15 @@ var _idles_companeros: Array[CompaneroIdle3D] = []
 func _ready() -> void:
 	estado = Golf.nueva(LANZADORES)
 	_montar_companeros()
+	_montar_coop_acceso()
 	_abrir_hoyo(0)
+
+
+func _montar_coop_acceso() -> void:
+	coop_acceso = COOP_ACCESO.new()
+	coop_acceso.name = "GolfCoopAcceso"
+	coop_acceso.configurar(self, CONFIGURACIONES)
+	add_child(coop_acceso)
 
 
 func _abrir_hoyo(indice: int) -> void:
