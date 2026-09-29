@@ -169,5 +169,48 @@ class WorkflowsYamlTest(unittest.TestCase):
                 )
 
 
+    def test_acciones_sensibles_usadas_por_sha(self):
+        """Los workflows privilegiados no ejecutan tags mutables de terceros."""
+        workflows = {
+            "agent-autopilot.yml",
+            "agent-worker.yml",
+            "agent-feeder.yml",
+            "agent-ci-repair.yml",
+            "agent-decompose.yml",
+            "agent-pool.yml",
+            "agent-reconciler.yml",
+            "agent-provider-smoke.yml",
+            "agent-omniroute-smoke.yml",
+            "label-areas.yml",
+            "reservas.yml",
+            "alpha-playtest.yml",
+            "cleanup-merged-branches.yml",
+        }
+        acciones = {
+            "actions/checkout",
+            "actions/setup-python",
+            "actions/upload-artifact",
+            "actions/download-artifact",
+            "actions/github-script",
+            "tailscale/github-action",
+            "QwenLM/qwen-code-action",
+            "google-github-actions/run-gemini-cli",
+            "softprops/action-gh-release",
+        }
+
+        patron = re.compile(r"uses:\\s*([^\\s@]+)@([^\\s#]+)")
+        for nombre in sorted(workflows):
+            texto = (ROOT / ".github" / "workflows" / nombre).read_text(encoding="utf-8")
+            for accion, referencia in patron.findall(texto):
+                if accion not in acciones:
+                    continue
+                with self.subTest(workflow=nombre, action=accion):
+                    self.assertRegex(
+                        referencia,
+                        r"^[0-9a-f]{40}$",
+                        f"{nombre}: {accion} debe fijarse a un SHA completo, no {referencia!r}",
+                    )
+
+
 if __name__ == "__main__":
     unittest.main()
