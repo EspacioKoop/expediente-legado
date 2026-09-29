@@ -56,16 +56,40 @@ jobs:
           echo "model=$model" >> "$GITHUB_OUTPUT"
           echo "Validando $SLOT con modelo $model"
 
+      - id: proxy
+        name: Proxy de compatibilidad del proveedor
+        env:
+          URL: ${{ steps.config.outputs.url }}
+        run: |
+          set -euo pipefail
+          # Mistral rechaza campos desconocidos y Groq topa max_tokens (#1928):
+          # un proxy local adapta la petición; el resto va directo.
+          profile="$(python3 scripts/agent_llm_proxy.py detect "$URL")"
+          echo "Perfil del proveedor: $profile"
+          [[ "$profile" != passthrough ]] || exit 0
+          nohup python3 scripts/agent_llm_proxy.py serve --upstream "$URL" --profile "$profile" --port 18080 \
+            > /tmp/agent-llm-proxy.log 2>&1 &
+          for _ in $(seq 1 50); do
+            curl -fsS http://127.0.0.1:18080/__health >/dev/null 2>&1 && break
+            sleep 0.2
+          done
+          curl -fsS http://127.0.0.1:18080/__health >/dev/null
+          echo "url=http://127.0.0.1:18080/v1" >> "$GITHUB_OUTPUT"
+
       - id: smoke
         name: Smoke del slot
         uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ secrets[steps.slot.outputs.secret] }}
-          openai_base_url: ${{ steps.config.outputs.url }}
+          openai_base_url: ${{ steps.proxy.outputs.url || steps.config.outputs.url }}
           openai_model: ${{ steps.config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":6},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file"]}}'
           prompt: 'Usa obligatoriamente read_file para leer AGENTS.md. No edites nada y no intentes ejecutar comandos. Después responde con una última línea exactamente: AGENT_PROVIDER_SMOKE_OK file=AGENTS.md'
+
+      - name: Log del proxy
+        if: always() && steps.proxy.outputs.url != ''
+        run: cat /tmp/agent-llm-proxy.log || true
 
       - name: Verificar marcador
         env:
