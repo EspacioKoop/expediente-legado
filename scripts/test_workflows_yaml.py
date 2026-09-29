@@ -111,5 +111,63 @@ class WorkflowsYamlTest(unittest.TestCase):
                 self.assertNotRegex(texto, rf"uses:\s*{re.escape(accion)}@v\d+")
 
 
+    def test_checkout_privilegiado_no_persiste_credenciales(self):
+        """Los workflows con capacidad de escritura/OIDC no dejan el token en git."""
+        privilegiados = {
+            "agent-autopilot.yml",
+            "agent-worker.yml",
+            "agent-feeder.yml",
+            "agent-ci-repair.yml",
+            "agent-decompose.yml",
+            "agent-pool.yml",
+            "agent-reconciler.yml",
+            "agent-provider-smoke.yml",
+            "label-areas.yml",
+            "reservas.yml",
+            "alpha-playtest.yml",
+        }
+
+        for nombre in sorted(privilegiados):
+            ruta = ROOT / ".github" / "workflows" / nombre
+            lineas = ruta.read_text(encoding="utf-8").splitlines()
+            encontrados = 0
+            for indice, linea in enumerate(lineas):
+                match = re.match(r"^(\\s*)(?:-\\s*)?uses:\\s*actions/checkout@", linea)
+                if not match:
+                    continue
+
+                encontrados += 1
+                indentacion = len(match.group(1))
+                bloque = [linea]
+                for siguiente in lineas[indice + 1 :]:
+                    texto = siguiente.strip()
+                    indentacion_siguiente = len(siguiente) - len(siguiente.lstrip())
+                    if texto.startswith("- ") and indentacion_siguiente <= indentacion:
+                        break
+                    bloque.append(siguiente)
+
+                with self.subTest(workflow=nombre, checkout=indice + 1):
+                    self.assertRegex(
+                        "\\n".join(bloque),
+                        r"(?m)^\\s*persist-credentials:\\s*false\\s*$",
+                        f"{nombre}:{indice + 1} debe usar persist-credentials: false",
+                    )
+
+            with self.subTest(workflow=nombre):
+                self.assertGreater(encontrados, 0, f"{nombre} debería tener checkout")
+
+    def test_pull_request_target_no_hace_checkout_del_head(self):
+        """Un token privilegiado nunca debe ejecutar el head de una PR no confiable."""
+        for ruta in WORKFLOWS:
+            texto = ruta.read_text(encoding="utf-8")
+            if "pull_request_target:" not in texto:
+                continue
+            with self.subTest(workflow=ruta.name):
+                self.assertNotRegex(
+                    texto,
+                    r"ref:\\s*\\$\\{\\{\\s*github\\.event\\.pull_request\\.head\\.(?:sha|ref)",
+                )
+
+
 if __name__ == "__main__":
     unittest.main()
