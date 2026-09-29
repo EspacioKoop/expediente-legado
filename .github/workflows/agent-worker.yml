@@ -649,7 +649,8 @@ jobs:
             --issue "$ISSUE" --provider "$PROVIDER" --worker "$WORKER" \
             --task .agent-task.md --plan .agent-plan.json \
             --context .agent-context.md --memory .agent-memory.json \
-            --history .agent-history.json --rules "$rules" \
+            --history .agent-history.json --agents AGENTS.md --rules "$rules" \
+            --platino-sha .agent-platino-sha \
             --output .agent-task-packet.json >/dev/null
           python3 scripts/agent_b2b.py verify --packet .agent-task-packet.json
           python3 scripts/agent_b2b.py prompt \
