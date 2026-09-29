@@ -61,8 +61,10 @@ func _ejecutar() -> void:
 			"el segundo sello distingue el final narrativo",
 		)
 		_comprobar(
-			int(historial[1].get("veredictos_total", 0))
-				> int(historial[0].get("veredictos_total", 0)),
+			(
+				int(historial[1].get("veredictos_total", 0))
+				> int(historial[0].get("veredictos_total", 0))
+			),
 			"el historial acumulado permite aislar productividad entre vidas",
 		)
 
