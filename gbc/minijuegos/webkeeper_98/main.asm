@@ -33,8 +33,10 @@ DEF KEY_START EQU %10000000
 DEF ESTADO_TITULO   EQU 0
 DEF ESTADO_HISTORIA EQU 1
 DEF ESTADO_PARTIDO  EQU 2
-DEF ESTADO_DERROTA  EQU 3
-DEF ESTADO_VICTORIA EQU 4
+DEF ESTADO_DERROTA     EQU 3
+DEF ESTADO_VICTORIA    EQU 4
+DEF ESTADO_DESAFIOS    EQU 5
+DEF ESTADO_DESAFIO_FIN EQU 6
 
 DEF CARRIL_IZQ    EQU 0
 DEF CARRIL_CENTRO EQU 1
@@ -42,8 +44,13 @@ DEF CARRIL_DER    EQU 2
 DEF ALTURA_RASO   EQU 0
 DEF ALTURA_ALTO   EQU 1
 
-DEF FRAMES_TELEGRAFO EQU 90
-DEF FRAMES_REVELADO  EQU 40
+DEF DESAFIO_MURO   EQU 0
+DEF DESAFIO_ENGANO EQU 1
+DEF DESAFIO_RAFAGA EQU 2
+
+DEF FRAMES_TELEGRAFO        EQU 90
+DEF FRAMES_TELEGRAFO_RAFAGA EQU 60
+DEF FRAMES_REVELADO         EQU 40
 DEF VENTANA_PARADA   EQU 45
 DEF VENTANA_RED      EQU 60
 DEF RECARGA_RED      EQU 180
@@ -89,6 +96,10 @@ Inicio:
     ld [wPartido], a
     ld [wDerrotasPartido], a
     ld [wAyuda], a
+    ld [wModoDesafio], a
+    ld [wDesafio], a
+    ld [wDesafiosSuperados], a
+    ld [wDesafioResultado], a
     ld [wTeclas], a
     ld [wTeclasPrevias], a
     ld [wTeclasNuevas], a
@@ -120,50 +131,119 @@ BuclePrincipal:
 
     ld a, [wEstado]
     cp ESTADO_TITULO
-    jr z, EstadoTitulo
+    jp z, EstadoTitulo
     cp ESTADO_HISTORIA
-    jr z, EstadoHistoria
+    jp z, EstadoHistoria
     cp ESTADO_PARTIDO
-    jr z, EstadoPartido
+    jp z, EstadoPartido
     cp ESTADO_DERROTA
-    jr z, EstadoDerrota
-    jr EstadoVictoria
+    jp z, EstadoDerrota
+    cp ESTADO_VICTORIA
+    jp z, EstadoVictoria
+    cp ESTADO_DESAFIOS
+    jp z, EstadoDesafios
+    jp EstadoDesafioFin
 
 EstadoTitulo:
     ld a, [wTeclasNuevas]
     and KEY_A | KEY_START
-    jr z, BuclePrincipal
+    jp z, BuclePrincipal
     xor a
     ld [wPartido], a
     ld [wDerrotasPartido], a
     ld [wAyuda], a
     call MostrarHistoria
-    jr BuclePrincipal
+    jp BuclePrincipal
 
 EstadoHistoria:
     ld a, [wTeclasNuevas]
     and KEY_A | KEY_START
-    jr z, BuclePrincipal
+    jp z, BuclePrincipal
     call IniciarPartido
-    jr BuclePrincipal
+    jp BuclePrincipal
 
 EstadoPartido:
     call ActualizarPartido
-    jr BuclePrincipal
+    jp BuclePrincipal
 
 EstadoDerrota:
     ld a, [wTeclasNuevas]
     and KEY_A | KEY_START
-    jr z, BuclePrincipal
+    jp z, BuclePrincipal
     call IniciarPartido
-    jr BuclePrincipal
+    jp BuclePrincipal
 
 EstadoVictoria:
     ld a, [wTeclasNuevas]
-    and KEY_A | KEY_START
-    jr z, BuclePrincipal
+    and KEY_A
+    jr nz, .desafios
+    ld a, [wTeclasNuevas]
+    and KEY_START
+    jp z, BuclePrincipal
     call MostrarTitulo
-    jr BuclePrincipal
+    jp BuclePrincipal
+.desafios:
+    call MostrarDesafios
+    jp BuclePrincipal
+
+EstadoDesafios:
+    ld a, [wTeclasNuevas]
+    and KEY_LEFT
+    jr z, .derecha
+    ld a, [wDesafio]
+    or a
+    jr nz, .anterior
+    ld a, DESAFIO_RAFAGA
+    jr .guardar
+.anterior:
+    dec a
+.guardar:
+    ld [wDesafio], a
+    call MostrarDesafios
+    jp BuclePrincipal
+
+.derecha:
+    ld a, [wTeclasNuevas]
+    and KEY_RIGHT
+    jr z, .jugar
+    ld a, [wDesafio]
+    inc a
+    cp DESAFIO_RAFAGA + 1
+    jr c, .guardar_derecha
+    xor a
+.guardar_derecha:
+    ld [wDesafio], a
+    call MostrarDesafios
+    jp BuclePrincipal
+
+.jugar:
+    ld a, [wTeclasNuevas]
+    and KEY_A
+    jr z, .salir
+    ld a, 1
+    ld [wModoDesafio], a
+    call IniciarPartido
+    jp BuclePrincipal
+
+.salir:
+    ld a, [wTeclasNuevas]
+    and KEY_START
+    jp z, BuclePrincipal
+    call MostrarTitulo
+    jp BuclePrincipal
+
+EstadoDesafioFin:
+    ld a, [wTeclasNuevas]
+    and KEY_A
+    jr z, .titulo
+    call MostrarDesafios
+    jp BuclePrincipal
+.titulo:
+    ld a, [wTeclasNuevas]
+    and KEY_START
+    jp z, BuclePrincipal
+    call MostrarTitulo
+    jp BuclePrincipal
 
 LeerControles:
     ld a, $20
@@ -221,6 +301,8 @@ MostrarTitulo:
     call EscribirTexto
 
 .estado:
+    xor a
+    ld [wModoDesafio], a
     ld a, ESTADO_TITULO
     ld [wEstado], a
     call ActivarLCD
@@ -320,14 +402,105 @@ MostrarVictoria:
     ld hl, BG_MAP + 8 * 32 + 1
     ld de, TextoMejorRed
     call EscribirTexto
-    ld hl, BG_MAP + 11 * 32 + 3
-    ld de, TextoNoSeVe
+    ld hl, BG_MAP + 11 * 32 + 2
+    ld de, TextoDesafiosAbiertos
     call EscribirTexto
-    ld hl, BG_MAP + 15 * 32 + 5
-    ld de, TextoPulsaA
+    ld hl, BG_MAP + 15 * 32 + 2
+    ld de, TextoVictoriaOpciones
     call EscribirTexto
 
     ld a, ESTADO_VICTORIA
+    ld [wEstado], a
+    call ActivarLCD
+    ret
+
+MostrarDesafios:
+    call DesactivarLCD
+    call LimpiarFondo
+    call LimpiarOAM
+
+    ld hl, BG_MAP + 2 * 32 + 3
+    ld de, TextoDesafiosExtra
+    call EscribirTexto
+
+    ld a, [wDesafio]
+    or a
+    jr z, .muro
+    cp DESAFIO_ENGANO
+    jr z, .engano
+
+.rafaga:
+    ld hl, BG_MAP + 5 * 32 + 4
+    ld de, TextoRafaga
+    call EscribirTexto
+    ld hl, BG_MAP + 8 * 32
+    ld de, TextoRafagaRegla
+    call EscribirTexto
+    jr .estado
+
+.muro:
+    ld hl, BG_MAP + 5 * 32 + 4
+    ld de, TextoMuro
+    call EscribirTexto
+    ld hl, BG_MAP + 8 * 32 + 2
+    ld de, TextoMuroRegla
+    call EscribirTexto
+    jr .estado
+
+.engano:
+    ld hl, BG_MAP + 5 * 32 + 4
+    ld de, TextoEngano
+    call EscribirTexto
+    ld hl, BG_MAP + 8 * 32
+    ld de, TextoEnganoRegla
+    call EscribirTexto
+
+.estado:
+    ld a, [wDesafio]
+    ld c, a
+    ld b, 0
+    ld hl, MascaraDesafio
+    add hl, bc
+    ld a, [wDesafiosSuperados]
+    and [hl]
+    jr z, .navegacion
+    ld hl, BG_MAP + 11 * 32 + 5
+    ld de, TextoSuperado
+    call EscribirTexto
+
+.navegacion:
+    ld hl, BG_MAP + 14 * 32 + 1
+    ld de, TextoDesafioControles
+    call EscribirTexto
+    ld hl, BG_MAP + 16 * 32 + 4
+    ld de, TextoStartTitulo
+    call EscribirTexto
+    ld a, ESTADO_DESAFIOS
+    ld [wEstado], a
+    call ActivarLCD
+    ret
+
+MostrarDesafioResultado:
+    call DesactivarLCD
+    call LimpiarFondo
+    call LimpiarOAM
+
+    ld a, [wDesafioResultado]
+    or a
+    jr z, .fallo
+    ld hl, BG_MAP + 6 * 32 + 2
+    ld de, TextoDesafioSuperado
+    call EscribirTexto
+    jr .opciones
+.fallo:
+    ld hl, BG_MAP + 6 * 32 + 4
+    ld de, TextoDesafioFallido
+    call EscribirTexto
+.opciones:
+    ld hl, BG_MAP + 12 * 32
+    ld de, TextoFinDesafioOpciones
+    call EscribirTexto
+    ld a, ESTADO_DESAFIO_FIN
     ld [wEstado], a
     call ActivarLCD
     ret
@@ -348,6 +521,9 @@ IniciarPartido:
     ld [wVentanaRed], a
     ld [wRecargaRed], a
 
+    ld a, [wModoDesafio]
+    or a
+    jr nz, .sin_ayuda
     ld a, [wDerrotasPartido]
     cp 2
     jr c, .sin_ayuda
@@ -442,6 +618,13 @@ AccionesPortero:
     ld a, VENTANA_PARADA
     ld [wVentanaParada], a
 .red:
+    ld a, [wModoDesafio]
+    or a
+    jr z, .comprobar_red
+    ld a, [wDesafio]
+    cp DESAFIO_MURO
+    ret z
+.comprobar_red:
     ld a, [wTeclasNuevas]
     and KEY_B
     ret z
@@ -456,11 +639,39 @@ AccionesPortero:
 
 PrepararTiro:
     call CargarDatosTiro
+    ld a, [wModoDesafio]
+    or a
+    jr z, .normal
+    ld a, [wDesafio]
+    cp DESAFIO_RAFAGA
+    jr nz, .normal
+    ld a, FRAMES_TELEGRAFO_RAFAGA
+    jr .guardar
+.normal:
     ld a, FRAMES_TELEGRAFO
+.guardar:
     ld [wTimerTiro], a
     ret
 
 CargarDatosTiro:
+    ld a, [wModoDesafio]
+    or a
+    jr z, .torneo
+    ld a, [wDesafio]
+    or a
+    jr z, .desafio_muro
+    cp DESAFIO_ENGANO
+    jr z, .desafio_engano
+    ld hl, TirosRafaga
+    jr .indice
+.desafio_muro:
+    ld hl, TirosMuro
+    jr .indice
+.desafio_engano:
+    ld hl, TirosEngano
+    jr .indice
+
+.torneo:
     ld a, [wPartido]
     or a
     jr z, .m1
@@ -565,6 +776,10 @@ FinalizarPartido:
     cp b
     jr c, .derrota
 
+    ld a, [wModoDesafio]
+    or a
+    jr nz, .desafio_superado
+
     ld a, [wPartido]
     cp 2
     jr z, .campeon
@@ -577,6 +792,9 @@ FinalizarPartido:
     ret
 
 .derrota:
+    ld a, [wModoDesafio]
+    or a
+    jr nz, .desafio_fallido
     ld hl, wDerrotasPartido
     inc [hl]
     ld a, [hl]
@@ -588,13 +806,48 @@ FinalizarPartido:
     call MostrarDerrota
     ret
 
+.desafio_superado:
+    call RegistrarDesafioSuperado
+    ld a, 1
+    ld [wDesafioResultado], a
+    call MostrarDesafioResultado
+    ret
+
+.desafio_fallido:
+    xor a
+    ld [wDesafioResultado], a
+    call MostrarDesafioResultado
+    ret
+
 .campeon:
     ld a, MARCA_COMPLETADO
     ld [wWebkeeperCompletado], a
     call MostrarVictoria
     ret
 
+RegistrarDesafioSuperado:
+    ld a, [wDesafio]
+    ld c, a
+    ld b, 0
+    ld hl, MascaraDesafio
+    add hl, bc
+    ld a, [wDesafiosSuperados]
+    or [hl]
+    ld [wDesafiosSuperados], a
+    ret
+
 TotalTirosActual:
+    ld a, [wModoDesafio]
+    or a
+    jr z, .torneo
+    ld a, [wDesafio]
+    or a
+    jr z, .seis
+    cp DESAFIO_ENGANO
+    jr z, .ocho
+    ld a, 9
+    ret
+.torneo:
     ld a, [wPartido]
     or a
     jr z, .seis
@@ -610,6 +863,18 @@ TotalTirosActual:
     ret
 
 ParadasNecesariasActual:
+    ld a, [wModoDesafio]
+    or a
+    jr z, .torneo
+    ld a, [wDesafio]
+    cp DESAFIO_RAFAGA
+    jr z, .seis
+    ld a, 5
+    ret
+.seis:
+    ld a, 6
+    ret
+.torneo:
     ld a, [wPartido]
     or a
     jr z, .tres
@@ -967,6 +1232,39 @@ TirosFinal:
     db 2, 0, 0
     db 0, 1, 1
 
+; Desafios post-torneo (#1803): secuencias propias y deterministas.
+TirosMuro:
+    db 0, 0, 0
+    db 2, 1, 0
+    db 1, 0, 0
+    db 0, 1, 0
+    db 2, 0, 0
+    db 1, 1, 0
+
+TirosEngano:
+    db 0, 0, 1
+    db 2, 1, 1
+    db 1, 0, 1
+    db 0, 1, 1
+    db 2, 0, 1
+    db 1, 1, 1
+    db 2, 1, 1
+    db 0, 0, 1
+
+TirosRafaga:
+    db 1, 0, 1
+    db 2, 1, 0
+    db 0, 0, 1
+    db 1, 1, 1
+    db 2, 0, 0
+    db 0, 1, 1
+    db 1, 0, 0
+    db 0, 0, 1
+    db 2, 1, 1
+
+MascaraDesafio:
+    db %00000001, %00000010, %00000100
+
 TextoTitulo:        db "WEBKEEPER 98", 0
 TextoSubtitulo:     db "OCHO PATAS. UN ARCO.", 0
 TextoPulsaA:        db "A PARA SEGUIR", 0
@@ -983,10 +1281,24 @@ TextoOtraVez:       db "OTRA VEZ.", 0
 TextoMismoPartido:  db "REPITES ESTE PARTIDO.", 0
 TextoPista:         db "PISTA: MIRA EL BALON.", 0
 TextoReintenta:     db "A PARA REINTENTAR", 0
-TextoCampeones:     db "CAMPEONES!", 0
-TextoMejorRed:      db "LA MEJOR RED", 0
-TextoNoSeVe:        db "NO SIEMPRE SE VE.", 0
-TextoMarcador:      db "P0 T0-0 S0-0", 0
+TextoCampeones:          db "CAMPEONES!", 0
+TextoMejorRed:           db "LA MEJOR RED", 0
+TextoDesafiosAbiertos:   db "DESAFIOS ABIERTOS", 0
+TextoVictoriaOpciones:   db "A DESAFIOS START FIN", 0
+TextoDesafiosExtra:      db "DESAFIOS EXTRA", 0
+TextoMuro:               db "MURO SIN RED", 0
+TextoMuroRegla:          db "5 DE 6. SOLO A.", 0
+TextoEngano:             db "ENGANO TOTAL", 0
+TextoEnganoRegla:        db "5 DE 8. PURO AMAGO.", 0
+TextoRafaga:             db "RAFAGA FINAL", 0
+TextoRafagaRegla:        db "6 DE 9. MAS RAPIDO.", 0
+TextoSuperado:           db "SUPERADO!", 0
+TextoDesafioControles:   db "IZQ DER. A JUEGA", 0
+TextoStartTitulo:        db "START TITULO", 0
+TextoDesafioSuperado:    db "DESAFIO SUPERADO!", 0
+TextoDesafioFallido:     db "CASI. REPITE.", 0
+TextoFinDesafioOpciones: db "A MENU START TITULO", 0
+TextoMarcador:           db "P0 T0-0 S0-0", 0
 
 Tiles:
     ds 16, 0
@@ -1070,6 +1382,10 @@ wVentanaParada:        ds 1
 wVentanaRed:           ds 1
 wRecargaRed:           ds 1
 wUltimoFueParada:      ds 1
+wModoDesafio:           ds 1
+wDesafio:               ds 1
+wDesafiosSuperados:     ds 1
+wDesafioResultado:      ds 1
 FinWRAM:
 
 ; Pantalla completa CGB (#808): si el fondo la tiene cargada, para devolverle
