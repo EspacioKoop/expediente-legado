@@ -122,9 +122,7 @@ func _probar_secuencia_y_recarga() -> void:
 	)
 	_comprobar(controller._papel.visible, "al abrir se ve el papel atascado")
 
-	var guardado: Dictionary = (
-		(host.jornada[controller.CLAVE_ESTADO] as Dictionary).duplicate(true)
-	)
+	var guardado: Dictionary = (host.jornada[controller.CLAVE_ESTADO] as Dictionary).duplicate(true)
 	controller.queue_free()
 	await process_frame
 	var recargado := _nuevo_controller(host)
