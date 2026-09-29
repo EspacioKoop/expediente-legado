@@ -414,9 +414,7 @@ async function transitionLease(
     }
 
     const now = Date.now();
-    const nextFiles = Object.hasOwn(input, "files")
-      ? cleanFiles(input.files)
-      : lease.files ?? [];
+    const nextFiles = Object.hasOwn(input, "files") ? cleanFiles(input.files) : lease.files ?? [];
     const next: AgentPoolLease = {
       ...lease,
       files: nextFiles,
