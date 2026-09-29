@@ -1,8 +1,10 @@
 import json
 import os
 from pathlib import Path
+from unittest import mock
 import re
 import subprocess
+import shutil
 import unittest
 
 
@@ -40,6 +42,8 @@ class ParteIncidenciasTest(unittest.TestCase):
 
     def test_contrato_ejecutable_en_godot(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
+        if shutil.which(motor) is None:
+            self.skipTest(f"{motor} no disponible en este entorno")
         resultado = subprocess.run(
             [
                 motor,
@@ -61,6 +65,12 @@ class ParteIncidenciasTest(unittest.TestCase):
         self.assertGreaterEqual(int(resumen.group(1)), 29, resultado.stdout)
         self.assertNotIn("SCRIPT ERROR:", resultado.stdout)
         self.assertNotIn("Parse Error:", resultado.stdout)
+
+    def test_contrato_ejecutable_se_salta_si_falta_godot(self):
+        caso = ParteIncidenciasTest("test_contrato_ejecutable_en_godot")
+        with mock.patch("shutil.which", return_value=None):
+            with self.assertRaises(unittest.SkipTest):
+                caso.test_contrato_ejecutable_en_godot()
 
     def test_f9_es_global_y_preserva_estado_previo(self):
         self.assertIn('ReportadorF9="*res://guion/reportador_f9.gd"', self.project)
