@@ -106,6 +106,18 @@ jobs:
         run: |
           set -euo pipefail
           [[ "$ISSUE" =~ ^[0-9]+$ ]] || exit 2
+          issue_meta="$(gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE")"
+          association="$(jq -r '.author_association // ""' <<<"$issue_meta")"
+          author="$(jq -r '.user.login // ""' <<<"$issue_meta")"
+          if [[ "$author" != "github-actions[bot]" && ! "$association" =~ ^(OWNER|MEMBER|COLLABORATOR)$ ]]; then
+            echo "::warning::Issue #$ISSUE bloqueado: autor no confiable ($author/$association)."
+            for label in agent:auto agent:pool agent:qwen agent:gemini agent:decompose; do
+              gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --remove-label "$label" >/dev/null 2>&1 || true
+            done
+            gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human >/dev/null 2>&1 || true
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           case "$WORKER:$PROVIDER" in
             qwen-primary:qwen) [[ "$HAS_QWEN" == true || "$HAS_OMNIROUTE" == true ]] || exit 3 ;;
             qwen-fallback-[1-9]*:qwen)
@@ -342,9 +354,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           ISSUE: ${{ inputs.issue }}
         run: |
-          gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json title,body,comments \
-            --jq '"# Issue\n\n## " + .title + "\n\n" + (.body//"") + "\n\n## Comentarios recientes\n" + ((.comments[-20:]//[])|map("- "+.author.login+": "+.body)|join("\n\n"))' \
-            > .agent-task.md
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE" > /tmp/agent-issue.json
+          gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$ISSUE/comments?per_page=100" \
+            --jq '.[]' | jq -s '.' > /tmp/agent-comments.json
+          python3 scripts/agent_issue_context.py \
+            --issue /tmp/agent-issue.json \
+            --comments /tmp/agent-comments.json \
+            --output .agent-task.md \
+            --max-comments 20
           # Los planificadores ignoraban .agent-task.md («no se ha presentado ninguna
           # tarea», #667): la tarea va también en el propio prompt, acotada.
           delim="TAREA_$(openssl rand -hex 8)"
@@ -706,8 +724,8 @@ jobs:
           set -euo pipefail
           outside="$(jq -r '.outside | join(",")' /tmp/claim-guard.json)"
           previous="$(
-            gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json comments |
-              jq '[.comments[].body | select(startswith("AGENT_POOL_REPLAN "))] | length'
+            gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$ISSUE/comments?per_page=100" --jq '.[]' |
+              jq -s '[.[] | select(.user.login == "github-actions[bot]" and ((.body // "") | startswith("AGENT_POOL_REPLAN ")))] | length'
           )"
           attempt=$((previous + 1))
 

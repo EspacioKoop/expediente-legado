@@ -17,6 +17,8 @@ def comentario(ident, body, minutos=0):
         "id": ident,
         "created_at": (T0 + timedelta(minutes=minutos)).isoformat().replace("+00:00", "Z"),
         "body": body,
+        "author_association": "MEMBER",
+        "user": {"login": "maintainer"},
     }
 
 
@@ -25,6 +27,12 @@ def claim(issue, rama, files, lease="48h"):
 
 
 class SolapesTest(unittest.TestCase):
+    def test_claim_externo_no_crea_reserva(self):
+        externo = comentario(99, claim(99, "feature/99-x", "a.gd"))
+        externo["author_association"] = "NONE"
+        externo["user"] = {"login": "externo"}
+        self.assertEqual([], rr.vigentes([externo], T0))
+
     def test_misma_ruta_o_directorio_contenedor(self):
         self.assertTrue(rr.solapan("godot/guion/a.gd", "godot/guion/a.gd"))
         self.assertTrue(rr.solapan("godot/guion/", "godot/guion/a.gd"))

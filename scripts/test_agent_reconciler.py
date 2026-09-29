@@ -30,7 +30,13 @@ def comment(body):
     # La capa de #182 necesita id y fecha: orden de creación y lease vigente
     # respecto al `now` de los tests (2026-09-28T16:00Z).
     ident = next(_IDS)
-    return {"id": ident, "created_at": f"2026-09-28T15:{ident % 60:02d}:00Z", "body": body}
+    return {
+        "id": ident,
+        "created_at": f"2026-09-28T15:{ident % 60:02d}:00Z",
+        "body": body,
+        "author_association": "MEMBER",
+        "user": {"login": "maintainer"},
+    }
 
 
 class AgentReconcilerTest(unittest.TestCase):
@@ -228,8 +234,13 @@ class AgentReconcilerTest(unittest.TestCase):
         self.assertNotIn("CLAIM_RE", fuente)
 
     def test_claim_caducado_no_cuenta_como_activo(self):
-        vieja = {"id": 1, "created_at": "2026-09-20T10:00:00Z",
-                 "body": "CLAIM issue=#40 agent=Pool-qwen branch=agent/qwen-40-1 files=a goal=x lease=48h"}
+        vieja = {
+            "id": 1,
+            "created_at": "2026-09-20T10:00:00Z",
+            "body": "CLAIM issue=#40 agent=Pool-qwen branch=agent/qwen-40-1 files=a goal=x lease=48h",
+            "author_association": "MEMBER",
+            "user": {"login": "maintainer"},
+        }
         self.assertEqual({}, mod.active_claims([vieja], self.now))
 
 if __name__ == "__main__":

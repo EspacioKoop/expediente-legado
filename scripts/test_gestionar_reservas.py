@@ -10,8 +10,13 @@ import gestionar_reservas as reservas
 UTC = timezone.utc
 
 
-def comentario(body: str, when: datetime) -> dict:
-    return {"body": body, "created_at": when.isoformat().replace("+00:00", "Z")}
+def comentario(body: str, when: datetime, *, association: str = "MEMBER", login: str = "maintainer") -> dict:
+    return {
+        "body": body,
+        "created_at": when.isoformat().replace("+00:00", "Z"),
+        "author_association": association,
+        "user": {"login": login},
+    }
 
 
 class GestionarReservasTest(unittest.TestCase):
@@ -31,6 +36,35 @@ class GestionarReservasTest(unittest.TestCase):
         self.assertEqual(48, reserva.lease_hours)
         self.assertEqual("Probar algo", reserva.goal)
         self.assertTrue(reserva.released)
+
+    def test_release_no_confiable_no_muta_estado(self):
+        t0 = datetime(2026, 9, 15, 0, 0, tzinfo=UTC)
+        comentarios = [
+            comentario(
+                "CLAIM issue=#10 agent=A branch=feature/10-a files=a.gd goal=A lease=48h",
+                t0,
+            ),
+            comentario(
+                "RELEASE issue=#10 branch=feature/10-a motivo=spoof",
+                t0 + timedelta(minutes=1),
+                association="NONE",
+                login="externo",
+            ),
+        ]
+        estado = reservas.reconstruir_reservas(comentarios)
+        self.assertFalse(estado[(10, "feature/10-a")].released)
+
+    def test_github_actions_bot_es_fuente_confiable(self):
+        t0 = datetime(2026, 9, 15, 0, 0, tzinfo=UTC)
+        estado = reservas.reconstruir_reservas([
+            comentario(
+                "CLAIM issue=#18 agent=Pool branch=agent/qwen-18-1 files=a.gd goal=A lease=2h",
+                t0,
+                association="NONE",
+                login="github-actions[bot]",
+            )
+        ])
+        self.assertIn((18, "agent/qwen-18-1"), estado)
 
     def test_release_con_branch_no_libera_otro_corte_del_mismo_issue(self):
         t0 = datetime(2026, 9, 15, 0, 0, tzinfo=UTC)
