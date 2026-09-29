@@ -174,8 +174,12 @@ class AgentHandoffMetricsTest(unittest.TestCase):
         prs = [
             agent_pr(
                 number=number,
-                loss="100" if number == 1 else "0",
-                updated_at=f"2026-09-{(number % 20) + 1:02d}T12:00:00Z",
+                loss="100" if number <= 2 else "0",
+                updated_at=(
+                    "2026-09-01T12:00:00Z"
+                    if number <= 2
+                    else "2026-09-29T12:00:00Z"
+                ),
             )
             for number in range(1, 53)
         ]
