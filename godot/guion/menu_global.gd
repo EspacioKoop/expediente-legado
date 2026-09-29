@@ -5,17 +5,20 @@
 ## Vive como autoload para no duplicarse entre las tres partes del juego.
 extends CanvasLayer
 
+const MenuFocoNavegacion = preload("res://guion/menu_foco_navegacion.gd")
+
 const RUTA_PRESENTACION_SELLOS := "res://datos/sellos_presentacion.json"
 const RUTA_TEXTOS_REMAPEO := "res://datos/menu_remapeo_textos.json"
 const RUTA_TEXTOS_DIFICULTAD := "res://datos/menu_dificultad_textos.json"
 ## Fuera de `textos.csv` como la dificultad: son nombres de máquinas con su
 ## detalle, y el selector los recorre en orden (#1270).
 const RUTA_TEXTOS_FILTRO := "res://datos/filtro_pantalla_textos.json"
-## El panel más alto (Opciones) se desplaza dentro de este alto en vez de salirse
-## de la pantalla a 1080p.
+## El panel más alto (Opciones) se desplaza dentro de este techo y además se
+## adapta al viewport para conservar margen seguro en resoluciones menores.
 const ALTO_MAXIMO_PANEL := 860.0
 const ANCHO_PANEL := 720.0
 const ALTO_BOTON := 44.0
+const MARGEN_SEGURO_PANEL := 48.0
 const ETIQUETAS_ACCIONES := {
 	"mover_adelante": "Avanzar",
 	"mover_atras": "Retroceder",
@@ -116,13 +119,30 @@ func _unhandled_input(evento: InputEvent) -> void:
 	if not _fondo.visible and evento is InputEventJoypadButton:
 		return
 	if _fondo.visible:
-		if _panel_incidencias.visible:
-			_volver_de_incidencias()
-		else:
+		if not _volver_un_nivel():
 			_cerrar()
 	elif _puede_abrir():
 		_abrir()
 	get_viewport().set_input_as_handled()
+
+
+## Cancelar/B/Escape recorre primero la jerarquía del menú. Start/Options sigue
+## cerrando el modal completo, de modo que ambas acciones conservan funciones
+## distintas y predecibles con teclado y mando.
+func _volver_un_nivel() -> bool:
+	if _panel_incidencias.visible:
+		_volver_de_incidencias()
+		return true
+	if _panel_opciones.visible:
+		_mostrar_principal(_opciones)
+		return true
+	if _panel_sellos.visible:
+		_mostrar_principal(_sellos)
+		return true
+	if _panel_historial.visible:
+		_mostrar_principal(_historial_boton)
+		return true
+	return false
 
 
 func _puede_abrir() -> bool:
@@ -160,7 +180,9 @@ func _montar() -> void:
 	_sellos_contenido(sellos)
 
 	_panel_historial = _crear_panel()
-	_panel_historial.custom_minimum_size = Vector2(760, 520)
+	_panel_historial.custom_minimum_size.y = minf(
+		520.0, maxf(300.0, get_viewport().get_visible_rect().size.y - MARGEN_SEGURO_PANEL * 2.0)
+	)
 	_panel_historial.visible = false
 	centro.add_child(_panel_historial)
 	var historial := _caja(_panel_historial)
@@ -191,7 +213,10 @@ func _dar_cuerpo_a_botones() -> void:
 ## gris oscuro.
 func _crear_panel() -> PanelContainer:
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(ANCHO_PANEL, 300)
+	var ancho_disponible := maxf(
+		240.0, get_viewport().get_visible_rect().size.x - MARGEN_SEGURO_PANEL * 2.0
+	)
+	panel.custom_minimum_size = Vector2(minf(ANCHO_PANEL, ancho_disponible), 300)
 	panel.theme = EstiloJuego.tema()
 	return panel
 
@@ -202,7 +227,12 @@ func _caja(panel: PanelContainer, desplazable: bool = false) -> VBoxContainer:
 		var scroll := ScrollContainer.new()
 		scroll.name = "Desplazable"
 		scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-		scroll.custom_minimum_size = Vector2(ANCHO_PANEL - 40.0, ALTO_MAXIMO_PANEL)
+		var vista := get_viewport().get_visible_rect().size
+		var ancho_disponible := maxf(240.0, vista.x - MARGEN_SEGURO_PANEL * 2.0)
+		var alto_disponible := maxf(240.0, vista.y - MARGEN_SEGURO_PANEL * 2.0)
+		scroll.custom_minimum_size = Vector2(
+			minf(ANCHO_PANEL - 40.0, ancho_disponible), minf(ALTO_MAXIMO_PANEL, alto_disponible)
+		)
 		# El foco de teclado/mando arrastra el desplazamiento hasta el control.
 		scroll.follow_focus = true
 		panel.add_child(scroll)
@@ -210,10 +240,10 @@ func _caja(panel: PanelContainer, desplazable: bool = false) -> VBoxContainer:
 	var margen := MarginContainer.new()
 	margen.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	for lado in ["left", "top", "right", "bottom"]:
-		margen.add_theme_constant_override("margin_" + lado, 12)
+		margen.add_theme_constant_override("margin_" + lado, 16)
 	contenedor.add_child(margen)
 	var caja := VBoxContainer.new()
-	caja.add_theme_constant_override("separation", 14)
+	caja.add_theme_constant_override("separation", 16)
 	margen.add_child(caja)
 	return caja
 
@@ -484,7 +514,7 @@ func _sellos_contenido(caja: VBoxContainer) -> void:
 		fila.name = "Sello_%s" % String(entrada.get("id", "sin-id"))
 		fila.text = _texto_sello(entrada)
 		fila.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		fila.custom_minimum_size.x = 560
+		fila.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		caja.add_child(fila)
 
 	_sellos_volver = Button.new()
@@ -555,7 +585,7 @@ func _refrescar_historial() -> void:
 		var fila := Label.new()
 		fila.text = _texto_evento_historial(evento)
 		fila.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		fila.custom_minimum_size.x = 640
+		fila.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		_historial_lista.add_child(fila)
 
 
@@ -785,7 +815,7 @@ func _abrir() -> void:
 	_panel_incidencias.visible = false
 	_fondo.visible = true
 	get_tree().paused = true
-	_enfocar_primero(_panel_principal, _continuar)
+	MenuFocoNavegacion.enfocar_primero(_panel_principal, _continuar)
 	_quizas_mostrar_verificacion()
 
 
@@ -855,7 +885,7 @@ func _mostrar_opciones() -> void:
 	_panel_incidencias.visible = false
 	_panel_opciones.visible = true
 	_refrescar_dificultad()
-	_enfocar_primero(_panel_opciones, _volumen)
+	MenuFocoNavegacion.enfocar_primero(_panel_opciones, _volumen)
 
 
 func _mostrar_sellos() -> void:
@@ -864,7 +894,7 @@ func _mostrar_sellos() -> void:
 	_panel_historial.visible = false
 	_panel_incidencias.visible = false
 	_panel_sellos.visible = true
-	_enfocar_primero(_panel_sellos, _sellos_volver)
+	MenuFocoNavegacion.enfocar_primero(_panel_sellos, _sellos_volver)
 
 
 func _mostrar_historial() -> void:
@@ -874,7 +904,7 @@ func _mostrar_historial() -> void:
 	_panel_incidencias.visible = false
 	_panel_historial.visible = true
 	_refrescar_historial()
-	_enfocar_primero(_panel_historial, _historial_volver)
+	MenuFocoNavegacion.enfocar_primero(_panel_historial, _historial_volver)
 
 
 func _mostrar_incidencias() -> void:
@@ -901,53 +931,11 @@ func _mostrar_principal(foco_destino: Control = null) -> void:
 	_panel_historial.visible = false
 	_panel_incidencias.visible = false
 	_panel_principal.visible = true
-	_encadenar_foco_panel(_panel_principal)
+	MenuFocoNavegacion.encadenar(_panel_principal)
 	if is_instance_valid(foco_destino) and foco_destino.is_visible_in_tree():
 		foco_destino.grab_focus()
 	else:
 		_opciones.grab_focus()
-
-
-## Construye una ruta vertical explícita para teclado/mando. La navegación
-## automática de Godot depende de la geometría final y puede saltar entre
-## columnas del remapeo; aquí cada panel tiene un orden estable y circular.
-func _controles_foco(panel: Control) -> Array[Control]:
-	var controles: Array[Control] = []
-	for nodo in panel.find_children("*", "Control", true, false):
-		var control := nodo as Control
-		if control == null or control.focus_mode == Control.FOCUS_NONE:
-			continue
-		if not (control is BaseButton or control is HSlider):
-			continue
-		if control is BaseButton and (control as BaseButton).disabled:
-			continue
-		if not control.is_visible_in_tree():
-			continue
-		controles.append(control)
-	return controles
-
-
-func _encadenar_foco_panel(panel: Control) -> Array[Control]:
-	var controles := _controles_foco(panel)
-	if controles.is_empty():
-		return controles
-	for indice in controles.size():
-		var actual := controles[indice]
-		var anterior := controles[(indice - 1 + controles.size()) % controles.size()]
-		var siguiente := controles[(indice + 1) % controles.size()]
-		actual.focus_neighbor_top = actual.get_path_to(anterior)
-		actual.focus_previous = actual.get_path_to(anterior)
-		actual.focus_neighbor_bottom = actual.get_path_to(siguiente)
-		actual.focus_next = actual.get_path_to(siguiente)
-	return controles
-
-
-func _enfocar_primero(panel: Control, respaldo: Control) -> void:
-	var controles := _encadenar_foco_panel(panel)
-	if not controles.is_empty():
-		controles[0].grab_focus()
-	elif is_instance_valid(respaldo):
-		respaldo.grab_focus()
 
 
 func _al_cambiar_volumen(valor: float) -> void:

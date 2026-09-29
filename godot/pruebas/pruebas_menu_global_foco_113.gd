@@ -1,5 +1,7 @@
 extends SceneTree
 
+const FOCO = preload("res://guion/menu_foco_navegacion.gd")
+
 var _pasadas := 0
 var _fallos := 0
 
@@ -23,13 +25,13 @@ func _probar() -> void:
 	menu._panel_incidencias.visible = false
 	await process_frame
 
-	var principal: Array[Control] = menu._encadenar_foco_panel(menu._panel_principal)
+	var principal: Array[Control] = FOCO.encadenar(menu._panel_principal)
 	_comprobar(principal.size() >= 5, "el panel principal expone una cadena completa")
 	_probar_cadena(principal, "principal")
 
 	menu._mostrar_opciones()
 	await process_frame
-	var opciones: Array[Control] = menu._controles_foco(menu._panel_opciones)
+	var opciones: Array[Control] = FOCO.controles(menu._panel_opciones)
 	_comprobar(opciones.size() >= 8, "Opciones incluye controles navegables de ajustes y remapeo")
 	_probar_cadena(opciones, "opciones")
 	_comprobar(
@@ -54,6 +56,37 @@ func _probar() -> void:
 		menu.get_viewport().gui_get_focus_owner() == menu._historial_boton,
 		"volver desde Historial restaura el lanzador Historial",
 	)
+
+	menu._mostrar_opciones()
+	await process_frame
+	_comprobar(menu._volver_un_nivel(), "cancelar reconoce Opciones como un nivel secundario")
+	await process_frame
+	_comprobar(menu._panel_principal.visible, "cancelar desde Opciones vuelve al panel principal")
+	_comprobar(
+		menu.get_viewport().gui_get_focus_owner() == menu._opciones,
+		"cancelar desde Opciones restaura su lanzador",
+	)
+
+	menu._mostrar_sellos()
+	await process_frame
+	_comprobar(menu._volver_un_nivel(), "cancelar reconoce Sellos como un nivel secundario")
+	await process_frame
+	_comprobar(menu._panel_principal.visible, "cancelar desde Sellos vuelve al panel principal")
+	_comprobar(
+		menu.get_viewport().gui_get_focus_owner() == menu._sellos,
+		"cancelar desde Sellos restaura su lanzador",
+	)
+
+	menu._mostrar_historial()
+	await process_frame
+	_comprobar(menu._volver_un_nivel(), "cancelar reconoce Historial como un nivel secundario")
+	await process_frame
+	_comprobar(menu._panel_principal.visible, "cancelar desde Historial vuelve al panel principal")
+	_comprobar(
+		menu.get_viewport().gui_get_focus_owner() == menu._historial_boton,
+		"cancelar desde Historial restaura su lanzador",
+	)
+	_comprobar(not menu._volver_un_nivel(), "el panel principal no inventa un nivel anterior")
 
 	menu._fondo.visible = false
 	_terminar()
