@@ -19,8 +19,13 @@ func _probar() -> void:
 	_comprobar(bloc.exportar_texto() == "Revisar expediente 14-B", "el bloc restaura su texto")
 	_comprobar(bloc.get_node_or_null("Editor") is TextEdit, "el bloc expone un editor de teclado")
 	var editor := bloc.get_node_or_null("Editor") as TextEdit
-	_comprobar(editor.accessibility_name == bloc.tr("BLOC_NOTAS_TITULO"), "el editor anuncia su función")
-	_comprobar(editor.accessibility_description == bloc.tr("BLOC_NOTAS_AYUDA"), "el editor anuncia su ayuda")
+	_comprobar(
+		editor.accessibility_name == bloc.tr("BLOC_NOTAS_TITULO"), "el editor anuncia su función"
+	)
+	_comprobar(
+		editor.accessibility_description == bloc.tr("BLOC_NOTAS_AYUDA"),
+		"el editor anuncia su ayuda"
+	)
 	bloc.configurar_texto("Llamar a archivo antes de las 12")
 	_comprobar(
 		bloc.exportar_texto() == "Llamar a archivo antes de las 12",
