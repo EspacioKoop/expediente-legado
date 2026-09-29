@@ -33,7 +33,7 @@ static func programacion(jornada: Dictionary, raiz: int) -> Dictionary:
 	var semilla := Azar.derivar(raiz, "dia", [vuelta, dia, 1768])
 	var activa := int(semilla % FRECUENCIA) != 0
 	var acciones := maxi(1, Jornada.ACCIONES_POR_DIA)
-	var tras_accion := 1 + int((semilla / FRECUENCIA) as int) % acciones
+	var tras_accion := 1 + int(semilla / FRECUENCIA) % acciones
 	return {
 		"activa": activa,
 		"dia": dia,
