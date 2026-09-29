@@ -182,12 +182,46 @@ class CliTest(unittest.TestCase):
                 "--source", str(delegado),
                 "--source", str(stdout),
                 "--output", str(output),
+                "--max-files", "2",
             ]
         )
         self.assertEqual(mod.EXIT_OK, code)
         written = json.loads(output.read_text(encoding="utf-8"))
         self.assertEqual(2, len(written["files"]))
         self.assertEqual({"files", "goal"}, set(written))
+
+    def test_por_defecto_una_tarea_es_un_fichero(self):
+        # #1901: dos ficheros ya no son una tarea del pool; no se escribe plan.
+        stdout = self.dir / "stdout.log"
+        stdout.write_text(qwen_stdout(SALIDA_933_SIN_MARCADORES), encoding="utf-8")
+        output = self.dir / ".agent-plan.json"
+        code = mod.main(["--source", str(stdout), "--output", str(output)])
+        self.assertEqual(mod.EXIT_TOO_BIG, code)
+        self.assertFalse(output.exists())
+
+    def test_plan_de_un_fichero_pasa_con_el_limite_por_defecto(self):
+        stdout = self.dir / "stdout.log"
+        uno = {"files": ["scripts/a.py"], "goal": "corte"}
+        stdout.write_text(
+            "AGENT_PLAN_BEGIN " + json.dumps(uno) + " AGENT_PLAN_END", encoding="utf-8"
+        )
+        output = self.dir / ".agent-plan.json"
+        code = mod.main(["--source", str(stdout), "--output", str(output)])
+        self.assertEqual(mod.EXIT_OK, code)
+        self.assertEqual(["scripts/a.py"], json.loads(output.read_text())["files"])
+
+    def test_max_files_se_acota_al_maximo_duro(self):
+        files = [f"godot/f{i}.gd" for i in range(mod.MAX_FILES + 1)]
+        stdout = self.dir / "stdout.log"
+        stdout.write_text(
+            "AGENT_PLAN_BEGIN " + json.dumps({"files": files, "goal": "x"}) + " AGENT_PLAN_END",
+            encoding="utf-8",
+        )
+        output = self.dir / ".agent-plan.json"
+        code = mod.main(
+            ["--source", str(stdout), "--output", str(output), "--max-files", "99"]
+        )
+        self.assertNotEqual(mod.EXIT_OK, code)
 
     def test_plan_vacio_conserva_el_formato_que_busca_el_workflow(self):
         stdout = self.dir / "stdout.log"
@@ -228,7 +262,8 @@ class CliTest(unittest.TestCase):
         )
         output = self.dir / ".agent-plan.json"
         self.assertEqual(
-            mod.EXIT_OK, mod.main(["--source", str(stdout), "--output", str(output)])
+            mod.EXIT_OK,
+            mod.main(["--source", str(stdout), "--output", str(output), "--max-files", "2"]),
         )
 
 

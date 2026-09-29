@@ -49,6 +49,51 @@ class AgentProtocolTest(unittest.TestCase):
         self.assertIn("read_file/grep_search", prompt)
         self.assertIn("No hagas commit, push, PR ni merge", prompt)
 
+    def test_prompt_es_autosuficiente_y_prohibe_contexto_extra(self):
+        # #1901: los workers agotaban turnos leyendo normas, wiki y memorias.
+        issue = {
+            "number": 1901,
+            "title": "Tarea de un fichero",
+            "body": "Cambia X por Y en la funcion f.\n\nAGENT_PLAN_BEGIN\n"
+            '{"files":["scripts/a.py"],"goal":"g"}\nAGENT_PLAN_END\n',
+        }
+        packet = mod.build_task_packet(
+            issue,
+            {"files": ["scripts/a.py"], "goal": "cambiar X por Y"},
+            repository="EspacioKoop/expediente-legado",
+            base_sha="a" * 40,
+            policy_sha="",
+            provider="qwen",
+            worker="qwen-fallback-2",
+            max_files=1,
+        )
+        self.assertEqual(1, packet["scope"]["max_files"])
+        self.assertNotIn("AGENT_PLAN_BEGIN", packet["objective"]["instructions"])
+        prompt = mod.render_worker_prompt(packet, "qwen")
+        self.assertIn("Cambia X por Y en la funcion f.", prompt)
+        self.assertIn("cambiar X por Y", prompt)
+        self.assertIn("No leas AGENTS.md", prompt)
+        self.assertIn(".agent-platino/", prompt)
+        self.assertNotIn("Lee primero '.agent-task-packet.json'", prompt)
+
+    def test_max_files_rechaza_planes_mas_grandes(self):
+        with self.assertRaisesRegex(ValueError, "excede 1 rutas"):
+            mod.build_task_packet(
+                {"number": 1, "title": "t", "body": ""},
+                {"files": ["a.py", "b.py"], "goal": "g"},
+                repository="r/r",
+                base_sha="a" * 40,
+                policy_sha="",
+                provider="qwen",
+                worker="w",
+                max_files=1,
+            )
+
+    def test_instrucciones_largas_se_recortan(self):
+        texto = mod._instructions("x" * (mod.MAX_INSTRUCTIONS + 500))
+        self.assertLessEqual(len(texto), mod.MAX_INSTRUCTIONS + 40)
+        self.assertIn("recortadas", texto)
+
     def test_result_anidado_se_parsea_sin_regex_fragil(self):
         packet = self.packet()
         raw = """texto
