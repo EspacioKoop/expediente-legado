@@ -202,9 +202,7 @@ func _probar_personajes_externos() -> void:
 		"Paco no conoce una práctica privada ajena",
 	)
 	_comprobar(
-		DialogoReligion933.resolver_clave(
-			practica, DialogoReligion933.ACTOR_TELEFONO_COMUNITARIO
-		),
+		DialogoReligion933.resolver_clave(practica, DialogoReligion933.ACTOR_TELEFONO_COMUNITARIO),
 		DialogoReligion933.CLAVE_TELEFONO_PRACTICA,
 		"el contacto reacciona a una práctica que conoce",
 	)
