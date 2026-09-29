@@ -152,6 +152,19 @@ class WorkflowsYamlTest(unittest.TestCase):
                         f"{ruta.name}:{indice + 1} debe usar persist-credentials: false",
                     )
 
+    def test_oidc_write_requiere_consumidor(self):
+        """No se concede id-token: write a jobs que no consumen OIDC."""
+        for ruta in WORKFLOWS:
+            texto = ruta.read_text(encoding="utf-8")
+            if not re.search(r"(?m)^\s*id-token:\s*write\s*$", texto):
+                continue
+            with self.subTest(workflow=ruta.name):
+                self.assertTrue(
+                    "ACTIONS_ID_TOKEN_REQUEST_URL" in texto
+                    or "tailscale/github-action@" in texto,
+                    f"{ruta.name} pide id-token: write sin un consumidor OIDC conocido",
+                )
+
     def test_pull_request_target_no_hace_checkout_del_head(self):
         """Un token privilegiado nunca debe ejecutar el head de una PR no confiable."""
         for ruta in WORKFLOWS:
