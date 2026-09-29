@@ -47,6 +47,11 @@ func _ejecutar() -> void:
 	var espacio: Dictionary = dia_modelo.call("_espacio_de", "trayecto")
 	dia_modelo.free()
 	Espacio3D.construir(mundo, espacio)
+	# Espacio3D monta las lámparas reales con sombras. Este benchmark declara
+	# explícitamente una base sin sombras para aislar el coste de las fachadas;
+	# si no se apagan aquí, Compatibility intenta además renderizar sombras y
+	# añade ruido ajeno a la capa que se está midiendo.
+	_desactivar_sombras_base(mundo)
 	_montar_iluminacion(mundo, espacio)
 
 	var calle := CalleIdentidad.montar(mundo)
@@ -190,6 +195,13 @@ func _leer_metricas() -> Dictionary:
 		"process_ms": Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
 		"static_memory_bytes": Performance.get_monitor(Performance.MEMORY_STATIC),
 	}
+
+
+func _desactivar_sombras_base(mundo: Node3D) -> void:
+	for nodo in mundo.find_children("*", "OmniLight3D", true, false):
+		var luz := nodo as OmniLight3D
+		if luz != null:
+			luz.shadow_enabled = false
 
 
 func _montar_iluminacion(mundo: Node3D, espacio: Dictionary) -> void:
