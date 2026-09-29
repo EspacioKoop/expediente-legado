@@ -12,6 +12,7 @@ PREVISUALIZADOR = RAIZ / "godot/guion/previsualizador_personaje_3d.gd"
 CAMINANTE = RAIZ / "godot/escenas/caminante.tscn"
 INICIO = RAIZ / "godot/guion/inicio_app.gd"
 DIA = RAIZ / "godot/guion/dia_app.gd"
+PRESENTACION_DIA = RAIZ / "godot/guion/dia_presentacion_app.gd"
 TEXTOS = RAIZ / "godot/datos/textos.csv"
 
 
@@ -26,6 +27,7 @@ class ProtagonistaConfigurableTest(unittest.TestCase):
         cls.caminante = CAMINANTE.read_text()
         cls.inicio = INICIO.read_text()
         cls.dia = DIA.read_text()
+        cls.presentacion_dia = PRESENTACION_DIA.read_text()
         cls.textos = TEXTOS.read_text()
 
     def test_hay_seis_avatares_rocketbox_elegibles(self):
@@ -126,7 +128,9 @@ class ProtagonistaConfigurableTest(unittest.TestCase):
         self.assertNotIn("Partida.new()", self.cuerpo)
         self.assertNotIn(".cargar(", self.cuerpo)
         self.assertNotIn(".guardar(", self.cuerpo)
-        self.assertIn('cuerpo_jugador.perfil = partida.estado.get("perfil_jugador", {})', self.dia)
+        self.assertIn("DiaPresentacionApp.new().montar_entorno(", self.dia)
+        self.assertIn("partida.estado.get(\"perfil_jugador\", {})", self.dia)
+        self.assertIn("cuerpo_jugador.perfil = perfil_jugador", self.presentacion_dia)
 
     def test_editor_es_accesible_desde_inicio(self):
         self.assertIn('tr("INICIO_PERSONAJE")', self.inicio)
