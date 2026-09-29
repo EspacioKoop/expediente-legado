@@ -1,6 +1,7 @@
 import importlib.util
 from pathlib import Path
 import sys
+import tempfile
 import unittest
 
 
@@ -76,6 +77,22 @@ class AgentFailurePolicyTest(unittest.TestCase):
         )
         self.assertEqual("provider_or_transport", result["category"])
         self.assertEqual("rotate_provider", result["action"])
+
+    def test_logs_se_leen_desde_fichero_y_se_acotan(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            first = Path(tmp) / "a.log"
+            second = Path(tmp) / "b.log"
+            first.write_text("503 Service temporarily overloaded", encoding="utf-8")
+            second.write_text("detalle posterior", encoding="utf-8")
+            text = mod.read_text_files([first, second], max_bytes=12)
+        self.assertEqual(12, len(text.encode("utf-8")))
+        self.assertTrue(text.startswith("503 Service"))
+
+    def test_log_inexistente_no_rompe_clasificacion(self):
+        text = mod.read_text_files([Path("/definitivamente/no/existe.log")])
+        self.assertEqual("", text)
+        result = mod.classify_failure(stage="implementing", text=text)
+        self.assertEqual("human_review", result["action"])
 
     def test_desconocido_escala_a_humano(self):
         result = mod.classify_failure(stage="publishing", text="fallo raro")
