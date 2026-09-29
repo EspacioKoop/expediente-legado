@@ -73,30 +73,48 @@ def verify_task_artifacts(packet: dict[str, Any]) -> None:
             raise ValueError(f"artifact {name} cambio despues del handoff")
 
 
-def build_task(args: argparse.Namespace) -> dict[str, Any]:
-    plan = _json(args.plan)
-    files = plan.get("files", [])
-    if not isinstance(files, list) or any(not isinstance(x, str) for x in files):
-        raise ValueError("plan.files invalido")
-    artifacts = {}
-    for name, path in {
-        "task": args.task,
-        "plan": args.plan,
-        "context": args.context,
-        "memory": args.memory,
-        "history": args.history,
-        "agents": args.agents,
-        "rules": args.rules,
-        "platino_sha": args.platino_sha,
-    }.items():
+def _base_artifacts(args: argparse.Namespace) -> dict[str, Any]:
+    artifacts: dict[str, Any] = {}
+    for name in ("task", "context", "memory", "history", "agents", "rules", "platino_sha"):
+        path = getattr(args, name)
         if path.exists():
             artifacts[name] = _artifact(path)
+    return artifacts
+
+
+def build_intake(args: argparse.Namespace) -> dict[str, Any]:
     packet = {
         "schema": SCHEMA,
         "type": "TASK",
         "issue": args.issue,
         "provider": args.provider,
         "worker": args.worker,
+        "phase": "plan",
+        "goal": "",
+        "scope": {"files": [], "max_files": 12, "reserved": False},
+        "source_priority": ["repo", "issue", "#181", "#1713", "normas-platino", "wiki", "memory", "ci-history"],
+        "abort_on": ["authority_conflict", "unsafe_or_secret_request", "stale_handoff_artifact", "no_safe_scope"],
+        "artifacts": _base_artifacts(args),
+        "handoff": {"from": "orchestrator", "to": "planner"},
+    }
+    validate(packet)
+    return packet
+
+
+def build_task(args: argparse.Namespace) -> dict[str, Any]:
+    plan = _json(args.plan)
+    files = plan.get("files", [])
+    if not isinstance(files, list) or any(not isinstance(x, str) for x in files):
+        raise ValueError("plan.files invalido")
+    artifacts = _base_artifacts(args)
+    artifacts["plan"] = _artifact(args.plan)
+    packet = {
+        "schema": SCHEMA,
+        "type": "TASK",
+        "issue": args.issue,
+        "provider": args.provider,
+        "worker": args.worker,
+        "phase": "implement",
         "goal": _clean_text(plan.get("goal"), 240),
         "scope": {"files": list(dict.fromkeys(files)), "max_files": 12, "reserved": True},
         "source_priority": ["repo", "issue", "#181", "#1713", "normas-platino", "wiki", "memory", "ci-history"],
@@ -161,6 +179,18 @@ def compile_prompt(role: str, provider: str, task_path: Path, result_path: Path 
     task = _json(task_path)
     validate(task)
     rules = "QWEN.md" if provider == "qwen" else "GEMINI.md"
+    if role == "plan":
+        return f"""# Agent B2B prompt v1
+
+Rol: planner
+Proveedor: {provider}
+
+Lee primero `.agent-plan-task-packet.json`. El workflow ya verificó sus fingerprints. Después lee `AGENTS.md`, `{rules}`, los artefactos declarados por el paquete y obligatoriamente las Normas Platino actuales en `.agent-platino/`.
+
+Jerarquía: repo/issue/#181/#1713/Normas Platino > wiki > memoria > histórico CI.
+Trabaja en solo lectura: no edites archivos ni solicites herramientas de edición. Revisa los puntos reales de integración y sus tests antes de cerrar el plan. Si existe un comentario `AGENT_POOL_REPLAN`, usa sus `observed_paths` solo si siguen siendo necesarios.
+Termina con AGENT_PLAN_BEGIN y JSON {{"files":["ruta"],"goal":"objetivo"}} seguido de AGENT_PLAN_END. Máximo 12 rutas concretas, sin glob. Usa files=[] si no existe un corte seguro.
+"""
     if role == "implement":
         files = ", ".join(task.get("scope", {}).get("files", [])) or "(ninguno)"
         return f"""# Agent B2B prompt v1
@@ -206,6 +236,12 @@ def _write(path: Path, payload: dict[str, Any]) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="cmd", required=True)
+    p = sub.add_parser("intake")
+    p.add_argument("--issue", type=int, required=True)
+    p.add_argument("--provider", choices=["qwen", "gemini"], required=True)
+    p.add_argument("--worker", required=True)
+    for name in ("task", "context", "memory", "history", "agents", "rules", "platino-sha", "output"):
+        p.add_argument(f"--{name}", type=Path, required=True)
     p = sub.add_parser("task")
     p.add_argument("--issue", type=int, required=True)
     p.add_argument("--provider", choices=["qwen", "gemini"], required=True)
@@ -222,7 +258,7 @@ def main() -> int:
     p.add_argument("--result-packet", type=Path, required=True)
     p.add_argument("--output", type=Path, required=True)
     p = sub.add_parser("prompt")
-    p.add_argument("--role", choices=["implement", "review"], required=True)
+    p.add_argument("--role", choices=["plan", "implement", "review"], required=True)
     p.add_argument("--provider", choices=["qwen", "gemini"], required=True)
     p.add_argument("--task-packet", type=Path, required=True)
     p.add_argument("--result-packet", type=Path)
@@ -232,6 +268,11 @@ def main() -> int:
     p = sub.add_parser("verify")
     p.add_argument("--packet", type=Path, required=True)
     args = parser.parse_args()
+    if args.cmd == "intake":
+        payload = build_intake(args)
+        _write(args.output, payload)
+        print(json.dumps(payload, ensure_ascii=False))
+        return 0
     if args.cmd == "task":
         payload = build_task(args)
         _write(args.output, payload)
