@@ -54,6 +54,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Validar launcher de playtest
         shell: bash
         run: |
@@ -92,6 +94,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Validar launchers Windows
         shell: pwsh
         run: |
@@ -134,6 +138,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          persist-credentials: false
           lfs: true
       - uses: actions/setup-python@v5
         with:
@@ -316,6 +321,7 @@ jobs:
       - name: Recuperar launchers versionados
         uses: actions/checkout@v4
         with:
+          persist-credentials: false
           sparse-checkout: |
             scripts/playtest.sh
             scripts/playtest.ps1
