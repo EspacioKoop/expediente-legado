@@ -1,5 +1,8 @@
 from pathlib import Path
+import os
 import re
+import shutil
+import subprocess
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -38,7 +41,31 @@ class MusicaPuntualTest(unittest.TestCase):
         self.assertIn("pista is AudioStreamOggVorbis", self.codigo)
         self.assertIn('"careo": true', self.codigo)
         self.assertIn('"final": false', self.codigo)
-        self.assertIn("pista.loop = en_bucle(nombre)", self.codigo)
+        self.assertIn("voz.stream = preparar_pista(nombre, pista, String(CATALOGO[nombre]))", self.codigo)
+
+    def test_punto_de_bucle_y_recurso_compartido_en_godot(self):
+        motor = os.environ.get("GODOT_BIN", "godot4")
+        if shutil.which(motor) is None:
+            self.skipTest("Godot no está disponible; CI ejecuta el contrato runtime")
+        importacion = subprocess.run(
+            [motor, "--headless", "--path", str(ROOT / "godot"), "--editor", "--import"],
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            timeout=120,
+            check=False,
+        )
+        self.assertEqual(importacion.returncode, 0, importacion.stdout)
+        resultado = subprocess.run(
+            [motor, "--headless", "--path", str(ROOT / "godot"), "--script", "pruebas/pruebas_musica_puntual_76.gd"],
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            timeout=45,
+            check=False,
+        )
+        self.assertEqual(resultado.returncode, 0, resultado.stdout)
+        self.assertIn("musica puntual 76: 0 fallos", resultado.stdout)
 
     def test_ogg_musical_nuevo_entra_por_lfs_sin_migrar_efectos(self):
         regla = "godot/assets/audio/musica/*.ogg filter=lfs diff=lfs merge=lfs -text"

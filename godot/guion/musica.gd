@@ -22,6 +22,13 @@ const BUCLE := {
 	"final": false,
 }
 
+## La candidata CC0 de #76 lleva una introducción que su autor excluye de las
+## repeticiones. La clave es el fichero, no el momento: otra pista de careo
+## vuelve a 0 salvo que se documente su propio punto de bucle.
+const INICIO_BUCLE_POR_FICHERO := {
+	"battle_music_01-loop.ogg": 7.5,
+}
+
 
 static func stream(nombre: String) -> AudioStream:
 	if not CATALOGO.has(nombre):
@@ -40,6 +47,19 @@ static func en_bucle(nombre: String) -> bool:
 	return bool(BUCLE.get(nombre, false))
 
 
+static func preparar_pista(nombre: String, pista: AudioStream, fichero: String) -> AudioStream:
+	if pista is AudioStreamOggVorbis:
+		# load() comparte el recurso: cada voz configura su copia para que un
+		# final no cambie el bucle de un careo que esté sonando en otra escena.
+		var copia := pista.duplicate() as AudioStreamOggVorbis
+		copia.loop = en_bucle(nombre)
+		copia.loop_offset = (
+			float(INICIO_BUCLE_POR_FICHERO.get(fichero, 0.0)) if copia.loop else 0.0
+		)
+		return copia
+	return pista
+
+
 static func reproducir(nodo: Node, nombre: String, volumen_db: float = -8.0) -> AudioStreamPlayer:
 	if nodo == null:
 		return null
@@ -50,10 +70,8 @@ static func reproducir(nodo: Node, nombre: String, volumen_db: float = -8.0) -> 
 	detener(nodo)
 	var voz := AudioStreamPlayer.new()
 	voz.name = NODO
-	voz.stream = pista
+	voz.stream = preparar_pista(nombre, pista, String(CATALOGO[nombre]))
 	voz.volume_db = volumen_db
-	if pista is AudioStreamOggVorbis:
-		pista.loop = en_bucle(nombre)
 	nodo.add_child(voz)
 	voz.play()
 	return voz
