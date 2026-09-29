@@ -57,7 +57,7 @@ class EvidenciaHidra439Test(unittest.TestCase):
         self.assertIn('renderer/rendering_method="forward_plus"', self.proyecto)
         self.assertIn("xvfb-run -a godot4 --path godot", self.workflow)
         self.assertNotIn("--rendering-method gl_compatibility", self.workflow)
-        self.assertIn("actions/upload-artifact@v4", self.workflow)
+        self.assertIn("actions/upload-artifact@", self.workflow)
         self.assertIn("len(set(hashes)) != 3", self.workflow)
         self.assertIn('proliferacion["cabezas"] <= inicial["cabezas"]', self.workflow)
 

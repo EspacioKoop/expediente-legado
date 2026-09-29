@@ -81,7 +81,7 @@ class EvidenciaMateriales399Test(unittest.TestCase):
         self.assertIn("comparativa.png", self.workflow)
         self.assertIn("manifest.json", self.workflow)
         self.assertIn("resumen.md", self.workflow)
-        self.assertIn("actions/upload-artifact@v4", self.workflow)
+        self.assertIn("actions/upload-artifact@", self.workflow)
         self.assertIn("len(set(hashes)) != 4", self.workflow)
 
     def test_documentacion_no_finge_automatizar_el_juicio_visual(self):

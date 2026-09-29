@@ -48,7 +48,7 @@ class EvidenciaVecinos673Test(unittest.TestCase):
         self.assertIn("xvfb-run -a godot4", self.workflow)
         self.assertIn("for captura in manuela repartidor; do", self.workflow)
         self.assertIn("manifest.json", self.workflow)
-        self.assertIn("actions/upload-artifact@v4", self.workflow)
+        self.assertIn("actions/upload-artifact@", self.workflow)
         self.assertIn("evidencia-vecinos-673-" + "$" + "{{ github.sha }}", self.workflow)
         self.assertIn('objetivo["en_frustum"] is not True', self.workflow)
 

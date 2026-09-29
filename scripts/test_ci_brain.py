@@ -246,8 +246,9 @@ class CiBrainTest(unittest.TestCase):
         self.assertIn("python3 scripts/ci_brain.py sync-turso", texto)
         self.assertIn("vars.TURSO_DATABASE_URL", texto)
         self.assertIn("secrets.TURSO_AUTH_TOKEN", texto)
-        # v4 fijado por SHA completo (#1819): el comentario conserva la versión.
-        self.assertRegex(texto, r"actions/upload-artifact@[0-9a-f]{40} # v4\b")
+        # Fijado por SHA completo (#1819); el comentario conserva la versión. No
+        # se exige una versión mayor concreta: Dependabot la sube (#1850).
+        self.assertRegex(texto, r"actions/upload-artifact@[0-9a-f]{40} # v\d+")
         self.assertNotIn("pull_request:", texto)
 
 

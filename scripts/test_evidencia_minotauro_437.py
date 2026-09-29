@@ -23,7 +23,7 @@ class EvidenciaMinotauro437Test(unittest.TestCase):
         self.assertIn('"veredicto_automatico": false', fuente)
         self.assertIn("SuenoMinotauro.leer_marca(estado, 0)", fuente)
         flujo = WORKFLOW.read_text(encoding="utf-8")
-        self.assertIn("actions/upload-artifact@v4", flujo)
+        self.assertIn("actions/upload-artifact@", flujo)
         self.assertIn("evidencia-minotauro-437", flujo)
         self.assertIn("capturar_minotauro_437.gd", flujo)
 

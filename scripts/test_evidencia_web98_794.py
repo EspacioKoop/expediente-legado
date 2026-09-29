@@ -33,7 +33,7 @@ class EvidenciaWeb98794Test(unittest.TestCase):
         fuente = WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("xvfb-run -a godot4", fuente)
         self.assertIn("capturar_web98_794.gd", fuente)
-        self.assertIn("actions/upload-artifact@v4", fuente)
+        self.assertIn("actions/upload-artifact@", fuente)
         self.assertIn("evidencia-web98-794-${{ github.sha }}", fuente)
         for nombre in (
             "byte-local",

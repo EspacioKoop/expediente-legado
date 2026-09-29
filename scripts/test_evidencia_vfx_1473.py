@@ -74,7 +74,7 @@ class EvidenciaVfx1473Test(unittest.TestCase):
         self.assertIn('test -s "evidencia-vfx-1473/${fase}_activo.png"', self.workflow)
         self.assertIn('test -s "evidencia-vfx-1473/${fase}_inactivo.png"', self.workflow)
         self.assertIn("manifest.json", self.workflow)
-        self.assertIn("actions/upload-artifact@v4", self.workflow)
+        self.assertIn("actions/upload-artifact@", self.workflow)
         self.assertIn("evidencia-vfx-1473-${{ github.sha }}", self.workflow)
         self.assertIn('manifest.get("renderer") != "forward_plus"', self.workflow)
         self.assertIn('manifest.get("veredicto_automatico") is not False', self.workflow)

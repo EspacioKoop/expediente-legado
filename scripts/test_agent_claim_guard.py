@@ -150,7 +150,7 @@ class AgentClaimGuardTest(unittest.TestCase):
         self.assertIn("motivo=autopilot-replan-claim-incompleto", workflow)
         self.assertIn('select(startswith("AUTOPILOT_REPLAN "))', workflow)
         gemini = workflow.split("name: Implementar con Gemini", 1)[1].split(
-            "uses: google-github-actions/run-gemini-cli@v0", 1
+            "uses: google-github-actions/run-gemini-cli@", 1
         )[0]
         self.assertIn("continue-on-error: true", gemini)
         self.assertIn("steps.claim_guard.outputs.drift != 'true'", workflow)
@@ -168,10 +168,10 @@ class AgentClaimGuardTest(unittest.TestCase):
         self.assertIn("steps.claim_guard.outputs.drift == 'true'", workflow)
         self.assertIn("steps.claim_guard.outputs.drift != 'true'", workflow)
         qwen = workflow.split("name: Implementar con Qwen", 1)[1].split(
-            "uses: QwenLM/qwen-code-action@v1", 1
+            "uses: QwenLM/qwen-code-action@", 1
         )[0]
         gemini = workflow.split("name: Implementar con Gemini", 1)[1].split(
-            "uses: google-github-actions/run-gemini-cli@v0", 1
+            "uses: google-github-actions/run-gemini-cli@", 1
         )[0]
         self.assertIn("continue-on-error: true", qwen)
         self.assertIn("continue-on-error: true", gemini)
