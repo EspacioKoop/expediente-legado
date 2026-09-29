@@ -35,7 +35,11 @@ static func montar(mundo: Node3D, espacio: Dictionary) -> SuenoMutadorPresentaci
 	var existente := mundo.get_node_or_null(NOMBRE)
 	if existente is SuenoMutadorPresentacion3D:
 		if String(existente.get_meta("mutador_id", "")) == id:
-			return existente as SuenoMutadorPresentacion3D
+			var capa_existente := existente as SuenoMutadorPresentacion3D
+			capa_existente._animar = bool((meta as Dictionary).get("animacion", false))
+			capa_existente.set_meta("presentacion", (meta as Dictionary).duplicate(true))
+			capa_existente._sincronizar_procesamiento()
+			return capa_existente
 		existente.queue_free()
 
 	var capa := SuenoMutadorPresentacion3D.new()
@@ -44,8 +48,16 @@ static func montar(mundo: Node3D, espacio: Dictionary) -> SuenoMutadorPresentaci
 	mundo.add_child(capa)
 	# Node reactiva automáticamente _process al entrar en árbol cuando el script
 	# lo implementa; fijar el estado después de add_child mantiene reduce_motion.
-	capa.set_process(capa._animar or capa._id == MutadoresSueno.DESFASE)
+	capa._sincronizar_procesamiento()
 	return capa
+
+
+func _sincronizar_procesamiento() -> void:
+	set_process(_animar or _id == MutadoresSueno.DESFASE)
+	if _id == MutadoresSueno.APAGONES and not _animar:
+		for luz in _luces:
+			if is_instance_valid(luz):
+				luz.light_energy = 0.72
 
 
 func configurar(meta: Dictionary, espacio: Dictionary) -> void:
