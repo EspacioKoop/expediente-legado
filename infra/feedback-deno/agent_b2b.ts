@@ -1,4 +1,11 @@
-const B2B_TYPES = new Set(["QUESTION", "BLOCKER", "EVIDENCE", "HANDOFF"]);
+const B2B_TYPES = new Set([
+  "QUESTION",
+  "BLOCKER",
+  "EVIDENCE",
+  "HANDOFF",
+  "RESULT",
+  "REVIEW",
+]);
 const B2B_RECIPIENTS = new Set(["dispatcher", "worker", "reviewer"]);
 const B2B_TTL_DEFAULT_MS = 2 * 60 * 60 * 1000;
 const B2B_TTL_MIN_MS = 5 * 60 * 1000;
@@ -19,7 +26,13 @@ export interface AgentB2BMessage {
   schema: 1;
   message_id: string;
   task_id: string;
-  message_type: "QUESTION" | "BLOCKER" | "EVIDENCE" | "HANDOFF";
+  message_type:
+    | "QUESTION"
+    | "BLOCKER"
+    | "EVIDENCE"
+    | "HANDOFF"
+    | "RESULT"
+    | "REVIEW";
   sender: string;
   recipient: "dispatcher" | "worker" | "reviewer";
   correlation_id: string;
