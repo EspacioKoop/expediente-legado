@@ -651,6 +651,7 @@ jobs:
             --context .agent-context.md --memory .agent-memory.json \
             --history .agent-history.json --rules "$rules" \
             --output .agent-task-packet.json >/dev/null
+          python3 scripts/agent_b2b.py verify --packet .agent-task-packet.json
           python3 scripts/agent_b2b.py prompt \
             --role implement --provider "$PROVIDER" \
             --task-packet .agent-task-packet.json \
