@@ -44,6 +44,25 @@ class CableadoPlanDelegadoTest(unittest.TestCase):
         self.assertEqual("/tmp/delegado.json", fuentes[0])
         self.assertGreater(len(fuentes), 1)
 
+    def test_una_tarea_es_un_fichero_por_defecto(self):
+        # #1901: el límite viaja al parser y al TaskPacket desde la misma variable.
+        reserva = self._paso("reserve")
+        self.assertIn("vars.AGENT_POOL_MAX_FILES || '1'", reserva)
+        self.assertIn('--max-files "$MAX_FILES"', reserva)
+        self.assertIn("status == 5", reserva)
+        self.assertIn("agent:needs-human", reserva)
+        protocolo = self._paso("protocol")
+        self.assertIn("vars.AGENT_POOL_MAX_FILES || '1'", protocolo)
+        self.assertIn('--max-files "$MAX_FILES"', protocolo)
+        for paso_id in ("plan_qwen", "plan_gemini"):
+            with self.subTest(paso=paso_id):
+                self.assertIn("Exactamente 1 archivo", self._paso(paso_id))
+
+    def test_implementacion_no_lee_contexto_extra(self):
+        for paso_id in ("implement_qwen", "implement_gemini"):
+            with self.subTest(paso=paso_id):
+                self.assertIn("No leas ningun otro fichero de contexto", self._paso(paso_id))
+
     def test_la_salida_del_planificador_no_viaja_por_env(self):
         # >128 KB en una variable: «Argument list too long» y el paso ni
         # arranca, tampoco el de limpieza, que deja el CLAIM colgado (#1881).

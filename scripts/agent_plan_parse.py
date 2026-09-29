@@ -25,6 +25,9 @@ import sys
 from typing import Any, Iterator
 
 MAX_FILES = 12
+# Una tarea del pool = un fichero (#1901): los workers pequeños agotaban sus
+# turnos en cortes de varios ficheros. Se amplía con --max-files.
+DEFAULT_MAX_FILES = 1
 MAX_GOAL = 180
 # Un plan son 12 rutas y un objetivo: ningún plan real se acerca a esto.
 MAX_OBJECT = 64 * 1024
@@ -35,6 +38,7 @@ PROTECTED_PREFIXES = (".github/", ".agent-")
 EXIT_OK = 0
 EXIT_UNPARSEABLE = 3
 EXIT_INVALID = 4
+EXIT_TOO_BIG = 5
 
 # El marcador puede llegar decorado: **AGENT_PLAN_BEGIN**, `AGENT_PLAN_BEGIN`,
 # ### AGENT_PLAN_BEGIN… Basta con localizar la palabra y buscar el JSON detrás.
@@ -48,6 +52,10 @@ GOAL_RE = re.compile(r'"goal"\s*:\s*"((?:[^"\\]|\\.)*)', re.S)
 
 class PlanError(Exception):
     """Plan localizado pero inválido (rutas, tamaño)."""
+
+
+class PlanTooBig(PlanError):
+    """Plan válido que toca más ficheros de los que admite una tarea del pool."""
 
 
 def _objects_from(text: str, start: int = 0) -> Iterator[tuple[int, Any]]:
@@ -197,7 +205,7 @@ def source_texts(raw: str) -> list[str]:
     return [raw]
 
 
-def normalize(plan: dict[str, Any]) -> dict[str, Any]:
+def normalize(plan: dict[str, Any], max_files: int = MAX_FILES) -> dict[str, Any]:
     """Misma validación de rutas que tenía el paso inline del worker."""
     files = plan.get("files", [])
     if not isinstance(files, list) or len(files) > MAX_FILES:
@@ -217,8 +225,11 @@ def normalize(plan: dict[str, Any]) -> dict[str, Any]:
         if item.startswith(PROTECTED_PREFIXES) or item in PROTECTED_FILES:
             raise PlanError("ruta protegida")
         clean.append(item)
+    unique = list(dict.fromkeys(clean))
+    if len(unique) > max_files:
+        raise PlanTooBig(f"plan de {len(unique)} ficheros; maximo {max_files}")
     return {
-        "files": list(dict.fromkeys(clean)),
+        "files": unique,
         "goal": str(plan.get("goal", ""))[:MAX_GOAL],
     }
 
@@ -247,7 +258,14 @@ def main(argv: list[str] | None = None) -> int:
         help="fichero con la salida del planificador; repetible, gana el primero con plan",
     )
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--max-files",
+        type=int,
+        default=DEFAULT_MAX_FILES,
+        help=f"ficheros por tarea (1..{MAX_FILES}); por defecto {DEFAULT_MAX_FILES}",
+    )
     args = parser.parse_args(argv)
+    max_files = min(max(args.max_files, 1), MAX_FILES)
 
     found = parse_sources(args.source)
     if found is None:
@@ -255,7 +273,10 @@ def main(argv: list[str] | None = None) -> int:
         return EXIT_UNPARSEABLE
     plan, strategy, path = found
     try:
-        normalized = normalize(plan)
+        normalized = normalize(plan, max_files)
+    except PlanTooBig as exc:
+        print(str(exc), file=sys.stderr)
+        return EXIT_TOO_BIG
     except PlanError as exc:
         print(str(exc), file=sys.stderr)
         return EXIT_INVALID

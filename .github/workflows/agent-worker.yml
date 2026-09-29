@@ -500,7 +500,7 @@ jobs:
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":16},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'FASE DE PLAN (solo lectura): no edites nada ni pidas herramientas de edicion; tu unica salida util es el bloque AGENT_PLAN. TAREA ASIGNADA: ${{ steps.task.outputs.brief }} FIN DE LA TAREA. Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-context.md, .agent-b2b-inbox.md si existe, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino. Jerarquia: repo/issue/#181/#182 y Normas Platino > contexto de wiki > memoria temporal Deno KV > memoria historica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integracion y sus tests: files debe incluir TODAS las rutas que una implementacion correcta podria necesitar. Si los comentarios recientes contienen AGENT_POOL_REPLAN o el inbox B2B contiene un BLOCKER de CLAIM, revisa explicitamente sus rutas/evidencia y anadelas solo si son realmente necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Maximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+          prompt: 'FASE DE PLAN (solo lectura): no edites nada ni pidas herramientas de edicion; tu unica salida util es el bloque AGENT_PLAN. TAREA ASIGNADA: ${{ steps.task.outputs.brief }} FIN DE LA TAREA. Lee .agent-task.md, .agent-b2b-inbox.md si existe, y solo el codigo que necesites para localizar el cambio (grep_search/read_file); no leas normas, wiki ni memorias. Una tarea del pool es UN UNICO archivo: elige el archivo donde vive el cambio mas pequeño util que se pueda hacer tocando solo ese archivo. Si los comentarios recientes contienen AGENT_POOL_REPLAN o el inbox B2B contiene un BLOCKER de CLAIM, revisa explicitamente sus rutas/evidencia y anadelas solo si son realmente necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Exactamente 1 archivo en files; usa files=[] si no hay corte seguro de un solo archivo.'
 
       - id: plan_gemini
         name: Plan Gemini
@@ -512,7 +512,7 @@ jobs:
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":16},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'FASE DE PLAN (solo lectura): no edites nada ni pidas herramientas de edicion; tu unica salida util es el bloque AGENT_PLAN. TAREA ASIGNADA: ${{ steps.task.outputs.brief }} FIN DE LA TAREA. Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-context.md, .agent-b2b-inbox.md si existe, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino. Jerarquia: repo/issue/#181/#182 y Normas Platino > contexto de wiki > memoria temporal Deno KV > memoria historica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integracion y sus tests: files debe incluir TODAS las rutas que una implementacion correcta podria necesitar. Si los comentarios recientes contienen AGENT_POOL_REPLAN o el inbox B2B contiene un BLOCKER de CLAIM, revisa explicitamente sus rutas/evidencia y anadelas solo si son realmente necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Maximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+          prompt: 'FASE DE PLAN (solo lectura): no edites nada ni pidas herramientas de edicion; tu unica salida util es el bloque AGENT_PLAN. TAREA ASIGNADA: ${{ steps.task.outputs.brief }} FIN DE LA TAREA. Lee .agent-task.md, .agent-b2b-inbox.md si existe, y solo el codigo que necesites para localizar el cambio (grep_search/read_file); no leas normas, wiki ni memorias. Una tarea del pool es UN UNICO archivo: elige el archivo donde vive el cambio mas pequeño util que se pueda hacer tocando solo ese archivo. Si los comentarios recientes contienen AGENT_POOL_REPLAN o el inbox B2B contiene un BLOCKER de CLAIM, revisa explicitamente sus rutas/evidencia y anadelas solo si son realmente necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Exactamente 1 archivo en files; usa files=[] si no hay corte seguro de un solo archivo.'
 
       - id: reserve
         name: Validar plan y reservar rutas
@@ -522,6 +522,8 @@ jobs:
           ISSUE: ${{ inputs.issue }}
           PROVIDER: ${{ inputs.provider }}
           BRANCH: ${{ steps.guard.outputs.branch }}
+          DELEGATED: ${{ steps.delegated.outputs.found }}
+          MAX_FILES: ${{ vars.AGENT_POOL_MAX_FILES || '1' }}
         run: |
           set -euo pipefail
           # La salida del planificador se lee de fichero, nunca de env: con más
@@ -531,10 +533,22 @@ jobs:
           cp qwen-artifacts/*.log gemini-artifacts/*.log /tmp/agent-output-plan/ 2>/dev/null || true
           # Parser tolerante (#1881): marcadores en Markdown, bloque json sin
           # marcadores o JSON truncado. Gana la primera fuente con plan.
+          # Una tarea = un fichero por defecto (#1901): los workers pequeños
+          # agotaban sus turnos en cortes de varios ficheros.
+          status=0
           python3 scripts/agent_plan_parse.py \
             --source /tmp/delegado.json \
             --source /tmp/agent-output-plan/stdout.log \
-            --output .agent-plan.json
+            --max-files "$MAX_FILES" \
+            --output .agent-plan.json || status=$?
+          if (( status == 5 )) && [[ "${DELEGATED:-}" == true ]]; then
+            # Un plan delegado demasiado grande no mejora reintentando: lo parte el nivel 2.
+            printf 'reserved=false\nreason=plan-demasiado-grande\n' >> "$GITHUB_OUTPUT"
+            gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human --remove-label agent:working >/dev/null 2>&1 || true
+            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Agent pool ($PROVIDER): el plan delegado toca más de $MAX_FILES fichero(s). Una tarea del pool es un único fichero: pártelo en issues de un fichero cada uno." || true
+            exit 0
+          fi
+          (( status == 0 )) || exit "$status"
 
           if grep -q '"files": \[\]' .agent-plan.json 2>/dev/null; then
             printf 'reserved=false\nreason=sin-corte-seguro\n' >> "$GITHUB_OUTPUT"
@@ -642,6 +656,7 @@ jobs:
         env:
           PROVIDER: ${{ inputs.provider }}
           WORKER: ${{ inputs.worker }}
+          MAX_FILES: ${{ vars.AGENT_POOL_MAX_FILES || '1' }}
         run: |
           set -euo pipefail
           base_sha="$(git rev-parse HEAD)"
@@ -654,6 +669,7 @@ jobs:
             --policy-sha "$policy_sha" \
             --provider "$PROVIDER" \
             --worker "$WORKER" \
+            --max-files "$MAX_FILES" \
             --output .agent-task-packet.json
           python3 scripts/agent_protocol.py prompt \
             --packet .agent-task-packet.json \
@@ -699,7 +715,7 @@ jobs:
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee .agent-worker-prompt.md y ejecuta exactamente ese contrato. Usa .agent-task-packet.json como sobre TASK autoritativo del handoff. No sustituyas el ResultPacket por una narracion libre.'
+          prompt: 'Lee .agent-worker-prompt.md y haz exactamente lo que dice: contiene toda la tarea. No leas ningun otro fichero de contexto (.agent-task-packet.json, .agent-*, AGENTS.md, .agent-platino/); solo el fichero asignado. Termina con el bloque AGENT_RESULT.'
 
       - id: implement_gemini
         name: Implementar con Gemini
@@ -714,7 +730,7 @@ jobs:
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"tools":{"core":["read_file","write_file","replace","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee .agent-worker-prompt.md y ejecuta exactamente ese contrato. Usa .agent-task-packet.json como sobre TASK autoritativo del handoff. No sustituyas el ResultPacket por una narracion libre.'
+          prompt: 'Lee .agent-worker-prompt.md y haz exactamente lo que dice: contiene toda la tarea. No leas ningun otro fichero de contexto (.agent-task-packet.json, .agent-*, AGENTS.md, .agent-platino/); solo el fichero asignado. Termina con el bloque AGENT_RESULT.'
 
       - name: Confirmar inbox B2B consumido
         if: >-
@@ -896,6 +912,9 @@ jobs:
           cp .agent-task.md /tmp/agent-task.md
           rm -f .agent-task.md .agent-plan.json .agent-task-packet.json .agent-worker-prompt.md .agent-b2b-inbox.md .agent-context.md .agent-memory.json .agent-history.json .agent-platino-sha gha-creds-*.json
           rm -rf .agent-platino .agent-wiki .gemini .qwen gemini-artifacts qwen-artifacts
+          # Cualquier otro auxiliar que cree el worker (.agent-result.json en #1894)
+          # no es contenido del repo: los planes no pueden reservar rutas .agent-*.
+          rm -rf ./.agent-*
           git add -A
           if git diff --cached --quiet; then
             echo "retry_stage=no-changes" >> "$GITHUB_OUTPUT"
