@@ -59,8 +59,12 @@ func _probar() -> void:
 		_fondo(favoritos, "panel").is_equal_approx(NavegadorSiga.FONDO_LATERAL),
 		"favoritos comparte la identidad lateral",
 	)
-	_comprobar(direccion.get_theme_stylebox("focus") is StyleBoxFlat, "dirección conserva foco visible")
-	_comprobar(enlaces.get_theme_stylebox("focus") is StyleBoxFlat, "enlaces conservan foco visible")
+	_comprobar(
+		direccion.get_theme_stylebox("focus") is StyleBoxFlat, "dirección conserva foco visible"
+	)
+	_comprobar(
+		enlaces.get_theme_stylebox("focus") is StyleBoxFlat, "enlaces conservan foco visible"
+	)
 	_comprobar(
 		navegador.url_actual() == NavegadorSiga.URL_INICIO,
 		"la identidad visual no cambia la navegación inicial",
