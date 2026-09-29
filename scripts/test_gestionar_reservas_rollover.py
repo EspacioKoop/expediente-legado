@@ -27,10 +27,10 @@ class ReservasRolloverTest(unittest.TestCase):
     def test_combina_registro_historico_y_activo_en_orden(self):
         respuestas = {
             "/issues/182/comments?per_page=100&page=1": [
-                {"id": 10, "created_at": "2026-09-28T10:00:00Z", "body": "viejo"}
+                {"id": 10, "created_at": "2026-09-28T10:00:00Z", "body": "viejo", "author_association": "MEMBER", "user": {"login": "maintainer"}}
             ],
             "/issues/1713/comments?per_page=100&page=1": [
-                {"id": 20, "created_at": "2026-09-28T11:00:00Z", "body": "nuevo"}
+                {"id": 20, "created_at": "2026-09-28T11:00:00Z", "body": "nuevo", "author_association": "NONE", "user": {"login": "github-actions[bot]"}}
             ],
         }
 
@@ -42,6 +42,21 @@ class ReservasRolloverTest(unittest.TestCase):
             comentarios = rollover.obtener_comentarios([182, 1713])
         self.assertEqual([c["id"] for c in comentarios], [10, 20])
 
+    def test_filtra_comentario_externo_del_historial(self):
+        respuestas = {
+            "/issues/182/comments?per_page=100&page=1": [
+                {"id": 10, "created_at": "2026-09-28T10:00:00Z", "body": "CLAIM issue=#9 agent=X branch=x files=a goal=a", "author_association": "NONE", "user": {"login": "externo"}}
+            ],
+        }
+
+        def api(_method, path, _payload=None):
+            sufijo = path.split("/repos/x/y", 1)[-1]
+            return respuestas.get(sufijo, []), {}
+
+        with patch.object(base, "REPO", "x/y"), patch.object(base, "api_json", api):
+            comentarios = rollover.obtener_comentarios([182])
+        self.assertEqual([], comentarios)
+
     def test_gestion_publica_release_solo_en_registro_activo(self):
         comentarios = [
             {
@@ -51,11 +66,15 @@ class ReservasRolloverTest(unittest.TestCase):
                     "CLAIM issue=#91 agent=A branch=feat/91-x "
                     "files=a.gd goal=x lease=48h"
                 ),
+                "author_association": "MEMBER",
+                "user": {"login": "maintainer"},
             },
             {
                 "id": 20,
                 "created_at": "2026-09-28T11:00:00Z",
                 "body": "PR_READY issue=#91 pr=#200 sha=abc pruebas=ok limites=ninguno",
+                "author_association": "NONE",
+                "user": {"login": "github-actions[bot]"},
             },
         ]
         llamadas = []
