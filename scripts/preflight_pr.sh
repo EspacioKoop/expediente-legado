@@ -10,6 +10,9 @@ cd "$RAIZ"
 echo "==> Preflight GDScript + tests Python"
 bash scripts/check_gdscript.sh
 
+echo "==> Secretos en los commits de la rama"
+bash scripts/escanear_secretos.sh
+
 echo "==> Whitespace del working tree"
 git diff --check
 
