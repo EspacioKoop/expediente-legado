@@ -24,7 +24,8 @@ import re
 import sys
 from typing import Any, Iterator
 
-MAX_FILES = 12
+DEFAULT_MAX_FILES = 1
+HARD_MAX_FILES = 12
 MAX_GOAL = 180
 # Un plan son 12 rutas y un objetivo: ningún plan real se acerca a esto.
 MAX_OBJECT = 64 * 1024
@@ -197,11 +198,13 @@ def source_texts(raw: str) -> list[str]:
     return [raw]
 
 
-def normalize(plan: dict[str, Any]) -> dict[str, Any]:
-    """Misma validación de rutas que tenía el paso inline del worker."""
+def normalize(plan: dict[str, Any], *, max_files: int = DEFAULT_MAX_FILES) -> dict[str, Any]:
+    """Valida rutas y aplica el presupuesto real del TaskPacket."""
+    if not 1 <= int(max_files) <= HARD_MAX_FILES:
+        raise PlanError("max_files fuera de límites")
     files = plan.get("files", [])
-    if not isinstance(files, list) or len(files) > MAX_FILES:
-        raise PlanError("plan invalido")
+    if not isinstance(files, list) or len(files) > int(max_files):
+        raise PlanError("plan excede max_files")
     clean: list[str] = []
     for item in files:
         if not isinstance(item, str):
@@ -247,6 +250,7 @@ def main(argv: list[str] | None = None) -> int:
         help="fichero con la salida del planificador; repetible, gana el primero con plan",
     )
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--max-files", type=int, default=DEFAULT_MAX_FILES)
     args = parser.parse_args(argv)
 
     found = parse_sources(args.source)
@@ -255,7 +259,7 @@ def main(argv: list[str] | None = None) -> int:
         return EXIT_UNPARSEABLE
     plan, strategy, path = found
     try:
-        normalized = normalize(plan)
+        normalized = normalize(plan, max_files=args.max_files)
     except PlanError as exc:
         print(str(exc), file=sys.stderr)
         return EXIT_INVALID
