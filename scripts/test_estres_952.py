@@ -141,7 +141,7 @@ class Estres952Test(unittest.TestCase):
         self.assertIn("if not correcta and registrada and primer_error:", bloque)
         self.assertIn("func _caso_tiene_error_previo", self.archivado)
 
-    def test_timbre_escolar_es_productor_diegético_idempotente(self):
+    def test_timbre_escolar_es_productor_diegetico_idempotente(self):
         self.assertIn("static func registrar_sonido_inquietante(", self.estres)
         self.assertIn("CAMPO_SONIDOS_INQUIETANTES", self.estres)
         self.assertIn('ID_SONIDO_INQUIETANTE := "escuela:timbre_fuera_horario"', self.escuela)
