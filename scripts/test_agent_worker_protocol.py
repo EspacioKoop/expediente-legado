@@ -28,6 +28,52 @@ class AgentWorkerProtocolTest(unittest.TestCase):
         self.assertIn(".agent-worker-prompt.md", block)
         self.assertIn("git rev-parse HEAD", block)
 
+    def test_blocker_b2b_llega_al_planner_antes_del_plan(self):
+        inbox = WORKFLOW.index("- id: b2b_plan_inbox\n")
+        qwen = WORKFLOW.index("- id: plan_qwen\n")
+        self.assertLess(inbox, qwen)
+        block = step("- id: b2b_plan_inbox\n")
+        self.assertIn("scripts/agent_b2b_mailbox.py", block)
+        self.assertIn("inbox --recipient worker", block)
+        self.assertIn("git rev-parse HEAD", block)
+        self.assertIn(".agent-b2b-inbox.md", block)
+
+        for planner in ("plan_qwen", "plan_gemini"):
+            plan = step(f"- id: {planner}\n")
+            self.assertIn(".agent-b2b-inbox.md si existe", plan)
+            self.assertIn("BLOCKER de CLAIM", plan)
+
+    def test_mailbox_b2b_se_refresca_antes_de_implementar(self):
+        protocol = WORKFLOW.index("- id: protocol\n")
+        inbox = WORKFLOW.index("- id: b2b_inbox\n")
+        qwen = WORKFLOW.index("- id: implement_qwen\n")
+        self.assertLess(protocol, inbox)
+        self.assertLess(inbox, qwen)
+        block = step("- id: b2b_inbox\n")
+        self.assertIn("scripts/agent_b2b_mailbox.py", block)
+        self.assertIn("inbox --recipient worker", block)
+        self.assertIn("steps.protocol.outputs.task_id", block)
+        self.assertIn("continue-on-error: true", block)
+
+    def test_ack_ocurre_solo_tras_consumo_del_implementer(self):
+        ack = step("- name: Confirmar inbox B2B consumido\n")
+        self.assertIn("scripts/agent_b2b_mailbox.py ack", ack)
+        self.assertIn("steps.implement_qwen.outcome == 'success'", ack)
+        self.assertIn("steps.implement_gemini.outcome == 'success'", ack)
+        self.assertGreater(
+            WORKFLOW.index("- name: Confirmar inbox B2B consumido\n"),
+            WORKFLOW.index("- id: implement_gemini\n"),
+        )
+
+    def test_claim_drift_envia_blocker_y_conserva_fallback_github(self):
+        block = step("- id: replan\n")
+        self.assertIn("scripts/agent_b2b_mailbox.py", block)
+        self.assertIn("--type BLOCKER", block)
+        self.assertIn("for recipient in dispatcher worker", block)
+        self.assertIn("claim-drift-", block)
+        self.assertIn(".outside[]", block)
+        self.assertIn("AGENT_POOL_REPLAN", block)
+
     def test_workers_consumen_el_prompt_compilado(self):
         for worker_step in ("implement_qwen", "implement_gemini"):
             with self.subTest(worker=worker_step):
