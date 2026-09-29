@@ -138,6 +138,14 @@ def build_task(args: argparse.Namespace) -> dict[str, Any]:
         artifacts["claim"] = _artifact(args.claim)
         claim_packet = _json(args.claim)
         validate(claim_packet)
+        if claim_packet.get("type") != "CLAIM":
+            raise ValueError("claim packet no es CLAIM")
+        if claim_packet.get("issue") != args.issue:
+            raise ValueError("claim packet pertenece a otro issue")
+        requested_correlation = _clean_text(getattr(args, "correlation_id", ""), 180)
+        claim_correlation = _clean_text(claim_packet.get("correlation_id"), 180)
+        if requested_correlation and claim_correlation and requested_correlation != claim_correlation:
+            raise ValueError("claim packet pertenece a otro intento")
     packet = {
         "schema": SCHEMA,
         "type": "TASK",
@@ -194,6 +202,12 @@ def parse_result(raw: str, task_packet: dict[str, Any]) -> dict[str, Any]:
 
 
 def build_review(review: dict[str, Any], task: dict[str, Any], result: dict[str, Any]) -> dict[str, Any]:
+    if result.get("issue") not in {None, task.get("issue")}:
+        raise ValueError("ResultPacket pertenece a otro issue")
+    task_correlation = task.get("correlation_id")
+    result_correlation = result.get("correlation_id")
+    if task_correlation and result_correlation and task_correlation != result_correlation:
+        raise ValueError("ResultPacket pertenece a otro intento")
     packet = {
         "schema": SCHEMA,
         "type": "REVIEW",
@@ -215,6 +229,9 @@ def build_review(review: dict[str, Any], task: dict[str, Any], result: dict[str,
 def compile_prompt(role: str, provider: str, task_path: Path, result_path: Path | None = None) -> str:
     task = _json(task_path)
     validate(task)
+    packet_provider = task.get("provider")
+    if packet_provider in {"qwen", "gemini"} and packet_provider != provider:
+        raise ValueError("provider del prompt no coincide con el TaskPacket")
     rules = "QWEN.md" if provider == "qwen" else "GEMINI.md"
     if role == "plan":
         return f"""# Agent B2B prompt v1
