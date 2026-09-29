@@ -186,9 +186,9 @@ func _entrar_sala() -> void:
 
 	if _servicio != null:
 		_servicio.cerrar()
-	var transporte: RefCounted = (
-		transporte_override if transporte_override != null else TransporteOnlineFactory.crear(endpoint, false)
-	)
+	var transporte: RefCounted = transporte_override
+	if transporte == null:
+		transporte = TransporteOnlineFactory.crear(endpoint, false)
 	_servicio = CombateCoopServicio.new(transporte)
 	var apertura := (
 		_servicio
