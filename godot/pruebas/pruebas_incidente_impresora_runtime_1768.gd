@@ -1,5 +1,6 @@
 extends SceneTree
 
+
 class HostFalso:
 	extends Node3D
 
@@ -78,14 +79,17 @@ func _probar_materializacion_y_chat() -> void:
 	_comprobar(bool(activa["evento_publicado"]), "publica el evento canónico")
 
 	var chat := ChatCorporativoModelo.new()
-	chat.configurar_contexto(
-		{
-			"fase": "archivo",
-			"dia": host.jornada["dia"],
-			"acciones": host.jornada["acciones"],
-			"companeros": ["becario", "telefono"],
-			"eventos": host.jornada["eventos"],
-		},
+	(
+		chat
+		. configurar_contexto(
+			{
+				"fase": "archivo",
+				"dia": host.jornada["dia"],
+				"acciones": host.jornada["acciones"],
+				"companeros": ["becario", "telefono"],
+				"eventos": host.jornada["eventos"],
+			},
+		)
 	)
 	var ids: Array[String] = []
 	for canal in chat.canales_visibles():
@@ -160,7 +164,9 @@ func _probar_ignorar_y_dia_nuevo() -> void:
 		host.jornada[controller.CLAVE_ESTADO] == estado_antes,
 		"ignorar no avanza la incidencia",
 	)
-	_comprobar(int(host.jornada["acciones"]) == acciones_antes, "ignorar no bloquea ni gasta acciones")
+	_comprobar(
+		int(host.jornada["acciones"]) == acciones_antes, "ignorar no bloquea ni gasta acciones"
+	)
 
 	host.jornada["dia"] = int(host.jornada["dia"]) + 1
 	host.jornada["acciones"] = Jornada.ACCIONES_POR_DIA
