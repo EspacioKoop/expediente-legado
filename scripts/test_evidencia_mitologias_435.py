@@ -65,7 +65,7 @@ class EvidenciaMitologias435Test(unittest.TestCase):
         self.assertIn("revisión humana", self.doc.lower())
 
     def test_workflow_publica_artifact(self):
-        self.assertIn("actions/upload-artifact@v4", self.workflow)
+        self.assertIn("actions/upload-artifact@", self.workflow)
         self.assertIn("evidencia-mitologias-435/", self.workflow)
         self.assertIn("capturar_mitologias_435.gd", self.workflow)
 

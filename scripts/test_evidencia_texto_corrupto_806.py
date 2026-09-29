@@ -23,7 +23,7 @@ class EvidenciaTextoCorrupto806Test(unittest.TestCase):
         self.assertIn('"rotulo-3d.png"', fuente)
         self.assertIn('"veredicto_automatico": false', fuente)
         flujo = WORKFLOW.read_text(encoding="utf-8")
-        self.assertIn("actions/upload-artifact@v4", flujo)
+        self.assertIn("actions/upload-artifact@", flujo)
         self.assertIn("evidencia-texto-corrupto-806", flujo)
         self.assertIn("capturar_texto_corrupto_806.gd", flujo)
 

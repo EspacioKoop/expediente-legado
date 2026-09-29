@@ -57,7 +57,7 @@ class EvidenciaComercios676Test(unittest.TestCase):
             self.workflow,
         )
         self.assertIn("manifest.json", self.workflow)
-        self.assertIn("actions/upload-artifact@v4", self.workflow)
+        self.assertIn("actions/upload-artifact@", self.workflow)
         self.assertIn("evidencia-comercios-676-${{ github.sha }}", self.workflow)
         self.assertIn("len(set(hashes)) != 4", self.workflow)
 

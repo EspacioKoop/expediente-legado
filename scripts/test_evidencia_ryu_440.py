@@ -77,7 +77,7 @@ class EvidenciaRyu440Test(unittest.TestCase):
         self.assertIn("Evidencia Ryū 440", self.workflow)
         self.assertIn("xvfb-run -a godot4", self.workflow)
         self.assertIn("capturar_ryu_440.gd", self.workflow)
-        self.assertIn("actions/upload-artifact@v4", self.workflow)
+        self.assertIn("actions/upload-artifact@", self.workflow)
         self.assertIn("evidencia-ryu-440/", self.workflow)
 
     def test_documentacion_separa_evidencia_de_playtest(self) -> None:

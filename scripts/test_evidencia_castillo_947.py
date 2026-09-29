@@ -39,7 +39,7 @@ class EvidenciaCastillo947Test(unittest.TestCase):
         self.assertIn("Evidencia castillo 947", self.workflow)
         self.assertIn("xvfb-run -a godot4", self.workflow)
         self.assertIn("capturar_castillo_947.gd", self.workflow)
-        self.assertIn("actions/upload-artifact@v4", self.workflow)
+        self.assertIn("actions/upload-artifact@", self.workflow)
         self.assertIn("evidencia-castillo-947/*.png", self.workflow)
 
     def test_documentacion_no_confunde_evidencia_con_playtest_humano(self) -> None:

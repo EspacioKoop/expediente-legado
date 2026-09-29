@@ -249,9 +249,11 @@ class CiBrainTest(unittest.TestCase):
         self.assertIn("secrets.TURSO_AUTH_TOKEN", texto)
         self.assertRegex(
             texto,
-            re.compile(r"uses: actions/upload-artifact@[0-9a-f]{40}\s+# v4"),
+            # Fijado por SHA completo (#1819) con su comentario de versión, sin
+            # exigir una mayor concreta: Dependabot la sube (#1850).
+            re.compile(r"uses: actions/upload-artifact@[0-9a-f]{40}\s+# v\d+"),
         )
-        self.assertNotIn("actions/upload-artifact@v4", texto)
+        self.assertNotRegex(texto, r"actions/upload-artifact@v\d")
         self.assertNotIn("pull_request:", texto)
 
 

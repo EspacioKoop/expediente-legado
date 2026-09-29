@@ -83,7 +83,7 @@ class EvidenciaDensidad282Test(unittest.TestCase):
             self.workflow,
         )
         self.assertIn("manifest.json", self.workflow)
-        self.assertIn("actions/upload-artifact@v4", self.workflow)
+        self.assertIn("actions/upload-artifact@", self.workflow)
         self.assertIn('manifest.get("locale") != "es"', self.workflow)
         self.assertIn('manifest.get("vistas_por_fase") != 3', self.workflow)
         self.assertIn('len(set(hashes)) != 3', self.workflow)

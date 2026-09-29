@@ -12,10 +12,8 @@ class DenoDeployWorkflowTest(unittest.TestCase):
         cls.text = WORKFLOW.read_text(encoding="utf-8")
 
     def test_usa_cli_moderno_y_valida_antes_de_desplegar(self):
-        self.assertIn(
-            "uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed",
-            self.text,
-        )
+        # Fijado por SHA completo, sin exigir uno concreto: Dependabot lo sube.
+        self.assertRegex(self.text, r"uses: denoland/setup-deno@[0-9a-f]{40} # v\d+")
         self.assertRegex(self.text, r"deno-version: v\d+\.\d+\.\d+\n")
         self.assertNotIn("uses: denoland/setup-deno@v2", self.text)
         self.assertIn("run: deno task check", self.text)

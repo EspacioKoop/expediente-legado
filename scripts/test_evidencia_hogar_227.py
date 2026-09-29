@@ -68,7 +68,7 @@ class EvidenciaHogar227Test(unittest.TestCase):
             self.workflow,
         )
         self.assertIn("manifest.json", self.workflow)
-        self.assertIn("actions/upload-artifact@v4", self.workflow)
+        self.assertIn("actions/upload-artifact@", self.workflow)
         self.assertIn("evidencia-hogar-227-${{ github.sha }}", self.workflow)
         self.assertIn('manifest["instancias_cc0"] != 15', self.workflow)
         self.assertIn('objeto["zona"] == zona', self.workflow)
