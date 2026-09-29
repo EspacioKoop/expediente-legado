@@ -150,9 +150,12 @@ func _montar_desfase(espacio: Dictionary) -> void:
 	_sonido_b.stream = stream
 	_sonido_b.position = centro + Vector3(0.8, 1.0, 0.0)
 	_sonido_b.unit_size = 3.0
-	_sonido_b.set_meta(
-		"retardo_ambiental",
-		float((get_meta("presentacion", {}) as Dictionary).get("retardo_ambiental", 0.40)),
+	(
+		_sonido_b
+		. set_meta(
+			"retardo_ambiental",
+			float((get_meta("presentacion", {}) as Dictionary).get("retardo_ambiental", 0.40)),
+		)
 	)
 	add_child(_sonido_b)
 
