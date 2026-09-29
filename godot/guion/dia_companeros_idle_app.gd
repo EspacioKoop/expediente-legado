@@ -149,6 +149,32 @@ func huir_de(origen_global: Vector3) -> void:
 			idle.huir_de(origen_global)
 
 
+## #1769: una llamada transferida cambia brevemente la rutina de un compañero
+## sin crear otro sistema de movimiento. Reutiliza el gesto conversacional ya
+## probado; al terminar vuelve exactamente a su rutina anterior.
+func reaccion_llamada_interna() -> bool:
+	var candidatos: Array[CompaneroIdle3D] = []
+	for idle in _idles:
+		if (
+			is_instance_valid(idle)
+			and not idle.gesto_telefono
+			and not idle.en_recado()
+			and not idle.esta_conversando()
+		):
+			candidatos.append(idle)
+	if candidatos.is_empty():
+		return false
+	var idle := candidatos[_recados_hechos % candidatos.size()]
+	idle.conversar(true)
+	get_tree().create_timer(3.0).timeout.connect(_terminar_reaccion_llamada.bind(idle))
+	return true
+
+
+func _terminar_reaccion_llamada(idle: CompaneroIdle3D) -> void:
+	if is_instance_valid(idle):
+		idle.conversar(false)
+
+
 ## Lanza el siguiente recado cuando toca y mantiene el volumen conversable
 ## encima del cuerpo que anda: hablar con alguien es hablar donde está.
 func _seguir_recados(
