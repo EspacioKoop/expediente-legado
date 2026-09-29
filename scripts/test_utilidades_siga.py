@@ -89,6 +89,8 @@ class UtilidadesSigaTest(unittest.TestCase):
             [
                 motor,
                 "--headless",
+                "--accessibility",
+                "disabled",
                 "--path",
                 str(ROOT / "godot"),
                 "--script",
