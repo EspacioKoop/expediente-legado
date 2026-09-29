@@ -11,6 +11,7 @@ from typing import Any, Iterator
 BEGIN = "AGENT_PLAN_BEGIN"
 END = "AGENT_PLAN_END"
 TRUSTED_ASSOCIATIONS = {"OWNER", "MEMBER", "COLLABORATOR"}
+MACHINE_PLAN_MARKER = "<!-- agent-delegated-plan:v1 -->"
 
 
 def _author_login(source: dict[str, Any]) -> str:
@@ -30,7 +31,18 @@ def _association(source: dict[str, Any]) -> str:
 
 def _trusted(source: dict[str, Any]) -> bool:
     login = _author_login(source)
-    if not login or login.lower().endswith("[bot]"):
+    if not login:
+        return False
+
+    body = source.get("body")
+    if (
+        login == "github-actions[bot]"
+        and isinstance(body, str)
+        and MACHINE_PLAN_MARKER in body
+    ):
+        return True
+
+    if login.lower().endswith("[bot]"):
         return False
     author = source.get("author") or source.get("user")
     if isinstance(author, dict):
