@@ -260,7 +260,9 @@ con JSON válido de esta forma:
   "next_action": "siguiente acción concreta"
 }}
 
-Después puedes emitir 'AGENT_MEMORY_BEGIN' con el formato histórico de memoria.
+Después puedes emitir 'AGENT_MEMORY_BEGIN' seguido de JSON
+{"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]}
+y 'AGENT_MEMORY_END' para conservar la memoria histórica existente.
 No incluyas secretos, razonamiento interno ni texto sensible en ninguno de los dos
 bloques.
 """
