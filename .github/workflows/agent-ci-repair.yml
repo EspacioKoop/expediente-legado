@@ -60,11 +60,7 @@ jobs:
       HAS_TS_OIDC: ${{ secrets.TS_OAUTH_CLIENT_ID != '' && secrets.TS_AUDIENCE != '' }}
       HAS_OMNIROUTE: ${{ secrets.OMNIROUTE_API_KEY != '' && secrets.TS_OAUTH_CLIENT_ID != '' && (secrets.TS_OAUTH_SECRET != '' || secrets.TS_AUDIENCE != '') && vars.OMNIROUTE_BASE_URL != '' && vars.OMNIROUTE_MODEL != '' }}
       HAS_QWEN: ${{ secrets.QWEN_API_KEY != '' }}
-      HAS_QWEN_FALLBACK_1: ${{ secrets.QWEN_FALLBACK_1_API_KEY != '' }}
-      HAS_QWEN_FALLBACK_2: ${{ secrets.QWEN_FALLBACK_2_API_KEY != '' }}
-      HAS_QWEN_FALLBACK_3: ${{ secrets.QWEN_FALLBACK_3_API_KEY != '' }}
-      HAS_QWEN_FALLBACK_4: ${{ secrets.QWEN_FALLBACK_4_API_KEY != '' }}
-      HAS_QWEN_ANY: ${{ (secrets.OMNIROUTE_API_KEY != '' && secrets.TS_OAUTH_CLIENT_ID != '' && (secrets.TS_OAUTH_SECRET != '' || secrets.TS_AUDIENCE != '') && vars.OMNIROUTE_BASE_URL != '' && vars.OMNIROUTE_MODEL != '') || secrets.QWEN_API_KEY != '' || secrets.QWEN_FALLBACK_1_API_KEY != '' || secrets.QWEN_FALLBACK_2_API_KEY != '' || secrets.QWEN_FALLBACK_3_API_KEY != '' || secrets.QWEN_FALLBACK_4_API_KEY != '' }}
+      HAS_QWEN_ANY: ${{ (secrets.OMNIROUTE_API_KEY != '' && secrets.TS_OAUTH_CLIENT_ID != '' && (secrets.TS_OAUTH_SECRET != '' || secrets.TS_AUDIENCE != '') && vars.OMNIROUTE_BASE_URL != '' && vars.OMNIROUTE_MODEL != '') || secrets.QWEN_API_KEY != '' || secrets.QWEN_FALLBACK_1_API_KEY != '' || secrets.QWEN_FALLBACK_2_API_KEY != '' || secrets.QWEN_FALLBACK_3_API_KEY != '' || secrets.QWEN_FALLBACK_4_API_KEY != '' || secrets.QWEN_FALLBACK_5_API_KEY != '' || secrets.QWEN_FALLBACK_6_API_KEY != '' || secrets.QWEN_FALLBACK_7_API_KEY != '' || secrets.QWEN_FALLBACK_8_API_KEY != '' || secrets.QWEN_FALLBACK_9_API_KEY != '' || secrets.QWEN_FALLBACK_10_API_KEY != '' || secrets.QWEN_FALLBACK_11_API_KEY != '' || secrets.QWEN_FALLBACK_12_API_KEY != '' }}
       HAS_GEMINI: ${{ secrets.GEMINI_API_KEY != '' }}
       GEMINI_CLI_TRUST_WORKSPACE: 'true'
     steps:
@@ -285,54 +281,91 @@ jobs:
           settings: '{"model":{"maxSessionTurns":30},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
           prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-ci-failure.log, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Corrige solo la causa del CI y solo rutas del CLAIM. No ejecutes shell ni Git. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable sobre el fallo y su corrección, sin secretos","tags":["ci"]} y AGENT_MEMORY_END.'
 
+      - id: qwen_fallbacks
+        name: Resolver fallbacks Qwen dinámicos
+        if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && steps.repair_omniroute.outcome != 'success' && steps.repair_qwen.outcome != 'success'
+        env:
+          VARS_JSON: ${{ toJSON(vars) }}
+          FALLBACK_KEYS: >-
+            ${{ secrets.QWEN_FALLBACK_1_API_KEY != '' && '1' || '' }}
+            ${{ secrets.QWEN_FALLBACK_2_API_KEY != '' && '2' || '' }}
+            ${{ secrets.QWEN_FALLBACK_3_API_KEY != '' && '3' || '' }}
+            ${{ secrets.QWEN_FALLBACK_4_API_KEY != '' && '4' || '' }}
+            ${{ secrets.QWEN_FALLBACK_5_API_KEY != '' && '5' || '' }}
+            ${{ secrets.QWEN_FALLBACK_6_API_KEY != '' && '6' || '' }}
+            ${{ secrets.QWEN_FALLBACK_7_API_KEY != '' && '7' || '' }}
+            ${{ secrets.QWEN_FALLBACK_8_API_KEY != '' && '8' || '' }}
+            ${{ secrets.QWEN_FALLBACK_9_API_KEY != '' && '9' || '' }}
+            ${{ secrets.QWEN_FALLBACK_10_API_KEY != '' && '10' || '' }}
+            ${{ secrets.QWEN_FALLBACK_11_API_KEY != '' && '11' || '' }}
+            ${{ secrets.QWEN_FALLBACK_12_API_KEY != '' && '12' || '' }}
+          BASE_KEYS: >-
+            ${{ secrets.QWEN_API_KEY != '' && 'qwen' || '' }}
+            ${{ secrets.GEMINI_API_KEY != '' && 'gemini' || '' }}
+          DEFAULT_MODEL: ${{ vars.QWEN_MODEL || steps.qwen.outputs.model }}
+        run: |
+          set -euo pipefail
+          mapfile -t workers < <(python3 scripts/agent_slots.py listar | jq -r '.[].worker')
+          for idx in 1 2 3 4; do
+            worker="${workers[$((idx - 1))]:-}"
+            [[ -n "$worker" ]] || continue
+            data="$(python3 scripts/agent_slots.py resolver --worker "$worker" --modelo-por-defecto "$DEFAULT_MODEL")"
+            {
+              echo "worker_$idx=$worker"
+              echo "url_$idx=$(jq -r '.url' <<<"$data")"
+              echo "model_$idx=$(jq -r '.model' <<<"$data")"
+              echo "secret_$idx=$(jq -r '.secret' <<<"$data")"
+            } >> "$GITHUB_OUTPUT"
+          done
+
       - id: repair_qwen_fallback_1
-        name: Reparar con Qwen (fallback 1)
-        if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_1 == 'true' && steps.repair_omniroute.outcome != 'success' && steps.repair_qwen.outcome != 'success'
+        name: Reparar con Qwen (fallback dinámico 1)
+        if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_1 != ''
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
-          openai_api_key: ${{ secrets.QWEN_FALLBACK_1_API_KEY }}
-          openai_base_url: ${{ vars.QWEN_FALLBACK_1_BASE_URL }}
-          openai_model: ${{ vars.QWEN_FALLBACK_1_MODEL || vars.QWEN_MODEL || steps.qwen.outputs.model }}
+          openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_1] }}
+          openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_1 }}
+          openai_model: ${{ steps.qwen_fallbacks.outputs.model_1 }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":30},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
           prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-ci-failure.log, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Corrige solo la causa del CI y solo rutas del CLAIM. No ejecutes shell ni Git. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable sobre el fallo y su corrección, sin secretos","tags":["ci"]} y AGENT_MEMORY_END.'
 
       - id: repair_qwen_fallback_2
-        name: Reparar con Qwen (fallback 2)
-        if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_2 == 'true' && steps.repair_omniroute.outcome != 'success' && steps.repair_qwen.outcome != 'success' && steps.repair_qwen_fallback_1.outcome != 'success'
+        name: Reparar con Qwen (fallback dinámico 2)
+        if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_2 != '' && steps.repair_qwen_fallback_1.outcome != 'success'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
-          openai_api_key: ${{ secrets.QWEN_FALLBACK_2_API_KEY }}
-          openai_base_url: ${{ vars.QWEN_FALLBACK_2_BASE_URL }}
-          openai_model: ${{ vars.QWEN_FALLBACK_2_MODEL || vars.QWEN_MODEL || steps.qwen.outputs.model }}
+          openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_2] }}
+          openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_2 }}
+          openai_model: ${{ steps.qwen_fallbacks.outputs.model_2 }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":30},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
           prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-ci-failure.log, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Corrige solo la causa del CI y solo rutas del CLAIM. No ejecutes shell ni Git. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable sobre el fallo y su corrección, sin secretos","tags":["ci"]} y AGENT_MEMORY_END.'
 
       - id: repair_qwen_fallback_3
-        name: Reparar con Qwen (fallback 3)
-        if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_3 == 'true' && steps.repair_omniroute.outcome != 'success' && steps.repair_qwen.outcome != 'success' && steps.repair_qwen_fallback_1.outcome != 'success' && steps.repair_qwen_fallback_2.outcome != 'success'
+        name: Reparar con Qwen (fallback dinámico 3)
+        if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_3 != '' && steps.repair_qwen_fallback_1.outcome != 'success' && steps.repair_qwen_fallback_2.outcome != 'success'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
-          openai_api_key: ${{ secrets.QWEN_FALLBACK_3_API_KEY }}
-          openai_base_url: ${{ vars.QWEN_FALLBACK_3_BASE_URL }}
-          openai_model: ${{ vars.QWEN_FALLBACK_3_MODEL || vars.QWEN_MODEL || steps.qwen.outputs.model }}
+          openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_3] }}
+          openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_3 }}
+          openai_model: ${{ steps.qwen_fallbacks.outputs.model_3 }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":30},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
           prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-ci-failure.log, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Corrige solo la causa del CI y solo rutas del CLAIM. No ejecutes shell ni Git. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable sobre el fallo y su corrección, sin secretos","tags":["ci"]} y AGENT_MEMORY_END.'
 
       - id: repair_qwen_fallback_4
-        name: Reparar con Qwen (fallback 4)
-        if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_4 == 'true' && steps.repair_omniroute.outcome != 'success' && steps.repair_qwen.outcome != 'success' && steps.repair_qwen_fallback_1.outcome != 'success' && steps.repair_qwen_fallback_2.outcome != 'success' && steps.repair_qwen_fallback_3.outcome != 'success'
+        name: Reparar con Qwen (fallback dinámico 4)
+        if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_4 != '' && steps.repair_qwen_fallback_1.outcome != 'success' && steps.repair_qwen_fallback_2.outcome != 'success' && steps.repair_qwen_fallback_3.outcome != 'success'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
-          openai_api_key: ${{ secrets.QWEN_FALLBACK_4_API_KEY }}
-          openai_base_url: ${{ vars.QWEN_FALLBACK_4_BASE_URL }}
-          openai_model: ${{ vars.QWEN_FALLBACK_4_MODEL || vars.QWEN_MODEL || steps.qwen.outputs.model }}
+          openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_4] }}
+          openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_4 }}
+          openai_model: ${{ steps.qwen_fallbacks.outputs.model_4 }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":30},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
           prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-ci-failure.log, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Corrige solo la causa del CI y solo rutas del CLAIM. No ejecutes shell ni Git. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable sobre el fallo y su corrección, sin secretos","tags":["ci"]} y AGENT_MEMORY_END.'
