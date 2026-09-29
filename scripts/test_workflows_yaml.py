@@ -99,7 +99,7 @@ class WorkflowsYamlTest(unittest.TestCase):
         self.assertTrue(backtick_peligroso('--body "reparado (`$reason`). fin"'))
         self.assertTrue(backtick_peligroso('echo "en `$WORKER`; x"'))
         # Casos que deben devolver False
-        self.assertFalse(backtick_peligroso('--body "worker \\`$WORKER\` ok"'))
+        self.assertFalse(backtick_peligroso('--body "worker \\`$WORKER\\` ok"'))
         self.assertFalse(backtick_peligroso('core.notice(`Deleted: ${ref}`;)'))
         self.assertFalse(backtick_peligroso("echo 'literal `$x` sin expandir'"))
         self.assertFalse(backtick_peligroso('echo "sin dolar `abc`"'))
