@@ -234,15 +234,46 @@ Deno.test("BLOCKER fuerza blocking aunque el emisor lo omita", async () => {
   });
 });
 
-Deno.test("inbox exige task_id para no mezclar conversaciones", async () => {
+Deno.test("solo dispatcher puede usar inbox global sin task_id", async () => {
   await withKv(async (kv) => {
-    const response = await call(
+    await call(
+      kv,
+      "send",
+      question({ recipient: "dispatcher", idempotency_key: "global-1" }),
+      worker(),
+    );
+    await call(
+      kv,
+      "send",
+      question({
+        recipient: "dispatcher",
+        idempotency_key: "global-2",
+        task_id: "EspacioKoop/expediente-legado#1871@bbbbbbbbbbbb",
+      }),
+      worker("run-worker-2"),
+    );
+
+    const forbidden = await call(
       kv,
       "inbox",
       { schema: 1, recipient: "reviewer" },
       worker("run-reviewer"),
     );
-    assertEquals(response.status, 400, "task_id obligatorio");
+    assertEquals(forbidden.status, 400, "worker/reviewer exige task_id");
+
+    const global = await call(
+      kv,
+      "inbox",
+      { schema: 1, recipient: "dispatcher", limit: 10 },
+      dispatcher(),
+    );
+    assertEquals(global.status, 200, "dispatcher global");
+    const messages = global.data.messages as Array<Record<string, unknown>>;
+    assertEquals(messages.length, 2, "dos tareas visibles");
+    assert(
+      Number(messages[0].created_ms) <= Number(messages[1].created_ms),
+      "orden global cronológico",
+    );
   });
 });
 
