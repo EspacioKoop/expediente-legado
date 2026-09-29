@@ -455,7 +455,7 @@ jobs:
         name: Plan Qwen
         if: steps.guard.outputs.run == 'true' && inputs.provider == 'qwen' && steps.delegated.outputs.found != 'true'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
+        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || secrets[steps.qwen_config.outputs.key_secret] }}
           openai_base_url: ${{ steps.qwen_config.outputs.url }}
@@ -629,7 +629,7 @@ jobs:
         # para liberar la reserva (#1695: Nemotron Super superó 40 min).
         timeout-minutes: 35
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
+        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || secrets[steps.qwen_config.outputs.key_secret] }}
           openai_base_url: ${{ steps.qwen_config.outputs.url }}
@@ -812,7 +812,7 @@ jobs:
         if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true' && inputs.provider == 'qwen'
         timeout-minutes: 3
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
+        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || secrets[steps.qwen_config.outputs.key_secret] }}
           openai_base_url: ${{ steps.qwen_config.outputs.url }}

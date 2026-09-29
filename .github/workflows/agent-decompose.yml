@@ -119,7 +119,7 @@ jobs:
         if: steps.select.outputs.run == 'true' && env.HAS_QWEN == 'true'
         timeout-minutes: 5
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
+        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ secrets.QWEN_API_KEY }}
           openai_base_url: ${{ steps.qwen_config.outputs.url }}
