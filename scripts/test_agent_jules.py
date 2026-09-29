@@ -8,8 +8,6 @@ from pathlib import Path
 import re
 import unittest
 
-import yaml
-
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "agent-jules.yml"
 
@@ -17,19 +15,18 @@ WORKFLOW = ROOT / ".github" / "workflows" / "agent-jules.yml"
 class PuenteJulesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        # Sin PyYAML: el job rápido de CI no lo instala (#1929).
         cls.texto = WORKFLOW.read_text(encoding="utf-8")
-        cls.datos = yaml.safe_load(cls.texto)
+        cls.script = cls.texto[cls.texto.index("        run: |"):]
 
     def test_escucha_label_y_cierre_del_issue(self):
-        # PyYAML lee la clave `on` como True.
-        eventos = self.datos[True]["issues"]["types"]
-        self.assertEqual({"labeled", "unlabeled", "closed"}, set(eventos))
-        condicion = self.datos["jobs"]["reserva"]["if"]
-        self.assertIn("github.event.label.name == 'jules'", condicion)
-        self.assertIn("contains(github.event.issue.labels.*.name, 'jules')", condicion)
+        self.assertRegex(self.texto, r"types:\s*\[labeled, unlabeled, closed\]")
+        self.assertIn("github.event.label.name == 'jules'", self.texto)
+        self.assertIn("contains(github.event.issue.labels.*.name, 'jules')", self.texto)
 
     def test_permisos_minimos_y_sin_secretos(self):
-        self.assertEqual({"contents": "read", "issues": "write"}, self.datos["permissions"])
+        self.assertRegex(self.texto, r"permissions:\n  contents: read\n  issues: write\n")
+        self.assertNotIn("write-all", self.texto)
         self.assertNotIn("secrets.", self.texto)
 
     def test_valida_con_las_herramientas_del_pool(self):
@@ -53,11 +50,8 @@ class PuenteJulesTest(unittest.TestCase):
 
     def test_no_interpola_texto_del_issue_en_el_script(self):
         # Título y cuerpo son de terceros: solo entran por fichero, nunca por ${{ }}.
-        run = "\n".join(
-            paso.get("run", "") for paso in self.datos["jobs"]["reserva"]["steps"]
-        )
-        self.assertNotRegex(run, r"\$\{\{[^}]*github\.event\.issue\.(title|body)")
-        self.assertIsNone(re.search(r"\$\{\{", run))
+        self.assertNotRegex(self.texto, r"\$\{\{[^}]*github\.event\.issue\.(title|body)")
+        self.assertIsNone(re.search(r"\$\{\{", self.script))
 
 
 if __name__ == "__main__":
