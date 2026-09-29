@@ -912,6 +912,9 @@ jobs:
           cp .agent-task.md /tmp/agent-task.md
           rm -f .agent-task.md .agent-plan.json .agent-task-packet.json .agent-worker-prompt.md .agent-b2b-inbox.md .agent-context.md .agent-memory.json .agent-history.json .agent-platino-sha gha-creds-*.json
           rm -rf .agent-platino .agent-wiki .gemini .qwen gemini-artifacts qwen-artifacts
+          # Cualquier otro auxiliar que cree el worker (.agent-result.json en #1894)
+          # no es contenido del repo: los planes no pueden reservar rutas .agent-*.
+          rm -rf ./.agent-*
           git add -A
           if git diff --cached --quiet; then
             echo "retry_stage=no-changes" >> "$GITHUB_OUTPUT"

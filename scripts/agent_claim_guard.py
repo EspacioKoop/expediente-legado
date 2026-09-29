@@ -75,6 +75,11 @@ def cargar_plan(ruta: Path) -> set[str]:
 def _se_ignora(ruta: str) -> bool:
     if ruta in IGNORED_EXACT:
         return True
+    # Auxiliares que el propio worker crea en la raíz (.agent-result.json en
+    # #1894): un plan nunca puede reservar .agent-*, así que no son contenido
+    # del repo ni motivo de replan. validate_diff los borra antes del commit.
+    if "/" not in ruta and ruta.startswith(".agent-"):
+        return True
     if any(ruta.startswith(prefijo) for prefijo in IGNORED_PREFIXES):
         return True
     nombre = Path(ruta).name

@@ -69,6 +69,19 @@ class AgentClaimGuardTest(unittest.TestCase):
 
         self.assertEqual(resultado["outside"], [])
 
+    def test_auxiliar_agent_creado_por_el_modelo_no_es_desvio(self):
+        # #1894: el worker escribió su ResultPacket en .agent-result.json y la
+        # implementación, correcta, se descartó como «fuera del CLAIM».
+        (self.repo / "permitido.txt").write_text("ok\n", encoding="utf-8")
+        (self.repo / ".agent-result.json").write_text("{}\n", encoding="utf-8")
+        (self.repo / "sub").mkdir()
+        (self.repo / "sub" / ".agent-x.md").write_text("x\n", encoding="utf-8")
+
+        resultado = guard.ejecutar(self.repo, self.plan, restaurar=False)
+
+        # Solo la raíz: un .agent-* dentro de un directorio sí es contenido.
+        self.assertEqual(resultado["outside"], ["sub/.agent-x.md"])
+
     def test_todo_artefacto_agent_del_worker_se_ignora(self):
         # Un artefacto .agent-* nuevo en el worker no puede volver a descartar
         # implementaciones en silencio.

@@ -311,8 +311,8 @@ edites nada y devuelve status "blocked" explicando por qué.
 {rendered_domain}
 
 ## Salida obligatoria
-Emite exactamente un bloque 'AGENT_RESULT_BEGIN' / 'AGENT_RESULT_END' con JSON
-válido:
+En tu respuesta final (no en un fichero: no crees ficheros auxiliares) emite
+exactamente un bloque 'AGENT_RESULT_BEGIN' / 'AGENT_RESULT_END' con JSON válido:
 
 {{
   "schema": 1,
