@@ -73,6 +73,7 @@ func _probar_enjambre() -> void:
 	c["cooldown"] = 0.0
 	var paso_a := JuicioCombateArquetipos.avanzar(a, 0.01, {"atacantes_activos": 0})
 	a = paso_a["unidad"]
+	_comprobar(String(paso_a["telegraph"]) == "ataque_corto", "enjambre avisa antes de atacar")
 	var paso_b := JuicioCombateArquetipos.avanzar(b, 0.01, {"atacantes_activos": 1})
 	b = paso_b["unidad"]
 	var activos := JuicioCombateArquetipos.cuenta_presupuesto([a, b, c])
