@@ -336,9 +336,7 @@ func _asegurar_hud_camara() -> void:
 
 func _actualizar_hud_camara(dia: Node) -> void:
 	var visible := (
-		dia != null
-		and String(dia.jornada.get("fase", "")) == "sueño"
-		and _camara_disponible(dia)
+		dia != null and String(dia.jornada.get("fase", "")) == "sueño" and _camara_disponible(dia)
 	)
 	if not visible:
 		if is_instance_valid(_hud_camara):
