@@ -65,6 +65,8 @@ func _construir_interfaz() -> void:
 	_editor = TextEdit.new()
 	_editor.name = "Editor"
 	_editor.placeholder_text = tr("BLOC_NOTAS_PLACEHOLDER")
+	_editor.accessibility_name = tr("BLOC_NOTAS_TITULO")
+	_editor.accessibility_description = tr("BLOC_NOTAS_AYUDA")
 	_editor.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
 	_editor.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_editor.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -90,6 +92,7 @@ func _construir_interfaz() -> void:
 
 	_estado = Label.new()
 	_estado.name = "Estado"
+	_estado.accessibility_name = tr("BLOC_NOTAS_ESTADO")
 	_estado.add_theme_font_size_override("font_size", 12)
 	_estado.add_theme_color_override("font_color", Color("#565448"))
 	pie.add_child(_estado)
@@ -130,3 +133,4 @@ func _al_cambiar_texto() -> void:
 func _actualizar_estado() -> void:
 	if _estado != null:
 		_estado.text = "%d %s" % [exportar_texto().length(), tr("BLOC_NOTAS_ESTADO")]
+		_estado.accessibility_description = _estado.text
