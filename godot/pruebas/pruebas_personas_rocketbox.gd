@@ -75,6 +75,7 @@ func _probar_avatar(quien: Dictionary) -> void:
 		if (
 			not _bajo_identidad_historica(malla)
 			and not _es_identidad(malla)
+			and not _es_silueta_modular(malla)
 			and (malla as MeshInstance3D).material_override != null
 		):
 			tintadas += 1
@@ -257,6 +258,10 @@ func _comprobar_materiales(pieza: Node3D, id: String, relieve := false) -> void:
 				if shader != Espacio3D.shader_del_sitio() and shader != PELO_CAPAS.SHADER:
 					ajenas += 1
 				continue
+			if material != null and material.has_meta(RocketboxSiluetasModulares.MARCA):
+				if shader != Espacio3D.shader_del_sitio():
+					ajenas += 1
+				continue
 			if not (material is ShaderMaterial and material.get_shader_parameter("usar_uv")):
 				ajenas += 1
 			elif (
@@ -368,6 +373,11 @@ func _comprobar_pelo(esqueleto: Skeleton3D, id: String) -> void:
 func _es_identidad(malla: MeshInstance3D) -> bool:
 	var material := malla.material_override
 	return material != null and material.has_meta("identidad_historica_275")
+
+
+func _es_silueta_modular(malla: MeshInstance3D) -> bool:
+	var material := malla.material_override
+	return material != null and material.has_meta(RocketboxSiluetasModulares.MARCA)
 
 
 ## Caja de todas las mallas de [param nodo] en el espacio de [param base].
