@@ -55,6 +55,24 @@ def validate(packet: dict[str, Any]) -> None:
         raise ValueError("handoff B2B ausente")
 
 
+def verify_task_artifacts(packet: dict[str, Any]) -> None:
+    validate(packet)
+    if packet.get("type") != "TASK":
+        raise ValueError("solo TASK admite verificacion de artefactos")
+    artifacts = packet.get("artifacts")
+    if not isinstance(artifacts, dict):
+        raise ValueError("artifacts B2B ausente")
+    for name, meta in artifacts.items():
+        if not isinstance(meta, dict):
+            raise ValueError(f"artifact {name} invalido")
+        path = Path(str(meta.get("path") or ""))
+        if not path.is_file():
+            raise ValueError(f"artifact {name} ausente: {path}")
+        actual = _artifact(path)
+        if actual["sha256"] != meta.get("sha256") or actual["bytes"] != meta.get("bytes"):
+            raise ValueError(f"artifact {name} cambio despues del handoff")
+
+
 def build_task(args: argparse.Namespace) -> dict[str, Any]:
     plan = _json(args.plan)
     files = plan.get("files", [])
@@ -209,6 +227,8 @@ def main() -> int:
     p.add_argument("--output", type=Path, required=True)
     p = sub.add_parser("validate")
     p.add_argument("--packet", type=Path, required=True)
+    p = sub.add_parser("verify")
+    p.add_argument("--packet", type=Path, required=True)
     args = parser.parse_args()
     if args.cmd == "task":
         payload = build_task(args)
@@ -232,6 +252,9 @@ def main() -> int:
         return 0
     if args.cmd == "prompt":
         args.output.write_text(compile_prompt(args.role, args.provider, args.task_packet, args.result_packet), encoding="utf-8")
+        return 0
+    if args.cmd == "verify":
+        verify_task_artifacts(_json(args.packet))
         return 0
     validate(_json(args.packet))
     return 0
