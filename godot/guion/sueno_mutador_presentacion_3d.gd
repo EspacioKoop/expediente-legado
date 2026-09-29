@@ -42,6 +42,9 @@ static func montar(mundo: Node3D, espacio: Dictionary) -> SuenoMutadorPresentaci
 	capa.name = NOMBRE
 	capa.configurar(meta as Dictionary, espacio)
 	mundo.add_child(capa)
+	# Node reactiva automáticamente _process al entrar en árbol cuando el script
+	# lo implementa; fijar el estado después de add_child mantiene reduce_motion.
+	capa.set_process(capa._animar or capa._id == MutadoresSueno.DESFASE)
 	return capa
 
 
@@ -63,7 +66,6 @@ func configurar(meta: Dictionary, espacio: Dictionary) -> void:
 		MutadoresSueno.DESFASE:
 			_montar_desfase(espacio)
 
-	set_process(_animar or _id == MutadoresSueno.DESFASE)
 
 
 func _process(delta: float) -> void:
