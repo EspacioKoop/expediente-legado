@@ -34,6 +34,10 @@ func _historias(ejes: Array) -> Dictionary:
 	return resultado
 
 
+func _ocho(eje: String) -> Array:
+	return [eje, eje, eje, eje, eje, eje, eje, eje]
+
+
 func _consistente() -> void:
 	var estado := _estado_base()
 	estado["historias_cartas"] = _historias(
@@ -169,25 +173,21 @@ func _logros_idempotentes() -> void:
 
 
 func _ecos_sin_eventos_mismo_cierre() -> void:
-	"""Sin eventos #920/#922/#923, el resumen sigue teniendo las capas base."""
+	"""Sin lecturas #920, el resumen sigue teniendo las capas base."""
 	var estado := _estado_base()
-	estado["historias_cartas"] = _historias(["socialdemocrata"] * 8)
+	estado["historias_cartas"] = _historias(_ocho("socialdemocrata"))
 	var resumen := FinalPolitico.resumen(estado)
-	# Las capas fundamentales existen siempre.
 	_comprobar(resumen.has("patron"), "el resumen siempre incluye patron")
 	_comprobar(resumen.has("dominantes"), "el resumen siempre incluye dominantes")
 	_comprobar(resumen.has("ejemplos"), "el resumen siempre incluye ejemplos")
-	# Sin ecos registrados, las claves opcionales deben ser vacías.
-	var lecturas = resumen.get("lecturas_sociales", [])
+	var lecturas: Array = resumen.get("lecturas_sociales", [])
 	_comprobar(lecturas.is_empty(), "sin lecturas sociales cuando no hay eventos #920")
-	var despertar = resumen.get("eco_despertar", {})
-	_comprobar(despertar.is_empty(), "sin eco_despertar cuando no hay eventos #922")
 
 
 func _un_eco_social_aparece_una_vez() -> void:
 	"""Un evento social aparece una vez y no altera conteos/ejes/logros."""
 	var estado := _estado_base()
-	estado["historias_cartas"] = _historias(["comunismo"] * 8)
+	estado["historias_cartas"] = _historias(_ocho("comunismo"))
 	estado[Prometeo.CLAVE_LECTURAS_SOCIALES] = [
 		{
 			"actor": "cunado",
@@ -197,68 +197,60 @@ func _un_eco_social_aparece_una_vez() -> void:
 		}
 	]
 	var resumen := FinalPolitico.resumen(estado)
-	var lecturas = resumen.get("lecturas_sociales", [])
+	var lecturas: Array = resumen.get("lecturas_sociales", [])
 	_comprobar(lecturas.size() == 1, "un actor genera un eco social")
+	var panel := FinalPoliticoPanel.new()
+	var ecos: Array = panel._preparar_ecos(resumen)
+	_comprobar(ecos.size() == 1, "el presentador muestra el eco una sola vez")
+	panel.free()
 	# Los ejes y conteos no cambian por el eco.
-	var conteo := FinalPolitico.resumen(estado).get("conteo", {})
+	var conteo: Dictionary = FinalPolitico.resumen(estado).get("conteo", {})
 	_comprobar(conteo.get("comunismo", 0) == 8, "el conteo conserva el eje real")
 
 
 func _maximo_dos_ecos_y_orden_estable() -> void:
-	"""Varios ecos → máximo 2 y orden estable tras guardar/recargar."""
+	"""El presentador selecciona máximo 2 ecos con orden estable."""
 	var estado := _estado_base()
-	estado["historias_cartas"] = _historias(["centrista"] * 8)
+	estado["historias_cartas"] = _historias(_ocho("centrista"))
 	estado[Prometeo.CLAVE_LECTURAS_SOCIALES] = [
-		{"actor": "becario", "evento_observado": "evento_vertical"},
 		{"actor": "jubilacion", "evento_observado": "evento_vertical"},
+		{"actor": "becario", "evento_observado": "evento_vertical"},
 		{"actor": "cunado", "evento_observado": "evento_vertical"},
 	]
-	var despertar := {
-		"id": "eco:2:humedad:papelera",
-		"tipo": "humedad",
-		"origen_id": "papelera",
-		"consumido": false,
-	}
-	estado["eco_despertar"] = despertar
 	var resumen := FinalPolitico.resumen(estado)
-	var lecturas = resumen.get("lecturas_sociales", [])
-	_comprobar(lecturas.size() <= 2, "las lecturas sociales no superan 2")
-	# El orden es determinista: prioridad=10 para todos, luego id ascendente.
-	if lecturas.size() >= 2:
-		var primer_actor := String(lecturas[0].get("actor", ""))
-		var segundo_actor := String(lecturas[1].get("actor", ""))
-		_comprobar(
-			primer_actor < segundo_actor,
-			(
-				"el orden es id ascendente cuando la prioridad es igual (%s < %s)"
-				% [primer_actor, segundo_actor]
-			)
-		)
+	var lecturas: Array = resumen.get("lecturas_sociales", [])
+	_comprobar(lecturas.size() == 3, "el modelo conserva los tres hechos fuente")
+
+	var panel := FinalPoliticoPanel.new()
+	var ecos: Array = panel._preparar_ecos(resumen)
+	_comprobar(ecos.size() == 2, "el presentador limita los ecos a dos")
+	if ecos.size() == 2:
+		var detalle0: Dictionary = ecos[0].get("detalle", {})
+		var detalle1: Dictionary = ecos[1].get("detalle", {})
+		_comprobar(String(detalle0.get("actor", "")) == "becario", "orden estable: becario primero")
+		_comprobar(String(detalle1.get("actor", "")) == "cunado", "orden estable: cunado segundo")
+	panel.free()
 
 
 func _evento_corrupto_se_ignora() -> void:
-	"""Evento desconocido/corrupto → se ignora de forma segura."""
+	"""Lecturas desconocidas o corruptas se ignoran de forma segura."""
 	var estado := _estado_base()
-	estado["historias_cartas"] = _historias(["neoliberal"] * 8)
-	# Lecturas rotas: sin tipo correcto, sin actor, con enteros.
+	estado["historias_cartas"] = _historias(_ocho("neoliberal"))
 	estado[Prometeo.CLAVE_LECTURAS_SOCIALES] = [
-		7,  # no es Dictionary
-		{"actor": "", "evento_observado": "x"},  # actor vacío
-		{"actor": null, "evento_observado": "y"},  # actor null
+		7,
+		{"actor": "", "evento_observado": "x"},
+		{"actor": null, "evento_observado": "y"},
+		{"actor": "remedios", "evento_observado": null},
 	]
-	var despertar := "esto no es un diccionario"  # formato errado
-	estado["eco_despertar"] = despertar
 	var resumen := FinalPolitico.resumen(estado)
-	var lecturas = resumen.get("lecturas_sociales", [])
+	var lecturas: Array = resumen.get("lecturas_sociales", [])
 	_comprobar(lecturas.is_empty(), "lecturas corruptas se filtran")
-	var despertar_res = resumen.get("eco_despertar", {})
-	_comprobar(despertar_res.is_empty(), "eco_despertar corrupto se filtra")
 
 
 func _abrir_cerrar_reabrir_no_muta() -> void:
 	"""Abrir/cerrar/reabrir el final → no muta Partida, historial ni registros fuente."""
 	var estado := _estado_base()
-	estado["historias_cartas"] = _historias(["socialdemocrata"] * 8)
+	estado["historias_cartas"] = _historias(_ocho("socialdemocrata"))
 	estado[Prometeo.CLAVE_LECTURAS_SOCIALES] = [
 		{"actor": "remedios", "evento_observado": "v", "reaccion": "apoyo"}
 	]
@@ -269,11 +261,11 @@ func _abrir_cerrar_reabrir_no_muta() -> void:
 	_comprobar(not logros.is_empty(), "confirmar_cierre genera logros esperados")
 	var resumen2 := FinalPolitico.resumen(estado)
 	# Los ejes y lecturas sociales no se alteran al cerrar ni reabrir.
-	var dominantes1 := resumen1.get("dominantes", [])
-	var dominantes2 := resumen2.get("dominantes", [])
+	var dominantes1: Array = resumen1.get("dominantes", [])
+	var dominantes2: Array = resumen2.get("dominantes", [])
 	_comprobar(dominantes1 == dominantes2, "reabrir no altera dominantes")
-	var lecturas1 = resumen1.get("lecturas_sociales", [])
-	var lecturas2 = resumen2.get("lecturas_sociales", [])
+	var lecturas1: Array = resumen1.get("lecturas_sociales", [])
+	var lecturas2: Array = resumen2.get("lecturas_sociales", [])
 	_comprobar(lecturas1 == lecturas2, "reabrir no altera lecturas sociales")
 
 
