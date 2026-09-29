@@ -59,7 +59,9 @@ func _probar_solo_carried() -> void:
 		Inventario.HOME_STORAGE: [{"id": "guardada", "usos": ["iluminar"]}],
 	}
 	var resultado := UsosHerramienta.resolver(inventario, "iluminar")
-	_comprobar(not bool(resultado["ok"]), "almacenamiento de casa no cuenta como herramienta llevada")
+	_comprobar(
+		not bool(resultado["ok"]), "almacenamiento de casa no cuenta como herramienta llevada"
+	)
 	_comprobar(String(resultado["motivo"]) == "sin_herramienta", "explica ausencia compatible")
 
 
@@ -127,7 +129,9 @@ func _probar_datos_invalidos() -> void:
 	_comprobar(bool(resultado["ok"]), "ignora entradas corruptas y encuentra la valida")
 	_comprobar(String(resultado["herramienta"]["id"]) == "valida", "devuelve la herramienta valida")
 	var roto := {Inventario.CARRIED: "no-array"}
-	_comprobar(UsosHerramienta.compatibles(roto, "forzar").is_empty(), "carried corrupto falla cerrado")
+	_comprobar(
+		UsosHerramienta.compatibles(roto, "forzar").is_empty(), "carried corrupto falla cerrado"
+	)
 
 
 func _comprobar(condicion: bool, mensaje: String) -> void:
