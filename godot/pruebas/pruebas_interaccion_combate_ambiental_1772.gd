@@ -19,59 +19,80 @@ func _ejecutar() -> void:
 
 
 func _probar_opt_in() -> void:
-	var silla := InteraccionCombateAmbiental.declaracion(
-		"silla-ligera",
-		[InteraccionCombateAmbiental.EMPUJAR],
+	var silla := (
+		InteraccionCombateAmbiental
+		. declaracion(
+			"silla-ligera",
+			[InteraccionCombateAmbiental.EMPUJAR],
+		)
 	)
 	_comprobar(
-		InteraccionCombateAmbiental.disponible(
-			silla,
-			InteraccionCombateAmbiental.EMPUJAR,
-			true,
+		(
+			InteraccionCombateAmbiental
+			. disponible(
+				silla,
+				InteraccionCombateAmbiental.EMPUJAR,
+				true,
+			)
 		),
 		"verbo declarado disponible en combate",
 	)
 	_comprobar(
-		not InteraccionCombateAmbiental.disponible(
-			silla,
-			InteraccionCombateAmbiental.VOLCAR,
-			true,
+		not (
+			InteraccionCombateAmbiental
+			. disponible(
+				silla,
+				InteraccionCombateAmbiental.VOLCAR,
+				true,
+			)
 		),
 		"verbo no declarado no aparece",
 	)
 	_comprobar(
-		not InteraccionCombateAmbiental.disponible(
-			silla,
-			InteraccionCombateAmbiental.EMPUJAR,
-			false,
+		not (
+			InteraccionCombateAmbiental
+			. disponible(
+				silla,
+				InteraccionCombateAmbiental.EMPUJAR,
+				false,
+			)
 		),
 		"fuera de combate no se habilita",
 	)
 	var vacia := InteraccionCombateAmbiental.declaracion("", [InteraccionCombateAmbiental.EMPUJAR])
 	_comprobar(
-		not InteraccionCombateAmbiental.disponible(
-			vacia,
-			InteraccionCombateAmbiental.EMPUJAR,
-			true,
+		not (
+			InteraccionCombateAmbiental
+			. disponible(
+				vacia,
+				InteraccionCombateAmbiental.EMPUJAR,
+				true,
+			)
 		),
 		"declaración sin id no habilita nada",
 	)
 
 
 func _probar_empujar() -> void:
-	var silla := InteraccionCombateAmbiental.declaracion(
-		"silla-ligera",
-		[InteraccionCombateAmbiental.EMPUJAR],
-		"",
-		1.25,
+	var silla := (
+		InteraccionCombateAmbiental
+		. declaracion(
+			"silla-ligera",
+			[InteraccionCombateAmbiental.EMPUJAR],
+			"",
+			1.25,
+		)
 	)
 	var estado := InteraccionCombateAmbiental.estado_inicial()
 	var antes := JSON.stringify(estado)
-	var resultado := InteraccionCombateAmbiental.aplicar(
-		silla,
-		estado,
-		InteraccionCombateAmbiental.EMPUJAR,
-		true,
+	var resultado := (
+		InteraccionCombateAmbiental
+		. aplicar(
+			silla,
+			estado,
+			InteraccionCombateAmbiental.EMPUJAR,
+			true,
+		)
 	)
 	_comprobar(bool(resultado["ok"]), "empujar se resuelve")
 	_comprobar(String(resultado["intencion"]["tipo"]) == "desplazar", "empujar desplaza")
@@ -81,19 +102,25 @@ func _probar_empujar() -> void:
 
 
 func _probar_volcar() -> void:
-	var caja := InteraccionCombateAmbiental.declaracion(
-		"caja-preparada",
-		[InteraccionCombateAmbiental.VOLCAR],
-		"",
-		0.85,
-		2.5,
+	var caja := (
+		InteraccionCombateAmbiental
+		. declaracion(
+			"caja-preparada",
+			[InteraccionCombateAmbiental.VOLCAR],
+			"",
+			0.85,
+			2.5,
+		)
 	)
 	var estado := InteraccionCombateAmbiental.estado_inicial()
-	var resultado := InteraccionCombateAmbiental.aplicar(
-		caja,
-		estado,
-		InteraccionCombateAmbiental.VOLCAR,
-		true,
+	var resultado := (
+		InteraccionCombateAmbiental
+		. aplicar(
+			caja,
+			estado,
+			InteraccionCombateAmbiental.VOLCAR,
+			true,
+		)
 	)
 	_comprobar(bool(resultado["ok"]), "volcar funciona una vez")
 	_comprobar(bool(resultado["estado"]["volcado"]), "volcar queda reflejado en estado local")
@@ -105,27 +132,36 @@ func _probar_volcar() -> void:
 		is_equal_approx(float(resultado["intencion"]["segundos"]), 2.5),
 		"obstáculo tiene duración declarada",
 	)
-	var repetido := InteraccionCombateAmbiental.aplicar(
-		caja,
-		resultado["estado"],
-		InteraccionCombateAmbiental.VOLCAR,
-		true,
+	var repetido := (
+		InteraccionCombateAmbiental
+		. aplicar(
+			caja,
+			resultado["estado"],
+			InteraccionCombateAmbiental.VOLCAR,
+			true,
+		)
 	)
 	_comprobar(not bool(repetido["ok"]), "volcar no se duplica")
 	_comprobar(String(repetido["motivo"]) == "ya_volcado", "repetición explica idempotencia")
 
 
 func _probar_activar() -> void:
-	var interruptor := InteraccionCombateAmbiental.declaracion(
-		"interruptor-preparado",
-		[InteraccionCombateAmbiental.ACTIVAR],
-		"luz_pasillo_izquierda",
+	var interruptor := (
+		InteraccionCombateAmbiental
+		. declaracion(
+			"interruptor-preparado",
+			[InteraccionCombateAmbiental.ACTIVAR],
+			"luz_pasillo_izquierda",
+		)
 	)
-	var resultado := InteraccionCombateAmbiental.aplicar(
-		interruptor,
-		InteraccionCombateAmbiental.estado_inicial(),
-		InteraccionCombateAmbiental.ACTIVAR,
-		true,
+	var resultado := (
+		InteraccionCombateAmbiental
+		. aplicar(
+			interruptor,
+			InteraccionCombateAmbiental.estado_inicial(),
+			InteraccionCombateAmbiental.ACTIVAR,
+			true,
+		)
 	)
 	_comprobar(bool(resultado["ok"]), "activar funciona con efecto declarado")
 	_comprobar(bool(resultado["estado"]["activado"]), "activar queda consumido localmente")
@@ -137,39 +173,51 @@ func _probar_activar() -> void:
 		String(resultado["intencion"]["efecto_id"]) == "luz_pasillo_izquierda",
 		"solo devuelve el efecto authored",
 	)
-	var sin_efecto := InteraccionCombateAmbiental.declaracion(
-		"interruptor-incompleto",
-		[InteraccionCombateAmbiental.ACTIVAR],
+	var sin_efecto := (
+		InteraccionCombateAmbiental
+		. declaracion(
+			"interruptor-incompleto",
+			[InteraccionCombateAmbiental.ACTIVAR],
+		)
 	)
-	var fallo := InteraccionCombateAmbiental.aplicar(
-		sin_efecto,
-		InteraccionCombateAmbiental.estado_inicial(),
-		InteraccionCombateAmbiental.ACTIVAR,
-		true,
+	var fallo := (
+		InteraccionCombateAmbiental
+		. aplicar(
+			sin_efecto,
+			InteraccionCombateAmbiental.estado_inicial(),
+			InteraccionCombateAmbiental.ACTIVAR,
+			true,
+		)
 	)
 	_comprobar(not bool(fallo["ok"]), "activar exige efecto explícito")
 	_comprobar(String(fallo["motivo"]) == "sin_efecto_declarado", "explica efecto ausente")
 
 
 func _probar_invalidos_no_mutan() -> void:
-	var prop := InteraccionCombateAmbiental.declaracion(
-		"prop-mixto",
-		[
-			InteraccionCombateAmbiental.EMPUJAR,
-			InteraccionCombateAmbiental.VOLCAR,
-			InteraccionCombateAmbiental.ACTIVAR,
-			"desconocido",
-		],
-		"luz_local",
+	var prop := (
+		InteraccionCombateAmbiental
+		. declaracion(
+			"prop-mixto",
+			[
+				InteraccionCombateAmbiental.EMPUJAR,
+				InteraccionCombateAmbiental.VOLCAR,
+				InteraccionCombateAmbiental.ACTIVAR,
+				"desconocido",
+			],
+			"luz_local",
+		)
 	)
 	_comprobar((prop["verbos_combate"] as Array).size() == 3, "filtra verbos desconocidos")
 	var estado := InteraccionCombateAmbiental.estado_inicial()
 	var antes := JSON.stringify(estado)
-	var fuera := InteraccionCombateAmbiental.aplicar(
-		prop,
-		estado,
-		InteraccionCombateAmbiental.EMPUJAR,
-		false,
+	var fuera := (
+		InteraccionCombateAmbiental
+		. aplicar(
+			prop,
+			estado,
+			InteraccionCombateAmbiental.EMPUJAR,
+			false,
+		)
 	)
 	_comprobar(not bool(fuera["ok"]), "combate no autorizado falla cerrado")
 	_comprobar(JSON.stringify(fuera["estado"]) == antes, "rechazo conserva estado")
