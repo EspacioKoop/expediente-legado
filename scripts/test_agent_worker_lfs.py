@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 import unittest
 
 
@@ -8,10 +9,11 @@ CI = ROOT / ".github" / "workflows" / "ci.yml"
 
 
 def checkout_block(text: str) -> str:
-    marker = "uses: actions/checkout@v4"
-    start = text.index(marker)
-    rest = text[start:]
-    next_step = rest.find("\n      - ", len(marker))
+    match = re.search(r"uses:\s*actions/checkout@[0-9a-f]{40}(?:\s*#.*)?", text)
+    if match is None:
+        raise AssertionError("el worker debe fijar actions/checkout a un SHA completo")
+    rest = text[match.start():]
+    next_step = rest.find("\n      - ", len(match.group(0)))
     return rest if next_step < 0 else rest[:next_step]
 
 
