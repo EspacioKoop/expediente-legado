@@ -132,7 +132,7 @@ class WorkflowsYamlTest(unittest.TestCase):
             lineas = ruta.read_text(encoding="utf-8").splitlines()
             encontrados = 0
             for indice, linea in enumerate(lineas):
-                match = re.match(r"^(\\s*)(?:-\\s*)?uses:\\s*actions/checkout@", linea)
+                match = re.match(r"^(\s*)(?:-\s*)?uses:\s*actions/checkout@", linea)
                 if not match:
                     continue
 
@@ -148,8 +148,8 @@ class WorkflowsYamlTest(unittest.TestCase):
 
                 with self.subTest(workflow=nombre, checkout=indice + 1):
                     self.assertRegex(
-                        "\\n".join(bloque),
-                        r"(?m)^\\s*persist-credentials:\\s*false\\s*$",
+                        "\n".join(bloque),
+                        r"(?m)^\s*persist-credentials:\s*false\s*$",
                         f"{nombre}:{indice + 1} debe usar persist-credentials: false",
                     )
 
@@ -165,9 +165,8 @@ class WorkflowsYamlTest(unittest.TestCase):
             with self.subTest(workflow=ruta.name):
                 self.assertNotRegex(
                     texto,
-                    r"ref:\\s*\\$\\{\\{\\s*github\\.event\\.pull_request\\.head\\.(?:sha|ref)",
+                    r"ref:\s*\$\{\{\s*github\.event\.pull_request\.head\.(?:sha|ref)",
                 )
-
 
     def test_acciones_sensibles_usadas_por_sha(self):
         """Los workflows privilegiados no ejecutan tags mutables de terceros."""
@@ -198,7 +197,7 @@ class WorkflowsYamlTest(unittest.TestCase):
             "softprops/action-gh-release",
         }
 
-        patron = re.compile(r"uses:\\s*([^\\s@]+)@([^\\s#]+)")
+        patron = re.compile(r"uses:\s*([^\s@]+)@([^\s#]+)")
         for nombre in sorted(workflows):
             texto = (ROOT / ".github" / "workflows" / nombre).read_text(encoding="utf-8")
             for accion, referencia in patron.findall(texto):
