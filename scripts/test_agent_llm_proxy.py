@@ -85,6 +85,18 @@ class PerfilesTest(unittest.TestCase):
         self.assertEqual(100, body["max_tokens"])
         self.assertFalse(dropped)
 
+    def test_resumen_de_error_de_mistral_sin_valores_ni_ruido(self):
+        cuerpo = json.dumps({"detail": [
+            {"type": "literal_error", "loc": ["body", "tools", "list[union[WebSearchTool,Tool]]", 1, "WebSearchTool", "type"],
+             "msg": "Input should be web_search", "input": "function"},
+            {"type": "string_pattern_mismatch", "loc": ["body", "tools", "list[union[WebSearchTool,Tool]]", 1, "Tool", "function", "name"],
+             "msg": "String should match pattern", "input": "secreto del prompt"},
+        ]}).encode()
+        resumen = mod.resumen_error(cuerpo)
+        self.assertIn("Tool.function.name: String should match pattern", resumen)
+        self.assertNotIn("WebSearchTool.type", resumen)
+        self.assertNotIn("secreto del prompt", resumen)
+
     def test_url_del_proveedor_sustituye_v1_local(self):
         self.assertEqual(
             "https://api.groq.com/openai/v1/chat/completions",

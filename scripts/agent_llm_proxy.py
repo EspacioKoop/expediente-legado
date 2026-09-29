@@ -55,6 +55,10 @@ MISTRAL_MESSAGE = {
 MISTRAL_PART = {"type", "text", "image_url"}
 MISTRAL_TOOL_CALL_ID = re.compile(r"^[A-Za-z0-9]{9}$")
 GROQ_MAX_TOKENS = 16384
+MISTRAL_BUILTIN_TOOLS = {
+    "WebSearchTool", "WebSearchPremiumTool", "CodeInterpreterTool",
+    "ImageGenerationTool", "DocumentLibraryTool", "CustomConnector",
+}
 
 
 def detect_profile(url: str) -> str:
@@ -164,6 +168,34 @@ def adapt(profile: str, body: dict[str, Any]) -> tuple[dict[str, Any], set[str]]
     return adapter(body, dropped), dropped
 
 
+def resumen_error(cuerpo: bytes) -> str:
+    """Error del proveedor en una línea por fallo, sin los valores de entrada.
+
+    Mistral devuelve errores de Pydantic con un intento por cada tipo de la
+    unión (WebSearchTool, CodeInterpreterTool…) y el motivo útil queda al final;
+    `input` puede llevar texto del prompt, así que no se registra.
+    """
+    try:
+        datos = json.loads(cuerpo)
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return cuerpo[:LOG_ERROR_BYTES].decode("utf-8", "replace")
+    detalle = datos.get("detail") if isinstance(datos, dict) else None
+    if isinstance(detalle, list):
+        lineas = []
+        for item in detalle:
+            if not isinstance(item, dict):
+                continue
+            partes = [str(parte) for parte in item.get("loc", [])]
+            # Los intentos contra herramientas integradas de Mistral son ruido:
+            # el cliente siempre manda herramientas de tipo function.
+            if any(parte in MISTRAL_BUILTIN_TOOLS for parte in partes):
+                continue
+            lineas.append(f"{'.'.join(partes)}: {item.get('msg', '')} ({item.get('type', '')})")
+        if lineas:
+            return " | ".join(lineas)[:LOG_ERROR_BYTES * 4]
+    return json.dumps(datos, ensure_ascii=False)[:LOG_ERROR_BYTES]
+
+
 def upstream_url(upstream: str, path: str) -> str:
     """El CLI apunta a http://127.0.0.1:P/v1; se sustituye ese /v1 por la base real."""
     base = upstream.rstrip("/")
@@ -223,12 +255,7 @@ def make_handler(upstream: str, profile: str, log):
                 response = urllib.request.urlopen(request, timeout=UPSTREAM_TIMEOUT)
             except urllib.error.HTTPError as exc:
                 cuerpo = exc.read()
-                print(
-                    f"[{profile}] {self.path} -> {exc.code}: "
-                    f"{cuerpo[:LOG_ERROR_BYTES].decode('utf-8', 'replace')}",
-                    file=log,
-                    flush=True,
-                )
+                print(f"[{profile}] {self.path} -> {exc.code}: {resumen_error(cuerpo)}", file=log, flush=True)
                 self._reply(exc.code, cuerpo, exc.headers.get("Content-Type", "application/json"))
                 return
             except (urllib.error.URLError, TimeoutError) as exc:
