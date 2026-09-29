@@ -22,6 +22,17 @@ MAX_LIST_ITEMS = 12
 MAX_TEXT = 800
 CHECK_RE = re.compile(r"(?m)^\s*[-*]\s*\[[ xX]\]\s+(.+?)\s*$")
 
+PROVIDER_GUIDANCE = {
+    "qwen": (
+        "Usa read_file/grep_search antes de editar; con edit/write_file toca solo "
+        "fragmentos necesarios y conserva el estilo local."
+    ),
+    "gemini": (
+        "Usa read_file antes de replace/write_file; prefiere reemplazos mínimos y "
+        "no regeneres archivos completos si un cambio localizado basta."
+    ),
+}
+
 
 def _text(value: Any, limit: int = MAX_TEXT) -> str:
     if not isinstance(value, str):
@@ -80,7 +91,7 @@ def normalize_message(data: Any) -> dict[str, Any] | None:
     message_type = _text(data.get("message_type"), 32).upper()
     if message_type not in MESSAGE_TYPES:
         return None
-    schema = data.get("schema", SCHEMA_VERSION)
+    schema = data.get("schema")
     if schema != SCHEMA_VERSION:
         return None
     normalized = dict(data)
@@ -118,6 +129,17 @@ def _plan_files(plan: dict[str, Any]) -> list[str]:
     if len(files) > 12:
         raise ValueError("plan excede 12 rutas")
     return files
+
+
+def _domain_constraints(files: list[str]) -> list[str]:
+    constraints: list[str] = []
+    if any(path.endswith((".gd", ".tscn", ".tres")) for path in files):
+        constraints.extend(["godot_4_x_only", "never_edit_generated_dot_godot"])
+    if any("test" in Path(path).name.casefold() for path in files):
+        constraints.append("do_not_weaken_assertions_to_make_tests_green")
+    if any(path.startswith(("backend/", ".github/")) for path in files):
+        constraints.append("never_log_or_embed_secrets")
+    return constraints
 
 
 def build_task_packet(
@@ -169,6 +191,7 @@ def build_task_packet(
             "allowed_files": files,
             "max_files": 12,
             "soft_diff_lines": 800,
+            "domain_constraints": _domain_constraints(files),
             "constraints": [
                 "minimal_diff",
                 "no_unrelated_refactors",
@@ -215,6 +238,12 @@ def render_worker_prompt(packet: dict[str, Any], provider: str) -> str:
     scope = packet.get("scope") if isinstance(packet.get("scope"), dict) else {}
     files = scope.get("allowed_files") if isinstance(scope.get("allowed_files"), list) else []
     rendered_files = "\n".join(f"- {item}" for item in files) or "- (ninguna)"
+    domain = scope.get("domain_constraints") if isinstance(scope.get("domain_constraints"), list) else []
+    rendered_domain = "\n".join(f"- {item}" for item in domain) or "- (sin reglas extra)"
+    provider_guidance = PROVIDER_GUIDANCE.get(
+        provider,
+        "Lee antes de editar y limita cada cambio al alcance explícitamente permitido.",
+    )
     return f"""# Worker contract v1
 
 Tarea: {task_id}
@@ -229,6 +258,12 @@ en el TaskPacket.
 ## Scope
 Solo puedes modificar estas rutas:
 {rendered_files}
+
+## Adaptador de proveedor
+{provider_guidance}
+
+## Restricciones de dominio
+{rendered_domain}
 
 El workflow ha sellado la base en 'base_sha'. No asumas otra base ni reconstruyas el
 contexto desde memoria. Si detectas evidencia de que el estado leído no corresponde a
