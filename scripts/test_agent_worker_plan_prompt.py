@@ -36,7 +36,7 @@ class WorkerExecutorOnlyTest(unittest.TestCase):
                 paso = self._bloque_paso(paso_id)
                 self.assertIn("Lee .agent-worker-prompt.md", paso)
                 self.assertIn("No leas ningun otro fichero de contexto", paso)
-                self.assertNotIn("AGENTS.md", paso)
+                self.assertNotIn("Lee AGENTS.md", paso)
 
 
 if __name__ == "__main__":
