@@ -93,9 +93,12 @@ func _materializar_si_toca(jornada: Dictionary) -> Dictionary:
 	if _acciones_consumidas(jornada) < int(plan.get("tras_accion", 1)):
 		return {}
 
-	var estado := IncidenteImpresoraOficina.nuevo(
-		int(jornada.get("dia", 1)),
-		int(jornada.get("vuelta", 1)),
+	var estado := (
+		IncidenteImpresoraOficina
+		. nuevo(
+			int(jornada.get("dia", 1)),
+			int(jornada.get("vuelta", 1)),
+		)
 	)
 	jornada[CLAVE_ESTADO] = estado
 	_publicar_evento(jornada)
@@ -220,9 +223,11 @@ func _aplicar_presentacion(estado: Dictionary) -> void:
 	_bandeja.position = Vector3(
 		0.0,
 		0.06,
-		0.32
-		if String(estado.get("estado", "")) == IncidenteImpresoraOficina.BANDEJA_ABIERTA
-		else 0.22,
+		(
+			0.32
+			if String(estado.get("estado", "")) == IncidenteImpresoraOficina.BANDEJA_ABIERTA
+			else 0.22
+		),
 	)
 	_papel.position = Vector3(0.0, 0.10, 0.39)
 	_papel.visible = String(estado.get("estado", "")) == IncidenteImpresoraOficina.BANDEJA_ABIERTA
@@ -287,13 +292,16 @@ func _al_activar(_actor: Node) -> void:
 		return
 	var actualizado: Dictionary = resultado["estado"]
 	jornada[CLAVE_ESTADO] = actualizado
-	_host.set_meta(
-		"ultimo_feedback_impresora",
-		{
-			"accion": accion,
-			"estado": String(actualizado.get("estado", "")),
-			"resuelta": bool(actualizado.get("resuelta", false)),
-		},
+	(
+		_host
+		. set_meta(
+			"ultimo_feedback_impresora",
+			{
+				"accion": accion,
+				"estado": String(actualizado.get("estado", "")),
+				"resuelta": bool(actualizado.get("resuelta", false)),
+			},
+		)
 	)
 	_aplicar_presentacion(actualizado)
 
