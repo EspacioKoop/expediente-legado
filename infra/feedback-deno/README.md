@@ -65,7 +65,7 @@ Los circuit breakers de workers se almacenan con TTL. El cliente puede solicitar
 
 El control-plane expone también un buzón dirigido para comunicación entre fases:
 
-- `POST /api/agent-pool/b2b/send`: publica `QUESTION`, `BLOCKER`, `EVIDENCE` o `HANDOFF`;
+- `POST /api/agent-pool/b2b/send`: publica `QUESTION`, `BLOCKER`, `EVIDENCE`, `HANDOFF`, `RESULT` o `REVIEW`;
 - `POST /api/agent-pool/b2b/inbox`: lee mensajes para `dispatcher`, `worker` o `reviewer`;
 - `POST /api/agent-pool/b2b/ack`: consume un mensaje leído.
 
