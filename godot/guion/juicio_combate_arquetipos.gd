@@ -164,15 +164,15 @@ static func _avanzar_bloqueador(
 			return _resultado(unidad, "guardar_frente", "guardia", false)
 
 
-static func _avanzar_enjambre(
-	unidad: Dictionary, delta: float, contexto: Dictionary
-) -> Dictionary:
+static func _avanzar_enjambre(unidad: Dictionary, delta: float, contexto: Dictionary) -> Dictionary:
 	var estado := String(unidad.get("estado", ESPERA))
 	match estado:
 		ESPERA:
 			unidad["cooldown"] = maxf(0.0, float(unidad.get("cooldown", 0.0)) - delta)
 			var activos := maxi(0, int(contexto.get("atacantes_activos", 0)))
-			var presupuesto := maxi(1, int(contexto.get("presupuesto_ataques", ENJAMBRE_PRESUPUESTO_ATAQUES)))
+			var presupuesto := maxi(
+				1, int(contexto.get("presupuesto_ataques", ENJAMBRE_PRESUPUESTO_ATAQUES))
+			)
 			if float(unidad["cooldown"]) <= 0.0 and activos < presupuesto:
 				unidad["estado"] = TELEGRAFIAR
 				unidad["temporizador"] = ENJAMBRE_TELEGRAFO
