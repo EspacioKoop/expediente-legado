@@ -960,6 +960,41 @@ jobs:
           )
           PY
 
+      - id: b2b_review_handoff
+        name: Transportar EVIDENCE/HANDOFF al reviewer
+        if: >-
+          steps.reserve.outputs.reserved == 'true' &&
+          steps.claim_guard.outputs.drift != 'true' &&
+          steps.guard.outputs.control == 'deno'
+        continue-on-error: true
+        env:
+          SIGA98_FEEDBACK_FALLBACK_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
+          TASK_ID: ${{ steps.protocol.outputs.task_id }}
+          RESULT_VALID: ${{ steps.result_contract.outputs.valid || 'false' }}
+          RESULT_STATUS: ${{ steps.result_contract.outputs.status || 'missing' }}
+          HANDOFF_LOSS: ${{ steps.result_contract.outputs.handoff_loss || '100' }}
+        run: |
+          set -euo pipefail
+          evidence_args=()
+          if [[ -s /tmp/agent-result-changed.txt ]]; then
+            while IFS= read -r path; do
+              [[ -n "$path" ]] || continue
+              evidence_args+=(--evidence "$path")
+            done < <(head -n 8 /tmp/agent-result-changed.txt)
+          fi
+
+          python3 scripts/agent_b2b_mailbox.py send             --task-id "$TASK_ID"             --type EVIDENCE             --recipient reviewer             --idempotency-key "evidence-review-${GITHUB_RUN_ID}"             --correlation-id "$TASK_ID"             --subject "Evidencia de implementación"             --body "Preflight completado; ResultPacket valid=$RESULT_VALID status=$RESULT_STATUS handoff-loss=$HANDOFF_LOSS%."             "${evidence_args[@]}" >/dev/null
+
+          python3 scripts/agent_b2b_mailbox.py send             --task-id "$TASK_ID"             --type HANDOFF             --recipient reviewer             --idempotency-key "handoff-review-${GITHUB_RUN_ID}"             --correlation-id "$TASK_ID"             --subject "Implementación lista para reviewer"             --body "Revisa el input acotado ya materializado; este handoff aporta evidencia compacta y no amplía el CLAIM." >/dev/null
+
+          python3 scripts/agent_b2b_mailbox.py             --output /tmp/agent-b2b-reviewer-inbox.json             inbox --recipient reviewer --task-id "$TASK_ID" --limit 20
+          {
+            echo
+            echo "## Handoff B2B dirigido"
+            jq -r '.messages[] |
+              "- [\(.message_type)] \(.subject // "")\n  \(.body // "")\n  evidencia: \((.evidence // []) | join("; "))"'               /tmp/agent-b2b-reviewer-inbox.json
+          } >> .agent-review-input.md
+
       - id: review_qwen
         name: Reviewer acotado Qwen
         if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true' && inputs.provider == 'qwen'
@@ -1002,6 +1037,54 @@ jobs:
           echo "verdict=$(jq -r '.verdict // "skipped"' /tmp/agent-review.json)" >> "$GITHUB_OUTPUT"
           rm -f .agent-review-input.md
           rm -rf .gemini .qwen gemini-artifacts qwen-artifacts
+
+      - id: b2b_review_publish
+        name: Publicar RESULT/REVIEW B2B y confirmar reviewer
+        if: >-
+          steps.reserve.outputs.reserved == 'true' &&
+          steps.claim_guard.outputs.drift != 'true' &&
+          steps.guard.outputs.control == 'deno'
+        continue-on-error: true
+        env:
+          SIGA98_FEEDBACK_FALLBACK_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
+          TASK_ID: ${{ steps.protocol.outputs.task_id }}
+          REVIEW_STATUS: ${{ steps.review_contract.outputs.status || 'skipped' }}
+          REVIEW_VERDICT: ${{ steps.review_contract.outputs.verdict || 'skipped' }}
+          RESULT_STATUS: ${{ steps.result_contract.outputs.status || 'missing' }}
+          HANDOFF_LOSS: ${{ steps.result_contract.outputs.handoff_loss || '100' }}
+        run: |
+          set -euo pipefail
+          result_summary="$(jq -r '.result.summary // "ResultPacket no disponible"' /tmp/agent-result.json)"
+          result_next="$(jq -r '.result.next_action // ""' /tmp/agent-result.json)"
+          mapfile -t result_evidence < <(jq -r '.result.evidence[]?.detail // empty' /tmp/agent-result.json | head -n 8)
+          result_args=()
+          for item in "${result_evidence[@]}"; do
+            [[ -n "$item" ]] && result_args+=(--evidence "$item")
+          done
+
+          python3 scripts/agent_b2b_mailbox.py send             --task-id "$TASK_ID"             --type RESULT             --recipient dispatcher             --idempotency-key "result-dispatch-${GITHUB_RUN_ID}"             --correlation-id "$TASK_ID"             --subject "ResultPacket $RESULT_STATUS"             --body "$result_summary"             "${result_args[@]}" >/dev/null
+
+          mapfile -t findings < <(jq -r '.findings[]? // empty' /tmp/agent-review.json | head -n 5)
+          review_args=()
+          for item in "${findings[@]}"; do
+            [[ -n "$item" ]] && review_args+=(--evidence "$item")
+          done
+          python3 scripts/agent_b2b_mailbox.py send             --task-id "$TASK_ID"             --type REVIEW             --recipient dispatcher             --idempotency-key "review-dispatch-${GITHUB_RUN_ID}"             --correlation-id "$TASK_ID"             --subject "Reviewer $REVIEW_STATUS/$REVIEW_VERDICT"             --body "Reviewer acotado completado; handoff-loss del implementer: $HANDOFF_LOSS%."             "${review_args[@]}" >/dev/null
+
+          if [[ "$RESULT_STATUS" == blocked ]]; then
+            mapfile -t unresolved < <(jq -r '.result.unresolved[]? // empty' /tmp/agent-result.json | head -n 8)
+            blocker_args=()
+            for item in "${unresolved[@]}"; do
+              [[ -n "$item" ]] && blocker_args+=(--evidence "$item")
+            done
+            python3 scripts/agent_b2b_mailbox.py send               --task-id "$TASK_ID"               --type BLOCKER               --recipient dispatcher               --idempotency-key "result-blocked-${GITHUB_RUN_ID}"               --correlation-id "$TASK_ID"               --subject "Implementación bloqueada"               --body "${result_next:-El ResultPacket terminó bloqueado; revisar la evidencia dirigida.}"               --blocking               "${blocker_args[@]}" >/dev/null
+          fi
+
+          [[ -s /tmp/agent-b2b-reviewer-inbox.json ]] || exit 0
+          jq -r '.messages[].message_id' /tmp/agent-b2b-reviewer-inbox.json | while IFS= read -r message_id; do
+            [[ -n "$message_id" ]] || continue
+            python3 scripts/agent_b2b_mailbox.py ack               --recipient reviewer --task-id "$TASK_ID" --message-id "$message_id" >/dev/null
+          done
 
       - name: Guardar memoria de trabajo
         if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true'
