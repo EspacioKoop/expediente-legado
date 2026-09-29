@@ -18,7 +18,8 @@ const SUPERFICIES := {
 		"fuente": "institucional:oficina:tablon",
 		"eje": "centrista",
 		"etiqueta": "tablón: circular de horario",
-		"tratamiento": (
+		"tratamiento":
+		(
 			"Circular interna: la planta 4 amplía treinta minutos la atención de tarde "
 			+ "durante dos semanas. Tras la primera semana se recogerá una evaluación "
 			+ "escrita."
@@ -32,7 +33,8 @@ const SUPERFICIES := {
 		"fuente": "correo_postal:aviso_horario_planta4",
 		"eje": "socialdemocrata",
 		"etiqueta": "Aviso de atención al público",
-		"tratamiento": (
+		"tratamiento":
+		(
 			"Aviso informativo: la atención vespertina de la planta 4 se amplía treinta "
 			+ "minutos durante una prueba de dos semanas. La medida afecta a catorce "
 			+ "puestos y tendrá revisión escrita."
