@@ -168,6 +168,23 @@ class WorkflowsYamlTest(unittest.TestCase):
                     r"ref:\s*\$\{\{\s*github\.event\.pull_request\.head\.(?:sha|ref)",
                 )
 
+
+    def test_ci_repair_workflow_run_atado_a_repo_y_sha(self):
+        """El workflow privilegiado no puede reparar una ejecución de un fork o SHA distinto."""
+        texto = (
+            ROOT / ".github" / "workflows" / "agent-ci-repair.yml"
+        ).read_text(encoding="utf-8")
+        self.assertGreaterEqual(
+            texto.count(
+                "github.event.workflow_run.head_repository.full_name == github.repository"
+            ),
+            2,
+        )
+        self.assertIn("RUN_SHA: ${{ github.event.workflow_run.head_sha }}", texto)
+        self.assertIn('"$head_sha" != "$RUN_SHA"', texto)
+        self.assertIn('"$head_sha" != "$SHA"', texto)
+
+
     def test_acciones_sensibles_usadas_por_sha(self):
         """Los workflows privilegiados no ejecutan tags mutables de terceros."""
         workflows = {
