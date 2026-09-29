@@ -1,8 +1,4 @@
-"""Contrato del cableado de planes delegados en agent-worker.yml (#1637).
-
-El selector vive en scripts/agent_delegated_plan.py; aquí se fija que el
-worker lo invoque con datos REST y que, si hay plan, se omita el planificador.
-"""
+"""Contrato del handoff nivel 2 -> executor en agent-worker.yml."""
 
 from pathlib import Path
 import re
@@ -22,42 +18,36 @@ class CableadoPlanDelegadoTest(unittest.TestCase):
         fin = self.worker.index("\n      - ", inicio + 1)
         return self.worker[inicio:fin]
 
-    def test_busca_plan_con_rest_antes_de_planificar(self):
+    def test_busca_plan_delegado_antes_de_reservar(self):
         paso = self._paso("delegated")
-        # gh issue view no expone author_association del cuerpo del issue.
         self.assertIn('gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE"', paso)
         self.assertIn("python3 scripts/agent_delegated_plan.py", paso)
-        self.assertIn("se usará el planificador", paso)
         self.assertLess(
-            self.worker.index("- id: delegated\n"), self.worker.index("- id: plan_qwen\n")
+            self.worker.index("- id: delegated\n"),
+            self.worker.index("- id: reserve\n"),
         )
 
-    def test_plan_delegado_omite_planificadores(self):
-        for paso_id in ("plan_qwen", "plan_gemini"):
-            with self.subTest(paso=paso_id):
-                self.assertIn("steps.delegated.outputs.found != 'true'", self._paso(paso_id))
+    def test_falta_plan_deriva_a_decompose_y_no_planifica(self):
+        route = self._paso("route_decompose")
+        self.assertIn("steps.delegated.outputs.found != 'true'", route)
+        self.assertIn("--add-label agent:decompose", route)
+        self.assertNotIn("- id: plan_qwen\n", self.worker)
+        self.assertNotIn("- id: plan_gemini\n", self.worker)
 
-    def test_toda_lectura_del_plan_prioriza_el_delegado(self):
+    def test_reserva_lee_solo_plan_delegado_y_presupuesto(self):
         paso = self._paso("reserve")
         fuentes = re.findall(r"--source\s+(\S+)", paso)
-        self.assertIn("python3 scripts/agent_plan_parse.py", paso)
-        self.assertEqual("/tmp/delegado.json", fuentes[0])
-        self.assertGreater(len(fuentes), 1)
+        self.assertEqual(["/tmp/delegado.json"], fuentes)
+        self.assertIn("AGENT_POOL_MAX_FILES", paso)
+        self.assertIn('--max-files "$MAX_FILES"', paso)
+        self.assertIn("steps.delegated.outputs.found == 'true'", paso)
 
-    def test_la_salida_del_planificador_no_viaja_por_env(self):
-        # >128 KB en una variable: «Argument list too long» y el paso ni
-        # arranca, tampoco el de limpieza, que deja el CLAIM colgado (#1881).
-        for step in ("plan_qwen", "plan_gemini", "delegated"):
-            with self.subTest(step=step):
-                self.assertNotRegex(self.worker, rf"steps\.{step}\.outputs\.summary")
-
-    def test_limpieza_detecta_sobrecarga_leyendo_fichero(self):
-        inicio = self.worker.index("name: Limpiar fallo o cancelacion")
-        paso = self.worker[inicio:]
-        self.assertIn("overloaded", paso)
-        self.assertIn("/tmp/agent-output-plan", paso)
-        self.assertIn("/tmp/agent-output-implement", paso)
-        self.assertIn("/tmp/agent-output-implement", self._paso("validate_diff"))
+    def test_executor_no_precarga_contexto_de_planificacion(self):
+        self.assertNotIn("Cargar memoria historica de CI", self.worker)
+        self.assertNotIn("Cargar Normas Platino, wiki y memoria", self.worker)
+        self.assertNotIn("Afinar contexto y memoria por rutas", self.worker)
+        self.assertNotIn("/tmp/agent-output-plan", self.worker)
+        self.assertIn("Sellar versión de Normas Platino", self.worker)
 
 
 if __name__ == "__main__":
