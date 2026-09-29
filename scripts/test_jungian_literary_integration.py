@@ -5,14 +5,17 @@ This script validates the GDScript logic by parsing and checking structure.
 """
 import json
 import os
+from pathlib import Path
 import unittest
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 class JungianLiteraryIntegrationTest(unittest.TestCase):
     def test_data_files(self):
         """Verify data files exist and have correct structure."""
         # Test obras.json
-        with open('godot/datos/literatura/obras.json', 'r') as f:
+        with open(ROOT / "godot" / "datos" / "literatura" / "obras.json", 'r', encoding='utf-8') as f:
             data = json.load(f)
 
         assert 'obras' in data
@@ -45,9 +48,10 @@ class JungianLiteraryIntegrationTest(unittest.TestCase):
         ]
 
         for f in required_files:
-            assert os.path.exists(f), f"Missing: {f}"
+            file_path = ROOT / f
+            assert file_path.exists(), f"Missing: {f}"
             # Basic syntax check - look for class_name or extends
-            with open(f, 'r') as fp:
+            with open(file_path, 'r', encoding='utf-8') as fp:
                 content = fp.read()
                 assert 'extends' in content or 'class_name' in content, f"Invalid GDScript: {f}"
 
@@ -55,7 +59,7 @@ class JungianLiteraryIntegrationTest(unittest.TestCase):
 
     def test_autoloads_in_project(self):
         """Verify autoloads are registered in project.godot."""
-        with open('godot/project.godot', 'r') as f:
+        with open(ROOT / "godot" / "project.godot", 'r', encoding='utf-8') as f:
             content = f.read()
 
         required_autoloads = [
@@ -73,7 +77,4 @@ class JungianLiteraryIntegrationTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    test_data_files()
-    test_gdscript_files()
-    test_autoloads_in_project()
-    print("\n✅ All structural tests passed!")
+    unittest.main()
