@@ -37,13 +37,12 @@ func _probar_contrato_compartido() -> void:
 	)
 
 	var estado := {
-		Prometeo.CLAVE_ELECCIONES_IDEOLOGICAS:
-		[{"id": "eleccion-previa", "eje": "centrista"}],
+		Prometeo.CLAVE_ELECCIONES_IDEOLOGICAS: [{"id": "eleccion-previa", "eje": "centrista"}],
 		Prometeo.CLAVE_EXPOSICION_IDEOLOGICA: [],
 	}
 	var elecciones_antes: Array = (
-		estado[Prometeo.CLAVE_ELECCIONES_IDEOLOGICAS] as Array
-	).duplicate(true)
+		(estado[Prometeo.CLAVE_ELECCIONES_IDEOLOGICAS] as Array).duplicate(true)
+	)
 	_comprobar(
 		IdeologiaCulturaCotidiana1883.registrar_exposicion(
 			estado, IdeologiaCulturaCotidiana1883.SUPERFICIE_CIRCULAR, 1
@@ -82,8 +81,10 @@ func _probar_correo_postal() -> void:
 		"el aviso postal conserva el id del hecho base",
 	)
 	_comprobar(
-		String(pieza.get("ideologia_superficie_id", ""))
-		== IdeologiaCulturaCotidiana1883.SUPERFICIE_POSTAL,
+		(
+			String(pieza.get("ideologia_superficie_id", ""))
+			== IdeologiaCulturaCotidiana1883.SUPERFICIE_POSTAL
+		),
 		"el aviso delega en la superficie compartida",
 	)
 
@@ -100,25 +101,29 @@ func _probar_tablon_oficina() -> void:
 	root.add_child(mundo)
 	var ronda := RondaCierre3D.new()
 	mundo.add_child(ronda)
-	ronda.configurar(
-		{
-			"ruta": ["comprobar_tablon"],
-			"completados": [],
-			"abandonada": false,
-			"finalizada": false,
-		}
+	(
+		ronda
+		. configurar(
+			{
+				"ruta": ["comprobar_tablon"],
+				"completados": [],
+				"abandonada": false,
+				"finalizada": false,
+			}
+		)
 	)
 	var tablon := ronda.punto("comprobar_tablon")
 	_comprobar(tablon != null, "la superficie de tablón usa el interactuable existente")
 	if tablon != null:
 		_comprobar(
-			String(tablon.get_meta("evento_base", ""))
-			== IdeologiaCulturaCotidiana1883.EVENTO_BASE,
+			String(tablon.get_meta("evento_base", "")) == IdeologiaCulturaCotidiana1883.EVENTO_BASE,
 			"el tablón conserva el mismo hecho base",
 		)
 		_comprobar(
-			String(tablon.get_meta("ideologia_superficie_id", ""))
-			== IdeologiaCulturaCotidiana1883.SUPERFICIE_CIRCULAR,
+			(
+				String(tablon.get_meta("ideologia_superficie_id", ""))
+				== IdeologiaCulturaCotidiana1883.SUPERFICIE_CIRCULAR
+			),
 			"el tablón identifica el tratamiento de circular",
 		)
 		_comprobar(
