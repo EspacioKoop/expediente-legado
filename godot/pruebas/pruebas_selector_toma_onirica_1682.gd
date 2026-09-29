@@ -12,6 +12,7 @@ class DiaFalso:
 	var jornada := {"fase": "sueño", "leido_hoy": ["doc-a", "doc-b"]}
 	var partida := Partida.new()
 	var guardados := 0
+	var _mundo: Node3D = null
 
 	func _guardar_o_avisar(_mensaje: String) -> bool:
 		guardados += 1
@@ -48,6 +49,7 @@ func _ejecutar() -> void:
 	dia.add_child(controlador)
 	# Godot reactiva el procesado al entrar en el árbol si el guion define
 	# _process; se apaga después para que el HUD solo cambie cuando la prueba lo pide.
+	controlador.process_mode = Node.PROCESS_MODE_DISABLED
 	controlador.set_process(false)
 	controlador._asegurar_hud_camara()
 	controlador._actualizar_hud_camara(dia)
