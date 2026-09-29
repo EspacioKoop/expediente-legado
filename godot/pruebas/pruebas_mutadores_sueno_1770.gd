@@ -65,7 +65,9 @@ func _probar_seleccion_reproducible() -> void:
 	var segunda := MutadoresSueno.seleccionar(jornada, 8172)
 	_comprobar(not primera.is_empty(), "con candidatos elige uno")
 	_comprobar(primera == segunda, "misma noche y raiz repiten seleccion")
-	_comprobar(MutadoresSueno.IDS.has(String(primera.get("id", ""))), "la seleccion sale del catalogo")
+	_comprobar(
+		MutadoresSueno.IDS.has(String(primera.get("id", ""))), "la seleccion sale del catalogo"
+	)
 
 
 func _probar_aplicacion_sin_tocar_ruta() -> void:
