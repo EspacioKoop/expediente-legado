@@ -61,7 +61,7 @@ jobs:
         working-directory: infra/feedback-deno
         env:
           DENO_DEPLOY_TOKEN: ${{ secrets.DENO_DEPLOY_TOKEN }}
-        run: deno deploy --org expediente-legado --app siga98-feedback-deno --prod
+        run: deno deploy --prod
 
       - name: Esperar y validar freshness
         if: steps.config.outputs.deploy == 'true' && steps.config.outputs.verify == 'true'
