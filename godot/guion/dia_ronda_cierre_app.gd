@@ -116,10 +116,13 @@ func _registrar_exposicion_tablon(dia: Node) -> bool:
 	var estado_partida = partida.get("estado")
 	if typeof(estado_partida) != TYPE_DICTIONARY:
 		return false
-	return IdeologiaCulturaCotidiana1883.registrar_exposicion(
-		estado_partida as Dictionary,
-		IdeologiaCulturaCotidiana1883.SUPERFICIE_CIRCULAR,
-		int(dia.jornada.get("dia", 1)),
+	return (
+		IdeologiaCulturaCotidiana1883
+		. registrar_exposicion(
+			estado_partida as Dictionary,
+			IdeologiaCulturaCotidiana1883.SUPERFICIE_CIRCULAR,
+			int(dia.jornada.get("dia", 1)),
+		)
 	)
 
 
