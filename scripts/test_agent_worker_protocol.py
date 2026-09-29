@@ -28,6 +28,21 @@ class AgentWorkerProtocolTest(unittest.TestCase):
         self.assertIn(".agent-worker-prompt.md", block)
         self.assertIn("git rev-parse HEAD", block)
 
+    def test_blocker_b2b_llega_al_planner_antes_del_plan(self):
+        inbox = WORKFLOW.index("- id: b2b_plan_inbox\n")
+        qwen = WORKFLOW.index("- id: plan_qwen\n")
+        self.assertLess(inbox, qwen)
+        block = step("- id: b2b_plan_inbox\n")
+        self.assertIn("/api/agent-pool/b2b/inbox", block)
+        self.assertIn('recipient:"worker"', block)
+        self.assertIn("git rev-parse HEAD", block)
+        self.assertIn(".agent-b2b-inbox.md", block)
+
+        for planner in ("plan_qwen", "plan_gemini"):
+            plan = step(f"- id: {planner}\n")
+            self.assertIn(".agent-b2b-inbox.md si existe", plan)
+            self.assertIn("BLOCKER de CLAIM", plan)
+
     def test_mailbox_b2b_se_lee_antes_de_implementar(self):
         inbox = WORKFLOW.index("- id: b2b_inbox\n")
         qwen = WORKFLOW.index("- id: implement_qwen\n")
@@ -52,7 +67,8 @@ class AgentWorkerProtocolTest(unittest.TestCase):
         block = step("- id: replan\n")
         self.assertIn("/api/agent-pool/b2b/send", block)
         self.assertIn('message_type:"BLOCKER"', block)
-        self.assertIn('recipient:"dispatcher"', block)
+        self.assertIn("for recipient in dispatcher worker", block)
+        self.assertIn('recipient:$recipient', block)
         self.assertIn("claim-drift-", block)
         self.assertIn(".outside[]", block)
         self.assertIn("AGENT_POOL_REPLAN", block)
