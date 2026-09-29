@@ -121,7 +121,10 @@ Desde la raíz:
 ```bash
 bash scripts/check_gdscript.sh
 python3 scripts/verificar_godot.py
+bash scripts/escanear_secretos.sh
 ```
+
+`escanear_secretos.sh` pasa gitleaks por los commits de la rama (`origin/main..HEAD`) con la salida redactada; el workflow `secretos.yml` hace lo mismo con cada PR y cada push a `main`. Un falso positivo se silencia con su huella en `.gitleaksignore`, nunca desactivando el gate. Un secreto real que ya se empujó no se arregla con otro commit: hay que rotarlo y avisar a @eGurucharri.
 
 Desde `backend/`:
 
