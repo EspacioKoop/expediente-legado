@@ -660,6 +660,37 @@ jobs:
           [[ "$(jq -r '.base_sha' .agent-task-packet.json)" == "$base_sha" ]]
           echo "task_id=$(jq -r '.task_id' .agent-task-packet.json)" >> "$GITHUB_OUTPUT"
 
+      - id: b2b_inbox
+        name: Leer inbox B2B dirigido
+        if: steps.reserve.outputs.reserved == 'true' && steps.guard.outputs.control == 'deno'
+        continue-on-error: true
+        env:
+          CONTROL_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
+          TASK_ID: ${{ steps.protocol.outputs.task_id }}
+        run: |
+          set -euo pipefail
+          : > .agent-b2b-inbox.md
+          base="${CONTROL_URL%/}"
+          base="${base%/api/report}"
+          oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN"             "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-pool")"
+          oidc_token="$(jq -er '.value' <<<"$oidc_json")"
+          payload="$(jq -nc --arg task "$TASK_ID"             '{schema:1,recipient:"worker",task_id:$task,limit:20}')"
+          curl -fsS -X POST "$base/api/agent-pool/b2b/inbox"             -H "Authorization: Bearer $oidc_token"             -H 'Content-Type: application/json'             --data "$payload" -o /tmp/agent-b2b-inbox.json
+          jq -e '.ok == true and (.messages | type == "array")' /tmp/agent-b2b-inbox.json >/dev/null
+
+          {
+            echo "# Mensajes B2B dirigidos"
+            echo
+            jq -r '.messages[] |
+              "- [\(.message_type)] \(.subject // "")\n  \(.body // "")\n  evidencia: \((.evidence // []) | join("; "))"'               /tmp/agent-b2b-inbox.json
+          } > .agent-b2b-inbox.md
+
+          jq -c '.messages[]' /tmp/agent-b2b-inbox.json | while IFS= read -r message; do
+            message_id="$(jq -r '.message_id' <<<"$message")"
+            ack="$(jq -nc --arg task "$TASK_ID" --arg id "$message_id"               '{schema:1,recipient:"worker",task_id:$task,message_id:$id}')"
+            curl -fsS -X POST "$base/api/agent-pool/b2b/ack"               -H "Authorization: Bearer $oidc_token"               -H 'Content-Type: application/json'               --data "$ack" >/dev/null
+          done
+
       - name: Crear rama
         if: steps.reserve.outputs.reserved == 'true'
         env:
@@ -777,6 +808,9 @@ jobs:
           WORKER: ${{ inputs.worker }}
           BRANCH: ${{ steps.guard.outputs.branch }}
           MAX_REPLANS: '2'
+          CONTROL: ${{ steps.guard.outputs.control }}
+          CONTROL_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
+          TASK_ID: ${{ steps.protocol.outputs.task_id }}
         run: |
           set -euo pipefail
           outside="$(jq -r '.outside | join(",")' /tmp/claim-guard.json)"
@@ -785,6 +819,20 @@ jobs:
               jq -s '[.[] | select(.user.login == "github-actions[bot]" and ((.body // "") | startswith("AGENT_POOL_REPLAN ")))] | length'
           )"
           attempt=$((previous + 1))
+
+          if [[ "$CONTROL" == deno && -n "${CONTROL_URL:-}" && -n "${TASK_ID:-}" ]]; then
+            base="${CONTROL_URL%/}"
+            base="${base%/api/report}"
+            if oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN"               "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-pool")" &&
+              oidc_token="$(jq -er '.value' <<<"$oidc_json")"; then
+              mapfile -t observed < <(jq -r '.outside[]' /tmp/claim-guard.json)
+              evidence="$(printf '%s\n' "${observed[@]}" | jq -Rsc 'split("\n") | map(select(length > 0))')"
+              payload="$(jq -nc                 --arg task "$TASK_ID"                 --arg key "claim-drift-${GITHUB_RUN_ID}-$attempt"                 --arg subject "CLAIM incompleto en #$ISSUE"                 --arg body "El worker detectó rutas necesarias fuera del CLAIM; el siguiente plan debe reinspeccionarlas antes de reservar."                 --argjson evidence "$evidence"                 '{schema:1,task_id:$task,message_type:"BLOCKER",recipient:"dispatcher",
+                  idempotency_key:$key,correlation_id:$task,subject:$subject,body:$body,
+                  evidence:$evidence,blocking:true}')"
+              curl -fsS --max-time 12 -X POST "$base/api/agent-pool/b2b/send"                 -H "Authorization: Bearer $oidc_token"                 -H 'Content-Type: application/json' --data "$payload" >/dev/null || true
+            fi
+          fi
 
           gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --repo "$GITHUB_REPOSITORY" \
             --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=agent-pool-replan-claim-incompleto" \
