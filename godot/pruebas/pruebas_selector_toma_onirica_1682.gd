@@ -45,8 +45,10 @@ func _ejecutar() -> void:
 	)
 
 	var controlador := CONTROLADOR.new()
-	controlador.set_process(false)
 	dia.add_child(controlador)
+	# Godot reactiva el procesado al entrar en el árbol si el guion define
+	# _process; se apaga después para que el HUD solo cambie cuando la prueba lo pide.
+	controlador.set_process(false)
 	controlador._asegurar_hud_camara()
 	controlador._actualizar_hud_camara(dia)
 	await process_frame
@@ -78,12 +80,13 @@ func _ejecutar() -> void:
 		not primera.button_pressed and not segunda.button_pressed, "no hay selección implícita"
 	)
 
-	var contenedor := GrabacionOniricaEstado.asegurar_en_estado(dia.partida.estado)
-	var tomas_antes := JSON.stringify((contenedor["cinta"] as Dictionary).get("tomas", []))
+	# asegurar_en_estado sustituye el contenedor por una copia en cada llamada:
+	# hay que releerlo tras cada pulsación, no conservar una referencia vieja.
+	var tomas_antes := JSON.stringify(_tomas(dia))
 	primera.pressed.emit()
 	await process_frame
 	_comprobar(
-		int(contenedor.get("toma_seleccionada", -1)) == 0,
+		_toma_seleccionada(dia) == 0,
 		"pulsar 1 selecciona explícitamente la primera",
 	)
 	_comprobar(dia.guardados == 1, "selección explícita guarda una vez")
@@ -93,7 +96,7 @@ func _ejecutar() -> void:
 	primera = selector.get_child(0) as Button
 	segunda = selector.get_child(1) as Button
 	_comprobar(
-		JSON.stringify((contenedor["cinta"] as Dictionary).get("tomas", [])) == tomas_antes,
+		JSON.stringify(_tomas(dia)) == tomas_antes,
 		"seleccionar no reevalúa ni modifica las tomas",
 	)
 	_comprobar(
@@ -107,7 +110,7 @@ func _ejecutar() -> void:
 	segunda.pressed.emit()
 	await process_frame
 	_comprobar(
-		int(contenedor.get("toma_seleccionada", -1)) == 1,
+		_toma_seleccionada(dia) == 1,
 		"pulsar 2 cambia la selección explícitamente",
 	)
 	_comprobar(dia.guardados == 2, "cambiar selección persiste una vez")
@@ -142,6 +145,16 @@ func _toma(original_id: String, proporcion: float) -> Dictionary:
 		"figura_detecto_camara": false,
 		"hubo_corte": false,
 	}
+
+
+func _toma_seleccionada(dia: DiaFalso) -> int:
+	var contenedor := GrabacionOniricaEstado.asegurar_en_estado(dia.partida.estado)
+	return int(contenedor.get("toma_seleccionada", -1))
+
+
+func _tomas(dia: DiaFalso) -> Array:
+	var contenedor := GrabacionOniricaEstado.asegurar_en_estado(dia.partida.estado)
+	return (contenedor["cinta"] as Dictionary).get("tomas", [])
 
 
 func _terminar(dia: Node) -> void:
