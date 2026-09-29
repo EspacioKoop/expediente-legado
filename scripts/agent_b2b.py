@@ -51,8 +51,13 @@ def validate(packet: dict[str, Any]) -> None:
     issue = packet.get("issue")
     if not isinstance(issue, int) or isinstance(issue, bool) or issue <= 0:
         raise ValueError("issue B2B invalido")
-    if not isinstance(packet.get("handoff"), dict):
+    handoff = packet.get("handoff")
+    if not isinstance(handoff, dict):
         raise ValueError("handoff B2B ausente")
+    for key in ("from", "to"):
+        value = handoff.get(key)
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError(f"handoff.{key} B2B invalido")
 
 
 def verify_task_artifacts(packet: dict[str, Any]) -> None:
@@ -82,6 +87,21 @@ def _base_artifacts(args: argparse.Namespace) -> dict[str, Any]:
     return artifacts
 
 
+def build_event(args: argparse.Namespace) -> dict[str, Any]:
+    packet = {
+        "schema": SCHEMA,
+        "type": args.type,
+        "issue": args.issue,
+        "provider": args.provider or None,
+        "worker": args.worker or None,
+        "summary": _clean_text(args.summary, 500),
+        "refs": _clean_list(args.ref or [], limit=16, item_limit=240),
+        "handoff": {"from": args.from_role, "to": args.to_role},
+    }
+    validate(packet)
+    return packet
+
+
 def build_intake(args: argparse.Namespace) -> dict[str, Any]:
     packet = {
         "schema": SCHEMA,
@@ -108,6 +128,8 @@ def build_task(args: argparse.Namespace) -> dict[str, Any]:
         raise ValueError("plan.files invalido")
     artifacts = _base_artifacts(args)
     artifacts["plan"] = _artifact(args.plan)
+    if args.claim and args.claim.exists():
+        artifacts["claim"] = _artifact(args.claim)
     packet = {
         "schema": SCHEMA,
         "type": "TASK",
@@ -236,6 +258,16 @@ def _write(path: Path, payload: dict[str, Any]) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="cmd", required=True)
+    p = sub.add_parser("event")
+    p.add_argument("--type", choices=["CLAIM", "EVIDENCE", "BLOCKER", "QUESTION", "HANDOFF"], required=True)
+    p.add_argument("--issue", type=int, required=True)
+    p.add_argument("--provider", choices=["qwen", "gemini"], default="")
+    p.add_argument("--worker", default="")
+    p.add_argument("--from-role", required=True)
+    p.add_argument("--to-role", required=True)
+    p.add_argument("--summary", required=True)
+    p.add_argument("--ref", action="append", default=[])
+    p.add_argument("--output", type=Path, required=True)
     p = sub.add_parser("intake")
     p.add_argument("--issue", type=int, required=True)
     p.add_argument("--provider", choices=["qwen", "gemini"], required=True)
@@ -248,6 +280,7 @@ def main() -> int:
     p.add_argument("--worker", required=True)
     for name in ("task", "plan", "context", "memory", "history", "agents", "rules", "platino-sha", "output"):
         p.add_argument(f"--{name}", type=Path, required=True)
+    p.add_argument("--claim", type=Path)
     p = sub.add_parser("result")
     p.add_argument("--summary-file", type=Path, required=True)
     p.add_argument("--task-packet", type=Path, required=True)
@@ -268,6 +301,11 @@ def main() -> int:
     p = sub.add_parser("verify")
     p.add_argument("--packet", type=Path, required=True)
     args = parser.parse_args()
+    if args.cmd == "event":
+        payload = build_event(args)
+        _write(args.output, payload)
+        print(json.dumps(payload, ensure_ascii=False))
+        return 0
     if args.cmd == "intake":
         payload = build_intake(args)
         _write(args.output, payload)
