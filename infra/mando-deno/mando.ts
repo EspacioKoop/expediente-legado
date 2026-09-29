@@ -179,6 +179,13 @@ export interface Reserva {
   fecha: string;
 }
 
+interface ComentarioRegistro {
+  body?: string;
+  created_at?: string;
+  author_association?: string;
+  user?: { login?: string } | null;
+}
+
 interface Salud {
   version: unknown;
   flags: Record<string, unknown>;
@@ -263,10 +270,16 @@ const TIPOS_REGISTRO = /^(CLAIM|HEARTBEAT|PR_DRAFT|PR_READY|CI_FIX|RELEASE)\b/;
 // la reserva ya no está viva. Solo mira la ventana reciente (las leases duran
 // 48 h), así que no es un sustituto del workflow de reservas.
 export function reservasVivas(
-  comentarios: Array<{ body?: string; created_at?: string }>,
+  comentarios: ComentarioRegistro[],
 ): Reserva[] {
   const ultima = new Map<number, Reserva>();
   for (const comentario of comentarios) {
+    // El registro es público: un comentario externo no puede crear ni liberar
+    // reservas en la vista. La ausencia de procedencia falla cerrada.
+    if (
+      !["OWNER", "MEMBER", "COLLABORATOR"].includes(comentario.author_association ?? "") &&
+      comentario.user?.login !== "github-actions[bot]"
+    ) continue;
     const linea = (comentario.body ?? "").trim().split("\n", 1)[0];
     const tipo = TIPOS_REGISTRO.exec(linea)?.[1];
     const issue = Number(/\bissue=#(\d+)/.exec(linea)?.[1]);
@@ -288,13 +301,13 @@ export function reservasVivas(
 
 async function leerReservas(config: MandoConfig): Promise<Reserva[]> {
   const desde = new Date(config.now() - VENTANA_RESERVAS_MS).toISOString();
-  const comentarios: Array<{ body?: string; created_at?: string }> = [];
+  const comentarios: ComentarioRegistro[] = [];
   for (let page = 1; page <= 3; page++) {
     const lote = await gh(
       config,
       `/repos/${config.repository}/issues/${config.registroIssue}/comments` +
         `?per_page=100&page=${page}&since=${encodeURIComponent(desde)}`,
-    ) as Array<{ body?: string; created_at?: string }>;
+    ) as ComentarioRegistro[];
     comentarios.push(...lote);
     if (lote.length < 100) break;
   }
