@@ -20,6 +20,8 @@ var _grabacion_runtime := GrabacionOniricaRuntime.new()
 var _anomalia_grabada: AnomaliaSueno3D
 var _hud_camara: CanvasLayer
 var _hud_metraje: Label
+var _hud_tomas: HBoxContainer
+var _hud_tomas_firma := ""
 
 
 func _process(delta: float) -> void:
@@ -341,6 +343,16 @@ func _asegurar_hud_camara() -> void:
 	_hud_metraje.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	superficie.add_child(_hud_metraje)
 
+	_hud_tomas = HBoxContainer.new()
+	_hud_tomas.name = "SelectorTomas"
+	_hud_tomas.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_hud_tomas.offset_left = -190.0
+	_hud_tomas.offset_top = 70.0
+	_hud_tomas.offset_right = -28.0
+	_hud_tomas.offset_bottom = 108.0
+	_hud_tomas.alignment = BoxContainer.ALIGNMENT_END
+	superficie.add_child(_hud_tomas)
+
 
 func _actualizar_hud_camara(dia: Node) -> void:
 	var visible := (
@@ -364,6 +376,58 @@ func _actualizar_hud_camara(dia: Node) -> void:
 		TranslationServer.translate("CAMARA_ONIRICA_METRAJE")
 		% ["●" if grabacion_activa() else "○", restante]
 	)
+	_refrescar_selector_tomas(dia, contenedor)
+
+
+func _refrescar_selector_tomas(dia: Node, contenedor: Dictionary) -> void:
+	if not is_instance_valid(_hud_tomas):
+		return
+	var cinta: Dictionary = contenedor.get("cinta", {})
+	var tomas: Variant = cinta.get("tomas", [])
+	if not tomas is Array:
+		tomas = []
+	var seleccionada := int(contenedor.get("toma_seleccionada", GrabacionOniricaEstado.SIN_TOMA))
+	var firma := "%d|%d|%d" % [(tomas as Array).size(), seleccionada, int(grabacion_activa())]
+	if firma == _hud_tomas_firma:
+		return
+	_hud_tomas_firma = firma
+
+	for hijo in _hud_tomas.get_children():
+		hijo.queue_free()
+
+	for indice in (tomas as Array).size():
+		var evaluacion: Variant = (tomas as Array)[indice]
+		if not evaluacion is Dictionary:
+			continue
+		var estado := String((evaluacion as Dictionary).get("estado", ""))
+		var boton := Button.new()
+		boton.name = "Toma%d" % (indice + 1)
+		boton.text = "%d%s" % [
+			indice + 1,
+			"✓" if estado == GrabacionOniricaContrato.ESTADO_VALIDA else "~",
+		]
+		boton.toggle_mode = true
+		boton.button_pressed = indice == seleccionada
+		boton.disabled = grabacion_activa()
+		boton.focus_mode = Control.FOCUS_ALL
+		boton.pressed.connect(_al_seleccionar_toma.bind(indice))
+		_hud_tomas.add_child(boton)
+
+
+func _al_seleccionar_toma(indice: int) -> void:
+	var dia := get_parent()
+	if dia == null or String(dia.jornada.get("fase", "")) != "sueño":
+		return
+	if grabacion_activa():
+		return
+	var partida_actual = dia.get("partida")
+	if not partida_actual is Partida:
+		return
+	if not GrabacionOniricaEstado.seleccionar_toma(partida_actual.estado, indice):
+		return
+	_hud_tomas_firma = ""
+	_actualizar_hud_camara(dia)
+	dia._guardar_o_avisar("")
 
 
 func _al_observar_anomalia(
