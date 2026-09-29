@@ -111,5 +111,122 @@ class WorkflowsYamlTest(unittest.TestCase):
                 self.assertNotRegex(texto, rf"uses:\s*{re.escape(accion)}@v\d+")
 
 
+    def test_checkout_privilegiado_no_persiste_credenciales(self):
+        """Los workflows con capacidad de escritura/OIDC no dejan el token en git."""
+        privilegiados = {
+            "agent-autopilot.yml",
+            "agent-worker.yml",
+            "agent-feeder.yml",
+            "agent-ci-repair.yml",
+            "agent-decompose.yml",
+            "agent-pool.yml",
+            "agent-reconciler.yml",
+            "agent-provider-smoke.yml",
+            "label-areas.yml",
+            "reservas.yml",
+            "alpha-playtest.yml",
+        }
+
+        for nombre in sorted(privilegiados):
+            ruta = ROOT / ".github" / "workflows" / nombre
+            lineas = ruta.read_text(encoding="utf-8").splitlines()
+            encontrados = 0
+            for indice, linea in enumerate(lineas):
+                match = re.match(r"^(\s*)(?:-\s*)?uses:\s*actions/checkout@", linea)
+                if not match:
+                    continue
+
+                encontrados += 1
+                indentacion = len(match.group(1))
+                bloque = [linea]
+                for siguiente in lineas[indice + 1 :]:
+                    texto = siguiente.strip()
+                    indentacion_siguiente = len(siguiente) - len(siguiente.lstrip())
+                    if texto.startswith("- ") and indentacion_siguiente <= indentacion:
+                        break
+                    bloque.append(siguiente)
+
+                with self.subTest(workflow=nombre, checkout=indice + 1):
+                    self.assertRegex(
+                        "\n".join(bloque),
+                        r"(?m)^\s*persist-credentials:\s*false\s*$",
+                        f"{nombre}:{indice + 1} debe usar persist-credentials: false",
+                    )
+
+            with self.subTest(workflow=nombre):
+                self.assertGreater(encontrados, 0, f"{nombre} debería tener checkout")
+
+    def test_pull_request_target_no_hace_checkout_del_head(self):
+        """Un token privilegiado nunca debe ejecutar el head de una PR no confiable."""
+        for ruta in WORKFLOWS:
+            texto = ruta.read_text(encoding="utf-8")
+            if "pull_request_target:" not in texto:
+                continue
+            with self.subTest(workflow=ruta.name):
+                self.assertNotRegex(
+                    texto,
+                    r"ref:\s*\$\{\{\s*github\.event\.pull_request\.head\.(?:sha|ref)",
+                )
+
+
+    def test_ci_repair_workflow_run_atado_a_repo_y_sha(self):
+        """El workflow privilegiado no puede reparar una ejecución de un fork o SHA distinto."""
+        texto = (
+            ROOT / ".github" / "workflows" / "agent-ci-repair.yml"
+        ).read_text(encoding="utf-8")
+        self.assertGreaterEqual(
+            texto.count(
+                "github.event.workflow_run.head_repository.full_name == github.repository"
+            ),
+            2,
+        )
+        self.assertIn("RUN_SHA: ${{ github.event.workflow_run.head_sha }}", texto)
+        self.assertIn('"$head_sha" != "$RUN_SHA"', texto)
+        self.assertIn('"$head_sha" != "$SHA"', texto)
+
+
+    def test_acciones_sensibles_usadas_por_sha(self):
+        """Los workflows privilegiados no ejecutan tags mutables de terceros."""
+        workflows = {
+            "agent-autopilot.yml",
+            "agent-worker.yml",
+            "agent-feeder.yml",
+            "agent-ci-repair.yml",
+            "agent-decompose.yml",
+            "agent-pool.yml",
+            "agent-reconciler.yml",
+            "agent-provider-smoke.yml",
+            "agent-omniroute-smoke.yml",
+            "label-areas.yml",
+            "reservas.yml",
+            "alpha-playtest.yml",
+            "cleanup-merged-branches.yml",
+        }
+        acciones = {
+            "actions/checkout",
+            "actions/setup-python",
+            "actions/upload-artifact",
+            "actions/download-artifact",
+            "actions/github-script",
+            "tailscale/github-action",
+            "QwenLM/qwen-code-action",
+            "google-github-actions/run-gemini-cli",
+            "softprops/action-gh-release",
+        }
+
+        patron = re.compile(r"uses:\s*([^\s@]+)@([^\s#]+)")
+        for nombre in sorted(workflows):
+            texto = (ROOT / ".github" / "workflows" / nombre).read_text(encoding="utf-8")
+            for accion, referencia in patron.findall(texto):
+                if accion not in acciones:
+                    continue
+                with self.subTest(workflow=nombre, action=accion):
+                    self.assertRegex(
+                        referencia,
+                        r"^[0-9a-f]{40}$",
+                        f"{nombre}: {accion} debe fijarse a un SHA completo, no {referencia!r}",
+                    )
+
+
 if __name__ == "__main__":
     unittest.main()

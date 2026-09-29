@@ -184,7 +184,7 @@ jobs:
 
       - name: Checkout
         if: steps.guard.outputs.run == 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: main
           fetch-depth: 0
@@ -214,7 +214,7 @@ jobs:
       - name: Conectar qwen-primary a OmniRoute por Tailscale (OAuth)
         if: steps.guard.outputs.run == 'true' && inputs.worker == 'qwen-primary' && env.HAS_OMNIROUTE == 'true' && env.HAS_TS_OAUTH == 'true'
         continue-on-error: true
-        uses: tailscale/github-action@v4
+        uses: tailscale/github-action@d1b6cd204f8dceda5b3eaad7f1f767be390056cd # v4
         with:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
@@ -223,7 +223,7 @@ jobs:
       - name: Conectar qwen-primary a OmniRoute por Tailscale (OIDC)
         if: steps.guard.outputs.run == 'true' && inputs.worker == 'qwen-primary' && env.HAS_OMNIROUTE == 'true' && env.HAS_TS_OAUTH != 'true' && env.HAS_TS_OIDC == 'true'
         continue-on-error: true
-        uses: tailscale/github-action@v4
+        uses: tailscale/github-action@d1b6cd204f8dceda5b3eaad7f1f767be390056cd # v4
         with:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           audience: ${{ secrets.TS_AUDIENCE }}
@@ -455,7 +455,7 @@ jobs:
         name: Plan Qwen
         if: steps.guard.outputs.run == 'true' && inputs.provider == 'qwen' && steps.delegated.outputs.found != 'true'
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@v1
+        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
         with:
           openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || secrets[steps.qwen_config.outputs.key_secret] }}
           openai_base_url: ${{ steps.qwen_config.outputs.url }}
@@ -468,7 +468,7 @@ jobs:
         name: Plan Gemini
         if: steps.guard.outputs.run == 'true' && inputs.provider == 'gemini' && steps.delegated.outputs.found != 'true'
         continue-on-error: true
-        uses: google-github-actions/run-gemini-cli@v0
+        uses: google-github-actions/run-gemini-cli@f77273f4c914e4bf38440cf36a0369cb64a37489 # v0.1.22
         with:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           gemini_model: ${{ vars.GEMINI_MODEL }}
@@ -629,7 +629,7 @@ jobs:
         # para liberar la reserva (#1695: Nemotron Super superó 40 min).
         timeout-minutes: 35
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@v1
+        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
         with:
           openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || secrets[steps.qwen_config.outputs.key_secret] }}
           openai_base_url: ${{ steps.qwen_config.outputs.url }}
@@ -645,7 +645,7 @@ jobs:
         # para liberar la reserva (#1695: Nemotron Super superó 40 min).
         timeout-minutes: 35
         continue-on-error: true
-        uses: google-github-actions/run-gemini-cli@v0
+        uses: google-github-actions/run-gemini-cli@f77273f4c914e4bf38440cf36a0369cb64a37489 # v0.1.22
         with:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           gemini_model: ${{ vars.GEMINI_MODEL }}
@@ -812,7 +812,7 @@ jobs:
         if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true' && inputs.provider == 'qwen'
         timeout-minutes: 3
         continue-on-error: true
-        uses: QwenLM/qwen-code-action@v1
+        uses: QwenLM/qwen-code-action@a08dc886c2094312d6cf2df08ba5fd0437c53339 # v1
         with:
           openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || secrets[steps.qwen_config.outputs.key_secret] }}
           openai_base_url: ${{ steps.qwen_config.outputs.url }}
@@ -826,7 +826,7 @@ jobs:
         if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true' && inputs.provider == 'gemini'
         timeout-minutes: 3
         continue-on-error: true
-        uses: google-github-actions/run-gemini-cli@v0
+        uses: google-github-actions/run-gemini-cli@f77273f4c914e4bf38440cf36a0369cb64a37489 # v0.1.22
         with:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           gemini_model: ${{ vars.GEMINI_MODEL }}
