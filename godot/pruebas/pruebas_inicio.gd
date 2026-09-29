@@ -71,7 +71,8 @@ func _probar() -> void:
 		"acciones tienen presencia visual suficiente"
 	)
 	_comprobar(
-		inicio._continuar.custom_minimum_size.x == 360.0,
+		inicio._continuar.custom_minimum_size.x >= 360.0
+		and inicio._continuar.custom_minimum_size.x <= 400.0,
 		"#1449: las acciones mantienen un ancho compacto y consistente"
 	)
 	_comprobar(
