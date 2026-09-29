@@ -94,7 +94,7 @@ class ContratoWorkflowsTest(unittest.TestCase):
         cuerpo = worker.split("    secrets:", 1)[1].split("jobs:", 1)[1]
         self.assertNotRegex(cuerpo, r"QWEN_FALLBACK_\d+_")
         self.assertNotRegex(cuerpo, r"qwen-fallback-\d+[):]")
-        self.assertEqual(3, cuerpo.count("secrets[steps.qwen_config.outputs.key_secret]"))
+        self.assertEqual(2, cuerpo.count("secrets[steps.qwen_config.outputs.key_secret]"))
         self.assertIn("secrets[steps.slot.outputs.secret] != ''", cuerpo)
         self.assertIn("^(QWEN_FALLBACK_[1-9][0-9]*_API_KEY|QWEN_API_KEY|GEMINI_API_KEY)$", cuerpo)
         self.assertIn("python3 scripts/agent_slots.py resolver", cuerpo)
