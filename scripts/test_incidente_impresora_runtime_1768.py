@@ -29,7 +29,7 @@ class IncidenteImpresoraRuntime1768Test(unittest.TestCase):
     def test_estado_es_diario_y_se_reconstruye(self):
         self.assertIn('CLAVE_ESTADO := "incidente_impresora"', self.fuente)
         self.assertIn('jornada[CLAVE_ESTADO] = estado', self.fuente)
-        self.assertIn("int(estado.get("dia", -1))", self.fuente)
+        self.assertIn('int(estado.get("dia", -1))', self.fuente)
         self.assertIn("int(estado.get("vuelta", -1))", self.fuente)
         self.assertIn("_limpiar_estado_obsoleto", self.fuente)
 
