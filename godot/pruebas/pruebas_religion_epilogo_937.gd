@@ -174,7 +174,6 @@ func _probar_final_base_estable() -> void:
 	_comprobar(a["religion"] != b["religion"], "hechos distintos producen capa distinta")
 
 
-
 func _probar_integracion_final_visible() -> void:
 	var estado := Partida.nueva()
 	var registro := ReligionEventos.asegurar_en_estado(estado)

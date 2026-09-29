@@ -104,7 +104,6 @@ func _construir() -> void:
 	_boton.grab_focus()
 
 
-
 func _montar_religion(caja: VBoxContainer) -> void:
 	var resumen_crudo = _resumen.get("religion", {})
 	if typeof(resumen_crudo) != TYPE_DICTIONARY:
