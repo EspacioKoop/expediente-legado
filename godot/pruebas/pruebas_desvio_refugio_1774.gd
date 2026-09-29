@@ -33,16 +33,18 @@ func _probar() -> void:
 			"no crea colisiones de softlock",
 		)
 		_comprobar(
-			refugio.get_node_or_null("GoteoBorde_0") == null,
+			refugio.get_node_or_null("GoteoBorde2") == null,
 			"despejado no inventa precipitación",
 		)
 
 	var calle_lluvia := Node3D.new()
 	root.add_child(calle_lluvia)
-	var lluvia := DesvioRefugio3D.montar(calle_lluvia, {"dia": 1, "clima_forzado": Clima.LLUVIA})
+	var lluvia := (
+		DesvioRefugio3D.montar(calle_lluvia, {"dia": 1, "clima_forzado": Clima.LLUVIA})
+	)
 	_comprobar(bool(lluvia.get_meta("precipitacion", false)), "lluvia activa lectura de refugio")
 	_comprobar(lluvia.get_node_or_null("CharcoExterior") != null, "lluvia queda fuera del suelo seco")
-	_comprobar(lluvia.get_node_or_null("GoteoBorde_0") != null, "lluvia gotea en el borde")
+	_comprobar(lluvia.get_node_or_null("GoteoBorde2") != null, "lluvia gotea en el borde")
 
 	var calle_nieve := Node3D.new()
 	root.add_child(calle_nieve)
