@@ -1,19 +1,13 @@
-"""Contrato: el planificador recibe la tarea en el prompt, no solo en un fichero.
-
-En el pool, Qwen respondió «no se ha presentado ninguna tarea» (#667), pidió
-herramientas de edición en la fase de plan (#668) o filtró razonamiento interno
-(#1615): ninguno llegó a leer `.agent-task.md`.
-"""
+"""Contrato: el worker de nivel 3 ejecuta un TaskPacket y no planifica."""
 
 from pathlib import Path
-import re
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKER = ROOT / ".github" / "workflows" / "agent-worker.yml"
 
 
-class PromptPlanIncluyeTareaTest(unittest.TestCase):
+class WorkerExecutorOnlyTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.worker = WORKER.read_text(encoding="utf-8")
@@ -23,25 +17,27 @@ class PromptPlanIncluyeTareaTest(unittest.TestCase):
         fin = self.worker.index("\n      - ", inicio + 1)
         return self.worker[inicio:fin]
 
-    def test_materializar_expone_la_tarea_como_salida(self):
-        paso = self._bloque_paso("task")
-        self.assertIn("name: Materializar contexto del issue", paso)
-        # Delimitador aleatorio: el cuerpo del issue no puede cerrar el heredoc.
-        self.assertIn('delim="TAREA_$(openssl rand -hex 8)"', paso)
-        self.assertIn('echo "brief<<$delim"', paso)
-        self.assertRegex(paso, r"--json\s+number,title,body")
-        self.assertIn(".[0:6000]", paso)
+    def test_no_hay_planificador_en_worker_final(self):
+        self.assertNotIn("- id: plan_qwen\n", self.worker)
+        self.assertNotIn("- id: plan_gemini\n", self.worker)
+        self.assertNotIn("FASE DE PLAN (solo lectura)", self.worker)
 
-    def test_prompts_de_plan_llevan_la_tarea_y_la_fase(self):
-        for paso_id in ("plan_qwen", "plan_gemini"):
+    def test_sin_plan_se_deriva_al_nivel_dos(self):
+        delegated = self._bloque_paso("delegated")
+        route = self._bloque_paso("route_decompose")
+        self.assertIn("scripts/agent_delegated_plan.py", delegated)
+        self.assertIn("found=false", delegated)
+        self.assertIn("agent:decompose", route)
+        self.assertIn("ningún worker executor gastará turnos planificando", route)
+
+    def test_implementers_reciben_solo_prompt_compilado(self):
+        for paso_id in ("implement_qwen", "implement_gemini"):
             with self.subTest(paso=paso_id):
-                prompt = re.search(r"prompt: '(.*)'", self._bloque_paso(paso_id)).group(1)
-                self.assertTrue(prompt.startswith("FASE DE PLAN (solo lectura)"))
-                self.assertIn("${{ steps.task.outputs.brief }}", prompt)
-                self.assertLess(
-                    prompt.index("${{ steps.task.outputs.brief }}"),
-                    prompt.index("AGENT_PLAN_BEGIN"),
-                )
+                paso = self._bloque_paso(paso_id)
+                self.assertIn("Lee .agent-worker-prompt.md", paso)
+                self.assertIn(".agent-task-packet.json", paso)
+                self.assertNotIn("AGENTS.md", paso)
+                self.assertNotIn(".agent-context.md", paso)
 
 
 if __name__ == "__main__":
