@@ -246,7 +246,7 @@ jobs:
           # Los fallos de cuota/guard sin PR quedan fuera y siguen en worker-health.
           printf '{}\n' > /tmp/handoff-metrics.json
           if gh pr list --repo "$GITHUB_REPOSITORY" --state all --limit 100 \
-            --json number,title,body,commits,updatedAt,statusCheckRollup \
+            --json number,title,body,commits,createdAt,updatedAt,closedAt,mergedAt,statusCheckRollup \
             > /tmp/agent-prs.json 2>/dev/null; then
             python3 scripts/agent_handoff_metrics.py \
               --prs /tmp/agent-prs.json \
