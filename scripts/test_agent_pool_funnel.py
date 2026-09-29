@@ -18,8 +18,8 @@ def job(worker, exitos, extra=None, issue=10, provider="qwen"):
 
 
 ARRANCA = ["Validar issue y slot", "Materializar contexto del issue"]
-PLAN = ARRANCA + ["Plan Qwen", "Validar plan y reservar rutas"]
-RESERVA = PLAN + ["Afinar contexto y memoria por rutas", "Crear rama"]
+PLAN = ARRANCA + ["Validar plan y reservar rutas"]
+RESERVA = PLAN + ["Compilar TaskPacket y prompt del worker", "Crear rama"]
 IMPLEMENTA = RESERVA + ["Implementar con Qwen", "Normalizar cambios al CLAIM"]
 COMPLETO = IMPLEMENTA + ["Validar diff y preflight", "Publicar PR draft y lanzar CI canonica"]
 
@@ -35,7 +35,7 @@ class EmbudoPoolTest(unittest.TestCase):
 
     def test_fase_rota_corta_el_embudo(self):
         # Sin plan válido no cuenta como reserva aunque un paso posterior figure en success.
-        pasos = ARRANCA + ["Afinar contexto y memoria por rutas"]
+        pasos = ARRANCA + ["Compilar TaskPacket y prompt del worker"]
         self.assertEqual("arranca", funnel.fase_alcanzada(job("w", pasos)))
 
     def test_replan_marca_implementacion_fuera_de_claim(self):

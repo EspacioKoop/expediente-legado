@@ -25,13 +25,12 @@ from typing import Any
 # (fase, pasos de agent-worker.yml que la acreditan si alguno terminó en success)
 FASES: list[tuple[str, tuple[str, ...]]] = [
     ("arranca", ("Materializar contexto del issue",)),
-    # Termina en success también con files=[] (sin corte seguro): la reserva
-    # es la que confirma que el plan era útil.
-    # Termina en success también con files=[] (sin corte seguro): la reserva
-    # es la que confirma que el plan era útil.
+    # El nivel 2 ya planificó: aquí solo validamos que el AGENT_PLAN delegado
+    # es ejecutable y que su CLAIM no colisiona.
     ("plan_parseado", ("Validar plan y reservar rutas",)),
-    # Solo se ejecuta con reserved == 'true': la reserva no chocó en #182.
-    ("reserva", ("Afinar contexto y memoria por rutas",)),
+    # El TaskPacket solo se compila con reserved == 'true', también en fallback
+    # GitHub, por lo que acredita una reserva útil sin depender de Deno.
+    ("reserva", ("Compilar TaskPacket y prompt del worker",)),
     ("implementa", ("Implementar con Qwen", "Implementar con Gemini")),
     ("preflight", ("Validar diff y preflight",)),
     ("pr_draft", ("Publicar PR draft y lanzar CI canonica",)),

@@ -384,181 +384,84 @@ jobs:
             echo "$delim"
           } >> "$GITHUB_OUTPUT"
 
-      - id: b2b_plan_inbox
-        name: Leer B2B antes de planificar
-        if: steps.guard.outputs.run == 'true' && steps.guard.outputs.control == 'deno'
-        continue-on-error: true
-        env:
-          SIGA98_FEEDBACK_FALLBACK_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
-          ISSUE: ${{ inputs.issue }}
-        run: |
-          set -euo pipefail
-          base_sha="$(git rev-parse HEAD)"
-          task_id="$GITHUB_REPOSITORY#$ISSUE@${base_sha:0:12}"
-          echo "task_id=$task_id" >> "$GITHUB_OUTPUT"
-          python3 scripts/agent_b2b_mailbox.py             --output /tmp/agent-b2b-plan-inbox.json             inbox --recipient worker --task-id "$task_id" --limit 20
-          {
-            echo "# Mensajes B2B dirigidos"
-            echo
-            jq -r '.messages[] |
-              "- [\(.message_type)] \(.subject // "")\n  \(.body // "")\n  evidencia: \((.evidence // []) | join("; "))"'               /tmp/agent-b2b-plan-inbox.json
-          } > .agent-b2b-inbox.md
-
       - id: delegated
-        name: Buscar plan delegado por el nivel 2
+        name: Cargar plan delegado del nivel 2
         if: steps.guard.outputs.run == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           ISSUE: ${{ inputs.issue }}
         run: |
           set -euo pipefail
-          # Planificar es trabajo del nivel 2 (#1637): si una cuenta de confianza
-          # dejó AGENT_PLAN en el issue, se ejecuta sin invocar al planificador.
-          # REST y no `gh issue view`: el cuerpo del issue necesita
-          # author_association para decidir si es de confianza.
-          # Best-effort: ante cualquier fallo se planifica como siempre.
-          if ! gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE" > /tmp/delegado-issue.json ||
-            ! gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$ISSUE/comments?per_page=100" \
-              --jq '.[]' | jq -s '.' > /tmp/delegado-comments.json ||
-            ! jq -s '.[0] + {comments: .[1]}' /tmp/delegado-issue.json /tmp/delegado-comments.json \
-              > /tmp/delegado-entrada.json ||
-            ! python3 scripts/agent_delegated_plan.py \
+          printf '%s\n' '{"found":false}' > /tmp/delegado.json
+          if gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE" > /tmp/delegado-issue.json &&
+            gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$ISSUE/comments?per_page=100" \
+              --jq '.[]' | jq -s '.' > /tmp/delegado-comments.json &&
+            jq -s '.[0] + {comments: .[1]}' /tmp/delegado-issue.json /tmp/delegado-comments.json \
+              > /tmp/delegado-entrada.json &&
+            python3 scripts/agent_delegated_plan.py \
               --issue /tmp/delegado-entrada.json --output /tmp/delegado.json >/dev/null; then
-            echo "AVISO: no se pudo buscar plan delegado; se usará el planificador"
-            exit 0
-          fi
-          if [[ "$(jq -r '.found' /tmp/delegado.json)" == true ]]; then
-            source="$(jq -r '"\(.source) de \(.author)"' /tmp/delegado.json)"
-            delim="PLAN_$(openssl rand -hex 8)"
-            {
-              echo "found=true"
-              echo "summary<<$delim"
-              echo "AGENT_PLAN_BEGIN"
-              jq -c '.plan' /tmp/delegado.json
-              echo "AGENT_PLAN_END"
-              echo "$delim"
-            } >> "$GITHUB_OUTPUT"
-            echo "Plan delegado por el nivel 2 ($source); se omite el planificador."
-          fi
-
-      - name: Cargar memoria historica de CI
-        if: steps.guard.outputs.run == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          printf '%s\n' '{"ok":true,"source":"ci-brain-sqlite","memories":[]}' > .agent-history.json
-          if python3 scripts/ci_brain.py restore --sqlite /tmp/ci-brain.sqlite3 >/tmp/ci-brain-restore.json; then
-            python3 scripts/ci_brain.py context \
-              --sqlite /tmp/ci-brain.sqlite3 \
-              --query-file .agent-task.md \
-              --output .agent-history.json >/dev/null
-          fi
-
-      - name: Cargar Normas Platino, wiki y memoria
-        if: steps.guard.outputs.run == 'true'
-        env:
-          ISSUE: ${{ inputs.issue }}
-          PROVIDER: ${{ inputs.provider }}
-          MEMORY_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
-        run: |
-          set -euo pipefail
-          git clone --depth 1 https://github.com/EspacioKoop/normas_platino.git .agent-platino
-          git -C .agent-platino rev-parse HEAD > .agent-platino-sha
-          rm -rf .agent-platino/.git
-
-          if git clone --depth 1 https://github.com/EspacioKoop/expediente-legado.wiki.git .agent-wiki; then
-            rm -rf .agent-wiki/.git
-          else
-            mkdir -p .agent-wiki
-            printf '%s\n' '# Wiki no disponible en esta ejecucion' > .agent-wiki/README.md
-          fi
-
-          python3 scripts/agent_context_pack.py \
-            --wiki-dir .agent-wiki \
-            --issue-file .agent-task.md \
-            --max-pages 8 \
-            --max-bytes 24000 \
-            --output .agent-context.md
-
-          printf '%s\n' '{"ok":true,"memories":[]}' > .agent-memory.json
-          if [[ -n "${MEMORY_URL:-}" ]]; then
-            base="${MEMORY_URL%/}"
-            base="${base%/api/report}"
-            if oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-              "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-memory")" &&
-              oidc_token="$(jq -er '.value' <<<"$oidc_json")"; then
-              payload="$(jq -nc --argjson issue "$ISSUE" --arg provider "$PROVIDER" \
-                '{schema:1,issue:$issue,provider:$provider}')"
-              if curl -fsS -X POST "$base/api/agent-memory/search" \
-                -H "Authorization: Bearer $oidc_token" \
-                -H 'Content-Type: application/json' \
-                --data "$payload" -o /tmp/agent-memory.json; then
-                mv /tmp/agent-memory.json .agent-memory.json
-              fi
+            if [[ "$(jq -r '.found' /tmp/delegado.json)" == true ]]; then
+              echo "found=true" >> "$GITHUB_OUTPUT"
+              echo "Plan delegado listo; nivel 3 entra directamente en reserva/ejecución."
+              exit 0
             fi
           fi
+          echo "found=false" >> "$GITHUB_OUTPUT"
 
-      - id: plan_qwen
-        name: Plan Qwen
-        if: steps.guard.outputs.run == 'true' && inputs.provider == 'qwen' && steps.delegated.outputs.found != 'true'
-        continue-on-error: true
-        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
-        with:
-          openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || secrets[steps.qwen_config.outputs.key_secret] }}
-          openai_base_url: ${{ steps.qwen_config.outputs.url }}
-          openai_model: ${{ steps.qwen_config.outputs.model }}
-          qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
-          settings: '{"model":{"maxSessionTurns":16},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'FASE DE PLAN (solo lectura): no edites nada ni pidas herramientas de edicion; tu unica salida util es el bloque AGENT_PLAN. TAREA ASIGNADA: ${{ steps.task.outputs.brief }} FIN DE LA TAREA. Lee .agent-task.md, .agent-b2b-inbox.md si existe, y solo el codigo que necesites para localizar el cambio (grep_search/read_file); no leas normas, wiki ni memorias. Una tarea del pool es UN UNICO archivo: elige el archivo donde vive el cambio mas pequeño util que se pueda hacer tocando solo ese archivo. Si los comentarios recientes contienen AGENT_POOL_REPLAN o el inbox B2B contiene un BLOCKER de CLAIM, revisa explicitamente sus rutas/evidencia y anadelas solo si son realmente necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Exactamente 1 archivo en files; usa files=[] si no hay corte seguro de un solo archivo.'
+      - id: route_decompose
+        name: Devolver al nivel 2 si falta plan
+        if: steps.guard.outputs.run == 'true' && steps.delegated.outputs.found != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ inputs.issue }}
+        run: |
+          set -euo pipefail
+          for label in agent:auto agent:pool agent:qwen agent:gemini agent:working; do
+            gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --remove-label "$label" >/dev/null 2>&1 || true
+          done
+          gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+            --remove-label agent:needs-human --add-label agent:decompose >/dev/null
+          gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
+            "Agent pool: falta AGENT_PLAN delegado. Se devuelve a agent:decompose; el executor no consume turnos planificando." >/dev/null
+          echo "routed=true" >> "$GITHUB_OUTPUT"
 
-      - id: plan_gemini
-        name: Plan Gemini
-        if: steps.guard.outputs.run == 'true' && inputs.provider == 'gemini' && steps.delegated.outputs.found != 'true'
-        continue-on-error: true
-        uses: google-github-actions/run-gemini-cli@f77273f4c914e4bf38440cf36a0369cb64a37489 # v0.1.22
-        with:
-          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
-          gemini_model: ${{ vars.GEMINI_MODEL }}
-          gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
-          settings: '{"model":{"maxSessionTurns":16},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'FASE DE PLAN (solo lectura): no edites nada ni pidas herramientas de edicion; tu unica salida util es el bloque AGENT_PLAN. TAREA ASIGNADA: ${{ steps.task.outputs.brief }} FIN DE LA TAREA. Lee .agent-task.md, .agent-b2b-inbox.md si existe, y solo el codigo que necesites para localizar el cambio (grep_search/read_file); no leas normas, wiki ni memorias. Una tarea del pool es UN UNICO archivo: elige el archivo donde vive el cambio mas pequeño util que se pueda hacer tocando solo ese archivo. Si los comentarios recientes contienen AGENT_POOL_REPLAN o el inbox B2B contiene un BLOCKER de CLAIM, revisa explicitamente sus rutas/evidencia y anadelas solo si son realmente necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Exactamente 1 archivo en files; usa files=[] si no hay corte seguro de un solo archivo.'
+      - name: Sellar versión de Normas Platino
+        if: steps.guard.outputs.run == 'true' && steps.delegated.outputs.found == 'true'
+        run: |
+          set -euo pipefail
+          git ls-remote https://github.com/EspacioKoop/normas_platino.git HEAD | awk '{print $1}' > .agent-platino-sha
+          test -s .agent-platino-sha
 
       - id: reserve
         name: Validar plan y reservar rutas
-        if: steps.guard.outputs.run == 'true'
+        if: steps.guard.outputs.run == 'true' && steps.delegated.outputs.found == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           ISSUE: ${{ inputs.issue }}
           PROVIDER: ${{ inputs.provider }}
           BRANCH: ${{ steps.guard.outputs.branch }}
-          DELEGATED: ${{ steps.delegated.outputs.found }}
           MAX_FILES: ${{ vars.AGENT_POOL_MAX_FILES || '1' }}
         run: |
           set -euo pipefail
-          # La salida del planificador se lee de fichero, nunca de env: con más
-          # de 128 KB el paso ni arrancaba («Argument list too long», #1881).
-          # La copia en /tmp sobrevive a la implementación, que pisa *-artifacts.
-          mkdir -p /tmp/agent-output-plan
-          cp qwen-artifacts/*.log gemini-artifacts/*.log /tmp/agent-output-plan/ 2>/dev/null || true
-          # Parser tolerante (#1881): marcadores en Markdown, bloque json sin
-          # marcadores o JSON truncado. Gana la primera fuente con plan.
-          # Una tarea = un fichero por defecto (#1901): los workers pequeños
-          # agotaban sus turnos en cortes de varios ficheros.
           status=0
           python3 scripts/agent_plan_parse.py \
             --source /tmp/delegado.json \
-            --source /tmp/agent-output-plan/stdout.log \
             --max-files "$MAX_FILES" \
-            --output .agent-plan.json || status=$?
-          if (( status == 5 )) && [[ "${DELEGATED:-}" == true ]]; then
-            # Un plan delegado demasiado grande no mejora reintentando: lo parte el nivel 2.
-            printf 'reserved=false\nreason=plan-demasiado-grande\n' >> "$GITHUB_OUTPUT"
-            gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human --remove-label agent:working >/dev/null 2>&1 || true
-            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Agent pool ($PROVIDER): el plan delegado toca más de $MAX_FILES fichero(s). Una tarea del pool es un único fichero: pártelo en issues de un fichero cada uno." || true
+            --output .agent-plan.json 2>/tmp/agent-plan-error.txt || status=$?
+          if (( status != 0 )); then
+            reason="$(tr '\n' ' ' < /tmp/agent-plan-error.txt)"
+            target=agent:needs-human
+            (( status == 5 )) && target=agent:decompose
+            for label in agent:auto agent:pool agent:qwen agent:gemini agent:working; do
+              gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --remove-label "$label" >/dev/null 2>&1 || true
+            done
+            gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label "$target" >/dev/null
+            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
+              "Agent pool: AGENT_PLAN delegado no ejecutable ($reason). Destino: $target." >/dev/null
+            echo "reserved=false" >> "$GITHUB_OUTPUT"
+            echo "reason=plan-delegado-invalido" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          (( status == 0 )) || exit "$status"
 
           if grep -q '"files": \[\]' .agent-plan.json 2>/dev/null; then
             printf 'reserved=false\nreason=sin-corte-seguro\n' >> "$GITHUB_OUTPUT"
@@ -617,48 +520,6 @@ jobs:
           curl -fsS -X POST "$base/api/agent-pool/transition" \
             -H "Authorization: Bearer $oidc_token" \
             -H 'Content-Type: application/json' --data "$payload" >/dev/null
-
-      - name: Afinar contexto y memoria por rutas
-        if: steps.reserve.outputs.reserved == 'true'
-        env:
-          ISSUE: ${{ inputs.issue }}
-          PROVIDER: ${{ inputs.provider }}
-          MEMORY_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
-        run: |
-          set -euo pipefail
-          mapfile -t files < <(jq -r '.files[]' .agent-plan.json)
-          args=()
-          for file in "${files[@]}"; do args+=(--path "$file"); done
-          python3 scripts/agent_context_pack.py \
-            --wiki-dir .agent-wiki \
-            --issue-file .agent-task.md \
-            "${args[@]}" \
-            --max-pages 8 \
-            --max-bytes 24000 \
-            --output .agent-context.md
-
-          [[ -s /tmp/ci-brain.sqlite3 ]] && python3 scripts/ci_brain.py context \
-            --sqlite /tmp/ci-brain.sqlite3 \
-            --query-file .agent-task.md \
-            --paths-json .agent-plan.json \
-            --output .agent-history.json >/dev/null || true
-
-          [[ -z "${MEMORY_URL:-}" ]] && exit 0
-          base="${MEMORY_URL%/}"
-          base="${base%/api/report}"
-          paths="$(jq -c '.files' .agent-plan.json)"
-          if oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-memory")" &&
-            oidc_token="$(jq -er '.value' <<<"$oidc_json")"; then
-              payload="$(jq -nc --argjson issue "$ISSUE" --arg provider "$PROVIDER" --argjson paths "$paths" \
-                '{schema:1,issue:$issue,provider:$provider,paths:$paths}')"
-              if curl -fsS -X POST "$base/api/agent-memory/search" \
-                -H "Authorization: Bearer $oidc_token" \
-                -H 'Content-Type: application/json' \
-                --data "$payload" -o /tmp/agent-memory.json; then
-                mv /tmp/agent-memory.json .agent-memory.json
-              fi
-          fi
 
       - id: protocol
         name: Compilar TaskPacket y prompt del worker
@@ -1258,8 +1119,6 @@ jobs:
           VARS_JSON: ${{ toJSON(vars) }}
           POOL_FALLBACK_KEYS: ${{ inputs.fallback_keys }}
           HAS_GEMINI: ${{ secrets.GEMINI_API_KEY != '' }}
-          PLAN_QWEN_OUTCOME: ${{ steps.plan_qwen.outcome }}
-          PLAN_GEMINI_OUTCOME: ${{ steps.plan_gemini.outcome }}
           IMPLEMENT_QWEN_OUTCOME: ${{ steps.implement_qwen.outcome }}
           IMPLEMENT_GEMINI_OUTCOME: ${{ steps.implement_gemini.outcome }}
           RETRY_STAGE: ${{ steps.validate_diff.outputs.retry_stage }}
@@ -1299,17 +1158,12 @@ jobs:
           fi
 
           retry_stage=""
-          if [[ "${RESERVED:-}" != true && -z "$pr" ]]; then
-            retry_stage=plan
-          elif [[ "${RESERVED:-}" == true && -z "$pr" && -n "${RETRY_STAGE:-}" ]]; then
+          if [[ "${RESERVED:-}" == true && -z "$pr" && -n "${RETRY_STAGE:-}" ]]; then
             retry_stage="$RETRY_STAGE"
           fi
 
           if [[ -n "$retry_stage" ]]; then
-            output_dir=/tmp/agent-output-plan
-            if [[ "$retry_stage" != plan ]]; then
-              output_dir=/tmp/agent-output-implement
-            fi
+            output_dir=/tmp/agent-output-implement
 
             policy_args=(--stage "$retry_stage" --job-status "$JOB_STATUS")
             [[ "$retry_stage" == no-changes ]] && policy_args+=(--no-changes)
