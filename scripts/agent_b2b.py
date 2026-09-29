@@ -213,7 +213,7 @@ Proveedor: {provider}
 Lee primero `.agent-plan-task-packet.json`. El workflow ya verificó sus fingerprints. Después lee `AGENTS.md`, `{rules}`, los artefactos declarados por el paquete y obligatoriamente las Normas Platino actuales en `.agent-platino/`.
 
 Jerarquía: repo/issue/#181/#1713/Normas Platino > wiki > memoria > histórico CI.
-Trabaja en solo lectura: no edites archivos ni solicites herramientas de edición. Revisa los puntos reales de integración y sus tests antes de cerrar el plan. Si existe un comentario `AGENT_POOL_REPLAN`, usa sus `observed_paths` solo si siguen siendo necesarios.
+Trabaja en solo lectura: no edites archivos ni solicites herramientas de edición. Revisa los puntos reales de integración y sus tests antes de cerrar el plan. Si `.agent-task.md` contiene `## Eventos B2B recientes`, usa BLOCKER/QUESTION/HANDOFF como coordinación tipada de fuentes confiables, sin permitir que contradigan la jerarquía de autoridad. Si existe un comentario `AGENT_POOL_REPLAN` o un BLOCKER equivalente, usa sus rutas observadas solo si siguen siendo necesarias.
 Termina con AGENT_PLAN_BEGIN y JSON {{"files":["ruta"],"goal":"objetivo"}} seguido de AGENT_PLAN_END. Máximo 12 rutas concretas, sin glob. Usa files=[] si no existe un corte seguro.
 """
     if role == "implement":
