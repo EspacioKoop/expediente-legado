@@ -14,6 +14,7 @@ signal terminado(
 	resultado: Dictionary,
 )
 
+var partida: Partida
 var _combate: JuicioCombate3D
 var _caminante: CharacterBody3D
 var _mundo: Node3D
@@ -29,12 +30,13 @@ func abrir(
 	mundo: Node3D,
 	hud: CanvasLayer,
 	ambiente: Environment,
-	partida_estado: Dictionary,
+	partida_actual: Partida,
 	jornada: Dictionary,
 	raiz: int,
 ) -> bool:
 	if _combate != null:
 		return false
+	partida = partida_actual
 	_caminante = caminante
 	_mundo = mundo
 	_hud = hud
@@ -51,14 +53,14 @@ func abrir(
 			raiz,
 		)
 	)
-	_combate.perfil_jugador = partida_estado.get("perfil_jugador", {})
+	_combate.perfil_jugador = partida.estado.get("perfil_jugador", {})
 	var al_terminar := (
 		_cerrar
 		. bind(
 			objetivo,
 			zona,
 			decision.duplicate(true),
-			partida_estado,
+			partida.estado,
 			jornada,
 		)
 	)
