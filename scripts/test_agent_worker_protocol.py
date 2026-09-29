@@ -28,6 +28,27 @@ class AgentWorkerProtocolTest(unittest.TestCase):
         self.assertIn(".agent-worker-prompt.md", block)
         self.assertIn("git rev-parse HEAD", block)
 
+    def test_mailbox_b2b_se_lee_antes_de_implementar(self):
+        inbox = WORKFLOW.index("- id: b2b_inbox\n")
+        qwen = WORKFLOW.index("- id: implement_qwen\n")
+        self.assertLess(inbox, qwen)
+        block = step("- id: b2b_inbox\n")
+        self.assertIn("/api/agent-pool/b2b/inbox", block)
+        self.assertIn("/api/agent-pool/b2b/ack", block)
+        self.assertIn('recipient:"worker"', block)
+        self.assertIn("steps.protocol.outputs.task_id", block)
+        self.assertIn(".agent-b2b-inbox.md", block)
+        self.assertIn("continue-on-error: true", block)
+
+    def test_claim_drift_envia_blocker_al_dispatcher_y_conserva_fallback(self):
+        block = step("- id: replan\n")
+        self.assertIn("/api/agent-pool/b2b/send", block)
+        self.assertIn('message_type:"BLOCKER"', block)
+        self.assertIn('recipient:"dispatcher"', block)
+        self.assertIn("claim-drift-", block)
+        self.assertIn(".outside[]", block)
+        self.assertIn("AGENT_POOL_REPLAN", block)
+
     def test_workers_consumen_el_prompt_compilado(self):
         for worker_step in ("implement_qwen", "implement_gemini"):
             with self.subTest(worker=worker_step):
