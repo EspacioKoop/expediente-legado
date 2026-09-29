@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout SIGA-98
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Validate workflow contract
         run: python -m unittest scripts.test_gbc_fixture_workflow scripts.test_inspect_gb_rom
@@ -270,7 +270,7 @@ jobs:
           test "$(od -An -tx1 -j 323 -N 1 gbc-fixtures/cgb_only_smoke.gbc | tr -d ' \n')" = "c0"
 
       - name: Upload ephemeral GBC ROMs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: gbc-roms-${{ github.sha }}
           path: |

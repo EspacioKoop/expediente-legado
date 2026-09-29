@@ -28,7 +28,7 @@ jobs:
       LIBGL_ALWAYS_SOFTWARE: '1'
       GALLIUM_DRIVER: llvmpipe
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           lfs: true
 
@@ -72,7 +72,7 @@ jobs:
 
       - name: Adjuntar evidencia comparativa
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: evidencia-sueno-284-${{ github.sha }}
           path: evidencia-sueno-284/

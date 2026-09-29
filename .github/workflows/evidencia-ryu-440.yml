@@ -30,7 +30,7 @@ jobs:
       LIBGL_ALWAYS_SOFTWARE: '1'
       GALLIUM_DRIVER: llvmpipe
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           lfs: true
 
@@ -73,7 +73,7 @@ jobs:
 
       - name: Adjuntar evidencia Ryū
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: evidencia-ryu-440-${{ github.sha }}
           path: evidencia-ryu-440/
