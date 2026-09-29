@@ -26,7 +26,6 @@ static func resumen(estado: Dictionary, contrato: Dictionary = {}) -> Dictionary
 	var religion := ReligionTrayectoria.resumir(ReligionEventos.resumen_trayectoria(estado))
 	var ejemplos := []
 	var lecturas_sociales := _lecturas_sociales(estado)
-	var eco_despertar := _eco_despertar(estado)
 
 	for evento in elecciones:
 		if ejemplos.size() >= 4:
@@ -51,7 +50,6 @@ static func resumen(estado: Dictionary, contrato: Dictionary = {}) -> Dictionary
 		"auditoria": auditoria,
 		"religion": religion,
 		"lecturas_sociales": lecturas_sociales,
-		"eco_despertar": eco_despertar,
 		"veredicto": String(contrato.get("veredicto", "")),
 	}
 
@@ -130,7 +128,7 @@ static func _desbloquear_logros(estado: Dictionary, ids: Array) -> Array:
 
 
 ## Devuelve las lecturas sociales ya registradas en el estado (#920).
-## Solo copia datos ya existentes: actor, evento_observado, reaccion y etiquetas.
+## Solo copia datos persistidos por su owner; no crea un segundo registro de epílogo.
 static func _lecturas_sociales(estado: Dictionary) -> Array:
 	var valor = estado.get(Prometeo.CLAVE_LECTURAS_SOCIALES, [])
 	if typeof(valor) != TYPE_ARRAY:
@@ -139,33 +137,27 @@ static func _lecturas_sociales(estado: Dictionary) -> Array:
 	for lectura in valor:
 		if typeof(lectura) != TYPE_DICTIONARY:
 			continue
-		var entrada: Dictionary = lectura.duplicate(true)
-		# Solo campos seguros; no añadimos nada nuevo al estado.
-		var actor := String(entrada.get("actor", ""))
-		if actor.is_empty():
+		var entrada: Dictionary = lectura
+		var actor_crudo = entrada.get("actor")
+		var evento_crudo = entrada.get("evento_observado")
+		if typeof(actor_crudo) != TYPE_STRING or typeof(evento_crudo) != TYPE_STRING:
 			continue
-		(
-			salida
-			. append(
-				{
-					"actor": actor,
-					"evento_observado": String(entrada.get("evento_observado", "")),
-					"reaccion": String(entrada.get("reaccion", "")),
-					"etiquetas": entrada.get("etiquetas", []),
-				}
-			)
+		var actor := String(actor_crudo).strip_edges()
+		var evento := String(evento_crudo).strip_edges()
+		if actor.is_empty() or evento.is_empty():
+			continue
+		var reaccion_cruda = entrada.get("reaccion", "")
+		var etiquetas_crudas = entrada.get("etiquetas", [])
+		salida.append(
+			{
+				"actor": actor,
+				"evento_observado": evento,
+				"reaccion": String(reaccion_cruda) if typeof(reaccion_cruda) == TYPE_STRING else "",
+				"etiquetas": (
+					(etiquetas_crudas as Array).duplicate(true)
+					if typeof(etiquetas_crudas) == TYPE_ARRAY
+					else []
+				),
+			}
 		)
 	return salida
-
-
-## Devuelve el eco de despertar ya registrado (#922/#923).
-## Si `eco_despertar` es un Dictionary con campos válidos, se pasa tal cual.
-static func _eco_despertar(estado: Dictionary) -> Dictionary:
-	var valor = estado.get("eco_despertar", {})
-	if typeof(valor) != TYPE_DICTIONARY:
-		return {}
-	var eco: Dictionary = valor
-	# Validación básica: debe tener id, tipo y origen_id.
-	if eco.get("tipo", "").is_empty() or eco.get("origen_id", "").is_empty():
-		return {}
-	return eco
