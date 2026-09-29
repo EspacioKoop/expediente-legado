@@ -130,7 +130,7 @@ async function sendMessage(
   const subject = cleanText(input.subject, 160);
   const body = cleanText(input.body, 4000);
   const evidence = cleanEvidence(input.evidence);
-  const blocking = input.blocking === true;
+  const blocking = input.blocking === true || type === "BLOCKER";
   const runId = cleanToken(actor.run_id, 100);
 
   if (
@@ -152,7 +152,7 @@ async function sendMessage(
 
   const sender = actor.role + ":" + runId;
   const ttlMs = requestedTtlMs(input.ttl_seconds);
-  const dedupe = dedupeKey(sender, taskId, idempotency);
+  const dedupe = dedupeKey(actor.role, taskId, idempotency);
 
   for (let attempt = 0; attempt < 5; attempt += 1) {
     const existing = await kv.get<AgentB2BDedupe>(dedupe);
@@ -228,10 +228,12 @@ async function inbox(
   if (
     input.schema !== 1 ||
     !B2B_RECIPIENTS.has(recipient) ||
-    !canRead(actor, recipient) ||
     (input.task_id !== undefined && !taskId)
   ) {
-    return json({ ok: false, error: "forbidden_or_invalid" }, 403);
+    return json({ ok: false, error: "invalid_request" }, 400);
+  }
+  if (!canRead(actor, recipient)) {
+    return json({ ok: false, error: "forbidden" }, 403);
   }
 
   const prefix: Deno.KvKey = taskId
@@ -278,10 +280,12 @@ async function acknowledge(
     input.schema !== 1 ||
     !taskId ||
     !messageId ||
-    !B2B_RECIPIENTS.has(recipient) ||
-    !canRead(actor, recipient)
+    !B2B_RECIPIENTS.has(recipient)
   ) {
-    return json({ ok: false, error: "forbidden_or_invalid" }, 403);
+    return json({ ok: false, error: "invalid_request" }, 400);
+  }
+  if (!canRead(actor, recipient)) {
+    return json({ ok: false, error: "forbidden" }, 403);
   }
 
   const key = messageKey(recipient, taskId, messageId);
