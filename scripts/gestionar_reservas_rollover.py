@@ -54,7 +54,9 @@ def obtener_comentarios(registros: list[int]) -> list[dict]:
                 f"/repos/{base.REPO}/issues/{registro}/comments?per_page=100&page={pagina}",
             )
             lote = list(payload or [])
-            comentarios.extend(lote)
+            comentarios.extend(
+                item for item in lote if base.comentario_confiable(item)
+            )
             if len(lote) < 100:
                 break
             pagina += 1
