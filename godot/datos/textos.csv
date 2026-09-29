@@ -892,3 +892,6 @@ DIALOGO_CAREO_OPCION_CONTRASTE,"Hay algo que no encaja en lo que consta."
 DIALOGO_CAREO_CONTRASTE_RESPUESTA,"«Que no encaje en el papel no significa que yo pueda arreglarlo.»"
 DIALOGO_CAREO_CONTRASTE_REENTRADA,"«Ya hablamos de lo que no encaja.»"
 CAMARA_ONIRICA_METRAJE,%s %.1f s\n
+VENTANA_FLOJA_OFICINA,ventana floja
+VENTANA_FLOJA_FALTA_CALZO,La ventana vuelve a golpear el marco · necesitas algo para calzarla
+VENTANA_FLOJA_ESTABILIZADA,Ventana calzada con %s
