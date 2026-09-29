@@ -374,6 +374,26 @@ jobs:
             echo "$delim"
           } >> "$GITHUB_OUTPUT"
 
+      - id: b2b_plan_inbox
+        name: Leer B2B antes de planificar
+        if: steps.guard.outputs.run == 'true' && steps.guard.outputs.control == 'deno'
+        continue-on-error: true
+        env:
+          SIGA98_FEEDBACK_FALLBACK_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
+          ISSUE: ${{ inputs.issue }}
+        run: |
+          set -euo pipefail
+          base_sha="$(git rev-parse HEAD)"
+          task_id="$GITHUB_REPOSITORY#$ISSUE@${base_sha:0:12}"
+          echo "task_id=$task_id" >> "$GITHUB_OUTPUT"
+          python3 scripts/agent_b2b_mailbox.py             --output /tmp/agent-b2b-plan-inbox.json             inbox --recipient worker --task-id "$task_id" --limit 20
+          {
+            echo "# Mensajes B2B dirigidos"
+            echo
+            jq -r '.messages[] |
+              "- [\(.message_type)] \(.subject // "")\n  \(.body // "")\n  evidencia: \((.evidence // []) | join("; "))"'               /tmp/agent-b2b-plan-inbox.json
+          } > .agent-b2b-inbox.md
+
       - id: delegated
         name: Buscar plan delegado por el nivel 2
         if: steps.guard.outputs.run == 'true'
@@ -480,7 +500,7 @@ jobs:
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'FASE DE PLAN (solo lectura): no edites nada ni pidas herramientas de edicion; tu unica salida util es el bloque AGENT_PLAN. TAREA ASIGNADA: ${{ steps.task.outputs.brief }} FIN DE LA TAREA. Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-context.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino. Jerarquia: repo/issue/#181/#182 y Normas Platino > contexto de wiki > memoria temporal Deno KV > memoria historica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integracion y sus tests: files debe incluir TODAS las rutas que una implementacion correcta podria necesitar. Si los comentarios recientes contienen AGENT_POOL_REPLAN, revisa explicitamente sus observed_paths y anadelas solo si son realmente necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Maximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+          prompt: 'FASE DE PLAN (solo lectura): no edites nada ni pidas herramientas de edicion; tu unica salida util es el bloque AGENT_PLAN. TAREA ASIGNADA: ${{ steps.task.outputs.brief }} FIN DE LA TAREA. Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-context.md, .agent-b2b-inbox.md si existe, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino. Jerarquia: repo/issue/#181/#182 y Normas Platino > contexto de wiki > memoria temporal Deno KV > memoria historica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integracion y sus tests: files debe incluir TODAS las rutas que una implementacion correcta podria necesitar. Si los comentarios recientes contienen AGENT_POOL_REPLAN o el inbox B2B contiene un BLOCKER de CLAIM, revisa explicitamente sus rutas/evidencia y anadelas solo si son realmente necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Maximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
 
       - id: plan_gemini
         name: Plan Gemini
@@ -492,7 +512,7 @@ jobs:
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'FASE DE PLAN (solo lectura): no edites nada ni pidas herramientas de edicion; tu unica salida util es el bloque AGENT_PLAN. TAREA ASIGNADA: ${{ steps.task.outputs.brief }} FIN DE LA TAREA. Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-context.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino. Jerarquia: repo/issue/#181/#182 y Normas Platino > contexto de wiki > memoria temporal Deno KV > memoria historica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integracion y sus tests: files debe incluir TODAS las rutas que una implementacion correcta podria necesitar. Si los comentarios recientes contienen AGENT_POOL_REPLAN, revisa explicitamente sus observed_paths y anadelas solo si son realmente necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Maximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+          prompt: 'FASE DE PLAN (solo lectura): no edites nada ni pidas herramientas de edicion; tu unica salida util es el bloque AGENT_PLAN. TAREA ASIGNADA: ${{ steps.task.outputs.brief }} FIN DE LA TAREA. Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-context.md, .agent-b2b-inbox.md si existe, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino. Jerarquia: repo/issue/#181/#182 y Normas Platino > contexto de wiki > memoria temporal Deno KV > memoria historica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integracion y sus tests: files debe incluir TODAS las rutas que una implementacion correcta podria necesitar. Si los comentarios recientes contienen AGENT_POOL_REPLAN o el inbox B2B contiene un BLOCKER de CLAIM, revisa explicitamente sus rutas/evidencia y anadelas solo si son realmente necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Maximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
 
       - id: reserve
         name: Validar plan y reservar rutas
@@ -660,6 +680,23 @@ jobs:
           [[ "$(jq -r '.base_sha' .agent-task-packet.json)" == "$base_sha" ]]
           echo "task_id=$(jq -r '.task_id' .agent-task-packet.json)" >> "$GITHUB_OUTPUT"
 
+      - id: b2b_inbox
+        name: Refrescar inbox B2B para implementacion
+        if: steps.reserve.outputs.reserved == 'true' && steps.guard.outputs.control == 'deno'
+        continue-on-error: true
+        env:
+          SIGA98_FEEDBACK_FALLBACK_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
+          TASK_ID: ${{ steps.protocol.outputs.task_id }}
+        run: |
+          set -euo pipefail
+          python3 scripts/agent_b2b_mailbox.py             --output /tmp/agent-b2b-inbox.json             inbox --recipient worker --task-id "$TASK_ID" --limit 20
+          {
+            echo "# Mensajes B2B dirigidos"
+            echo
+            jq -r '.messages[] |
+              "- [\(.message_type)] \(.subject // "")\n  \(.body // "")\n  evidencia: \((.evidence // []) | join("; "))"'               /tmp/agent-b2b-inbox.json
+          } > .agent-b2b-inbox.md
+
       - name: Crear rama
         if: steps.reserve.outputs.reserved == 'true'
         env:
@@ -696,6 +733,23 @@ jobs:
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"tools":{"core":["read_file","write_file","replace","glob","grep_search","list_directory"]}}'
           prompt: 'Lee .agent-worker-prompt.md y ejecuta exactamente ese contrato. Usa .agent-task-packet.json como sobre TASK autoritativo del handoff. No sustituyas el ResultPacket por una narracion libre.'
+
+      - name: Confirmar inbox B2B consumido
+        if: >-
+          steps.reserve.outputs.reserved == 'true' &&
+          steps.guard.outputs.control == 'deno' &&
+          (steps.implement_qwen.outcome == 'success' || steps.implement_gemini.outcome == 'success')
+        continue-on-error: true
+        env:
+          SIGA98_FEEDBACK_FALLBACK_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
+          TASK_ID: ${{ steps.protocol.outputs.task_id }}
+        run: |
+          set -euo pipefail
+          [[ -s /tmp/agent-b2b-inbox.json ]] || exit 0
+          jq -r '.messages[].message_id' /tmp/agent-b2b-inbox.json | while IFS= read -r message_id; do
+            [[ -n "$message_id" ]] || continue
+            python3 scripts/agent_b2b_mailbox.py ack               --recipient worker --task-id "$TASK_ID" --message-id "$message_id" >/dev/null
+          done
 
       - id: claim_guard
         name: Normalizar cambios al CLAIM
@@ -777,6 +831,9 @@ jobs:
           WORKER: ${{ inputs.worker }}
           BRANCH: ${{ steps.guard.outputs.branch }}
           MAX_REPLANS: '2'
+          SIGA98_FEEDBACK_FALLBACK_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
+          TASK_ID: ${{ steps.protocol.outputs.task_id }}
+          CONTROL: ${{ steps.guard.outputs.control }}
         run: |
           set -euo pipefail
           outside="$(jq -r '.outside | join(",")' /tmp/claim-guard.json)"
@@ -785,6 +842,27 @@ jobs:
               jq -s '[.[] | select(.user.login == "github-actions[bot]" and ((.body // "") | startswith("AGENT_POOL_REPLAN ")))] | length'
           )"
           attempt=$((previous + 1))
+
+          if [[ "$CONTROL" == deno && -n "${TASK_ID:-}" ]]; then
+            mapfile -t observed < <(jq -r '.outside[]' /tmp/claim-guard.json)
+            for recipient in dispatcher worker; do
+              args=(
+                send
+                --task-id "$TASK_ID"
+                --type BLOCKER
+                --recipient "$recipient"
+                --idempotency-key "claim-drift-${GITHUB_RUN_ID}-$attempt-$recipient"
+                --correlation-id "$TASK_ID"
+                --subject "CLAIM incompleto en #$ISSUE"
+                --body "El worker detectó rutas necesarias fuera del CLAIM; el siguiente plan debe reinspeccionarlas antes de reservar."
+                --blocking
+              )
+              for path in "${observed[@]}"; do
+                args+=(--evidence "$path")
+              done
+              python3 scripts/agent_b2b_mailbox.py "${args[@]}" >/dev/null || true
+            done
+          fi
 
           gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --repo "$GITHUB_REPOSITORY" \
             --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=agent-pool-replan-claim-incompleto" \
