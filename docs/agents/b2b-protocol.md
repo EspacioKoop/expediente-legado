@@ -47,6 +47,11 @@ solo después de que la reserva real haya sido aceptada y lo correlaciona median
 `github-comment:<id>` y `branch:<rama>`. Ese envelope viaja como artefacto dentro
 del TaskPacket de implementación; no reemplaza el comentario ni el lease.
 
+Tras superar el preflight dirigido, el validador genera además un `EVIDENCE`
+tipado con referencias al informe y al diff staged. El reviewer recibe ese envelope
+junto al ResultPacket y el diff, de forma que puede distinguir evidencia de
+implementación de afirmaciones del propio modelo.
+
 ## Seguridad y autoridad
 
 El paquete no concede permisos. La jerarquía sigue siendo repo/issue, #181,
