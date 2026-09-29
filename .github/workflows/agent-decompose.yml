@@ -60,6 +60,19 @@ jobs:
           issue="$INPUT_ISSUE"
           [[ "$EVENT" == issues ]] && issue="$EVENT_ISSUE"
           [[ "$issue" =~ ^[0-9]+$ ]] || exit 2
+          ISSUE="$issue"
+          issue_meta="$(gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE")"
+          association="$(jq -r '.author_association // ""' <<<"$issue_meta")"
+          author="$(jq -r '.user.login // ""' <<<"$issue_meta")"
+          if [[ "$author" != "github-actions[bot]" && ! "$association" =~ ^(OWNER|MEMBER|COLLABORATOR)$ ]]; then
+            echo "::warning::Issue #$ISSUE bloqueado: autor no confiable ($author/$association)."
+            for label in agent:auto agent:pool agent:qwen agent:gemini agent:decompose; do
+              gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --remove-label "$label" >/dev/null 2>&1 || true
+            done
+            gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human >/dev/null 2>&1 || true
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           state="$(gh issue view "$issue" --repo "$GITHUB_REPOSITORY" --json state --jq .state)"
           [[ "$state" == OPEN ]] || { echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
           already="$(gh issue view "$issue" --repo "$GITHUB_REPOSITORY" --json comments --jq '[.comments[].body | select(startswith("AGENT_DECOMPOSED parent=#'"$issue"' "))] | length')"
@@ -90,7 +103,14 @@ jobs:
           ISSUE: ${{ steps.select.outputs.issue }}
         run: |
           set -euo pipefail
-          gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json title,body,comments --jq '"# Issue\n\n## " + .title + "\n\n" + (.body//"") + "\n\n## Comentarios recientes\n" + ((.comments[-12:]//[])|map("- "+.author.login+": "+.body)|join("\n\n"))' > .agent-decompose-input.md
+          gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE" > /tmp/agent-issue.json
+          gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$ISSUE/comments?per_page=100" \
+            --jq '.[]' | jq -s '.' > /tmp/agent-comments.json
+          python3 scripts/agent_issue_context.py \
+            --issue /tmp/agent-issue.json \
+            --comments /tmp/agent-comments.json \
+            --output .agent-decompose-input.md \
+            --max-comments 12
           git clone --depth 1 https://github.com/EspacioKoop/normas_platino.git .agent-platino
           rm -rf .agent-platino/.git
 
