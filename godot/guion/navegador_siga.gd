@@ -28,6 +28,11 @@ const ESCALA_TEXTO_MIN := 0.8
 const ESCALA_TEXTO_MAX := 1.6
 const ESCALA_TEXTO_PASO := 0.2
 
+const Web98Estilo = preload("res://guion/navegador_web98_estilo.gd")
+const FONDO_CROMO := Web98Estilo.FONDO_CROMO
+const FONDO_DIRECCION := Web98Estilo.FONDO_DIRECCION
+const FONDO_PAGINA := Web98Estilo.FONDO_PAGINA
+const FONDO_LATERAL := Web98Estilo.FONDO_LATERAL
 var _indice := Web98Indice.new()
 var _prensa := Web98Prensa.new()
 var _bbs := Bbs98Modelo.new()
@@ -234,56 +239,67 @@ func _construir_interfaz() -> void:
 	_atras = Button.new()
 	_atras.text = "<"
 	_atras.tooltip_text = tr("NAVEGADOR_ATRAS")
+	Web98Estilo.estilizar_boton_cromo(_atras, "Atras")
 	_atras.pressed.connect(ir_atras)
 	barra.add_child(_atras)
 
 	_adelante = Button.new()
 	_adelante.text = ">"
 	_adelante.tooltip_text = tr("NAVEGADOR_ADELANTE")
+	Web98Estilo.estilizar_boton_cromo(_adelante, "Adelante")
 	_adelante.pressed.connect(ir_adelante)
 	barra.add_child(_adelante)
 
 	var boton_recargar := Button.new()
 	boton_recargar.text = tr("NAVEGADOR_RECARGAR")
 	boton_recargar.tooltip_text = tr("NAVEGADOR_ATAJO_RECARGAR")
+	Web98Estilo.estilizar_boton_cromo(boton_recargar, "Recargar")
 	boton_recargar.pressed.connect(recargar)
 	barra.add_child(boton_recargar)
 
 	var inicio := Button.new()
 	inicio.text = tr("NAVEGADOR_INICIO")
+	Web98Estilo.estilizar_boton_cromo(inicio, "Inicio")
 	inicio.pressed.connect(func() -> void: navegar(URL_INICIO))
 	barra.add_child(inicio)
 
 	_direccion = LineEdit.new()
+	_direccion.name = "Direccion"
 	_direccion.placeholder_text = tr("NAVEGADOR_DIRECCION")
 	_direccion.tooltip_text = tr("NAVEGADOR_ATAJO_DIRECCION")
 	_direccion.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	Web98Estilo.estilizar_linea_web98(_direccion)
 	_direccion.text_submitted.connect(func(texto: String) -> void: navegar(texto))
 	barra.add_child(_direccion)
 
 	var ir := Button.new()
 	ir.text = tr("NAVEGADOR_IR")
+	Web98Estilo.estilizar_boton_cromo(ir, "Ir")
 	ir.pressed.connect(func() -> void: navegar(_direccion.text))
 	barra.add_child(ir)
 
 	_favorito = Button.new()
 	_favorito.text = tr("NAVEGADOR_FAVORITO")
+	Web98Estilo.estilizar_boton_cromo(_favorito, "Favorito")
 	_favorito.pressed.connect(alternar_favorito_actual)
 	barra.add_child(_favorito)
 
 	var texto_menos := Button.new()
 	texto_menos.text = tr("NAVEGADOR_TEXTO_MENOS")
+	Web98Estilo.estilizar_boton_cromo(texto_menos, "TextoMenos")
 	texto_menos.pressed.connect(func() -> void: ajustar_escala_texto(-ESCALA_TEXTO_PASO))
 	barra.add_child(texto_menos)
 
 	var texto_mas := Button.new()
 	texto_mas.text = tr("NAVEGADOR_TEXTO_MAS")
+	Web98Estilo.estilizar_boton_cromo(texto_mas, "TextoMas")
 	texto_mas.pressed.connect(func() -> void: ajustar_escala_texto(ESCALA_TEXTO_PASO))
 	barra.add_child(texto_mas)
 
 	_cache = Button.new()
 	_cache.text = tr("NAVEGADOR_CACHE")
 	_cache.visible = false
+	Web98Estilo.estilizar_boton_cromo(_cache, "Cache")
 	_cache.pressed.connect(_abrir_cache_actual)
 	barra.add_child(_cache)
 
@@ -293,18 +309,23 @@ func _construir_interfaz() -> void:
 	etiqueta.text = tr("NAVEGADOR_BUSCAR_ETIQUETA")
 	barra_busqueda.add_child(etiqueta)
 	_busqueda = LineEdit.new()
+	_busqueda.name = "Busqueda"
 	_busqueda.tooltip_text = tr("NAVEGADOR_ATAJO_BUSCAR")
 	_busqueda.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	Web98Estilo.estilizar_linea_web98(_busqueda)
 	_busqueda.text_submitted.connect(_mostrar_busqueda)
 	barra_busqueda.add_child(_busqueda)
 	var boton_buscar := Button.new()
+	boton_buscar.name = "Buscar"
 	boton_buscar.text = tr("NAVEGADOR_BUSCAR")
+	Web98Estilo.estilizar_boton_cromo(boton_buscar)
 	boton_buscar.pressed.connect(func() -> void: _mostrar_busqueda(_busqueda.text))
 	barra_busqueda.add_child(boton_buscar)
 
 	_directorio_boton = Button.new()
 	_directorio_boton.name = "DirectorioWeb98"
 	_directorio_boton.text = tr("NAVEGADOR_DIRECTORIO")
+	Web98Estilo.estilizar_boton_cromo(_directorio_boton)
 	_directorio_boton.pressed.connect(abrir_directorio)
 	barra_busqueda.add_child(_directorio_boton)
 
@@ -357,16 +378,19 @@ func _construir_interfaz() -> void:
 	principal.add_child(_decoracion_web)
 
 	_pagina = RichTextLabel.new()
+	_pagina.name = "Pagina"
 	_pagina.bbcode_enabled = true
 	_pagina.fit_content = false
 	_pagina.selection_enabled = true
 	_pagina.focus_mode = Control.FOCUS_ALL
 	_pagina.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	Web98Estilo.estilizar_pagina(_pagina)
 	principal.add_child(_pagina)
 
 	_descargar_software = Button.new()
 	_descargar_software.name = "DescargarSoftware"
 	_descargar_software.visible = false
+	Web98Estilo.estilizar_boton_cromo(_descargar_software)
 	_descargar_software.pressed.connect(_obtener_software_actual)
 	principal.add_child(_descargar_software)
 
@@ -374,7 +398,9 @@ func _construir_interfaz() -> void:
 	etiqueta_enlaces.text = tr("NAVEGADOR_ENLACES")
 	principal.add_child(etiqueta_enlaces)
 	_enlaces = ItemList.new()
+	_enlaces.name = "Enlaces"
 	_enlaces.custom_minimum_size = Vector2(0, 110)
+	Web98Estilo.estilizar_lista_web98(_enlaces, FONDO_PAGINA)
 	_enlaces.item_activated.connect(_activar_enlace)
 	principal.add_child(_enlaces)
 
@@ -385,14 +411,18 @@ func _construir_interfaz() -> void:
 	etiqueta_historial.text = tr("NAVEGADOR_HISTORIAL")
 	lateral.add_child(etiqueta_historial)
 	_historial_lista = ItemList.new()
+	_historial_lista.name = "Historial"
 	_historial_lista.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	Web98Estilo.estilizar_lista_web98(_historial_lista, FONDO_LATERAL)
 	_historial_lista.item_activated.connect(_activar_historial)
 	lateral.add_child(_historial_lista)
 	var etiqueta_favoritos := Label.new()
 	etiqueta_favoritos.text = tr("NAVEGADOR_FAVORITOS")
 	lateral.add_child(etiqueta_favoritos)
 	_favoritos_lista = ItemList.new()
+	_favoritos_lista.name = "Favoritos"
 	_favoritos_lista.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	Web98Estilo.estilizar_lista_web98(_favoritos_lista, FONDO_LATERAL)
 	_favoritos_lista.item_activated.connect(_activar_favorito)
 	lateral.add_child(_favoritos_lista)
 
