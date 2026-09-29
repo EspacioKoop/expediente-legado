@@ -101,8 +101,10 @@ const CONTACTOS := [
 		"id": "centro_comunitario",
 		"nombre": "Centro comunitario del barrio",
 		"numero": "555-0164",
-		"texto":
-		"Centro comunitario. Si llama por una actividad, consulte el tablón del barrio o vuelva mañana por la tarde.",
+		"texto": (
+			"Centro comunitario. Si llama por una actividad, consulte el tablón "
+			+ "del barrio o vuelva mañana por la tarde."
+		),
 		"religion_actor": DialogoReligion933.ACTOR_TELEFONO_COMUNITARIO,
 	},
 ]
