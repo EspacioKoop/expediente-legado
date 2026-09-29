@@ -17,14 +17,17 @@ func _initialize() -> void:
 func _configuraciones_faciles() -> Array:
 	var salida: Array = []
 	for _i in range(3):
-		salida.append(
-			{
-				"inicio": Vector2.ZERO,
-				"objetivo": Vector2(0.0, -0.14625),
-				"limite": Rect2(-1.0, -1.0, 2.0, 2.0),
-				"radio_objetivo": 0.04,
-				"obstaculos": [],
-			}
+		(
+			salida
+			. append(
+				{
+					"inicio": Vector2.ZERO,
+					"objetivo": Vector2(0.0, -0.14625),
+					"limite": Rect2(-1.0, -1.0, 2.0, 2.0),
+					"radio_objetivo": 0.04,
+					"obstaculos": [],
+				}
+			)
 		)
 	return salida
 
