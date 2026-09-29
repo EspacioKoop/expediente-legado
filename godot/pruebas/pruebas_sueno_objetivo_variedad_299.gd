@@ -35,8 +35,12 @@ func _probar_politica() -> void:
 	)
 
 
-func _actor() -> CharacterBody3D:
+func _actor(posicion: Vector3) -> CharacterBody3D:
 	var actor := CharacterBody3D.new()
+	# La transformación inicial debe llegar al PhysicsServer antes de entrar al
+	# árbol. Añadirlo en ZERO y moverlo en el mismo frame puede producir un
+	# body_entered fantasma en el primer checkpoint del smoke.
+	actor.position = posicion
 	var colision := CollisionShape3D.new()
 	var forma := CapsuleShape3D.new()
 	forma.radius = 0.35
@@ -58,8 +62,7 @@ func _controlador() -> SuenoObjetivoVariedad3D:
 func _probar_secuencia() -> void:
 	_completados.clear()
 	_rumbos.clear()
-	var actor := _actor()
-	actor.position = Vector3(8.0, 0.0, 0.0)
+	var actor := _actor(Vector3(8.0, 0.0, 0.0))
 	var controlador := _controlador()
 	var puntos := [Vector3.ZERO, Vector3(4.0, 0.0, 0.0)]
 	_comprobar(
@@ -102,10 +105,9 @@ func _probar_secuencia() -> void:
 func _probar_retorno() -> void:
 	_completados.clear()
 	_rumbos.clear()
-	var actor := _actor()
+	var actor := _actor(Vector3(10.0, 0.0, 0.0))
 	var origen := Vector3(6.0, 0.0, 0.0)
 	var foco := Vector3.ZERO
-	actor.position = Vector3(10.0, 0.0, 0.0)
 	var controlador := _controlador()
 	_comprobar(
 		"retorno se configura",
@@ -140,8 +142,7 @@ func _probar_retorno() -> void:
 func _probar_permanencia() -> void:
 	_completados.clear()
 	_rumbos.clear()
-	var actor := _actor()
-	actor.position = Vector3(5.0, 0.0, 0.0)
+	var actor := _actor(Vector3(5.0, 0.0, 0.0))
 	var controlador := _controlador()
 	_comprobar(
 		"permanencia se configura",
