@@ -36,6 +36,8 @@ FASES: list[tuple[str, tuple[str, ...]]] = [
     ("pr_draft", ("Publicar PR draft y lanzar CI canonica",)),
 ]
 NOMBRES_FASE = [nombre for nombre, _ in FASES]
+PASO_PLAN_DELEGADO = "Buscar plan delegado por el nivel 2"
+PASOS_PLANIFICADOR = ("Plan Qwen", "Plan Gemini")
 JOB_WORKER_RE = re.compile(r"^run \((?P<issue>\d+), (?P<provider>[^,]+), (?P<worker>[^)]+)\) / worker$")
 
 
@@ -64,6 +66,35 @@ def fase_alcanzada(job: dict[str, Any]) -> str | None:
     return alcanzada
 
 
+def _pasos_por_nombre(job: dict[str, Any]) -> dict[str, str]:
+    """Conclusión de cada paso, por nombre (el último gana si hay repetidos)."""
+
+    conclusiones: dict[str, str] = {}
+    for paso in job.get("steps", []) or []:
+        if isinstance(paso, dict) and paso.get("name"):
+            conclusiones[str(paso["name"])] = str(paso.get("conclusion", ""))
+    return conclusiones
+
+
+def origen_plan(job: dict[str, Any]) -> str | None:
+    """Origen del plan que ejecutó el worker: delegado, generado o None."""
+
+    conclusiones = _pasos_por_nombre(job)
+    planificado = [
+        conclusion for paso, conclusion in conclusiones.items()
+        if paso in PASOS_PLANIFICADOR
+    ]
+    if not planificado and PASO_PLAN_DELEGADO not in conclusiones:
+        return None
+    if any(conclusion != "skipped" for conclusion in planificado):
+        return "generado"
+    # Planificador omitido solo puede significar plan delegado si la búsqueda
+    # del nivel 2 terminó bien; si no, el job no llegó a planificar de verdad.
+    if conclusiones.get(PASO_PLAN_DELEGADO) == "success":
+        return "delegado"
+    return None
+
+
 def embudo(jobs: list[dict[str, Any]]) -> dict[str, Any]:
     """Cuenta, para cada fase, cuántos workers llegaron al menos hasta ella."""
 
@@ -89,6 +120,22 @@ def embudo(jobs: list[dict[str, Any]]) -> dict[str, Any]:
         return salida
 
     acumulado_total = acumulado(alcanzadas)
+    # Origen del plan: delegado por el nivel 2 vs generado por el pool (#1894).
+    por_origen_contadores: dict[str, Counter[str]] = defaultdict(Counter)
+    por_origen_workers: Counter[str] = Counter()
+    for job in jobs:
+        match = JOB_WORKER_RE.match(str(job.get("name", "")))
+        if not match:
+            continue
+        origen = origen_plan(job)
+        if origen is None:
+            continue
+        por_origen_workers[origen] += 1
+        por_origen_contadores[origen][fase_alcanzada(job) or "no_arranca"] += 1
+    por_origen = {
+        origen: acumulado(por_origen_contadores[origen]) | {"workers": por_origen_workers[origen]}
+        for origen in sorted(por_origen_workers)
+    }
     # Tasas sobre el total de workers para distinguir capacidad de actividad real:
     # con 0 workers las tasas son 0.0 en vez de dividir por cero.
     tasas = {
@@ -101,6 +148,7 @@ def embudo(jobs: list[dict[str, Any]]) -> dict[str, Any]:
         "embudo": acumulado_total,
         **tasas,
         "implementa_fuera_de_claim": alcanzadas["implementa_fuera_de_claim"],
+        "por_origen": por_origen,
         "por_worker": {w: acumulado(c) | {"workers": sum(c.values())} for w, c in sorted(por_worker.items())},
     }
 
@@ -114,6 +162,10 @@ def tabla(resultado: dict[str, Any]) -> str:
     lineas.append(f"\nPR/worker: {resultado['pr_rate']:.0%}. "
                   f"Workers analizados: {resultado['workers']}. "
                   f"Implementaciones descartadas por salir del CLAIM: {resultado['implementa_fuera_de_claim']}.")
+    for origen in sorted(resultado.get("por_origen", {})):
+        datos = resultado["por_origen"][origen]
+        lineas.append(f"Plan {origen}: {datos['workers']} workers, "
+                      f"{datos['pr_draft']} PR ({100 * datos['pr_draft'] / (datos['workers'] or 1):.0f}%).")
     return "\n".join(lineas)
 
 
