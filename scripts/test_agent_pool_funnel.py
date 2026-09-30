@@ -18,8 +18,8 @@ def job(worker, exitos, extra=None, issue=10, provider="qwen"):
 
 
 ARRANCA = ["Validar issue y slot", "Materializar contexto del issue"]
-PLAN = ARRANCA + ["Plan Qwen", "Validar plan y reservar rutas"]
-RESERVA = PLAN + ["Afinar contexto y memoria por rutas", "Crear rama"]
+PLAN = ARRANCA + ["Validar plan y reservar rutas"]
+RESERVA = PLAN + ["Compilar TaskPacket y prompt del worker", "Crear rama"]
 IMPLEMENTA = RESERVA + ["Implementar con Qwen", "Normalizar cambios al CLAIM"]
 COMPLETO = IMPLEMENTA + ["Validar diff y preflight", "Publicar PR draft y lanzar CI canonica"]
 
@@ -35,12 +35,48 @@ class EmbudoPoolTest(unittest.TestCase):
 
     def test_fase_rota_corta_el_embudo(self):
         # Sin plan válido no cuenta como reserva aunque un paso posterior figure en success.
-        pasos = ARRANCA + ["Afinar contexto y memoria por rutas"]
+        pasos = ARRANCA + ["Compilar TaskPacket y prompt del worker"]
         self.assertEqual("arranca", funnel.fase_alcanzada(job("w", pasos)))
 
     def test_replan_marca_implementacion_fuera_de_claim(self):
         replan = job("w", IMPLEMENTA + ["Replanificar pool tras desvio de CLAIM"])
         self.assertEqual("implementa_fuera_de_claim", funnel.fase_alcanzada(replan))
+
+    def test_origen_plan_delegado(self):
+        delegado = job("w", PLAN, extra=[("Plan Qwen", "skipped")])
+        delegado["steps"].append({"name": "Buscar plan delegado por el nivel 2", "conclusion": "success"})
+        self.assertEqual("delegado", funnel.origen_plan(delegado))
+
+    def test_origen_plan_generado(self):
+        # Runs anteriores a #1915: el worker aún planificaba con Plan Qwen/Gemini.
+        self.assertEqual("generado", funnel.origen_plan(job("w", PLAN + ["Plan Qwen"])))
+        fallido = job("w", PLAN, extra=[("Plan Qwen", "failure")])
+        self.assertEqual("generado", funnel.origen_plan(fallido))
+
+    def test_origen_plan_nulo_si_no_llega(self):
+        self.assertIsNone(funnel.origen_plan(job("w", ["Validar issue y slot"])))
+        # Planificador omitido sin búsqueda delegada exitosa: no llegó a planificar.
+        omitido = job("w", ARRANCA, extra=[("Plan Gemini", "skipped")])
+        self.assertIsNone(funnel.origen_plan(omitido))
+
+    def test_embudo_separa_por_origen_del_plan(self):
+        delegado = job("w", COMPLETO)
+        delegado["steps"].append({"name": "Buscar plan delegado por el nivel 2", "conclusion": "success"})
+        delegado["steps"].append({"name": "Plan Qwen", "conclusion": "skipped"})
+        generado = job("w", PLAN + ["Plan Gemini"], provider="gemini")
+        resultado = funnel.embudo([delegado, generado])
+        self.assertEqual(1, resultado["por_origen"]["delegado"]["pr_draft"])
+        self.assertEqual(0, resultado["por_origen"]["generado"]["pr_draft"])
+        self.assertEqual(1, resultado["por_origen"]["generado"]["plan_parseado"])
+
+    def test_tabla_muestra_linea_por_origen(self):
+        delegado = job("w", COMPLETO)
+        delegado["steps"].append({"name": "Buscar plan delegado por el nivel 2", "conclusion": "success"})
+        delegado["steps"].append({"name": "Plan Qwen", "conclusion": "skipped"})
+        resultado = funnel.embudo([delegado])
+        texto = funnel.tabla(resultado)
+        self.assertIn("Plan delegado: 1 workers, 1 PR (100%).", texto)
+        self.assertNotIn("Plan generado:", texto)
 
     def test_embudo_acumulado_y_por_worker(self):
         jobs = [
