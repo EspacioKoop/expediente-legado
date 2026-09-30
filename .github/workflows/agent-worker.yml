@@ -357,6 +357,27 @@ jobs:
           echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "model=$model" >> "$GITHUB_OUTPUT"
 
+      - id: qwen_proxy
+        name: Proxy de compatibilidad del proveedor
+        if: steps.guard.outputs.run == 'true' && inputs.provider == 'qwen'
+        env:
+          URL: ${{ steps.qwen_config.outputs.url }}
+        run: |
+          set -euo pipefail
+          # Mistral rechaza campos desconocidos y Groq topa max_tokens (#1928):
+          # un proxy local adapta la petición; el resto va directo al endpoint.
+          profile="$(python3 scripts/agent_llm_proxy.py detect "$URL")"
+          echo "Perfil del proveedor: $profile"
+          [[ "$profile" != passthrough ]] || exit 0
+          nohup python3 scripts/agent_llm_proxy.py serve --upstream "$URL" --profile "$profile" --port 18080 \
+            > /tmp/agent-llm-proxy.log 2>&1 &
+          for _ in $(seq 1 50); do
+            curl -fsS http://127.0.0.1:18080/__health >/dev/null 2>&1 && break
+            sleep 0.2
+          done
+          curl -fsS http://127.0.0.1:18080/__health >/dev/null
+          echo "url=http://127.0.0.1:18080/v1" >> "$GITHUB_OUTPUT"
+
       - id: task
         name: Materializar contexto del issue
         if: steps.guard.outputs.run == 'true'
@@ -592,7 +613,7 @@ jobs:
         uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || secrets[steps.qwen_config.outputs.key_secret] }}
-          openai_base_url: ${{ steps.qwen_config.outputs.url }}
+          openai_base_url: ${{ steps.qwen_proxy.outputs.url || steps.qwen_config.outputs.url }}
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
@@ -898,7 +919,7 @@ jobs:
         uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || secrets[steps.qwen_config.outputs.key_secret] }}
-          openai_base_url: ${{ steps.qwen_config.outputs.url }}
+          openai_base_url: ${{ steps.qwen_proxy.outputs.url || steps.qwen_config.outputs.url }}
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":4},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file"]}}'
@@ -1104,6 +1125,10 @@ jobs:
           # Los PR creados con GITHUB_TOKEN pueden dejar el pull_request CI esperando
           # aprobacion; workflow_dispatch es la ruta no recursiva y ya usada por el autopilot.
           gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref "$BRANCH"
+
+      - name: Log del proxy
+        if: always() && steps.qwen_proxy.outputs.url != ''
+        run: cat /tmp/agent-llm-proxy.log || true
 
       - name: Limpiar fallo o cancelacion
         if: (failure() || cancelled()) && inputs.issue != 0

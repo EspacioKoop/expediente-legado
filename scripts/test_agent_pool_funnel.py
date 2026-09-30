@@ -48,7 +48,8 @@ class EmbudoPoolTest(unittest.TestCase):
         self.assertEqual("delegado", funnel.origen_plan(delegado))
 
     def test_origen_plan_generado(self):
-        self.assertEqual("generado", funnel.origen_plan(job("w", PLAN)))
+        # Runs anteriores a #1915: el worker aún planificaba con Plan Qwen/Gemini.
+        self.assertEqual("generado", funnel.origen_plan(job("w", PLAN + ["Plan Qwen"])))
         fallido = job("w", PLAN, extra=[("Plan Qwen", "failure")])
         self.assertEqual("generado", funnel.origen_plan(fallido))
 
@@ -62,7 +63,7 @@ class EmbudoPoolTest(unittest.TestCase):
         delegado = job("w", COMPLETO)
         delegado["steps"].append({"name": "Buscar plan delegado por el nivel 2", "conclusion": "success"})
         delegado["steps"].append({"name": "Plan Qwen", "conclusion": "skipped"})
-        generado = job("w", PLAN, provider="gemini")
+        generado = job("w", PLAN + ["Plan Gemini"], provider="gemini")
         resultado = funnel.embudo([delegado, generado])
         self.assertEqual(1, resultado["por_origen"]["delegado"]["pr_draft"])
         self.assertEqual(0, resultado["por_origen"]["generado"]["pr_draft"])
