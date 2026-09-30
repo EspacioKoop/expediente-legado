@@ -30,7 +30,7 @@ class EncuentroReal1889Test(unittest.TestCase):
         self.assertIn("extends Node3D", self.encuentro)
         self.assertIn("Interactuable3D.new()", self.encuentro)
         self.assertIn("combate_solicitado.emit(objetivo())", self.encuentro)
-        self.assertIn("CombateContextual.autorizar_realidad(", self.encuentro)
+        self.assertRegex(self.encuentro, r"CombateContextual\\s*\\.\\s*autorizar_realidad\\(")
         self.assertNotIn("Input.is_action", self.encuentro)
         self.assertNotIn("IncidentesConducta.GOLPE_PARED", self.encuentro)
 
