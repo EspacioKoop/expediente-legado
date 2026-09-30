@@ -31,7 +31,7 @@ func _probar() -> void:
 		bloc.exportar_texto() == "Llamar a archivo antes de las 12",
 		"el bloc actualiza el contenido sin tocar ficheros del host"
 	)
-	var estado_bloc := bloc.get_node_or_null("Estado") as Label
+	var estado_bloc := bloc.find_child("Estado", true, false) as Label
 	_comprobar(
 		estado_bloc.accessibility_description == estado_bloc.text,
 		"el estado del bloc expone la misma información que se ve",
