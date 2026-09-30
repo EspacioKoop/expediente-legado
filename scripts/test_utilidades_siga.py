@@ -91,6 +91,11 @@ class UtilidadesSigaTest(unittest.TestCase):
                 "--headless",
                 "--accessibility",
                 "disabled",
+                # Failsafe del motor: el smoke debe imprimir su resumen antes de
+                # este límite; evita que el teardown headless de accesibilidad
+                # deje vivo el proceso después de haber terminado las aserciones.
+                "--quit-after",
+                "120",
                 "--path",
                 str(ROOT / "godot"),
                 "--script",
