@@ -133,7 +133,8 @@ jobs:
 
           # El issue se obtiene de un token numerico controlado, nunca se
           # evalua texto libre del cuerpo.
-          if [[ "$BODY" =~ Fixes[[:space:]]+#([0-9]+) ]]; then
+          fixes_re='Fixes[[:space:]]+#([0-9]+)'
+          if [[ "$BODY" =~ $fixes_re ]]; then
             issue="${BASH_REMATCH[1]}"
           else
             echo "PR ignorada: no declara Fixes #N."
