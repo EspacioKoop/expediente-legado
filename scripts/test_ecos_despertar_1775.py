@@ -10,6 +10,8 @@ from scripts.godot_pruebas import importar_proyecto
 
 ROOT = Path(__file__).resolve().parents[1]
 MODELO = ROOT / "godot" / "guion" / "ecos_despertar.gd"
+RUNTIME = ROOT / "godot" / "guion" / "ecos_despertar_runtime.gd"
+DIA_REACTIVO = ROOT / "godot" / "guion" / "dia_sueno_reactivo_app.gd"
 PRUEBA = "res://pruebas/pruebas_ecos_despertar_1775.gd"
 RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
 
@@ -18,6 +20,8 @@ class EcosDespertar1775Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.fuente = MODELO.read_text(encoding="utf-8")
+        cls.runtime = RUNTIME.read_text(encoding="utf-8")
+        cls.dia_reactivo = DIA_REACTIVO.read_text(encoding="utf-8")
 
     def test_material_vivido_sale_de_presentacion_runtime(self):
         self.assertIn("static func material_desde_noche(", self.fuente)
@@ -30,6 +34,27 @@ class EcosDespertar1775Test(unittest.TestCase):
         self.assertIn("\"armario_hogar\"", self.fuente)
         self.assertNotIn("SuenoFormas", self.fuente)
         self.assertNotIn("ObjetosOniricos", self.fuente)
+
+    def test_captura_runtime_solo_mira_presentacion_montada(self):
+        self.assertIn("class_name EcosDespertarRuntime", self.runtime)
+        self.assertIn("SuenoMutadorPresentacion3D.NOMBRE", self.runtime)
+        self.assertIn('get_meta("presentacion"', self.runtime)
+        self.assertIn('get_meta("objeto_origen"', self.runtime)
+        self.assertIn("EcosDespertar.material_desde_noche(", self.runtime)
+        self.assertIn("EcosDespertar.candidatos(", self.runtime)
+        self.assertNotIn("SuenoFormas", self.runtime)
+        self.assertNotIn("ObjetosOniricos", self.runtime)
+        self.assertNotIn("HuellasAmbientales", self.runtime)
+        self.assertNotIn("EcosDespertar.preparar(", self.runtime)
+        self.assertNotIn("EcosDespertar.presentacion(", self.runtime)
+
+    def test_controller_registra_despues_de_montar_utileria(self):
+        llamada = "EcosDespertarRuntime.registrar_sala(dia.jornada, mundo, anomalias)"
+        self.assertIn(llamada, self.dia_reactivo)
+        self.assertLess(
+            self.dia_reactivo.index("SuenoUtileria"),
+            self.dia_reactivo.index(llamada),
+        )
 
     def test_catalogo_y_seleccion_son_acotados(self):
         for tipo in ("humedad", "crt", "objeto_desplazado", "sonido_residual"):
