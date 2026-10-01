@@ -38,6 +38,8 @@ class CapturasNpc275Test(unittest.TestCase):
         self.assertIn("SIGA-98-npc-visual-gate-275-${{ github.sha }}", self.workflow)
         self.assertIn("dist/capturas-npc-275", self.workflow)
         self.assertIn("retention-days: 14", self.workflow)
+        self.assertIn("uses: ./.github/actions/upload-artifact", self.workflow)
+        self.assertNotIn("actions/upload-artifact@", self.workflow)
 
 
 if __name__ == "__main__":
