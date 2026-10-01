@@ -20,11 +20,14 @@ def issue(
     preferred=None,
     comments=None,
     planned_files=None,
+    planned_bytes=None,
+    body="",
 ):
     result = {
         "number": number,
         "createdAt": created,
         "labels": [{"name": label} for label in labels],
+        "body": body,
     }
     if preferred is not None:
         result["preferredProvider"] = preferred
@@ -32,6 +35,8 @@ def issue(
         result["comments"] = [{"body": body} for body in comments]
     if planned_files is not None:
         result["plannedFiles"] = planned_files
+    if planned_bytes is not None:
+        result["plannedBytes"] = planned_bytes
     return result
 
 
@@ -277,6 +282,66 @@ class AgentPoolTest(unittest.TestCase):
 
         self.assertEqual("qwen-primary", tasks[0]["worker"])
 
+    def test_slot_limitado_gana_empate_en_tarea_pequena(self):
+        workers = [
+            {"worker": "qwen-primary", "provider": "qwen", "score": 50},
+            {
+                "worker": "qwen-fallback-groq",
+                "provider": "qwen",
+                "score": 50,
+                "max_task_bytes": 20000,
+            },
+        ]
+
+        tasks = mod.select_tasks(
+            [issue(590, "agent:qwen", planned_bytes=6000, body="x" * 1000)],
+            workers,
+        )
+
+        self.assertEqual("qwen-fallback-groq", tasks[0]["worker"])
+
+    def test_slot_limitado_no_recibe_tarea_sobredimensionada(self):
+        workers = [
+            {"worker": "qwen-primary", "provider": "qwen", "score": 50},
+            {
+                "worker": "qwen-fallback-groq",
+                "provider": "qwen",
+                "score": 99,
+                "max_task_bytes": 8000,
+            },
+        ]
+
+        tasks = mod.select_tasks(
+            [issue(591, "agent:qwen", planned_bytes=9000, body="instrucciones")],
+            workers,
+        )
+
+        self.assertEqual("qwen-primary", tasks[0]["worker"])
+
+    def test_score_historico_sigue_mandando_antes_que_especializacion(self):
+        workers = [
+            {"worker": "qwen-primary", "provider": "qwen", "score": 51},
+            {
+                "worker": "qwen-fallback-groq",
+                "provider": "qwen",
+                "score": 50,
+                "max_task_bytes": 20000,
+            },
+        ]
+        tasks = mod.select_tasks(
+            [issue(592, "agent:qwen", planned_bytes=1000)],
+            workers,
+        )
+        self.assertEqual("qwen-primary", tasks[0]["worker"])
+
+    def test_presupuesto_invalido_se_normaliza_a_sin_limite(self):
+        for value in (-1, "x", True, None):
+            with self.subTest(value=value):
+                worker = mod._worker(
+                    {"worker": "w", "provider": "qwen", "max_task_bytes": value}
+                )
+                self.assertEqual(0, worker["max_task_bytes"])
+
     def test_slot_no_saludable_sale_de_rotacion_para_tarea_flexible(self):
         workers = [
             {"worker": "gemini", "provider": "gemini", "healthy": False},
@@ -384,6 +449,8 @@ class AgentPoolTest(unittest.TestCase):
         self.assertIn("scripts/agent_pool_backpressure.py", pool)
         self.assertIn("AGENT_POOL_ACTIONS_BUDGET", pool)
         self.assertIn("plannedFiles", pool)
+        self.assertIn("plannedBytes", pool)
+        self.assertIn('wc -c < "$path"', pool)
         self.assertIn("scripts/agent_delegated_plan.py", pool)
         self.assertNotIn('maxSessionTurns":16', worker)
         self.assertIn('maxSessionTurns":40', worker)
