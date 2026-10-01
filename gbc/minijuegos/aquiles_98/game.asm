@@ -93,6 +93,9 @@ DEF TILE_MYRMIDON_ESTATUA    EQU TILE_MYRMIDON_BG_BASE + 7
 DEF TILE_MYRMIDON_HUD_BASE   EQU TILE_MYRMIDON_BG_BASE + 8
 DEF TILE_MYRMIDON_OBSERVAR   EQU TILE_MYRMIDON_HUD_BASE + 0
 DEF TILE_MYRMIDON_REFLEJO    EQU TILE_MYRMIDON_HUD_BASE + 1
+; Indice estable reservado al talon revelado (#808): se rellena solo tras
+; deducir la vulnerabilidad, nunca por CargarTiles.
+DEF TILE_MYRMIDON_TALON      EQU TILE_MYRMIDON_HUD_BASE + 2
 
 DEF LECTURA_COMPLETA EQU $0F
 DEF IMPACTOS_META    EQU 3
@@ -151,6 +154,7 @@ Inicio:
 Bucle:
     halt
     ; OAM se toca al principio de VBlank y nunca desde la logica tardia.
+    call CopiarTalonPendiente
     call RenderOAM
     call LeerControles
 
@@ -242,11 +246,23 @@ IniciarRival:
     call LimpiarFondo
     call DibujarArena
 
+    ; Con LCD apagada, el slot del talon vuelve a vaciarse: cada rival exige
+    ; volver a observar y el anterior no deja el tile cargado ni visible.
+    ld hl, VRAM_TILES + (TILE_MYRMIDON_TALON * 16)
+    ld b, 16
+    xor a
+.limpiar_talon:
+    ld [hli], a
+    dec b
+    jr nz, .limpiar_talon
+
     xor a
     ld [wMira], a
     ld [wPasoPatron], a
     ld [wMascaraLectura], a
     ld [wLeido], a
+    ld [wTalonPendiente], a
+    ld [wTalonCargado], a
     ld [wFalloTimer], a
     call CargarFasePatron
     call DuracionFase
@@ -342,6 +358,9 @@ ActualizarLectura:
 
     ld a, 1
     ld [wLeido], a
+    ; Solo se marca pendiente: el tile se copia en el proximo VBlank, nunca
+    ; aqui dentro (la logica puede correr fuera de VBlank).
+    ld [wTalonPendiente], a
     call SonidoLectura
     ret
 
@@ -457,6 +476,29 @@ ActivarLCD:
     ei
     ret
 
+; Copia el talon del pack al slot reservado durante VBlank, antes de dibujar
+; OAM. Solo 16 bytes, solo si la lectura acaba de completarse.
+CopiarTalonPendiente:
+    ld a, [wTalonPendiente]
+    or a
+    ret z
+    ld hl, MyrmidonHudRevealed
+    ld de, VRAM_TILES + (TILE_MYRMIDON_TALON * 16)
+    ld bc, 16
+.loop:
+    ld a, [hli]
+    ld [de], a
+    inc de
+    dec bc
+    ld a, b
+    or c
+    jr nz, .loop
+    xor a
+    ld [wTalonPendiente], a
+    ld a, 1
+    ld [wTalonCargado], a
+    ret
+
 ; OAM fijo: mira, guardia, punto debil, ojo, tres impactos y fallo.
 ; Solo se ejecuta justo despues de VBlank.
 RenderOAM:
@@ -507,18 +549,22 @@ RenderOAM:
     ld [OAM_BASE + 7], a
 
 .punto_debil:
-    ; Slot 2: el talon solo se hace visible tras leer y durante la apertura.
+    ; Slot 2: el talon del pack solo aparece con las tres condiciones:
+    ; lectura deducida, fase vulnerable 3 y tile ya copiado en VBlank.
     ld a, [wLeido]
     or a
     jr z, .ojo
     ld a, [wFase]
     cp 3
     jr nz, .ojo
+    ld a, [wTalonCargado]
+    or a
+    jr z, .ojo
     ld a, 120
     ld [OAM_BASE + 8], a
     ld a, 144
     ld [OAM_BASE + 9], a
-    ld a, TILE_DEBIL
+    ld a, TILE_MYRMIDON_TALON
     ld [OAM_BASE + 10], a
     ld a, 2
     ld [OAM_BASE + 11], a
@@ -728,8 +774,8 @@ CargarTiles:
     ld bc, TilesFin - Tiles
     call CopiarTilesVRAM
 
-    ; #1804: cargar solo BG y HUD base del pack textual. Los mapas/sprites
-    ; revealed permanecen en ROM y no pueden aparecer antes de la deduccion.
+    ; #1804: cargar solo BG y HUD base del pack textual. El talon revealed no
+    ; se carga aqui: entra por CopiarTalonPendiente tras deducir la lectura.
     ld hl, MyrmidonBgTiles
     ld de, VRAM_TILES + (TILE_MYRMIDON_BG_BASE * 16)
     ld bc, MyrmidonHudBase - MyrmidonBgTiles
@@ -961,8 +1007,9 @@ Tiles:
 TilesFin:
 ASSERT TilesFin - Tiles == TILE_MYRMIDON_BG_BASE * 16
 
-; Datos generados/reproducibles de #1804. En runtime este corte consume solo
-; MyrmidonBgTiles..MyrmidonHudRevealed; no carga el banco revealed.
+; Datos generados/reproducibles de #1804. En runtime este corte consume
+; MyrmidonBgTiles..MyrmidonHudRevealed; el talon revealed entra solo tras la
+; lectura completa, copiado en VBlank.
 INCLUDE "assets/myrmidon_v1_tiles.inc"
 ASSERT MyrmidonHudBase - MyrmidonBgTiles == 8 * 16
 ASSERT MyrmidonHudRevealed - MyrmidonHudBase == 2 * 16
@@ -981,3 +1028,5 @@ wImpactos:       ds 1
 wFalloTimer:     ds 1
 wRival:          ds 1
 wPasoPatron:     ds 1
+wTalonPendiente: ds 1
+wTalonCargado:   ds 1
