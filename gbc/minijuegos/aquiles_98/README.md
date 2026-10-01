@@ -93,6 +93,19 @@ python3 gbc/minijuegos/aquiles_98/generar_arte_v1.py \
 Se producen el mismo layout en estado normal y con vulnerabilidad revelada. Esos previews sirven como gate reproducible de lectura del pack; no sustituyen un playtest de la ROM.
 
 
+## Primer consumidor runtime del pack GBC v1 (#1804)
+
+La ROM ya consume directamente el pack textual versionado, pero de forma deliberadamente acotada:
+
+- `game.asm` incluye `assets/myrmidon_v1_tiles.inc`;
+- carga en VRAM los ocho tiles BG y los dos tiles de HUD **base**;
+- la arena usa mármol, columnas, estandarte, plataforma y suelo del pack;
+- los iconos `observar` / `reflejo` sustituyen el placeholder de observación;
+- las siluetas diferenciadas de los tres rivales (#1945) permanecen intactas;
+- `MyrmidonFrameMapsRevealed` y `MyrmidonHud_talon` no se cargan en este corte.
+
+Esto convierte el pack en datos jugables reales sin adelantar la vulnerabilidad ni mezclar todavía el metasprite de Aquiles con la campaña de tres rivales.
+
 ## Compilar
 
 Requiere RGBDS 1.0.x; CI usa la versión fijada por el repositorio.
