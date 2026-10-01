@@ -14,6 +14,17 @@ PATTERN = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 
+REASON_MAX = 400
+
+
+def _recortar(texto: str, limite: int) -> str:
+    # El reason solo acaba en un comentario: un diagnóstico largo vale más
+    # recortado que descartado por el mensaje genérico de fallo (#2068).
+    if len(texto) <= limite:
+        return texto
+    corte = texto[: limite - 1].rsplit(" ", 1)[0].rstrip(" ,.;:")
+    return corte + "…"
+
 
 def _safe_path(value: Any) -> str:
     if not isinstance(value, str):
@@ -56,13 +67,13 @@ def parse_decomposition(raw: str) -> dict[str, Any]:
     if needs_human:
         if fits or raw_tasks:
             raise ValueError("needs_human no puede combinarse con corte o subtareas")
-        if not 10 <= len(reason) <= 400:
+        if len(reason) < 10:
             raise ValueError("reason humano fuera de límites")
         return {
             "schema": 1,
             "fits_single_cut": False,
             "needs_human": True,
-            "reason": reason,
+            "reason": _recortar(reason, REASON_MAX),
             "subtasks": [],
         }
 
