@@ -15,6 +15,9 @@ FAMILIA_EVIDENCIA = [
         "evidencia-hogar-227.yml",
         "evidencia-gato-787.yml",
         "evidencia-vida-1998.yml",
+        "evidencia-minotauro-437.yml",
+        "evidencia-hidra-439.yml",
+        "evidencia-ryu-440.yml",
     )
 ]
 
