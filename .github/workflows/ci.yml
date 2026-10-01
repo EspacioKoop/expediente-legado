@@ -71,6 +71,19 @@ jobs:
             python scripts/test_deno_deploy_workflow.py
           fi
 
+      - name: Preflight evidencias rápido
+        if: steps.scope.outputs.mode == 'evidence'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/test_ci_scope.py
+          python scripts/test_workflows_yaml.py
+          python scripts/test_upload_artifact_wrapper_1888.py
+          python -m unittest discover -s scripts -p 'test_evidencia_*.py'
+          python -m unittest discover -s scripts -p 'test_*visual_gate_*.py'
+          python -m unittest -v scripts/test_laboratorio_sonoro_1475.py
+          python -m unittest -v scripts/test_cata_ambientes_originales.py
+
       - name: Materializar LFS para CI completo
         if: steps.scope.outputs.mode == 'full'
         shell: bash
