@@ -46,8 +46,9 @@ func _probar_eleccion() -> void:
 		_comprobar(tipo.is_empty() or HOST.soportado(tipo), true, "solo arquetipos con cuerpo")
 		if not tipo.is_empty():
 			con_arquetipo += 1
-	_comprobar(con_arquetipo > 0 and con_arquetipo < 40, true, "mezcla clásicos y bloqueadores")
-	_comprobar(HOST.soportado(ARQUETIPOS.HOSTIGADOR), false, "el hostigador aún no tiene cuerpo")
+	_comprobar(con_arquetipo > 0 and con_arquetipo < 40, true, "mezcla clásicos y arquetipos")
+	_comprobar(HOST.soportado(ARQUETIPOS.BLOQUEADOR), true, "el bloqueador conserva cuerpo")
+	_comprobar(HOST.soportado(ARQUETIPOS.HOSTIGADOR), true, "el hostigador ya tiene cuerpo")
 	_comprobar(HOST.soportado(ARQUETIPOS.ENJAMBRE), false, "el enjambre aún no tiene cuerpo")
 
 

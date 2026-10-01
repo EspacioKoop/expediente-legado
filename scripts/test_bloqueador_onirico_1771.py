@@ -45,10 +45,15 @@ class BloqueadorOnirico1771Test(unittest.TestCase):
         )
         self.assertNotIn("PLANO_REALIDAD", self.adaptador)
 
-    def test_solo_declara_soportado_el_bloqueador(self) -> None:
+    def test_declara_los_dos_cuerpos_soportados(self) -> None:
         soportados = re.search(r"const SOPORTADOS := \[(.*?)\]", self.adaptador, re.S)
         self.assertIsNotNone(soportados)
-        self.assertEqual(soportados.group(1).strip(), "ARQUETIPOS.BLOQUEADOR")
+        declarados = {parte.strip() for parte in soportados.group(1).split(",")}
+        self.assertEqual(
+            declarados,
+            {"ARQUETIPOS.BLOQUEADOR", "ARQUETIPOS.HOSTIGADOR"},
+        )
+        self.assertNotIn("ARQUETIPOS.ENJAMBRE", declarados)
 
     def test_runtime_standalone(self) -> None:
         motor = os.environ.get("GODOT_BIN") or shutil.which("godot4")
