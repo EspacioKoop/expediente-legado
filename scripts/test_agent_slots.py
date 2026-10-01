@@ -17,6 +17,7 @@ VARS = {
     "QWEN_FALLBACK_2_MODEL": "nvidia/nemotron-3-super-120b-a12b",
     "QWEN_FALLBACK_7_BASE_URL": NVIDIA,
     "QWEN_FALLBACK_7_MODEL": "",
+    "QWEN_FALLBACK_7_MAX_TASK_BYTES": "24000",
     "QWEN_FALLBACK_13_BASE_URL": NVIDIA,
     "OTRA_VARIABLE": "x",
 }
@@ -40,7 +41,7 @@ class SlotsTest(unittest.TestCase):
     def test_resolver_worker_y_modelo_por_defecto(self):
         self.assertEqual(
             {"worker": "qwen-fallback-7", "slot": 7, "url": NVIDIA, "model": "qwen3-coder-plus", "tier": 1,
-             "secret": "QWEN_FALLBACK_7_API_KEY"},
+             "max_task_bytes": 24000, "secret": "QWEN_FALLBACK_7_API_KEY"},
             slots.resolver(VARS, "qwen-fallback-7", {7}, "qwen3-coder-plus"),
         )
         self.assertIsNone(slots.resolver(VARS, "qwen-fallback-7", {2}))
@@ -61,6 +62,24 @@ class SlotsTest(unittest.TestCase):
             with self.subTest(valor=valor):
                 self.assertEqual(1, slots.tier_de({"QWEN_FALLBACK_3_TIER": valor}, 3))
         self.assertEqual(3, slots.tier_de({"QWEN_FALLBACK_3_TIER": " 3 "}, 3))
+
+    def test_presupuesto_de_tarea_es_opcional_y_provider_neutral(self):
+        self.assertEqual(24000, slots.max_task_bytes_de_worker(VARS, "qwen-fallback-7"))
+        self.assertEqual(
+            32000,
+            slots.max_task_bytes_de_worker(
+                {"QWEN_PRIMARY_MAX_TASK_BYTES": "32000"}, "qwen-primary"
+            ),
+        )
+        for valor in ("", "-1", "x", None):
+            with self.subTest(valor=valor):
+                self.assertEqual(
+                    0,
+                    slots.max_task_bytes_de_worker(
+                        {"QWEN_FALLBACK_3_MAX_TASK_BYTES": valor},
+                        "qwen-fallback-3",
+                    ),
+                )
 
     def test_cli_listar_y_resolver(self):
         entorno = {**os.environ, "VARS_JSON": json.dumps(VARS), "FALLBACK_KEYS": "2 7"}
