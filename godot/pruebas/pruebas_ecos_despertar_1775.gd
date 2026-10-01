@@ -41,9 +41,12 @@ func _probar_candidatos() -> void:
 
 
 func _probar_material_desde_noche() -> void:
-	var material := EcosDespertar.material_desde_noche(
-		{"id": MutadoresSueno.HUMEDAD},
-		["monitor", "silla", "desconocido", "monitor"],
+	var material := (
+		EcosDespertar
+		. material_desde_noche(
+			{"id": MutadoresSueno.HUMEDAD},
+			["monitor", "silla", "desconocido", "monitor"],
+		)
 	)
 	_comprobar(material.size() == 3, "solo usa presentacion nocturna reconocida")
 	_comprobar(
@@ -55,9 +58,7 @@ func _probar_material_desde_noche() -> void:
 		"monitor realmente montado habilita eco CRT",
 	)
 	_comprobar(
-		material.has(
-			{"tipo": EcosDespertar.OBJETO_DESPLAZADO, "origen_id": "utileria:silla"}
-		),
+		material.has({"tipo": EcosDespertar.OBJETO_DESPLAZADO, "origen_id": "utileria:silla"}),
 		"objeto montado habilita desplazamiento ambiguo",
 	)
 	_comprobar(
@@ -67,13 +68,15 @@ func _probar_material_desde_noche() -> void:
 
 	var sonido := EcosDespertar.material_desde_noche({"id": MutadoresSueno.DESFASE}, [])
 	_comprobar(
-		sonido
-		== [
-			{
-				"tipo": EcosDespertar.SONIDO_RESIDUAL,
-				"origen_id": "mutador:desfase",
-			}
-		],
+		(
+			sonido
+			== [
+				{
+					"tipo": EcosDespertar.SONIDO_RESIDUAL,
+					"origen_id": "mutador:desfase",
+				}
+			]
+		),
 		"desfase conserva solo el pulso audible que ya existio en sueno",
 	)
 	_comprobar(
