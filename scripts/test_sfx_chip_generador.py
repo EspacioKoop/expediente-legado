@@ -19,7 +19,7 @@ RUNTIME = {
     "archivador_cerrar_03.ogg": "b7597fcb04a74189035809268b47a2c1821e9482489e06cda450cda2fe83a277",
     "papel_coger_01.ogg": "ab7c79d10d10996bcd01f3550abdedf562e180f7b53295ad48b8e91365d075aa",
     "papel_pasar_01.ogg": "0d8c22e65257cf8f097a2225c679608a147f2b4c6e18b174b32cfac0c636a191",
-    "papel_manojo_01.ogg": "55910ef28577d8aed8be2a3aae83a97904799e6e418654d514a991934463048c",
+    "papel_manojo_01.ogg": "f738a8c8c04dc822f5855fb3812156027fb66f802139f2a3b34231577db58bbb",
 }
 ARCHIVADOR_WAV = {
     "archivador_abrir_01": "f2ffeb6b5bdf3f7bb34e108755ec561688af9ed368f4baf7656db7b84112fdc5",
@@ -73,6 +73,27 @@ class SfxChipGeneradorTest(unittest.TestCase):
         self.assertEqual(len({generador.RECETAS[n]["seed"] for n in cerrar}), 3)
 
 
+    def _assert_ogg_completo(self, ruta: Path, nombre: str):
+        datos = ruta.read_bytes()
+        offset = 0
+        paginas = 0
+        tiene_eos = False
+        while offset < len(datos):
+            self.assertGreaterEqual(len(datos) - offset, 27, nombre)
+            self.assertEqual(datos[offset : offset + 4], b"OggS", nombre)
+            segmentos = datos[offset + 26]
+            cabecera = offset + 27 + segmentos
+            self.assertLessEqual(cabecera, len(datos), nombre)
+            cuerpo = sum(datos[offset + 27 : cabecera])
+            fin = cabecera + cuerpo
+            self.assertLessEqual(fin, len(datos), nombre)
+            tiene_eos = bool(datos[offset + 5] & 0x04)
+            offset = fin
+            paginas += 1
+        self.assertEqual(offset, len(datos), nombre)
+        self.assertGreaterEqual(paginas, 3, nombre)
+        self.assertTrue(tiene_eos, nombre)
+
     def test_ogg_runtime_tienen_hash_procedencia_y_presupuesto(self):
         sonido = SONIDO.read_text(encoding="utf-8")
         fichas = {
@@ -83,6 +104,7 @@ class SfxChipGeneradorTest(unittest.TestCase):
             ruta = ASSETS / "audio" / "chip" / nombre
             self.assertTrue(ruta.exists(), nombre)
             self.assertLess(ruta.stat().st_size, 30_000, nombre)
+            self._assert_ogg_completo(ruta, nombre)
             real = hashlib.sha256(ruta.read_bytes()).hexdigest()
             self.assertEqual(real, esperado, nombre)
             ficha = fichas.get(f"audio/chip/{nombre}")
