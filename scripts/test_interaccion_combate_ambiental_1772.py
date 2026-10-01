@@ -96,6 +96,7 @@ class InteraccionCombateAmbiental1772Test(unittest.TestCase):
         self.assertNotIn("InteraccionCombateAmbiental.VOLCAR", self.runtime_empujar)
         self.assertNotIn("InteraccionCombateAmbiental.ACTIVAR", self.runtime_empujar)
         self.assertIn("AnimatableBody3D.new()", self.runtime_empujar)
+        self.assertIn("prop.sync_to_physics = false", self.runtime_empujar)
         self.assertIn("CollisionShape3D.new()", self.runtime_empujar)
         self.assertIn("BoxShape3D.new()", self.runtime_empujar)
         self.assertIn("const USOS_MAX := 2", self.runtime_empujar)
