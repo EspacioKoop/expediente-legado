@@ -318,6 +318,7 @@ jobs:
             # Si GitHub o el parser fallan, se conserva fail-open y el worker
             # mantiene su guard defensivo.
             planned='[]'
+            planned_bytes=0
             comments='[]'
             context_ok=false
             plan_ok=false
@@ -355,6 +356,17 @@ jobs:
                     mv "$tmp" /tmp/issues.json
                     continue
                   fi
+
+                  # Presupuesto aproximado del executor: el checkout ya contiene
+                  # los ficheros que el TaskPacket permitirá leer/editar. Un
+                  # fichero nuevo pesa 0 aquí; el cuerpo del issue se suma en el
+                  # selector Python.
+                  while IFS= read -r path; do
+                    if [[ -f "$path" ]]; then
+                      bytes="$(wc -c < "$path")"
+                      planned_bytes=$((planned_bytes + bytes))
+                    fi
+                  done < <(jq -r '.[]' <<<"$planned")
                 else
                   already_decompose="$(
                     jq --argjson issue "$issue" \
@@ -386,8 +398,9 @@ jobs:
 
             tmp="$(mktemp)"
             jq --argjson issue "$issue" --argjson comments "$comments" --argjson planned "$planned" \
+              --argjson planned_bytes "$planned_bytes" \
               'map(if .number == $issue
-                   then . + {comments:$comments,plannedFiles:$planned}
+                   then . + {comments:$comments,plannedFiles:$planned,plannedBytes:$planned_bytes}
                    else . end)' \
               /tmp/issues.json > "$tmp"
             mv "$tmp" /tmp/issues.json

@@ -16,8 +16,12 @@ Variables por slot `N` (1..MAX_FALLBACKS):
 - `QWEN_FALLBACK_N_KEY_FROM`: reutiliza una clave existente en vez de pedir
   `QWEN_FALLBACK_N_API_KEY`: otro slot (`2`) o un proveedor base (`qwen`,
   `gemini`). Así se añaden modelos sin duplicar secretos.
+- `QWEN_FALLBACK_N_MAX_TASK_BYTES`: presupuesto máximo aproximado de entrada
+  para ese worker. `0` o ausente significa sin límite explícito.
 
-Tiers de los workers base: `QWEN_PRIMARY_TIER` y `GEMINI_TIER`.
+Los workers base admiten `QWEN_PRIMARY_MAX_TASK_BYTES` y
+`GEMINI_MAX_TASK_BYTES` con la misma semántica. Tiers de los workers base:
+`QWEN_PRIMARY_TIER` y `GEMINI_TIER`.
 
 Entorno de la CLI: `VARS_JSON`; `FALLBACK_KEYS` (slots con clave utilizable,
 "2 3"); `BASE_KEYS` (proveedores base con clave, "qwen gemini");
@@ -41,6 +45,10 @@ SECRET_SLOT_RE = re.compile(r"^QWEN_FALLBACK_(?P<n>[1-9]\d*)_API_KEY$")
 # arbitrario (OmniRoute, Kev, Tailscale…) enviado a una URL cualquiera.
 SECRETOS_BASE = {"qwen": "QWEN_API_KEY", "gemini": "GEMINI_API_KEY"}
 TIER_BASE = {"qwen-primary": "QWEN_PRIMARY_TIER", "gemini": "GEMINI_TIER"}
+MAX_TASK_BYTES_BASE = {
+    "qwen-primary": "QWEN_PRIMARY_MAX_TASK_BYTES",
+    "gemini": "GEMINI_MAX_TASK_BYTES",
+}
 
 
 def claves_presentes(texto: str) -> set[int]:
@@ -62,10 +70,26 @@ def _entero_positivo(crudo: Any) -> int:
     return int(texto) if texto.isdigit() and int(texto) >= 1 else 1
 
 
+def _entero_no_negativo(crudo: Any) -> int:
+    texto = str(crudo or "").strip()
+    return int(texto) if texto.isdigit() else 0
+
+
 def tier_de(variables: dict[str, Any], n: int) -> int:
     """`QWEN_FALLBACK_N_TIER` (entero >= 1); 1 si falta o no es válido."""
 
     return _entero_positivo(variables.get(f"QWEN_FALLBACK_{n}_TIER"))
+
+
+def max_task_bytes_de_worker(variables: dict[str, Any], worker: str) -> int:
+    """Presupuesto de entrada del worker; 0 significa sin límite explícito."""
+
+    n = slot_de_worker(worker)
+    if n is not None:
+        return _entero_no_negativo(
+            variables.get(f"QWEN_FALLBACK_{n}_MAX_TASK_BYTES")
+        )
+    return _entero_no_negativo(variables.get(MAX_TASK_BYTES_BASE.get(worker, "")))
 
 
 def tier_de_worker(variables: dict[str, Any], worker: str) -> int:
@@ -118,6 +142,9 @@ def fallbacks(
                 "url": url,
                 "model": str(variables.get(f"QWEN_FALLBACK_{n}_MODEL") or "").strip(),
                 "tier": tier_de(variables, n),
+                "max_task_bytes": max_task_bytes_de_worker(
+                    variables, f"qwen-fallback-{n}"
+                ),
                 "secret": secreto,
             }
         )
@@ -135,8 +162,24 @@ def inventario(
         workers.append({"worker": "qwen-primary", "provider": "qwen"})
     if "gemini" in base:
         workers.append({"worker": "gemini", "provider": "gemini"})
-    workers += [{"worker": s["worker"], "provider": "qwen"} for s in fallbacks(variables, con_clave, base)]
-    return [{**w, "tier": tier_de_worker(variables, w["worker"])} for w in workers]
+    workers += [
+        {
+            "worker": s["worker"],
+            "provider": "qwen",
+            "max_task_bytes": s["max_task_bytes"],
+        }
+        for s in fallbacks(variables, con_clave, base)
+    ]
+    return [
+        {
+            **w,
+            "tier": tier_de_worker(variables, w["worker"]),
+            "max_task_bytes": w.get(
+                "max_task_bytes", max_task_bytes_de_worker(variables, w["worker"])
+            ),
+        }
+        for w in workers
+    ]
 
 
 def resolver(
