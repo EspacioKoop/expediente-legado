@@ -6,6 +6,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ENTRADA = ROOT / "godot" / "guion" / "entrada_cinematica.gd"
 REPRODUCTOR = ROOT / "godot" / "guion" / "cinematica_app.gd"
 DIA = ROOT / "godot" / "guion" / "dia_app.gd"
+CICLO_LABORAL = ROOT / "godot" / "guion" / "dia_ciclo_laboral_app.gd"
 
 
 class EntradaCinematica3DTest(unittest.TestCase):
@@ -13,6 +14,7 @@ class EntradaCinematica3DTest(unittest.TestCase):
         self.entrada = ENTRADA.read_text(encoding="utf-8")
         self.reproductor = REPRODUCTOR.read_text(encoding="utf-8")
         self.dia = DIA.read_text(encoding="utf-8")
+        self.ciclo_laboral = CICLO_LABORAL.read_text(encoding="utf-8")
 
     def test_entrada_deja_de_ser_cuatro_inserts_2d(self) -> None:
         self.assertEqual(self.entrada.count('"tipo": "3d"'), 4)
@@ -85,7 +87,8 @@ class EntradaCinematica3DTest(unittest.TestCase):
         self.assertIn("_terminar()", salto)
         self.assertIn("Cinematica.anotar_vista(_estado, _id)", self.reproductor)
         self.assertIn("terminada.emit()", self.reproductor)
-        self.assertIn("_entrada.terminada.connect(_cerrar_vuelta)", self.dia)
+        self.assertIn('Callable(self, "_cerrar_vuelta")', self.dia)
+        self.assertIn("entrada.terminada.connect(al_cerrar)", self.ciclo_laboral)
 
     def test_se_conservan_identidad_repeticion_y_remate(self) -> None:
         for contrato in (

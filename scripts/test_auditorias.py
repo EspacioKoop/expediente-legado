@@ -6,6 +6,7 @@ RUTA = Path("godot/guion/auditorias.gd")
 PARTIDA = Path("godot/guion/partida.gd")
 PROMETEO = Path("godot/guion/prometeo.gd")
 DIA = Path("godot/guion/dia_app.gd")
+CICLO_LABORAL = Path("godot/guion/dia_ciclo_laboral_app.gd")
 ASCENSOR = Path("godot/guion/dia_ascensor_app.gd")
 SUENO = Path("godot/guion/dia_sueno_app.gd")
 CREADOR = Path("godot/guion/creador_personaje_app.gd")
@@ -95,15 +96,18 @@ class AuditoriasTest(unittest.TestCase):
     def test_alta_y_reasignacion_resuelven_antes_de_empezar(self):
         creador = CREADOR.read_text(encoding="utf-8")
         dia = DIA.read_text(encoding="utf-8")
+        ciclo = CICLO_LABORAL.read_text(encoding="utf-8")
         assert "Auditorias.resolver_seleccion(_partida.estado, _auditorias.seleccion())" in creador
-        assert "Auditorias.seleccion_pendiente(partida.estado)" in dia
-        assert "AuditoriasNuevaVidaApp.new()" in dia
-        assert "Auditorias.resolver_seleccion(partida.estado, seleccion)" in dia
-        abrir = dia.split("func _abrir_vuelta() -> void:", 1)[1].split(
-            "func _abrir_auditorias_nueva_vida", 1
+        assert "_ciclo_laboral" in dia
+        assert ". abrir_vuelta(" in dia
+        assert "Auditorias.seleccion_pendiente(estado)" in ciclo
+        assert "AuditoriasNuevaVidaApp.new()" in ciclo
+        assert "Auditorias.resolver_seleccion(estado, seleccion)" in ciclo
+        abrir = ciclo.split("func abrir_vuelta(", 1)[1].split(
+            "func abrir_auditorias", 1
         )[0]
-        assert abrir.index("Auditorias.seleccion_pendiente(partida.estado)") < abrir.index(
-            "_registrar_reincorporacion()"
+        assert abrir.index("Auditorias.seleccion_pendiente(estado)") < abrir.index(
+            "registrar_reincorporacion("
         )
     
     

@@ -36,9 +36,12 @@ var _pantalla: CanvasLayer
 var _hud: CanvasLayer
 ## La entrada de la vuelta mientras se está poniendo (#68). Fuera de ella es
 ## nula: el reproductor se descarta al terminar en vez de quedarse escuchando.
-var _entrada: Node3D
-var _ultimo_recurso: UltimoRecursoApp
-var _auditorias_nueva_vida: AuditoriasNuevaVidaApp
+var _ciclo_laboral := DiaCicloLaboralApp.new()
+## Compatibilidad para la cadena de herencia dia_* y las herramientas de captura.
+## El estado real pertenece a DiaCicloLaboralApp.
+var _entrada: Node3D:
+	get:
+		return _ciclo_laboral.entrada
 
 ## El sitio montado ahora mismo, tal como se construyó. Las cinemáticas que
 ## ruedan dentro de él (#395) lo leen en vez de volver a pedirlo: en el sueño
@@ -91,156 +94,74 @@ func _ready() -> void:
 
 ## Recupera o presenta la única decisión pendiente de vida cero.
 func _abrir_ultimo_recurso_pendiente() -> void:
-	if not Acusacion.despido_pendiente(partida.estado):
-		return
-	if is_instance_valid(_ultimo_recurso):
-		_ultimo_recurso.actualizar(partida.estado)
-		return
-	if is_instance_valid(_caminante):
-		_caminante.set_physics_process(false)
-	_ultimo_recurso = UltimoRecursoApp.new()
-	_ultimo_recurso.name = "UltimoRecurso"
-	_ultimo_recurso.canje_solicitado.connect(_al_canjear_ultimo_recurso)
-	_ultimo_recurso.cese_solicitado.connect(_al_aceptar_cese)
-	add_child(_ultimo_recurso)
-	_ultimo_recurso.abrir(partida.estado)
+	(
+		_ciclo_laboral
+		. abrir_ultimo_recurso_pendiente(
+			self,
+			partida.estado,
+			_caminante,
+			Callable(self, "_al_canjear_ultimo_recurso"),
+			Callable(self, "_al_aceptar_cese"),
+		)
+	)
 
 
 func _al_canjear_ultimo_recurso(carta_id: String) -> void:
-	var resultado := Acusacion.canjear_carta_por_vida(partida.estado, carta_id)
-	if String(resultado.get("resultado", "")) != "canje":
-		if is_instance_valid(_ultimo_recurso):
-			_ultimo_recurso.actualizar(partida.estado)
-		return
-
-	# Una derrota de Hastur deja su combate interrumpido mientras existe la
-	# frontera. Si el canje salva la misma vuelta, se rearma ese mismo intento.
-	ClimaxHastur.reanudar_tras_ultimo_recurso(partida.estado, jornada)
-	var guardado := _guardar_o_avisar("")
-	_cerrar_ultimo_recurso()
-	if not guardado:
-		if is_instance_valid(_caminante):
-			_caminante.set_physics_process(true)
-		return
-
-	var climax := get_node_or_null("ClimaxHasturOwnerController")
-	if climax != null and climax.has_method("_reanudar_si_procede"):
-		climax.call_deferred("_reanudar_si_procede")
-	elif is_instance_valid(_caminante):
-		_caminante.set_physics_process(true)
+	_ciclo_laboral.canjear_ultimo_recurso(
+		self, partida.estado, jornada, carta_id, Callable(self, "_guardar_o_avisar"), _caminante
+	)
 
 
 func _al_aceptar_cese() -> void:
-	var resultado := Acusacion.aceptar_cese(partida.estado, jornada)
-	if not bool(resultado.get("despido", false)):
-		if is_instance_valid(_ultimo_recurso):
-			_ultimo_recurso.actualizar(partida.estado)
-		return
-	_guardar_o_avisar("")
-	_cerrar_ultimo_recurso()
-	_reasignar()
+	_ciclo_laboral.aceptar_cese(
+		partida.estado, jornada, Callable(self, "_guardar_o_avisar"), Callable(self, "_reasignar")
+	)
 
 
 func _cerrar_ultimo_recurso() -> void:
-	if is_instance_valid(_ultimo_recurso):
-		_ultimo_recurso.queue_free()
-	_ultimo_recurso = null
+	_ciclo_laboral.cerrar_ultimo_recurso()
 
 
-## La entrada de una vida laboral (#68).
-##
-## Se pone ENCIMA de la oficina ya montada y no antes de montarla: así al
-## terminar no hay ningún fotograma en negro esperando a que se construya el
-## archivo, y saltarla deja al jugador exactamente donde estaría.
-##
-## Solo abre una vuelta —día uno, en el archivo y con la jornada entera por
-## delante—, que es lo que distingue empezar de volver a cargar una partida a
-## medias. Una entrada que se repita cada vez que se abre el juego dejaría de
-## ser una entrada.
-##
-## Ocurre al arrancar y también a media sesión: cuando firmar cuesta la última
-## vida, `_cerrar_expediente` vuelve a llamar aquí por `_reasignar`. Esa es la
-## razón de que la condición mire la jornada y no una bandera de "ya
-## arrancamos" — lo que abre una entrada es que la vida laboral esté por
-## estrenar, venga de donde venga.
+## Hook heredable: DiaApp decide cuándo empezar una vida laboral; el helper
+## posee la presentación y el estado temporal.
 func _abrir_vuelta() -> void:
-	if jornada["fase"] != "archivo" or jornada["dia"] != 1:
-		return
-	if jornada["acciones"] != Jornada.ACCIONES_POR_DIA:
-		return
-	if int(jornada.get("vuelta", 1)) > 1 and Auditorias.seleccion_pendiente(partida.estado):
-		_abrir_auditorias_nueva_vida()
-		return
-
-	_registrar_reincorporacion()
-
-	# El cuerpo se queda quieto mientras dura: la cinemática se salta con
-	# cualquier tecla, y sin esto esa misma tecla sería también un paso.
-	_caminante.set_physics_process(false)
-
-	# Y los rótulos del día se apagan. No es limpieza: la oficina ya está
-	# montada detrás, así que sin esto la frase de un compañero se lee ENCIMA de
-	# la pantalla de arranque —alguien te habla antes de que hayas entrado, en la
-	# cinemática cuyo remate es que no hay nadie más—.
-	_hud.visible = false
-
-	_entrada = load("res://escenas/cinematica.tscn").instantiate()
-	add_child(_entrada)
-	_entrada.terminada.connect(_cerrar_vuelta)
-	var vistas := Cinematica.vistas_de(partida.estado, EntradaCinematica.ID)
-	_entrada.reproducir(EntradaCinematica.planos_de(vistas), EntradaCinematica.ID, partida.estado)
+	(
+		_ciclo_laboral
+		. abrir_vuelta(
+			self,
+			partida.estado,
+			jornada,
+			_caminante,
+			_hud,
+			Callable(self, "_abrir_auditorias_nueva_vida"),
+			Callable(self, "_cerrar_vuelta"),
+			SELLO_REINCORPORACION,
+		)
+	)
 
 
-## La segunda vida laboral y siguientes ya son una reincorporación administrativa.
-##
-## Se deriva del contador de vuelta existente: no hace falta una bandera paralela
-## y recargar el día 1 sigue siendo idempotente. El guardado ocurre al cerrar la
-## misma entrada de vuelta.
 func _abrir_auditorias_nueva_vida() -> void:
-	if is_instance_valid(_auditorias_nueva_vida):
-		return
-	if is_instance_valid(_caminante):
-		_caminante.set_physics_process(false)
-	if is_instance_valid(_hud):
-		_hud.visible = false
-	_auditorias_nueva_vida = AuditoriasNuevaVidaApp.new()
-	_auditorias_nueva_vida.name = "AuditoriasNuevaVida"
-	_auditorias_nueva_vida.seleccion_confirmada.connect(_confirmar_auditorias_nueva_vida)
-	add_child(_auditorias_nueva_vida)
-	_auditorias_nueva_vida.abrir(partida.estado)
+	_ciclo_laboral.abrir_auditorias(
+		self, partida.estado, _caminante, _hud, Callable(self, "_confirmar_auditorias_nueva_vida")
+	)
 
 
 func _confirmar_auditorias_nueva_vida(seleccion: Array) -> void:
-	var anterior := Dictionary(partida.estado.get(Auditorias.CLAVE_ESTADO, {})).duplicate(true)
-	if not Auditorias.resolver_seleccion(partida.estado, seleccion):
-		return
-	if not _guardar_o_avisar(""):
-		partida.estado[Auditorias.CLAVE_ESTADO] = anterior
-		return
-	if is_instance_valid(_auditorias_nueva_vida):
-		_auditorias_nueva_vida.queue_free()
-	_auditorias_nueva_vida = null
-	_abrir_vuelta()
+	_ciclo_laboral.confirmar_auditorias(
+		partida.estado,
+		seleccion,
+		Callable(self, "_guardar_o_avisar"),
+		Callable(self, "_abrir_vuelta")
+	)
 
 
 func _registrar_reincorporacion() -> Dictionary:
-	if int(jornada.get("vuelta", 1)) <= 1:
-		return {"resultado": "no-cumplido", "id": SELLO_REINCORPORACION}
-	return Sellos.registrar_sello(partida.estado, SELLO_REINCORPORACION)
+	return _ciclo_laboral.registrar_reincorporacion(partida.estado, jornada, SELLO_REINCORPORACION)
 
 
-## Al acabar la entrada se guarda, y no por costumbre: lo que hay que conservar
-## es que se ha visto. Sin este guardado la cuenta se pierde al cerrar el juego
-## y la entrada volvería a durar lo mismo para siempre, que es justo lo que el
-## acortado de #67 vino a evitar.
+## Hook heredable para que DiaJornadaApp/DiaClimaApp reaccionen al mismo cierre.
 func _cerrar_vuelta() -> void:
-	if _entrada == null:
-		return
-	_entrada.queue_free()
-	_entrada = null
-	_caminante.set_physics_process(true)
-	_hud.visible = true
-	_guardar_o_avisar("")
+	_ciclo_laboral.cerrar_vuelta(_caminante, _hud, Callable(self, "_guardar_o_avisar"))
 
 
 ## Luz y ambiente. Una sola direccional, ahora con sombra, y oclusión.
