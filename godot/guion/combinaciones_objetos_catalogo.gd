@@ -17,8 +17,12 @@ static func recetas() -> Array[Dictionary]:
 	palanca["nombre"] = "Palanca calzada"
 	palanca["descripcion"] = (
 		"Has encajado la cuña imposible en el extremo de la palanca. "
-		+ "La herramienta sigue sirviendo para forzar, pero ahora conserva la huella del sueño."
+		+ "Sigue sirviendo para forzar y ahora también puede calzar o estabilizar objetos inestables."
 	)
+	var usos: Array = palanca.get("usos", []).duplicate()
+	if UsosHerramienta.ESTABILIZAR not in usos:
+		usos.append(UsosHerramienta.ESTABILIZAR)
+	palanca["usos"] = usos
 	palanca["combinada_con"] = RecompensaOnirica.ID
 	palanca["receta_combinacion"] = RECETA_PALANCA_CUNA
 
