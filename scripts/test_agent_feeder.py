@@ -85,6 +85,38 @@ class AgentFeederTest(unittest.TestCase):
         result = mod.select_candidate(candidates, [], now=NOW)
         self.assertEqual(12, result["selected"]["number"])
 
+    def test_umbral_descarta_p3_generico_pero_no_test_autocontenido(self):
+        candidates = [
+            issue(21, "Feature amplia", ["prioridad:P3"]),
+            issue(22, "test: regresion pequena"),
+        ]
+        result = mod.select_candidate(candidates, [], now=NOW)
+        self.assertEqual(22, result["selected"]["number"])
+        self.assertEqual(2, result["eligible"])
+        self.assertEqual(1, result["qualified"])
+        self.assertEqual(1, result["rejected"]["score-insuficiente"])
+
+    def test_umbral_puede_dejar_cola_sin_candidato(self):
+        result = mod.select_candidate(
+            [issue(23, "Feature amplia", ["prioridad:P3"])],
+            [],
+            now=NOW,
+        )
+        self.assertIsNone(result["selected"])
+        self.assertEqual(1, result["eligible"])
+        self.assertEqual(0, result["qualified"])
+        self.assertEqual(1, result["rejected"]["score-insuficiente"])
+
+    def test_override_min_score_sirve_para_diagnostico(self):
+        result = mod.select_candidate(
+            [issue(24, "Feature amplia", ["prioridad:P3"])],
+            [],
+            now=NOW,
+            min_score=25,
+        )
+        self.assertEqual(24, result["selected"]["number"])
+        self.assertEqual(1, result["qualified"])
+
     def test_refs_de_pr_reconoce_formas_comunes(self):
         refs = mod.referenced_issues([
             {"body": "Refs #21\nFixes #22"},
@@ -126,6 +158,7 @@ class AgentFeederTest(unittest.TestCase):
         self.assertIn("authorAssociation", workflow)
         self.assertIn("gh workflow run agent-decompose.yml", workflow)
         self.assertNotIn("--add-label agent:auto", workflow)
+        self.assertEqual(30, mod.DEFAULT_MIN_SCORE)
 
     def test_decompose_despacha_pool_sin_confiar_en_evento_recursivo(self):
         decompose = DECOMPOSE.read_text(encoding="utf-8")

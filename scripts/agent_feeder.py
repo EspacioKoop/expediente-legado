@@ -15,6 +15,7 @@ import re
 from typing import Any
 
 TRUSTED_ASSOCIATIONS = {"OWNER", "MEMBER", "COLLABORATOR"}
+DEFAULT_MIN_SCORE = 30
 
 BLOCKING_LABELS = {
     "estado:validacion-humana",
@@ -121,7 +122,7 @@ def eligible(
     return True, "ok"
 
 
-def score(issue: dict[str, Any]) -> tuple[int, str, int]:
+def score_points(issue: dict[str, Any]) -> int:
     labels = _labels(issue)
     title = str(issue.get("title") or "")
     points = 0
@@ -139,10 +140,14 @@ def score(issue: dict[str, Any]) -> tuple[int, str, int]:
     if lowered.startswith("infra(") or lowered.startswith("infra:"):
         points += 30
     if lowered.startswith("test(") or lowered.startswith("test:"):
-        points += 25
+        points += 30
     if "area:accesibilidad" in labels:
         points += 5
+    return points
 
+
+def score(issue: dict[str, Any]) -> tuple[int, str, int]:
+    points = score_points(issue)
     created = str(issue.get("createdAt") or issue.get("created_at") or "")
     try:
         number = int(issue.get("number", 0))
@@ -157,6 +162,7 @@ def select_candidate(
     *,
     now: datetime,
     min_age_minutes: int = 90,
+    min_score: int = DEFAULT_MIN_SCORE,
 ) -> dict[str, Any]:
     refs = referenced_issues(prs)
     eligible_items: list[dict[str, Any]] = []
@@ -175,18 +181,27 @@ def select_candidate(
             rejected[reason] = rejected.get(reason, 0) + 1
 
     eligible_items.sort(key=score)
-    selected = eligible_items[0] if eligible_items else None
+    minimum = max(0, min_score)
+    qualified_items = [
+        issue for issue in eligible_items if score_points(issue) >= minimum
+    ]
+    below_threshold = len(eligible_items) - len(qualified_items)
+    if below_threshold:
+        rejected["score-insuficiente"] = below_threshold
+
+    selected = qualified_items[0] if qualified_items else None
     return {
         "selected": (
             {
                 "number": int(selected["number"]),
                 "title": str(selected.get("title") or ""),
-                "score": -score(selected)[0],
+                "score": score_points(selected),
             }
             if selected
             else None
         ),
         "eligible": len(eligible_items),
+        "qualified": len(qualified_items),
         "rejected": rejected,
     }
 
@@ -198,6 +213,7 @@ def main() -> int:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--now")
     parser.add_argument("--min-age-minutes", type=int, default=90)
+    parser.add_argument("--min-score", type=int, default=DEFAULT_MIN_SCORE)
     args = parser.parse_args()
 
     issues = json.loads(args.issues.read_text(encoding="utf-8"))
@@ -215,6 +231,7 @@ def main() -> int:
         prs,
         now=now.astimezone(timezone.utc),
         min_age_minutes=max(0, args.min_age_minutes),
+        min_score=max(0, args.min_score),
     )
     args.output.write_text(
         json.dumps(result, ensure_ascii=False, indent=2) + "\n",
