@@ -17,6 +17,7 @@ const DOCTRINA = preload("res://guion/juicio_combate_doctrina.gd")
 const JUGADOR = preload("res://guion/juicio_combate_jugador.gd")
 const ESTADO_TEMPORAL = preload("res://guion/juicio_combate_estado_temporal.gd")
 const AMBIENTAL_1772 = preload("res://guion/juicio_combate_ambiental_1772.gd")
+const EMPUJAR_1772 = preload("res://guion/juicio_combate_ambiental_empujar_1772.gd")
 const ARQUETIPOS = preload("res://guion/juicio_combate_arquetipos.gd")
 const ARQUETIPO_HOST = preload("res://guion/juicio_combate_arquetipo_host.gd")
 const DETERMINACION_BASE := REGLAS.DETERMINACION_BASE
@@ -45,6 +46,7 @@ var interaccion_ambiental_habilitada := false
 var arquetipo_onirico := ""
 
 var _ambiental_1772: Dictionary = {}
+var _empujar_1772: Dictionary = {}
 var _arquetipo: Dictionary = {}
 var _guardia_rota := false
 var _escudo_guardia: MeshInstance3D
@@ -182,6 +184,7 @@ func _ready() -> void:
 	_montar_arquetipo()
 	if interaccion_ambiental_habilitada:
 		_ambiental_1772 = AMBIENTAL_1772.montar(self)
+		_empujar_1772 = EMPUJAR_1772.montar(self)
 	_montar_hud()
 	_actualizar_hud()
 
@@ -191,6 +194,7 @@ func _process(delta: float) -> void:
 		return
 	_descontar_temporizadores(delta)
 	_descontar_tregua_religion(delta)
+	_avanzar_empujar_1772(delta)
 	_mover_jugador(delta)
 	_avanzar_arquetipo(delta)
 	_mover_rival(delta)
@@ -208,15 +212,40 @@ func _process(delta: float) -> void:
 		_esquivar()
 
 
+## Avanza la recarga local de EMPUJAR cuando el host está montado.
+func _avanzar_empujar_1772(delta: float) -> void:
+	if _empujar_1772.is_empty():
+		return
+	EMPUJAR_1772.avanzar(_empujar_1772, delta)
+
+
 ## Primer consumidor runtime de #1772. Devuelve false sin efectos cuando el
 ## host no lo habilitó, el combate acabó o el jugador está fuera de alcance.
+## Prioriza ACTIVAR; solo prueba EMPUJAR si ACTIVAR no tuvo efecto por
+## `fuera_de_alcance` o `ya_activado`. Devuelve true si alguno se ejecutó.
 func usar_entorno_ambiental_1772() -> bool:
-	if not interaccion_ambiental_habilitada or _acabado or _ambiental_1772.is_empty():
+	if not interaccion_ambiental_habilitada or _acabado:
 		return false
 	if _jugador == null or not is_instance_valid(_jugador):
 		return false
-	var resultado := AMBIENTAL_1772.activar(_ambiental_1772, _jugador.global_position, true)
-	return bool(resultado.get("ok", false))
+	var posicion := _jugador.global_position
+
+	# Intentar ACTIVAR primero.
+	if not _ambiental_1772.is_empty():
+		var resultado_activar := AMBIENTAL_1772.activar(_ambiental_1772, posicion, true)
+		if bool(resultado_activar.get("ok", false)):
+			return true
+		var motivo := String(resultado_activar.get("motivo", ""))
+		if motivo != "fuera_de_alcance" and motivo != "ya_activado":
+			return false
+
+	# Fallback a EMPUJAR solo si el runtime está montado y ACTIVAR falló por
+	# fuera_de_alcance o ya_activado.
+	if not _empujar_1772.is_empty():
+		var resultado_empujar := EMPUJAR_1772.empujar(_empujar_1772, posicion, true)
+		return bool(resultado_empujar.get("ok", false))
+
+	return false
 
 
 func estado_entorno_ambiental_1772() -> Dictionary:
