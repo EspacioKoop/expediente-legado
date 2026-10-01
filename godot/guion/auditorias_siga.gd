@@ -100,6 +100,8 @@ func _construir() -> void:
 		check.name = "Condicion_%s" % id
 		check.text = tr(String(definicion["titulo"]))
 		check.tooltip_text = tr(String(definicion["descripcion"]))
+		check.accessibility_name = check.text
+		check.accessibility_description = check.tooltip_text
 		check.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		bloque.add_child(check)
 		_checks[id] = check
@@ -112,6 +114,7 @@ func _construir() -> void:
 
 		var estado := Label.new()
 		estado.name = "Estado_%s" % id
+		estado.accessibility_live = AccessibilityServer.LIVE_POLITE
 		bloque.add_child(estado)
 		_estados[id] = estado
 
