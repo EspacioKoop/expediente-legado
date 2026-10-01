@@ -73,6 +73,27 @@ class SfxChipGeneradorTest(unittest.TestCase):
         self.assertEqual(len({generador.RECETAS[n]["seed"] for n in cerrar}), 3)
 
 
+    def _assert_ogg_completo(self, ruta: Path, nombre: str):
+        datos = ruta.read_bytes()
+        offset = 0
+        paginas = 0
+        tiene_eos = False
+        while offset < len(datos):
+            self.assertGreaterEqual(len(datos) - offset, 27, nombre)
+            self.assertEqual(datos[offset : offset + 4], b"OggS", nombre)
+            segmentos = datos[offset + 26]
+            cabecera = offset + 27 + segmentos
+            self.assertLessEqual(cabecera, len(datos), nombre)
+            cuerpo = sum(datos[offset + 27 : cabecera])
+            fin = cabecera + cuerpo
+            self.assertLessEqual(fin, len(datos), nombre)
+            tiene_eos = bool(datos[offset + 5] & 0x04)
+            offset = fin
+            paginas += 1
+        self.assertEqual(offset, len(datos), nombre)
+        self.assertGreaterEqual(paginas, 3, nombre)
+        self.assertTrue(tiene_eos, nombre)
+
     def test_ogg_runtime_tienen_hash_procedencia_y_presupuesto(self):
         sonido = SONIDO.read_text(encoding="utf-8")
         fichas = {
@@ -83,6 +104,7 @@ class SfxChipGeneradorTest(unittest.TestCase):
             ruta = ASSETS / "audio" / "chip" / nombre
             self.assertTrue(ruta.exists(), nombre)
             self.assertLess(ruta.stat().st_size, 30_000, nombre)
+            self._assert_ogg_completo(ruta, nombre)
             real = hashlib.sha256(ruta.read_bytes()).hexdigest()
             self.assertEqual(real, esperado, nombre)
             ficha = fichas.get(f"audio/chip/{nombre}")
