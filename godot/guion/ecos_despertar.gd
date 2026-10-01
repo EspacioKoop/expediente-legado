@@ -12,6 +12,43 @@ const OBJETO_DESPLAZADO := "objeto_desplazado"
 const SONIDO_RESIDUAL := "sonido_residual"
 const TIPOS := [HUMEDAD, CRT, OBJETO_DESPLAZADO, SONIDO_RESIDUAL]
 
+## Solo material que puede haber aparecido realmente en SuenoUtileria. Esta
+## tabla no mira objetos tocados: el caller pasa exclusivamente ids extraidos
+## de anomalias que ya fueron montadas en la sala.
+const ORIGENES_CRT := ["monitor", "televisor_casa"]
+const ORIGENES_OBJETO_DESPLAZADO := ["silla", "archivador", "armario_hogar"]
+
+
+## Traduce presentacion nocturna ya materializada al contrato minimo de ecos.
+## mutador_nocturno es la metadata aplicada al espacio por MutadoresSueno;
+## objetos_montados son los objeto_origen de las anomalias creadas por
+## SuenoUtileria. Desconocidos y material no montado no generan nada.
+static func material_desde_noche(
+	mutador_nocturno: Dictionary, objetos_montados: Array
+) -> Array[Dictionary]:
+	var material: Array[Dictionary] = []
+	var mutador_id := String(mutador_nocturno.get("id", "")).strip_edges()
+	if mutador_id == MutadoresSueno.HUMEDAD:
+		material.append({"tipo": HUMEDAD, "origen_id": "mutador:humedad"})
+	elif mutador_id == MutadoresSueno.DESFASE:
+		# DESFASE es el unico mutador actual que monta audio audible en la sala.
+		material.append({"tipo": SONIDO_RESIDUAL, "origen_id": "mutador:desfase"})
+
+	var vistos := {}
+	for valor in objetos_montados:
+		var objeto_id := String(valor).strip_edges()
+		if objeto_id.is_empty() or vistos.has(objeto_id):
+			continue
+		vistos[objeto_id] = true
+		if ORIGENES_CRT.has(objeto_id):
+			material.append({"tipo": CRT, "origen_id": "utileria:%s" % objeto_id})
+		elif ORIGENES_OBJETO_DESPLAZADO.has(objeto_id):
+			material.append(
+				{"tipo": OBJETO_DESPLAZADO, "origen_id": "utileria:%s" % objeto_id}
+			)
+
+	return candidatos(material)
+
 
 static func candidatos(material_vivido: Array) -> Array[Dictionary]:
 	var salida: Array[Dictionary] = []
