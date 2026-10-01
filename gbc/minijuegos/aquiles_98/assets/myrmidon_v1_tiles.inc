@@ -119,7 +119,8 @@ MyrmidonObjTiles::
 ; OBJ tile 57
     db $00, $00, $C0, $C0, $C0, $C0, $C0, $C0, $C0, $C0, $00, $00, $00, $00, $00, $00
 
-MyrmidonFrameMaps::
+; Estados visibles antes de deducir la vulnerabilidad.
+MyrmidonFrameMapsBase::
 MyrmidonFrame_Idle_0::
     db $00, $01, $02, $03, $04, $05, $06, $07, $08, $09, $0A, $0B
 MyrmidonFrame_Idle_1::
@@ -136,15 +137,17 @@ MyrmidonFrame_Block_0::
     db $00, $01, $20, $21, $04, $22, $23, $07, $24, $09, $0A, $25
 MyrmidonFrame_Block_1::
     db $00, $01, $20, $26, $04, $22, $27, $07, $24, $09, $0A, $25
-MyrmidonFrame_Vulnerable_0::
-    db $00, $01, $28, $03, $04, $29, $2A, $07, $2B, $2C, $2D, $2E
-MyrmidonFrame_Vulnerable_1::
-    db $00, $01, $28, $03, $04, $29, $2A, $07, $2B, $2C, $2D, $2F
 MyrmidonFrame_Defeat_0::
     db $00, $00, $00, $00, $30, $31, $32, $33, $34, $35, $36, $37
 MyrmidonFrame_Defeat_1::
     db $00, $00, $00, $00, $38, $39, $32, $33, $34, $35, $36, $37
 
+; Estado revelado: no consumir antes de que el patron haya sido deducido.
+MyrmidonFrameMapsRevealed::
+MyrmidonFrame_Vulnerable_0::
+    db $00, $01, $28, $03, $04, $29, $2A, $07, $2B, $2C, $2D, $2E
+MyrmidonFrame_Vulnerable_1::
+    db $00, $01, $28, $03, $04, $29, $2A, $07, $2B, $2C, $2D, $2F
 MyrmidonBgTiles::
 MyrmidonBg_marmol_a::
     db $FF, $0E, $FF, $70, $FF, $00, $FC, $03, $F3, $0C, $CF, $30, $3F, $C0, $FF, $00
