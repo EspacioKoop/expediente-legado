@@ -49,10 +49,14 @@ static func montar(anfitrion: Node3D) -> Dictionary:
 	raiz.add_child(luz)
 
 	return {
-		"declaracion": InteraccionCombateAmbiental.declaracion(
-			ID_INTERRUPTOR,
-			[InteraccionCombateAmbiental.ACTIVAR],
-			EFECTO_LUZ,
+		"declaracion":
+		(
+			InteraccionCombateAmbiental
+			. declaracion(
+				ID_INTERRUPTOR,
+				[InteraccionCombateAmbiental.ACTIVAR],
+				EFECTO_LUZ,
+			)
 		),
 		"estado": InteraccionCombateAmbiental.estado_inicial(),
 		"prop": interruptor,
@@ -78,11 +82,14 @@ static func activar(
 	if prop.global_position.distance_to(posicion_jugador) > RADIO_USO:
 		return _rechazo(estado, "fuera_de_alcance")
 
-	var resultado := InteraccionCombateAmbiental.aplicar(
-		declarado_bruto as Dictionary,
-		estado,
-		InteraccionCombateAmbiental.ACTIVAR,
-		combate_permitido,
+	var resultado := (
+		InteraccionCombateAmbiental
+		. aplicar(
+			declarado_bruto as Dictionary,
+			estado,
+			InteraccionCombateAmbiental.ACTIVAR,
+			combate_permitido,
+		)
 	)
 	if not bool(resultado.get("ok", false)):
 		return resultado
