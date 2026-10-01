@@ -148,6 +148,7 @@ MyrmidonFrame_Vulnerable_0::
     db $00, $01, $28, $03, $04, $29, $2A, $07, $2B, $2C, $2D, $2E
 MyrmidonFrame_Vulnerable_1::
     db $00, $01, $28, $03, $04, $29, $2A, $07, $2B, $2C, $2D, $2F
+
 MyrmidonBgTiles::
 MyrmidonBg_marmol_a::
     db $FF, $0E, $FF, $70, $FF, $00, $FC, $03, $F3, $0C, $CF, $30, $3F, $C0, $FF, $00
