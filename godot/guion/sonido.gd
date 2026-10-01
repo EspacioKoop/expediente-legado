@@ -112,6 +112,11 @@ const FAMILIAS_RESPALDO := {
 	"cerrar": ["impactMetal_medium_000.ogg"],
 	"documento": ["bookFlip1.ogg"],
 }
+## Godot 4.7 acepta los OGG chip de papel al cargar, pero al agotar esos streams
+## cortos registra errores Vorbis y convierte el recorrido canónico en CI rojo.
+## Conservamos los masters y el catálogo para rehabilitarlos cuando el runtime
+## deje de producir ese error; mientras tanto se usa el fallback ya previsto.
+const FAMILIAS_RESPALDO_FORZADO := ["documento"]
 const VARIACION_TONO := 1.08
 
 static var _familias := {}
@@ -132,7 +137,10 @@ static func _familia(nombre: String) -> AudioStreamRandomizer:
 	familia.random_pitch = VARIACION_TONO
 	familia.playback_mode = AudioStreamRandomizer.PLAYBACK_RANDOM_NO_REPEATS
 	var ficheros: Array = FAMILIAS[nombre]
-	if not _familia_disponible(ficheros) and FAMILIAS_RESPALDO.has(nombre):
+	var usar_respaldo := (
+		FAMILIAS_RESPALDO_FORZADO.has(nombre) or not _familia_disponible(ficheros)
+	)
+	if usar_respaldo and FAMILIAS_RESPALDO.has(nombre):
 		ficheros = FAMILIAS_RESPALDO[nombre]
 	for fichero in ficheros:
 		var ruta := RUTA + String(fichero)
