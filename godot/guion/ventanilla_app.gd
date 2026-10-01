@@ -508,6 +508,7 @@ func _construir() -> void:
 	_evidencias.allow_reselect = true
 	_evidencias.add_theme_stylebox_override("panel", _hundido(EstiloSiga.BLANCO))
 	_evidencias.add_theme_color_override("font_color", EstiloSiga.NEGRO)
+	_evidencias.accessibility_name = tr("VISOR_DOCUMENTOS")
 	informacion.add_child(_evidencias)
 
 	_pulso = CareoPulso.new()
