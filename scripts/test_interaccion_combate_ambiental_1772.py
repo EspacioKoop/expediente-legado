@@ -11,6 +11,7 @@ from scripts.godot_pruebas import importar_proyecto
 ROOT = Path(__file__).resolve().parents[1]
 MODELO = ROOT / "godot" / "guion" / "interaccion_combate_ambiental.gd"
 RUNTIME = ROOT / "godot" / "guion" / "juicio_combate_ambiental_1772.gd"
+RUNTIME_VOLCAR = ROOT / "godot" / "guion" / "juicio_combate_ambiental_volcar_1772.gd"
 COMBATE = ROOT / "godot" / "guion" / "juicio_combate_3d.gd"
 CONTEXTUAL = ROOT / "godot" / "guion" / "dia_combate_contextual_app.gd"
 PRUEBA = "res://pruebas/pruebas_interaccion_combate_ambiental_1772.gd"
@@ -22,6 +23,7 @@ class InteraccionCombateAmbiental1772Test(unittest.TestCase):
     def setUpClass(cls):
         cls.fuente = MODELO.read_text(encoding="utf-8")
         cls.runtime = RUNTIME.read_text(encoding="utf-8")
+        cls.runtime_volcar = RUNTIME_VOLCAR.read_text(encoding="utf-8")
         cls.combate = COMBATE.read_text(encoding="utf-8")
         cls.contextual = CONTEXTUAL.read_text(encoding="utf-8")
 
@@ -71,6 +73,20 @@ class InteraccionCombateAmbiental1772Test(unittest.TestCase):
         self.assertIn("OmniLight3D.new()", self.runtime)
         self.assertNotIn("Partida.", self.runtime)
         self.assertNotIn("Jornada.", self.runtime)
+
+    def test_volcar_materializa_obstaculo_temporal_sin_tocar_host(self):
+        self.assertIn("class_name JuicioCombateAmbientalVolcar1772", self.runtime_volcar)
+        self.assertIn("InteraccionCombateAmbiental.VOLCAR", self.runtime_volcar)
+        self.assertNotIn("InteraccionCombateAmbiental.EMPUJAR", self.runtime_volcar)
+        self.assertNotIn("InteraccionCombateAmbiental.ACTIVAR", self.runtime_volcar)
+        self.assertIn("StaticBody3D.new()", self.runtime_volcar)
+        self.assertIn("CollisionShape3D.new()", self.runtime_volcar)
+        self.assertIn("BoxShape3D.new()", self.runtime_volcar)
+        self.assertIn("collision_layer = CAPA_OBSTACULO", self.runtime_volcar)
+        self.assertIn("collision_layer = 0", self.runtime_volcar)
+        self.assertNotIn("JuicioCombate3D", self.runtime_volcar)
+        for simbolo in ("Partida.", "Jornada.", "Inventario.", "SuenoCombate"):
+            self.assertNotIn(simbolo, self.runtime_volcar)
 
     def test_host_contextual_habilita_prop_sin_pisar_ataques(self):
         self.assertIn("_combate.interaccion_ambiental_habilitada = true", self.contextual)
