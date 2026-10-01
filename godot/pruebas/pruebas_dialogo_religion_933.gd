@@ -15,6 +15,7 @@ func _ejecutar() -> void:
 	_probar_frontera_de_conocimiento()
 	_probar_conviccion_explicita_conocida()
 	_probar_personajes_externos()
+	_probar_mismo_hecho_dos_reacciones()
 	_probar_vuelta_actual()
 	print("dialogo_religion_933: %d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos > 0 else 0)
@@ -228,6 +229,90 @@ func _probar_personajes_externos() -> void:
 		),
 		"",
 		"la declaración privada a Paco no se filtra por teléfono",
+	)
+
+
+## #1940: dos personas discrepan ante UN hecho, no ante dos hechos fabricados
+## para el test. Se registra una sola identidad de evento y se exige que el
+## registro siga teniendo solo esa tras resolver a ambos interlocutores.
+func _probar_mismo_hecho_dos_reacciones() -> void:
+	var estado := _estado()
+	_registrar(estado, "expo-cartel-barrio", ReligionEventos.CANAL_EXPOSICION, 1, true)
+	var registro: Dictionary = estado[ReligionEventos.CLAVE_ESTADO]
+	_comprobar(
+		ReligionEventos.eventos(registro, ReligionEventos.CANAL_EXPOSICION).size(),
+		1,
+		"el hecho compartido es un único evento",
+	)
+	var antes := estado.duplicate(true)
+
+	var clave_paco := DialogoReligion933.resolver_clave(estado, DialogoReligion933.ACTOR_PACO)
+	var clave_telefono := DialogoReligion933.resolver_clave(
+		estado, DialogoReligion933.ACTOR_TELEFONO_COMUNITARIO
+	)
+	_comprobar(clave_paco, DialogoReligion933.CLAVE_PACO_EXPOSICION, "Paco reacciona al hecho")
+	_comprobar(
+		clave_telefono,
+		DialogoReligion933.CLAVE_TELEFONO_EXPOSICION,
+		"el contacto reacciona al mismo hecho",
+	)
+	_comprobar(clave_paco != clave_telefono, true, "el mismo hecho produce dos reacciones")
+
+	# Exposición no es convicción: ninguna reacción sale del canal de convicción
+	# ni deja una declaración inferida en el registro.
+	_comprobar(
+		(
+			[clave_paco, clave_telefono].has(DialogoReligion933.CLAVE_PACO_CONVICCION)
+			or [clave_paco, clave_telefono].has(DialogoReligion933.CLAVE_TELEFONO_CONVICCION)
+		),
+		false,
+		"la exposición compartida no se lee como convicción",
+	)
+	_comprobar(
+		ReligionEventos.ultima_declaracion(registro).is_empty(),
+		true,
+		"resolver la reacción no inventa una declaración",
+	)
+	_comprobar(estado == antes, true, "resolver ambas reacciones no muta el estado")
+
+	# La partida persiste por JSON: tras guardar y recargar, cada persona
+	# conserva su reacción y siguen discrepando.
+	var recargado: Variant = JSON.parse_string(JSON.stringify(estado))
+	_comprobar(recargado is Dictionary, true, "el estado sobrevive a JSON")
+	if recargado is Dictionary:
+		_comprobar(
+			DialogoReligion933.resolver_clave(recargado, DialogoReligion933.ACTOR_PACO),
+			clave_paco,
+			"Paco mantiene su reacción tras recargar",
+		)
+		_comprobar(
+			DialogoReligion933.resolver_clave(
+				recargado, DialogoReligion933.ACTOR_TELEFONO_COMUNITARIO
+			),
+			clave_telefono,
+			"el contacto mantiene su reacción tras recargar",
+		)
+
+	# Frontera de conocimiento: el mismo tipo de hecho, privado y conocido solo
+	# por Paco, deja al contacto en su diálogo base.
+	var privado := _estado()
+	_registrar(
+		privado,
+		"expo-contada-a-paco",
+		ReligionEventos.CANAL_EXPOSICION,
+		1,
+		false,
+		[DialogoReligion933.ACTOR_PACO],
+	)
+	_comprobar(
+		DialogoReligion933.resolver_clave(privado, DialogoReligion933.ACTOR_PACO),
+		DialogoReligion933.CLAVE_PACO_EXPOSICION,
+		"Paco reacciona a la exposición que le contaron",
+	)
+	_comprobar(
+		DialogoReligion933.resolver_clave(privado, DialogoReligion933.ACTOR_TELEFONO_COMUNITARIO),
+		"",
+		"el contacto que no lo conoce conserva la base",
 	)
 
 
