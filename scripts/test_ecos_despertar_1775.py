@@ -53,7 +53,7 @@ class EcosDespertar1775Test(unittest.TestCase):
         self.assertNotIn("HuellasAmbientales", self.runtime)
         self.assertIn('CLAVE_PENDIENTE := "eco_despertar_pendiente"', self.runtime)
         self.assertIn("static func preparar_despertar(", self.runtime)
-        self.assertIn("EcosDespertar.preparar(", self.runtime)
+        self.assertRegex(self.runtime, r"EcosDespertar\s*\.\s*preparar\(")
         self.assertIn("EcosDespertar.vigente(", self.runtime)
         self.assertIn("jornada.erase(CLAVE_MATERIAL)", self.runtime)
         self.assertNotIn("EcosDespertar.presentacion(", self.runtime)
