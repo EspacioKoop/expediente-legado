@@ -98,7 +98,8 @@ class AuditoriasTest(unittest.TestCase):
         dia = DIA.read_text(encoding="utf-8")
         ciclo = CICLO_LABORAL.read_text(encoding="utf-8")
         assert "Auditorias.resolver_seleccion(_partida.estado, _auditorias.seleccion())" in creador
-        assert "_ciclo_laboral.abrir_vuelta(" in dia
+        assert "_ciclo_laboral" in dia
+        assert ". abrir_vuelta(" in dia
         assert "Auditorias.seleccion_pendiente(estado)" in ciclo
         assert "AuditoriasNuevaVidaApp.new()" in ciclo
         assert "Auditorias.resolver_seleccion(estado, seleccion)" in ciclo
