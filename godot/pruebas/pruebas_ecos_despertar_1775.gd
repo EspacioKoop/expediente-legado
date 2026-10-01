@@ -11,6 +11,7 @@ func _init() -> void:
 func _ejecutar() -> void:
 	_probar_candidatos()
 	_probar_material_desde_noche()
+	_probar_captura_runtime()
 	_probar_seleccion()
 	_probar_persistencia_y_consumo()
 	_probar_descarte()
@@ -83,6 +84,71 @@ func _probar_material_desde_noche() -> void:
 		EcosDespertar.material_desde_noche({"id": MutadoresSueno.APAGONES}, []).is_empty(),
 		"un mutador sin familia de eco no se fuerza a encajar",
 	)
+
+
+func _probar_captura_runtime() -> void:
+	var jornada := {"fase": "sueño"}
+	var mundo := Node3D.new()
+	get_root().add_child(mundo)
+
+	var presentador := SuenoMutadorPresentacion3D.new()
+	presentador.name = SuenoMutadorPresentacion3D.NOMBRE
+	presentador.set_meta("presentacion", {"id": MutadoresSueno.HUMEDAD})
+	mundo.add_child(presentador)
+
+	var monitor := Node3D.new()
+	monitor.set_meta("objeto_origen", "monitor")
+	mundo.add_child(monitor)
+	var silla := Node3D.new()
+	silla.set_meta("objeto_origen", "silla")
+	mundo.add_child(silla)
+	var documento := Node3D.new()
+	documento.set_meta("documento_origen", "folio-irrelevante")
+	mundo.add_child(documento)
+
+	var capturado := EcosDespertarRuntime.registrar_sala(
+		jornada, mundo, [monitor, silla, documento]
+	)
+	_comprobar(capturado.size() == 3, "captura solo material realmente montado")
+	_comprobar(
+		capturado.has({"tipo": EcosDespertar.HUMEDAD, "origen_id": "mutador:humedad"}),
+		"el mutador cuenta solo desde su presentador runtime",
+	)
+	_comprobar(
+		capturado.has({"tipo": EcosDespertar.CRT, "origen_id": "utileria:monitor"}),
+		"objeto_origen montado habilita CRT",
+	)
+	_comprobar(
+		capturado.has(
+			{"tipo": EcosDespertar.OBJETO_DESPLAZADO, "origen_id": "utileria:silla"}
+		),
+		"objeto_origen montado habilita desplazamiento",
+	)
+
+	var repetido := EcosDespertarRuntime.registrar_sala(jornada, mundo, [monitor, silla])
+	_comprobar(repetido.size() == 3, "remontar la misma sala no duplica material")
+	_comprobar(
+		jornada[EcosDespertarRuntime.CLAVE_MATERIAL] == repetido,
+		"el material queda en Jornada para el despertar posterior",
+	)
+
+	presentador.queue_free()
+	await process_frame
+	var sin_presentador := {"fase": "sueño"}
+	var solo_objeto := EcosDespertarRuntime.registrar_sala(sin_presentador, mundo, [monitor])
+	_comprobar(solo_objeto.size() == 1, "sin presentador no se inventa mutador")
+	_comprobar(
+		String(solo_objeto[0]["tipo"]) == EcosDespertar.CRT,
+		"la utileria montada sigue siendo evidencia independiente",
+	)
+
+	var fuera := {"fase": "archivo"}
+	_comprobar(
+		EcosDespertarRuntime.registrar_sala(fuera, mundo, [monitor]).is_empty(),
+		"fuera del sueño no se registra material",
+	)
+	_comprobar(not fuera.has(EcosDespertarRuntime.CLAVE_MATERIAL), "fuera no muta Jornada")
+	mundo.queue_free()
 
 
 func _probar_seleccion() -> void:
