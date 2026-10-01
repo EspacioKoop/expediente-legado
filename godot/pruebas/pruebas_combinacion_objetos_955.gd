@@ -94,6 +94,41 @@ func _initialize() -> void:
 	var mismo := CombinacionObjetos.previsualizar(incompleto, RECETAS, "documento", "documento")
 	_comprobar(mismo["motivo"] == "mismo_objeto", "dos slots no duplican una sola instancia")
 
+	var real := Inventario.nuevo()
+	_comprobar(
+		Inventario.recoger(real, PropsUtilizablesCC0.objeto_inventario("palanca_kkryy")),
+		"la palanca real entra en inventario",
+	)
+	_comprobar(
+		Inventario.recoger(real, RecompensaOnirica.objeto()),
+		"la cuña onírica real entra en inventario",
+	)
+	var combinada := CombinacionObjetos.combinar(
+		real,
+		CombinacionesObjetosCatalogo.recetas(),
+		RecompensaOnirica.ID,
+		"palanca_kkryy",
+	)
+	_comprobar(
+		combinada["estado"] == CombinacionObjetos.ESTADO_EXITO,
+		"la receta authored combina palanca y cuña",
+	)
+	_comprobar(
+		not Inventario.contiene(real, RecompensaOnirica.ID),
+		"la transformación consume la cuña onírica",
+	)
+	var estabilizar := UsosHerramienta.resolver(real, UsosHerramienta.ESTABILIZAR)
+	_comprobar(bool(estabilizar.get("ok", false)), "la palanca calzada resuelve estabilizar")
+	var herramienta: Dictionary = estabilizar.get("herramienta", {})
+	_comprobar(
+		String(herramienta.get("id", "")) == "palanca_kkryy",
+		"estabilizar se resuelve por el mismo id de palanca",
+	)
+	_comprobar(
+		String(herramienta.get("combinada_con", "")) == RecompensaOnirica.ID,
+		"el resultado conserva la huella material de la combinación",
+	)
+
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 
