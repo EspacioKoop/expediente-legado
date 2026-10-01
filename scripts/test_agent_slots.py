@@ -40,7 +40,7 @@ class SlotsTest(unittest.TestCase):
 
     def test_resolver_worker_y_modelo_por_defecto(self):
         self.assertEqual(
-            {"worker": "qwen-fallback-7", "slot": 7, "url": NVIDIA, "model": "qwen3-coder-plus", "tier": 1,
+            {"worker": "qwen-fallback-7", "slot": 7, "url": NVIDIA, "model": "qwen3-coder-plus", "backend": "nvidia", "tier": 1,
              "max_task_bytes": 24000, "secret": "QWEN_FALLBACK_7_API_KEY"},
             slots.resolver(VARS, "qwen-fallback-7", {7}, "qwen3-coder-plus"),
         )
@@ -81,14 +81,47 @@ class SlotsTest(unittest.TestCase):
                     ),
                 )
 
+    def test_backend_se_infiere_solo_para_hosts_conocidos(self):
+        casos = {
+            "https://api.groq.com/openai/v1": "groq",
+            "https://api.mistral.ai/v1": "mistral",
+            NVIDIA: "nvidia",
+            "https://openrouter.ai/api/v1": "openrouter",
+            "https://generativelanguage.googleapis.com/v1beta/openai/": "gemini",
+            "https://api.deepseek.com/v1": "deepseek",
+            "https://api.cohere.ai/compatibility/v1": "cohere",
+            "https://api.together.xyz/v1": "together",
+            "https://omniroute.tailnet.example/v1": "custom",
+            "not-a-url": "custom",
+        }
+        for url, esperado in casos.items():
+            with self.subTest(url=url):
+                self.assertEqual(esperado, slots.backend_de_url(url))
+
+    def test_inventario_distingue_backend_de_executor(self):
+        inventario = slots.inventario(VARS, {1, 2}, {"gemini"}, omniroute=True)
+        por_worker = {w["worker"]: w for w in inventario}
+        self.assertEqual(("qwen", "omniroute"), (
+            por_worker["qwen-primary"]["provider"], por_worker["qwen-primary"]["backend"]
+        ))
+        self.assertEqual(("gemini", "gemini"), (
+            por_worker["gemini"]["provider"], por_worker["gemini"]["backend"]
+        ))
+        self.assertEqual(("qwen", "openrouter"), (
+            por_worker["qwen-fallback-1"]["provider"], por_worker["qwen-fallback-1"]["backend"]
+        ))
+        self.assertEqual(("qwen", "nvidia"), (
+            por_worker["qwen-fallback-2"]["provider"], por_worker["qwen-fallback-2"]["backend"]
+        ))
+
     def test_cli_listar_y_resolver(self):
         entorno = {**os.environ, "VARS_JSON": json.dumps(VARS), "FALLBACK_KEYS": "2 7"}
         script = str(ROOT / "scripts" / "agent_slots.py")
         listar = subprocess.run([sys.executable, script, "listar"], env=entorno, capture_output=True, text=True, check=True)
         self.assertEqual(
             [
-                {"worker": "qwen-fallback-2", "provider": "qwen", "tier": 1},
-                {"worker": "qwen-fallback-7", "provider": "qwen", "tier": 1},
+                {"worker": "qwen-fallback-2", "provider": "qwen", "backend": "nvidia", "tier": 1},
+                {"worker": "qwen-fallback-7", "provider": "qwen", "backend": "nvidia", "tier": 1},
             ],
             json.loads(listar.stdout),
         )
