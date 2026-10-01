@@ -5,6 +5,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 PERIFERIA = ROOT / "godot/guion/estres_periferia.gd"
 HUD = ROOT / "godot/guion/hud_layer.gd"
 
+
 class EstresPeriferia1941Test(unittest.TestCase):
     def test_consumidor_es_estatico_y_no_intercepta_input(self):
         fuente = PERIFERIA.read_text(encoding="utf-8")
@@ -19,6 +20,7 @@ class EstresPeriferia1941Test(unittest.TestCase):
         fuente = HUD.read_text(encoding="utf-8")
         self.assertNotIn("Estres.", fuente)
         self.assertNotIn("EstresPeriferia", fuente)
+
 
 if __name__ == "__main__":
     unittest.main()
