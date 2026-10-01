@@ -283,7 +283,7 @@ jobs:
               telemetry_samples: (($handoff[0][.worker].samples) // 0)
             })' /tmp/workers.json > "$tmp"
           mv "$tmp" /tmp/workers.json
-          jq -r '.[] | "worker-score \(.worker)=\(.score) samples=\(.score_samples) handoff=\(.handoff_loss_proxy_pct // "n/a") rework=\(.rework_rate_pct // "n/a") ci_ok=\(.ci_success_rate_pct // "n/a") ci_fail=\(.ci_failure_rate_pct // "n/a") window=\(.telemetry_window_days)d telemetry=\(.telemetry_samples)"' /tmp/workers.json
+          jq -r '.[] | "worker-score \(.worker)=\(.score) provider=\(.provider) backend=\(.backend // .provider) samples=\(.score_samples) handoff=\(.handoff_loss_proxy_pct // "n/a") rework=\(.rework_rate_pct // "n/a") ci_ok=\(.ci_success_rate_pct // "n/a") ci_fail=\(.ci_failure_rate_pct // "n/a") window=\(.telemetry_window_days)d telemetry=\(.telemetry_samples)"' /tmp/workers.json
 
           has_qwen="$(jq -r 'any(.[]; .provider == "qwen" and (if has("healthy") then .healthy else true end))' /tmp/workers.json)"
           has_gemini="$(jq -r 'any(.[]; .provider == "gemini" and (if has("healthy") then .healthy else true end))' /tmp/workers.json)"
@@ -439,6 +439,7 @@ jobs:
 
           matrix="$(cat /tmp/matrix.json)"
           count="$(jq '.include|length' /tmp/matrix.json)"
+          jq -r '.include[] | "route issue=#\(.issue) provider=\(.provider) backend=\(.backend // .provider) worker=\(.worker)"' /tmp/matrix.json
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
           echo "count=$count" >> "$GITHUB_OUTPUT"
           echo "requested_max=$REQUESTED_MAX" >> "$GITHUB_OUTPUT"

@@ -221,7 +221,7 @@ class AgentPoolTest(unittest.TestCase):
         tasks = mod.select_tasks([candidate], workers)
 
         self.assertEqual(
-            [{"issue": 57, "provider": "qwen", "worker": "qwen-fallback-1"}],
+            [{"issue": 57, "provider": "qwen", "backend": "qwen", "worker": "qwen-fallback-1"}],
             tasks,
         )
 
@@ -342,6 +342,31 @@ class AgentPoolTest(unittest.TestCase):
                 )
                 self.assertEqual(0, worker["max_task_bytes"])
 
+    def test_backend_se_propaga_sin_cambiar_provider(self):
+        workers = [
+            {
+                "worker": "qwen-fallback-groq",
+                "provider": "qwen",
+                "backend": "groq",
+                "score": 50,
+            }
+        ]
+        tasks = mod.select_tasks([issue(593, "agent:qwen")], workers)
+        self.assertEqual(
+            [{"issue": 593, "provider": "qwen", "backend": "groq", "worker": "qwen-fallback-groq"}],
+            tasks,
+        )
+
+    def test_backend_invalido_se_reduce_a_custom(self):
+        worker = mod._worker(
+            {"worker": "slot", "provider": "qwen", "backend": "https://privado.local/token"}
+        )
+        self.assertEqual("custom", worker["backend"])
+
+    def test_worker_sin_backend_conserva_compatibilidad(self):
+        worker = mod._worker({"worker": "qwen-primary", "provider": "qwen"})
+        self.assertEqual("qwen", worker["backend"])
+
     def test_slot_no_saludable_sale_de_rotacion_para_tarea_flexible(self):
         workers = [
             {"worker": "gemini", "provider": "gemini", "healthy": False},
@@ -352,7 +377,7 @@ class AgentPoolTest(unittest.TestCase):
         tasks = mod.select_tasks([candidate], workers)
 
         self.assertEqual(
-            [{"issue": 58, "provider": "qwen", "worker": "qwen-primary"}],
+            [{"issue": 58, "provider": "qwen", "backend": "qwen", "worker": "qwen-primary"}],
             tasks,
         )
 
@@ -451,6 +476,8 @@ class AgentPoolTest(unittest.TestCase):
         self.assertIn("plannedFiles", pool)
         self.assertIn("plannedBytes", pool)
         self.assertIn('wc -c < "$path"', pool)
+        self.assertIn('backend=\\(.backend // .provider)', pool)
+        self.assertIn('"route issue=#\\(.issue)', pool)
         self.assertIn("scripts/agent_delegated_plan.py", pool)
         self.assertNotIn('maxSessionTurns":16', worker)
         self.assertIn('maxSessionTurns":40', worker)

@@ -36,6 +36,7 @@ import os
 import re
 import sys
 from typing import Any
+from urllib.parse import urlsplit
 
 # Debe coincidir con la tabla de claves de agent-pool.yml (lo fija un test).
 MAX_FALLBACKS = 12
@@ -49,6 +50,26 @@ MAX_TASK_BYTES_BASE = {
     "qwen-primary": "QWEN_PRIMARY_MAX_TASK_BYTES",
     "gemini": "GEMINI_MAX_TASK_BYTES",
 }
+# Identidad operativa para observabilidad. Solo se etiquetan hosts conocidos:
+# un endpoint privado/desconocido nunca se vuelca en logs y queda como "custom".
+BACKEND_HOSTS = {
+    "api.groq.com": "groq",
+    "api.mistral.ai": "mistral",
+    "integrate.api.nvidia.com": "nvidia",
+    "openrouter.ai": "openrouter",
+    "generativelanguage.googleapis.com": "gemini",
+    "api.deepseek.com": "deepseek",
+    "api.cohere.ai": "cohere",
+    "api.cohere.com": "cohere",
+    "api.together.xyz": "together",
+}
+
+
+def backend_de_url(url: str) -> str:
+    """Backend conocido de un endpoint; nunca devuelve el hostname desconocido."""
+
+    host = (urlsplit(url).hostname or "").lower()
+    return BACKEND_HOSTS.get(host, "custom")
 
 
 def claves_presentes(texto: str) -> set[int]:
@@ -141,6 +162,7 @@ def fallbacks(
                 "slot": n,
                 "url": url,
                 "model": str(variables.get(f"QWEN_FALLBACK_{n}_MODEL") or "").strip(),
+                "backend": backend_de_url(url),
                 "tier": tier_de(variables, n),
                 "max_task_bytes": max_task_bytes_de_worker(
                     variables, f"qwen-fallback-{n}"
@@ -159,13 +181,18 @@ def inventario(
 
     workers = []
     if "qwen" in base or omniroute:
-        workers.append({"worker": "qwen-primary", "provider": "qwen"})
+        workers.append({
+            "worker": "qwen-primary",
+            "provider": "qwen",
+            "backend": "omniroute" if omniroute else "qwen",
+        })
     if "gemini" in base:
-        workers.append({"worker": "gemini", "provider": "gemini"})
+        workers.append({"worker": "gemini", "provider": "gemini", "backend": "gemini"})
     workers += [
         {
             "worker": s["worker"],
             "provider": "qwen",
+            "backend": s["backend"],
             "max_task_bytes": s["max_task_bytes"],
         }
         for s in fallbacks(variables, con_clave, base)
@@ -233,7 +260,12 @@ def main() -> int:
         return 0
     elif args.orden == "listar":
         resultado = [
-            {"worker": s["worker"], "provider": "qwen", "tier": s["tier"]}
+            {
+                "worker": s["worker"],
+                "provider": "qwen",
+                "backend": s["backend"],
+                "tier": s["tier"],
+            }
             for s in fallbacks(variables, con_clave, base)
         ]
     elif args.orden == "secreto":
