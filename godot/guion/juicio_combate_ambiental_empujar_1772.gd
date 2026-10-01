@@ -20,6 +20,10 @@ static func montar(anfitrion: Node3D) -> Dictionary:
 
 	var prop := AnimatableBody3D.new()
 	prop.name = "SillaEmpujable1772"
+	# El empuje es un salto authored inmediato, no una plataforma animada. Con
+	# sync_to_physics=true Godot difiere la transformación al frame físico y el
+	# estado leído justo después del verbo puede seguir en la posición anterior.
+	prop.sync_to_physics = false
 	prop.position = Vector3(0.0, 0.45, -2.2)
 	prop.collision_layer = 1
 	prop.collision_mask = 0
