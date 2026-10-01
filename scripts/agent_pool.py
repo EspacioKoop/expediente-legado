@@ -64,7 +64,20 @@ def _worker(item: dict[str, Any]) -> dict[str, Any] | None:
         tier = 1
     if isinstance(raw_tier, bool) or tier < 1:
         tier = 1
-    return {"worker": worker_id.strip(), "provider": provider, "score": score, "tier": tier}
+    raw_max_task_bytes = item.get("max_task_bytes", 0)
+    try:
+        max_task_bytes = int(raw_max_task_bytes)
+    except (TypeError, ValueError):
+        max_task_bytes = 0
+    if isinstance(raw_max_task_bytes, bool) or max_task_bytes < 0:
+        max_task_bytes = 0
+    return {
+        "worker": worker_id.strip(),
+        "provider": provider,
+        "score": score,
+        "tier": tier,
+        "max_task_bytes": max_task_bytes,
+    }
 
 
 def _preferred_provider(issue: dict[str, Any]) -> str | None:
@@ -86,6 +99,31 @@ def _planned_files(issue: dict[str, Any]) -> set[str]:
         if path and not path.startswith("/") and ".." not in path.split("/"):
             files.add(path)
     return files
+
+
+def _estimated_task_bytes(issue: dict[str, Any]) -> int:
+    """Huella aproximada que el executor tendrá que meter en contexto.
+
+    El dispatcher añade el tamaño de los ficheros del plan. El cuerpo del issue
+    también viaja en el TaskPacket, así que se suma aquí. Datos ausentes o
+    inválidos son 0 para conservar el comportamiento fail-open histórico.
+    """
+
+    raw = issue.get("plannedBytes") or issue.get("planned_bytes") or 0
+    try:
+        planned = int(raw)
+    except (TypeError, ValueError):
+        planned = 0
+    if isinstance(raw, bool) or planned < 0:
+        planned = 0
+    body = issue.get("body")
+    body_bytes = len(body.encode("utf-8")) if isinstance(body, str) else 0
+    return planned + body_bytes
+
+
+def _worker_fits_issue(worker: dict[str, Any], issue: dict[str, Any]) -> bool:
+    limit = int(worker.get("max_task_bytes", 0) or 0)
+    return limit <= 0 or _estimated_task_bytes(issue) <= limit
 
 
 def _paths_overlap(issue: dict[str, Any], selected_paths: set[str]) -> bool:
@@ -174,7 +212,7 @@ def _usable_indices(
     return [
         index
         for index, worker in enumerate(workers)
-        if worker["worker"] not in avoided
+        if worker["worker"] not in avoided and _worker_fits_issue(worker, issue)
     ]
 
 
@@ -191,15 +229,21 @@ def _best_index(
     ]
     if not candidates:
         return None
-    # Primero el tier más bajo; dentro del tier, el mejor score histórico.
-    return max(
-        candidates,
-        key=lambda index: (
-            -int(workers[index].get("tier", 1)),
-            float(workers[index].get("score", 50.0)),
-            -index,
-        ),
-    )
+    # Primero el tier más bajo y el mejor score histórico. En empate se usa el
+    # worker con presupuesto explícito más ajustado: aprovecha backends rápidos
+    # con cuota/contexto limitado sin gastar capacidad amplia en tareas pequeñas.
+    def key(index: int) -> tuple[float, ...]:
+        worker = workers[index]
+        cap = int(worker.get("max_task_bytes", 0) or 0)
+        return (
+            -int(worker.get("tier", 1)),
+            float(worker.get("score", 50.0)),
+            1.0 if cap > 0 else 0.0,
+            float(-cap if cap > 0 else 0),
+            float(-index),
+        )
+
+    return max(candidates, key=key)
 
 
 def select_tasks(
