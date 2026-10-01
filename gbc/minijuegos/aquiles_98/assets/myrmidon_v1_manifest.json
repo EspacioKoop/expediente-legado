@@ -276,6 +276,18 @@
       8,
       8
     ],
+    "map_banks": {
+      "base": [
+        "idle",
+        "advance",
+        "attack",
+        "block",
+        "defeat"
+      ],
+      "revealed_only": [
+        "vulnerable"
+      ]
+    },
     "states": [
       "idle",
       "advance",
