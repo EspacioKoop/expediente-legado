@@ -119,9 +119,7 @@ func _probar_captura_runtime() -> void:
 		"objeto_origen montado habilita CRT",
 	)
 	_comprobar(
-		capturado.has(
-			{"tipo": EcosDespertar.OBJETO_DESPLAZADO, "origen_id": "utileria:silla"}
-		),
+		capturado.has({"tipo": EcosDespertar.OBJETO_DESPLAZADO, "origen_id": "utileria:silla"}),
 		"objeto_origen montado habilita desplazamiento",
 	)
 
