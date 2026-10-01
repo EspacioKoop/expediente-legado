@@ -7,6 +7,7 @@ class_name EcosDespertarRuntime
 extends RefCounted
 
 const CLAVE_MATERIAL := "eco_despertar_material_vivido"
+const CLAVE_PENDIENTE := "eco_despertar_pendiente"
 
 
 static func registrar_sala(
@@ -41,3 +42,38 @@ static func registrar_sala(
 		return []
 	jornada[CLAVE_MATERIAL] = canonicos.duplicate(true)
 	return canonicos
+
+## Convierte el material de la noche que termina en un único pendiente para la
+## mañana siguiente. Debe llamarse antes de Jornada.despertar*: después se
+## pierde la fase nocturna y el día ya ha avanzado.
+##
+## Es idempotente dentro de la misma noche. Si una ruta intenta preparar dos
+## veces (por reintento/callback duplicado), conserva el pendiente ya elegido y
+## consume igualmente el acumulador para que no contamine noches posteriores.
+static func preparar_despertar(jornada: Dictionary) -> Dictionary:
+	if String(jornada.get("fase", "")) != "sueño":
+		return {}
+
+	var noche := int(jornada.get("dia", 0))
+	var previo_bruto: Variant = jornada.get(CLAVE_PENDIENTE, {})
+	if previo_bruto is Dictionary:
+		var previo := previo_bruto as Dictionary
+		if EcosDespertar.vigente(previo, noche + 1):
+			jornada.erase(CLAVE_MATERIAL)
+			return previo.duplicate(true)
+
+	var material_bruto: Variant = jornada.get(CLAVE_MATERIAL, [])
+	var material: Array = material_bruto as Array if material_bruto is Array else []
+	var pendiente := EcosDespertar.preparar(
+		material,
+		int(jornada.get("raiz", 0)),
+		noche,
+	)
+	jornada.erase(CLAVE_MATERIAL)
+	if pendiente.is_empty():
+		jornada.erase(CLAVE_PENDIENTE)
+		return {}
+
+	jornada[CLAVE_PENDIENTE] = pendiente.duplicate(true)
+	return pendiente.duplicate(true)
+
