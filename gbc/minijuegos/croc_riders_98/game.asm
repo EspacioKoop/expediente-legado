@@ -1192,6 +1192,7 @@ PonerCroc16:
 ; Determina la silueta de un rival sin PRNG: el rival 1 sigue el orden de
 ; mangas (clasificatoria/nilo/final) y el rival 2 avanza una variante.
 ; Sale en C el tile izquierdo par de la variante elegida.
+; No altera OAM: cada rival conserva exactamente sus dos sprites 8x16.
 ElegirSiluetaRival:
     ; A=indice de rival (0 o 1).
     ld c, a
