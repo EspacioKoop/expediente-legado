@@ -122,6 +122,7 @@ func _montar() -> void:
 	_arbol.item_selected.connect(_mostrar_detalle_seleccionado)
 	_arbol.item_activated.connect(_asignar_seleccion_al_primer_slot)
 	_arbol.set_drag_forwarding(_datos_arrastre_inventario, Callable(), Callable())
+	_arbol.accessibility_name = titulo.text
 	cuerpo.add_child(_arbol)
 
 	_detalle = RichTextLabel.new()
@@ -179,6 +180,7 @@ func _montar() -> void:
 	_feedback_combinacion = Label.new()
 	_feedback_combinacion.name = "CombinacionFeedback"
 	_feedback_combinacion.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_feedback_combinacion.accessibility_live = AccessibilityServer.LIVE_POLITE
 	combinacion.add_child(_feedback_combinacion)
 
 	_volver_boton = Button.new()
@@ -344,8 +346,12 @@ func _inventario_mutable() -> Dictionary:
 func _refrescar_combinacion() -> void:
 	if not is_instance_valid(_slot_a_boton):
 		return
-	_slot_a_boton.text = _texto_slot(String(_textos.get("combinacion_slot_a", "Ranura A")), _slot_a)
-	_slot_b_boton.text = _texto_slot(String(_textos.get("combinacion_slot_b", "Ranura B")), _slot_b)
+	var texto_a := _texto_slot(String(_textos.get("combinacion_slot_a", "Ranura A")), _slot_a)
+	var texto_b := _texto_slot(String(_textos.get("combinacion_slot_b", "Ranura B")), _slot_b)
+	_slot_a_boton.text = texto_a
+	_slot_b_boton.text = texto_b
+	_slot_a_boton.accessibility_description = texto_a
+	_slot_b_boton.accessibility_description = texto_b
 	_combinar_boton.disabled = _slot_a.is_empty() or _slot_b.is_empty()
 
 
@@ -406,12 +412,18 @@ func _mostrar_detalle_seleccionado() -> void:
 	var seleccionado := _arbol.get_selected()
 	if seleccionado == null:
 		_detalle.text = ""
+		_detalle.accessibility_name = ""
+		_detalle.accessibility_description = ""
 		return
 	var objeto = seleccionado.get_metadata(0)
 	if not objeto is Dictionary:
 		_detalle.text = ""
+		_detalle.accessibility_name = ""
+		_detalle.accessibility_description = ""
 		return
 	_detalle.text = _texto_detalle(objeto)
+	_detalle.accessibility_name = _nombre_objeto(objeto)
+	_detalle.accessibility_description = _texto_detalle(objeto)
 
 
 func _texto_detalle(objeto: Dictionary) -> String:
