@@ -78,11 +78,14 @@ static func empujar(
 
 	# La politica es la autoridad para autorizar el verbo fuera/dentro de combate.
 	if not combate_permitido:
-		return InteraccionCombateAmbiental.aplicar(
-			declarado_bruto as Dictionary,
-			estado,
-			InteraccionCombateAmbiental.EMPUJAR,
-			false,
+		return (
+			InteraccionCombateAmbiental
+			. aplicar(
+				declarado_bruto as Dictionary,
+				estado,
+				InteraccionCombateAmbiental.EMPUJAR,
+				false,
+			)
 		)
 	if int(runtime.get("usos_restantes", 0)) <= 0:
 		return _rechazo(estado, "sin_usos")
@@ -94,11 +97,14 @@ static func empujar(
 	if direccion.length() < 0.01:
 		return _rechazo(estado, "sin_direccion")
 
-	var resultado := InteraccionCombateAmbiental.aplicar(
-		declarado_bruto as Dictionary,
-		estado,
-		InteraccionCombateAmbiental.EMPUJAR,
-		true,
+	var resultado := (
+		InteraccionCombateAmbiental
+		. aplicar(
+			declarado_bruto as Dictionary,
+			estado,
+			InteraccionCombateAmbiental.EMPUJAR,
+			true,
+		)
 	)
 	if not bool(resultado.get("ok", false)):
 		return resultado
