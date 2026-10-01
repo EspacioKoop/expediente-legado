@@ -57,7 +57,8 @@ class EvidenciaRocketboxOficina1319Test(unittest.TestCase):
         self.assertIn("rocketbox/*", self.doc)
 
     def test_workflow_publica_manifest_y_capturas(self):
-        self.assertIn("actions/upload-artifact@", self.workflow)
+        self.assertIn("uses: ./.github/actions/upload-artifact", self.workflow)
+        self.assertNotIn("actions/upload-artifact@", self.workflow)
         self.assertIn("manifest.json", self.workflow)
         self.assertIn("SIGA-98-rocketbox-oficina-1319-", self.workflow)
         self.assertIn("capturar_rocketbox_oficina_1319.gd", self.workflow)
