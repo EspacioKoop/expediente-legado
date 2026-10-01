@@ -63,7 +63,8 @@ class PuenteJulesTest(unittest.TestCase):
         self.assertIn("github.event.pull_request.head.repo.full_name == github.repository", self.texto)
         self.assertIn("PR created automatically by Jules for task [", self.texto)
         self.assertIn('[[ ! "$HEAD_BRANCH" =~ -([0-9]{12,})$ ]]', self.texto)
-        self.assertIn('[[ "$BODY" =~ Fixes[[:space:]]+\\#([0-9]+) ]]', self.texto)
+        self.assertIn("fixes_re='Fixes[[:space:]]+#([0-9]+)'", self.texto)
+        self.assertIn('[[ "$BODY" =~ $fixes_re ]]', self.texto)
         self.assertIn("grep -Fxq jules", self.texto)
 
     def test_pr_real_espeja_draft_y_libera_claim_sintetico(self):
