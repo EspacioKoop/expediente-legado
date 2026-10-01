@@ -94,12 +94,15 @@ func _ready() -> void:
 
 ## Recupera o presenta la única decisión pendiente de vida cero.
 func _abrir_ultimo_recurso_pendiente() -> void:
-	_ciclo_laboral.abrir_ultimo_recurso_pendiente(
-		self,
-		partida.estado,
-		_caminante,
-		Callable(self, "_al_canjear_ultimo_recurso"),
-		Callable(self, "_al_aceptar_cese"),
+	(
+		_ciclo_laboral
+		. abrir_ultimo_recurso_pendiente(
+			self,
+			partida.estado,
+			_caminante,
+			Callable(self, "_al_canjear_ultimo_recurso"),
+			Callable(self, "_al_aceptar_cese"),
+		)
 	)
 
 
@@ -122,15 +125,18 @@ func _cerrar_ultimo_recurso() -> void:
 ## Hook heredable: DiaApp decide cuándo empezar una vida laboral; el helper
 ## posee la presentación y el estado temporal.
 func _abrir_vuelta() -> void:
-	_ciclo_laboral.abrir_vuelta(
-		self,
-		partida.estado,
-		jornada,
-		_caminante,
-		_hud,
-		Callable(self, "_abrir_auditorias_nueva_vida"),
-		Callable(self, "_cerrar_vuelta"),
-		SELLO_REINCORPORACION,
+	(
+		_ciclo_laboral
+		. abrir_vuelta(
+			self,
+			partida.estado,
+			jornada,
+			_caminante,
+			_hud,
+			Callable(self, "_abrir_auditorias_nueva_vida"),
+			Callable(self, "_cerrar_vuelta"),
+			SELLO_REINCORPORACION,
+		)
 	)
 
 
@@ -142,7 +148,10 @@ func _abrir_auditorias_nueva_vida() -> void:
 
 func _confirmar_auditorias_nueva_vida(seleccion: Array) -> void:
 	_ciclo_laboral.confirmar_auditorias(
-		partida.estado, seleccion, Callable(self, "_guardar_o_avisar"), Callable(self, "_abrir_vuelta")
+		partida.estado,
+		seleccion,
+		Callable(self, "_guardar_o_avisar"),
+		Callable(self, "_abrir_vuelta")
 	)
 
 
