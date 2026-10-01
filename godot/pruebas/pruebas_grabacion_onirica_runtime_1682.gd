@@ -72,6 +72,7 @@ func _ejecutar() -> void:
 func _anomalia(nombre: String, documento: String, posicion: Vector3) -> AnomaliaSueno3D:
 	var anomalia := AnomaliaSueno3D.new()
 	anomalia.name = nombre
+	anomalia._catalogo_id = nombre.to_lower()
 	anomalia.position = posicion
 	anomalia.set_meta("documento_origen", documento)
 	return anomalia
@@ -94,6 +95,16 @@ func _probar_valida(controlador: Node, dia: DiaFalso, anomalia: AnomaliaSueno3D)
 		"runtime conserva el original real",
 		resultado.get("toma", {}).get("original_id"),
 		"doc-conocido",
+	)
+	_comprobar(
+		"runtime conserva la identidad del sujeto real",
+		resultado.get("toma", {}).get("sujeto", {}).get("anomalia_id"),
+		"conocida",
+	)
+	_comprobar(
+		"runtime conserva el estado reactivo observado al iniciar",
+		resultado.get("toma", {}).get("sujeto", {}).get("reactiva"),
+		false,
 	)
 	_comprobar(
 		"registrar no selecciona a escondidas",
