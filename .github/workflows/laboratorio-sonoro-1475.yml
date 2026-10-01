@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/laboratorio-sonoro-1475.yml'
+      - '.github/actions/upload-artifact/**'
       - 'scripts/laboratorio_sonoro_1475.py'
       - 'scripts/test_laboratorio_sonoro_1475.py'
       - 'referencia/audio/laboratorio_1475/**'
@@ -40,7 +41,7 @@ jobs:
           python3 scripts/laboratorio_sonoro_1475.py --cata-motivos-timbres --destino cata-repetida --exigir-ffmpeg
           diff -r cata-1475 cata-repetida
       - name: Adjuntar cata de dos motivos por dos timbres y reproductor
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: ./.github/actions/upload-artifact
         with:
           name: cata-motivos-timbres-1475-${{ github.sha }}
           path: cata-1475/

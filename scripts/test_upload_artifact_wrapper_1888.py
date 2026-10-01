@@ -36,6 +36,9 @@ FAMILIA_EVIDENCIA = [
         "evidencia-vfx-1473.yml",
         "evidencia-props-1474.yml",
         "evidencia-materiales-399.yml",
+        "benchmark-cc0.yml",
+        "laboratorio-sonoro-1475.yml",
+        "cata-ambientes-119.yml",
     )
 ]
 

@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - '.github/workflows/cata-ambientes-119.yml'
+      - '.github/actions/upload-artifact/**'
       - 'referencia/audio/ambientes_originales/**'
       - 'scripts/generar_ambientes_originales.py'
       - 'scripts/preparar_cata_ambientes.py'
@@ -61,7 +62,7 @@ jobs:
           done
 
       - name: Adjuntar cata para revisión humana
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: ./.github/actions/upload-artifact
         with:
           name: cata-ambientes-119-${{ github.sha }}
           path: cata-ambientes-119/
