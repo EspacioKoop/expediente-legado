@@ -235,6 +235,30 @@ jobs:
             exit 0
           fi
 
+          # Defensa contra drift del worker: reconstruir el plan delegado y
+          # compararlo con el diff publicado, sin ampliar la reserva a posteriori.
+          gh api "repos/$GITHUB_REPOSITORY/issues/$issue" > /tmp/issue.json
+          gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$issue/comments?per_page=100" --jq '.[]' |
+            jq -s '.' > /tmp/comments.json
+          jq -s '.[0] + {comments: .[1]}' /tmp/issue.json /tmp/comments.json > /tmp/entrada.json
+          python3 scripts/agent_delegated_plan.py --issue /tmp/entrada.json --output /tmp/delegado.json >/dev/null
+
+          status=0
+          python3 scripts/agent_plan_parse.py --source /tmp/delegado.json --max-files "$MAX_FILES" --output /tmp/plan.json || status=$?
+          if (( status != 0 )) || [[ "$(jq -r '.found' /tmp/delegado.json)" != true ]]; then
+            echo "PR no lista: no se pudo reconstruir un AGENT_PLAN delegado valido."
+            exit 0
+          fi
+
+          jq -r '.files[]' /tmp/plan.json | sort -u > /tmp/plan_files
+          gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files?per_page=100" --jq '.[].filename' |
+            sort -u > /tmp/pr_files
+          if ! diff -u /tmp/plan_files /tmp/pr_files; then
+            gh issue edit "$issue" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human >/dev/null 2>&1 || true
+            echo "PR no lista: archivos reales fuera o ausentes del AGENT_PLAN."
+            exit 0
+          fi
+
           gh api "repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$head_sha&event=pull_request&per_page=100"             > /tmp/runs.json
 
           # CI debe estar verde. Los otros checks core se exigen si existen para
