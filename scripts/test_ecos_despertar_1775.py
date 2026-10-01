@@ -19,6 +19,18 @@ class EcosDespertar1775Test(unittest.TestCase):
     def setUpClass(cls):
         cls.fuente = MODELO.read_text(encoding="utf-8")
 
+    def test_material_vivido_sale_de_presentacion_runtime(self):
+        self.assertIn("static func material_desde_noche(", self.fuente)
+        self.assertIn("MutadoresSueno.HUMEDAD", self.fuente)
+        self.assertIn("MutadoresSueno.DESFASE", self.fuente)
+        self.assertIn("\"monitor\"", self.fuente)
+        self.assertIn("\"televisor_casa\"", self.fuente)
+        self.assertIn("\"silla\"", self.fuente)
+        self.assertIn("\"archivador\"", self.fuente)
+        self.assertIn("\"armario_hogar\"", self.fuente)
+        self.assertNotIn("SuenoFormas", self.fuente)
+        self.assertNotIn("ObjetosOniricos", self.fuente)
+
     def test_catalogo_y_seleccion_son_acotados(self):
         for tipo in ("humedad", "crt", "objeto_desplazado", "sonido_residual"):
             self.assertIn(f'"{tipo}"', self.fuente)
