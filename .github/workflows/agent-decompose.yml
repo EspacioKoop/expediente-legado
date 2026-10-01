@@ -150,12 +150,32 @@ jobs:
           openai_base_url: ${{ steps.qwen_config.outputs.url }}
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
-          settings: '{"model":{"maxSessionTurns":8},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
+          settings: '{"model":{"maxSessionTurns":20},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
           prompt: 'Lee AGENTS.md, .agent-decompose-input.md y las Normas Platino en .agent-platino. Inspecciona el repo solo para decidir cortes ejecutables; no edites nada. Cada tarea de nivel 3 debe modificar exactamente 1 ruta. Si el pendiente restante es exclusivamente un gate/playtest humano, requiere hardware físico o no justifica código, devuelve needs_human=true, fits_single_cut=false, reason concreto y subtasks=[]. Si cabe en un único fichero, devuelve fits_single_cut=true, needs_human=false y exactamente una subtarea con title, goal, files=["ruta"] y depends_on=[]. Si no, crea entre 2 y 6 subtareas pequeñas; cada una con exactamente 1 ruta y depends_on con indices anteriores. Si dos subtareas tocan la misma ruta, la posterior DEBE depender de la anterior. Termina con AGENT_DECOMPOSE_BEGIN seguido de JSON {"fits_single_cut":false,"needs_human":false,"reason":"","subtasks":[{"title":"...","goal":"...","files":["ruta"],"depends_on":[]}]} y AGENT_DECOMPOSE_END.'
+
+      # Qwen puede terminar con éxito y aun así devolver un contrato inválido
+      # (reason fuera de límites, bloque ausente). El fallback a Gemini depende
+      # del contrato, no del exit code; sigue siendo un intento por provider.
+      - id: qwen_check
+        name: Validar contrato de Qwen
+        if: steps.select.outputs.run == 'true' && env.HAS_QWEN == 'true'
+        env:
+          QWEN_OUTCOME: ${{ steps.plan_qwen.outcome }}
+          QWEN_SUMMARY: ${{ steps.plan_qwen.outputs.summary }}
+        run: |
+          set -euo pipefail
+          printf '%s' "${QWEN_SUMMARY:-}" > /tmp/agent-decompose-qwen.txt
+          if [[ "$QWEN_OUTCOME" == success ]] &&
+            python3 scripts/agent_decompose.py --summary-file /tmp/agent-decompose-qwen.txt --output /tmp/agent-decompose-qwen.json >/dev/null; then
+            echo "valid=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Qwen no entregó un contrato válido (outcome=$QWEN_OUTCOME); se intenta Gemini."
+            echo "valid=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - id: plan_gemini
         name: Descomponer con Gemini
-        if: steps.select.outputs.run == 'true' && env.HAS_GEMINI == 'true' && (env.HAS_QWEN != 'true' || steps.plan_qwen.outcome != 'success')
+        if: steps.select.outputs.run == 'true' && env.HAS_GEMINI == 'true' && (env.HAS_QWEN != 'true' || steps.qwen_check.outputs.valid != 'true')
         timeout-minutes: 5
         continue-on-error: true
         uses: google-github-actions/run-gemini-cli@f77273f4c914e4bf38440cf36a0369cb64a37489 # v0.1.22
@@ -163,7 +183,7 @@ jobs:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
-          settings: '{"model":{"maxSessionTurns":8},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
+          settings: '{"model":{"maxSessionTurns":20},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
           prompt: 'Lee AGENTS.md, .agent-decompose-input.md y las Normas Platino en .agent-platino. Inspecciona el repo solo para decidir cortes ejecutables; no edites nada. Cada tarea de nivel 3 debe modificar exactamente 1 ruta. Si el pendiente restante es exclusivamente un gate/playtest humano, requiere hardware físico o no justifica código, devuelve needs_human=true, fits_single_cut=false, reason concreto y subtasks=[]. Si cabe en un único fichero, devuelve fits_single_cut=true, needs_human=false y exactamente una subtarea con title, goal, files=["ruta"] y depends_on=[]. Si no, crea entre 2 y 6 subtareas pequeñas; cada una con exactamente 1 ruta y depends_on con indices anteriores. Si dos subtareas tocan la misma ruta, la posterior DEBE depender de la anterior. Termina con AGENT_DECOMPOSE_BEGIN seguido de JSON {"fits_single_cut":false,"needs_human":false,"reason":"","subtasks":[{"title":"...","goal":"...","files":["ruta"],"depends_on":[]}]} y AGENT_DECOMPOSE_END.'
 
       - id: normalize
@@ -173,7 +193,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           ISSUE: ${{ steps.select.outputs.issue }}
           REQUESTED_PROVIDER: ${{ steps.select.outputs.requested_provider }}
-          SUMMARY: ${{ steps.plan_qwen.outcome == 'success' && steps.plan_qwen.outputs.summary || steps.plan_gemini.outputs.summary }}
+          SUMMARY: ${{ steps.qwen_check.outputs.valid == 'true' && steps.plan_qwen.outputs.summary || steps.plan_gemini.outputs.summary || steps.plan_qwen.outputs.summary }}
         run: |
           set -euo pipefail
           if [[ "$HAS_QWEN" != true && "$HAS_GEMINI" != true ]]; then

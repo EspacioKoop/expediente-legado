@@ -1,5 +1,9 @@
 import importlib.util
+import os
+import subprocess
 import sys
+import tempfile
+import textwrap
 import unittest
 from pathlib import Path
 
@@ -11,6 +15,45 @@ assert SPEC and SPEC.loader
 mod = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = mod
 SPEC.loader.exec_module(mod)
+
+
+def _run_del_step(workflow: str, step_id: str) -> str:
+    """Extrae el bloque `run: |` de un step sin depender de PyYAML."""
+    lineas = workflow.split(f"- id: {step_id}\n", 1)[1].splitlines()
+    inicio = next(i for i, linea in enumerate(lineas) if linea.strip() == "run: |") + 1
+    cuerpo = []
+    sangria = None
+    for linea in lineas[inicio:]:
+        if linea.strip():
+            actual = len(linea) - len(linea.lstrip())
+            sangria = actual if sangria is None else sangria
+            if actual < sangria:
+                break
+        cuerpo.append(linea)
+    return textwrap.dedent("\n".join(cuerpo))
+
+
+def _ejecutar_qwen_check(outcome: str, summary: str) -> str:
+    workflow = (ROOT / ".github" / "workflows" / "agent-decompose.yml").read_text(
+        encoding="utf-8"
+    )
+    script = _run_del_step(workflow, "qwen_check")
+    with tempfile.TemporaryDirectory() as tmp:
+        salida = Path(tmp) / "github_output"
+        salida.touch()
+        env = dict(
+            os.environ,
+            GITHUB_OUTPUT=str(salida),
+            QWEN_OUTCOME=outcome,
+            QWEN_SUMMARY=summary,
+        )
+        subprocess.run(
+            ["bash", "-c", script], cwd=ROOT, env=env, check=True, capture_output=True
+        )
+        valores = dict(
+            linea.split("=", 1) for linea in salida.read_text().splitlines() if linea
+        )
+    return valores["valid"]
 
 
 def wrap(payload):
@@ -52,6 +95,51 @@ class AgentDecomposeTest(unittest.TestCase):
         self.assertTrue(result["needs_human"])
         self.assertFalse(result["fits_single_cut"])
         self.assertEqual([], result["subtasks"])
+
+    def test_gate_humano_con_reason_largo_se_recorta_sin_perderlo(self):
+        # Caso real del run 36822348075 (#375): diagnóstico útil de ~440
+        # caracteres que antes tumbaba la validación entera.
+        reason = (
+            "Issue #375 (multiplayer offline-first contract) está completamente "
+            "completado. Todos los 7 criterios de aceptación están satisfechos por "
+            "código integrado y probado: evento versionado #615, identidad revocable "
+            "#1287, TTL revalidación #1734, y abstracción de transporte #1934. No hay "
+            "código pendiente, PRs abiertos ni huecos. Los issues posteriores "
+            "(#376-#383) son verticales independientes que construyen sobre esta base."
+        )
+        self.assertGreater(len(reason), mod.REASON_MAX)
+        result = mod.parse_decomposition(
+            wrap(
+                {
+                    "fits_single_cut": False,
+                    "needs_human": True,
+                    "reason": reason,
+                    "subtasks": [],
+                }
+            )
+        )
+        self.assertTrue(result["needs_human"])
+        self.assertLessEqual(len(result["reason"]), mod.REASON_MAX)
+        self.assertTrue(result["reason"].endswith("…"))
+        self.assertTrue(result["reason"].startswith("Issue #375"))
+        self.assertIn("#1934", result["reason"])
+
+    def test_gate_humano_sin_reason_concreto_se_rechaza(self):
+        with self.assertRaisesRegex(ValueError, "reason humano"):
+            mod.parse_decomposition(
+                wrap(
+                    {
+                        "fits_single_cut": False,
+                        "needs_human": True,
+                        "reason": "humano",
+                        "subtasks": [],
+                    }
+                )
+            )
+
+    def test_recorte_respeta_palabras_y_textos_cortos(self):
+        self.assertEqual("corto", mod._recortar("corto", 10))
+        self.assertEqual("uno dos…", mod._recortar("uno dos tres cuatro", 10))
 
     def test_gate_humano_no_se_mezcla_con_trabajo_automatico(self):
         with self.assertRaisesRegex(ValueError, "no puede combinarse"):
@@ -198,12 +286,13 @@ class AgentDecomposeTest(unittest.TestCase):
         workflow = (
             ROOT / ".github" / "workflows" / "agent-decompose.yml"
         ).read_text(encoding="utf-8")
-        self.assertIn('maxSessionTurns":8', workflow)
+        # Con 8 turnos Qwen agotaba la sesión antes de emitir el bloque en 8 de
+        # cada 10 runs (#2068); el tope duro sigue siendo el timeout por provider.
+        self.assertEqual(2, workflow.count('maxSessionTurns":20'))
+        self.assertNotIn('maxSessionTurns":8', workflow)
         self.assertIn("timeout-minutes: 5", workflow)
         self.assertIn("continue-on-error: true", workflow)
         self.assertIn("GEMINI_CLI_TRUST_WORKSPACE: 'true'", workflow)
-        self.assertIn("steps.plan_qwen.outcome != 'success'", workflow)
-        self.assertIn("steps.plan_qwen.outcome == 'success'", workflow)
         self.assertNotIn("Normas Platino no disponibles en esta ejecucion", workflow)
         self.assertIn("crea entre 2 y 6 subtareas pequeñas", workflow)
         self.assertIn("needs_human=true", workflow)
@@ -245,6 +334,45 @@ class AgentDecomposeTest(unittest.TestCase):
             self.assertIn(f'--remove-label "$label"', workflow)
         self.assertIn("requested_provider", workflow)
         self.assertIn("agent-provider:", workflow)
+
+    def test_fallback_gemini_depende_del_contrato_de_qwen(self):
+        workflow = (
+            ROOT / ".github" / "workflows" / "agent-decompose.yml"
+        ).read_text(encoding="utf-8")
+        orden = [
+            workflow.index("- id: plan_qwen"),
+            workflow.index("- id: qwen_check"),
+            workflow.index("- id: plan_gemini"),
+            workflow.index("- id: normalize"),
+        ]
+        self.assertEqual(sorted(orden), orden)
+        gemini = workflow.split("- id: plan_gemini", 1)[1].split("uses:", 1)[0]
+        self.assertIn("steps.qwen_check.outputs.valid != 'true'", gemini)
+        self.assertNotIn("steps.plan_qwen.outcome", gemini)
+        normalizar = workflow.split("- id: normalize", 1)[1].split("run:", 1)[0]
+        self.assertIn(
+            "steps.qwen_check.outputs.valid == 'true' && steps.plan_qwen.outputs.summary",
+            normalizar,
+        )
+
+    def test_qwen_check_ejecutado_clasifica_la_salida(self):
+        bloque_valido = wrap(
+            {
+                "fits_single_cut": False,
+                "needs_human": True,
+                "reason": "x " * 300,
+                "subtasks": [],
+            }
+        )
+        casos = [
+            ("success", bloque_valido, "true"),
+            ("success", "Reached max session turns", "false"),
+            ("success", "", "false"),
+            ("failure", bloque_valido, "false"),
+        ]
+        for outcome, summary, esperado in casos:
+            with self.subTest(outcome=outcome, summary=summary[:30]):
+                self.assertEqual(esperado, _ejecutar_qwen_check(outcome, summary))
 
     def test_ruta_protegida_se_rechaza(self):
         with self.assertRaisesRegex(ValueError, "insegura"):
