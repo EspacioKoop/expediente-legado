@@ -40,6 +40,15 @@ DEF ESTADO_META       EQU 2
 DEF ESTADO_WRECK      EQU 3
 DEF ESTADO_ENTREMANGA EQU 4
 
+; Progreso en SRAM (#808). MBC5 + 8 KiB de SRAM con batería (comun/cartucho.mk).
+DEF SRAM_MAGIC0           EQU $A000
+DEF SRAM_MAGIC1           EQU $A001
+DEF SRAM_MAGIC2           EQU $A002
+DEF SRAM_VERSION          EQU $A003
+DEF SRAM_RECORD           EQU $A004
+DEF SRAM_CHECKSUM         EQU $A005
+DEF SRAM_VERSION_ACTUAL   EQU 1
+
 ; Tiles de fondo/HUD.
 DEF TILE_ROAD       EQU 1
 DEF TILE_EDGE       EQU 2
@@ -114,6 +123,7 @@ Inicio:
     di
     ld sp, $DFFF
     call IniciarCartucho
+    call CargarRecord
     call ApagarLCDSeguro
     call BorrarOAMParcial
     call CargarTiles
@@ -793,6 +803,8 @@ PrepararFinal:
     call BorrarOAMParcial
     call LimpiarBG
 
+    call ActualizarRecord
+
     ld a, [wEstado]
     cp ESTADO_META
     jr z, .trofeo
@@ -813,6 +825,12 @@ PrepararFinal:
     ld [BG_MAP + (11 * 32) + 6], a
     ld a, [wDistance]
     ld de, BG_MAP + (11 * 32) + 8
+    call EscribirDosDigitos
+
+    ld a, TILE_R
+    ld [BG_MAP + (13 * 32) + 6], a
+    ld a, [wRecord]
+    ld de, BG_MAP + (13 * 32) + 8
     call EscribirDosDigitos
 
     ld a, TILE_ARROW
@@ -1294,9 +1312,12 @@ ApagarLCDSeguro:
 
 BorrarOAMParcial:
     ld hl, OAM_BASE
-    ld b, 40
+    ld b, 10
     xor a
 .loop:
+    ld [hli], a
+    ld [hli], a
+    ld [hli], a
     ld [hli], a
     dec b
     jr nz, .loop
@@ -1444,6 +1465,72 @@ SonidoMeta:
     ret
 
 SECTION "Datos", ROM0
+CargarRecord:
+    xor a
+    ld [wRecord], a
+    call HabilitarSRAM
+    ld a, [SRAM_MAGIC0]
+    cp $43 ; C
+    jr nz, .fin
+    ld a, [SRAM_MAGIC1]
+    cp $52 ; R
+    jr nz, .fin
+    ld a, [SRAM_MAGIC2]
+    cp $4F ; O
+    jr nz, .fin
+    ld a, [SRAM_VERSION]
+    cp SRAM_VERSION_ACTUAL
+    jr nz, .fin
+    ld a, [SRAM_RECORD]
+    cp 100
+    jr nc, .fin
+    ld b, a
+    xor $A5
+    ld c, a
+    ld a, [SRAM_CHECKSUM]
+    cp c
+    jr nz, .fin
+    ld a, b
+    ld [wRecord], a
+.fin:
+    jp ProtegerSRAM
+
+ActualizarRecord:
+    call CargarRecord
+    ld a, [wScore]
+    ld b, a
+    ld a, [wRecord]
+    cp b
+    ret nc
+    ld a, b
+    ld [wRecord], a
+    call HabilitarSRAM
+    ld a, $43
+    ld [SRAM_MAGIC0], a
+    ld a, $52
+    ld [SRAM_MAGIC1], a
+    ld a, $4F
+    ld [SRAM_MAGIC2], a
+    ld a, SRAM_VERSION_ACTUAL
+    ld [SRAM_VERSION], a
+    ld a, b
+    ld [SRAM_RECORD], a
+    xor $A5
+    ld [SRAM_CHECKSUM], a
+    jp ProtegerSRAM
+
+HabilitarSRAM:
+    ld a, $0A
+    ld [rRAMG], a
+    xor a
+    ld [rRAMB], a
+    ret
+
+ProtegerSRAM:
+    xor a
+    ld [rRAMG], a
+    ret
+
 DistanciasManga:
     db 60, 75, 90
 VidasManga:
@@ -1619,3 +1706,4 @@ wR2Dir:        ds 1
 wDraft:        ds 1
 wDraftDirty:   ds 1
 wManga:        ds 1
+wRecord:       ds 1
