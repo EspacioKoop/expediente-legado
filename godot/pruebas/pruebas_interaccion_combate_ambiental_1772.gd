@@ -1,6 +1,7 @@
 extends SceneTree
 
 const Ambiental := preload("res://guion/interaccion_combate_ambiental.gd")
+const RuntimeAmbiental := preload("res://guion/juicio_combate_ambiental_1772.gd")
 
 var _pasadas := 0
 var _fallos := 0
@@ -15,6 +16,7 @@ func _ejecutar() -> void:
 	_probar_empujar()
 	_probar_volcar()
 	_probar_activar()
+	_probar_runtime_activar()
 	_probar_invalidos_no_mutan()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos > 0 else 0)
@@ -193,6 +195,37 @@ func _probar_activar() -> void:
 	)
 	_comprobar(not bool(fallo["ok"]), "activar exige efecto explícito")
 	_comprobar(String(fallo["motivo"]) == "sin_efecto_declarado", "explica efecto ausente")
+
+
+func _probar_runtime_activar() -> void:
+	var anfitrion := Node3D.new()
+	get_root().add_child(anfitrion)
+	var runtime := RuntimeAmbiental.montar(anfitrion)
+	var prop := runtime.get("prop") as Node3D
+	var luz := runtime.get("luz") as OmniLight3D
+	_comprobar(prop != null, "el vertical runtime monta un prop explícito")
+	_comprobar(luz != null and not luz.visible, "la luz ambiental empieza apagada")
+
+	var fuera_combate := RuntimeAmbiental.activar(runtime, prop.global_position, false)
+	_comprobar(not bool(fuera_combate["ok"]), "fuera de combate el prop falla cerrado")
+	_comprobar(not bool(runtime["estado"]["activado"]), "el rechazo no consume el prop")
+
+	var lejos := RuntimeAmbiental.activar(
+		runtime, prop.global_position + Vector3(RuntimeAmbiental.RADIO_USO + 0.5, 0.0, 0.0), true
+	)
+	_comprobar(not bool(lejos["ok"]), "activar exige cercanía real al prop")
+	_comprobar(String(lejos["motivo"]) == "fuera_de_alcance", "la distancia explica el rechazo")
+
+	var activado := RuntimeAmbiental.activar(runtime, prop.global_position, true)
+	_comprobar(bool(activado["ok"]), "activar funciona en combate y dentro de alcance")
+	_comprobar(bool(runtime["estado"]["activado"]), "el runtime conserva estado local consumido")
+	_comprobar(luz.visible, "activar enciende el efecto visual authored")
+
+	var repetido := RuntimeAmbiental.activar(runtime, prop.global_position, true)
+	_comprobar(not bool(repetido["ok"]), "el prop runtime es idempotente")
+	_comprobar(String(repetido["motivo"]) == "ya_activado", "la repetición mantiene el contrato puro")
+	_comprobar(luz.visible, "repetir no revierte el efecto ya aplicado")
+	anfitrion.queue_free()
 
 
 func _probar_invalidos_no_mutan() -> void:
