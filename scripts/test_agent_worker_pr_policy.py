@@ -10,9 +10,25 @@ class AgentWorkerPrPolicyTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.workflow = WORKFLOW.read_text(encoding="utf-8")
+        cls.guard = cls.workflow.split(
+            "- id: guard\n", 1
+        )[1].split("\n      - name: Checkout", 1)[0]
         cls.publish = cls.workflow.split(
             "name: Publicar PR draft y lanzar CI canonica", 1
         )[1].split("\n      - name: Limpiar fallo o cancelacion", 1)[0]
+
+    def test_guard_reconoce_refs_closes_y_fixes_sin_prefijos_numericos(self):
+        self.assertIn('--arg issue "$ISSUE"', self.guard)
+        self.assertIn("(Refs|Closes|Fixes)", self.guard)
+        self.assertIn('$issue + "([[:space:]]|[.,;:]|$)"', self.guard)
+        self.assertNotIn('--arg n "Refs #$ISSUE"', self.guard)
+
+    def test_pr_existente_normaliza_issue_y_no_arranca_worker(self):
+        self.assertIn("--add-label agent:pr-open", self.guard)
+        for label in ("agent:auto", "agent:pool", "agent:qwen", "agent:gemini"):
+            self.assertIn(f"--remove-label {label}", self.guard)
+        self.assertIn('echo "run=false" >> "$GITHUB_OUTPUT"', self.guard)
+        self.assertIn("ya tiene una PR abierta", self.guard)
 
     def test_rama_se_publica_antes_de_intentar_crear_pr(self):
         self.assertLess(
