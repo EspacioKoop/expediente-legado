@@ -66,6 +66,8 @@ func _construir_interfaz() -> void:
 	_entrada = LineEdit.new()
 	_entrada.name = "Entrada"
 	_entrada.placeholder_text = tr("CALCULADORA_PLACEHOLDER")
+	_entrada.accessibility_name = tr("CALCULADORA_TITULO")
+	_entrada.accessibility_description = tr("CALCULADORA_AYUDA")
 	_entrada.text_submitted.connect(_al_enviar)
 	_entrada.add_theme_color_override("font_color", Color("#d7f4c8"))
 	_entrada.add_theme_color_override("font_placeholder_color", Color("#8ca786"))
@@ -77,6 +79,9 @@ func _construir_interfaz() -> void:
 	_resultado = Label.new()
 	_resultado.name = "Resultado"
 	_resultado.text = tr("CALCULADORA_RESULTADO_VACIO")
+	_resultado.accessibility_name = tr("CALCULADORA_RESULTADO_VACIO")
+	_resultado.accessibility_description = _resultado.text
+	_resultado.accessibility_live = AccessibilityServer.LIVE_POLITE
 	_resultado.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_resultado.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_resultado.add_theme_font_size_override("font_size", 18)
@@ -209,11 +214,13 @@ func _calcular() -> void:
 	var valor := resolver(_entrada.text)
 	var texto_resultado := "%s %s" % [tr("CALCULADORA_RESULTADO_VACIO"), valor]
 	_resultado.text = texto_resultado
+	_resultado.accessibility_description = texto_resultado
 
 
 func _borrar() -> void:
 	_entrada.clear()
 	_resultado.text = tr("CALCULADORA_RESULTADO_VACIO")
+	_resultado.accessibility_description = _resultado.text
 	_entrada.grab_focus()
 
 

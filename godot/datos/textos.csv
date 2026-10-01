@@ -157,6 +157,10 @@ DIA_ROTULO,Día %d  ·  %s  ·  %d en el bolsillo%s
 DIA_SIN_GATO,  ·  sin gato
 DIA_SIN_GATO_AVISO,  El gato no está.
 DIA_VIVIR,Vivir cuesta %d. Le quedan %d.%s
+ENCUENTRO_REAL_1889_INTERVENIR,un paso al frente
+ENCUENTRO_REAL_1889_RIVAL,Agresor desconocido
+ENCUENTRO_REAL_1889_VICTORIA,El forcejeo termina y la otra persona puede apartarse.
+ENCUENTRO_REAL_1889_DERROTA,Te obligan a retroceder. El incidente termina sin convertirse en una pelea abierta por la calle.
 ENTRADA_AUDITOR,AUDITOR EN TURNO: {usuario}
 ENTRADA_COPIA_INDICES,"Copia parcial. No se restauran los índices; el volumen se monta sin ellos."
 ENTRADA_COPIA_INTEGRA,Copia íntegra. Sin incidencias que reseñar.

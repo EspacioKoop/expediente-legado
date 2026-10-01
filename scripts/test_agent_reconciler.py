@@ -157,7 +157,7 @@ class AgentReconcilerTest(unittest.TestCase):
                 "branch=feature/17-x files=a goal=x lease=48h"
             ),
         ]
-        self.assertEqual([102], mod.discover_run_ids(issues, comments))
+        self.assertEqual([102], mod.discover_run_ids(issues, comments, now=self.now))
 
     def test_pr_open_con_claim_fuera_de_ventana_no_reencola(self):
         # El workflow solo lee los últimos 300 comentarios de #182 (~39 h):
