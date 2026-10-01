@@ -100,6 +100,14 @@ class DialogoReligion933Test(unittest.TestCase):
             self.assertIn(clave, self.textos)
             self.assertTrue(self.textos[clave].strip())
 
+    def test_mismo_hecho_publico_suena_a_dos_personas(self) -> None:
+        # #1940: claves distintas no bastan si ambas apuntan a la misma frase.
+        paco = self.textos["RELIGION_933_PACO_EXPOSICION"].strip()
+        telefono = self.textos["RELIGION_933_TELEFONO_EXPOSICION"].strip()
+        self.assertNotEqual(paco, telefono)
+        prueba = (ROOT / "godot" / PRUEBA_GODOT.removeprefix("res://")).read_text(encoding="utf-8")
+        self.assertRegex(prueba, r"\n\s+_probar_mismo_hecho_dos_reacciones\(\s*\)")
+
     def test_runtime_standalone(self) -> None:
         motor = os.environ.get("GODOT_BIN") or shutil.which("godot4")
         if not motor:
