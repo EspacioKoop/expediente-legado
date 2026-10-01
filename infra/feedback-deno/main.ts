@@ -1,4 +1,5 @@
 import { handleAgentMemory } from "./agent_memory.ts";
+import { handleAgentCoord } from "./agent_coord.ts";
 import { handleAgentPool } from "./agent_pool_state.ts";
 
 const DEFAULT_REPOSITORY = "EspacioKoop/expediente-legado";
@@ -203,6 +204,7 @@ async function handler(
       agent_pool_control: true,
       agent_pool_worker_health: true,
       agent_b2b: true,
+      agent_coord: true,
     });
   }
 
@@ -215,6 +217,17 @@ async function handler(
       return json({ ok: false, error: "service_unavailable" }, 503);
     }
     return await handleAgentMemory(request, url, kv, configuredRepository());
+  }
+
+  if (url.pathname.startsWith("/api/agent-coord/")) {
+    let kv: Deno.Kv;
+    try {
+      kv = await getKv();
+    } catch (error) {
+      console.error("Agent coord KV unavailable", error);
+      return json({ ok: false, error: "service_unavailable" }, 503);
+    }
+    return await handleAgentCoord(request, url, kv, configuredRepository());
   }
 
   if (url.pathname.startsWith("/api/agent-pool/")) {
