@@ -876,7 +876,9 @@ func _crear_ayuda_sistema() -> Control:
 
 func _preparar_boton(boton: Button, icono_escritorio: bool = false) -> void:
 	boton.focus_mode = Control.FOCUS_ALL
-	boton.accessibility_name = boton.tooltip_text if not boton.tooltip_text.is_empty() else boton.text
+	boton.accessibility_name = (
+		boton.tooltip_text if not boton.tooltip_text.is_empty() else boton.text
+	)
 	var normal := _estilo_panel(Color(EstiloSiga.PAPEL_BOTON, 0.96), EstiloSiga.GRIS_OSCURO)
 	if icono_escritorio:
 		normal = _estilo_panel(Color(FONDO_CORPORATIVO, 0.35), Color(FONDO_CORPORATIVO, 0.0))
