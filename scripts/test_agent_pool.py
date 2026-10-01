@@ -221,7 +221,7 @@ class AgentPoolTest(unittest.TestCase):
         tasks = mod.select_tasks([candidate], workers)
 
         self.assertEqual(
-            [{"issue": 57, "provider": "qwen", "worker": "qwen-fallback-1"}],
+            [{"issue": 57, "provider": "qwen", "backend": "qwen", "worker": "qwen-fallback-1"}],
             tasks,
         )
 
@@ -476,6 +476,8 @@ class AgentPoolTest(unittest.TestCase):
         self.assertIn("plannedFiles", pool)
         self.assertIn("plannedBytes", pool)
         self.assertIn('wc -c < "$path"', pool)
+        self.assertIn('backend=\\(.backend // .provider)', pool)
+        self.assertIn('"route issue=#\\(.issue)', pool)
         self.assertIn("scripts/agent_delegated_plan.py", pool)
         self.assertNotIn('maxSessionTurns":16', worker)
         self.assertIn('maxSessionTurns":40', worker)
