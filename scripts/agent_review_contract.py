@@ -15,7 +15,7 @@ PATTERN = re.compile(
 )
 
 
-def parse_review(raw: str) -> dict[str, Any]:
+def parse_review(raw: str, nonce: str | None = None) -> dict[str, Any]:
     match = PATTERN.search(raw or "")
     if not match:
         return {"status": "skipped", "verdict": None, "findings": []}
@@ -23,6 +23,11 @@ def parse_review(raw: str) -> dict[str, Any]:
         data = json.loads(match.group(1))
     except json.JSONDecodeError:
         return {"status": "skipped", "verdict": None, "findings": []}
+
+    # El código de lectura solo está dentro de .agent-review-input.md: si no
+    # vuelve, el modelo contestó sin leer el diff y su veredicto no vale (#2038).
+    if nonce and str(data.get("input_nonce") or "").strip() != nonce:
+        return {"status": "blind", "verdict": None, "findings": []}
 
     verdict = data.get("verdict")
     findings = data.get("findings", [])
@@ -49,9 +54,10 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--summary-file", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--nonce", default="", help="código de lectura escrito en el input")
     args = parser.parse_args()
     raw = args.summary_file.read_text(encoding="utf-8") if args.summary_file.exists() else ""
-    result = parse_review(raw)
+    result = parse_review(raw, args.nonce.strip() or None)
     rendered = json.dumps(result, ensure_ascii=False, separators=(",", ":"))
     args.output.write_text(rendered + "\n", encoding="utf-8")
     print(rendered)
