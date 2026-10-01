@@ -149,7 +149,11 @@ func iniciar_grabacion_anomalia(anomalia: AnomaliaSueno3D) -> Dictionary:
 	var camara: Camera3D = null
 	if caminante != null and is_instance_valid(caminante):
 		camara = caminante.get_node_or_null("Camara") as Camera3D
-	var inicio := _grabacion_runtime.iniciar(camara, anomalia, documento, true)
+	var sujeto := {
+		"anomalia_id": anomalia.id_catalogo(),
+		"reactiva": anomalia.reactiva(),
+	}
+	var inicio := _grabacion_runtime.iniciar(camara, anomalia, documento, true, sujeto)
 	if bool(inicio.get("ok", false)):
 		_anomalia_grabada = anomalia
 	return inicio
