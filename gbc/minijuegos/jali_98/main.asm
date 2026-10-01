@@ -394,17 +394,28 @@ DibujarCursor:
 
 DibujarVictoria:
     ld a, TILE_SOL
-    ld [BG_MAP + (4 * 32) + 9], a
+    ld [BG_MAP + (2 * 32) + 9], a
     ld a, TILE_RAYO
-    ld [BG_MAP + (6 * 32) + 9], a
-    ld [BG_MAP + (8 * 32) + 9], a
-    ld a, TILE_ESTRELLA
-    ld [BG_MAP + (10 * 32) + 8], a
-    ld [BG_MAP + (10 * 32) + 10], a
+    ld [BG_MAP + (3 * 32) + 7], a
+    ld [BG_MAP + (3 * 32) + 9], a
+    ld [BG_MAP + (3 * 32) + 11], a
+
+    ld hl, BG_MAP + (6 * 32) + 6
+    ld a, 1
+    call DibujarPatron
+
+    ld hl, BG_MAP + (9 * 32) + 6
+    ld a, 3
+    call DibujarPatron
+
+    ld hl, BG_MAP + (12 * 32) + 6
+    ld a, 2
+    call DibujarPatron
+
     ld a, TILE_LUZ
-    ld [BG_MAP + (12 * 32) + 7], a
-    ld [BG_MAP + (12 * 32) + 9], a
-    ld [BG_MAP + (12 * 32) + 11], a
+    ld [BG_MAP + (6 * 32) + 16], a
+    ld [BG_MAP + (9 * 32) + 16], a
+    ld [BG_MAP + (12 * 32) + 16], a
     ret
 
 LeerControles:
