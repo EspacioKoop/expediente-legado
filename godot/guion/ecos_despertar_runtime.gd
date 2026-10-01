@@ -1,0 +1,43 @@
+## Captura runtime del material vivido para los ecos de despertar (#1775).
+##
+## No prepara ni presenta el eco. Solo acumula candidatos provenientes de
+## nodos que ya existen en la sala onirica actual y los deja en Jornada para
+## que la ruta de despertar los consuma en un corte posterior.
+class_name EcosDespertarRuntime
+extends RefCounted
+
+const CLAVE_MATERIAL := "eco_despertar_material_vivido"
+
+
+static func registrar_sala(
+	jornada: Dictionary, mundo: Node3D, anomalias: Array
+) -> Array[Dictionary]:
+	if String(jornada.get("fase", "")) != "sueño" or mundo == null:
+		return []
+
+	var objetos_montados := []
+	for candidato in anomalias:
+		if not candidato is Node:
+			continue
+		var objeto_id := String((candidato as Node).get_meta("objeto_origen", "")).strip_edges()
+		if not objeto_id.is_empty() and not objetos_montados.has(objeto_id):
+			objetos_montados.append(objeto_id)
+
+	var mutador_presentado := {}
+	var presentador := mundo.get_node_or_null(SuenoMutadorPresentacion3D.NOMBRE)
+	if presentador != null and is_instance_valid(presentador):
+		var meta: Variant = presentador.get_meta("presentacion", {})
+		if meta is Dictionary:
+			mutador_presentado = (meta as Dictionary).duplicate(true)
+
+	var nuevos := EcosDespertar.material_desde_noche(mutador_presentado, objetos_montados)
+	var previos: Variant = jornada.get(CLAVE_MATERIAL, [])
+	var acumulado := []
+	if previos is Array:
+		acumulado.append_array((previos as Array).duplicate(true))
+	acumulado.append_array(nuevos)
+	var canonicos := EcosDespertar.candidatos(acumulado)
+	if canonicos.is_empty():
+		return []
+	jornada[CLAVE_MATERIAL] = canonicos.duplicate(true)
+	return canonicos
