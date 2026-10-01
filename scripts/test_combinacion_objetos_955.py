@@ -10,6 +10,7 @@ from scripts.godot_pruebas import importar_proyecto
 ROOT = Path(__file__).resolve().parents[1]
 DOMINIO = ROOT / "godot" / "guion" / "combinacion_objetos.gd"
 INVENTARIO = ROOT / "godot" / "guion" / "inventario.gd"
+CATALOGO = ROOT / "godot" / "guion" / "combinaciones_objetos_catalogo.gd"
 PRUEBA_GODOT = "pruebas/pruebas_combinacion_objetos_955.gd"
 RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
 
@@ -18,6 +19,7 @@ class CombinacionObjetos955Test(unittest.TestCase):
     def setUp(self):
         self.dominio = DOMINIO.read_text(encoding="utf-8")
         self.inventario = INVENTARIO.read_text(encoding="utf-8")
+        self.catalogo = CATALOGO.read_text(encoding="utf-8")
 
     def test_reutiliza_inventario_y_no_crea_estado_paralelo(self):
         self.assertIn("class_name CombinacionObjetos", self.dominio)
@@ -40,6 +42,13 @@ class CombinacionObjetos955Test(unittest.TestCase):
             self.assertIn(motivo, self.dominio)
         self.assertIn("static func _restaurar(", self.dominio)
         self.assertIn("static func retirar(", self.inventario)
+
+    def test_receta_authored_gana_estabilizar_sin_acoplar_escena(self):
+        self.assertIn("RECETA_PALANCA_CUNA", self.catalogo)
+        self.assertIn("UsosHerramienta.ESTABILIZAR", self.catalogo)
+        self.assertIn('palanca["usos"] = usos', self.catalogo)
+        self.assertNotIn("VentanaFloja", self.catalogo)
+        self.assertNotIn("ventana_floja", self.catalogo)
 
     def test_dominio_funciona_en_godot_headless(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
