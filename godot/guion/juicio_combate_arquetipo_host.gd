@@ -6,8 +6,8 @@
 ## dónde gira mientras guarda, si el jugador la flanquea y si un golpe concreto
 ## queda bloqueado. No monta nodos, no toca determinación ni consecuencias.
 ##
-## Primer corte: solo el bloqueador. El hostigador necesita un aviso en línea y
-## el enjambre varios cuerpos, y ninguno cabe todavía en el duelo 1 contra 1.
+## El duelo 1 contra 1 ya representa bloqueador y hostigador. El enjambre sigue
+## fuera porque necesita varios cuerpos y un presupuesto compartido de ataques.
 class_name JuicioCombateArquetipoHost
 extends RefCounted
 
@@ -15,7 +15,7 @@ const ARQUETIPOS = preload("res://guion/juicio_combate_arquetipos.gd")
 
 ## Arquetipos que el host sabe representar. Elegir otro dejaría una política
 ## viva sin cuerpo que la muestre.
-const SOPORTADOS := [ARQUETIPOS.BLOQUEADOR]
+const SOPORTADOS := [ARQUETIPOS.BLOQUEADOR, ARQUETIPOS.HOSTIGADOR]
 
 ## Medio arco frontal de la guardia: ±60° respecto a donde mira la figura.
 ## Fuera de ese cono el golpe entra por el flanco.
@@ -35,10 +35,16 @@ static func elegir(id_figura: String, raiz: int, plano: String) -> String:
 	var id := id_figura.strip_edges()
 	if plano != CombateContextual.PLANO_SUENO or id.is_empty():
 		return ""
-	# La mitad de las figuras conservan el duelo clásico: la variedad viene de
-	# alternar cuerpos, no de convertir todos los sueños en el mismo muro.
+	# Se conserva la asignación histórica de bloqueadores (todas las tiradas
+	# pares); entre las antiguas figuras clásicas, una mitad pasa a hostigador.
 	var tirada := Azar.derivar_texto(raiz, "combate", "arquetipo_1771:%s" % id)
-	return ARQUETIPOS.BLOQUEADOR if tirada % 2 == 0 else ""
+	# Conservar exactamente todos los bloqueadores ya asignados (tirada par) y
+	# convertir solo la mitad del antiguo duelo clásico en hostigador.
+	if tirada % 2 == 0:
+		return ARQUETIPOS.BLOQUEADOR
+	if tirada % 4 == 1:
+		return ARQUETIPOS.HOSTIGADOR
+	return ""
 
 
 static func soportado(tipo: String) -> bool:
@@ -114,7 +120,12 @@ static func golpe(unidad: Dictionary, flanco: bool, fuerte: bool) -> Dictionary:
 ## La apertura es la ventana del jugador: mientras dura, la figura no empieza
 ## un ataque propio. En guardia y recuperación sí puede, como el rival clásico.
 static func permite_iniciar_ataque(unidad: Dictionary) -> bool:
-	if String(unidad.get("tipo", "")) != ARQUETIPOS.BLOQUEADOR:
+	var tipo := String(unidad.get("tipo", ""))
+	# El hostigador dispara por su propia línea telegrafiada; nunca debe caer en
+	# el ataque cuerpo a cuerpo genérico del rival.
+	if tipo == ARQUETIPOS.HOSTIGADOR:
+		return false
+	if tipo != ARQUETIPOS.BLOQUEADOR:
 		return true
 	return String(unidad.get("estado", "")) != ARQUETIPOS.APERTURA
 
@@ -141,3 +152,26 @@ static func contexto_hostigador(
 ## salir solo de ese ángulo: si el jugador se mueve después, la línea no gira.
 static func direccion_linea(rumbo_bloqueado: float) -> Vector3:
 	return Vector3(sin(rumbo_bloqueado), 0.0, cos(rumbo_bloqueado))
+
+
+## Comprueba un impacto contra el segmento de disparo congelado. La anchura es
+## deliberadamente generosa para que el reto sea leer la línea y salir de ella,
+## no acertar un píxel. Solo usa geometría plana; el host decide después cómo
+## resolver esquiva, invulnerabilidad y doctrinas.
+static func impacto_linea(
+	origen: Vector3,
+	rumbo_bloqueado: float,
+	objetivo: Vector3,
+	alcance: float,
+	radio: float,
+) -> bool:
+	if alcance <= 0.0 or radio < 0.0:
+		return false
+	var direccion := direccion_linea(rumbo_bloqueado)
+	var relativo := objetivo - origen
+	relativo.y = 0.0
+	var avance := relativo.dot(direccion)
+	if avance < 0.0 or avance > alcance:
+		return false
+	var lateral := relativo - direccion * avance
+	return lateral.length() <= radio

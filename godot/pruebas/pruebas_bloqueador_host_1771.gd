@@ -19,7 +19,7 @@ func _initialize() -> void:
 
 func _ejecutar() -> void:
 	await _probar_duelo_clasico_intacto()
-	await _probar_arquetipo_sin_cuerpo_no_se_monta()
+	await _probar_hostigador_no_fabrica_guardia()
 	await _probar_frente_bloquea()
 	await _probar_fuerte_rompe_y_abre()
 	await _probar_flanco_entra()
@@ -44,12 +44,15 @@ func _probar_duelo_clasico_intacto() -> void:
 	juicio.free()
 
 
-func _probar_arquetipo_sin_cuerpo_no_se_monta() -> void:
+func _probar_hostigador_no_fabrica_guardia() -> void:
 	var juicio := await _nuevo(ARQUETIPOS.HOSTIGADOR)
-	_comprobar(juicio._arquetipo.is_empty(), true, "el hostigador aún no tiene cuerpo")
-	var antes := juicio._determinacion_rival
-	_golpe(juicio, false)
-	_comprobar(juicio._determinacion_rival, antes - 1, "y el duelo sigue siendo el clásico")
+	_comprobar(
+		String(juicio._arquetipo.get("tipo", "")),
+		ARQUETIPOS.HOSTIGADOR,
+		"el hostigador ya tiene cuerpo propio",
+	)
+	_comprobar(juicio._escudo_guardia == null, true, "el hostigador no fabrica guardia")
+	_comprobar(juicio._linea_hostigador != null, true, "y monta su aviso lineal")
 	juicio.free()
 
 
