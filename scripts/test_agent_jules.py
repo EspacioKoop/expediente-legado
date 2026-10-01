@@ -17,7 +17,11 @@ class PuenteJulesTest(unittest.TestCase):
     def setUpClass(cls):
         # Sin PyYAML: el job rápido de CI no lo instala (#1929).
         cls.texto = WORKFLOW.read_text(encoding="utf-8")
-        cls.script = cls.texto[cls.texto.index("        run: |"):]
+        primer_run = cls.texto.index("        run: |")
+        siguiente_job = cls.texto.index("\n  pr_real:", primer_run)
+        cls.script_reserva = cls.texto[primer_run:siguiente_job]
+        segundo_run = cls.texto.index("        run: |", siguiente_job)
+        cls.script_pr = cls.texto[segundo_run:]
 
     def test_escucha_label_y_cierre_del_issue(self):
         self.assertRegex(self.texto, r"types:\s*\[labeled, unlabeled, closed\]")
@@ -51,7 +55,25 @@ class PuenteJulesTest(unittest.TestCase):
     def test_no_interpola_texto_del_issue_en_el_script(self):
         # Título y cuerpo son de terceros: solo entran por fichero, nunca por ${{ }}.
         self.assertNotRegex(self.texto, r"\$\{\{[^}]*github\.event\.issue\.(title|body)")
-        self.assertIsNone(re.search(r"\$\{\{", self.script))
+        self.assertIsNone(re.search(r"\$\{\{", self.script_reserva))
+        self.assertIsNone(re.search(r"\$\{\{", self.script_pr))
+
+    def test_pr_real_se_autentica_por_tres_senales(self):
+        self.assertRegex(self.texto, r"pull_request:\n\s+types: \[opened, reopened, synchronize, closed\]")
+        self.assertIn("github.event.pull_request.head.repo.full_name == github.repository", self.texto)
+        self.assertIn("PR created automatically by Jules for task [", self.texto)
+        self.assertIn('[[ ! "$HEAD_BRANCH" =~ -([0-9]{12,})$ ]]', self.texto)
+        self.assertIn("fixes_re='Fixes[[:space:]]+#([0-9]+)'", self.texto)
+        self.assertIn('[[ "$BODY" =~ $fixes_re ]]', self.texto)
+        self.assertIn("grep -Fxq jules", self.texto)
+
+    def test_pr_real_espeja_draft_y_libera_claim_sintetico(self):
+        self.assertIn("PR_DRAFT issue=#$issue pr=#$PR sha=$HEAD_SHA branch=$HEAD_BRANCH", self.texto)
+        self.assertIn('claim_branch="jules/issue-$issue"', self.texto)
+        self.assertIn("RELEASE issue=#$issue pr=#$PR branch=$claim_branch", self.texto)
+        self.assertIn("actual_branch=$HEAD_BRANCH", self.texto)
+        self.assertNotIn("gh pr merge", self.texto)
+        self.assertNotRegex(self.texto, r"contents:\s+write")
 
 
 if __name__ == "__main__":
