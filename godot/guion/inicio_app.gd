@@ -249,12 +249,14 @@ func _crear_estado(caja: VBoxContainer) -> void:
 	_aviso.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_aviso.custom_minimum_size.x = 360
 	_aplicar_contraste(_aviso)
+	_aviso.accessibility_live = AccessibilityServer.LIVE_POLITE
 	caja.add_child(_aviso)
 
 
 func _crear_boton(texto: String, accion: Callable) -> Button:
 	var boton := Button.new()
 	boton.text = texto
+	boton.accessibility_name = texto
 	# #1449 / #830: el menú debe leerse como una lista compacta superpuesta al
 	# diorama, no como una botonera que ocupa todo el viewport.
 	boton.custom_minimum_size = Vector2(380, 40)
