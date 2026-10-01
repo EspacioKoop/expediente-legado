@@ -55,7 +55,8 @@ class EvidenciaTraficoVial225Test(unittest.TestCase):
             self.workflow,
         )
         self.assertIn("manifest.json", self.workflow)
-        self.assertIn("actions/upload-artifact@", self.workflow)
+        self.assertIn("uses: ./.github/actions/upload-artifact", self.workflow)
+        self.assertNotIn("actions/upload-artifact@", self.workflow)
         self.assertIn("evidencia-trafico-vial-225-${{ github.sha }}", self.workflow)
         self.assertIn('manifest["instancias_cc0"] != 5', self.workflow)
 

@@ -68,7 +68,8 @@ class EvidenciaSueno284Test(unittest.TestCase):
         self.assertIn("Evidencia sueño 284", self.workflow)
         self.assertIn("xvfb-run -a godot4", self.workflow)
         self.assertIn("capturar_sueno_284.gd", self.workflow)
-        self.assertIn("actions/upload-artifact@", self.workflow)
+        self.assertIn("uses: ./.github/actions/upload-artifact", self.workflow)
+        self.assertNotIn("actions/upload-artifact@", self.workflow)
         self.assertIn("evidencia-sueno-284/", self.workflow)
 
     def test_documentacion_separa_evidencia_de_juicio_humano(self) -> None:

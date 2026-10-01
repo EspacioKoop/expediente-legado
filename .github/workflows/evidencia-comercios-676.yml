@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - '.github/workflows/evidencia-comercios-676.yml'
+      - '.github/actions/upload-artifact/**'
       - '.godot-version'
       - 'godot/arte/bit98/**'
       - 'godot/arte/comercio_barrio/**'
@@ -106,7 +107,7 @@ jobs:
 
       - name: Adjuntar evidencia visual de #676
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: ./.github/actions/upload-artifact
         with:
           name: evidencia-comercios-676-${{ github.sha }}
           path: evidencia-comercios-676/
