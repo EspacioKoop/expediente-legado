@@ -19,7 +19,7 @@ RUNTIME = {
     "archivador_cerrar_03.ogg": "b7597fcb04a74189035809268b47a2c1821e9482489e06cda450cda2fe83a277",
     "papel_coger_01.ogg": "ab7c79d10d10996bcd01f3550abdedf562e180f7b53295ad48b8e91365d075aa",
     "papel_pasar_01.ogg": "0d8c22e65257cf8f097a2225c679608a147f2b4c6e18b174b32cfac0c636a191",
-    "papel_manojo_01.ogg": "9255d624eb107cb437d9d1be077ce4372c6cb29a4f5021290d7a9702441392ca",
+    "papel_manojo_01.ogg": "55910ef28577d8aed8be2a3aae83a97904799e6e418654d514a991934463048c",
 }
 ARCHIVADOR_WAV = {
     "archivador_abrir_01": "f2ffeb6b5bdf3f7bb34e108755ec561688af9ed368f4baf7656db7b84112fdc5",
