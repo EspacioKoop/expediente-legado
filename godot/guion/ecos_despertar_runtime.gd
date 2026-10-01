@@ -63,7 +63,9 @@ static func preparar_despertar(jornada: Dictionary) -> Dictionary:
 			return previo.duplicate(true)
 
 	var material_bruto: Variant = jornada.get(CLAVE_MATERIAL, [])
-	var material: Array = material_bruto as Array if material_bruto is Array else []
+	var material: Array = []
+	if material_bruto is Array:
+		material = (material_bruto as Array).duplicate(true)
 	var pendiente := EcosDespertar.preparar(
 		material,
 		int(jornada.get("raiz", 0)),
