@@ -8,6 +8,8 @@ name: Agent Jules
 on:
   issues:
     types: [labeled, unlabeled, closed]
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
 
 permissions:
   contents: read
@@ -20,8 +22,11 @@ concurrency:
 jobs:
   reserva:
     if: >-
-      (github.event.action == 'closed' && contains(github.event.issue.labels.*.name, 'jules')) ||
-      (github.event.action != 'closed' && github.event.label.name == 'jules')
+      github.event_name == 'issues' &&
+      (
+        (github.event.action == 'closed' && contains(github.event.issue.labels.*.name, 'jules')) ||
+        (github.event.action != 'closed' && github.event.label.name == 'jules')
+      )
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -78,3 +83,82 @@ jobs:
           gh issue comment "$registro" --repo "$GITHUB_REPOSITORY" --body \
             "CLAIM issue=#$ISSUE agent=Jules branch=$branch files=$files goal=$goal lease=48h" >/dev/null
           echo "CLAIM de Jules publicado en #$registro: $files"
+
+
+  # Las ramas reales de Jules no siguen jules/issue-N: terminan en el task id
+  # de Jules y la PR contiene un marcador estable + "Fixes #N". Este job solo
+  # espeja ese ciclo en #1713; no concede autorización, no fusiona y no escribe
+  # contenido del repositorio.
+  pr_real:
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      contains(github.event.pull_request.body, 'PR created automatically by Jules for task [')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: main
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+
+      - name: Espejar PR real de Jules en el registro
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ACTION: ${{ github.event.action }}
+          PR: ${{ github.event.pull_request.number }}
+          BODY: ${{ github.event.pull_request.body }}
+          HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          MERGED: ${{ github.event.pull_request.merged }}
+        run: |
+          set -euo pipefail
+
+          # Las cuatro PR reales observadas terminan en el id numerico de la
+          # tarea Jules. El marcador del cuerpo debe contener el mismo id.
+          if [[ ! "$HEAD_BRANCH" =~ -([0-9]{12,})$ ]]; then
+            echo "PR ignorada: la rama no termina en task id de Jules."
+            exit 0
+          fi
+          task_id="${BASH_REMATCH[1]}"
+          marcador="PR created automatically by Jules for task [$task_id]"
+          if [[ "$BODY" != *"$marcador"* ]]; then
+            echo "PR ignorada: marcador Jules/task id no coincide."
+            exit 0
+          fi
+
+          # El issue se obtiene de un token numerico controlado, nunca se
+          # evalua texto libre del cuerpo.
+          if [[ "$BODY" =~ Fixes[[:space:]]+#([0-9]+) ]]; then
+            issue="${BASH_REMATCH[1]}"
+          else
+            echo "PR ignorada: no declara Fixes #N."
+            exit 0
+          fi
+
+          # Segunda prueba de pertenencia: el issue delegado sigue marcado como
+          # Jules. Un texto de PR copiado a mano no basta para tocar el registro.
+          if ! gh api "repos/$GITHUB_REPOSITORY/issues/$issue" --jq '.labels[].name' |
+            grep -Fxq jules; then
+            echo "PR ignorada: #$issue no esta en la cola Jules."
+            exit 0
+          fi
+
+          registro="$(python3 scripts/gestionar_reservas_rollover.py --active)"
+          claim_branch="jules/issue-$issue"
+
+          if [[ "$ACTION" == closed ]]; then
+            motivo="jules-pr-cerrada"
+            [[ "$MERGED" == true ]] && motivo="jules-pr-mergeada"
+            gh issue comment "$registro" --repo "$GITHUB_REPOSITORY" --body \
+              "RELEASE issue=#$issue pr=#$PR branch=$claim_branch motivo=$motivo actual_branch=$HEAD_BRANCH" >/dev/null
+            exit 0
+          fi
+
+          gh issue comment "$registro" --repo "$GITHUB_REPOSITORY" --body \
+            "PR_DRAFT issue=#$issue pr=#$PR sha=$HEAD_SHA branch=$HEAD_BRANCH pruebas=CI-canonica-por-pull_request alcance=jules-task-$task_id limites=sin-auto-merge" >/dev/null
+          echo "PR Jules #$PR enlazada con issue #$issue ($HEAD_BRANCH)."
