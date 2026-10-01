@@ -27,6 +27,7 @@ jobs:
     env:
       HAS_QWEN: ${{ secrets.QWEN_API_KEY != '' }}
       HAS_GEMINI: ${{ secrets.GEMINI_API_KEY != '' }}
+      GEMINI_CLI_TRUST_WORKSPACE: 'true'
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:

@@ -201,6 +201,7 @@ class AgentDecomposeTest(unittest.TestCase):
         self.assertIn('maxSessionTurns":8', workflow)
         self.assertIn("timeout-minutes: 5", workflow)
         self.assertIn("continue-on-error: true", workflow)
+        self.assertIn("GEMINI_CLI_TRUST_WORKSPACE: 'true'", workflow)
         self.assertIn("steps.plan_qwen.outcome != 'success'", workflow)
         self.assertIn("steps.plan_qwen.outcome == 'success'", workflow)
         self.assertNotIn("Normas Platino no disponibles en esta ejecucion", workflow)
