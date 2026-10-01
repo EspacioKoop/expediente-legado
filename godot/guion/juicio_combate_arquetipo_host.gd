@@ -117,3 +117,27 @@ static func permite_iniciar_ataque(unidad: Dictionary) -> bool:
 	if String(unidad.get("tipo", "")) != ARQUETIPOS.BLOQUEADOR:
 		return true
 	return String(unidad.get("estado", "")) != ARQUETIPOS.APERTURA
+
+
+## Contexto que JuicioCombateArquetipos.avanzar espera para el hostigador:
+## distancia en plano y rumbo hacia el jugador, con la misma convención de
+## `girar` (0 mira hacia +Z). Con distancia casi cero no hay rumbo legible:
+## se fija 0.0 para que la política tenga un valor estable sin NaN ni tirones.
+static func contexto_hostigador(
+	posicion_hostigador: Vector3,
+	posicion_jugador: Vector3,
+) -> Dictionary:
+	var hacia := posicion_jugador - posicion_hostigador
+	hacia.y = 0.0
+	var distancia := hacia.length()
+	var rumbo := 0.0
+	if distancia >= 0.01:
+		rumbo = atan2(hacia.x, hacia.z)
+	return {"distancia": distancia, "rumbo_objetivo": rumbo}
+
+
+## Dirección 3D de la línea de ataque a partir de un rumbo congelado. Durante
+## `telegrafiar` la política congela `rumbo_bloqueado`, así que la línea debe
+## salir solo de ese ángulo: si el jugador se mueve después, la línea no gira.
+static func direccion_linea(rumbo_bloqueado: float) -> Vector3:
+	return Vector3(sin(rumbo_bloqueado), 0.0, cos(rumbo_bloqueado))
