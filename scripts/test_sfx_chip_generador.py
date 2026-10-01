@@ -17,6 +17,9 @@ RUNTIME = {
     "archivador_cerrar_01.ogg": "5dc7cdb111692b1f58e30f457d4595433d365f54aa789158fe461c4a0a4fdff4",
     "archivador_cerrar_02.ogg": "d7ec8cd0de8f6a6afd9f2662994c73e06aa572ef30d8f729ccf6602743ed6bcf",
     "archivador_cerrar_03.ogg": "b7597fcb04a74189035809268b47a2c1821e9482489e06cda450cda2fe83a277",
+    "papel_coger_01.ogg": "ab7c79d10d10996bcd01f3550abdedf562e180f7b53295ad48b8e91365d075aa",
+    "papel_pasar_01.ogg": "0d8c22e65257cf8f097a2225c679608a147f2b4c6e18b174b32cfac0c636a191",
+    "papel_manojo_01.ogg": "9255d624eb107cb437d9d1be077ce4372c6cb29a4f5021290d7a9702441392ca",
 }
 ARCHIVADOR_WAV = {
     "archivador_abrir_01": "f2ffeb6b5bdf3f7bb34e108755ec561688af9ed368f4baf7656db7b84112fdc5",
@@ -97,6 +100,7 @@ class SfxChipGeneradorTest(unittest.TestCase):
             "impactMetal_light_000.ogg",
             "impactMetal_light_001.ogg",
             "impactMetal_medium_000.ogg",
+            "bookFlip1.ogg",
         ):
             self.assertIn(muestra, sonido)
         self.assertIn("ResourceLoader.exists", sonido)
