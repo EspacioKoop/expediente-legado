@@ -118,14 +118,14 @@ func _probar_embestidor() -> void:
 	)
 	_comprobar(String(paso["telegraph"]) == "carga_lineal", "carga tiene aviso propio")
 	var rumbo := float(unidad["rumbo_bloqueado"])
-	paso = JuicioCombateArquetipos.avanzar(
-		unidad, 0.30, {"distancia": 6.0, "rumbo_objetivo": 2.75}
-	)
+	paso = JuicioCombateArquetipos.avanzar(unidad, 0.30, {"distancia": 6.0, "rumbo_objetivo": 2.75})
 	unidad = paso["unidad"]
 	_comprobar(float(unidad["rumbo_bloqueado"]) == rumbo, "carga congela rumbo durante aviso")
 	paso = JuicioCombateArquetipos.avanzar(unidad, 0.45, {"rumbo_objetivo": 3.0})
 	unidad = paso["unidad"]
-	_comprobar(String(unidad["estado"]) == JuicioCombateArquetipos.CARGAR, "entra en carga tras aviso")
+	_comprobar(
+		String(unidad["estado"]) == JuicioCombateArquetipos.CARGAR, "entra en carga tras aviso"
+	)
 	_comprobar(float(unidad["rumbo_bloqueado"]) == rumbo, "carga no retargetea al jugador")
 	paso = JuicioCombateArquetipos.avanzar(unidad, 0.05, {"choque": true})
 	unidad = paso["unidad"]
