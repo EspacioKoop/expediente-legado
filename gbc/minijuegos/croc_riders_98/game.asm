@@ -86,6 +86,7 @@ DEF TILE_BARRIER_R  EQU 42
 DEF TILE_BUS_L      EQU 44
 DEF TILE_BUS_R      EQU 46
 DEF TILE_FLAME      EQU 48
+DEF TILE_FLAME_ALT  EQU 54
 
 DEF TILE_TROPHY     EQU 50
 DEF TILE_CRASH      EQU 51
@@ -1078,19 +1079,25 @@ DibujarJugador:
     ld a, [wPlayerLane]
     call LaneToX
     ld b, a
+    push bc
     ld a, 128
     ld d, 0
     call PonerCroc16
+    pop bc
 
     ld a, [wTurbo]
     or a
     ret z
-    ld a, [wPlayerLane]
-    call LaneToX
+    ld a, b
     add 4
     ld b, a
     ld a, 140
     ld c, TILE_FLAME
+    ld a, [wFrame]
+    bit 2, a
+    jr z, .pinta_llama
+    ld c, TILE_FLAME_ALT
+.pinta_llama:
     ld d, 3
     call PonerSprite
     ret
@@ -1522,6 +1529,9 @@ Tiles:
     ; 52 segmento de rebufo vacio / 53 lleno (contorno negro, relleno amarillo)
     db $00,$00,$7E,$7E,$42,$42,$42,$42,$42,$42,$42,$42,$7E,$7E,$00,$00
     db $00,$00,$7E,$7E,$42,$7E,$42,$7E,$42,$7E,$42,$7E,$7E,$7E,$00,$00
+    ; 54-55 llama nitro frame alternativo (sprite 8x16)
+    db $00,$00,$08,$00,$1C,$00,$3E,$00,$7F,$00,$3E,$00,$1C,$00,$08,$00
+    db $1C,$00,$3E,$00,$1C,$00,$08,$00,$1C,$00,$08,$00,$00,$00,$00,$00
 TilesFin:
 
 PaletaFondo:

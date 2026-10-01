@@ -167,7 +167,7 @@ class PruebasROM(unittest.TestCase):
             wR2Y=8,
             wHazY=32,
         )
-        emulador.tick(1, False)
+        emulador.tick(2, False)
 
     def test_campeonato_encadena_tres_mangas_y_conserva_score(self):
         emulador = self.iniciar_carrera()
@@ -325,6 +325,29 @@ class PruebasROM(unittest.TestCase):
         self.poner(emulador, wTurbo=60, wR1Y=159, wR2Y=100, wScore=98)
         emulador.tick(1, False)
         self.assertEqual(self.leer(emulador, "wScore"), 99)
+
+    def test_animacion_llama_nitro(self):
+        emulador = self.iniciar_carrera()
+        # Fuera de turbo: no se dibuja llama en OAM.
+        self.poner(emulador, wTurbo=0, wFrame=0)
+        emulador.tick(1, False)
+        oam_tiles = [emulador.memory[0xFE00 + i * 4 + 2] for i in range(10)]
+        self.assertNotIn(48, oam_tiles)
+        self.assertNotIn(54, oam_tiles)
+
+        # Con turbo y bit 2 de wFrame en 0: tile 48
+        self.poner(emulador, wTurbo=30, wFrame=0)
+        emulador.tick(1, False)
+        flame_sprites = [i for i in range(10) if emulador.memory[0xFE00 + i * 4 + 2] in (48, 54)]
+        self.assertEqual(len(flame_sprites), 1)
+        self.assertEqual(emulador.memory[0xFE00 + flame_sprites[0] * 4 + 2], 48)
+
+        # Con turbo y bit 2 de wFrame en 1: tile 54
+        self.poner(emulador, wTurbo=30, wFrame=4)
+        emulador.tick(1, False)
+        flame_sprites = [i for i in range(10) if emulador.memory[0xFE00 + i * 4 + 2] in (48, 54)]
+        self.assertEqual(len(flame_sprites), 1)
+        self.assertEqual(emulador.memory[0xFE00 + flame_sprites[0] * 4 + 2], 54)
 
 
 if __name__ == "__main__":
