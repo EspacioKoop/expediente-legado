@@ -37,6 +37,13 @@ class UtilidadesSigaTest(unittest.TestCase):
         for api in ("FileAccess", "DirAccess", "OS.", "execute("):
             self.assertNotIn(api, fuente)
 
+    def test_bloc_expone_semantica_accesible(self) -> None:
+        fuente = BLOC.read_text(encoding="utf-8")
+        self.assertIn('_editor.accessibility_name = tr("BLOC_NOTAS_TITULO")', fuente)
+        self.assertIn('_editor.accessibility_description = tr("BLOC_NOTAS_AYUDA")', fuente)
+        self.assertIn('_estado.accessibility_name = tr("BLOC_NOTAS_ESTADO")', fuente)
+        self.assertIn("_estado.accessibility_description = _estado.text", fuente)
+
     def test_bloc_tiene_identidad_visual_de_documento(self) -> None:
         fuente = BLOC.read_text(encoding="utf-8")
         self.assertIn("PanelContainer.new()", fuente)
@@ -57,6 +64,13 @@ class UtilidadesSigaTest(unittest.TestCase):
             # Límite de palabra: «CARACTERES_PERMITIDOS.contains» no es «OS.».
             self.assertIsNone(re.search(rf"\b{re.escape(api)}", fuente), api)
 
+    def test_calculadora_expone_resultado_accesible(self) -> None:
+        fuente = CALCULADORA.read_text(encoding="utf-8")
+        self.assertIn('_entrada.accessibility_name = tr("CALCULADORA_TITULO")', fuente)
+        self.assertIn('_entrada.accessibility_description = tr("CALCULADORA_AYUDA")', fuente)
+        self.assertIn("_resultado.accessibility_live = AccessibilityServer.LIVE_POLITE", fuente)
+        self.assertIn("_resultado.accessibility_description = texto_resultado", fuente)
+
     def test_calculadora_tiene_identidad_visual_y_teclado_propios(self) -> None:
         fuente = CALCULADORA.read_text(encoding="utf-8")
         self.assertIn("PanelContainer.new()", fuente)
@@ -75,6 +89,13 @@ class UtilidadesSigaTest(unittest.TestCase):
             [
                 motor,
                 "--headless",
+                "--accessibility",
+                "disabled",
+                # Failsafe del motor: el smoke debe imprimir su resumen antes de
+                # este límite; evita que el teardown headless de accesibilidad
+                # deje vivo el proceso después de haber terminado las aserciones.
+                "--quit-after",
+                "120",
                 "--path",
                 str(ROOT / "godot"),
                 "--script",
@@ -87,7 +108,7 @@ class UtilidadesSigaTest(unittest.TestCase):
             check=False,
         )
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
-        self.assertIn("12 pasadas, 0 fallos", resultado.stdout)
+        self.assertIn("19 pasadas, 0 fallos", resultado.stdout)
         self.assertNotIn("ERROR:", resultado.stdout)
         self.assertNotIn("Parse Error:", resultado.stdout)
 
