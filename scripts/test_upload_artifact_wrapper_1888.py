@@ -18,6 +18,9 @@ FAMILIA_EVIDENCIA = [
         "evidencia-minotauro-437.yml",
         "evidencia-hidra-439.yml",
         "evidencia-ryu-440.yml",
+        "evidencia-vecinos-673.yml",
+        "evidencia-comercios-676.yml",
+        "evidencia-trafico-vial-225.yml",
     )
 ]
 
