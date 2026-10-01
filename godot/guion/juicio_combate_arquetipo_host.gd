@@ -6,8 +6,9 @@
 ## dónde gira mientras guarda, si el jugador la flanquea y si un golpe concreto
 ## queda bloqueado. No monta nodos, no toca determinación ni consecuencias.
 ##
-## El duelo 1 contra 1 ya representa bloqueador y hostigador. El enjambre sigue
-## fuera porque necesita varios cuerpos y un presupuesto compartido de ataques.
+## El duelo 1 contra 1 ya representa bloqueador y hostigador. El enjambre aún no
+## tiene cuerpo en la arena, pero su coordinador sí es puro: reparte los
+## ataques que caben a la vez y fija el orden en que avanza cada unidad.
 class_name JuicioCombateArquetipoHost
 extends RefCounted
 
@@ -25,6 +26,16 @@ const COSENO_ARCO_FRONTAL := 0.5
 ## distancia de golpe del rival, así que flanquear exige moverse con intención
 ## pero nunca precisión extrema.
 const GIRO_GUARDIA := 1.6
+
+## Tamaño de un enjambre. Con 1 no hay turno compartido que repartir; con más de
+## 3 el presupuesto deja de ser una presión legible y el enjambre se vuelve ruido.
+const ENJAMBRE_MINIMO := 2
+const ENJAMBRE_MAXIMO := 3
+
+## Estados que ocupan un hueco del presupuesto compartido: avisar y golpear. La
+## lista sale de la política para que el contador y `cuenta_presupuesto` no
+## puedan discrepar sobre qué cuenta como atacante.
+const ESTADOS_ATACANTE := [ARQUETIPOS.TELEGRAFIAR, ARQUETIPOS.ATACAR]
 
 
 ## Arquetipo de una figura onírica concreta, estable para la misma partida.
@@ -175,3 +186,61 @@ static func impacto_linea(
 		return false
 	var lateral := relativo - direccion * avance
 	return lateral.length() <= radio
+
+
+## Tamaño de enjambre seguro para un requisito del host. Una arena que no pide
+## ninguno arranca en el mínimo; una que pide más se recorta al máximo porque un
+## presupuesto de tres ataques simultáneos dejaría de leerse como presión.
+static func tamano_enjambre(cantidad: int = ENJAMBRE_MINIMO) -> int:
+	if cantidad < ENJAMBRE_MINIMO:
+		return ENJAMBRE_MINIMO
+	return mini(cantidad, ENJAMBRE_MAXIMO)
+
+
+## Presupuesto de ataques simultáneos. Un valor menor que uno haría que la
+## política elevase el suelo por su cuenta; aquí se respeta el mínimo de uno y
+## se descarta cualquier sobra.
+static func presupuesto_enjambre(presupuesto: int = ARQUETIPOS.ENJAMBRE_PRESUPUESTO_ATAQUES) -> int:
+	return maxi(1, presupuesto)
+
+
+## Estados de un enjambre recién creado. Determinista: la misma raíz produce el
+## mismo grupo, y el índice distingue a cada unidad dentro de él. Cada estado es
+## una copia propia, para que avanzar una nunca altere a sus hermanas.
+static func nuevo_enjambre(raiz: int, cantidad: int = ENJAMBRE_MINIMO) -> Array:
+	var unidades := []
+	for indice in range(tamano_enjambre(cantidad)):
+		unidades.append(ARQUETIPOS.nuevo(ARQUETIPOS.ENJAMBRE, raiz, indice))
+	return unidades
+
+
+## Un fotograma del enjambre completo. Devuelve estados y resultados nuevos; el
+## array recibido no se muta.
+##
+## Los atacantes se cuentan una sola vez al abrir el tick y el contador se ajusta
+## en local según lo que devuelve cada unidad. Sin ese ajuste, dos huecos libres
+## al empezar el tick dejarían arrancar a tres unidades: las dos primeras no se
+## verían reflejadas hasta que la tercera ya habría leído el presupuesto intacto.
+static func avanzar_enjambre(
+	unidades: Array, delta: float, presupuesto: int = ARQUETIPOS.ENJAMBRE_PRESUPUESTO_ATAQUES
+) -> Dictionary:
+	var maximo := presupuesto_enjambre(presupuesto)
+	var atacantes := ARQUETIPOS.cuenta_presupuesto(unidades)
+	var nuevos := []
+	var resultados := []
+	for unidad in unidades:
+		var paso := ARQUETIPOS.avanzar(
+			unidad, delta, {"atacantes_activos": atacantes, "presupuesto_ataques": maximo}
+		)
+		var estado: Dictionary = paso.get("unidad", {})
+		nuevos.append(estado)
+		resultados.append(paso)
+		atacantes += _delta_atacante(unidad, estado)
+	return {"unidades": nuevos, "resultados": resultados, "atacantes_activos": atacantes}
+
+
+## Cuántos atacantes gana o pierde una unidad al pasar de un estado a otro.
+static func _delta_atacante(anterior: Dictionary, nuevo: Dictionary) -> int:
+	var antes := 1 if String(anterior.get("estado", "")) in ESTADOS_ATACANTE else 0
+	var despues := 1 if String(nuevo.get("estado", "")) in ESTADOS_ATACANTE else 0
+	return despues - antes
