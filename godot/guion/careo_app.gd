@@ -304,8 +304,7 @@ func _pintar_habilidades() -> void:
 		var boton := Button.new()
 		boton.theme = EstiloSiga.tema()
 		boton.text = (
-			tr("VENTANILLA_HABILIDAD")
-			% [tr(habilidad["nombre"]), _combate["cargas"][eje]]
+			tr("VENTANILLA_HABILIDAD") % [tr(habilidad["nombre"]), _combate["cargas"][eje]]
 		)
 		boton.tooltip_text = tr(habilidad["efecto"])
 		boton.toggle_mode = true
