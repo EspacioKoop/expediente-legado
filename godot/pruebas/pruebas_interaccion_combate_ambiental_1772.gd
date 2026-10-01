@@ -223,7 +223,9 @@ func _probar_runtime_activar() -> void:
 
 	var repetido := RuntimeAmbiental.activar(runtime, prop.global_position, true)
 	_comprobar(not bool(repetido["ok"]), "el prop runtime es idempotente")
-	_comprobar(String(repetido["motivo"]) == "ya_activado", "la repetición mantiene el contrato puro")
+	_comprobar(
+		String(repetido["motivo"]) == "ya_activado", "la repetición mantiene el contrato puro"
+	)
 	_comprobar(luz.visible, "repetir no revierte el efecto ya aplicado")
 	anfitrion.queue_free()
 
