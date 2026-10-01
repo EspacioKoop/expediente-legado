@@ -30,6 +30,9 @@ FAMILIA_EVIDENCIA = [
         "oficina-visual-gate-126.yml",
         "npc-visual-gate-275.yml",
         "evidencia-rocketbox-oficina-1319.yml",
+        "evidencia-vfx-1473.yml",
+        "evidencia-props-1474.yml",
+        "evidencia-materiales-399.yml",
     )
 ]
 

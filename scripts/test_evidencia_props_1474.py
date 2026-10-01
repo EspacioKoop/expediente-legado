@@ -65,7 +65,8 @@ class EvidenciaProps1474Test(unittest.TestCase):
         self.assertIn('manifest.get("companeros_visibles") != 0', self.workflow)
         self.assertIn('len(set(perfiles)) != 3', self.workflow)
         self.assertIn('len(set(firmas)) != 3', self.workflow)
-        self.assertIn("actions/upload-artifact@", self.workflow)
+        self.assertIn("uses: ./.github/actions/upload-artifact", self.workflow)
+        self.assertNotIn("actions/upload-artifact@", self.workflow)
         self.assertIn("evidencia-props-1474-${{ github.sha }}", self.workflow)
 
     def test_documentacion_reserva_el_veredicto_a_revision_humana(self):
