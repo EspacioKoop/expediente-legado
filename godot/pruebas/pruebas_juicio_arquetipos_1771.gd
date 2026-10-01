@@ -13,6 +13,7 @@ func _ejecutar() -> void:
 	_probar_hostigador()
 	_probar_bloqueador()
 	_probar_enjambre()
+	_probar_embestidor()
 	_probar_mezcla_y_reduccion_movimiento()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos > 0 else 0)
@@ -95,6 +96,55 @@ func _probar_enjambre() -> void:
 		String(c["estado"]) == JuicioCombateArquetipos.ESPERA, "tercera unidad espera presupuesto"
 	)
 	_comprobar(String(paso_c["intencion"]) == "rodear", "esperar no congela el movimiento")
+
+
+func _probar_embestidor() -> void:
+	var unidad := JuicioCombateArquetipos.nuevo(JuicioCombateArquetipos.EMBESTIDOR, 2086, 1)
+	var bloqueado := JuicioCombateArquetipos.avanzar(
+		unidad, 0.01, {"distancia": 6.0, "linea_libre": false}
+	)
+	_comprobar(
+		String(bloqueado["unidad"]["estado"]) == JuicioCombateArquetipos.REPOSICIONAR,
+		"embestidor no carga sin línea libre",
+	)
+	_comprobar(String(bloqueado["intencion"]) == "buscar_linea", "busca una carga posible")
+	var paso := JuicioCombateArquetipos.avanzar(
+		unidad, 0.01, {"distancia": 6.0, "rumbo_objetivo": 1.25, "linea_libre": true}
+	)
+	unidad = paso["unidad"]
+	_comprobar(
+		String(unidad["estado"]) == JuicioCombateArquetipos.TELEGRAFIAR,
+		"embestidor telegrafía antes de cargar",
+	)
+	_comprobar(String(paso["telegraph"]) == "carga_lineal", "carga tiene aviso propio")
+	var rumbo := float(unidad["rumbo_bloqueado"])
+	paso = JuicioCombateArquetipos.avanzar(
+		unidad, 0.30, {"distancia": 6.0, "rumbo_objetivo": 2.75}
+	)
+	unidad = paso["unidad"]
+	_comprobar(float(unidad["rumbo_bloqueado"]) == rumbo, "carga congela rumbo durante aviso")
+	paso = JuicioCombateArquetipos.avanzar(unidad, 0.45, {"rumbo_objetivo": 3.0})
+	unidad = paso["unidad"]
+	_comprobar(String(unidad["estado"]) == JuicioCombateArquetipos.CARGAR, "entra en carga tras aviso")
+	_comprobar(float(unidad["rumbo_bloqueado"]) == rumbo, "carga no retargetea al jugador")
+	paso = JuicioCombateArquetipos.avanzar(unidad, 0.05, {"choque": true})
+	unidad = paso["unidad"]
+	_comprobar(
+		String(unidad["estado"]) == JuicioCombateArquetipos.RECUPERAR,
+		"choque termina la carga",
+	)
+	_comprobar(bool(paso["ventana_respuesta"]), "fallar la carga abre respuesta")
+	_comprobar(
+		JuicioCombateArquetipos.arena_tiene_ventana([unidad]),
+		"recuperación del embestidor cuenta como ventana de arena",
+	)
+	var normal := JuicioCombateArquetipos.presentacion(paso, false)
+	var reducida := JuicioCombateArquetipos.presentacion(paso, true)
+	_comprobar(normal["estado"] == reducida["estado"], "reducción conserva estado del embestidor")
+	_comprobar(
+		normal["temporizador"] == reducida["temporizador"],
+		"reducción conserva timing del embestidor",
+	)
 
 
 func _probar_mezcla_y_reduccion_movimiento() -> void:
