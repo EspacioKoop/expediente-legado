@@ -219,11 +219,15 @@ jobs:
           PY
           fi
 
-          # #1621: ranking histórico sin estado adicional. Se usan solo los
-          # últimos runs completados del propio pool; si la API falla, score=50.
+          # #1621: ranking histórico sin estado adicional. Un dispatcher puede
+          # completar sin lanzar workers; esos runs vacíos no deben expulsar
+          # muestras útiles de la ventana. Se inspeccionan hasta 40 runs pero se
+          # conservan como máximo los 8 más recientes que sí contienen matrix jobs.
+          # Si la API falla o no hay muestras útiles, el score sigue siendo 50.
           printf '[]\n' > /tmp/worker-jobs.json
+          history_worker_runs=0
           if mapfile -t history_runs < <(
-            gh api "repos/$GITHUB_REPOSITORY/actions/workflows/agent-pool.yml/runs?status=completed&per_page=8" \
+            gh api "repos/$GITHUB_REPOSITORY/actions/workflows/agent-pool.yml/runs?status=completed&per_page=40" \
               --jq '.workflow_runs[].id' 2>/dev/null
           ); then
             for history_run in "${history_runs[@]}"; do
@@ -231,9 +235,17 @@ jobs:
               if gh api "repos/$GITHUB_REPOSITORY/actions/runs/$history_run/jobs?per_page=100" \
                 --jq '[.jobs[] | {name:.name,conclusion:.conclusion,steps:[.steps[]? | {name:.name,conclusion:.conclusion}]}]' \
                 > /tmp/worker-jobs-one.json 2>/dev/null; then
+                worker_jobs="$(jq '[.[] | select(((.name // "") | startswith("run (")) and ((.name // "") | endswith(" / worker")))] | length' /tmp/worker-jobs-one.json)"
+                if (( worker_jobs == 0 )); then
+                  continue
+                fi
                 tmp="$(mktemp)"
                 jq -s '.[0] + .[1]' /tmp/worker-jobs.json /tmp/worker-jobs-one.json > "$tmp"
                 mv "$tmp" /tmp/worker-jobs.json
+                history_worker_runs=$((history_worker_runs + 1))
+                if (( history_worker_runs >= 8 )); then
+                  break
+                fi
               fi
             done
           fi
