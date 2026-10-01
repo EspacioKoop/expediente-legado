@@ -83,11 +83,13 @@ static func resolver(
 		# Perder no cuesta una vida: ya te costó una firmarlo mal, y cobrar dos
 		# veces por el mismo acusado convertiría dormir en un riesgo que se
 		# esquiva no durmiendo. Lo que cuesta es la noche.
+		EcosDespertarRuntime.preparar_despertar(jornada)
+		var dia_despertar := Jornada.despertar_de_golpe(jornada)
 		return {
 			"gano": false,
 			"vida": int(estado.get("vida", 3)),
 			"recuperada": false,
-			"dia": Jornada.despertar_de_golpe(jornada),
+			"dia": dia_despertar,
 		}
 
 	var lista: Array = vencidos(estado).duplicate()

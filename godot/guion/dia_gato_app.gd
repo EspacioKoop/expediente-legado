@@ -371,6 +371,7 @@ func _resolver_objetivos_sueno() -> void:
 	if jornada["sueno_escenas"].is_empty():
 		_registrar_despertar_reglamentario()
 		Auditorias.resolver_fin_sueno(partida.estado, true)
+		EcosDespertarRuntime.preparar_despertar(jornada)
 		dia_nuevo = Jornada.despertar(jornada)
 		Prometeo.reiniciar_exposicion_ideologica_diaria(partida.estado)
 		destino = "archivo"
