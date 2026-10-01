@@ -81,11 +81,11 @@ const CATALOGO := {
 	"cama": "impactSoft_medium_000.ogg",
 }
 
-## Gestos físicos que se repiten mucho —abrir el mismo archivador diez veces al
-## día—. Abrir/cerrar usan síntesis propia reproducible con tres variaciones
-## realmente distintas; `coger` conserva Impact Sounds. Los Kenney de metal
-## siguen declarados como respaldo para una reversión barata si el gate A/B no
-## aprueba todavía el carácter chip.
+## Gestos físicos que se repiten mucho —abrir el mismo archivador o revisar
+## varios documentos—. Abrir/cerrar y documento usan síntesis propia reproducible
+## con tres variaciones realmente distintas; `coger` conserva Impact Sounds.
+## Los Kenney originales siguen como respaldo para una reversión barata si el
+## gate A/B no aprueba todavía el carácter chip.
 const FAMILIAS := {
 	"abrir":
 	[
@@ -99,11 +99,18 @@ const FAMILIAS := {
 		"chip/archivador_cerrar_02.ogg",
 		"chip/archivador_cerrar_03.ogg",
 	],
+	"documento":
+	[
+		"chip/papel_coger_01.ogg",
+		"chip/papel_pasar_01.ogg",
+		"chip/papel_manojo_01.ogg",
+	],
 	"coger": ["impactSoft_medium_000.ogg", "impactSoft_medium_001.ogg"],
 }
 const FAMILIAS_RESPALDO := {
 	"abrir": ["impactMetal_light_000.ogg", "impactMetal_light_001.ogg"],
 	"cerrar": ["impactMetal_medium_000.ogg"],
+	"documento": ["bookFlip1.ogg"],
 }
 const VARIACION_TONO := 1.08
 
