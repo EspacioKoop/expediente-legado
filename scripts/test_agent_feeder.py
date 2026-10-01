@@ -59,6 +59,16 @@ class AgentFeederTest(unittest.TestCase):
         self.assertEqual(1, result["eligible"])
         self.assertEqual(1, result["rejected"]["gate-humano"])
 
+    def test_excluye_estado_bloqueado_aunque_puntue_alto(self):
+        # #382 llegó a decompose estando bloqueado hasta 1.0 (#2005).
+        candidates = [
+            issue(11, "infra: bloqueado por diseño", ["bug", "prioridad:P3", "estado:bloqueado"]),
+            issue(12, "Bug elegible", ["bug"]),
+        ]
+        result = mod.select_candidate(candidates, [], now=NOW)
+        self.assertEqual(12, result["selected"]["number"])
+        self.assertEqual(1, result["rejected"]["label-bloqueante"])
+
     def test_excluye_autor_no_confiable(self):
         externo = issue(14, "Bug externo", ["bug"])
         externo["authorAssociation"] = "NONE"
