@@ -287,6 +287,7 @@ func _probar_runtime_empujar() -> void:
 	var runtime := RuntimeEmpujar.montar(anfitrion)
 	var prop := runtime.get("prop") as AnimatableBody3D
 	_comprobar(prop != null, "empujar monta un prop fisico explicito")
+	_comprobar(not prop.sync_to_physics, "el salto authored se aplica de forma inmediata")
 	_comprobar(int(runtime["usos_restantes"]) == RuntimeEmpujar.USOS_MAX, "parte con usos acotados")
 	_comprobar(is_zero_approx(float(runtime["recarga"])), "parte sin recarga")
 
