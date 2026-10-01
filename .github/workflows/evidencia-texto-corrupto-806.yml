@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - '.github/workflows/evidencia-texto-corrupto-806.yml'
+      - '.github/actions/upload-artifact/**'
       - '.godot-version'
       - 'godot/guion/texto_corrupto_narrativo.gd'
       - 'godot/guion/contaminacion_os98.gd'
@@ -96,7 +97,7 @@ jobs:
 
       - name: Adjuntar evidencia visual de #806
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: ./.github/actions/upload-artifact
         with:
           name: evidencia-texto-corrupto-806-${{ github.sha }}
           path: evidencia-texto-corrupto-806/
