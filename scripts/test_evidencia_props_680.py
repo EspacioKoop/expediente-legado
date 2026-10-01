@@ -58,7 +58,8 @@ class EvidenciaProps680Test(unittest.TestCase):
         self.assertIn("evidencia-props-680/manifest.json", self.workflow)
         self.assertIn("len(set(hashes)) != 5", self.workflow)
         self.assertIn('if not manifest["presupuesto_cumplido"]', self.workflow)
-        self.assertIn("actions/upload-artifact@", self.workflow)
+        self.assertIn("uses: ./.github/actions/upload-artifact", self.workflow)
+        self.assertNotIn("actions/upload-artifact@", self.workflow)
 
     def test_workflow_verifica_los_dos_usos_reales(self):
         self.assertIn(
