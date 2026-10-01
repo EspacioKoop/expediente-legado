@@ -19,8 +19,8 @@ class JuicioArquetipos1771Test(unittest.TestCase):
     def setUpClass(cls):
         cls.fuente = MODELO.read_text(encoding="utf-8")
 
-    def test_tres_arquetipos_y_contrato_comun(self):
-        for nombre in ("hostigador", "bloqueador", "enjambre"):
+    def test_cuatro_arquetipos_y_contrato_comun(self):
+        for nombre in ("hostigador", "bloqueador", "enjambre", "embestidor"):
             self.assertIn(f'"{nombre}"', self.fuente)
         for campo in ("intencion", "telegraph", "ventana_respuesta", "cooldown"):
             self.assertIn(f'"{campo}"', self.fuente)
@@ -30,6 +30,9 @@ class JuicioArquetipos1771Test(unittest.TestCase):
         self.assertIn("HOSTIGADOR_VENTANA := 0.90", self.fuente)
         self.assertIn("BLOQUEADOR_GUARDIA_MAX := 1.20", self.fuente)
         self.assertIn("ENJAMBRE_PRESUPUESTO_ATAQUES := 2", self.fuente)
+        self.assertIn("EMBESTIDOR_TELEGRAFO := 0.70", self.fuente)
+        self.assertIn("EMBESTIDOR_RECUPERACION := 1.00", self.fuente)
+        self.assertIn('"carga_lineal"', self.fuente)
         self.assertIn("cuenta_presupuesto", self.fuente)
         self.assertIn("arena_tiene_ventana", self.fuente)
 
