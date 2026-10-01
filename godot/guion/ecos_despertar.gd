@@ -43,9 +43,7 @@ static func material_desde_noche(
 		if ORIGENES_CRT.has(objeto_id):
 			material.append({"tipo": CRT, "origen_id": "utileria:%s" % objeto_id})
 		elif ORIGENES_OBJETO_DESPLAZADO.has(objeto_id):
-			material.append(
-				{"tipo": OBJETO_DESPLAZADO, "origen_id": "utileria:%s" % objeto_id}
-			)
+			material.append({"tipo": OBJETO_DESPLAZADO, "origen_id": "utileria:%s" % objeto_id})
 
 	return candidatos(material)
 
