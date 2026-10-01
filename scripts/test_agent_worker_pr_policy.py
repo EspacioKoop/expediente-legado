@@ -33,6 +33,16 @@ class AgentWorkerPrPolicyTest(unittest.TestCase):
         self.assertIn("exit 1", self.publish)
         self.assertIn('url="$pr_salida"', self.publish)
 
+    def test_euriclea_se_dispara_por_pr_y_es_best_effort(self):
+        self.assertIn('pr_number="$(gh pr view "$url"', self.publish)
+        self.assertIn("if ! gh workflow run agent-review.yml", self.publish)
+        self.assertIn('--ref main -f pr="$pr_number"', self.publish)
+        self.assertIn("queda el barrido periódico", self.publish)
+        self.assertLess(
+            self.publish.index("gh workflow run agent-review.yml"),
+            self.publish.index("gh workflow run ci.yml"),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
