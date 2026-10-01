@@ -24,7 +24,10 @@ class PuenteJulesTest(unittest.TestCase):
         tercer_job = cls.texto.index("\n  pr_ready:", segundo_run)
         cls.script_pr = cls.texto[segundo_run:tercer_job]
         tercer_run = cls.texto.index("        run: |", tercer_job)
-        cls.script_ready = cls.texto[tercer_run:]
+        cuarto_job = cls.texto.index("\n  fallback_pool:", tercer_run)
+        cls.script_ready = cls.texto[tercer_run:cuarto_job]
+        cuarto_run = cls.texto.index("        run: |", cuarto_job)
+        cls.script_fallback = cls.texto[cuarto_run:]
 
     def test_escucha_label_y_cierre_del_issue(self):
         self.assertRegex(self.texto, r"types:\s*\[labeled, unlabeled, closed\]")
@@ -34,7 +37,7 @@ class PuenteJulesTest(unittest.TestCase):
     def test_permisos_minimos_y_sin_secretos(self):
         self.assertRegex(
             self.texto,
-            r"permissions:\n  contents: read\n  issues: write\n  pull-requests: read\n",
+            r"permissions:\n  contents: read\n  issues: write\n  pull-requests: read\n  actions: write\n",
         )
         self.assertNotIn("write-all", self.texto)
         self.assertNotIn("secrets.", self.texto)
@@ -64,6 +67,38 @@ class PuenteJulesTest(unittest.TestCase):
         self.assertIsNone(re.search(r"\$\{\{", self.script_reserva))
         self.assertIsNone(re.search(r"\$\{\{", self.script_pr))
         self.assertIsNone(re.search(r"\$\{\{", self.script_ready))
+        self.assertIsNone(re.search(r"\$\{\{", self.script_fallback))
+
+    def test_fallback_escucha_solo_error_terminal_del_bot_jules(self):
+        self.assertRegex(
+            self.texto,
+            r"issue_comment:\n\s+types: \[created\]",
+        )
+        self.assertIn(
+            "github.event.comment.user.login == 'google-labs-jules[bot]'",
+            self.texto,
+        )
+        self.assertIn("encountered an unexpected error", self.texto)
+        self.assertIn("wasn''t able to complete", self.texto)
+        self.assertIn("contains(github.event.issue.labels.*.name, 'jules')", self.texto)
+
+    def test_fallback_revalida_plan_y_evitar_pr_duplicada(self):
+        self.assertIn("scripts/agent_delegated_plan.py", self.script_fallback)
+        self.assertIn("scripts/agent_plan_parse.py", self.script_fallback)
+        self.assertRegex(self.script_fallback, r'--max-files\s+"\$MAX_FILES"')
+        self.assertIn("gh pr list", self.script_fallback)
+        self.assertIn("Fallback Jules omitido: #$ISSUE ya tiene una PR abierta.", self.script_fallback)
+        self.assertIn("agent:needs-human", self.script_fallback)
+
+    def test_fallback_libera_reencola_y_despacha_pool(self):
+        self.assertIn(
+            "RELEASE issue=#$ISSUE branch=jules/issue-$ISSUE motivo=jules-error-sin-PR-fallback-pool",
+            self.script_fallback,
+        )
+        self.assertIn("--remove-label jules --add-label agent:auto", self.script_fallback)
+        self.assertIn("gh workflow run agent-pool.yml", self.script_fallback)
+        self.assertIn("-f max_parallel=6", self.script_fallback)
+        self.assertNotIn("gh pr merge", self.script_fallback)
 
     def test_pr_real_se_autentica_por_tres_senales(self):
         self.assertRegex(self.texto, r"pull_request:\n\s+types: \[opened, reopened, synchronize, closed\]")
