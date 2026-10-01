@@ -8,6 +8,7 @@ extends RefCounted
 const HOSTIGADOR := "hostigador"
 const BLOQUEADOR := "bloqueador"
 const ENJAMBRE := "enjambre"
+const EMBESTIDOR := "embestidor"
 
 const REPOSICIONAR := "reposicionar"
 const TELEGRAFIAR := "telegrafiar"
@@ -18,6 +19,7 @@ const APERTURA := "apertura"
 const RECUPERAR := "recuperar"
 const ESPERA := "espera"
 const ATACAR := "atacar"
+const CARGAR := "cargar"
 
 const HOSTIGADOR_DISTANCIA_MIN := 5.0
 const HOSTIGADOR_DISTANCIA_MAX := 8.0
@@ -34,6 +36,13 @@ const ENJAMBRE_TELEGRAFO := 0.35
 const ENJAMBRE_ATAQUE := 0.12
 const ENJAMBRE_RECUPERACION := 0.75
 const ENJAMBRE_PRESUPUESTO_ATAQUES := 2
+
+const EMBESTIDOR_DISTANCIA_MIN := 2.5
+const EMBESTIDOR_DISTANCIA_MAX := 9.0
+const EMBESTIDOR_TELEGRAFO := 0.70
+const EMBESTIDOR_CARGA := 0.55
+const EMBESTIDOR_RECUPERACION := 1.00
+const EMBESTIDOR_RECARGA := 0.80
 
 
 static func nuevo(tipo: String, raiz: int, indice: int = 0) -> Dictionary:
@@ -63,6 +72,14 @@ static func nuevo(tipo: String, raiz: int, indice: int = 0) -> Dictionary:
 				"cooldown": 0.10 + float(tirada % 5) * 0.05,
 				"determinacion": 1,
 			}
+		EMBESTIDOR:
+			return {
+				"tipo": EMBESTIDOR,
+				"estado": REPOSICIONAR,
+				"temporizador": 0.0,
+				"cooldown": 0.0,
+				"rumbo_bloqueado": 0.0,
+			}
 		_:
 			return {}
 
@@ -78,6 +95,8 @@ static func avanzar(unidad: Dictionary, delta: float, contexto: Dictionary = {})
 			return _avanzar_bloqueador(copia, delta, contexto)
 		ENJAMBRE:
 			return _avanzar_enjambre(copia, delta, contexto)
+		EMBESTIDOR:
+			return _avanzar_embestidor(copia, delta, contexto)
 		_:
 			return _resultado(copia, "ninguna", "", false)
 
@@ -206,6 +225,53 @@ static func _avanzar_enjambre(unidad: Dictionary, delta: float, contexto: Dictio
 			return _resultado(unidad, "rodear", "", false)
 
 
+static func _avanzar_embestidor(
+	unidad: Dictionary, delta: float, contexto: Dictionary
+) -> Dictionary:
+	unidad["cooldown"] = maxf(0.0, float(unidad.get("cooldown", 0.0)) - delta)
+	var distancia := float(contexto.get("distancia", EMBESTIDOR_DISTANCIA_MAX))
+	var estado := String(unidad.get("estado", REPOSICIONAR))
+	match estado:
+		REPOSICIONAR:
+			if distancia < EMBESTIDOR_DISTANCIA_MIN:
+				return _resultado(unidad, "alejarse", "", false)
+			if distancia > EMBESTIDOR_DISTANCIA_MAX:
+				return _resultado(unidad, "acercarse", "", false)
+			if not bool(contexto.get("linea_libre", true)):
+				return _resultado(unidad, "buscar_linea", "", false)
+			if float(unidad["cooldown"]) <= 0.0:
+				unidad["estado"] = TELEGRAFIAR
+				unidad["temporizador"] = EMBESTIDOR_TELEGRAFO
+				unidad["rumbo_bloqueado"] = float(contexto.get("rumbo_objetivo", 0.0))
+				return _resultado(unidad, "telegrafiar", "carga_lineal", false)
+			return _resultado(unidad, "reposicionar", "", false)
+		TELEGRAFIAR:
+			unidad["temporizador"] = maxf(0.0, float(unidad["temporizador"]) - delta)
+			if float(unidad["temporizador"]) <= 0.0:
+				unidad["estado"] = CARGAR
+				unidad["temporizador"] = EMBESTIDOR_CARGA
+				return _resultado(unidad, CARGAR, "carga_lineal", false)
+			return _resultado(unidad, "telegrafiar", "carga_lineal", false)
+		CARGAR:
+			unidad["temporizador"] = maxf(0.0, float(unidad["temporizador"]) - delta)
+			if bool(contexto.get("choque", false)) or float(unidad["temporizador"]) <= 0.0:
+				unidad["estado"] = RECUPERAR
+				unidad["temporizador"] = EMBESTIDOR_RECUPERACION
+				unidad["cooldown"] = EMBESTIDOR_RECARGA
+				return _resultado(unidad, "recuperar", "vulnerable", true)
+			return _resultado(unidad, CARGAR, "carga_lineal", false)
+		RECUPERAR:
+			unidad["temporizador"] = maxf(0.0, float(unidad["temporizador"]) - delta)
+			if float(unidad["temporizador"]) <= 0.0:
+				unidad["estado"] = REPOSICIONAR
+				return _resultado(unidad, "reposicionar", "", false)
+			return _resultado(unidad, "recuperar", "vulnerable", true)
+		_:
+			unidad["estado"] = REPOSICIONAR
+			unidad["temporizador"] = 0.0
+			return _resultado(unidad, "reposicionar", "", false)
+
+
 static func cuenta_presupuesto(unidades: Array) -> int:
 	var activos := 0
 	for unidad in unidades:
@@ -229,6 +295,8 @@ static func arena_tiene_ventana(unidades: Array) -> bool:
 		if tipo == BLOQUEADOR and estado == APERTURA:
 			return true
 		if tipo == ENJAMBRE and estado == RECUPERAR:
+			return true
+		if tipo == EMBESTIDOR and estado == RECUPERAR:
 			return true
 	return false
 
