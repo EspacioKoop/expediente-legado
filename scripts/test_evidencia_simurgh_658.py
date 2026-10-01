@@ -47,7 +47,8 @@ class EvidenciaSimurgh658Test(unittest.TestCase):
         self.assertIn("camara.unproject_position", self.captura)
         self.assertIn('"veredicto_automatico": false', self.captura)
         self.assertIn('"requiere_revision_humana": true', self.captura)
-        self.assertIn("actions/upload-artifact@", self.workflow)
+        self.assertIn("uses: ./.github/actions/upload-artifact", self.workflow)
+        self.assertNotIn("actions/upload-artifact@", self.workflow)
 
     def test_documentacion_exige_comprension_humana(self):
         texto = self.docs.lower()
