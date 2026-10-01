@@ -70,6 +70,8 @@ DEF TILE_GUION      EQU FONT_BASE + 37
 DEF TILE_BARRA      EQU FONT_BASE + 38
 DEF TILE_PUNTO      EQU FONT_BASE + 39
 DEF TILE_MAYOR      EQU FONT_BASE + 40
+DEF TILE_AVION_PLEG_IZQ EQU FONT_BASE + 41
+DEF TILE_AVION_PLEG_DER EQU TILE_AVION_PLEG_IZQ + 1
 
 
 INCLUDE "../comun/cartucho.asm"
@@ -557,9 +559,15 @@ DibujarAvion:
     ld a, [wAvionX]
     ld e, a
 
+    ld c, TILE_AVION_IZQ
+    ld a, [wKeys]
+    and KEY_B
+    jr z, .sprite_izq
+    ld c, TILE_AVION_PLEG_IZQ
+
+.sprite_izq:
     ld a, b
     ld b, e
-    ld c, TILE_AVION_IZQ
     ld d, 0
     call PonerSprite
 
@@ -567,7 +575,7 @@ DibujarAvion:
     add 8
     ld b, a
     ld a, [wAvionY]
-    ld c, TILE_AVION_DER
+    inc c
     ld d, 0
     call PonerSprite
     ret
@@ -1260,6 +1268,9 @@ Tiles:
     db $00, $00, $04, $04, $08, $08, $08, $08, $10, $10, $20, $20, $20, $20, $40, $40
     db $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $10, $10, $10, $10
     db $00, $00, $40, $40, $20, $20, $10, $10, $08, $08, $10, $10, $20, $20, $40, $40
+    ; Silueta 16x8 mas estrecha/plegada para HOLD con B (tiles 54 y 55)
+    db $00, $00, $00, $00, $01, $01, $07, $07, $0F, $0F, $03, $03, $00, $00, $00, $00
+    db $00, $00, $80, $80, $E0, $E0, $FE, $FE, $FC, $FC, $F0, $F0, $80, $80, $00, $00
 TilesFin:
 
 PaletaFondo:
