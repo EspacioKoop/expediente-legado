@@ -12,7 +12,7 @@ all: $(ROM)
 build:
 	mkdir -p build
 
-$(OBJ): $(SRC) $(wildcard ../comun/*.asm) | build
+$(OBJ): $(SRC) $(wildcard ../comun/*.asm) $(wildcard assets/*.inc) | build
 	rgbasm -o $@ $<
 
 $(ROM): $(OBJ)

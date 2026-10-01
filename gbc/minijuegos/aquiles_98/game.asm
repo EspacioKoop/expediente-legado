@@ -79,6 +79,21 @@ DEF TILE_CABEZA_3  EQU 26
 DEF TILE_TORSO_3   EQU 27
 DEF TILE_PIERNAS_3 EQU 28
 
+; Primer consumidor runtime del pack GBC de #1804. Los 29 tiles historicos
+; permanecen intactos y el dressing nuevo se carga a continuacion en VRAM.
+DEF TILE_MYRMIDON_BG_BASE    EQU 29
+DEF TILE_MYRMIDON_MARMOL_A   EQU TILE_MYRMIDON_BG_BASE + 0
+DEF TILE_MYRMIDON_MARMOL_B   EQU TILE_MYRMIDON_BG_BASE + 1
+DEF TILE_MYRMIDON_COLUMNA    EQU TILE_MYRMIDON_BG_BASE + 2
+DEF TILE_MYRMIDON_RELIEVE    EQU TILE_MYRMIDON_BG_BASE + 3
+DEF TILE_MYRMIDON_ESTANDARTE EQU TILE_MYRMIDON_BG_BASE + 4
+DEF TILE_MYRMIDON_SUELO      EQU TILE_MYRMIDON_BG_BASE + 5
+DEF TILE_MYRMIDON_PLATAFORMA EQU TILE_MYRMIDON_BG_BASE + 6
+DEF TILE_MYRMIDON_ESTATUA    EQU TILE_MYRMIDON_BG_BASE + 7
+DEF TILE_MYRMIDON_HUD_BASE   EQU TILE_MYRMIDON_BG_BASE + 8
+DEF TILE_MYRMIDON_OBSERVAR   EQU TILE_MYRMIDON_HUD_BASE + 0
+DEF TILE_MYRMIDON_REFLEJO    EQU TILE_MYRMIDON_HUD_BASE + 1
+
 DEF LECTURA_COMPLETA EQU $0F
 DEF IMPACTOS_META    EQU 3
 DEF FALLO_FRAMES     EQU 12
@@ -633,14 +648,35 @@ DibujarArena:
     ld a, [hl]
     ld [BG_MAP + (11 * 32) + 16], a
 
-    ; El ojo en la esquina sugiere observacion sin un tutorial textual.
-    ld a, TILE_OJO
+    ; HUD base del pack #1804: observar/reflejo son seguros antes de deducir
+    ; la vulnerabilidad. El banco revealed no se carga en este corte.
+    ld a, TILE_MYRMIDON_OBSERVAR
     ld [BG_MAP + (4 * 32) + 2], a
+    ld a, TILE_MYRMIDON_REFLEJO
+    ld [BG_MAP + (4 * 32) + 4], a
 
-    ; Suelo de arena.
+    ; Dressing minimo de arena desde el mismo pack, sin tocar las siluetas de
+    ; los tres rivales introducidas por #1945.
+    ld a, TILE_MYRMIDON_COLUMNA
+    ld [BG_MAP + (7 * 32) + 4], a
+    ld [BG_MAP + (8 * 32) + 4], a
+    ld [BG_MAP + (9 * 32) + 4], a
+    ld a, TILE_MYRMIDON_ESTANDARTE
+    ld [BG_MAP + (7 * 32) + 18], a
+    ld [BG_MAP + (8 * 32) + 18], a
+    ld a, TILE_MYRMIDON_MARMOL_A
+    ld [BG_MAP + (13 * 32) + 6], a
+    ld a, TILE_MYRMIDON_MARMOL_B
+    ld [BG_MAP + (13 * 32) + 7], a
+    ld a, TILE_MYRMIDON_PLATAFORMA
+    ld [BG_MAP + (14 * 32) + 15], a
+    ld [BG_MAP + (14 * 32) + 16], a
+    ld [BG_MAP + (14 * 32) + 17], a
+
+    ; Suelo de arena del pack v1.
     ld hl, BG_MAP + (15 * 32) + 2
     ld b, 17
-    ld a, TILE_SUELO
+    ld a, TILE_MYRMIDON_SUELO
 .suelo:
     ld [hli], a
     dec b
@@ -690,6 +726,22 @@ CargarTiles:
     ld hl, Tiles
     ld de, VRAM_TILES
     ld bc, TilesFin - Tiles
+    call CopiarTilesVRAM
+
+    ; #1804: cargar solo BG y HUD base del pack textual. Los mapas/sprites
+    ; revealed permanecen en ROM y no pueden aparecer antes de la deduccion.
+    ld hl, MyrmidonBgTiles
+    ld de, VRAM_TILES + (TILE_MYRMIDON_BG_BASE * 16)
+    ld bc, MyrmidonHudBase - MyrmidonBgTiles
+    call CopiarTilesVRAM
+
+    ld hl, MyrmidonHudBase
+    ld de, VRAM_TILES + (TILE_MYRMIDON_HUD_BASE * 16)
+    ld bc, MyrmidonHudRevealed - MyrmidonHudBase
+    call CopiarTilesVRAM
+    ret
+
+CopiarTilesVRAM:
 .loop:
     ld a, [hli]
     ld [de], a
@@ -907,6 +959,13 @@ Tiles:
 ; 28 piernas rival 3 (piernas estilizadas en postura atletica)
     db $18,$00,$24,$00,$24,$00,$42,$00,$42,$00,$81,$00,$81,$00,$00,$00
 TilesFin:
+ASSERT TilesFin - Tiles == TILE_MYRMIDON_BG_BASE * 16
+
+; Datos generados/reproducibles de #1804. En runtime este corte consume solo
+; MyrmidonBgTiles..MyrmidonHudRevealed; no carga el banco revealed.
+INCLUDE "assets/myrmidon_v1_tiles.inc"
+ASSERT MyrmidonHudBase - MyrmidonBgTiles == 8 * 16
+ASSERT MyrmidonHudRevealed - MyrmidonHudBase == 2 * 16
 
 SECTION "Estado", WRAM0
 wEstado:         ds 1
