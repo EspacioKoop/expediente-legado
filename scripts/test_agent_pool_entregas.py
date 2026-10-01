@@ -3,8 +3,10 @@ import json
 from contextlib import redirect_stdout
 from datetime import datetime, timezone
 from pathlib import Path
+import subprocess
 import tempfile
 import unittest
+from unittest import mock
 
 import agent_pool_entregas as entregas
 
@@ -32,6 +34,19 @@ class EntregasPoolTest(unittest.TestCase):
         self.assertFalse(entregas.es_pr_del_pool(pr("agent/protocol-v1-1866")))
         self.assertFalse(entregas.es_pr_del_pool(pr("feature/1-x")))
         self.assertFalse(entregas.es_pr_del_pool(pr("agent/qwen-1865")))
+
+    def test_reconoce_pr_real_de_jules_sin_aceptar_menciones_incidentales(self):
+        cuerpo_jules = (
+            "Fixes #1949\n\n---\n"
+            "*PR created automatically by Jules for task [123](https://jules.google.com/task/123)*"
+        )
+        self.assertTrue(entregas.es_pr_del_pool(pr("feature/audio-123", cuerpo=cuerpo_jules)))
+        self.assertEqual("jules", entregas.worker_de(pr("feature/audio-123", cuerpo=cuerpo_jules)))
+        self.assertFalse(
+            entregas.es_pr_del_pool(
+                pr("feature/humana", cuerpo="Revisar después con Jules si hace falta")
+            )
+        )
 
     def test_extrae_worker_del_cuerpo(self):
         cuerpo = "Implementacion autonoma mediante worker `qwen-fallback-3`"
@@ -90,6 +105,31 @@ class EntregasPoolTest(unittest.TestCase):
         self.assertIn("| Worker | PRs | Fusionadas |", salida)
         self.assertIn("| qwen-primary | 1 | 1 |", salida)
         self.assertIn("Total: 1 PRs, 1 fusionadas (100%).", salida)
+
+    @mock.patch("agent_pool_entregas.subprocess.run")
+    def test_descargar_prs_combina_agent_y_jules_sin_duplicados(self, run):
+        qwen = pr("agent/qwen-10-100", "MERGED")
+        qwen["number"] = 10
+        jules = pr(
+            "feature/audio-123",
+            "OPEN",
+            "*PR created automatically by Jules for task [123](https://jules.google.com/task/123)*",
+        )
+        jules["number"] = 11
+        run.side_effect = [
+            subprocess.CompletedProcess([], 0, stdout=json.dumps([qwen, jules]), stderr=""),
+            subprocess.CompletedProcess([], 0, stdout=json.dumps([jules]), stderr=""),
+        ]
+
+        resultado = entregas.descargar_prs("EspacioKoop/expediente-legado")
+
+        self.assertEqual({10, 11}, {item["number"] for item in resultado})
+        self.assertEqual(2, run.call_count)
+        segunda_consulta = run.call_args_list[1].args[0]
+        self.assertIn(
+            entregas.JULES_MARKER,
+            segunda_consulta[segunda_consulta.index("--search") + 1],
+        )
 
     def test_main_con_json_local_imprime_json_valido(self):
         with tempfile.TemporaryDirectory() as tmp:

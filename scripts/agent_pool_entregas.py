@@ -2,8 +2,9 @@
 """Entregas reales del pool: PRs abiertas, fusionadas y cerradas (#1895).
 
 El embudo operativo mide hasta dónde llega cada worker; este informe mide el
-resultado final observable en GitHub a partir de las ramas publicadas por el
-pool. Solo cuentan ramas con el patrón canónico agent/(qwen|gemini)-N-RUN.
+resultado final observable en GitHub a partir de las PR publicadas por el
+pool. Cuentan las ramas canónicas agent/(qwen|gemini)-N-RUN y las PR creadas
+automáticamente por Jules con su marcador estable en el cuerpo.
 
 Uso:
     python3 scripts/agent_pool_entregas.py --dias 7
@@ -24,6 +25,7 @@ from typing import Any
 
 
 PR_POOL_RE = re.compile(r"^agent/(qwen|gemini)-\d+-\d+$")
+JULES_MARKER = "PR created automatically by Jules for task"
 WORKER_RE = re.compile(
     r"Implementaci[oó]n autonoma mediante worker `(?P<worker>[A-Za-z0-9._-]+)`",
     re.IGNORECASE,
@@ -32,16 +34,23 @@ ESTADOS = ("OPEN", "MERGED", "CLOSED")
 
 
 def es_pr_del_pool(pr: dict[str, Any]) -> bool:
-    """True solo para PRs publicadas por ramas canónicas del pool."""
+    """True para PRs publicadas por workers reconocibles del pool."""
 
-    return PR_POOL_RE.fullmatch(str(pr.get("headRefName", ""))) is not None
+    rama_pool = PR_POOL_RE.fullmatch(str(pr.get("headRefName", ""))) is not None
+    es_jules = JULES_MARKER.lower() in str(pr.get("body", "") or "").lower()
+    return rama_pool or es_jules
 
 
 def worker_de(pr: dict[str, Any]) -> str:
     """Extrae el worker declarado en el cuerpo de la PR."""
 
-    match = WORKER_RE.search(str(pr.get("body", "") or ""))
-    return match.group("worker") if match else "desconocido"
+    cuerpo = str(pr.get("body", "") or "")
+    match = WORKER_RE.search(cuerpo)
+    if match:
+        return match.group("worker")
+    if JULES_MARKER.lower() in cuerpo.lower():
+        return "jules"
+    return "desconocido"
 
 
 def _fecha_utc(valor: Any) -> datetime | None:
@@ -120,28 +129,35 @@ def tabla(resultado: dict[str, Any]) -> str:
 
 
 def descargar_prs(repo: str) -> list[dict[str, Any]]:
-    """Consulta las PRs candidatas mediante gh sin interpretar el cuerpo."""
+    """Consulta candidatas del pool mediante gh y deduplica por número."""
 
-    comando = [
-        "gh",
-        "pr",
-        "list",
-        "--repo",
-        repo,
-        "--state",
-        "all",
-        "--search",
-        "head:agent/",
-        "--limit",
-        "200",
-        "--json",
-        "number,headRefName,state,body,createdAt,mergedAt",
-    ]
-    salida = subprocess.run(comando, check=True, capture_output=True, text=True)
-    datos = json.loads(salida.stdout)
-    if not isinstance(datos, list):
-        raise ValueError("gh pr list no devolvió una lista")
-    return datos
+    consultas = ("head:agent/", f'"{JULES_MARKER}" in:body')
+    por_numero: dict[int, dict[str, Any]] = {}
+    for consulta in consultas:
+        comando = [
+            "gh",
+            "pr",
+            "list",
+            "--repo",
+            repo,
+            "--state",
+            "all",
+            "--search",
+            consulta,
+            "--limit",
+            "200",
+            "--json",
+            "number,headRefName,state,body,createdAt,mergedAt",
+        ]
+        salida = subprocess.run(comando, check=True, capture_output=True, text=True)
+        datos = json.loads(salida.stdout)
+        if not isinstance(datos, list):
+            raise ValueError("gh pr list no devolvió una lista")
+        for pr in datos:
+            numero = pr.get("number")
+            if isinstance(numero, int):
+                por_numero[numero] = pr
+    return list(por_numero.values())
 
 
 def main(argv: list[str] | None = None) -> int:
