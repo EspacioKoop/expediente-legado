@@ -257,6 +257,7 @@ func _construir_ui() -> void:
 	_estado = Label.new()
 	_estado.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_estado.custom_minimum_size = Vector2(480, 52)
+	_estado.accessibility_live = AccessibilityServer.LIVE_POLITE
 	izquierda.add_child(_estado)
 
 	# La columna crece con cada cartucho comprado: sin desplazamiento, «Cerrar»
@@ -350,6 +351,7 @@ func _preparar_selector_paleta(contenedor: VBoxContainer) -> void:
 
 	_paleta_selector = OptionButton.new()
 	_paleta_selector.name = "SelectorPaletaGbClasico"
+	_paleta_selector.accessibility_name = titulo.text
 	for id in PaletasGbClasico.ids():
 		var indice := _paleta_selector.item_count
 		_paleta_selector.add_item(PaletasGbClasico.nombre(id))
