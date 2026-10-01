@@ -83,6 +83,19 @@ class MyrmidonAssets1804Test(unittest.TestCase):
         self.assertNotIn("talon", self.manifest["hud"]["base"])
         self.assertEqual(self.manifest["hud"]["revealed_only"], ["talon"])
         tiles = (ASSETS / "myrmidon_v1_tiles.inc").read_text(encoding="utf-8")
+        self.assertEqual(
+            self.manifest["sprite"]["map_banks"],
+            {
+                "base": ["idle", "advance", "attack", "block", "defeat"],
+                "revealed_only": ["vulnerable"],
+            },
+        )
+        self.assertLess(
+            tiles.index("MyrmidonFrameMapsBase::"),
+            tiles.index("MyrmidonFrameMapsRevealed::"),
+        )
+        base_maps = tiles.split("MyrmidonFrameMapsRevealed::", 1)[0]
+        self.assertNotIn("MyrmidonFrame_Vulnerable_", base_maps)
         self.assertLess(tiles.index("MyrmidonHudBase::"), tiles.index("MyrmidonHudRevealed::"))
         self.assertLess(tiles.index("MyrmidonHudRevealed::"), tiles.index("MyrmidonHud_talon::"))
 
