@@ -21,7 +21,10 @@ class PuenteJulesTest(unittest.TestCase):
         siguiente_job = cls.texto.index("\n  pr_real:", primer_run)
         cls.script_reserva = cls.texto[primer_run:siguiente_job]
         segundo_run = cls.texto.index("        run: |", siguiente_job)
-        cls.script_pr = cls.texto[segundo_run:]
+        tercer_job = cls.texto.index("\n  pr_ready:", segundo_run)
+        cls.script_pr = cls.texto[segundo_run:tercer_job]
+        tercer_run = cls.texto.index("        run: |", tercer_job)
+        cls.script_ready = cls.texto[tercer_run:]
 
     def test_escucha_label_y_cierre_del_issue(self):
         self.assertRegex(self.texto, r"types:\s*\[labeled, unlabeled, closed\]")
@@ -29,7 +32,10 @@ class PuenteJulesTest(unittest.TestCase):
         self.assertIn("contains(github.event.issue.labels.*.name, 'jules')", self.texto)
 
     def test_permisos_minimos_y_sin_secretos(self):
-        self.assertRegex(self.texto, r"permissions:\n  contents: read\n  issues: write\n")
+        self.assertRegex(
+            self.texto,
+            r"permissions:\n  contents: read\n  issues: write\n  pull-requests: read\n",
+        )
         self.assertNotIn("write-all", self.texto)
         self.assertNotIn("secrets.", self.texto)
 
@@ -57,6 +63,7 @@ class PuenteJulesTest(unittest.TestCase):
         self.assertNotRegex(self.texto, r"\$\{\{[^}]*github\.event\.issue\.(title|body)")
         self.assertIsNone(re.search(r"\$\{\{", self.script_reserva))
         self.assertIsNone(re.search(r"\$\{\{", self.script_pr))
+        self.assertIsNone(re.search(r"\$\{\{", self.script_ready))
 
     def test_pr_real_se_autentica_por_tres_senales(self):
         self.assertRegex(self.texto, r"pull_request:\n\s+types: \[opened, reopened, synchronize, closed\]")
@@ -66,6 +73,34 @@ class PuenteJulesTest(unittest.TestCase):
         self.assertIn("fixes_re='Fixes[[:space:]]+#([0-9]+)'", self.texto)
         self.assertIn('[[ "$BODY" =~ $fixes_re ]]', self.texto)
         self.assertIn("grep -Fxq jules", self.texto)
+
+    def test_pr_ready_solo_nace_de_ci_canonico_verde(self):
+        self.assertRegex(
+            self.texto,
+            r"workflow_run:\n\s+workflows: \[CI\]\n\s+types: \[completed\]",
+        )
+        self.assertIn("github.event.workflow_run.conclusion == 'success'", self.texto)
+        self.assertIn("github.event.workflow_run.event == 'pull_request'", self.texto)
+        self.assertIn("github.event.workflow_run.head_sha", self.texto)
+
+    def test_pr_ready_revalida_jules_sha_issue_y_checks_core(self):
+        self.assertIn('gh api "repos/$GITHUB_REPOSITORY/pulls/$PR"', self.script_ready)
+        self.assertIn('[[ "$head_repo" != "$GITHUB_REPOSITORY" ]]', self.script_ready)
+        self.assertIn('[[ "$head_sha" != "$CI_HEAD_SHA" ]]', self.script_ready)
+        self.assertIn('[[ ! "$head_branch" =~ -([0-9]{12,})$ ]]', self.script_ready)
+        self.assertIn("PR created automatically by Jules for task [$task_id]", self.script_ready)
+        self.assertIn("fixes_re='Fixes[[:space:]]+#([0-9]+)'", self.script_ready)
+        self.assertIn("grep -Fxq jules", self.script_ready)
+        self.assertIn("actions/runs?head_sha=$head_sha&event=pull_request", self.script_ready)
+        for check in ("CI", "Secretos", "GBC fixtures", "Auto-label by area"):
+            self.assertIn(f'.name == "{check}"', self.script_ready)
+
+    def test_pr_ready_es_idempotente_y_no_fusiona(self):
+        self.assertIn('marca="PR_READY issue=#$issue pr=#$PR sha=$head_sha"', self.script_ready)
+        self.assertIn('grep -Fq "$marca"', self.script_ready)
+        self.assertIn('"$marca pruebas=CI-canonica+checks-core-verdes', self.script_ready)
+        self.assertNotIn("gh pr merge", self.script_ready)
+        self.assertNotRegex(self.texto, r"contents:\s+write")
 
     def test_pr_real_espeja_draft_y_libera_claim_sintetico(self):
         self.assertIn("PR_DRAFT issue=#$issue pr=#$PR sha=$HEAD_SHA branch=$HEAD_BRANCH", self.texto)

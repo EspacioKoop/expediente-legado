@@ -10,13 +10,17 @@ on:
     types: [labeled, unlabeled, closed]
   pull_request:
     types: [opened, reopened, synchronize, closed]
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
 
 permissions:
   contents: read
   issues: write
+  pull-requests: read
 
 concurrency:
-  group: agent-jules-${{ github.event.issue.number }}
+  group: agent-jules-${{ github.event.issue.number || github.event.pull_request.number || github.event.workflow_run.id }}
   cancel-in-progress: false
 
 jobs:
@@ -163,3 +167,114 @@ jobs:
           gh issue comment "$registro" --repo "$GITHUB_REPOSITORY" --body \
             "PR_DRAFT issue=#$issue pr=#$PR sha=$HEAD_SHA branch=$HEAD_BRANCH pruebas=CI-canonica-por-pull_request alcance=jules-task-$task_id limites=sin-auto-merge" >/dev/null
           echo "PR Jules #$PR enlazada con issue #$issue ($HEAD_BRANCH)."
+
+
+  # CI es la señal canónica de que el head fue validado. Este job no confía en
+  # el workflow_run por sí solo: vuelve a autenticar la PR Jules, comprueba que
+  # el SHA sigue siendo el mismo y que los checks core presentes ya terminaron.
+  # PR_READY sigue siendo informativo; nunca habilita ni ejecuta merge.
+  pr_ready:
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.pull_requests[0].number != null
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: main
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+
+      - name: Publicar PR_READY de Jules tras CI verde
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.workflow_run.pull_requests[0].number }}
+          CI_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+
+          gh api "repos/$GITHUB_REPOSITORY/pulls/$PR" > /tmp/pr.json
+          body="$(jq -r '.body // ""' /tmp/pr.json)"
+          head_branch="$(jq -r '.head.ref' /tmp/pr.json)"
+          head_sha="$(jq -r '.head.sha' /tmp/pr.json)"
+          head_repo="$(jq -r '.head.repo.full_name // ""' /tmp/pr.json)"
+
+          if [[ "$head_repo" != "$GITHUB_REPOSITORY" ]] || [[ "$head_sha" != "$CI_HEAD_SHA" ]]; then
+            echo "PR ignorada: repo o SHA ya no coincide con el run de CI."
+            exit 0
+          fi
+
+          if [[ ! "$head_branch" =~ -([0-9]{12,})$ ]]; then
+            echo "PR ignorada: la rama no termina en task id de Jules."
+            exit 0
+          fi
+          task_id="${BASH_REMATCH[1]}"
+          marcador="PR created automatically by Jules for task [$task_id]"
+          if [[ "$body" != *"$marcador"* ]]; then
+            echo "PR ignorada: marcador Jules/task id no coincide."
+            exit 0
+          fi
+
+          fixes_re='Fixes[[:space:]]+#([0-9]+)'
+          if [[ "$body" =~ $fixes_re ]]; then
+            issue="${BASH_REMATCH[1]}"
+          else
+            echo "PR ignorada: no declara Fixes #N."
+            exit 0
+          fi
+
+          if ! gh api "repos/$GITHUB_REPOSITORY/issues/$issue" --jq '.labels[].name' |
+            grep -Fxq jules; then
+            echo "PR ignorada: #$issue ya no esta en la cola Jules."
+            exit 0
+          fi
+
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$head_sha&event=pull_request&per_page=100"             > /tmp/runs.json
+
+          # CI debe estar verde. Los otros checks core se exigen si existen para
+          # este head; un workflow opcional ausente no bloquea una tarea Jules.
+          if ! jq -e '
+            [.workflow_runs[] | select(.name == "CI")] |
+            length > 0 and all(.[]; .status == "completed" and .conclusion == "success")
+          ' /tmp/runs.json >/dev/null; then
+            echo "PR no lista: CI canónico no está completamente verde."
+            exit 0
+          fi
+
+          if ! jq -e '
+            [
+              .workflow_runs[]
+              | select(
+                  .name == "Secretos"
+                  or .name == "GBC fixtures"
+                  or .name == "Auto-label by area"
+                )
+            ]
+            | all(.[];
+                .status == "completed"
+                and (
+                  .conclusion == "success"
+                  or .conclusion == "skipped"
+                  or .conclusion == "neutral"
+                )
+              )
+          ' /tmp/runs.json >/dev/null; then
+            echo "PR no lista: hay un check core presente pendiente o fallido."
+            exit 0
+          fi
+
+          registro="$(python3 scripts/gestionar_reservas_rollover.py --active)"
+          marca="PR_READY issue=#$issue pr=#$PR sha=$head_sha"
+          if gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$registro/comments?per_page=100"             --jq '.[].body' | grep -Fq "$marca"; then
+            echo "PR_READY ya publicado para #$PR@$head_sha."
+            exit 0
+          fi
+
+          gh issue comment "$registro" --repo "$GITHUB_REPOSITORY" --body             "$marca pruebas=CI-canonica+checks-core-verdes alcance=jules-task-$task_id limites=sin-auto-merge" >/dev/null
+          echo "PR_READY de Jules #$PR publicado en #$registro."
