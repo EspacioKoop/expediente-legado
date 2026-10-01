@@ -25,6 +25,33 @@ FAST_EXACT = {
     "scripts/test_deno_production_freshness.py",
 }
 
+EVIDENCE_PREFIXES = (
+    ".github/workflows/evidencia-",
+    ".github/workflows/kubasta-visual-gate-",
+    ".github/workflows/npc-visual-gate-",
+    ".github/workflows/oficina-visual-gate-",
+    ".github/workflows/cata-",
+    ".github/workflows/laboratorio-",
+    ".github/actions/upload-artifact/",
+    "scripts/test_evidencia_",
+    "scripts/test_kubasta_visual_gate_",
+    "scripts/test_npc_visual_gate_",
+    "scripts/test_oficina_visual_gate_",
+)
+EVIDENCE_EXACT = {
+    ".github/workflows/benchmark-cc0.yml",
+    "scripts/test_upload_artifact_wrapper_1888.py",
+    "scripts/test_laboratorio_sonoro_1475.py",
+    "scripts/test_cata_ambientes_originales.py",
+}
+
+
+def is_evidence_path(path: str) -> bool:
+    normalized = path.strip().replace("\\", "/")
+    if not normalized:
+        return False
+    return normalized in EVIDENCE_EXACT or normalized.startswith(EVIDENCE_PREFIXES)
+
 
 def is_fast_path(path: str) -> bool:
     normalized = path.strip().replace("\\", "/")
@@ -37,12 +64,30 @@ def classify(paths: Iterable[str]) -> dict[str, object]:
     clean = sorted({path.strip().replace("\\", "/") for path in paths if path.strip()})
     if not clean:
         return {"mode": "full", "files": [], "reason": "diff-vacio"}
-    outside = [path for path in clean if not is_fast_path(path)]
+
+    outside_fast = [path for path in clean if not is_fast_path(path)]
+    if not outside_fast:
+        return {
+            "mode": "fast",
+            "files": clean,
+            "outside": [],
+            "reason": "solo-infra-agentes",
+        }
+
+    outside_evidence = [path for path in clean if not is_evidence_path(path)]
+    if not outside_evidence:
+        return {
+            "mode": "evidence",
+            "files": clean,
+            "outside": [],
+            "reason": "solo-evidencias",
+        }
+
     return {
-        "mode": "fast" if not outside else "full",
+        "mode": "full",
         "files": clean,
-        "outside": outside,
-        "reason": "solo-infra-agentes" if not outside else "ruta-no-fast",
+        "outside": outside_evidence,
+        "reason": "ruta-no-fast",
     }
 
 
