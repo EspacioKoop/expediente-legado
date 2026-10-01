@@ -243,6 +243,7 @@ func _montar_controles() -> void:
 	var anterior := Button.new()
 	anterior.text = "<"
 	anterior.tooltip_text = String(_app.call("_texto", "selector_anterior"))
+	anterior.accessibility_name = anterior.tooltip_text
 	anterior.focus_mode = Control.FOCUS_NONE
 	anterior.pressed.connect(_mover.bind(-1))
 	navegacion.add_child(anterior)
@@ -255,6 +256,7 @@ func _montar_controles() -> void:
 	var siguiente := Button.new()
 	siguiente.text = ">"
 	siguiente.tooltip_text = String(_app.call("_texto", "selector_siguiente"))
+	siguiente.accessibility_name = siguiente.tooltip_text
 	siguiente.focus_mode = Control.FOCUS_NONE
 	siguiente.pressed.connect(_mover.bind(1))
 	navegacion.add_child(siguiente)
@@ -276,6 +278,7 @@ func _actualizar_selector() -> void:
 	var titulo := _titulo(entrada)
 	_nombre.text = "%d/%d · %s" % [_indice + 1, _entradas.size(), String(entrada["nombre"])]
 	_insertar.text = String(_app.call("_formatear", "selector_insertar", [titulo]))
+	_insertar.accessibility_description = titulo
 	_reconstruir_carrusel()
 
 
