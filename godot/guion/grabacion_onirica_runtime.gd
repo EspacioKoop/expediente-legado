@@ -16,6 +16,7 @@ const ERROR_CAMARA_INVALIDA := "camara_invalida"
 var _medidor := GrabacionOniricaMedidor.new()
 var _camara: Camera3D
 var _sujeto: Node3D
+var _metadatos_sujeto: Dictionary = {}
 
 
 func iniciar(
@@ -23,6 +24,7 @@ func iniciar(
 	sujeto: Node3D,
 	original_id: String,
 	original_identificado: bool,
+	metadatos_sujeto: Dictionary = {},
 ) -> Dictionary:
 	if _medidor.esta_activa():
 		return {"ok": false, "error": ERROR_TOMA_ACTIVA}
@@ -36,6 +38,7 @@ func iniciar(
 
 	_camara = camara
 	_sujeto = sujeto
+	_metadatos_sujeto = metadatos_sujeto.duplicate(true)
 	_medidor.iniciar(original, true)
 	return {"ok": true, "original_id": original}
 
@@ -67,8 +70,11 @@ func finalizar(
 		return {"ok": false, "error": ERROR_SIN_TOMA}
 
 	var toma := _medidor.finalizar(frase_completa, figura_detecto_camara)
+	if not _metadatos_sujeto.is_empty():
+		toma["sujeto"] = _metadatos_sujeto.duplicate(true)
 	_camara = null
 	_sujeto = null
+	_metadatos_sujeto = {}
 	var resultado := GrabacionOniricaEstado.registrar_toma(estado, toma)
 	if not bool(resultado.get("ok", false)):
 		return resultado
