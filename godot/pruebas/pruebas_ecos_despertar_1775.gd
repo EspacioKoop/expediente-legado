@@ -12,6 +12,7 @@ func _ejecutar() -> void:
 	_probar_candidatos()
 	_probar_material_desde_noche()
 	_probar_captura_runtime()
+	_probar_preparacion_runtime()
 	_probar_seleccion()
 	_probar_persistencia_y_consumo()
 	_probar_descarte()
@@ -147,6 +148,62 @@ func _probar_captura_runtime() -> void:
 	)
 	_comprobar(not fuera.has(EcosDespertarRuntime.CLAVE_MATERIAL), "fuera no muta Jornada")
 	mundo.queue_free()
+
+
+func _probar_preparacion_runtime() -> void:
+	var jornada := {
+		"fase": "sueño",
+		"dia": 4,
+		"raiz": 1775,
+		EcosDespertarRuntime.CLAVE_MATERIAL: _material(),
+	}
+	var primero := EcosDespertarRuntime.preparar_despertar(jornada)
+	_comprobar(not primero.is_empty(), "despertar prepara un eco desde material vivido")
+	_comprobar(
+		not jornada.has(EcosDespertarRuntime.CLAVE_MATERIAL),
+		"preparar consume el acumulador nocturno",
+	)
+	_comprobar(
+		jornada.get(EcosDespertarRuntime.CLAVE_PENDIENTE, {}) == primero,
+		"el pendiente queda persistido en Jornada",
+	)
+
+	var repetido := EcosDespertarRuntime.preparar_despertar(jornada)
+	_comprobar(repetido == primero, "reintentar la misma noche conserva el mismo pendiente")
+	_comprobar(
+		jornada.get(EcosDespertarRuntime.CLAVE_PENDIENTE, {}) == primero,
+		"reintentar no duplica ni reemplaza el pendiente",
+	)
+
+	var vacia := {
+		"fase": "sueño",
+		"dia": 8,
+		"raiz": 1775,
+		EcosDespertarRuntime.CLAVE_PENDIENTE: primero.duplicate(true),
+	}
+	_comprobar(
+		EcosDespertarRuntime.preparar_despertar(vacia).is_empty(),
+		"noche sin material no fabrica un eco nuevo",
+	)
+	_comprobar(
+		not vacia.has(EcosDespertarRuntime.CLAVE_PENDIENTE),
+		"pendiente de otra mañana se descarta al preparar una noche vacia",
+	)
+
+	var fuera := {
+		"fase": "archivo",
+		"dia": 5,
+		"raiz": 1775,
+		EcosDespertarRuntime.CLAVE_MATERIAL: _material(),
+	}
+	_comprobar(
+		EcosDespertarRuntime.preparar_despertar(fuera).is_empty(),
+		"fuera del sueño no se prepara el eco",
+	)
+	_comprobar(
+		fuera.has(EcosDespertarRuntime.CLAVE_MATERIAL),
+		"llamada fuera de sueño no consume material",
+	)
 
 
 func _probar_seleccion() -> void:
