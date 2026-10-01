@@ -264,12 +264,26 @@ def rgbds_tiles():
         lineas.append(f"; OBJ tile {i:02d}")
         bs = tile_bytes(t)
         lineas.append("    db " + ", ".join(f"${b:02X}" for b in bs))
-    lineas += ["", "MyrmidonFrameMaps::"]
+    lineas += [
+        "",
+        "; Estados visibles antes de deducir la vulnerabilidad.",
+        "MyrmidonFrameMapsBase::",
+    ]
     for estado in ESTADOS:
+        if estado == "vulnerable":
+            continue
         for n, mapa in enumerate(mapas[estado]):
             nombre = estado.capitalize()
             lineas.append(f"MyrmidonFrame_{nombre}_{n}::")
             lineas.append("    db " + ", ".join(f"${x:02X}" for x in mapa))
+    lineas += [
+        "",
+        "; Estado revelado: no consumir antes de que el patron haya sido deducido.",
+        "MyrmidonFrameMapsRevealed::",
+    ]
+    for n, mapa in enumerate(mapas["vulnerable"]):
+        lineas.append(f"MyrmidonFrame_Vulnerable_{n}::")
+        lineas.append("    db " + ", ".join(f"${x:02X}" for x in mapa))
     lineas += ["", "MyrmidonBgTiles::"]
     for nombre, t in bg.items():
         lineas.append(f"MyrmidonBg_{nombre}::")
@@ -328,6 +342,10 @@ def manifest():
             "tiles_per_frame": 12,
             "unique_obj_tiles": len(pool),
             "frame_maps": mapas,
+            "map_banks": {
+                "base": [x for x in ESTADOS if x != "vulnerable"],
+                "revealed_only": ["vulnerable"],
+            },
         },
         "bg": {
             "familias": list(patrones_bg().keys()),
