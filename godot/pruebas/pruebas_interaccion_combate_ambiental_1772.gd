@@ -3,6 +3,7 @@ extends SceneTree
 const Ambiental := preload("res://guion/interaccion_combate_ambiental.gd")
 const RuntimeAmbiental := preload("res://guion/juicio_combate_ambiental_1772.gd")
 const RuntimeVolcar := preload("res://guion/juicio_combate_ambiental_volcar_1772.gd")
+const RuntimeEmpujar := preload("res://guion/juicio_combate_ambiental_empujar_1772.gd")
 
 var _pasadas := 0
 var _fallos := 0
@@ -19,6 +20,7 @@ func _ejecutar() -> void:
 	_probar_activar()
 	_probar_runtime_activar()
 	_probar_runtime_volcar()
+	_probar_runtime_empujar()
 	_probar_invalidos_no_mutan()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos > 0 else 0)
@@ -276,6 +278,67 @@ func _probar_runtime_volcar() -> void:
 	_comprobar(prop.collision_layer == 0, "el volumen temporal expira")
 	_comprobar(is_zero_approx(float(runtime["restante"])), "temporizador termina en cero")
 	_comprobar(absf(prop.rotation_degrees.z - 90.0) < 0.01, "el estado visual final permanece")
+	anfitrion.queue_free()
+
+
+func _probar_runtime_empujar() -> void:
+	var anfitrion := Node3D.new()
+	get_root().add_child(anfitrion)
+	var runtime := RuntimeEmpujar.montar(anfitrion)
+	var prop := runtime.get("prop") as AnimatableBody3D
+	_comprobar(prop != null, "empujar monta un prop fisico explicito")
+	_comprobar(not prop.sync_to_physics, "el salto authored se aplica de forma inmediata")
+	_comprobar(int(runtime["usos_restantes"]) == RuntimeEmpujar.USOS_MAX, "parte con usos acotados")
+	_comprobar(is_zero_approx(float(runtime["recarga"])), "parte sin recarga")
+
+	var fuera := RuntimeEmpujar.empujar(
+		runtime, prop.global_position + Vector3(0.0, 0.0, 1.0), false
+	)
+	_comprobar(not bool(fuera["ok"]), "empujar falla cerrado fuera de combate")
+	_comprobar(int(runtime["usos_restantes"]) == RuntimeEmpujar.USOS_MAX, "rechazo no consume uso")
+
+	var lejos := RuntimeEmpujar.empujar(
+		runtime, prop.global_position + Vector3(0.0, 0.0, RuntimeEmpujar.RADIO_USO + 0.5), true
+	)
+	_comprobar(not bool(lejos["ok"]), "empujar exige cercania")
+	_comprobar(String(lejos["motivo"]) == "fuera_de_alcance", "explica distancia")
+
+	var origen := prop.global_position
+	var primero := RuntimeEmpujar.empujar(
+		runtime, prop.global_position + Vector3(0.0, 0.0, 1.0), true
+	)
+	_comprobar(bool(primero["ok"]), "empujar funciona en combate autorizado")
+	_comprobar(bool(primero["intencion"]["interrumpe"]), "conserva intencion de interrupcion")
+	_comprobar(int(runtime["usos_restantes"]) == RuntimeEmpujar.USOS_MAX - 1, "consume un uso")
+	_comprobar(float(runtime["recarga"]) > 0.0, "activa recarga local")
+	var metros := float(primero["intencion"]["metros"])
+	_comprobar(
+		is_equal_approx(prop.global_position.distance_to(origen), metros),
+		"desplaza exactamente los metros declarados",
+	)
+
+	var tras_primero := prop.global_position
+	var repetido := RuntimeEmpujar.empujar(
+		runtime, prop.global_position + Vector3(0.0, 0.0, 1.0), true
+	)
+	_comprobar(not bool(repetido["ok"]), "recarga impide spam inmediato")
+	_comprobar(String(repetido["motivo"]) == "en_recarga", "explica bloqueo temporal")
+	_comprobar(prop.global_position == tras_primero, "recarga no mueve el prop")
+	_comprobar(int(runtime["usos_restantes"]) == RuntimeEmpujar.USOS_MAX - 1, "recarga no consume")
+
+	RuntimeEmpujar.avanzar(runtime, RuntimeEmpujar.RECARGA_SEGUNDOS)
+	var segundo := RuntimeEmpujar.empujar(
+		runtime, prop.global_position + Vector3(0.0, 0.0, 1.0), true
+	)
+	_comprobar(bool(segundo["ok"]), "segundo uso entra tras recarga")
+	_comprobar(int(runtime["usos_restantes"]) == 0, "segundo uso agota el prop")
+
+	RuntimeEmpujar.avanzar(runtime, RuntimeEmpujar.RECARGA_SEGUNDOS)
+	var agotado := RuntimeEmpujar.empujar(
+		runtime, prop.global_position + Vector3(0.0, 0.0, 1.0), true
+	)
+	_comprobar(not bool(agotado["ok"]), "no hay loop infinito de empujones")
+	_comprobar(String(agotado["motivo"]) == "sin_usos", "agotamiento queda explicito")
 	anfitrion.queue_free()
 
 

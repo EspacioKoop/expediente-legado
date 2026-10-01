@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MODELO = ROOT / "godot" / "guion" / "interaccion_combate_ambiental.gd"
 RUNTIME = ROOT / "godot" / "guion" / "juicio_combate_ambiental_1772.gd"
 RUNTIME_VOLCAR = ROOT / "godot" / "guion" / "juicio_combate_ambiental_volcar_1772.gd"
+RUNTIME_EMPUJAR = ROOT / "godot" / "guion" / "juicio_combate_ambiental_empujar_1772.gd"
 COMBATE = ROOT / "godot" / "guion" / "juicio_combate_3d.gd"
 CONTEXTUAL = ROOT / "godot" / "guion" / "dia_combate_contextual_app.gd"
 PRUEBA = "res://pruebas/pruebas_interaccion_combate_ambiental_1772.gd"
@@ -24,6 +25,7 @@ class InteraccionCombateAmbiental1772Test(unittest.TestCase):
         cls.fuente = MODELO.read_text(encoding="utf-8")
         cls.runtime = RUNTIME.read_text(encoding="utf-8")
         cls.runtime_volcar = RUNTIME_VOLCAR.read_text(encoding="utf-8")
+        cls.runtime_empujar = RUNTIME_EMPUJAR.read_text(encoding="utf-8")
         cls.combate = COMBATE.read_text(encoding="utf-8")
         cls.contextual = CONTEXTUAL.read_text(encoding="utf-8")
 
@@ -87,6 +89,23 @@ class InteraccionCombateAmbiental1772Test(unittest.TestCase):
         self.assertNotIn("JuicioCombate3D", self.runtime_volcar)
         for simbolo in ("Partida.", "Jornada.", "Inventario.", "SuenoCombate"):
             self.assertNotIn(simbolo, self.runtime_volcar)
+
+    def test_empujar_limita_usos_y_recarga_sin_tocar_host(self):
+        self.assertIn("class_name JuicioCombateAmbientalEmpujar1772", self.runtime_empujar)
+        self.assertIn("InteraccionCombateAmbiental.EMPUJAR", self.runtime_empujar)
+        self.assertNotIn("InteraccionCombateAmbiental.VOLCAR", self.runtime_empujar)
+        self.assertNotIn("InteraccionCombateAmbiental.ACTIVAR", self.runtime_empujar)
+        self.assertIn("AnimatableBody3D.new()", self.runtime_empujar)
+        self.assertIn("prop.sync_to_physics = false", self.runtime_empujar)
+        self.assertIn("CollisionShape3D.new()", self.runtime_empujar)
+        self.assertIn("BoxShape3D.new()", self.runtime_empujar)
+        self.assertIn("const USOS_MAX := 2", self.runtime_empujar)
+        self.assertIn("const RECARGA_SEGUNDOS := 0.8", self.runtime_empujar)
+        self.assertIn('"sin_usos"', self.runtime_empujar)
+        self.assertIn('"en_recarga"', self.runtime_empujar)
+        self.assertNotIn("JuicioCombate3D", self.runtime_empujar)
+        for simbolo in ("Partida.", "Jornada.", "Inventario.", "SuenoCombate"):
+            self.assertNotIn(simbolo, self.runtime_empujar)
 
     def test_host_contextual_habilita_prop_sin_pisar_ataques(self):
         self.assertIn("_combate.interaccion_ambiental_habilitada = true", self.contextual)
