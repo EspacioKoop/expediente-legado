@@ -4,7 +4,8 @@
 ;
 ; Vuela un avion de papel por una ruta arcade inspirada en el skyline
 ; neoyorquino de finales de los 90: Liberty, WTC, Brooklyn Bridge y Empire.
-; Toda la puntuacion vive en RAM; no hay guardado ni recompensa sistemica.
+; Toda la puntuacion vive en RAM durante la partida; el mejor record se
+; conserva en SRAM con firma y checksum.
 
 DEF rP1    EQU $FF00
 DEF rNR10  EQU $FF10
@@ -72,6 +73,16 @@ DEF TILE_PUNTO      EQU FONT_BASE + 39
 DEF TILE_MAYOR      EQU FONT_BASE + 40
 DEF TILE_AVION_PLEG_IZQ EQU FONT_BASE + 41
 DEF TILE_AVION_PLEG_DER EQU TILE_AVION_PLEG_IZQ + 1
+
+; Record persistente: la SRAM del cartucho común (#808) guarda el mejor
+; wScore. Firma propia de esta ROM, distinta de la de Ryu Flow.
+DEF SRAM_MAGIC0           EQU $A000
+DEF SRAM_MAGIC1           EQU $A001
+DEF SRAM_MAGIC2           EQU $A002
+DEF SRAM_VERSION          EQU $A003
+DEF SRAM_RECORD           EQU $A004
+DEF SRAM_CHECKSUM         EQU $A005
+DEF SRAM_VERSION_ACTUAL   EQU 1
 
 
 INCLUDE "../comun/cartucho.asm"
@@ -233,6 +244,8 @@ PrepararFinal:
     call LimpiarBG
     call DibujarFondoBase
 
+    call ActualizarRecordSRAM
+
     ld hl, TextoTitulo
     ld de, BG_MAP + (4 * 32) + 2
     call EscribirCadena
@@ -265,9 +278,66 @@ PrepararFinal:
     ld de, BG_MAP + (13 * 32) + 2
     call EscribirCadena
 
+    ld hl, TextoBest
+    ld de, BG_MAP + (12 * 32) + 5
+    call EscribirCadena
+    ld a, [wRecord]
+    call EscribirDosDigitosFila
+
     ld a, $93
     ldh [rLCDC], a
     ret
+
+ActualizarRecordSRAM:
+    ; Solo desde PrepararFinal (LCD apagada): lee el record de SRAM, lo
+    ; pisa si wScore lo supera y protege la SRAM antes de volver.
+    xor a
+    ld [wRecord], a
+    call HabilitarSRAM
+    ld a, [SRAM_MAGIC0]
+    cp $50 ; P
+    jr nz, .fin
+    ld a, [SRAM_MAGIC1]
+    cp $4C ; L
+    jr nz, .fin
+    ld a, [SRAM_MAGIC2]
+    cp $41 ; A
+    jr nz, .fin
+    ld a, [SRAM_VERSION]
+    cp SRAM_VERSION_ACTUAL
+    jr nz, .fin
+    ld a, [SRAM_RECORD]
+    ld b, a
+    xor $5A
+    ld c, a
+    ld a, [SRAM_CHECKSUM]
+    cp c
+    jr nz, .fin
+    ld a, b
+    ld [wRecord], a
+.fin:
+    ld a, [wScore]
+    ld b, a
+    ld a, [wRecord]
+    cp b
+    jr nc, .proteger
+    ; Nueva marca: el checksum sigue el patrón de Ryu Flow (dato XOR clave).
+    ld a, b
+    ld [wRecord], a
+    ld [SRAM_RECORD], a
+    ld a, $50
+    ld [SRAM_MAGIC0], a
+    ld a, $4C
+    ld [SRAM_MAGIC1], a
+    ld a, $41
+    ld [SRAM_MAGIC2], a
+    ld a, SRAM_VERSION_ACTUAL
+    ld [SRAM_VERSION], a
+    ld a, b
+    xor $5A
+    ld [SRAM_CHECKSUM], a
+.proteger:
+    jp ProtegerSRAM
 
 MoverAvion:
     ; B pliega el avion: mantiene la altura actual y bloquea el viento.
@@ -869,6 +939,21 @@ DibujarHUD:
     ret
 
 EscribirDosDigitosFinal:
+    ; Fila fija del SCORE; no cambiar el layout de la pantalla final.
+    ld b, 10
+    ; La variante BEST llega aqui con B = fila destino.
+EscribirDosDigitosFila:
+    ; A = valor, B = fila del mapa BG; digitos en columnas 11-12.
+    ld h, b
+    ld l, 0
+    add hl, hl
+    add hl, hl
+    add hl, hl
+    add hl, hl
+    add hl, hl
+    ld bc, BG_MAP + 11
+    add hl, bc
+    push hl
     ld b, 0
     cp 10
     jr c, .unidad
@@ -878,10 +963,14 @@ EscribirDosDigitosFinal:
     ld c, a
     ld a, b
     call TileDigito
-    ld [BG_MAP + (10 * 32) + 11], a
+    pop hl
+    ld [hl], a
+    push hl
     ld a, c
     call TileDigito
-    ld [BG_MAP + (10 * 32) + 12], a
+    pop hl
+    inc hl
+    ld [hl], a
     ret
 
 TileDigito:
@@ -1210,6 +1299,7 @@ TextoClear:    db "NYC CLEAR", 0
 TextoCrumpled: db "PLANE CRUMPLED", 0
 TextoScore:    db "SCORE 00", 0
 TextoPerfect:  db "PERFECT 0/4", 0
+TextoBest:     db "BEST 00", 0
 TextoAgain:    db "A/START AGAIN", 0
 
 Tiles:
@@ -1302,3 +1392,4 @@ wScore:        ds 1
 wPerfectos:    ds 1
 wVidas:        ds 1
 wInv:          ds 1
+wRecord:       ds 1
