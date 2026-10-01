@@ -48,6 +48,52 @@ class CiScopeTest(unittest.TestCase):
         )
         self.assertEqual("fast", result["mode"])
 
+    def test_workflows_y_regresiones_de_evidencia_usan_modo_evidence(self):
+        result = mod.classify(
+            [
+                ".github/workflows/evidencia-juicio-779.yml",
+                ".github/workflows/kubasta-visual-gate-298.yml",
+                "scripts/test_kubasta_visual_gate_298.py",
+                "scripts/test_upload_artifact_wrapper_1888.py",
+            ]
+        )
+        self.assertEqual("evidence", result["mode"])
+        self.assertEqual("solo-evidencias", result["reason"])
+        self.assertEqual([], result["outside"])
+
+    def test_wrapper_local_y_audio_evidencia_usan_modo_evidence(self):
+        result = mod.classify(
+            [
+                ".github/actions/upload-artifact/action.yml",
+                ".github/workflows/cata-ambientes-119.yml",
+                ".github/workflows/laboratorio-sonoro-1475.yml",
+                ".github/workflows/benchmark-cc0.yml",
+                "scripts/test_cata_ambientes_originales.py",
+                "scripts/test_laboratorio_sonoro_1475.py",
+            ]
+        )
+        self.assertEqual("evidence", result["mode"])
+
+    def test_evidencia_mezclada_con_runtime_fuerza_full(self):
+        result = mod.classify(
+            [
+                ".github/workflows/evidencia-juicio-779.yml",
+                "godot/guion/juicio_combate_3d.gd",
+            ]
+        )
+        self.assertEqual("full", result["mode"])
+        self.assertIn("godot/guion/juicio_combate_3d.gd", result["outside"])
+
+    def test_ci_canonico_nunca_es_evidence_fast(self):
+        result = mod.classify(
+            [
+                ".github/workflows/evidencia-juicio-779.yml",
+                ".github/workflows/ci.yml",
+            ]
+        )
+        self.assertEqual("full", result["mode"])
+        self.assertIn(".github/workflows/ci.yml", result["outside"])
+
     def test_runtime_o_script_generico_fuerza_full(self):
         for path in (
             "godot/main.gd",
@@ -95,6 +141,16 @@ class CiScopeTest(unittest.TestCase):
         self.assertNotIn("git lfs pull", fast)
         self.assertIn("steps.scope.outputs.mode == 'full'", workflow)
         self.assertIn("steps.scope.outputs.mode == 'fast'", workflow)
+        self.assertIn("steps.scope.outputs.mode == 'evidence'", workflow)
+        evidence = workflow.split("- name: Preflight evidencias rápido", 1)[1].split(
+            "- name: Materializar LFS para CI completo", 1
+        )[0]
+        self.assertIn("test_upload_artifact_wrapper_1888.py", evidence)
+        self.assertIn("test_evidencia_*.py", evidence)
+        self.assertIn("test_*visual_gate_*.py", evidence)
+        self.assertIn("test_laboratorio_sonoro_1475.py", evidence)
+        self.assertIn("test_cata_ambientes_originales.py", evidence)
+        self.assertNotIn("git lfs pull", evidence)
         self.assertIn("git lfs pull", workflow)
 
     def test_pull_request_usa_merge_base_actual_y_no_payload_stale(self):
