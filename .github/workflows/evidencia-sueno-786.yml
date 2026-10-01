@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - '.github/workflows/evidencia-sueno-786.yml'
+      - '.github/actions/upload-artifact/**'
       - '.godot-version'
       - 'godot/guion/dia_sueno_app.gd'
       - 'godot/guion/sueno_vacio*.gd'
@@ -69,7 +70,7 @@ jobs:
 
       - name: Adjuntar capturas para revisión humana
         if: success()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: ./.github/actions/upload-artifact
         with:
           name: evidencia-sueno-786-${{ github.sha }}
           path: evidencia-sueno-786/
