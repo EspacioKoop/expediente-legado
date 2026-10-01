@@ -43,6 +43,7 @@ static func registrar_sala(
 	jornada[CLAVE_MATERIAL] = canonicos.duplicate(true)
 	return canonicos
 
+
 ## Convierte el material de la noche que termina en un único pendiente para la
 ## mañana siguiente. Debe llamarse antes de Jornada.despertar*: después se
 ## pierde la fase nocturna y el día ya ha avanzado.
@@ -66,10 +67,13 @@ static func preparar_despertar(jornada: Dictionary) -> Dictionary:
 	var material: Array = []
 	if material_bruto is Array:
 		material = (material_bruto as Array).duplicate(true)
-	var pendiente := EcosDespertar.preparar(
-		material,
-		int(jornada.get("raiz", 0)),
-		noche,
+	var pendiente := (
+		EcosDespertar
+		. preparar(
+			material,
+			int(jornada.get("raiz", 0)),
+			noche,
+		)
 	)
 	jornada.erase(CLAVE_MATERIAL)
 	if pendiente.is_empty():
@@ -78,4 +82,3 @@ static func preparar_despertar(jornada: Dictionary) -> Dictionary:
 
 	jornada[CLAVE_PENDIENTE] = pendiente.duplicate(true)
 	return pendiente.duplicate(true)
-
