@@ -14,14 +14,14 @@ const GITHUB_OIDC_ISSUER = "https://token.actions.githubusercontent.com";
 const GITHUB_OIDC_JWKS = "https://token.actions.githubusercontent.com/.well-known/jwks";
 
 const POOL_PROVIDERS = ["qwen", "gemini"] as const;
-const NIVEL2_AGENTS = ["claude", "codex", "hermes", "odiseo"] as const;
+export const NIVEL2_AGENTS = ["claude", "codex", "hermes", "odiseo"] as const;
 type AgentMemoryProvider = typeof POOL_PROVIDERS[number] | typeof NIVEL2_AGENTS[number];
 
 // `episodio`: lo que pasó en un issue concreto, caduca a los 30 días.
 // `leccion`: conocimiento estable que escribe el nivel 2 y lee todo el mundo.
 type AgentMemoryKind = "episodio" | "leccion";
 
-type AgentIdentity =
+export type AgentIdentity =
   | { level: "pool"; claims: OidcClaims }
   | { level: "nivel2" };
 
@@ -58,7 +58,7 @@ export interface AgentMemoryRecord {
 
 let oidcJwksCache: { expiresAt: number; keys: OidcJwk[] } | null = null;
 
-function json(data: unknown, status = 200): Response {
+export function json(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
@@ -75,7 +75,7 @@ function cleanText(value: unknown, max: number): string {
   return value.trim().slice(0, max);
 }
 
-function cleanTitle(value: unknown, max: number): string {
+export function cleanTitle(value: unknown, max: number): string {
   return cleanText(value, max)
     .replace(/[\r\n\t]+/g, " ")
     .replace(/\s{2,}/g, " ");
@@ -182,6 +182,8 @@ async function authenticateAgentRequest(
   const allowedWorkflows = [
     repository + "/.github/workflows/agent-autopilot.yml@",
     repository + "/.github/workflows/agent-ci-repair.yml@",
+    // Publica y retira el aviso main-rojo de la mesa de coordinación (#1867).
+    repository + "/.github/workflows/aviso-main-rojo.yml@",
   ];
   const workerPrefix = repository + "/.github/workflows/agent-worker.yml@";
   const poolPrefix = repository + "/.github/workflows/agent-pool.yml@";
@@ -215,7 +217,7 @@ async function nivel2TokenMatches(token: string): Promise<boolean> {
   return diff === 0;
 }
 
-async function authenticateAgent(
+export async function authenticateAgent(
   request: Request,
   repository: string,
 ): Promise<AgentIdentity | null> {
@@ -231,7 +233,7 @@ async function authenticateAgent(
   return await nivel2TokenMatches(token) ? { level: "nivel2" } : null;
 }
 
-async function readJsonBody(request: Request, maxBytes = 8192): Promise<unknown> {
+export async function readJsonBody(request: Request, maxBytes = 8192): Promise<unknown> {
   const declaredLength = Number(request.headers.get("content-length") || "0");
   if (Number.isFinite(declaredLength) && declaredLength > maxBytes) {
     throw new Error("payload_too_large");
@@ -294,7 +296,7 @@ function pathsOverlap(left: string, right: string): boolean {
   return a === b || a.startsWith(b + "/") || b.startsWith(a + "/");
 }
 
-function containsPotentialSecret(value: string): boolean {
+export function containsPotentialSecret(value: string): boolean {
   return /(github_pat_|gh[pousr]_|AIza[0-9A-Za-z_-]{20,}|sk-[A-Za-z0-9_-]{12,}|Bearer\s+[A-Za-z0-9._-]{12,})/i
     .test(value);
 }

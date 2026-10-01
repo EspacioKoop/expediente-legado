@@ -1,0 +1,76 @@
+name: Aviso main rojo
+
+# Publica en la mesa de coordinación (#1867) que CI de main ha fallado, y lo
+# retira cuando vuelve a verde. Existe para que los agentes no arreglen cada uno
+# por su lado la misma rotura: con #1825, doce PRs llevaban el mismo parche.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: aviso-main-rojo
+  cancel-in-progress: false
+
+jobs:
+  avisar:
+    # Solo ejecuciones de push sobre main de este mismo repo: nunca un fork.
+    if: >-
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      (github.event.workflow_run.conclusion == 'failure' ||
+       github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      MESA_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
+      CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+      RUN_URL: ${{ github.event.workflow_run.html_url }}
+      RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+      COMMIT_TITULO: ${{ github.event.workflow_run.display_title }}
+    steps:
+      - name: Publicar o retirar el aviso
+        run: |
+          set -euo pipefail
+          if [[ -z "${MESA_URL:-}" ]]; then
+            echo "::warning::Falta vars.SIGA98_FEEDBACK_FALLBACK_URL; no hay mesa a la que avisar."
+            exit 0
+          fi
+          base="${MESA_URL%/}"
+          base="${base%/api/report}"
+          oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-memory")"
+          token="$(jq -er '.value' <<<"$oidc_json")"
+          mesa() {
+            curl -fsS -X POST "$base/api/agent-coord/$1" \
+              -H "Authorization: Bearer $token" \
+              -H 'Content-Type: application/json' \
+              --data "$2"
+          }
+
+          # Avisos main-rojo que publicó este mismo workflow y siguen activos.
+          previos="$(mesa avisos '{"schema":1}' |
+            jq -r '.avisos[] | select(.tipo == "main-rojo" and .agente == "pool") | .id')"
+
+          if [[ "$CONCLUSION" == "success" ]]; then
+            for id in $previos; do
+              mesa resolver "$(jq -nc --arg id "$id" '{schema:1,id:$id}')" >/dev/null
+              echo "Aviso $id retirado: main vuelve a verde en ${RUN_SHA:0:9}."
+            done
+            exit 0
+          fi
+
+          # Un solo aviso vivo basta: el primero ya apunta a la ejecución que rompió.
+          if [[ -n "$previos" ]]; then
+            echo "Ya hay un aviso main-rojo activo; no se duplica."
+            exit 0
+          fi
+          texto="CI de main en rojo en ${RUN_SHA:0:9} (${COMMIT_TITULO:0:160}). Antes de arreglarlo en tu rama, mira si alguien ya lo está haciendo (avisos en-curso) y avisa tú si lo tomas: ${RUN_URL}"
+          mesa avisar "$(jq -nc --arg texto "$texto" \
+            '{schema:1,tipo:"main-rojo",texto:$texto,ttl_horas:24}')" >/dev/null
+          echo "Aviso main-rojo publicado para ${RUN_SHA:0:9}."
