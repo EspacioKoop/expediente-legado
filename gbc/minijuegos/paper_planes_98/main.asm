@@ -339,6 +339,18 @@ ActualizarRecordSRAM:
 .proteger:
     jp ProtegerSRAM
 
+HabilitarSRAM:
+    ld a, $0A
+    ld [rRAMG], a
+    xor a
+    ld [rRAMB], a
+    ret
+
+ProtegerSRAM:
+    xor a
+    ld [rRAMG], a
+    ret
+
 MoverAvion:
     ; B pliega el avion: mantiene la altura actual y bloquea el viento.
     ; El mundo no se detiene, asi que hay que alinearse antes de estabilizar.
