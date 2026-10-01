@@ -137,9 +137,7 @@ static func _familia(nombre: String) -> AudioStreamRandomizer:
 	familia.random_pitch = VARIACION_TONO
 	familia.playback_mode = AudioStreamRandomizer.PLAYBACK_RANDOM_NO_REPEATS
 	var ficheros: Array = FAMILIAS[nombre]
-	var usar_respaldo := (
-		FAMILIAS_RESPALDO_FORZADO.has(nombre) or not _familia_disponible(ficheros)
-	)
+	var usar_respaldo := FAMILIAS_RESPALDO_FORZADO.has(nombre) or not _familia_disponible(ficheros)
 	if usar_respaldo and FAMILIAS_RESPALDO.has(nombre):
 		ficheros = FAMILIAS_RESPALDO[nombre]
 	for fichero in ficheros:
