@@ -27,6 +27,9 @@ FAMILIA_EVIDENCIA = [
         "evidencia-web98-794.yml",
         "evidencia-texto-corrupto-806.yml",
         "evidencia-sueno-786.yml",
+        "oficina-visual-gate-126.yml",
+        "npc-visual-gate-275.yml",
+        "evidencia-rocketbox-oficina-1319.yml",
     )
 ]
 
