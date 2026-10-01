@@ -2,6 +2,7 @@ extends SceneTree
 
 const Ambiental := preload("res://guion/interaccion_combate_ambiental.gd")
 const RuntimeAmbiental := preload("res://guion/juicio_combate_ambiental_1772.gd")
+const RuntimeVolcar := preload("res://guion/juicio_combate_ambiental_volcar_1772.gd")
 
 var _pasadas := 0
 var _fallos := 0
@@ -17,6 +18,7 @@ func _ejecutar() -> void:
 	_probar_volcar()
 	_probar_activar()
 	_probar_runtime_activar()
+	_probar_runtime_volcar()
 	_probar_invalidos_no_mutan()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos > 0 else 0)
@@ -227,6 +229,49 @@ func _probar_runtime_activar() -> void:
 		String(repetido["motivo"]) == "ya_activado", "la repetición mantiene el contrato puro"
 	)
 	_comprobar(luz.visible, "repetir no revierte el efecto ya aplicado")
+	anfitrion.queue_free()
+
+
+func _probar_runtime_volcar() -> void:
+	var anfitrion := Node3D.new()
+	get_root().add_child(anfitrion)
+	var runtime := RuntimeVolcar.montar(anfitrion)
+	var prop := runtime.get("prop") as StaticBody3D
+	_comprobar(prop != null, "volcar monta un prop fisico explicito")
+	_comprobar(prop.collision_layer == 0, "el volumen empieza inactivo")
+	_comprobar(is_zero_approx(float(runtime["restante"])), "sin uso no hay temporizador")
+
+	var fuera := RuntimeVolcar.volcar(runtime, prop.global_position, false)
+	_comprobar(not bool(fuera["ok"]), "volcar falla cerrado fuera de combate")
+	_comprobar(not bool(runtime["estado"]["volcado"]), "rechazo no consume el prop")
+	_comprobar(prop.collision_layer == 0, "rechazo no activa obstaculo")
+
+	var lejos := RuntimeVolcar.volcar(
+		runtime, prop.global_position + Vector3(RuntimeVolcar.RADIO_USO + 0.5, 0.0, 0.0), true
+	)
+	_comprobar(not bool(lejos["ok"]), "volcar exige cercania")
+	_comprobar(String(lejos["motivo"]) == "fuera_de_alcance", "explica distancia")
+
+	var volcado := RuntimeVolcar.volcar(runtime, prop.global_position, true)
+	_comprobar(bool(volcado["ok"]), "volcar funciona en combate autorizado")
+	_comprobar(bool(runtime["estado"]["volcado"]), "el estado final impide repetir")
+	_comprobar(prop.collision_layer == RuntimeVolcar.CAPA_OBSTACULO, "activa volumen temporal")
+	_comprobar(absf(prop.rotation_degrees.z - 90.0) < 0.01, "el prop queda visualmente volcado")
+	var duracion := float(volcado["intencion"]["segundos"])
+	_comprobar(is_equal_approx(float(runtime["restante"]), duracion), "respeta duracion declarada")
+
+	RuntimeVolcar.avanzar(runtime, duracion * 0.5)
+	_comprobar(prop.collision_layer == RuntimeVolcar.CAPA_OBSTACULO, "obstaculo sigue durante ventana")
+	var antes_repetir := float(runtime["restante"])
+	var repetido := RuntimeVolcar.volcar(runtime, prop.global_position, true)
+	_comprobar(not bool(repetido["ok"]), "volcar es de un solo uso")
+	_comprobar(String(repetido["motivo"]) == "ya_volcado", "repeticion conserva contrato")
+	_comprobar(is_equal_approx(float(runtime["restante"]), antes_repetir), "repetir no reinicia tiempo")
+
+	RuntimeVolcar.avanzar(runtime, duracion)
+	_comprobar(prop.collision_layer == 0, "el volumen temporal expira")
+	_comprobar(is_zero_approx(float(runtime["restante"])), "temporizador termina en cero")
+	_comprobar(absf(prop.rotation_degrees.z - 90.0) < 0.01, "el estado visual final permanece")
 	anfitrion.queue_free()
 
 
