@@ -56,6 +56,15 @@ DEF VENTANA_RED      EQU 60
 DEF RECARGA_RED      EQU 180
 DEF MARCA_COMPLETADO EQU $A5
 
+; Progreso en SRAM (#808). MBC5 + 8 KiB de SRAM con batería (comun/cartucho.mk).
+DEF SRAM_MAGIC0           EQU $A000
+DEF SRAM_MAGIC1           EQU $A001
+DEF SRAM_MAGIC2           EQU $A002
+DEF SRAM_VERSION          EQU $A003
+DEF SRAM_DESAFIOS         EQU $A004
+DEF SRAM_CHECKSUM         EQU $A005
+DEF SRAM_VERSION_ACTUAL   EQU 1
+
 DEF TILE_VACIO   EQU 0
 DEF TILE_ARANA   EQU 1
 DEF TILE_BALON   EQU 2
@@ -107,6 +116,7 @@ Inicio:
     ld [wTeclasNuevas], a
     ldh [rSCX], a
     ldh [rSCY], a
+    call CargarProgreso
 
 .espera_vblank:
     ldh a, [rLY]
@@ -834,8 +844,12 @@ RegistrarDesafioSuperado:
     ld hl, MascaraDesafio
     add hl, bc
     ld a, [wDesafiosSuperados]
+    ld b, a
     or [hl]
     ld [wDesafiosSuperados], a
+    cp b
+    ret z
+    call GuardarProgreso
     ret
 
 TotalTirosActual:
@@ -1217,6 +1231,61 @@ EscribirTexto:
 .poner:
     ld [hli], a
     jr .loop
+
+CargarProgreso:
+    call HabilitarSRAM
+    ld a, [SRAM_MAGIC0]
+    cp $57 ; W
+    jr nz, .fin
+    ld a, [SRAM_MAGIC1]
+    cp $45 ; E
+    jr nz, .fin
+    ld a, [SRAM_MAGIC2]
+    cp $42 ; B
+    jr nz, .fin
+    ld a, [SRAM_VERSION]
+    cp SRAM_VERSION_ACTUAL
+    jr nz, .fin
+    ld a, [SRAM_DESAFIOS]
+    ld b, a
+    xor $A5
+    ld c, a
+    ld a, [SRAM_CHECKSUM]
+    cp c
+    jr nz, .fin
+    ld a, b
+    and %00000111
+    ld [wDesafiosSuperados], a
+.fin:
+    jp ProtegerSRAM
+
+GuardarProgreso:
+    call HabilitarSRAM
+    ld a, $57 ; W
+    ld [SRAM_MAGIC0], a
+    ld a, $45 ; E
+    ld [SRAM_MAGIC1], a
+    ld a, $42 ; B
+    ld [SRAM_MAGIC2], a
+    ld a, SRAM_VERSION_ACTUAL
+    ld [SRAM_VERSION], a
+    ld a, [wDesafiosSuperados]
+    ld [SRAM_DESAFIOS], a
+    xor $A5
+    ld [SRAM_CHECKSUM], a
+    jp ProtegerSRAM
+
+HabilitarSRAM:
+    ld a, $0A
+    ld [rRAMG], a
+    xor a
+    ld [rRAMB], a
+    ret
+
+ProtegerSRAM:
+    xor a
+    ld [rRAMG], a
+    ret
 
 TirosDebut:
     db 1, 0, 0
