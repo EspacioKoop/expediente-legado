@@ -153,9 +153,26 @@ jobs:
             [[ " $labels " == *" $blocked "* ]] && { echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
           done
 
+          # Una PR ya abierta es autoridad suficiente para no gastar otro worker.
+          # Acepta las tres formas usadas por el repo y exige frontera tras el
+          # número para que #203 no coincida accidentalmente con #2035.
           existing="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 100 --json body \
-            | jq -r --arg n "Refs #$ISSUE" '[.[]|select(((.body//"")|split("\n")|index($n)) != null)]|length')"
-          [[ "$existing" == 0 ]] || { echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
+            | jq -r --arg issue "$ISSUE" \
+              '[.[] | select((.body // "") | test(
+                "(^|\\n)[[:space:]]*(Refs|Closes|Fixes)[[:space:]]+#" + $issue + "([[:space:]]|[.,;:]|$)";
+                "i"
+              ))] | length')"
+          if [[ "$existing" != 0 ]]; then
+            gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+              --add-label agent:pr-open \
+              --remove-label agent:auto \
+              --remove-label agent:pool \
+              --remove-label agent:qwen \
+              --remove-label agent:gemini >/dev/null 2>&1 || true
+            echo "::notice::Issue #$ISSUE ya tiene una PR abierta; se normaliza a agent:pr-open."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
 
           branch="agent/${PROVIDER}-${ISSUE}-${GITHUB_RUN_ID}"
           control="github-fallback"
