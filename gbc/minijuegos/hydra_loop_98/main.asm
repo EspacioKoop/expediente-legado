@@ -72,6 +72,7 @@ DEF TILE_ICONO          EQU 54
 DEF TILE_RELOJ_ON       EQU 55
 DEF TILE_CURSOR         EQU 57
 DEF TILE_DESTELLO       EQU 58
+DEF TILE_CABEZA_OBSERVADA EQU 59
 DEF TILE_O              EQU 50
 DEF TILE_P              EQU 51
 DEF TILE_R              EQU 52
@@ -751,12 +752,14 @@ DibujarHueco:
     ; Placa: interrogacion hasta observar, despues la marca de su raiz.
     ld a, c
     or a
-    ld a, TILE_PLACA_DUDA
-    jr z, .placa
+    jr z, .sin_observar
     ld a, b
     add TILE_GLIFO - 1
-.placa:
     ld c, a
+    ld b, TILE_CABEZA_OBSERVADA
+    jr .direccion
+.sin_observar:
+    ld c, TILE_PLACA_DUDA
     ld b, TILE_CABEZA
     jr .direccion
 .vacio:
@@ -776,8 +779,8 @@ DibujarHueco:
     pop bc
     ; Mientras dura la lectura, el cuello de la cabeza observada se ilumina.
     ld a, b
-    cp TILE_CABEZA
-    ret nz
+    cp TILE_HUECO
+    ret z
     ld a, [wBloqueo]
     or a
     ret z
@@ -1277,6 +1280,19 @@ TilesJuego:
     ; 58 destello de raiz (sprite)
     dw `00030000, `00323000, `03222300, `32212230
     dw `03222300, `00323000, `00030000, `00000000
+    ; 59-64 cabeza observada de hidra con cuello (cresta, ojos, contorno), 2x3
+    dw `03300300, `31130313, `31113113, `03111311
+    dw `00311111, `03132231, `03322231, `03133311
+    dw `00300030, `03130313, `31130313, `11113110
+    dw `11111130, `13223130, `13222330, `11333130
+    dw `03111111, `03311111, `00031333, `00313333
+    dw `03312323, `03133333, `00333233, `00031111
+    dw `11111130, `11111330, `33313000, `33331300
+    dw `32323130, `33333130, `33231300, `11113000
+    dw `00003111, `00003121, `00003111, `00003212
+    dw `00003111, `00031121, `00311111, `03333333
+    dw `11130000, `21130000, `11130000, `12130000
+    dw `11130000, `21113000, `11111300, `33333330
 TilesJuegoFin:
 
 FondoJuego:

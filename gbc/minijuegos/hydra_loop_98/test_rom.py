@@ -18,6 +18,7 @@ NIVEL_2 = [1, 3, 0, 1, 0, 3, 0, 1, 0, 2]
 BG = 0x9800
 # Indices de tile de main.asm (EQU no exportadas al .sym).
 TILE_CABEZA, TILE_HUECO, TILE_SELLO, TILE_CUELLO_LUZ = 3, 9, 21, 27
+TILE_CABEZA_OBSERVADA = 59
 TILE_PLACA_AGUA, TILE_PLACA_DUDA, TILE_GLIFO, TILE_DIGITO = 34, 35, 36, 39
 TILE_L, TILE_O, TILE_P, TILE_R, TILE_T = 49, 50, 51, 52, 53
 TILE_ICONO, TILE_RELOJ_ON = 54, 55
@@ -129,6 +130,8 @@ class PruebasHydraLoop(unittest.TestCase):
         # Placa del hueco 2 (fila 3, columna 11): cuadrado del nodo central.
         self.assertEqual(emulador.memory[celda(3, 11)], TILE_GLIFO + 1)
         self.assertEqual(emulador.memory[celda(13, 11)], TILE_GLIFO + 1)
+        # Cabeza observada usa TILE_CABEZA_OBSERVADA como silueta base.
+        self.assertEqual(emulador.memory[celda(2, 9)], TILE_CABEZA_OBSERVADA)
 
     def test_el_cuello_se_ilumina_solo_mientras_dura_la_lectura(self):
         emulador = self.jugar()
@@ -144,7 +147,7 @@ class PruebasHydraLoop(unittest.TestCase):
         emulador.tick(34, False)
         self.assertEqual(self.leer(emulador, "wBloqueo"), 0)
         self.assertEqual(emulador.memory[celda(4, 1):celda(4, 3)],
-                         [TILE_CABEZA + 4, TILE_CABEZA + 5])
+                         [TILE_CABEZA_OBSERVADA + 4, TILE_CABEZA_OBSERVADA + 5])
         self.assertEqual(emulador.memory[celda(3, 3)], TILE_GLIFO + 1)
         # Encender y apagar el cuello tambien cabe en VBlank.
         activas = [x for x in observadas if x[4]]
