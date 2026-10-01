@@ -19,6 +19,9 @@ DEFAULT_MIN_SCORE = 30
 
 BLOCKING_LABELS = {
     "estado:validacion-humana",
+    # Bloqueado por diseño (p. ej. #382 «desactivada hasta 1.0»): decompose
+    # solo puede fallar y dejarlo en agent:needs-human (#2005).
+    "estado:bloqueado",
     "prioridad:P0",
     "agent:no-auto",
     # Cola de Jules (#1917): es nivel 3 externo, no hay que decomponerla.
