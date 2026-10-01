@@ -12,6 +12,9 @@ ROOT = Path(__file__).resolve().parents[1]
 MODELO = ROOT / "godot" / "guion" / "ecos_despertar.gd"
 RUNTIME = ROOT / "godot" / "guion" / "ecos_despertar_runtime.gd"
 DIA_REACTIVO = ROOT / "godot" / "guion" / "dia_sueno_reactivo_app.gd"
+DIA_APP = ROOT / "godot" / "guion" / "dia_app.gd"
+DIA_GATO = ROOT / "godot" / "guion" / "dia_gato_app.gd"
+SUENO_COMBATE = ROOT / "godot" / "guion" / "sueno_combate.gd"
 PRUEBA = "res://pruebas/pruebas_ecos_despertar_1775.gd"
 RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
 
@@ -22,6 +25,9 @@ class EcosDespertar1775Test(unittest.TestCase):
         cls.fuente = MODELO.read_text(encoding="utf-8")
         cls.runtime = RUNTIME.read_text(encoding="utf-8")
         cls.dia_reactivo = DIA_REACTIVO.read_text(encoding="utf-8")
+        cls.dia_app = DIA_APP.read_text(encoding="utf-8")
+        cls.dia_gato = DIA_GATO.read_text(encoding="utf-8")
+        cls.sueno_combate = SUENO_COMBATE.read_text(encoding="utf-8")
 
     def test_material_vivido_sale_de_presentacion_runtime(self):
         self.assertIn("static func material_desde_noche(", self.fuente)
@@ -45,7 +51,11 @@ class EcosDespertar1775Test(unittest.TestCase):
         self.assertNotIn("SuenoFormas", self.runtime)
         self.assertNotIn("ObjetosOniricos", self.runtime)
         self.assertNotIn("HuellasAmbientales", self.runtime)
-        self.assertNotIn("EcosDespertar.preparar(", self.runtime)
+        self.assertIn('CLAVE_PENDIENTE := "eco_despertar_pendiente"', self.runtime)
+        self.assertIn("static func preparar_despertar(", self.runtime)
+        self.assertIn("EcosDespertar.preparar(", self.runtime)
+        self.assertIn("EcosDespertar.vigente(", self.runtime)
+        self.assertIn("jornada.erase(CLAVE_MATERIAL)", self.runtime)
         self.assertNotIn("EcosDespertar.presentacion(", self.runtime)
 
     def test_controller_registra_despues_de_montar_utileria(self):
@@ -55,6 +65,38 @@ class EcosDespertar1775Test(unittest.TestCase):
             self.dia_reactivo.index("SuenoUtileria"),
             self.dia_reactivo.index(llamada),
         )
+
+    def test_cuatro_rutas_preparan_antes_de_despertar(self):
+        preparar = r"EcosDespertarRuntime\.preparar_despertar\(jornada\)"
+        self.assertEqual(2, len(re.findall(preparar, self.dia_app)))
+        self.assertRegex(
+            self.dia_app,
+            preparar + r"\s+var dia := Jornada\.despertar\(jornada\)",
+        )
+        self.assertRegex(
+            self.dia_app,
+            preparar + r"\s+var dia := Jornada\.despertar_de_golpe\(jornada\)",
+        )
+        self.assertEqual(1, len(re.findall(preparar, self.dia_gato)))
+        self.assertRegex(
+            self.dia_gato,
+            preparar + r"\s+dia_nuevo = Jornada\.despertar\(jornada\)",
+        )
+        self.assertEqual(1, len(re.findall(preparar, self.sueno_combate)))
+        self.assertRegex(
+            self.sueno_combate,
+            preparar
+            + r"\s+var dia_despertar := Jornada\.despertar_de_golpe\(jornada\)",
+        )
+        self.assertIn('"dia": dia_despertar', self.sueno_combate)
+
+    def test_runtime_preparacion_es_idempotente_y_no_presenta(self):
+        self.assertIn("EcosDespertar.vigente(previo, noche + 1)", self.runtime)
+        self.assertIn("return previo.duplicate(true)", self.runtime)
+        self.assertIn("jornada.erase(CLAVE_PENDIENTE)", self.runtime)
+        self.assertIn("jornada[CLAVE_PENDIENTE] = pendiente.duplicate(true)", self.runtime)
+        self.assertNotIn("EcosDespertar.presentacion(", self.runtime)
+        self.assertNotIn("EcosDespertar.aceptar(", self.runtime)
 
     def test_catalogo_y_seleccion_son_acotados(self):
         for tipo in ("humedad", "crt", "objeto_desplazado", "sonido_residual"):
