@@ -43,6 +43,36 @@ interface AuthenticatedActor {
   role: "dispatcher" | "worker" | "smoke";
 }
 
+export function agentPoolRoleFromWorkflowRefs(
+  repository: string,
+  workflowRef: string,
+  jobWorkflowRef: string,
+): "dispatcher" | "worker" | "smoke" | null {
+  const poolPrefix = repository + "/.github/workflows/agent-pool.yml@";
+  const workerPrefix = repository + "/.github/workflows/agent-worker.yml@";
+  const smokePrefix = repository + "/.github/workflows/agent-provider-smoke.yml@";
+
+  if (workflowRef.startsWith(workerPrefix)) {
+    return "worker";
+  }
+  if (
+    workflowRef.startsWith(poolPrefix) &&
+    jobWorkflowRef.startsWith(workerPrefix)
+  ) {
+    return "worker";
+  }
+  if (
+    workflowRef.startsWith(poolPrefix) &&
+    (!jobWorkflowRef || jobWorkflowRef.startsWith(poolPrefix))
+  ) {
+    return "dispatcher";
+  }
+  if (workflowRef.startsWith(smokePrefix)) {
+    return "smoke";
+  }
+  return null;
+}
+
 export interface AgentPoolLease {
   schema: 1;
   issue: number;
@@ -211,27 +241,12 @@ async function authenticateAgentPoolRequest(
 
   const workflowRef = claims.workflow_ref ?? "";
   const jobWorkflowRef = claims.job_workflow_ref ?? "";
-  const poolPrefix = repository + "/.github/workflows/agent-pool.yml@";
-  const workerPrefix = repository + "/.github/workflows/agent-worker.yml@";
-  const smokePrefix = repository + "/.github/workflows/agent-provider-smoke.yml@";
-
-  if (workflowRef.startsWith(workerPrefix)) {
-    return { claims, role: "worker" };
-  }
-  if (
-    workflowRef.startsWith(poolPrefix) &&
-    jobWorkflowRef.startsWith(workerPrefix)
-  ) {
-    return { claims, role: "worker" };
-  }
-  if (workflowRef.startsWith(poolPrefix) && !jobWorkflowRef) {
-    return { claims, role: "dispatcher" };
-  }
-  if (workflowRef.startsWith(smokePrefix)) {
-    return { claims, role: "smoke" };
-  }
-
-  return null;
+  const role = agentPoolRoleFromWorkflowRefs(
+    repository,
+    workflowRef,
+    jobWorkflowRef,
+  );
+  return role ? { claims, role } : null;
 }
 
 async function readJsonBody(request: Request, maxBytes = 16384): Promise<unknown> {
