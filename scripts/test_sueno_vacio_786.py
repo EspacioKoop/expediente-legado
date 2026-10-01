@@ -82,7 +82,8 @@ class SuenoVacio786Test(unittest.TestCase):
         self.assertIn("xvfb-run -a godot4", self.workflow)
         self.assertIn("entrada.png", self.workflow)
         self.assertIn("interior.png", self.workflow)
-        self.assertIn("actions/upload-artifact@", self.workflow)
+        self.assertIn("uses: ./.github/actions/upload-artifact", self.workflow)
+        self.assertNotIn("actions/upload-artifact@", self.workflow)
 
 
 if __name__ == "__main__":
