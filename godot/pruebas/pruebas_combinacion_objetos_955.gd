@@ -103,11 +103,14 @@ func _initialize() -> void:
 		Inventario.recoger(real, RecompensaOnirica.objeto()),
 		"la cuña onírica real entra en inventario",
 	)
-	var combinada := CombinacionObjetos.combinar(
-		real,
-		CombinacionesObjetosCatalogo.recetas(),
-		RecompensaOnirica.ID,
-		"palanca_kkryy",
+	var combinada := (
+		CombinacionObjetos
+		. combinar(
+			real,
+			CombinacionesObjetosCatalogo.recetas(),
+			RecompensaOnirica.ID,
+			"palanca_kkryy",
+		)
 	)
 	_comprobar(
 		combinada["estado"] == CombinacionObjetos.ESTADO_EXITO,
