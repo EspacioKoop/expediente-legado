@@ -21,6 +21,9 @@ FAMILIA_EVIDENCIA = [
         "evidencia-vecinos-673.yml",
         "evidencia-comercios-676.yml",
         "evidencia-trafico-vial-225.yml",
+        "evidencia-simurgh-658.yml",
+        "evidencia-castillo-947.yml",
+        "evidencia-sueno-284.yml",
     )
 ]
 

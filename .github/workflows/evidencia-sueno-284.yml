@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - '.github/workflows/evidencia-sueno-284.yml'
+      - '.github/actions/upload-artifact/**'
       - '.godot-version'
       - 'godot/guion/sueno*.gd'
       - 'godot/escenas/suenos/props_284/**'
@@ -72,7 +73,7 @@ jobs:
 
       - name: Adjuntar evidencia comparativa
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: ./.github/actions/upload-artifact
         with:
           name: evidencia-sueno-284-${{ github.sha }}
           path: evidencia-sueno-284/
