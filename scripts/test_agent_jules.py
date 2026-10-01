@@ -99,7 +99,7 @@ class PuenteJulesTest(unittest.TestCase):
         self.assertIn("vars.AGENT_POOL_MAX_FILES || '1'", self.texto)
         self.assertIn("scripts/agent_delegated_plan.py", self.script_ready)
         self.assertIn("scripts/agent_plan_parse.py", self.script_ready)
-        self.assertIn('jq -r '.files[]' /tmp/plan.json | sort -u', self.script_ready)
+        self.assertIn("jq -r '.files[]' /tmp/plan.json | sort -u", self.script_ready)
         self.assertIn('pulls/$PR/files?per_page=100', self.script_ready)
         self.assertIn("diff -u /tmp/plan_files /tmp/pr_files", self.script_ready)
         self.assertIn("--add-label agent:needs-human", self.script_ready)
