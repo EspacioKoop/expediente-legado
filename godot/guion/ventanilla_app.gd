@@ -70,6 +70,9 @@ func _ready() -> void:
 	_sembrar_tiradas()
 	_construir()
 	_llenar_turno()
+	# Configurar accesibilidad
+	_replica.accessibility_live = AccessibilityServer.LIVE_POLITE
+	_cronica.accessibility_live = AccessibilityServer.LIVE_POLITE
 
 
 func _process(delta: float) -> void:
@@ -325,6 +328,7 @@ func _pintar_ficha() -> void:
 	var etiqueta := tr("FICHA_PERSONA") if _rival["tipo"] == "PERSONA" else tr("FICHA_COMITE")
 	var cuerpo: String = tr(_rival.get("resumen", ""))
 	_ficha.text = tr("FICHA_RECLAMANTE") % [tr(_rival["nombre"]), etiqueta, cuerpo]
+	_ficha.accessibility_description = _ficha.text
 
 
 func _decir(frase: String) -> void:
@@ -453,6 +457,7 @@ func _construir() -> void:
 	_lista.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_lista.add_theme_stylebox_override("panel", _hundido(EstiloSiga.BLANCO))
 	_lista.add_theme_color_override("font_color", EstiloSiga.NEGRO)
+	_lista.accessibility_name = tr("VENTANILLA_LLAME")
 	_lista.item_activated.connect(_al_llamar)
 	_lista.item_selected.connect(_al_llamar)
 	_tablero.add_child(_lista)
@@ -503,6 +508,7 @@ func _construir() -> void:
 	_evidencias.allow_reselect = true
 	_evidencias.add_theme_stylebox_override("panel", _hundido(EstiloSiga.BLANCO))
 	_evidencias.add_theme_color_override("font_color", EstiloSiga.NEGRO)
+	_evidencias.accessibility_name = tr("VENTANILLA_ADELANTA")
 	informacion.add_child(_evidencias)
 
 	_pulso = CareoPulso.new()
