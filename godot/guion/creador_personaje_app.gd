@@ -103,6 +103,7 @@ func _construir() -> void:
 	_trasfondo = OptionButton.new()
 	_trasfondo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_trasfondo.custom_minimum_size.y = ALTO_CONTROL
+	_trasfondo.accessibility_name = etiqueta.text
 	for entrada in PerfilJugador.TRASFONDOS:
 		_trasfondo.add_item(tr(String(entrada["nombre"])))
 		_trasfondo.set_item_metadata(_trasfondo.item_count - 1, entrada["id"])
@@ -140,6 +141,7 @@ func _construir() -> void:
 	textos.add_child(_resumen)
 	_estado = Label.new()
 	_estado.add_theme_color_override("font_color", EstiloJuego.ACENTO)
+	_estado.accessibility_live = AccessibilityServer.LIVE_POLITE
 	textos.add_child(_estado)
 
 	var volver := Button.new()
@@ -193,6 +195,7 @@ func _opcion(caja: VBoxContainer, clave: String, opciones: Array) -> OptionButto
 	var control := OptionButton.new()
 	control.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	control.custom_minimum_size.y = ALTO_CONTROL
+	control.accessibility_name = etiqueta.text
 	for opcion in opciones:
 		control.add_item(tr(String(opcion[0])))
 		control.set_item_metadata(control.item_count - 1, opcion[1])
@@ -266,6 +269,7 @@ func _refrescar() -> void:
 		_previsualizacion.aplicar(candidato)
 	var pasado := PerfilJugador.trasfondo_por_id(String(candidato["trasfondo"]))
 	_descripcion.text = tr(String(pasado.get("descripcion", "")))
+	_descripcion.accessibility_description = _descripcion.text
 	var etiquetas := Array(pasado.get("etiquetas", []))
 	_resumen.text = (
 		tr("PERSONAJE_RESUMEN")
