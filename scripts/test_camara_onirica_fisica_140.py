@@ -35,7 +35,9 @@ class CamaraOniricaFisica140Test(unittest.TestCase):
     def test_grabacion_exige_adquisicion_y_conserva_runtime_existente(self):
         self.assertIn("ERROR_CAMARA_NO_ADQUIRIDA", self.controlador)
         self.assertIn("if not _camara_disponible(dia):", self.controlador)
-        self.assertIn("_grabacion_runtime.iniciar(camara, anomalia, documento, true)", self.controlador)
+        self.assertIn("_grabacion_runtime.iniciar(camara, anomalia, documento, true, sujeto)", self.controlador)
+        self.assertIn('"anomalia_id": anomalia.id_catalogo()', self.controlador)
+        self.assertIn('"reactiva": anomalia.reactiva()', self.controlador)
         self.assertIn("_grabacion_runtime.muestrear(delta)", self.controlador)
 
     def test_hud_es_presentacion_y_muestra_metraje(self):
