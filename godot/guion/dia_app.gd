@@ -356,6 +356,7 @@ func _process(delta: float) -> void:
 		return
 	if Jornada.gastar_sueno(jornada, delta):
 		Auditorias.resolver_fin_sueno(partida.estado, false)
+		EcosDespertarRuntime.preparar_despertar(jornada)
 		var dia := Jornada.despertar_de_golpe(jornada)
 		Prometeo.reiniciar_exposicion_ideologica_diaria(partida.estado)
 		_hablando = false
@@ -493,6 +494,7 @@ func _al_pisar_salida(cuerpo: Node3D, salida: Area3D) -> void:
 			if jornada["sueno_escenas"].is_empty():
 				_registrar_despertar_reglamentario()
 				Auditorias.resolver_fin_sueno(partida.estado, true)
+				EcosDespertarRuntime.preparar_despertar(jornada)
 				var dia := Jornada.despertar(jornada)
 				Prometeo.reiniciar_exposicion_ideologica_diaria(partida.estado)
 				_hablando = false
