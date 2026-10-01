@@ -261,12 +261,16 @@ func _probar_runtime_volcar() -> void:
 	_comprobar(is_equal_approx(float(runtime["restante"]), duracion), "respeta duracion declarada")
 
 	RuntimeVolcar.avanzar(runtime, duracion * 0.5)
-	_comprobar(prop.collision_layer == RuntimeVolcar.CAPA_OBSTACULO, "obstaculo sigue durante ventana")
+	_comprobar(
+		prop.collision_layer == RuntimeVolcar.CAPA_OBSTACULO, "obstaculo sigue durante ventana"
+	)
 	var antes_repetir := float(runtime["restante"])
 	var repetido := RuntimeVolcar.volcar(runtime, prop.global_position, true)
 	_comprobar(not bool(repetido["ok"]), "volcar es de un solo uso")
 	_comprobar(String(repetido["motivo"]) == "ya_volcado", "repeticion conserva contrato")
-	_comprobar(is_equal_approx(float(runtime["restante"]), antes_repetir), "repetir no reinicia tiempo")
+	_comprobar(
+		is_equal_approx(float(runtime["restante"]), antes_repetir), "repetir no reinicia tiempo"
+	)
 
 	RuntimeVolcar.avanzar(runtime, duracion)
 	_comprobar(prop.collision_layer == 0, "el volumen temporal expira")
