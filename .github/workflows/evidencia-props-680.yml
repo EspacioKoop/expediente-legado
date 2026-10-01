@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - '.github/workflows/evidencia-props-680.yml'
+      - '.github/actions/upload-artifact/**'
       - '.godot-version'
       - 'godot/assets/modelos/street_furniture/**'
       - 'godot/assets/procedencia.json'
@@ -148,7 +149,7 @@ jobs:
 
       - name: Adjuntar evidencia visual y presupuesto
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: ./.github/actions/upload-artifact
         with:
           name: evidencia-props-680-${{ github.sha }}
           path: evidencia-props-680/
