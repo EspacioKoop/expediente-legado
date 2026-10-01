@@ -70,8 +70,14 @@ DEF TILE_O       EQU 17
 DEF TILE_N       EQU 18
 DEF TILE_9       EQU 19
 DEF TILE_8       EQU 20
-DEF TILE_A       EQU 21
-DEF TILE_SUELO   EQU 22
+DEF TILE_A         EQU 21
+DEF TILE_SUELO     EQU 22
+DEF TILE_CABEZA_2  EQU 23
+DEF TILE_TORSO_2   EQU 24
+DEF TILE_PIERNAS_2 EQU 25
+DEF TILE_CABEZA_3  EQU 26
+DEF TILE_TORSO_3   EQU 27
+DEF TILE_PIERNAS_3 EQU 28
 
 DEF LECTURA_COMPLETA EQU $0F
 DEF IMPACTOS_META    EQU 3
@@ -610,12 +616,21 @@ DibujarTitulo:
     ret
 
 DibujarArena:
-    ; Rival monumental simplificado a tres tiles verticales.
-    ld a, TILE_CABEZA
+    ; Rival monumental simplificado a tres tiles verticales segun wRival.
+    ld a, [wRival]
+    ld e, a
+    add a
+    add e
+    ld e, a
+    ld d, 0
+    ld hl, TilesRivales
+    add hl, de
+
+    ld a, [hli]
     ld [BG_MAP + (5 * 32) + 16], a
-    ld a, TILE_TORSO
+    ld a, [hli]
     ld [BG_MAP + (8 * 32) + 16], a
-    ld a, TILE_PIERNAS
+    ld a, [hl]
     ld [BG_MAP + (11 * 32) + 16], a
 
     ; El ojo en la esquina sugiere observacion sin un tutorial textual.
@@ -792,6 +807,12 @@ SonidoImpacto:
     ldh [rNR14], a
     ret
 
+; Tripletes de tiles de silueta por rival (cabeza, torso, piernas).
+TilesRivales:
+    db TILE_CABEZA,   TILE_TORSO,   TILE_PIERNAS
+    db TILE_CABEZA_2, TILE_TORSO_2, TILE_PIERNAS_2
+    db TILE_CABEZA_3, TILE_TORSO_3, TILE_PIERNAS_3
+
 ; Y de OAM: coordenada visible + 16.
 MiraY:
     db 64, 88, 120
@@ -873,6 +894,18 @@ Tiles:
     db $38,$00,$44,$00,$82,$00,$FE,$00,$82,$00,$82,$00,$82,$00,$00,$00
 ; 22 suelo
     db $00,$00,$00,$00,$00,$00,$FF,$00,$55,$00,$AA,$00,$00,$00,$00,$00
+; 23 cabeza rival 2 (casco pesado con cornamenta/cresta ancha)
+    db $C3,$00,$E7,$00,$7E,$00,$5A,$00,$7E,$00,$3C,$00,$3C,$00,$00,$00
+; 24 torso rival 2 (peto robusto con hombreras anchas)
+    db $7E,$00,$FF,$00,$FF,$00,$BD,$00,$7E,$00,$7E,$00,$3C,$00,$00,$00
+; 25 piernas rival 2 (grebas pesadas y anchas)
+    db $3C,$00,$7E,$00,$7E,$00,$DB,$00,$C3,$00,$C3,$00,$E7,$00,$00,$00
+; 26 cabeza rival 3 (casco estilizado con penacho alto)
+    db $18,$00,$18,$00,$3C,$00,$5A,$00,$3C,$00,$18,$00,$18,$00,$00,$00
+; 27 torso rival 3 (armadura agil y triangular)
+    db $18,$00,$3C,$00,$7E,$00,$5A,$00,$3C,$00,$18,$00,$18,$00,$00,$00
+; 28 piernas rival 3 (piernas estilizadas en postura atletica)
+    db $18,$00,$24,$00,$24,$00,$42,$00,$42,$00,$81,$00,$81,$00,$00,$00
 TilesFin:
 
 SECTION "Estado", WRAM0
