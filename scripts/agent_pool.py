@@ -20,6 +20,7 @@ MAX_ALLOWED_PARALLEL = 6
 WORKER_FAILURE_RE = re.compile(
     r"^AGENT_POOL_WORKER_FAILURE\s+worker=([A-Za-z0-9._-]+)\b"
 )
+BACKEND_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{0,31}$")
 
 
 def _labels(issue: dict[str, Any]) -> set[str]:
@@ -41,6 +42,10 @@ def _worker(item: dict[str, Any]) -> dict[str, Any] | None:
     worker_id = item.get("worker")
     provider = item.get("provider")
     healthy = item.get("healthy", True)
+    raw_backend = item.get("backend", provider)
+    backend = raw_backend.strip().lower() if isinstance(raw_backend, str) else str(provider)
+    if not BACKEND_RE.fullmatch(backend):
+        backend = "custom"
     if not isinstance(worker_id, str) or not worker_id.strip():
         return None
     if provider not in {"qwen", "gemini"}:
@@ -74,6 +79,7 @@ def _worker(item: dict[str, Any]) -> dict[str, Any] | None:
     return {
         "worker": worker_id.strip(),
         "provider": provider,
+        "backend": backend,
         "score": score,
         "tier": tier,
         "max_task_bytes": max_task_bytes,
@@ -290,6 +296,7 @@ def select_tasks(
             {
                 "issue": int(issue["number"]),
                 "provider": worker["provider"],
+                "backend": worker["backend"],
                 "worker": worker["worker"],
             }
         )
@@ -328,6 +335,7 @@ def select_tasks(
             {
                 "issue": int(issue["number"]),
                 "provider": worker["provider"],
+                "backend": worker["backend"],
                 "worker": worker["worker"],
             }
         )
