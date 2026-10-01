@@ -92,6 +92,9 @@ func _process(delta: float) -> void:
 			Meticulosidad.motivos_oniricos(dia.jornada),
 		)
 	)
+	# #1775: registra solo material ya materializado en esta sala. El mutador se
+	# lee del presentador montado y los objetos de las anomalías realmente creadas.
+	EcosDespertarRuntime.registrar_sala(dia.jornada, mundo, anomalias)
 
 	var opciones: Dictionary = dia._opciones_sueno()
 	var total_escenas := clampi(
