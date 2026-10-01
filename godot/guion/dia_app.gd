@@ -105,21 +105,13 @@ func _abrir_ultimo_recurso_pendiente() -> void:
 
 func _al_canjear_ultimo_recurso(carta_id: String) -> void:
 	_ciclo_laboral.canjear_ultimo_recurso(
-		self,
-		partida.estado,
-		jornada,
-		carta_id,
-		Callable(self, "_guardar_o_avisar"),
-		_caminante,
+		self, partida.estado, jornada, carta_id, Callable(self, "_guardar_o_avisar"), _caminante
 	)
 
 
 func _al_aceptar_cese() -> void:
 	_ciclo_laboral.aceptar_cese(
-		partida.estado,
-		jornada,
-		Callable(self, "_guardar_o_avisar"),
-		Callable(self, "_reasignar"),
+		partida.estado, jornada, Callable(self, "_guardar_o_avisar"), Callable(self, "_reasignar")
 	)
 
 
@@ -144,38 +136,23 @@ func _abrir_vuelta() -> void:
 
 func _abrir_auditorias_nueva_vida() -> void:
 	_ciclo_laboral.abrir_auditorias(
-		self,
-		partida.estado,
-		_caminante,
-		_hud,
-		Callable(self, "_confirmar_auditorias_nueva_vida"),
+		self, partida.estado, _caminante, _hud, Callable(self, "_confirmar_auditorias_nueva_vida")
 	)
 
 
 func _confirmar_auditorias_nueva_vida(seleccion: Array) -> void:
 	_ciclo_laboral.confirmar_auditorias(
-		partida.estado,
-		seleccion,
-		Callable(self, "_guardar_o_avisar"),
-		Callable(self, "_abrir_vuelta"),
+		partida.estado, seleccion, Callable(self, "_guardar_o_avisar"), Callable(self, "_abrir_vuelta")
 	)
 
 
 func _registrar_reincorporacion() -> Dictionary:
-	return _ciclo_laboral.registrar_reincorporacion(
-		partida.estado,
-		jornada,
-		SELLO_REINCORPORACION,
-	)
+	return _ciclo_laboral.registrar_reincorporacion(partida.estado, jornada, SELLO_REINCORPORACION)
 
 
 ## Hook heredable para que DiaJornadaApp/DiaClimaApp reaccionen al mismo cierre.
 func _cerrar_vuelta() -> void:
-	_ciclo_laboral.cerrar_vuelta(
-		_caminante,
-		_hud,
-		Callable(self, "_guardar_o_avisar"),
-	)
+	_ciclo_laboral.cerrar_vuelta(_caminante, _hud, Callable(self, "_guardar_o_avisar"))
 
 
 ## Luz y ambiente. Una sola direccional, ahora con sombra, y oclusión.
