@@ -118,6 +118,7 @@ func _construir() -> void:
 
 	_estado = _linea("")
 	_estado.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_estado.accessibility_live = AccessibilityServer.LIVE_POLITE
 	raiz.add_child(_estado)
 
 
@@ -128,6 +129,7 @@ func _refrescar_tarjetas() -> void:
 
 	for i in _orden.size():
 		var boton := _boton(_rotulo_tarjeta(i))
+		boton.accessibility_name = _rotulo_tarjeta(i, false)
 		boton.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		boton.pressed.connect(_seleccionar_para_mover.bind(i))
 		boton.gui_input.connect(_entrada_tarjeta.bind(i, boton))
@@ -137,13 +139,13 @@ func _refrescar_tarjetas() -> void:
 	_refrescar_controles()
 
 
-func _rotulo_tarjeta(indice: int) -> String:
+func _rotulo_tarjeta(indice: int, incluir_marca: bool = true) -> String:
 	var id := String(_orden[indice])
 	var tarjeta: Dictionary = _tarjetas_por_id.get(id, {})
 	var fecha := String(tarjeta.get("fecha", ""))
 	if fecha.is_empty():
 		fecha = "s/f"
-	var marca := "↕ " if _indice_mover == indice else ""
+	var marca := "↕ " if incluir_marca and _indice_mover == indice else ""
 	return (
 		"%s%d. Folio %s · %s · %s"
 		% [marca, indice + 1, tarjeta.get("folio", id), tarjeta.get("tipo", ""), fecha]
@@ -190,6 +192,7 @@ func _mover_seleccion(delta: int) -> void:
 func _refrescar_rotulos() -> void:
 	for i in _botones_tarjeta.size():
 		_botones_tarjeta[i].text = _rotulo_tarjeta(i)
+		_botones_tarjeta[i].accessibility_name = _rotulo_tarjeta(i, false)
 
 
 func _refrescar_controles() -> void:
@@ -301,6 +304,7 @@ func _actualizar_vecinos_foco() -> void:
 func _boton(texto: String) -> Button:
 	var boton := Button.new()
 	boton.text = texto
+	boton.accessibility_name = texto
 	_hacer_enfocable(boton)
 	return boton
 
