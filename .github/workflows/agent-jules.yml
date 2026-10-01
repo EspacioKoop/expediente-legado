@@ -8,6 +8,8 @@ name: Agent Jules
 on:
   issues:
     types: [labeled, unlabeled, closed]
+  issue_comment:
+    types: [created]
   pull_request:
     types: [opened, reopened, synchronize, closed]
   workflow_run:
@@ -18,6 +20,7 @@ permissions:
   contents: read
   issues: write
   pull-requests: read
+  actions: write
 
 concurrency:
   group: agent-jules-${{ github.event.issue.number || github.event.pull_request.number || github.event.workflow_run.id }}
@@ -302,3 +305,104 @@ jobs:
 
           gh issue comment "$registro" --repo "$GITHUB_REPOSITORY" --body             "$marca pruebas=CI-canonica+checks-core-verdes alcance=jules-task-$task_id limites=sin-auto-merge" >/dev/null
           echo "PR_READY de Jules #$PR publicado en #$registro."
+
+  # Jules es capacidad burst: un fallo terminal suyo no debe dejar una tarea
+  # válida bloqueada. El comentario del bot oficial actúa como señal de fallback,
+  # pero el puente vuelve a validar plan, estado y ausencia de PR antes de encolar.
+  fallback_pool:
+    if: >-
+      github.event_name == 'issue_comment' &&
+      github.event.action == 'created' &&
+      github.event.comment.user.login == 'google-labs-jules[bot]' &&
+      contains(github.event.comment.body, 'encountered an unexpected error') &&
+      contains(github.event.comment.body, 'wasn''t able to complete') &&
+      github.event.issue.state == 'open' &&
+      contains(github.event.issue.labels.*.name, 'jules')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: main
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+
+      - name: Reencolar en pool si Jules termino sin PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ github.event.issue.number }}
+          MAX_FILES: ${{ vars.AGENT_POOL_MAX_FILES || '1' }}
+        run: |
+          set -euo pipefail
+
+          # Un comentario terminal tardio no debe duplicar trabajo ya publicado.
+          gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 100 \
+            --json number,body > /tmp/open-prs.json
+          refs="$(jq --arg issue "$ISSUE" '
+            [
+              .[]
+              | select(
+                  ((.body // "") | test(
+                    "(?im)(refs?|fix(?:es|ed)?|clos(?:es|ed)?|resolv(?:es|ed)?)[[:space:]]+#"
+                    + $issue + "([^0-9]|$)"
+                  ))
+                )
+            ] | length
+          ' /tmp/open-prs.json)"
+          if (( refs > 0 )); then
+            echo "Fallback Jules omitido: #$ISSUE ya tiene una PR abierta."
+            exit 0
+          fi
+
+          # Revalidar el TaskPacket delegado; nunca improvisar un plan al fallar
+          # el proveedor externo.
+          gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE" > /tmp/issue.json
+          gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$ISSUE/comments?per_page=100" \
+            --jq '.[]' | jq -s '.' > /tmp/comments.json
+          jq -s '.[0] + {comments: .[1]}' /tmp/issue.json /tmp/comments.json > /tmp/entrada.json
+          python3 scripts/agent_delegated_plan.py \
+            --issue /tmp/entrada.json --output /tmp/delegado.json >/dev/null
+
+          status=0
+          python3 scripts/agent_plan_parse.py \
+            --source /tmp/delegado.json \
+            --max-files "$MAX_FILES" \
+            --output /tmp/plan.json || status=$?
+          # Liberar explícitamente: las mutaciones hechas con GITHUB_TOKEN no
+          # vuelven a disparar este workflow de forma recursiva.
+          registro="$(python3 scripts/gestionar_reservas_rollover.py --active)"
+
+          if (( status != 0 )) || [[ "$(jq -r '.found' /tmp/delegado.json)" != true ]] ||
+            [[ "$(jq '.files | length' /tmp/plan.json)" -eq 0 ]]; then
+            gh issue comment "$registro" --repo "$GITHUB_REPOSITORY" --body \
+              "RELEASE issue=#$ISSUE branch=jules/issue-$ISSUE motivo=jules-error-sin-PR-plan-invalido" \
+              >/dev/null
+            gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+              --remove-label jules --add-label agent:needs-human >/dev/null 2>&1 || true
+            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
+              "Jules fallo sin PR y el AGENT_PLAN ya no es ejecutable por nivel 3; se deriva a revision humana." \
+              >/dev/null || true
+            exit 0
+          fi
+
+          gh issue comment "$registro" --repo "$GITHUB_REPOSITORY" --body \
+            "RELEASE issue=#$ISSUE branch=jules/issue-$ISSUE motivo=jules-error-sin-PR-fallback-pool" \
+            >/dev/null
+
+          gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+            --remove-label jules --add-label agent:auto >/dev/null
+          gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+            --remove-label agent:needs-human >/dev/null 2>&1 || true
+          gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
+            "Jules termino sin PR; AGENT_PLAN revalidado y tarea devuelta automaticamente a agent:auto." \
+            >/dev/null || true
+
+          # Añadir agent:auto desde GITHUB_TOKEN no encadena el dispatcher:
+          # lanzarlo de forma explícita garantiza el fallback.
+          gh workflow run agent-pool.yml --repo "$GITHUB_REPOSITORY" --ref main \
+            -f max_parallel=6
+          echo "Fallback Jules -> pool despachado para #$ISSUE."
+
