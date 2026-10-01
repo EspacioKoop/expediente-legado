@@ -18,6 +18,14 @@ RUNTIME = {
     "archivador_cerrar_02.ogg": "d7ec8cd0de8f6a6afd9f2662994c73e06aa572ef30d8f729ccf6602743ed6bcf",
     "archivador_cerrar_03.ogg": "b7597fcb04a74189035809268b47a2c1821e9482489e06cda450cda2fe83a277",
 }
+ARCHIVADOR_WAV = {
+    "archivador_abrir_01": "f2ffeb6b5bdf3f7bb34e108755ec561688af9ed368f4baf7656db7b84112fdc5",
+    "archivador_abrir_02": "955612e51f50cfee151f61be36faadc441bc55b5013580d491d364a85af70024",
+    "archivador_abrir_03": "1a1ac4635f0f5c3607b8a2c133dcb9fe6d052a410608d0f67c072963805e3be0",
+    "archivador_cerrar_01": "8d820839175e0b2e2f411027845875323e7a38873ae08ad18e85dd175ee3d935",
+    "archivador_cerrar_02": "b52f5bfe6a0654577b45b0f51ce29f76e7f54fcaed53bed65ec879e2f0b35b3d",
+    "archivador_cerrar_03": "7c6650547bbb11dfaf72afb931bf014f3686eeb19f69c583d6ada42a17898dfe",
+}
 
 spec = importlib.util.spec_from_file_location("sfx_chip_generar", GENERADOR)
 generador = importlib.util.module_from_spec(spec)
@@ -26,15 +34,18 @@ spec.loader.exec_module(generador)
 
 
 class SfxChipGeneradorTest(unittest.TestCase):
-    def test_seis_recetas_regeneran_el_pcm_canonico(self):
-        self.assertEqual(len(generador.RECETAS), 6)
+    def test_recetas_regeneran_el_pcm_canonico(self):
+        for nombre, esperado in ARCHIVADOR_WAV.items():
+            self.assertIn(nombre, generador.RECETAS)
+            self.assertEqual(generador.RECETAS[nombre]["wav_sha256"], esperado, nombre)
+
         hashes = set()
         for nombre, receta in generador.RECETAS.items():
             wav = generador.wav_bytes(generador.sintetizar(receta))
             real = hashlib.sha256(wav).hexdigest()
             self.assertEqual(real, receta["wav_sha256"], nombre)
             hashes.add(real)
-        self.assertEqual(len(hashes), 6)
+        self.assertEqual(len(hashes), len(generador.RECETAS))
 
     def test_pcm_es_mono_44100_sin_clipping_dc_ni_click_de_borde(self):
         self.assertEqual(generador.SAMPLE_RATE, 44_100)
