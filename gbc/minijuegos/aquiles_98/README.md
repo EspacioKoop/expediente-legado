@@ -62,6 +62,37 @@ La persistencia de campaña pertenece a Godot. `Aquiles98Vigilia` observa la ROM
 
 No incluye BIOS, dumps, ROMs comerciales, logotipos ni recursos externos. Código y pixel-art nacen en este repositorio bajo su licencia MIT.
 
+
+## Pack de arte GBC v1 (#1804)
+
+El primer corte de conversión visual es textual y reproducible: no añade PNG/ROM/LFS ni cambia todavía el gameplay.
+
+- `generar_arte_v1.py` redibuja sobre grid 8×8 seis estados (`idle`, `advance`, `attack`, `block`, `vulnerable`, `defeat`) con 2 frames por estado;
+- `assets/myrmidon_v1_tiles.inc` contiene tiles OBJ/BG/HUD 2bpp y mapas de frames listos para `INCLUDE` desde RGBDS;
+- `assets/myrmidon_v1_palettes.inc` contiene 4 paletas BG + 4 OBJ en BGR555;
+- `assets/myrmidon_v1_manifest.json` fija fuentes visuales por blob SHA, dimensiones y presupuestos;
+- los mapas previos viven en `MyrmidonFrameMapsBase` y `vulnerable` queda en `MyrmidonFrameMapsRevealed`; el HUD de talón vive además en `MyrmidonHudRevealed`. Ningún banco revelado debe consumirse antes de deducir la vulnerabilidad.
+
+Presupuesto v1: **58 tiles OBJ únicos, 8 BG y 3 HUD**, dejando margen sobre los límites 64/16/4.
+
+Regenerar y verificar:
+
+```bash
+python3 gbc/minijuegos/aquiles_98/generar_arte_v1.py
+python3 gbc/minijuegos/aquiles_98/generar_arte_v1.py --check
+python3 scripts/test_myrmidon_assets_1804.py
+```
+
+Generar la evidencia visual 160×144 sin versionar previews:
+
+```bash
+python3 gbc/minijuegos/aquiles_98/generar_arte_v1.py \
+  --check --preview-dir build/myrmidon_1804
+```
+
+Se producen el mismo layout en estado normal y con vulnerabilidad revelada. Esos previews sirven como gate reproducible de lectura del pack; no sustituyen un playtest de la ROM.
+
+
 ## Compilar
 
 Requiere RGBDS 1.0.x; CI usa la versión fijada por el repositorio.
