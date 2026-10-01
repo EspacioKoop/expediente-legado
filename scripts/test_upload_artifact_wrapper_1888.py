@@ -24,6 +24,9 @@ FAMILIA_EVIDENCIA = [
         "evidencia-simurgh-658.yml",
         "evidencia-castillo-947.yml",
         "evidencia-sueno-284.yml",
+        "evidencia-web98-794.yml",
+        "evidencia-texto-corrupto-806.yml",
+        "evidencia-sueno-786.yml",
     )
 ]
 
