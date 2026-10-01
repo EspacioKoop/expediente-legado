@@ -2,6 +2,7 @@ extends SceneTree
 
 var fallos := 0
 
+
 func _init() -> void:
 	var periferia := EstresPeriferia.new()
 	root.add_child(periferia)
@@ -15,11 +16,16 @@ func _init() -> void:
 	_comprobar(periferia.intensidad() > media, "intensidad es monotónica")
 	_comprobar(periferia.intensidad() <= EstresPeriferia.ALPHA_MAX, "intensidad queda acotada")
 	periferia.sincronizar(2.0)
-	_comprobar(is_equal_approx(periferia.intensidad(), EstresPeriferia.ALPHA_MAX), "nivel alto se limita")
+	_comprobar(
+		is_equal_approx(periferia.intensidad(), EstresPeriferia.ALPHA_MAX), "nivel alto se limita"
+	)
 	periferia.sincronizar(-1.0, true)
-	_comprobar(not periferia.visible, "nivel negativo se limita a cero también con reducción de movimiento")
+	_comprobar(
+		not periferia.visible, "nivel negativo se limita a cero también con reducción de movimiento"
+	)
 	periferia.queue_free()
 	quit(fallos)
+
 
 func _comprobar(condicion: bool, mensaje: String) -> void:
 	if condicion:
