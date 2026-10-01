@@ -64,10 +64,12 @@ DEF TILE_RED     EQU 4
 DEF TILE_LINEA   EQU 5
 DEF TILE_DIGITO0 EQU 6
 DEF TILE_A       EQU 16
-DEF TILE_EXCL    EQU 42
-DEF TILE_PUNTO   EQU 43
-DEF TILE_DOSPT   EQU 44
-DEF TILE_GUION   EQU 45
+DEF TILE_EXCL       EQU 42
+DEF TILE_PUNTO      EQU 43
+DEF TILE_DOSPT      EQU 44
+DEF TILE_GUION      EQU 45
+DEF TILE_ARANA_ALTA EQU 46
+DEF TILE_ARANA_RASA EQU 47
 
 
 INCLUDE "../comun/cartucho.asm"
@@ -984,7 +986,20 @@ ActualizarOAM:
     ld a, [wPorteroCarril]
     call XDeCarril
     ld [OAM_BASE + 1], a
+    ld a, [wVentanaParada]
+    or a
+    jr z, .arana_neutra
+    ld a, [wPorteroAltura]
+    or a
+    jr z, .arana_parada_rasa
+    ld a, TILE_ARANA_ALTA
+    jr .arana_tile_listo
+.arana_parada_rasa:
+    ld a, TILE_ARANA_RASA
+    jr .arana_tile_listo
+.arana_neutra:
     ld a, TILE_ARANA
+.arana_tile_listo:
     ld [OAM_BASE + 2], a
     xor a
     ld [OAM_BASE + 3], a
@@ -1350,6 +1365,8 @@ Tiles:
     db $00,0,$00,0,$00,0,$00,0,$00,0,$00,0,$18,0,$00,0
     db $00,0,$18,0,$18,0,$00,0,$00,0,$18,0,$18,0,$00,0
     db $00,0,$00,0,$00,0,$7E,0,$00,0,$00,0,$00,0,$00,0
+    db $A5,$A5,$5A,$5A,$3C,$3C,$7E,$7E,$DB,$DB,$7E,$7E,$3C,$3C,$24,$24
+    db $00,$00,$00,$00,$3C,$3C,$7E,$7E,$DB,$DB,$7E,$7E,$DB,$DB,$A5,$A5
 TilesFin:
 
 PaletaBG:
