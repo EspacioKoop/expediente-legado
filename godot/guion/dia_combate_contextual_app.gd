@@ -54,6 +54,9 @@ func abrir(
 		)
 	)
 	_combate.perfil_jugador = partida.estado.get("perfil_jugador", {})
+	# #1772: el prop ambiental existe solo dentro de un combate ya autorizado
+	# por CombateContextual; los JuicioCombate3D usados en otras superficies no lo heredan.
+	_combate.interaccion_ambiental_habilitada = true
 	var al_terminar := (
 		_cerrar
 		. bind(

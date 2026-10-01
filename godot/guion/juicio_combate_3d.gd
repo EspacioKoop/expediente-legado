@@ -16,6 +16,7 @@ const RIVAL = preload("res://guion/juicio_combate_rival.gd")
 const DOCTRINA = preload("res://guion/juicio_combate_doctrina.gd")
 const JUGADOR = preload("res://guion/juicio_combate_jugador.gd")
 const ESTADO_TEMPORAL = preload("res://guion/juicio_combate_estado_temporal.gd")
+const AMBIENTAL_1772 = preload("res://guion/juicio_combate_ambiental_1772.gd")
 const DETERMINACION_BASE := REGLAS.DETERMINACION_BASE
 const DETERMINACION_MINIMA_RIVAL := REGLAS.DETERMINACION_MINIMA_RIVAL
 const VELOCIDAD_JUGADOR := 4.8
@@ -35,6 +36,10 @@ const DISTANCIA_MESA := 3.0
 ## La ficha del jugador, para que pelee con su cuerpo. Vacía: el de serie.
 var perfil_jugador: Dictionary = {}
 var reduccion_movimiento := false
+## Opt-in explícito: solo los hosts de combate contextual lo activan.
+var interaccion_ambiental_habilitada := false
+
+var _ambiental_1772: Dictionary = {}
 
 var _acusado: Dictionary = {}
 var _bono_documental := 0
@@ -164,6 +169,8 @@ func _ready() -> void:
 	_preparar_sistemas_jungianos()
 	_resolver_capa_simbolica()
 	_montar_arena()
+	if interaccion_ambiental_habilitada:
+		_ambiental_1772 = AMBIENTAL_1772.montar(self)
 	_montar_hud()
 	_actualizar_hud()
 
@@ -177,12 +184,34 @@ func _process(delta: float) -> void:
 	_mover_rival(delta)
 	_actualizar_camara()
 
+	# Acción secundaria semántica y remapeable. Fuera de este host, inventario
+	# conserva su significado normal; aquí no sustituye a ningún ataque.
+	if interaccion_ambiental_habilitada and Input.is_action_just_pressed("inventario"):
+		usar_entorno_ambiental_1772()
 	if Input.is_action_just_pressed("interactuar"):
 		_atacar(1, ALCANCE_LIGERO, RECARGA_LIGERA, false)
 	if Input.is_action_just_pressed("saltar"):
 		_atacar(2, ALCANCE_FUERTE, _recarga_fuerte, true)
 	if Input.is_action_just_pressed("agacharse"):
 		_esquivar()
+
+
+## Primer consumidor runtime de #1772. Devuelve false sin efectos cuando el
+## host no lo habilitó, el combate acabó o el jugador está fuera de alcance.
+func usar_entorno_ambiental_1772() -> bool:
+	if not interaccion_ambiental_habilitada or _acabado or _ambiental_1772.is_empty():
+		return false
+	if _jugador == null or not is_instance_valid(_jugador):
+		return false
+	var resultado := AMBIENTAL_1772.activar(_ambiental_1772, _jugador.global_position, true)
+	return bool(resultado.get("ok", false))
+
+
+func estado_entorno_ambiental_1772() -> Dictionary:
+	if _ambiental_1772.is_empty():
+		return {}
+	var estado: Variant = _ambiental_1772.get("estado", {})
+	return (estado as Dictionary).duplicate(true) if estado is Dictionary else {}
 
 
 ## Los campos siguen siendo propios del nodo porque pruebas y
