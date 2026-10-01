@@ -2331,6 +2331,30 @@
       "licencia": "CC0-1.0",
       "fuente": "tools/sfx_chip/generar.py",
       "sha256": "b7597fcb04a74189035809268b47a2c1821e9482489e06cda450cda2fe83a277"
+    },
+    {
+      "ruta": "audio/chip/papel_coger_01.ogg",
+      "titulo": "Foley chip · papel coger 01",
+      "autor": "SIGA-98 · síntesis propia",
+      "licencia": "CC0-1.0",
+      "fuente": "tools/sfx_chip/generar.py",
+      "sha256": "ab7c79d10d10996bcd01f3550abdedf562e180f7b53295ad48b8e91365d075aa"
+    },
+    {
+      "ruta": "audio/chip/papel_pasar_01.ogg",
+      "titulo": "Foley chip · papel pasar 01",
+      "autor": "SIGA-98 · síntesis propia",
+      "licencia": "CC0-1.0",
+      "fuente": "tools/sfx_chip/generar.py",
+      "sha256": "0d8c22e65257cf8f097a2225c679608a147f2b4c6e18b174b32cfac0c636a191"
+    },
+    {
+      "ruta": "audio/chip/papel_manojo_01.ogg",
+      "titulo": "Foley chip · papel manojo 01",
+      "autor": "SIGA-98 · síntesis propia",
+      "licencia": "CC0-1.0",
+      "fuente": "tools/sfx_chip/generar.py",
+      "sha256": "55910ef28577d8aed8be2a3aae83a97904799e6e418654d514a991934463048c"
     }
   ]
 }
