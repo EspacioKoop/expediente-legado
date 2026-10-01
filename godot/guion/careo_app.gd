@@ -38,10 +38,12 @@ var _en_cinematica := true
 var _combate: Dictionary = {}
 var _azar := RandomNumberGenerator.new()
 var _desde := 0.0
+var _habilidad_eje := ""
 
 var _voz: Label
 var _cronica: Label
 var _marcador: Label
+var _habilidades: HBoxContainer
 var _botones: HBoxContainer
 var _figura_cunado: Node3D
 var _camara_duelo: Camera3D
@@ -96,6 +98,7 @@ func _empezar_duelo() -> void:
 	_camara_duelo.current = true
 	_camara_duelo.position = Vector3(0.0, 1.6, 2.9)
 	_camara_duelo.look_at(Vector3(0, 1.5, 0), Vector3.UP)
+	_pintar_habilidades()
 	_botones.visible = true
 	_figura_cunado.visible = true
 	_actualizar_marcador()
@@ -105,7 +108,8 @@ func _empezar_duelo() -> void:
 func _al_jugar(tipo: String) -> void:
 	if _combate["terminado"]:
 		return
-	var ronda := Combate.jugar(_combate, tipo, "", _tirada())
+	var ronda := Combate.jugar(_combate, tipo, _habilidad_eje, _tirada())
+	_habilidad_eje = ""
 	# El sonido cuenta un daño que YA está resuelto. En empate no hay golpe y
 	# nunca interviene en la tirada, la vida ni el veredicto.
 	if ronda["veredicto"] != "empate":
@@ -120,9 +124,12 @@ func _al_jugar(tipo: String) -> void:
 			_veredicto(ronda["veredicto"])
 		]
 	)
+	if not ronda["revelada"].is_empty():
+		_cronica.text += "\n" + tr("VENTANILLA_ADELANTA") % ronda["revelada"]
 	if not ronda["replica"].is_empty():
 		_cronica.text += "\n" + tr("CAREO_REPLICA") % ronda["replica"]
 
+	_pintar_habilidades()
 	_actualizar_marcador()
 
 	if ronda["terminado"]:
@@ -130,6 +137,7 @@ func _al_jugar(tipo: String) -> void:
 		Musica.detener(self)
 		_decir(Cunado.comentario("victoria" if gano else "derrota", _tirada()))
 		_botones.visible = false
+		_habilidades.visible = false
 		terminado.emit(gano)
 	elif Time.get_ticks_msec() / 1000.0 - _desde > PAUSA_ENTRE_COMENTARIOS:
 		_decir(Cunado.sobre_ronda(ronda, _tirada()))
@@ -259,7 +267,7 @@ func _montar_interfaz() -> void:
 
 	var abajo := VBoxContainer.new()
 	abajo.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	abajo.offset_top = -150
+	abajo.offset_top = -200
 	abajo.offset_left = 16
 	abajo.offset_right = -16
 	abajo.offset_bottom = -12
@@ -273,14 +281,42 @@ func _montar_interfaz() -> void:
 	_voz.add_theme_color_override("font_color", Color(0.85, 0.82, 0.55))
 	abajo.add_child(_voz)
 
+	_habilidades = HBoxContainer.new()
+	_habilidades.visible = false
+	abajo.add_child(_habilidades)
+
 	_botones = HBoxContainer.new()
 	_botones.visible = false
+	_botones.visibility_changed.connect(func(): _habilidades.visible = _botones.visible)
 	for tipo in Combate.TIPOS:
 		var boton := Button.new()
 		boton.text = Combate.etiqueta(tipo)
 		boton.pressed.connect(_al_jugar.bind(tipo))
 		_botones.add_child(boton)
 	abajo.add_child(_botones)
+
+
+func _pintar_habilidades() -> void:
+	for hijo in _habilidades.get_children():
+		hijo.queue_free()
+	for eje in Combate.cargas_disponibles(_combate):
+		var habilidad: Dictionary = Historias.HABILIDADES[eje]
+		var boton := Button.new()
+		boton.theme = EstiloSiga.tema()
+		boton.text = (
+			tr("VENTANILLA_HABILIDAD")
+			% [tr(habilidad["nombre"]), _combate["cargas"][eje]]
+		)
+		boton.tooltip_text = tr(habilidad["efecto"])
+		boton.toggle_mode = true
+		boton.pressed.connect(
+			func():
+				_habilidad_eje = eje if boton.button_pressed else ""
+				for otro in _habilidades.get_children():
+					if otro != boton:
+						otro.button_pressed = false
+		)
+		_habilidades.add_child(boton)
 
 
 func _texto(tamano: int) -> Label:
