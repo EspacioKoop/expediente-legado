@@ -105,6 +105,8 @@ static func para_caso(estado: Dictionary, caso: Dictionary) -> Dictionary:
 	var proyeccion := GrabacionOniricaContrato.para_proyeccion(evaluacion)
 	proyeccion["original_id"] = original_id
 	proyeccion["toma_indice"] = int(asegurar_en_estado(estado).get("toma_seleccionada", SIN_TOMA))
+	var sujeto = toma.get("sujeto", {})
+	proyeccion["sujeto"] = sujeto.duplicate(true) if typeof(sujeto) == TYPE_DICTIONARY else {}
 	return proyeccion
 
 
