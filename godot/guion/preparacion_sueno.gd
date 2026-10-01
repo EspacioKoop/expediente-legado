@@ -80,6 +80,7 @@ func _construir() -> void:
 		hueco.name = "Hueco%d" % (i + 1)
 		hueco.custom_minimum_size = Vector2(200, 54)
 		hueco.pressed.connect(_quitar_hueco.bind(i))
+		hueco.accessibility_name = hueco.text
 		fila_huecos.add_child(hueco)
 		_huecos.append(hueco)
 
@@ -100,6 +101,7 @@ func _construir() -> void:
 
 	_aviso = Label.new()
 	_aviso.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_aviso.accessibility_live_label = AccessibilityServer.LIVE_POLITE
 	columna.add_child(_aviso)
 
 	var acciones := HBoxContainer.new()
@@ -124,6 +126,7 @@ func _agregar_boton_documento(lista: VBoxContainer, indice: int, folio: String) 
 	var boton := Button.new()
 	boton.name = "Documento%d" % indice
 	boton.text = folio
+	boton.accessibility_name = boton.text
 	boton.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	boton.pressed.connect(_anadir_folio.bind(folio))
 	lista.add_child(boton)
@@ -174,6 +177,7 @@ func _refrescar() -> void:
 			if ocupado
 			else tr("SUENO_PREPARAR_HUECO_VACIO") % [i + 1]
 		)
+		hueco.accessibility_name = hueco.text
 
 	for i in _documentos.size():
 		var boton := _documentos[i]
@@ -183,6 +187,7 @@ func _refrescar() -> void:
 		boton.text = (
 			folio if repeticiones == 0 else tr("SUENO_PREPARAR_REPETIDA") % [folio, repeticiones]
 		)
+		boton.accessibility_name = boton.text
 
 	_sin_documentos.visible = _documentos.is_empty()
 	_aviso.text = (
