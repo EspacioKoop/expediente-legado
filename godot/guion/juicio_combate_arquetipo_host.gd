@@ -69,9 +69,11 @@ static func contexto(
 	}
 
 
-## Orientación tras un fotograma. Solo la guardia sigue al jugador, y a ritmo
-## limitado; en apertura y recuperación la figura se queda mirando donde estaba
-## para que la ventana sea legible.
+## Orientación tras un fotograma. La figura sigue al jugador a ritmo limitado,
+## salvo en la apertura: ahí se queda mirando donde estaba para que la ventana
+## sea legible. Recuperar también gira; si no, quien se planta a la espalda
+## volvería a encontrar la guardia de cara a la nada y la tendría abierta para
+## siempre.
 static func girar(
 	unidad: Dictionary,
 	rotacion_y_rival: float,
@@ -81,7 +83,7 @@ static func girar(
 ) -> float:
 	if String(unidad.get("tipo", "")) != ARQUETIPOS.BLOQUEADOR:
 		return rotacion_y_rival
-	if String(unidad.get("estado", "")) != ARQUETIPOS.GUARDIA:
+	if String(unidad.get("estado", "")) == ARQUETIPOS.APERTURA:
 		return rotacion_y_rival
 	var hacia := posicion_jugador - posicion_rival
 	hacia.y = 0.0

@@ -17,6 +17,8 @@ const DOCTRINA = preload("res://guion/juicio_combate_doctrina.gd")
 const JUGADOR = preload("res://guion/juicio_combate_jugador.gd")
 const ESTADO_TEMPORAL = preload("res://guion/juicio_combate_estado_temporal.gd")
 const AMBIENTAL_1772 = preload("res://guion/juicio_combate_ambiental_1772.gd")
+const ARQUETIPOS = preload("res://guion/juicio_combate_arquetipos.gd")
+const ARQUETIPO_HOST = preload("res://guion/juicio_combate_arquetipo_host.gd")
 const DETERMINACION_BASE := REGLAS.DETERMINACION_BASE
 const DETERMINACION_MINIMA_RIVAL := REGLAS.DETERMINACION_MINIMA_RIVAL
 const VELOCIDAD_JUGADOR := 4.8
@@ -38,8 +40,15 @@ var perfil_jugador: Dictionary = {}
 var reduccion_movimiento := false
 ## Opt-in explícito: solo los hosts de combate contextual lo activan.
 var interaccion_ambiental_habilitada := false
+## Arquetipo onírico (#1771) que ya eligió el host contextual. Vacío, o uno
+## que este duelo no sabe representar, deja el rival clásico.
+var arquetipo_onirico := ""
 
 var _ambiental_1772: Dictionary = {}
+var _arquetipo: Dictionary = {}
+var _guardia_rota := false
+var _escudo_guardia: MeshInstance3D
+var _raiz := 0
 
 var _acusado: Dictionary = {}
 var _bono_documental := 0
@@ -154,6 +163,7 @@ func configurar(
 	_bono_documental = bono_documental
 	reduccion_movimiento = reducir_movimiento
 	_determinacion_rival = determinacion_rival(_bono_documental)
+	_raiz = raiz
 	_azar.seed = (
 		Azar
 		. derivar_texto(
@@ -169,6 +179,7 @@ func _ready() -> void:
 	_preparar_sistemas_jungianos()
 	_resolver_capa_simbolica()
 	_montar_arena()
+	_montar_arquetipo()
 	if interaccion_ambiental_habilitada:
 		_ambiental_1772 = AMBIENTAL_1772.montar(self)
 	_montar_hud()
@@ -181,6 +192,7 @@ func _process(delta: float) -> void:
 	_descontar_temporizadores(delta)
 	_descontar_tregua_religion(delta)
 	_mover_jugador(delta)
+	_avanzar_arquetipo(delta)
 	_mover_rival(delta)
 	_actualizar_camara()
 
@@ -325,6 +337,11 @@ func _mover_rival(delta: float) -> void:
 	if _ataque_rival_pendiente:
 		_actualizar_telegrafo_rival(delta)
 		return
+	# La apertura del bloqueador es la ventana del jugador: quieto y sin atacar,
+	# para que se lea sin texto que ahora se le puede golpear.
+	if not ARQUETIPO_HOST.permite_iniciar_ataque(_arquetipo):
+		JuicioCombateEscenografia3D.andar(_figura_rival, false)
+		return
 
 	var paso := (
 		RIVAL
@@ -342,7 +359,9 @@ func _mover_rival(delta: float) -> void:
 	if bool(paso["mover"]):
 		var desplazamiento: Vector3 = paso["desplazamiento"]
 		_rival.position = _limitar(_rival.position + desplazamiento)
-		_rival.rotation.y = float(paso["rotacion_y"])
+		# Con arquetipo, la orientación es la guardia y ya la gira la política.
+		if _arquetipo.is_empty():
+			_rival.rotation.y = float(paso["rotacion_y"])
 	elif bool(paso["iniciar_ataque"]):
 		_iniciar_ataque_rival()
 
@@ -456,6 +475,8 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 		_jugador.rotation.y = atan2(hacia.x, hacia.z)
 	if hacia.length() > alcance:
 		return
+	if _bloquear_golpe(fuerte):
+		return
 
 	var efectos_jungianos := JUNGIANO.efectos_activos(self)
 	var probabilidad_critico := JUNGIANO.probabilidad_critico(efectos_jungianos)
@@ -511,6 +532,79 @@ func _intentar_retorno_rival() -> bool:
 	Sonido.sonar(self, "marcar")
 	_actualizar_hud()
 	return true
+
+
+func _montar_arquetipo() -> void:
+	if not ARQUETIPO_HOST.soportado(arquetipo_onirico) or _rival == null:
+		return
+	_arquetipo = ARQUETIPOS.nuevo(arquetipo_onirico, _raiz)
+	# El telegraph de la guardia es un cuerpo, no un texto: una placa delante
+	# del rival que solo existe mientras para golpes. Es estática, así que
+	# `reduccion_movimiento` la deja igual de legible.
+	_escudo_guardia = MeshInstance3D.new()
+	_escudo_guardia.name = "GuardiaBloqueador"
+	var malla := BoxMesh.new()
+	malla.size = Vector3(0.95, 1.3, 0.06)
+	_escudo_guardia.mesh = malla
+	var material := _material(Color(0.55, 0.78, 1.0, 0.55), true)
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_escudo_guardia.material_override = material
+	# Rotación 0 mira hacia +Z: la placa va delante y gira con el rival.
+	_escudo_guardia.position = Vector3(0.0, 0.95, 0.45)
+	_rival.add_child(_escudo_guardia)
+	_pintar_guardia()
+
+
+## Un paso de la política del arquetipo. Va antes de mover al rival para que la
+## apertura que provoca un flanco o una rotura ya impida el ataque este fotograma.
+func _avanzar_arquetipo(delta: float) -> void:
+	if _arquetipo.is_empty():
+		return
+	var contexto := (
+		ARQUETIPO_HOST
+		. contexto(
+			_rival.position,
+			_rival.rotation.y,
+			_jugador.position,
+			_guardia_rota,
+		)
+	)
+	_guardia_rota = false
+	_arquetipo = ARQUETIPOS.avanzar(_arquetipo, delta, contexto)["unidad"]
+	_rival.rotation.y = (
+		ARQUETIPO_HOST
+		. girar(
+			_arquetipo,
+			_rival.rotation.y,
+			_rival.position,
+			_jugador.position,
+			delta,
+		)
+	)
+	_pintar_guardia()
+
+
+## La guardia para el golpe de frente sin daño ni momentum. El fuerte además la
+## rompe: la apertura llega en el siguiente paso de la política.
+func _bloquear_golpe(fuerte: bool) -> bool:
+	if _arquetipo.is_empty():
+		return false
+	var flanco := ARQUETIPO_HOST.flanqueado(_rival.position, _rival.rotation.y, _jugador.position)
+	var guardia := ARQUETIPO_HOST.golpe(_arquetipo, flanco, fuerte)
+	if not bool(guardia["bloqueado"]):
+		return false
+	var rompe := bool(guardia["rompe_guardia"])
+	_guardia_rota = _guardia_rota or rompe
+	Sonido.sonar(self, "marcar" if rompe else "pulsar")
+	JuicioCombateEscenografia3D.gesto(_figura_rival, "encajar" if rompe else "negar")
+	_reaccion(_figura_rival, 0.20 if rompe else 0.06)
+	return true
+
+
+func _pintar_guardia() -> void:
+	if _escudo_guardia == null:
+		return
+	_escudo_guardia.visible = String(_arquetipo.get("estado", "")) == ARQUETIPOS.GUARDIA
 
 
 func _esquivar() -> void:

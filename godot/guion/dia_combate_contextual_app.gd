@@ -57,6 +57,16 @@ func abrir(
 	# #1772: el prop ambiental existe solo dentro de un combate ya autorizado
 	# por CombateContextual; los JuicioCombate3D usados en otras superficies no lo heredan.
 	_combate.interaccion_ambiental_habilitada = true
+	# #1771: solo las figuras del sueño pueden llegar con arquetipo; la
+	# realidad y la ventanilla conservan el duelo clásico.
+	_combate.arquetipo_onirico = (
+		JuicioCombateArquetipoHost
+		. elegir(
+			String(objetivo.get("id", "")),
+			raiz,
+			String(decision.get("plano", "")),
+		)
+	)
 	var al_terminar := (
 		_cerrar
 		. bind(
