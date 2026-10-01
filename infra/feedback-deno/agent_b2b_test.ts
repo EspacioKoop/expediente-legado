@@ -1,4 +1,5 @@
 import { handleAgentB2B, type AgentB2BActor } from "./agent_b2b.ts";
+import { agentPoolRoleFromWorkflowRefs } from "./agent_pool_state.ts";
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
@@ -52,6 +53,39 @@ async function withKv(fn: (kv: Deno.Kv) => Promise<void>): Promise<void> {
     kv.close();
   }
 }
+
+Deno.test("OIDC dispatcher acepta job_workflow_ref ausente o propio", () => {
+  const repo = "EspacioKoop/expediente-legado";
+  const pool = repo + "/.github/workflows/agent-pool.yml@refs/heads/main";
+  assertEquals(agentPoolRoleFromWorkflowRefs(repo, pool, ""), "dispatcher", "sin job ref");
+  assertEquals(
+    agentPoolRoleFromWorkflowRefs(repo, pool, pool),
+    "dispatcher",
+    "job ref propio",
+  );
+});
+
+Deno.test("OIDC worker reusable conserva precedencia sobre dispatcher", () => {
+  const repo = "EspacioKoop/expediente-legado";
+  const pool = repo + "/.github/workflows/agent-pool.yml@refs/heads/main";
+  const worker = repo + "/.github/workflows/agent-worker.yml@refs/heads/main";
+  assertEquals(
+    agentPoolRoleFromWorkflowRefs(repo, pool, worker),
+    "worker",
+    "worker reusable",
+  );
+});
+
+Deno.test("OIDC caller ajeno no escala a dispatcher", () => {
+  const repo = "EspacioKoop/expediente-legado";
+  const other = repo + "/.github/workflows/otro.yml@refs/heads/main";
+  const pool = repo + "/.github/workflows/agent-pool.yml@refs/heads/main";
+  assertEquals(
+    agentPoolRoleFromWorkflowRefs(repo, other, pool),
+    null,
+    "caller ajeno",
+  );
+});
 
 Deno.test("send e inbox conservan identidad, tipo y correlación", async () => {
   await withKv(async (kv) => {
