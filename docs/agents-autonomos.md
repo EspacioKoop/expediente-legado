@@ -36,69 +36,57 @@ Si solo configuras una clave, `agent:auto` usa ese proveedor. Con ambas disponib
 
 ### OmniRoute privado como backend preferente
 
-El autopilot puede usar una instancia local de OmniRoute como primer backend de Qwen sin publicarla en Internet. El runner hospedado por GitHub entra en la tailnet con un nodo efímero usando OIDC, accede a `Tailscale Serve` por HTTPS privado y Serve reenvía únicamente al loopback de OmniRoute.
+El pool puede usar OmniRoute como primer backend de Qwen. **Este repositorio solo define el contrato cliente**; despliegue, topología doméstica, puertos, inventario de conexiones y runbooks se mantienen en la infraestructura privada.
 
 Configuración del repositorio:
 
 | Tipo | Nombre | Uso |
 | --- | --- | --- |
-| Secret | `OMNIROUTE_API_KEY` | API key de endpoint creada en OmniRoute; no usar la contraseña del dashboard |
-| Variable | `OMNIROUTE_BASE_URL` | URL privada Tailscale terminada en `/v1` |
-| Variable | `OMNIROUTE_MODEL` | Modelo, alias o combo de OmniRoute; recomendado: `autopilot-code` |
-| Secret | `TS_OAUTH_CLIENT_ID` | Client ID de Tailscale |
-| Secret | `TS_OAUTH_SECRET` | OAuth secret preferente para el tag `github-autopilot` |
-| Secret | `TS_AUDIENCE` | Audience usada solo como fallback OIDC |
+| Secret | `OMNIROUTE_API_KEY` | credencial del endpoint de inferencia |
+| Variable | `OMNIROUTE_BASE_URL` | base URL privada terminada en `/v1` |
+| Variable | `OMNIROUTE_MODEL` | modelo/alias/combo usado por el worker |
+| Secret | `TS_OAUTH_CLIENT_ID` | identidad Tailscale del runner |
+| Secret | `TS_OAUTH_SECRET` | OAuth preferente |
+| Secret | `TS_AUDIENCE` | fallback OIDC |
 
-El workflow usa `tailscale/github-action@v4` con `tag:github-autopilot`. OAuth (`TS_OAUTH_CLIENT_ID` + `TS_OAUTH_SECRET`) tiene prioridad; OIDC (`TS_OAUTH_CLIENT_ID` + `TS_AUDIENCE`) queda como fallback. Si Tailscale falla, OmniRoute se marca como no disponible y el worker continúa por los backends directos. La policy de la tailnet debe permitir al tag únicamente TCP/443 hacia el equipo que ejecuta OmniRoute. No usar Tailscale Funnel ni abrir los puertos 20128/20130/20131 en el router.
+El runner entra con `tag:github-autopilot`. La ACL debe limitar ese tag al endpoint de inferencia necesario; no necesita acceso al resto de servicios privados. Si Tailscale u OmniRoute no están disponibles, el worker continúa por los backends directos.
 
-En la máquina que aloja OmniRoute, publica únicamente el puerto API local mediante `tailscale serve --bg http://127.0.0.1:<puerto>`, usa la URL MagicDNS resultante terminada en `/v1` como `OMNIROUTE_BASE_URL` y restringe la policy para que `tag:github-autopilot` solo pueda alcanzar TCP/443 de ese equipo.
+Orden lógico:
 
-Para varias cuentas de un mismo proveedor, mantener cada cuenta como conexión separada en OmniRoute. Un `429` debe enfriar solo esa conexión, permitiendo que las demás sigan disponibles. En Dashboard → Settings → Resilience conviene habilitar Rate Limit Auto-Detection y respetar los hints de `Retry-After`. Para cuentas free o con límites inciertos, empezar con `Max Concurrent Requests = 1`; si el proveedor publica un RPM conocido, usar un objetivo conservador y derivar `Min Time Between Requests ≈ 60000 / RPM_objetivo`. Subir concurrencia únicamente después de observar estabilidad.
+`OmniRoute privado → Qwen directo → fallbacks OpenAI-compatible`.
 
-Para el combo `autopilot-code`, usar solo modelos que soporten correctamente las herramientas requeridas por Qwen Code. `Least-Used` reparte carga entre candidatos; `Priority` es preferible si se quiere agotar primero una suscripción principal y usar el resto solo como fallback.
-
-Orden efectivo del worker Qwen:
-
-`OmniRoute privado → Qwen directo → fallback 1 → fallback 2 → fallback 3 → fallback 4`.
-
-Si el equipo local, Tailscale u OmniRoute no están disponibles, el workflow continúa automáticamente por la cadena directa.
+Los detalles de resiliencia, rate limits y composición interna de OmniRoute no son parte del contrato de este repositorio.
 
 ### Smoke aislado de proveedores
 
 `.github/workflows/agent-provider-smoke.yml` valida cada slot sin crear trabajo ficticio ni dar permisos de escritura al modelo. El smoke usa Qwen Code únicamente con `read_file`, obliga a leer `AGENTS.md` y exige el marcador `AGENT_PROVIDER_SMOKE_OK file=AGENTS.md`.
 
-Al integrarse o modificarse el workflow, el push a `main` comprueba automáticamente `qwen-fallback-1`. Después puede ejecutarse manualmente desde **Actions → Agent provider smoke** indicando el **número** de slot (1-12). Esto valida conjuntamente secret, URL, modelo, compatibilidad OpenAI y tool-calling básico. Un smoke verde cierra además el circuit breaker de ese slot en Deno KV, por lo que un backend recuperado vuelve a rotación sin esperar a que caduque su cooldown anterior.
+Puede ejecutarse manualmente indicando el slot. Valida secret, endpoint, modelo, compatibilidad OpenAI y tool-calling básico. Un smoke verde puede cerrar además el circuit breaker de ese worker. El smoke demuestra compatibilidad de protocolo; una tarea real pequeña sigue siendo necesaria para evaluar calidad.
 
 ### Cadena de fallback OpenAI-compatible
 
-El worker Qwen admite hasta **12 backends de reserva** (#1685). Esto permite trasladar al repositorio conexiones de OmniRoute, FreeInference, NVIDIA u otros gateways siempre que expongan una API compatible con OpenAI y *tool calling*.
-
-Cada slot `N` (1-12) usa:
+El worker Qwen admite hasta **12 backends de reserva** (#1685). Cada slot `N` usa:
 
 | Qué | Dónde | Nombre |
 | --- | --- | --- |
 | Clave | Actions **Secret** | `QWEN_FALLBACK_N_API_KEY` |
 | Endpoint | Actions **Variable** | `QWEN_FALLBACK_N_BASE_URL` |
 | Modelo | Actions **Variable** | `QWEN_FALLBACK_N_MODEL` |
-| Tier (opcional) | Actions **Variable** | `QWEN_FALLBACK_N_TIER` (entero ≥ 1; 1 por defecto) |
-| Presupuesto de tarea (opcional) | Actions **Variable** | `QWEN_FALLBACK_N_MAX_TASK_BYTES` (bytes aproximados de entrada; 0/ausente = sin límite) |
-| Clave heredada (opcional) | Actions **Variable** | `QWEN_FALLBACK_N_KEY_FROM`: otro slot (`2`) o un proveedor base (`qwen`, `gemini`) |
+| Tier (opcional) | Actions **Variable** | `QWEN_FALLBACK_N_TIER` |
+| Presupuesto (opcional) | Actions **Variable** | `QWEN_FALLBACK_N_MAX_TASK_BYTES` |
+| Clave heredada (opcional) | Actions **Variable** | `QWEN_FALLBACK_N_KEY_FROM` |
 
-Para añadir un slot basta con crear esas tres entradas: `scripts/agent_slots.py` descubre las variables desde `toJSON(vars)` y el worker toma la clave con `secrets[format('QWEN_FALLBACK_{0}_API_KEY', N)]`. Los secretos no se pueden enumerar, así que el pool tiene **una única tabla** (`FALLBACK_KEYS` en `agent-pool.yml`) que dice qué slots tienen clave; es el único sitio con números de slot. Para pasar de 12, añade líneas a esa tabla y sube `MAX_FALLBACKS` en el script: un test exige que coincidan.
+`scripts/agent_slots.py` descubre la configuración pública desde `toJSON(vars)`. Como los secrets no se pueden enumerar, `agent-pool.yml` mantiene la tabla mínima que indica qué slots tienen credencial propia. Los tests exigen coherencia entre esa tabla y el máximo de slots.
 
-**Tiers.** Todos los workers tienen tier: los slots con `QWEN_FALLBACK_N_TIER`, y `qwen-primary` y `gemini` con `QWEN_PRIMARY_TIER` y `GEMINI_TIER` (1 por defecto). El dispatcher agota el tier más bajo antes de usar el siguiente; dentro de un tier decide el score histórico (#1621). Así se deja de último recurso un backend flojo o caro sin quitarlo (hoy `QWEN_FALLBACK_1_TIER=2` para Cohere). La cascada de `qwen-primary` sin clave también empieza por el tier más bajo. Se pueden usar tantos niveles como se quiera.
+**Tiers.** Un tier menor se consume antes que uno mayor. `qwen-primary` y `gemini` aceptan igualmente `QWEN_PRIMARY_TIER` y `GEMINI_TIER`.
 
-**Presupuesto por worker.** `QWEN_FALLBACK_N_MAX_TASK_BYTES` permite mantener en tier preferente un backend rápido con límites de contexto/TPM sin mandarle tareas demasiado grandes. El dispatcher estima la huella como **bytes de los ficheros del AGENT_PLAN + bytes del cuerpo del issue**. Si el presupuesto es 0 o no existe, el comportamiento sigue siendo ilimitado/fail-open. A igualdad de tier y score histórico, se prefiere el worker limitado más ajustado que todavía cabe; con ello se consume capacidad rápida en tareas pequeñas y se reservan workers amplios para las grandes. Los workers base aceptan también `QWEN_PRIMARY_MAX_TASK_BYTES` y `GEMINI_MAX_TASK_BYTES`.
+**Presupuesto por worker.** `*_MAX_TASK_BYTES` limita la huella aproximada (cuerpo del issue + ficheros del AGENT_PLAN). Valor 0/ausente conserva comportamiento ilimitado. A igualdad de tier/score se puede preferir el worker limitado más ajustado que todavía soporte la tarea.
 
-**Identidad del backend.** `provider` sigue describiendo el executor (`qwen` o `gemini`), mientras `backend` identifica únicamente la inferencia subyacente para observabilidad. `agent_slots.py` reconoce mediante una lista cerrada Groq, Mistral, NVIDIA, OpenRouter, Gemini OpenAI-compatible, DeepSeek, Cohere y Together; cualquier hostname no reconocido se convierte en `custom` y el hostname no se imprime. `qwen-primary` aparece como `omniroute` cuando usa ese carril. El dispatcher propaga este metadato a la matrix y a sus líneas `worker-score`/`route`, sin cambiar tiers, score ni preferencias.
+**Identidad del backend.** `provider` describe el executor (`qwen`/`gemini`) y `backend` la inferencia subyacente para observabilidad. Solo se emiten categorías conocidas; un hostname no reconocido se normaliza como `custom` y nunca se imprime la URL privada. Este metadato no modifica routing, tier ni score.
 
-Para **Groq**, tras el 413 observado en #1928 conviene dejar el slot en un tier rápido y fijar un `MAX_TASK_BYTES` conservador según la cuota real de la cuenta; así sigue absorbiendo cambios pequeños sin entrar en bucle con TaskPackets grandes. Para **Mistral**, el proxy de #1928 ya adapta el dialecto de Qwen; puede dejarse sin límite explícito o con uno mayor si la cuenta lo requiere. En ambos casos valida primero el smoke del slot y ajusta el presupuesto con evidencia, no con un modelo concreto hardcodeado en el workflow.
+**Reutilización de credencial.** `QWEN_FALLBACK_N_KEY_FROM` puede apuntar a otro slot o a los proveedores base admitidos. El workflow resuelve la credencial de forma explícita; una variable pública nunca contiene el secret.
 
-**Más modelos y proveedores sin nuevos secretos.** Un slot sirve para cualquier proveedor compatible con OpenAI: NVIDIA, OpenRouter, DeepSeek o Gemini por `https://generativelanguage.googleapis.com/v1beta/openai/`. Para añadir otro modelo de una cuenta que ya existe, crea un slot con su URL y modelo y `QWEN_FALLBACK_N_KEY_FROM` apuntando a esa cuenta. Por ejemplo, Nemotron Ultra con la clave del slot 2 (`KEY_FROM=2`) o Gemini Flash-Lite en tier 3 con la clave de Gemini (`KEY_FROM=gemini`). `KEY_FROM` solo acepta otro slot, `qwen` o `gemini`: una variable nunca puede enviar un secret arbitrario (OmniRoute, Kev, Tailscale…) a una URL cualquiera. Todo el inventario de workers (`qwen-primary`, `gemini` y slots, con su tier) lo construye `scripts/agent_slots.py workers`.
-
-Un slot con URL pero sin clave no recibe trabajo, así que se puede preparar el endpoint antes de tener la cuenta. Cada slot es un worker propio del pool (`qwen-fallback-N`). Si `qwen-primary` no tiene clave ni OmniRoute, usa el primer fallback con clave. Antes de confiar en un slot, valida el smoke y después un issue real con plan delegado: el smoke comprueba *tool calling*, pero no que el modelo sepa implementar.
-
-No apuntes estos slots a `127.0.0.1` o `localhost`: los runners hospedados por GitHub no pueden alcanzar el OmniRoute local de tu PC. Para reutilizar una conexión de OmniRoute hay que copiar al repo el endpoint público del proveedor/gateway, el modelo y su key; alternativamente habría que usar un runner self-hosted con acceso a OmniRoute.
+Un slot sin credencial utilizable no recibe trabajo. Antes de confiar en uno nuevo: smoke y después tarea real pequeña con plan delegado.
 
 ## Único ajuste de GitHub que puede ser necesario
 
