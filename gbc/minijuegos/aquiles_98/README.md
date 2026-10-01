@@ -71,7 +71,7 @@ El primer corte de conversión visual es textual y reproducible: no añade PNG/R
 - `assets/myrmidon_v1_tiles.inc` contiene tiles OBJ/BG/HUD 2bpp y mapas de frames listos para `INCLUDE` desde RGBDS;
 - `assets/myrmidon_v1_palettes.inc` contiene 4 paletas BG + 4 OBJ en BGR555;
 - `assets/myrmidon_v1_manifest.json` fija fuentes visuales por blob SHA, dimensiones y presupuestos;
-- el HUD de talón vive en `MyrmidonHudRevealed`, separado del HUD base, para mantener la regla de deducir antes de revelar.
+- los mapas previos viven en `MyrmidonFrameMapsBase` y `vulnerable` queda en `MyrmidonFrameMapsRevealed`; el HUD de talón vive además en `MyrmidonHudRevealed`. Ningún banco revelado debe consumirse antes de deducir la vulnerabilidad.
 
 Presupuesto v1: **58 tiles OBJ únicos, 8 BG y 3 HUD**, dejando margen sobre los límites 64/16/4.
 
