@@ -237,6 +237,18 @@ func _entrar_en(fase: String) -> void:
 
 	_caminante.situar(espacio["entrada"], espacio.get("mirada", NAN))
 	_refrescar_rotulos(espacio)
+	if fase == "archivo":
+		if (
+			EcosDespertarRuntime
+			. presentar_vigilia(
+				jornada,
+				_mundo,
+				espacio,
+				bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false)),
+			)
+		):
+			# Persistir evita repetir el mismo residuo tras recargar.
+			_guardar_o_avisar("")
 
 
 ## Dónde se está. Los sitios del día están declarados uno por fase; el sueño no

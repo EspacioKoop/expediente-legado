@@ -1,8 +1,8 @@
 ## Captura runtime del material vivido para los ecos de despertar (#1775).
 ##
-## No prepara ni presenta el eco. Solo acumula candidatos provenientes de
-## nodos que ya existen en la sala onirica actual y los deja en Jornada para
-## que la ruta de despertar los consuma en un corte posterior.
+## Acumula candidatos provenientes de nodos realmente montados, prepara un
+## único pendiente antes de despertar y lo presenta una sola vez al entrar en
+## la primera vigilia. Ninguna de esas capas crea hechos o progreso.
 class_name EcosDespertarRuntime
 extends RefCounted
 
@@ -82,3 +82,33 @@ static func preparar_despertar(jornada: Dictionary) -> Dictionary:
 
 	jornada[CLAVE_PENDIENTE] = pendiente.duplicate(true)
 	return pendiente.duplicate(true)
+
+
+## Monta el pendiente únicamente en la primera fase de vigilia. Consultar no
+## consume: la aceptación se escribe en Jornada solo si el presentador llegó a
+## crear una capa sensorial válida.
+static func presentar_vigilia(
+	jornada: Dictionary,
+	mundo: Node3D,
+	espacio: Dictionary,
+	reduccion_movimiento: bool,
+) -> bool:
+	if String(jornada.get("fase", "")) != "archivo" or mundo == null:
+		return false
+	var dia := int(jornada.get("dia", 0))
+	var bruto: Variant = jornada.get(CLAVE_PENDIENTE, {})
+	if not bruto is Dictionary:
+		return false
+	var oferta := EcosDespertar.oferta(bruto as Dictionary, dia)
+	if oferta.is_empty():
+		return false
+	var presentacion := EcosDespertar.presentacion(oferta, reduccion_movimiento)
+	var capa := EcoDespertarPresentacion3D.montar(mundo, presentacion, espacio)
+	if capa == null:
+		return false
+	var aceptado := EcosDespertar.aceptar(oferta, String(presentacion.get("id", "")), dia)
+	if not bool(aceptado.get("ok", false)):
+		capa.queue_free()
+		return false
+	jornada[CLAVE_PENDIENTE] = (aceptado["estado"] as Dictionary).duplicate(true)
+	return true

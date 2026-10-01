@@ -13,6 +13,7 @@ func _ejecutar() -> void:
 	_probar_material_desde_noche()
 	_probar_captura_runtime()
 	_probar_preparacion_runtime()
+	_probar_presentacion_runtime()
 	_probar_seleccion()
 	_probar_persistencia_y_consumo()
 	_probar_descarte()
@@ -204,6 +205,103 @@ func _probar_preparacion_runtime() -> void:
 		fuera.has(EcosDespertarRuntime.CLAVE_MATERIAL),
 		"llamada fuera de sueño no consume material",
 	)
+
+
+func _probar_presentacion_runtime() -> void:
+	var tipos := [
+		EcosDespertar.HUMEDAD,
+		EcosDespertar.CRT,
+		EcosDespertar.OBJETO_DESPLAZADO,
+		EcosDespertar.SONIDO_RESIDUAL,
+	]
+	for tipo in tipos:
+		var mundo := Node3D.new()
+		get_root().add_child(mundo)
+		var pendiente := {
+			"id": "eco:5:%s:prueba" % tipo,
+			"tipo": tipo,
+			"origen_id": "utileria:silla" if tipo == EcosDespertar.OBJETO_DESPLAZADO else "prueba",
+			"dia_vigilia": 5,
+			"consumido": false,
+		}
+		var jornada := {
+			"fase": "archivo",
+			"dia": 5,
+			EcosDespertarRuntime.CLAVE_PENDIENTE: pendiente,
+		}
+		var montado := EcosDespertarRuntime.presentar_vigilia(
+			jornada, mundo, {"entrada": Vector3.ZERO}, false
+		)
+		_comprobar(montado, "cada familia monta una presentación: %s" % tipo)
+		var capa := mundo.get_node_or_null(EcoDespertarPresentacion3D.NOMBRE)
+		_comprobar(capa != null, "la presentación queda en el mundo: %s" % tipo)
+		_comprobar(
+			capa != null and String(capa.get_meta("tipo", "")) == tipo,
+			"la capa conserva solo el tipo sensorial: %s" % tipo,
+		)
+		_comprobar(
+			bool(jornada[EcosDespertarRuntime.CLAVE_PENDIENTE]["consumido"]),
+			"montar confirma consumo: %s" % tipo,
+		)
+		var hijos := mundo.get_child_count()
+		_comprobar(
+			not EcosDespertarRuntime.presentar_vigilia(
+				jornada, mundo, {"entrada": Vector3.ZERO}, false
+			),
+			"remontar no vuelve a aceptar el mismo eco: %s" % tipo,
+		)
+		_comprobar(mundo.get_child_count() == hijos, "remontar no duplica nodos: %s" % tipo)
+		mundo.queue_free()
+
+	var fuera := {
+		"fase": "casa",
+		"dia": 5,
+		EcosDespertarRuntime.CLAVE_PENDIENTE:
+		{
+			"id": "eco:5:humedad:fuera",
+			"tipo": EcosDespertar.HUMEDAD,
+			"origen_id": "fuera",
+			"dia_vigilia": 5,
+			"consumido": false,
+		},
+	}
+	var mundo_fuera := Node3D.new()
+	get_root().add_child(mundo_fuera)
+	_comprobar(
+		not EcosDespertarRuntime.presentar_vigilia(
+			fuera, mundo_fuera, {"entrada": Vector3.ZERO}, false
+		),
+		"fuera de la primera vigilia no presenta",
+	)
+	_comprobar(
+		not bool(fuera[EcosDespertarRuntime.CLAVE_PENDIENTE]["consumido"]),
+		"fallar presentación no consume",
+	)
+	mundo_fuera.queue_free()
+
+	var crt := {
+		"id": "eco:5:crt:reducido",
+		"tipo": EcosDespertar.CRT,
+		"origen_id": "utileria:monitor",
+		"dia_vigilia": 5,
+		"consumido": false,
+	}
+	var mundo_reducido := Node3D.new()
+	get_root().add_child(mundo_reducido)
+	var capa_reducida := (
+		EcoDespertarPresentacion3D
+		. montar(
+			mundo_reducido,
+			EcosDespertar.presentacion(crt, true),
+			{"entrada": Vector3.ZERO},
+		)
+	)
+	_comprobar(capa_reducida != null, "reducción de movimiento conserva la señal CRT")
+	_comprobar(
+		capa_reducida != null and not bool(capa_reducida.get_meta("animacion", false)),
+		"reducción de movimiento elimina la transición CRT",
+	)
+	mundo_reducido.queue_free()
 
 
 func _probar_seleccion() -> void:

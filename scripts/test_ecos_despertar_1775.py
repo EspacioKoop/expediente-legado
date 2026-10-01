@@ -11,6 +11,7 @@ from scripts.godot_pruebas import importar_proyecto
 ROOT = Path(__file__).resolve().parents[1]
 MODELO = ROOT / "godot" / "guion" / "ecos_despertar.gd"
 RUNTIME = ROOT / "godot" / "guion" / "ecos_despertar_runtime.gd"
+PRESENTADOR = ROOT / "godot" / "guion" / "eco_despertar_presentacion_3d.gd"
 DIA_REACTIVO = ROOT / "godot" / "guion" / "dia_sueno_reactivo_app.gd"
 DIA_APP = ROOT / "godot" / "guion" / "dia_app.gd"
 DIA_GATO = ROOT / "godot" / "guion" / "dia_gato_app.gd"
@@ -24,6 +25,7 @@ class EcosDespertar1775Test(unittest.TestCase):
     def setUpClass(cls):
         cls.fuente = MODELO.read_text(encoding="utf-8")
         cls.runtime = RUNTIME.read_text(encoding="utf-8")
+        cls.presentador = PRESENTADOR.read_text(encoding="utf-8")
         cls.dia_reactivo = DIA_REACTIVO.read_text(encoding="utf-8")
         cls.dia_app = DIA_APP.read_text(encoding="utf-8")
         cls.dia_gato = DIA_GATO.read_text(encoding="utf-8")
@@ -56,7 +58,9 @@ class EcosDespertar1775Test(unittest.TestCase):
         self.assertRegex(self.runtime, r"EcosDespertar\s*\.\s*preparar\(")
         self.assertIn("EcosDespertar.vigente(", self.runtime)
         self.assertIn("jornada.erase(CLAVE_MATERIAL)", self.runtime)
-        self.assertNotIn("EcosDespertar.presentacion(", self.runtime)
+        self.assertIn("EcosDespertar.presentacion(", self.runtime)
+        self.assertIn("EcoDespertarPresentacion3D.montar(", self.runtime)
+        self.assertIn("EcosDespertar.aceptar(", self.runtime)
 
     def test_controller_registra_despues_de_montar_utileria(self):
         llamada = "EcosDespertarRuntime.registrar_sala(dia.jornada, mundo, anomalias)"
@@ -90,13 +94,39 @@ class EcosDespertar1775Test(unittest.TestCase):
         )
         self.assertIn('"dia": dia_despertar', self.sueno_combate)
 
-    def test_runtime_preparacion_es_idempotente_y_no_presenta(self):
+    def test_runtime_preparacion_y_presentacion_son_idempotentes(self):
         self.assertIn("EcosDespertar.vigente(previo, noche + 1)", self.runtime)
         self.assertIn("return previo.duplicate(true)", self.runtime)
         self.assertIn("jornada.erase(CLAVE_PENDIENTE)", self.runtime)
         self.assertIn("jornada[CLAVE_PENDIENTE] = pendiente.duplicate(true)", self.runtime)
-        self.assertNotIn("EcosDespertar.presentacion(", self.runtime)
-        self.assertNotIn("EcosDespertar.aceptar(", self.runtime)
+        self.assertIn("static func presentar_vigilia(", self.runtime)
+        self.assertIn("EcosDespertar.oferta(", self.runtime)
+        self.assertIn("EcoDespertarPresentacion3D.montar(", self.runtime)
+        self.assertIn("EcosDespertar.aceptar(", self.runtime)
+        self.assertIn('String(jornada.get("fase", "")) != "archivo"', self.runtime)
+
+    def test_primera_vigilia_cablea_presentacion_despues_de_montar_mundo(self):
+        llamada = "presentar_vigilia("
+        bloque = self.dia_app.split("func _entrar_en(fase: String) -> void:", 1)[1].split(
+            "\n\nfunc _espacio_de", 1
+        )[0]
+        self.assertEqual(1, bloque.count(llamada))
+        self.assertLess(bloque.index("Espacio3D.construir("), bloque.index(llamada))
+        self.assertIn('"reduccion_movimiento"', bloque)
+        self.assertIn("EcosDespertarRuntime", bloque)
+        self.assertIn(". presentar_vigilia(", bloque)
+        self.assertLess(bloque.index(llamada), bloque.index('_guardar_o_avisar("")'))
+
+    def test_presentador_es_sensorial_y_cubre_cuatro_familias(self):
+        self.assertIn("class_name EcoDespertarPresentacion3D", self.presentador)
+        for simbolo in ("HUMEDAD", "CRT", "OBJETO_DESPLAZADO", "SONIDO_RESIDUAL"):
+            self.assertIn(f"EcosDespertar.{simbolo}", self.presentador)
+        self.assertIn('set_meta("solo_visual", true)', self.presentador)
+        self.assertIn('set_meta("sin_progreso", true)', self.presentador)
+        self.assertIn('set_meta("afecta_navegacion", false)', self.presentador)
+        self.assertIn("AudioStreamWAV", self.presentador)
+        self.assertNotIn("HuellasAmbientales", self.presentador)
+        self.assertNotIn("Expediente", self.presentador)
 
     def test_catalogo_y_seleccion_son_acotados(self):
         for tipo in ("humedad", "crt", "objeto_desplazado", "sonido_residual"):
