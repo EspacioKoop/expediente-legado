@@ -864,12 +864,19 @@ jobs:
 
           git diff --cached --no-ext-diff --unified=3 > /tmp/agent-review.diff
           python3 - <<'PY'
+          import os, secrets
           from pathlib import Path
           task=Path("/tmp/agent-task.md").read_text(encoding="utf-8")[:12000]
           plan=Path("/tmp/plan.json").read_text(encoding="utf-8")[:4000]
           diff=Path("/tmp/agent-review.diff").read_text(encoding="utf-8")[:32000]
+          # Código de lectura (#2038): solo existe en este fichero; si el reviewer
+          # no lo devuelve, contestó sin leer el diff.
+          nonce=secrets.token_hex(4)
+          with open(os.environ["GITHUB_OUTPUT"],"a",encoding="utf-8") as out:
+              out.write("review_nonce="+nonce+"\n")
           Path(".agent-review-input.md").write_text(
-              "# Reviewer input\n\n## Issue\n"+task+
+              "# Reviewer input\n\nCódigo de lectura (input_nonce): "+nonce+
+              "\n\n## Issue\n"+task+
               "\n\n## Plan reservado\n"+plan+
               "\n\n## Diff staged\n```diff\n"+diff+"\n```\n",
               encoding="utf-8",
@@ -923,7 +930,7 @@ jobs:
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":4},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file"]}}'
-          prompt: 'Lee UNICAMENTE .agent-review-input.md. No abras otros archivos, no uses shell, no edites nada y no propongas refactors generales. Revisa solo incumplimiento del issue/plan, bug claro del diff, test imprescindible ausente o violacion evidente de seguridad inferible del input. Maximo 5 hallazgos, una frase cada uno. Termina inmediatamente con AGENT_REVIEW_BEGIN seguido de JSON {"schema":1,"message_type":"REVIEW","verdict":"approve","findings":[]} o {"schema":1,"message_type":"REVIEW","verdict":"findings","findings":["..."]} y AGENT_REVIEW_END.'
+          prompt: 'Primero usa read_file para leer .agent-review-input.md: es obligatorio y es el unico archivo que puedes abrir. No uses shell, no edites nada y no propongas refactors generales. Revisa solo incumplimiento del issue/plan, bug claro del diff, test imprescindible ausente o violacion evidente de seguridad inferible del input. Maximo 5 hallazgos, una frase cada uno. En input_nonce copia el codigo de lectura que aparece al principio de ese archivo; sin el, la revision se descarta. Termina inmediatamente con AGENT_REVIEW_BEGIN seguido de JSON {"schema":1,"message_type":"REVIEW","input_nonce":"CODIGO","verdict":"approve","findings":[]} o {"schema":1,"message_type":"REVIEW","input_nonce":"CODIGO","verdict":"findings","findings":["..."]} y AGENT_REVIEW_END.'
 
       - id: review_gemini
         name: Reviewer acotado Gemini
@@ -936,18 +943,20 @@ jobs:
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":4},"tools":{"core":["read_file"]}}'
-          prompt: 'Lee UNICAMENTE .agent-review-input.md. No abras otros archivos, no uses shell, no edites nada y no propongas refactors generales. Revisa solo incumplimiento del issue/plan, bug claro del diff, test imprescindible ausente o violacion evidente de seguridad inferible del input. Maximo 5 hallazgos, una frase cada uno. Termina inmediatamente con AGENT_REVIEW_BEGIN seguido de JSON {"schema":1,"message_type":"REVIEW","verdict":"approve","findings":[]} o {"schema":1,"message_type":"REVIEW","verdict":"findings","findings":["..."]} y AGENT_REVIEW_END.'
+          prompt: 'Primero usa read_file para leer .agent-review-input.md: es obligatorio y es el unico archivo que puedes abrir. No uses shell, no edites nada y no propongas refactors generales. Revisa solo incumplimiento del issue/plan, bug claro del diff, test imprescindible ausente o violacion evidente de seguridad inferible del input. Maximo 5 hallazgos, una frase cada uno. En input_nonce copia el codigo de lectura que aparece al principio de ese archivo; sin el, la revision se descarta. Termina inmediatamente con AGENT_REVIEW_BEGIN seguido de JSON {"schema":1,"message_type":"REVIEW","input_nonce":"CODIGO","verdict":"approve","findings":[]} o {"schema":1,"message_type":"REVIEW","input_nonce":"CODIGO","verdict":"findings","findings":["..."]} y AGENT_REVIEW_END.'
 
       - id: review_contract
         name: Normalizar reviewer no bloqueante
         if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true'
         env:
           SUMMARY: ${{ steps.review_qwen.outputs.summary || steps.review_gemini.outputs.summary }}
+          REVIEW_NONCE: ${{ steps.validate_diff.outputs.review_nonce }}
         run: |
           set -euo pipefail
           printf '%s' "${SUMMARY:-}" > /tmp/agent-review-summary.txt
           python3 scripts/agent_review_contract.py \
             --summary-file /tmp/agent-review-summary.txt \
+            --nonce "${REVIEW_NONCE:-}" \
             --output /tmp/agent-review.json >/dev/null
           echo "status=$(jq -r '.status' /tmp/agent-review.json)" >> "$GITHUB_OUTPUT"
           echo "verdict=$(jq -r '.verdict // "skipped"' /tmp/agent-review.json)" >> "$GITHUB_OUTPUT"
