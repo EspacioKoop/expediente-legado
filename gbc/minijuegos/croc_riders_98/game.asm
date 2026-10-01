@@ -79,6 +79,9 @@ DEF TURBO_REBUFO    EQU 150
 ; Sprites 8x16. Los indices deben ser pares: cada sprite usa N y N+1.
 DEF TILE_CROC_L     EQU 32
 DEF TILE_CROC_R     EQU 34
+; Variantes de silueta de rival (16x16, dos sprites 8x16 cada una).
+DEF TILE_RIVAL_A    EQU 56
+DEF TILE_RIVAL_B    EQU 60
 DEF TILE_TAXI_L     EQU 36
 DEF TILE_TAXI_R     EQU 38
 DEF TILE_BARRIER_L  EQU 40
@@ -1082,6 +1085,7 @@ DibujarJugador:
     push bc
     ld a, 128
     ld d, 0
+    ld c, TILE_CROC_L
     call PonerCroc16
     pop bc
 
@@ -1110,6 +1114,8 @@ DibujarRival1:
     call AplicarAviso
     ld a, [wR1Y]
     ld d, 1
+    xor a
+    call ElegirSiluetaRival
     call PonerCroc16
     ret
 
@@ -1121,6 +1127,8 @@ DibujarRival2:
     call AplicarAviso
     ld a, [wR2Y]
     ld d, 1
+    ld a, 1
+    call ElegirSiluetaRival
     call PonerCroc16
     ret
 
@@ -1167,8 +1175,8 @@ AplicarAviso:
 
 PonerCroc16:
     ; A=Y, B=X, D=paleta. Dos sprites 8x16: izquierda y derecha.
+    ; C debe traer el tile izquierdo par; el derecho esta a +2.
     push af
-    ld c, TILE_CROC_L
     call PonerSprite
     pop af
     ld e, a
@@ -1176,8 +1184,25 @@ PonerCroc16:
     add 8
     ld b, a
     ld a, e
-    ld c, TILE_CROC_R
+    inc c
+    inc c
     call PonerSprite
+    ret
+
+; Determina la silueta de un rival sin PRNG: el rival 1 sigue el orden de
+; mangas (clasificatoria/nilo/final) y el rival 2 avanza una variante.
+; Sale en C el tile izquierdo par de la variante elegida.
+ElegirSiluetaRival:
+    ; A=indice de rival (0 o 1).
+    ld c, a
+    ld a, [wManga]
+    add c
+    and 1
+    jr z, .variante_b
+    ld c, TILE_RIVAL_A
+    ret
+.variante_b:
+    ld c, TILE_RIVAL_B
     ret
 
 PonerVehiculo16:
@@ -1532,6 +1557,20 @@ Tiles:
     ; 54-55 llama nitro frame alternativo (sprite 8x16)
     db $00,$00,$08,$00,$1C,$00,$3E,$00,$7F,$00,$3E,$00,$1C,$00,$08,$00
     db $1C,$00,$3E,$00,$1C,$00,$08,$00,$1C,$00,$08,$00,$00,$00,$00,$00
+
+    ; 56-59 rival variante A 16x16: casco alto y carenado abultado, cola con
+    ; puntas. Mismo lenguaje cocodrilo + moto que el jugador.
+    db $00,$00,$1C,$00,$3E,$00,$3E,$00,$7F,$00,$7F,$00,$CF,$00,$03,$0C
+    db $00,$1F,$00,$38,$30,$30,$78,$78,$78,$78,$30,$30,$00,$00,$00,$00
+    db $00,$00,$7E,$00,$FF,$40,$FF,$00,$FE,$00,$F8,$00,$C0,$00,$00,$C0
+    db $00,$F0,$00,$78,$30,$30,$78,$78,$78,$78,$30,$30,$00,$00,$00,$00
+
+    ; 60-63 rival variante B 16x16: hocico alargado con cuernos pequeños y
+    ; carenado bajo; mantiene perfil lateral y dos ruedas.
+    db $00,$00,$0C,$00,$1C,$00,$1F,$00,$3F,$00,$3F,$00,$7F,$00,$CF,$0C
+    db $00,$1F,$00,$38,$30,$30,$78,$78,$78,$78,$30,$30,$00,$00,$00,$00
+    db $00,$00,$3C,$40,$7E,$C0,$FF,$00,$FE,$00,$F8,$00,$E0,$00,$00,$C0
+    db $00,$F0,$00,$78,$30,$30,$78,$78,$78,$78,$30,$30,$00,$00,$00,$00
 TilesFin:
 
 PaletaFondo:
