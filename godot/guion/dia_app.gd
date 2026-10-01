@@ -23,11 +23,10 @@ var _mundo: Node3D
 var _rotulo: Label
 var _nomina: Label
 
-## El destino al que no se llegó a entrar porque no se pudo guardar. Mientras
-## haya uno, pisar cualquier salida REINTENTA el guardado en vez de volver a
-## fichar: la nómina y la noche ya están cobradas en memoria, y cobrarlas dos
-## veces sería peor que no haberlas escrito.
-var _transito_pendiente := ""
+## #1761: el helper posee el destino de un tránsito que quedó a medias por
+## fallo de guardado. DiaApp conserva los wrappers porque son contrato de la
+## cadena dia_* y de numerosos controladores.
+var _guardado := DiaGuardadoApp.new()
 var _borrar: Button
 var _borrar_confirmando := false
 var _pantalla: CanvasLayer
@@ -372,37 +371,13 @@ func _process(delta: float) -> void:
 ## queda esperando y lo cuenta: nada de esto deshace lo ya aplicado a la
 ## jornada, que sigue siendo lo vigente aunque el disco no se haya enterado.
 func _guardar_o_avisar(destino: String) -> bool:
-	if partida.guardar():
-		# Sección aparte y deliberadamente distinta de la partida (#535): si
-		# esto falla no se cuenta como fallo de guardado de campaña, que es
-		# lo que de verdad bloquea el tránsito.
-		var escritorio_controller := get_node_or_null("EscritorioSigaController")
-		if (
-			escritorio_controller != null
-			and escritorio_controller.has_method("guardar_estado_aplicaciones")
-		):
-			escritorio_controller.guardar_estado_aplicaciones()
-		return true
-	_transito_pendiente = destino
-	_hablando = false
-	_nomina.text = tr("ARCHIVO_ERROR_GUARDAR")
-	return false
+	return _guardado.guardar(self, partida, destino)
 
 
-## El reintento. Solo vuelve a escribir el mismo estado —ni ficha, ni paga, ni
-## gasta una acción— y, si esta vez sale, termina el tránsito que quedó a
-## medias.
+## El reintento conserva el contrato histórico para subclases/controladores.
+## La política de persistencia y el tránsito pendiente pertenecen al helper.
 func _reintentar_guardado() -> void:
-	var destino := _transito_pendiente
-	if not _guardar_o_avisar(destino):
-		return
-	_transito_pendiente = ""
-	_nomina.text = tr("ARCHIVO_GUARDADO_HECHO")
-	if destino.is_empty():
-		return
-	if jornada["fase"] != "sueño":
-		_sonar("puerta_abre")
-	_entrar_en(destino)
+	_guardado.reintentar(self, partida, jornada)
 
 
 func _al_pisar_salida(cuerpo: Node3D, salida: Area3D) -> void:
