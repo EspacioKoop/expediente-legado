@@ -65,6 +65,48 @@ RECETAS = {
         "clacks": ((0.030, 0.35, 0.009), (0.082, 0.25, 0.008)),
         "wav_sha256": "7c6650547bbb11dfaf72afb931bf014f3686eeb19f69c583d6ada42a17898dfe",
     },
+    "papel_coger_01": {
+        "seed": 180601, "duration": 0.13, "tone_hz": (300, 450), "decay": 2.8,
+        "tone_mix": 0.05, "pulse_mix": 0.02, "pulse_threshold": 0.5,
+        "noise_mix": 0.75, "noise_lp": 0.25, "drive": 1.1, "gain": 0.55,
+        "clacks": ((0.02, 0.20, 0.006),),
+        "wav_sha256": "c3e72e31939d6e119f5bbe44cbc9fb60d1030d007e7ca7b63528637f82396fef",
+    },
+    "papel_pasar_01": {
+        "seed": 180602, "duration": 0.26, "tone_hz": (180, 520), "decay": 0.9,
+        "tone_mix": 0.10, "pulse_mix": 0.05, "pulse_threshold": 0.2,
+        "noise_mix": 0.70, "noise_lp": 0.15, "drive": 1.2, "gain": 0.60,
+        "clacks": ((0.04, 0.12, 0.012), (0.16, 0.15, 0.015)),
+        "wav_sha256": "385db0698398b6aa0172b6914aa25dde9f98e0e912b74dc3ea9be136fb997605",
+    },
+    "papel_manojo_01": {
+        "seed": 180603, "duration": 0.22, "tone_hz": (120, 220), "decay": 1.4,
+        "tone_mix": 0.15, "pulse_mix": 0.08, "pulse_threshold": 0.1,
+        "noise_mix": 0.60, "noise_lp": 0.08, "drive": 1.3, "gain": 0.65,
+        "clacks": ((0.025, 0.28, 0.007), (0.070, 0.22, 0.008), (0.115, 0.32, 0.009), (0.160, 0.20, 0.007)),
+        "wav_sha256": "0138dae3be8487bd7d9099f676e2a7284d1b678073fa1c556907d524fa09a6b6",
+    },
+    "teclado_tecla_01": {
+        "seed": 180611, "duration": 0.14, "tone_hz": (450, 280), "decay": 2.5,
+        "tone_mix": 0.35, "pulse_mix": 0.30, "pulse_threshold": 0.0,
+        "noise_mix": 0.25, "noise_lp": 0.30, "drive": 1.5, "gain": 0.68,
+        "clacks": ((0.018, 0.45, 0.005),),
+        "wav_sha256": "a0e2c6542eaccc88789c627ee42bfd9818317aeb736e2e9d71666878878be65e",
+    },
+    "teclado_enter_01": {
+        "seed": 180612, "duration": 0.18, "tone_hz": (220, 110), "decay": 2.0,
+        "tone_mix": 0.45, "pulse_mix": 0.25, "pulse_threshold": -0.1,
+        "noise_mix": 0.30, "noise_lp": 0.18, "drive": 1.7, "gain": 0.74,
+        "clacks": ((0.020, 0.60, 0.008), (0.055, 0.25, 0.006)),
+        "wav_sha256": "6d07c656d5ccffdb48d009afe91c885936f1e2755d3c8f3d1c549f7a702adfb0",
+    },
+    "teclado_rafaga_01": {
+        "seed": 180613, "duration": 0.28, "tone_hz": (380, 320), "decay": 0.8,
+        "tone_mix": 0.30, "pulse_mix": 0.25, "pulse_threshold": 0.1,
+        "noise_mix": 0.30, "noise_lp": 0.22, "drive": 1.4, "gain": 0.70,
+        "clacks": ((0.02, 0.40, 0.005), (0.07, 0.38, 0.005), (0.12, 0.42, 0.005), (0.18, 0.39, 0.005), (0.23, 0.35, 0.005)),
+        "wav_sha256": "f46839830706b008cd2724eb3b141d1160d414c6ecbadc164bc1a07bcd6b4da6",
+    },
 }
 
 
