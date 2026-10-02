@@ -158,14 +158,29 @@ def restaurar_fuera_del_claim(root: Path, fuera: list[str]) -> None:
             _podar_padres_vacios(root, destino)
 
 
+def _es_borrador(root: Path, ruta: str) -> bool:
+    """Fichero nuevo, sin versionar, suelto en la raíz: basura del modelo.
+
+    Medido en #2106: 10 de 12 replans del pool se debieron a `agent_result.json`,
+    `result.txt`, `_tmp_*.py`… que el modelo dejó en la raíz, no a rutas que la
+    implementación necesitara. Ningún corte legítimo crea un fichero suelto en
+    la raíz sin reservarlo, así que se borra sin replanificar. Un fichero nuevo
+    en un subdirectorio, o uno versionado de la raíz, sigue siendo desvío.
+    """
+
+    return "/" not in ruta and not _es_trackeada(root, ruta)
+
+
 def ejecutar(root: Path, plan: Path, *, restaurar: bool) -> dict[str, object]:
     permitidas = cargar_plan(plan)
     cambiadas = rutas_cambiadas(root)
-    fuera = sorted(cambiadas - permitidas)
+    candidatas = sorted(cambiadas - permitidas)
+    borradores = [ruta for ruta in candidatas if _es_borrador(root, ruta)]
+    fuera = [ruta for ruta in candidatas if ruta not in borradores]
     dentro = sorted(cambiadas & permitidas)
 
-    if restaurar and fuera:
-        restaurar_fuera_del_claim(root, fuera)
+    if restaurar and candidatas:
+        restaurar_fuera_del_claim(root, candidatas)
         restantes = sorted(rutas_cambiadas(root) - permitidas)
         if restantes:
             raise RuntimeError(
@@ -177,6 +192,7 @@ def ejecutar(root: Path, plan: Path, *, restaurar: bool) -> dict[str, object]:
         "allowed": sorted(permitidas),
         "changed_allowed": dentro,
         "outside": fuera,
+        "scratch": borradores,
         "restored": bool(restaurar and fuera),
     }
 
