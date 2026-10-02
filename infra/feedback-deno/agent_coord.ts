@@ -24,7 +24,19 @@ const AVISOS_LIMITE = 20;
 // Un latido vale media hora: quien no renueva deja de figurar sin barrido manual.
 const PRESENCIA_TTL_MS = 30 * 60 * 1000;
 const PRESENCIA_LIMITE = 50;
+const RESERVA_TTL_MS = 48 * 60 * 60 * 1000;
+const RESERVA_LIMITE = 100;
 const HORA_MS = 60 * 60 * 1000;
+
+export interface Reserva {
+  schema: 1;
+  agente: string;
+  issue: number;
+  rama: string;
+  files: string[];
+  goal: string;
+  visto: string;
+}
 
 export interface Aviso {
   schema: 1;
@@ -73,6 +85,17 @@ function limpiarPaths(value: unknown): string[] {
     if (paths.length >= 12) break;
   }
   return paths;
+}
+
+function normalizarRutas(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  const rutas: string[] = [];
+  for (const raw of value) {
+    const ruta = cleanTitle(raw, 200).replace(/\\/g, "/");
+    if (!ruta || ruta.startsWith("/") || ruta.split("/").includes("..")) continue;
+    if (!rutas.includes(ruta)) rutas.push(ruta);
+  }
+  return rutas;
 }
 
 async function avisar(
@@ -181,6 +204,125 @@ async function presentes(kv: Deno.Kv): Promise<Presencia[]> {
   return lista.sort((a, b) => b.visto.localeCompare(a.visto));
 }
 
+async function claim(
+  kv: Deno.Kv,
+  raw: Record<string, unknown>,
+  identity: AgentIdentity,
+): Promise<Reserva | null> {
+  const agente = agenteDe(identity, raw.agente);
+  if (!agente) return null;
+
+  const issue = Number(raw.issue ?? 0);
+  if (!Number.isInteger(issue) || issue <= 0) return null;
+
+  const rutas = normalizarRutas(raw.files);
+  if (rutas.length === 0) return null;
+
+  const rama = cleanTitle(raw.branch || raw.rama, 120);
+  if (!rama) return null;
+
+  const goal = cleanTitle(raw.goal || raw.objetivo, 200);
+  if (!goal) return null;
+
+  // Verificación de solape: un archivo está reservado si coincide exactamente
+  // o si alguna ruta reservada es prefijo de la ruta solicitada (directorio).
+  // "foo" solapa "foo/bar", pero "foo" no solapa "foobar".
+  const iterator = kv.list<Reserva>({ prefix: ["agent_coord", "reserva"] });
+  for await (const entry of iterator) {
+    const r = entry.value;
+    if (!r || r.schema !== 1) continue;
+    for (const rutaR of r.files) {
+      for (const rutaS of rutas) {
+        if (rutaS === rutaR || rutaS.startsWith(rutaR + "/")) {
+          return null; // Solapado
+        }
+        if (rutaR.startsWith(rutaS + "/")) {
+          return null; // Solapado
+        }
+      }
+    }
+  }
+
+  const reserva: Reserva = {
+    schema: 1,
+    agente,
+    issue,
+    rama,
+    files: rutas,
+    goal,
+    visto: new Date().toISOString(),
+  };
+
+  // Persistencia con CAS (Check-and-Set) implícito en el flujo de validación
+  // previo, aunque para concurrencia estricta se requeriría una transacción.
+  // Deno KV soporta atomic().
+  const key = ["agent_coord", "reserva", issue, ...rutas.sort()];
+  const res = await kv.atomic()
+    .check({ key: key, versionstamp: null }) // solo si no existe
+    .set(key, reserva)
+    .commit();
+
+  if (!res.ok) return null;
+
+  return reserva;
+}
+
+async function heartbeat(
+  kv: Deno.Kv,
+  raw: Record<string, unknown>,
+  identity: AgentIdentity,
+): Promise<Reserva | null> {
+  const agente = agenteDe(identity, raw.agente);
+  if (!agente) return null;
+
+  const issue = Number(raw.issue ?? 0);
+  if (!Number.isInteger(issue) || issue <= 0) return null;
+
+  const rutas = normalizarRutas(raw.files);
+  if (rutas.length === 0) return null;
+
+  const key = ["agent_coord", "reserva", issue, ...rutas.sort()];
+  const existente = await kv.get<Reserva>(key);
+
+  if (!existente.value || existente.value.agente !== agente) return null;
+
+  const reserva = { ...existente.value, visto: new Date().toISOString() };
+  await kv.set(key, reserva, { expireIn: RESERVA_TTL_MS });
+  return reserva;
+}
+
+async function release(
+  kv: Deno.Kv,
+  raw: Record<string, unknown>,
+  identity: AgentIdentity,
+): Promise<boolean> {
+  const agente = agenteDe(identity, raw.agente);
+  if (!agente) return null;
+
+  const issue = Number(raw.issue ?? 0);
+  if (!Number.isInteger(issue) || issue <= 0) return null;
+
+  const rutas = normalizarRutas(raw.files);
+  if (rutas.length === 0) return null;
+
+  const key = ["agent_coord", "reserva", issue, ...rutas.sort()];
+  const existente = await kv.get<Reserva>(key);
+
+  if (!existente.value || existente.value.agente !== agente) return null;
+
+  await kv.delete(key);
+  return true;
+}
+
+async function claims(kv: Deno.Kv): Promise<Reserva[]> {
+  const lista: Reserva[] = [];
+  const iterator = kv.list<Reserva>({ prefix: ["agent_coord", "reserva"] });
+  for await (const entry of iterator) {
+    if (entry.value?.schema === 1) lista.push(entry.value);
+  }
+  return lista;
+}
+
 export async function handleAgentCoord(
   request: Request,
   url: URL,
@@ -236,6 +378,26 @@ export async function handleAgentCoord(
     }
     case "/api/agent-coord/presentes":
       return json({ ok: true, presentes: await presentes(kv) });
+    case "/api/agent-coord/claim": {
+      const reserva = await claim(kv, raw, identity);
+      return reserva
+        ? json({ ok: true, reserva }, 201)
+        : json({ ok: false, error: "solapado_o_invalido" }, 400);
+    }
+    case "/api/agent-coord/heartbeat": {
+      const reserva = await heartbeat(kv, raw, identity);
+      return reserva
+        ? json({ ok: true, reserva })
+        : json({ ok: false, error: "reserva_no_encontrada" }, 400);
+    }
+    case "/api/agent-coord/release": {
+      const ok = await release(kv, raw, identity);
+      return ok
+        ? json({ ok: true })
+        : json({ ok: false, error: "reserva_no_encontrada" }, 400);
+    }
+    case "/api/agent-coord/claims":
+      return json({ ok: true, claims: await claims(kv) });
   }
   return json({ ok: false, error: "not_found" }, 404);
 }
