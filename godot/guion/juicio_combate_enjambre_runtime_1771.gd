@@ -75,7 +75,9 @@ static func resultado_ataque(
 	ataque: Dictionary, posicion_jugador: Vector3, esquiva_restante: float
 ) -> String:
 	var posicion: Vector3 = ataque.get("posicion", Vector3.ZERO)
-	var resolucion := RIVAL.resolver_ataque(posicion.distance_to(posicion_jugador), esquiva_restante)
+	var resolucion := RIVAL.resolver_ataque(
+		posicion.distance_to(posicion_jugador), esquiva_restante
+	)
 	return String(resolucion.get("resultado", "falla"))
 
 
@@ -115,9 +117,7 @@ static func mover(
 		ESCENA.andar(figura, true)
 
 
-static func objetivo(
-	runtime: Dictionary, posicion_jugador: Vector3, alcance: float
-) -> Dictionary:
+static func objetivo(runtime: Dictionary, posicion_jugador: Vector3, alcance: float) -> Dictionary:
 	var actores: Array = runtime.get("actores", [])
 	var unidades: Array = runtime.get("unidades", [])
 	var mejor := {}
