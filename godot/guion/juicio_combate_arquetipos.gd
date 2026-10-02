@@ -9,6 +9,7 @@ const HOSTIGADOR := "hostigador"
 const BLOQUEADOR := "bloqueador"
 const ENJAMBRE := "enjambre"
 const EMBESTIDOR := "embestidor"
+const CONTROLADOR := "controlador"
 
 const REPOSICIONAR := "reposicionar"
 const TELEGRAFIAR := "telegrafiar"
@@ -20,6 +21,8 @@ const RECUPERAR := "recuperar"
 const ESPERA := "espera"
 const ATACAR := "atacar"
 const CARGAR := "cargar"
+const MARCAR_ZONA := "marcar_zona"
+const ACTIVAR_ZONA := "activar_zona"
 
 const HOSTIGADOR_DISTANCIA_MIN := 5.0
 const HOSTIGADOR_DISTANCIA_MAX := 8.0
@@ -43,6 +46,11 @@ const EMBESTIDOR_TELEGRAFO := 0.70
 const EMBESTIDOR_CARGA := 0.55
 const EMBESTIDOR_RECUPERACION := 1.00
 const EMBESTIDOR_RECARGA := 0.80
+
+const CONTROLADOR_MAX_ZONAS := 3
+const CONTROLADOR_TELEGRAFO := 0.60
+const CONTROLADOR_ACTIVACION := 0.40
+const CONTROLADOR_RECUPERACION := 0.90
 
 
 static func nuevo(tipo: String, raiz: int, indice: int = 0) -> Dictionary:
@@ -80,6 +88,14 @@ static func nuevo(tipo: String, raiz: int, indice: int = 0) -> Dictionary:
 				"cooldown": 0.0,
 				"rumbo_bloqueado": 0.0,
 			}
+		CONTROLADOR:
+			return {
+				"tipo": CONTROLADOR,
+				"estado": REPOSICIONAR,
+				"temporizador": 0.0,
+				"cooldown": 0.0,
+				"zonas_marcadas": 0,
+			}
 		_:
 			return {}
 
@@ -97,6 +113,8 @@ static func avanzar(unidad: Dictionary, delta: float, contexto: Dictionary = {})
 			return _avanzar_enjambre(copia, delta, contexto)
 		EMBESTIDOR:
 			return _avanzar_embestidor(copia, delta, contexto)
+		CONTROLADOR:
+			return _avanzar_controlador(copia, delta, contexto)
 		_:
 			return _resultado(copia, "ninguna", "", false)
 
@@ -298,7 +316,60 @@ static func arena_tiene_ventana(unidades: Array) -> bool:
 			return true
 		if tipo == EMBESTIDOR and estado == RECUPERAR:
 			return true
+		if tipo == CONTROLADOR and estado == RECUPERAR:
+			return true
 	return false
+
+
+static func _avanzar_controlador(
+	unidad: Dictionary, delta: float, contexto: Dictionary
+) -> Dictionary:
+	unidad["cooldown"] = maxf(0.0, float(unidad.get("cooldown", 0.0)) - delta)
+	var distancia := float(contexto.get("distancia", 6.0))
+	var estado := String(unidad.get("estado", REPOSICIONAR))
+	var zonas_activas := int(contexto.get("zonas_activas", 0))
+	var hay_salida := bool(contexto.get("queda_salida_valida", true))
+	var zonas_marcadas := int(unidad.get("zonas_marcadas", 0))
+	match estado:
+		REPOSICIONAR:
+			if distancia < 3.0:
+				return _resultado(unidad, "alejarse", "", false)
+			if float(unidad["cooldown"]) <= 0.0 and zonas_marcadas < CONTROLADOR_MAX_ZONAS:
+				unidad["estado"] = MARCAR_ZONA
+				unidad["temporizador"] = CONTROLADOR_TELEGRAFO
+				unidad["zonas_marcadas"] = zonas_marcadas + 1
+				return _resultado(unidad, "telegrafiar", "zona", false)
+			return _resultado(unidad, "reposicionar", "", false)
+		MARCAR_ZONA:
+			unidad["temporizador"] = maxf(0.0, float(unidad["temporizador"]) - delta)
+			if float(unidad["temporizador"]) <= 0.0:
+				# No activar si cerraría todas las salidas
+				if not hay_salida:
+					return _resultado(unidad, "esperar_salida", "zona", false)
+				if zonas_activas >= CONTROLADOR_MAX_ZONAS:
+					return _resultado(unidad, "esperar_zona", "zona", false)
+				unidad["estado"] = ACTIVAR_ZONA
+				unidad["temporizador"] = CONTROLADOR_ACTIVACION
+				return _resultado(unidad, "activar_zona", "zona", false)
+			return _resultado(unidad, "telegrafiar", "zona", false)
+		ACTIVAR_ZONA:
+			unidad["temporizador"] = maxf(0.0, float(unidad["temporizador"]) - delta)
+			if float(unidad["temporizador"]) <= 0.0:
+				unidad["estado"] = RECUPERAR
+				unidad["temporizador"] = CONTROLADOR_RECUPERACION
+				return _resultado(unidad, "activar_zona", "zona", false)
+			return _resultado(unidad, "activar_zona", "zona", false)
+		RECUPERAR:
+			unidad["temporizador"] = maxf(0.0, float(unidad["temporizador"]) - delta)
+			if float(unidad["temporizador"]) <= 0.0:
+				unidad["estado"] = REPOSICIONAR
+				unidad["cooldown"] = 0.50
+				return _resultado(unidad, "reposicionar", "", false)
+			return _resultado(unidad, "recuperar", "vulnerable", true)
+		_:
+			unidad["estado"] = REPOSICIONAR
+			unidad["temporizador"] = 0.0
+			return _resultado(unidad, "reposicionar", "", false)
 
 
 ## La reducción de movimiento solo cambia cómo se dibuja el aviso. La lógica y
