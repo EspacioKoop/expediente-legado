@@ -24,19 +24,34 @@ const AVISOS_LIMITE = 20;
 // Un latido vale media hora: quien no renueva deja de figurar sin barrido manual.
 const PRESENCIA_TTL_MS = 30 * 60 * 1000;
 const PRESENCIA_LIMITE = 50;
-const RESERVA_TTL_MS = 48 * 60 * 60 * 1000;
+const RESERVA_TTL_MIN_DEFECTO = 30;
+const RESERVA_TTL_MIN_MAX = 48 * 60;
 const RESERVA_LIMITE = 100;
+const RESERVA_CAS_INTENTOS = 5;
+const RESERVAS_KEY: Deno.KvKey = ["agent_coord", "reservas", "v1"];
 const HORA_MS = 60 * 60 * 1000;
 
 export interface Reserva {
   schema: 1;
+  id: string;
   agente: string;
   issue: number;
   rama: string;
   files: string[];
   goal: string;
+  creado: string;
   visto: string;
+  expira: string;
 }
+
+interface RegistroReservas {
+  schema: 1;
+  reservas: Reserva[];
+}
+
+type ClaimResultado =
+  | { ok: true; reserva: Reserva }
+  | { ok: false; error: "invalid_request" | "conflict" | "limit"; conflicts?: Reserva[] };
 
 export interface Aviso {
   schema: 1;
@@ -87,184 +102,113 @@ function limpiarPaths(value: unknown): string[] {
   return paths;
 }
 
-function normalizarRutas(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
+
+function normalizarRutas(value: unknown): string[] | null {
+  if (!Array.isArray(value) || value.length === 0 || value.length > 12) return null;
   const rutas: string[] = [];
+  const vistas = new Set<string>();
   for (const raw of value) {
-    const ruta = cleanTitle(raw, 200).replace(/\\/g, "/");
-    if (!ruta || ruta.startsWith("/") || ruta.split("/").includes("..")) continue;
-    if (!rutas.includes(ruta)) rutas.push(ruta);
+    if (typeof raw !== "string") return null;
+    const original = raw.trim();
+    if (!original || original.length > 200) return null;
+    const ruta = original.replace(/\\/g, "/");
+    if (ruta.startsWith("/") || /^[A-Za-z]:\//.test(ruta)) return null;
+    const segmentos = ruta.split("/");
+    if (segmentos.some((segmento) => !segmento || segmento === "." || segmento === "..")) {
+      return null;
+    }
+    const canonica = segmentos.join("/");
+    if (vistas.has(canonica)) return null;
+    vistas.add(canonica);
+    rutas.push(canonica);
   }
-  return rutas;
+  return rutas.sort();
 }
 
-async function avisar(
-  kv: Deno.Kv,
-  raw: Record<string, unknown>,
-  identity: AgentIdentity,
-): Promise<Aviso | null> {
-  const agente = agenteDe(identity, raw.agente);
-  const tipo = cleanTitle(raw.tipo, 16) as AvisoTipo;
-  const texto = cleanTitle(raw.texto, AVISO_MAX_TEXTO);
-  if (
-    !agente ||
-    !AVISO_TIPOS.includes(tipo) ||
-    texto.length < 10 ||
-    containsPotentialSecret(texto)
-  ) {
-    return null;
+function rutasSolapan(a: string, b: string): boolean {
+  return a === b || a.startsWith(b + "/") || b.startsWith(a + "/");
+}
+
+function ttlReservaMinutos(raw: Record<string, unknown>): number {
+  const pedido = Number(raw.ttl_min ?? RESERVA_TTL_MIN_DEFECTO);
+  if (!Number.isFinite(pedido)) return RESERVA_TTL_MIN_DEFECTO;
+  return Math.min(Math.max(Math.trunc(pedido), 5), RESERVA_TTL_MIN_MAX);
+}
+
+function registroReservas(value: RegistroReservas | null): RegistroReservas {
+  if (value === null) return { schema: 1, reservas: [] };
+  if (value.schema !== 1 || !Array.isArray(value.reservas)) {
+    throw new Error("registro_reservas_invalido");
   }
-
-  const horasPedidas = Number(raw.ttl_horas ?? AVISO_TTL_HORAS_DEFECTO);
-  const horas = Number.isFinite(horasPedidas)
-    ? Math.min(Math.max(horasPedidas, 1), AVISO_TTL_HORAS_MAX)
-    : AVISO_TTL_HORAS_DEFECTO;
-  const ahora = Date.now();
-  const id = String(ahora) + "-" + crypto.randomUUID();
-  const aviso: Aviso = {
-    schema: 1,
-    id,
-    tipo,
-    texto,
-    refs: limpiarRefs(raw.refs),
-    paths: limpiarPaths(raw.paths),
-    agente,
-    creado: new Date(ahora).toISOString(),
-    caduca: new Date(ahora + horas * HORA_MS).toISOString(),
-  };
-  await kv.set(["agent_coord", "aviso", ahora, id], aviso, { expireIn: horas * HORA_MS });
-  return aviso;
+  return value;
 }
 
-async function avisosActivos(kv: Deno.Kv): Promise<Aviso[]> {
-  const ahora = new Date().toISOString();
-  const avisos: Aviso[] = [];
-  const iterator = kv.list<Aviso>(
-    { prefix: ["agent_coord", "aviso"] },
-    { reverse: true, limit: AVISOS_LIMITE * 2 },
-  );
-  for await (const entry of iterator) {
-    // expireIn no borra en el acto: se filtra también por la fecha guardada.
-    if (entry.value?.schema === 1 && entry.value.caduca > ahora) avisos.push(entry.value);
-    if (avisos.length >= AVISOS_LIMITE) break;
-  }
-  return avisos;
-}
-
-// Cualquier agente autenticado puede resolver: quien arregla main no tiene por
-// qué ser quien avisó de que estaba roto.
-async function resolver(kv: Deno.Kv, raw: Record<string, unknown>): Promise<boolean> {
-  const id = cleanTitle(raw.id, 80);
-  const match = /^(\d{13})-[0-9a-f-]{36}$/.exec(id);
-  if (!match) return false;
-  const key = ["agent_coord", "aviso", Number(match[1]), id];
-  const existente = await kv.get<Aviso>(key);
-  if (!existente.value) return false;
-  await kv.delete(key);
-  return true;
-}
-
-async function latido(
-  kv: Deno.Kv,
-  raw: Record<string, unknown>,
-  identity: AgentIdentity,
-): Promise<Presencia | null> {
-  const agente = agenteDe(identity, raw.agente);
-  if (!agente) return null;
-  const issue = Number(raw.issue ?? 0);
-  const tarea = cleanTitle(raw.tarea, 200);
-  if (containsPotentialSecret(tarea)) return null;
-
-  const presencia: Presencia = {
-    schema: 1,
-    agente,
-    issue: Number.isInteger(issue) && issue > 0 ? issue : 0,
-    rama: cleanTitle(raw.rama, 120),
-    tarea,
-    visto: new Date().toISOString(),
-  };
-  // El pool tiene varios workers a la vez: se distinguen por run.
-  const clave = identity.level === "pool"
-    ? "pool:" + (cleanTitle(identity.claims.run_id, 40) || "desconocido")
-    : agente;
-  await kv.set(["agent_coord", "presencia", clave], presencia, { expireIn: PRESENCIA_TTL_MS });
-  return presencia;
-}
-
-async function presentes(kv: Deno.Kv): Promise<Presencia[]> {
-  const limite = new Date(Date.now() - PRESENCIA_TTL_MS).toISOString();
-  const lista: Presencia[] = [];
-  const iterator = kv.list<Presencia>(
-    { prefix: ["agent_coord", "presencia"] },
-    { limit: PRESENCIA_LIMITE },
-  );
-  for await (const entry of iterator) {
-    if (entry.value?.schema === 1 && entry.value.visto > limite) lista.push(entry.value);
-  }
-  return lista.sort((a, b) => b.visto.localeCompare(a.visto));
+function reservasVivas(reservas: Reserva[], ahora = Date.now()): Reserva[] {
+  return reservas.filter((reserva) => {
+    if (reserva?.schema !== 1 || typeof reserva.expira !== "string") return false;
+    const expira = Date.parse(reserva.expira);
+    return Number.isFinite(expira) && expira > ahora;
+  });
 }
 
 async function claim(
   kv: Deno.Kv,
   raw: Record<string, unknown>,
   identity: AgentIdentity,
-): Promise<Reserva | null> {
+): Promise<ClaimResultado> {
   const agente = agenteDe(identity, raw.agente);
-  if (!agente) return null;
-
   const issue = Number(raw.issue ?? 0);
-  if (!Number.isInteger(issue) || issue <= 0) return null;
-
   const rutas = normalizarRutas(raw.files);
-  if (rutas.length === 0) return null;
-
   const rama = cleanTitle(raw.branch || raw.rama, 120);
-  if (!rama) return null;
-
   const goal = cleanTitle(raw.goal || raw.objetivo, 200);
-  if (!goal) return null;
-
-  // Verificación de solape: un archivo está reservado si coincide exactamente
-  // o si alguna ruta reservada es prefijo de la ruta solicitada (directorio).
-  // "foo" solapa "foo/bar", pero "foo" no solapa "foobar".
-  const iterator = kv.list<Reserva>({ prefix: ["agent_coord", "reserva"] });
-  for await (const entry of iterator) {
-    const r = entry.value;
-    if (!r || r.schema !== 1) continue;
-    for (const rutaR of r.files) {
-      for (const rutaS of rutas) {
-        if (rutaS === rutaR || rutaS.startsWith(rutaR + "/")) {
-          return null; // Solapado
-        }
-        if (rutaR.startsWith(rutaS + "/")) {
-          return null; // Solapado
-        }
-      }
-    }
+  if (
+    !agente ||
+    !Number.isInteger(issue) ||
+    issue <= 0 ||
+    !rutas ||
+    !rama ||
+    !goal ||
+    containsPotentialSecret(goal)
+  ) {
+    return { ok: false, error: "invalid_request" };
   }
 
-  const reserva: Reserva = {
-    schema: 1,
-    agente,
-    issue,
-    rama,
-    files: rutas,
-    goal,
-    visto: new Date().toISOString(),
-  };
+  for (let intento = 0; intento < RESERVA_CAS_INTENTOS; intento += 1) {
+    const entry = await kv.get<RegistroReservas>(RESERVAS_KEY);
+    const vivas = reservasVivas(registroReservas(entry.value).reservas);
+    const conflicts = vivas.filter((reserva) =>
+      reserva.files.some((existente) => rutas.some((solicitada) => rutasSolapan(existente, solicitada)))
+    );
+    if (conflicts.length > 0) {
+      return { ok: false, error: "conflict", conflicts };
+    }
+    if (vivas.length >= RESERVA_LIMITE) {
+      return { ok: false, error: "limit" };
+    }
 
-  // Persistencia con CAS (Check-and-Set) implícito en el flujo de validación
-  // previo, aunque para concurrencia estricta se requeriría una transacción.
-  // Deno KV soporta atomic().
-  const key = ["agent_coord", "reserva", issue, ...rutas.sort()];
-  const res = await kv.atomic()
-    .check({ key: key, versionstamp: null }) // solo si no existe
-    .set(key, reserva)
-    .commit();
+    const ahora = Date.now();
+    const ttlMin = ttlReservaMinutos(raw);
+    const reserva: Reserva = {
+      schema: 1,
+      id: crypto.randomUUID(),
+      agente,
+      issue,
+      rama,
+      files: rutas,
+      goal,
+      creado: new Date(ahora).toISOString(),
+      visto: new Date(ahora).toISOString(),
+      expira: new Date(ahora + ttlMin * 60 * 1000).toISOString(),
+    };
+    const siguiente: RegistroReservas = { schema: 1, reservas: [...vivas, reserva] };
+    const committed = await kv.atomic()
+      .check(entry)
+      .set(RESERVAS_KEY, siguiente)
+      .commit();
+    if (committed.ok) return { ok: true, reserva };
+  }
 
-  if (!res.ok) return null;
-
-  return reserva;
+  throw new Error("claim_cas_agotado");
 }
 
 async function heartbeat(
@@ -273,54 +217,117 @@ async function heartbeat(
   identity: AgentIdentity,
 ): Promise<Reserva | null> {
   const agente = agenteDe(identity, raw.agente);
-  if (!agente) return null;
+  const id = cleanTitle(raw.id, 80);
+  if (!agente || !id) return null;
 
-  const issue = Number(raw.issue ?? 0);
-  if (!Number.isInteger(issue) || issue <= 0) return null;
+  for (let intento = 0; intento < RESERVA_CAS_INTENTOS; intento += 1) {
+    const entry = await kv.get<RegistroReservas>(RESERVAS_KEY);
+    const vivas = reservasVivas(registroReservas(entry.value).reservas);
+    const indice = vivas.findIndex((reserva) => reserva.id === id);
+    if (indice < 0 || vivas[indice].agente !== agente) return null;
 
-  const rutas = normalizarRutas(raw.files);
-  if (rutas.length === 0) return null;
+    const ahora = Date.now();
+    const renovada: Reserva = {
+      ...vivas[indice],
+      visto: new Date(ahora).toISOString(),
+      expira: new Date(ahora + ttlReservaMinutos(raw) * 60 * 1000).toISOString(),
+    };
+    const siguientes = vivas.slice();
+    siguientes[indice] = renovada;
+    const committed = await kv.atomic()
+      .check(entry)
+      .set(RESERVAS_KEY, { schema: 1, reservas: siguientes } satisfies RegistroReservas)
+      .commit();
+    if (committed.ok) return renovada;
+  }
 
-  const key = ["agent_coord", "reserva", issue, ...rutas.sort()];
-  const existente = await kv.get<Reserva>(key);
-
-  if (!existente.value || existente.value.agente !== agente) return null;
-
-  const reserva = { ...existente.value, visto: new Date().toISOString() };
-  await kv.set(key, reserva, { expireIn: RESERVA_TTL_MS });
-  return reserva;
+  throw new Error("heartbeat_cas_agotado");
 }
 
 async function release(
   kv: Deno.Kv,
   raw: Record<string, unknown>,
   identity: AgentIdentity,
-): Promise<boolean> {
+): Promise<{ ok: boolean; reserva: Reserva | null }> {
   const agente = agenteDe(identity, raw.agente);
-  if (!agente) return null;
+  const id = cleanTitle(raw.id, 80);
+  if (!agente || !id) return { ok: false, reserva: null };
 
-  const issue = Number(raw.issue ?? 0);
-  if (!Number.isInteger(issue) || issue <= 0) return null;
+  for (let intento = 0; intento < RESERVA_CAS_INTENTOS; intento += 1) {
+    const entry = await kv.get<RegistroReservas>(RESERVAS_KEY);
+    const vivas = reservasVivas(registroReservas(entry.value).reservas);
+    const reserva = vivas.find((item) => item.id === id) ?? null;
+    if (!reserva) return { ok: true, reserva: null };
+    if (reserva.agente !== agente) return { ok: false, reserva: null };
 
-  const rutas = normalizarRutas(raw.files);
-  if (rutas.length === 0) return null;
+    const committed = await kv.atomic()
+      .check(entry)
+      .set(
+        RESERVAS_KEY,
+        { schema: 1, reservas: vivas.filter((item) => item.id !== id) } satisfies RegistroReservas,
+      )
+      .commit();
+    if (committed.ok) return { ok: true, reserva };
+  }
 
-  const key = ["agent_coord", "reserva", issue, ...rutas.sort()];
-  const existente = await kv.get<Reserva>(key);
-
-  if (!existente.value || existente.value.agente !== agente) return null;
-
-  await kv.delete(key);
-  return true;
+  throw new Error("release_cas_agotado");
 }
 
 async function claims(kv: Deno.Kv): Promise<Reserva[]> {
-  const lista: Reserva[] = [];
-  const iterator = kv.list<Reserva>({ prefix: ["agent_coord", "reserva"] });
-  for await (const entry of iterator) {
-    if (entry.value?.schema === 1) lista.push(entry.value);
+  const entry = await kv.get<RegistroReservas>(RESERVAS_KEY);
+  return reservasVivas(registroReservas(entry.value).reservas)
+    .sort((a, b) => a.expira.localeCompare(b.expira) || a.id.localeCompare(b.id));
+}
+
+async function espejo1713(repository: string, texto: string): Promise<boolean> {
+  const token = Deno.env.get("GITHUB_TOKEN") ?? "";
+  if (!token) {
+    console.error("Agent coord: GITHUB_TOKEN ausente; no se pudo espejar #1713");
+    return false;
   }
-  return lista;
+  const response = await fetch(
+    `https://api.github.com/repos/${repository}/issues/1713/comments`,
+    {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${token}`,
+        accept: "application/vnd.github+json",
+        "content-type": "application/json",
+        "user-agent": "SIGA98-Agent-Coord",
+        "x-github-api-version": "2022-11-28",
+      },
+      body: JSON.stringify({ body: texto }),
+    },
+  );
+  if (!response.ok) {
+    console.error("Agent coord: espejo #1713 devolvió", response.status);
+    return false;
+  }
+  return true;
+}
+
+function textoClaim(reserva: Reserva): string {
+  return [
+    "AGENT_COORD_CLAIM",
+    `id=${reserva.id}`,
+    `agent=${reserva.agente}`,
+    `issue=#${reserva.issue}`,
+    `branch=${reserva.rama}`,
+    `files=${reserva.files.join(",")}`,
+    `expires=${reserva.expira}`,
+  ].join(" ");
+}
+
+function textoRelease(reserva: Reserva, raw: Record<string, unknown>): string {
+  let reason = cleanTitle(raw.reason, 80);
+  if (!reason || containsPotentialSecret(reason)) reason = "unspecified";
+  return [
+    "AGENT_COORD_RELEASE",
+    `id=${reserva.id}`,
+    `agent=${reserva.agente}`,
+    `issue=#${reserva.issue}`,
+    `reason=${reason}`,
+  ].join(" ");
 }
 
 export async function handleAgentCoord(
@@ -379,25 +386,51 @@ export async function handleAgentCoord(
     case "/api/agent-coord/presentes":
       return json({ ok: true, presentes: await presentes(kv) });
     case "/api/agent-coord/claim": {
-      const reserva = await claim(kv, raw, identity);
-      return reserva
-        ? json({ ok: true, reserva }, 201)
-        : json({ ok: false, error: "solapado_o_invalido" }, 400);
+      try {
+        const resultado = await claim(kv, raw, identity);
+        if (!resultado.ok) {
+          const status = resultado.error === "conflict" ? 409 : 400;
+          return json({ ok: false, error: resultado.error, conflicts: resultado.conflicts ?? [] }, status);
+        }
+        const espejo = await espejo1713(repository, textoClaim(resultado.reserva));
+        return json({ ok: true, reserva: resultado.reserva, espejo_1713: espejo }, 201);
+      } catch (error) {
+        console.error("Agent coord claim failure", error);
+        return json({ ok: false, error: "service_unavailable" }, 503);
+      }
     }
     case "/api/agent-coord/heartbeat": {
-      const reserva = await heartbeat(kv, raw, identity);
-      return reserva
-        ? json({ ok: true, reserva })
-        : json({ ok: false, error: "reserva_no_encontrada" }, 400);
+      try {
+        const reserva = await heartbeat(kv, raw, identity);
+        return reserva
+          ? json({ ok: true, reserva })
+          : json({ ok: false, error: "reserva_no_encontrada" }, 404);
+      } catch (error) {
+        console.error("Agent coord heartbeat failure", error);
+        return json({ ok: false, error: "service_unavailable" }, 503);
+      }
     }
     case "/api/agent-coord/release": {
-      const ok = await release(kv, raw, identity);
-      return ok
-        ? json({ ok: true })
-        : json({ ok: false, error: "reserva_no_encontrada" }, 400);
+      try {
+        const resultado = await release(kv, raw, identity);
+        if (!resultado.ok) return json({ ok: false, error: "forbidden" }, 403);
+        const espejo = resultado.reserva
+          ? await espejo1713(repository, textoRelease(resultado.reserva, raw))
+          : true;
+        return json({ ok: true, released: Boolean(resultado.reserva), espejo_1713: espejo });
+      } catch (error) {
+        console.error("Agent coord release failure", error);
+        return json({ ok: false, error: "service_unavailable" }, 503);
+      }
     }
-    case "/api/agent-coord/claims":
-      return json({ ok: true, claims: await claims(kv) });
+    case "/api/agent-coord/claims": {
+      try {
+        return json({ ok: true, claims: await claims(kv) });
+      } catch (error) {
+        console.error("Agent coord claims failure", error);
+        return json({ ok: false, error: "service_unavailable" }, 503);
+      }
+    }
   }
   return json({ ok: false, error: "not_found" }, 404);
 }
