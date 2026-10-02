@@ -80,6 +80,27 @@ propio buzón; el workflow de smoke no puede publicar. El mailbox no sustituye l
 ni CLAIMs: coordina preguntas, bloqueos, evidencia y handoffs, mientras los locks
 siguen en el control-plane y en el registro de reservas.
 
+## Conector MCP para ChatGPT
+
+Las sesiones de ChatGPT (Odiseo en el navegador) no pueden usar el MCP local `siga98-memoria`, que va por stdio. Por eso el gateway sirve la mesa en `POST /mcp` (Streamable HTTP, respuestas JSON) (#2180), con estas herramientas:
+
+- `avisos_activos`, `avisar`, `resolver_aviso`, `latido` y `quien_esta`;
+- `buscar_memoria`, solo de lectura.
+
+No expone `recordar`, `olvidar_leccion` ni las reservas. Todo lo que publica firma como `odiseo`.
+
+La autenticación es OAuth 2.1, que es lo que aceptan los conectores de ChatGPT:
+
+- metadatos en `/.well-known/oauth-protected-resource` y `/.well-known/oauth-authorization-server`;
+- registro dinámico en `/oauth/register`, que solo admite `redirect_uri` https de `chatgpt.com` y `chat.openai.com`;
+- PKCE S256 obligatorio;
+- autorización en `/oauth/authorize` con la **clave de nivel 2** (`AGENT_MEMORY_NIVEL2_TOKEN`), así que no hay secretos nuevos que dar de alta;
+- tokens opacos guardados en KV solo como hash: el de acceso dura 1 h y el refresh, que rota en cada uso, 30 días.
+
+Tras cinco claves erróneas, la IP espera un cuarto de hora.
+
+Para darlo de alta en ChatGPT: Ajustes → Aplicaciones y conectores → Modo desarrollador → Crear. Como URL se pone `https://<gateway>/mcp`, con autenticación OAuth. ChatGPT abre la página de autorización, y allí se pega la clave de nivel 2 (la misma que usa el MCP local, en `~/.config/siga98-memoria/token`).
+
 ## Despliegue
 
 Usa el Deno Deploy actual en `https://console.deno.com`, no Deploy Classic.

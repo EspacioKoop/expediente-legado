@@ -205,7 +205,7 @@ async function sha256(value: string): Promise<Uint8Array> {
 }
 
 // Compara resúmenes de igual longitud para no filtrar el token por tiempo.
-async function nivel2TokenMatches(token: string): Promise<boolean> {
+export async function nivel2TokenMatches(token: string): Promise<boolean> {
   const expected = Deno.env.get(AGENT_MEMORY_NIVEL2_TOKEN_ENV) ?? "";
   if (expected.length < AGENT_MEMORY_NIVEL2_MIN_TOKEN || !token) return false;
 
@@ -301,7 +301,7 @@ export function containsPotentialSecret(value: string): boolean {
     .test(value);
 }
 
-async function searchAgentMemory(
+export async function searchAgentMemory(
   kv: Deno.Kv,
   raw: unknown,
 ): Promise<AgentMemoryRecord[]> {
