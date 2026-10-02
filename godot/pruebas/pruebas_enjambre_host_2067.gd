@@ -79,11 +79,14 @@ func _probar_cuerpos_debiles_y_resolucion_unica() -> void:
 		var cuerpo := objetivo["cuerpo"] as CharacterBody3D
 		juicio._jugador.position = cuerpo.position + Vector3(0.0, 0.0, 0.9)
 		juicio._recarga_jugador = 0.0
-		juicio._atacar(
-			1,
-			JuicioCombate3D.ALCANCE_LIGERO,
-			JuicioCombate3D.RECARGA_LIGERA,
-			false,
+		(
+			juicio
+			. _atacar(
+				1,
+				JuicioCombate3D.ALCANCE_LIGERO,
+				JuicioCombate3D.RECARGA_LIGERA,
+				false,
+			)
 		)
 		_comprobar(
 			juicio._determinacion_rival,
