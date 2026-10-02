@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - '.github/workflows/evidencia-pixel-exodus-882.yml'
+      - '.github/actions/upload-artifact/**'
       - 'gbc/minijuegos/caza_pixeles_98/**'
       - 'godot/pruebas/capturar_pixel_exodus_882.gd'
       - 'godot/native/siga98_gb/**'
@@ -124,7 +125,7 @@ jobs:
           PY
 
       - name: Publicar evidencia audiovisual como artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: ./.github/actions/upload-artifact
         with:
           name: evidencia-pixel-exodus-882-${{ github.sha }}
           path: ${{ runner.temp }}/pixel-exodus-882/*
