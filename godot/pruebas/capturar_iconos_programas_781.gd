@@ -82,8 +82,10 @@ func _ejecutar() -> void:
 		quit(1)
 		return
 	print(
-		"EVIDENCIA_ICONOS_781_OK programas=%d capturas=%d resolucion=%dx%d"
-		% [PROGRAMAS.size(), _capturas.size(), ANCHO, ALTO]
+		(
+			"EVIDENCIA_ICONOS_781_OK programas=%d capturas=%d resolucion=%dx%d"
+			% [PROGRAMAS.size(), _capturas.size(), ANCHO, ALTO]
+		)
 	)
 	quit(0)
 
@@ -121,8 +123,7 @@ func _comprobar_iconos(escritorio: EscritorioSigaVisual, tamano: int) -> void:
 		if boton.icon is AtlasTexture:
 			var atlas := boton.icon as AtlasTexture
 			_comprobar(
-				atlas.region
-				== Rect2(float(indice * tamano), 0.0, float(tamano), float(tamano)),
+				atlas.region == Rect2(float(indice * tamano), 0.0, float(tamano), float(tamano)),
 				"%s usa la celda esperada del atlas de programas" % nombre,
 			)
 		else:
@@ -157,12 +158,15 @@ func _capturar(nombre_archivo: String, superficie: String) -> void:
 	var ruta := _salida.path_join(nombre_archivo)
 	var error := imagen.save_png(ruta)
 	_comprobar(error == OK, "%s se guarda" % nombre_archivo)
-	_capturas.append(
-		{
-			"archivo": nombre_archivo,
-			"superficie": superficie,
-			"bytes": png.size(),
-		}
+	(
+		_capturas
+		. append(
+			{
+				"archivo": nombre_archivo,
+				"superficie": superficie,
+				"bytes": png.size(),
+			}
+		)
 	)
 
 
