@@ -14,6 +14,10 @@ const VELOCIDAD_AGACHADO := 1.4
 const ACELERACION := 10.0
 const FRENADO := 14.0
 const SENSIBILIDAD_RATON_BASE := 0.0022
+## Sensibilidad del giro por arrastre táctil, en radianes por píxel. No reutiliza
+## la del ratón a propósito: el dedo recorre muchos más píxeles por gesto, así
+## que el valor queda explícito y acotado para que un barrido no pegue un volantazo.
+const SENSIBILIDAD_TACTIL_BASE := 0.0018
 const VOLUMEN_PISADA_DB := -8.0
 const GRUPO_CAMARA := "caminante_camara"
 
@@ -382,10 +386,41 @@ func _aplicar_movimiento_raton(evento: InputEventMouseMotion) -> void:
 	)
 
 
+## El arrastre táctil mira con los mismos guardas de gameplay que el ratón,
+## salvo la captura: el tacto no captura puntero. Que una GUI se haya quedado
+## el gesto se resuelve escuchando el drag en `_unhandled_input`, no aquí.
+static func debe_procesar_arrastre_tactil(
+	fisica_activa: bool, arbol_pausado: bool, dialogo_activo: bool
+) -> bool:
+	return fisica_activa and not arbol_pausado and not dialogo_activo
+
+
+## Misma inversión Y y mismo tope vertical que el ratón; solo cambia la
+## sensibilidad, que es propia del tacto y no lee las preferencias de ratón.
+func _aplicar_arrastre_tactil(evento: InputEventScreenDrag) -> void:
+	rotate_y(-evento.relative.x * SENSIBILIDAD_TACTIL_BASE)
+	_camara.rotation.x = clampf(
+		_camara.rotation.x - evento.relative.y * SENSIBILIDAD_TACTIL_BASE * _sentido_vertical(),
+		-TOPE_VERTICAL,
+		TOPE_VERTICAL
+	)
+
+
 func _unhandled_input(evento: InputEvent) -> void:
 	# MouseMotion ya se atendió en `_input`; aquí quedan los eventos que deben
 	# respetar que una GUI los haya consumido, especialmente el clic de recaptura.
 	if evento is InputEventMouseMotion:
+		return
+	# Un drag que llega aquí no fue consumido por ninguna GUI; si empezó sobre
+	# una app o modal, esa interfaz se lo queda y la cámara no gira. El tacto
+	# tampoco registra dispositivo: el prompt solo distingue teclado/ratón y mando.
+	if evento is InputEventScreenDrag:
+		if debe_procesar_arrastre_tactil(
+			is_physics_processing(),
+			get_tree().paused,
+			is_instance_valid(_camara_dialogo),
+		):
+			_aplicar_arrastre_tactil(evento)
 		return
 	_registrar_dispositivo_entrada(evento)
 	# El menú global es el único dueño de `cancelar`: al abrirlo libera el ratón y
