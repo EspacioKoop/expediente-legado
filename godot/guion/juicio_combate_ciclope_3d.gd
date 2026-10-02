@@ -118,11 +118,11 @@ static func pintar(runtime: Dictionary, estado: String, reduccion_movimiento: bo
 		material_ojo.emission_energy_multiplier = (
 			1.45
 			if estado == ARQUETIPOS.TELEGRAFIAR
-			else 1.8
-			if estado == ARQUETIPOS.CARGAR
-			else 0.45
-			if estado == ARQUETIPOS.RECUPERAR
-			else 0.8
+			else (
+				1.8
+				if estado == ARQUETIPOS.CARGAR
+				else 0.45 if estado == ARQUETIPOS.RECUPERAR else 0.8
+			)
 		)
 
 
