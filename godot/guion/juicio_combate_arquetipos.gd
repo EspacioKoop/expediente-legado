@@ -10,6 +10,7 @@ const BLOQUEADOR := "bloqueador"
 const ENJAMBRE := "enjambre"
 const EMBESTIDOR := "embestidor"
 const CONTROLADOR := "controlador"
+const MIMETICO := "mimetico"
 
 const REPOSICIONAR := "reposicionar"
 const TELEGRAFIAR := "telegrafiar"
@@ -23,6 +24,9 @@ const ATACAR := "atacar"
 const CARGAR := "cargar"
 const MARCAR_ZONA := "marcar_zona"
 const ACTIVAR_ZONA := "activar_zona"
+const OBSERVAR := "observar"
+const TELEGRAFIAR_ECO := "telegrafiar_eco"
+const REPETIR := "repetir"
 
 const HOSTIGADOR_DISTANCIA_MIN := 5.0
 const HOSTIGADOR_DISTANCIA_MAX := 8.0
@@ -51,6 +55,11 @@ const CONTROLADOR_MAX_ZONAS := 3
 const CONTROLADOR_TELEGRAFO := 0.60
 const CONTROLADOR_ACTIVACION := 0.40
 const CONTROLADOR_RECUPERACION := 0.90
+
+const MIMETICO_TELEGRAFO := 0.55
+const MIMETICO_REPETICION := 0.20
+const MIMETICO_RECUPERACION := 0.85
+const MIMETICO_PATRONES_PERMITIDOS := ["linea", "carga_lineal", "ataque_corto", "zona"]
 
 
 static func nuevo(tipo: String, raiz: int, indice: int = 0) -> Dictionary:
@@ -96,6 +105,14 @@ static func nuevo(tipo: String, raiz: int, indice: int = 0) -> Dictionary:
 				"cooldown": 0.0,
 				"zonas_marcadas": 0,
 			}
+		MIMETICO:
+			return {
+				"tipo": MIMETICO,
+				"estado": OBSERVAR,
+				"temporizador": 0.0,
+				"cooldown": 0.0,
+				"patron_eco": "",
+			}
 		_:
 			return {}
 
@@ -115,6 +132,8 @@ static func avanzar(unidad: Dictionary, delta: float, contexto: Dictionary = {})
 			return _avanzar_embestidor(copia, delta, contexto)
 		CONTROLADOR:
 			return _avanzar_controlador(copia, delta, contexto)
+		MIMETICO:
+			return _avanzar_mimetico(copia, delta, contexto)
 		_:
 			return _resultado(copia, "ninguna", "", false)
 
@@ -318,6 +337,8 @@ static func arena_tiene_ventana(unidades: Array) -> bool:
 			return true
 		if tipo == CONTROLADOR and estado == RECUPERAR:
 			return true
+		if tipo == MIMETICO and estado == RECUPERAR:
+			return true
 	return false
 
 
@@ -370,6 +391,47 @@ static func _avanzar_controlador(
 			unidad["estado"] = REPOSICIONAR
 			unidad["temporizador"] = 0.0
 			return _resultado(unidad, "reposicionar", "", false)
+
+
+static func _avanzar_mimetico(unidad: Dictionary, delta: float, contexto: Dictionary) -> Dictionary:
+	var estado := String(unidad.get("estado", OBSERVAR))
+	var patron := String(unidad.get("patron_eco", ""))
+	match estado:
+		OBSERVAR:
+			var observado := String(contexto.get("patron_observado", ""))
+			if observado not in MIMETICO_PATRONES_PERMITIDOS:
+				unidad["patron_eco"] = ""
+				return _resultado(unidad, "observar", "", false)
+			unidad["patron_eco"] = observado
+			unidad["estado"] = TELEGRAFIAR_ECO
+			unidad["temporizador"] = MIMETICO_TELEGRAFO
+			return _resultado(unidad, "telegrafiar_eco", observado, false)
+		TELEGRAFIAR_ECO:
+			unidad["temporizador"] = maxf(0.0, float(unidad["temporizador"]) - delta)
+			if float(unidad["temporizador"]) <= 0.0:
+				unidad["estado"] = REPETIR
+				unidad["temporizador"] = MIMETICO_REPETICION
+				return _resultado(unidad, "repetir", patron, false)
+			return _resultado(unidad, "telegrafiar_eco", patron, false)
+		REPETIR:
+			unidad["temporizador"] = maxf(0.0, float(unidad["temporizador"]) - delta)
+			if float(unidad["temporizador"]) <= 0.0:
+				unidad["estado"] = RECUPERAR
+				unidad["temporizador"] = MIMETICO_RECUPERACION
+				return _resultado(unidad, "recuperar", "vulnerable", true)
+			return _resultado(unidad, "repetir", patron, false)
+		RECUPERAR:
+			unidad["temporizador"] = maxf(0.0, float(unidad["temporizador"]) - delta)
+			if float(unidad["temporizador"]) <= 0.0:
+				unidad["estado"] = OBSERVAR
+				unidad["patron_eco"] = ""
+				return _resultado(unidad, "observar", "", false)
+			return _resultado(unidad, "recuperar", "vulnerable", true)
+		_:
+			unidad["estado"] = OBSERVAR
+			unidad["temporizador"] = 0.0
+			unidad["patron_eco"] = ""
+			return _resultado(unidad, "observar", "", false)
 
 
 ## La reducción de movimiento solo cambia cómo se dibuja el aviso. La lógica y
