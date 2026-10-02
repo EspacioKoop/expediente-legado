@@ -43,8 +43,7 @@ var perfil_jugador: Dictionary = {}
 var reduccion_movimiento := false
 ## Opt-in explícito: solo los hosts de combate contextual lo activan.
 var interaccion_ambiental_habilitada := false
-## Arquetipo onírico (#1771) que ya eligió el host contextual. Vacío, o uno
-## que este duelo no sabe representar, deja el rival clásico.
+## Arquetipo onírico elegido por el host; vacío/no soportado conserva el duelo clásico.
 var arquetipo_onirico := ""
 
 var _ambiental_1772: Dictionary = {}
@@ -207,8 +206,7 @@ func _process(delta: float) -> void:
 	_mover_rival(delta)
 	_actualizar_camara()
 
-	# Acción secundaria semántica y remapeable. Fuera de este host, inventario
-	# conserva su significado normal; aquí no sustituye a ningún ataque.
+	# Acción secundaria remapeable; fuera de este host inventario conserva su significado.
 	if interaccion_ambiental_habilitada and Input.is_action_just_pressed("inventario"):
 		usar_entorno_ambiental_1772()
 	if Input.is_action_just_pressed("interactuar"):
@@ -219,14 +217,18 @@ func _process(delta: float) -> void:
 		_esquivar()
 
 
-## Avanza los runtimes ambientales temporales desde el mismo tick.
 func _avanzar_ambiental_1772(delta: float) -> void:
 	ENTORNO_HOST_1772.avanzar(_empujar_1772, _volcar_1772, delta)
 
 
 func usar_entorno_ambiental_1772() -> bool:
 	return ENTORNO_HOST_1772.usar(
-		interaccion_ambiental_habilitada, _acabado, _jugador, _ambiental_1772, _empujar_1772, _volcar_1772
+		interaccion_ambiental_habilitada,
+		_acabado,
+		_jugador,
+		_ambiental_1772,
+		_empujar_1772,
+		_volcar_1772
 	)
 
 
@@ -234,9 +236,7 @@ func estado_entorno_ambiental_1772() -> Dictionary:
 	return ENTORNO_HOST_1772.estado(_ambiental_1772)
 
 
-## Los campos siguen siendo propios del nodo porque pruebas y
-## `JuicioFeedbackRitual` los leen por nombre; aquí solo se aplican los
-## cierres que la regla pura declara expirados.
+## Conserva los campos del nodo que consumen pruebas y JuicioFeedbackRitual.
 func _descontar_temporizadores(delta: float) -> void:
 	var expirados := _estado_temporal.descontar(delta)
 	if expirados.has("aviso_jungiano") and _etiqueta_jungiana != null:
@@ -357,8 +357,7 @@ func _mover_rival(delta: float) -> void:
 		_rival.rotation.y = float(host["rotacion_y"])
 		JuicioCombateEscenografia3D.andar(_figura_rival, bool(host["andando"]))
 		return
-	# La apertura del bloqueador es la ventana del jugador: quieto y sin atacar,
-	# para que se lea sin texto que ahora se le puede golpear.
+	# La apertura del bloqueador queda quieta y sin atacar para hacer legible la ventana.
 	if not ARQUETIPO_HOST.permite_iniciar_ataque(_arquetipo):
 		JuicioCombateEscenografia3D.andar(_figura_rival, false)
 		return
@@ -515,15 +514,18 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 	JUNGIANO.registrar_golpe(self, es_critico, fuerte)
 	if es_critico:
 		_mostrar_aviso_jungiano("CRÍTICO", 0.65)
-	var impacto := JUGADOR.resolver_impacto(
-		dano_base,
-		_dano_combo_pendiente,
-		es_critico,
-		fuerte,
-		_ritual,
-		_ataque_rival_pendiente,
-		_doctrina_activa,
-		_contraataque,
+	var impacto := (
+		JUGADOR
+		. resolver_impacto(
+			dano_base,
+			_dano_combo_pendiente,
+			es_critico,
+			fuerte,
+			_ritual,
+			_ataque_rival_pendiente,
+			_doctrina_activa,
+			_contraataque,
+		)
 	)
 	_dano_combo_pendiente = 0
 	if bool(impacto["interrumpir_rival"]):
@@ -684,9 +686,7 @@ func _terminar(gano: bool, inmediato: bool = false) -> void:
 		JuicioCombateEscenografia3D.gesto(_figura_jugador, "celebrar" if gano else "nervioso"),
 		JuicioCombateEscenografia3D.gesto(_figura_rival, "nervioso" if gano else "aplaudir"),
 	)
-	# El gesto final se ve antes de cerrar: quien escucha `terminado` libera la
-	# escena en ese mismo fotograma (VentanillaApp). El resultado ya es firme
-	# (`_acabado`), así que la espera no admite más golpes.
+	# El gesto final se ve antes de que `terminado` libere la escena; el resultado ya es firme.
 	espera = minf(espera, PAUSA_FINAL_MAX)
 	if not inmediato and espera > 0.0 and is_inside_tree():
 		await get_tree().create_timer(espera).timeout
