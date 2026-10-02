@@ -172,3 +172,154 @@ Deno.test("el latido registra presencia por agente y la renueva", async () => {
     assertEquals(presentes[0].agente, "odiseo", "el más reciente primero");
   });
 });
+
+Deno.test("reserva: carrera de claims concurrentes sobre misma ruta", async () => {
+  await withKv(async (kv) => {
+    const ruta = "src/main.ts";
+    const claim1 = call(kv, "claim", {
+      schema: 1,
+      agente: "claude",
+      issue: 2001,
+      rama: "feat/1",
+      files: [ruta],
+      goal: "goal 1",
+    });
+    const claim2 = call(kv, "claim", {
+      schema: 1,
+      agente: "odiseo",
+      issue: 2002,
+      rama: "feat/2",
+      files: [ruta],
+      goal: "goal 2",
+    });
+
+    const [res1, res2] = await Promise.all([claim1, claim2]);
+    const ganadores = [res1, res2].filter((r) => r.status === 201);
+    assertEquals(ganadores.length, 1, "exactamente un ganador en carrera");
+  });
+});
+
+Deno.test("reserva: solapo padre-hijo y prefijos", async () => {
+  await withKv(async (kv) => {
+    // 1. Reservar carpeta padre
+    await call(kv, "claim", {
+      schema: 1,
+      agente: "claude",
+      issue: 3001,
+      rama: "feat/padre",
+      files: ["src/components/"],
+      goal: "padre",
+    });
+
+    // 2. Intentar reservar hijo (debería fallar por solapo)
+    const hijo = await call(kv, "claim", {
+      schema: 1,
+      agente: "odiseo",
+      issue: 3002,
+      rama: "feat/hijo",
+      files: ["src/components/Botton.ts"],
+      goal: "hijo",
+    });
+    assertEquals(hijo.status, 409, "solapo hijo en carpeta reservada");
+
+    // 3. Reserva en ruta no solapada
+    const ok = await call(kv, "claim", {
+      schema: 1,
+      agente: "odiseo",
+      issue: 3003,
+      rama: "feat/otro",
+      files: ["src/utils/helpers.ts"],
+      goal: "otro",
+    });
+    assertEquals(ok.status, 201, "ruta sin solapo permitida");
+  });
+});
+
+Deno.test("reserva: expiración de lease y renovación (heartbeat)", async () => {
+  await withKv(async (kv) => {
+    const ruta = "src/expire.ts";
+    await call(kv, "claim", {
+      schema: 1,
+      agente: "claude",
+      issue: 4001,
+      rama: "feat/exp",
+      files: [ruta],
+      goal: "expira",
+      lease: 1, // 1 minuto
+    });
+
+    // Heartbeat autorizado
+    const claimRes = await call(kv, "claim", {
+      schema: 1,
+      agente: "claude",
+      issue: 4002,
+      rama: "feat/hb",
+      files: ["src/hb.ts"],
+      goal: "hb",
+    });
+    const id = (claimRes.data.reserva as Record<string, unknown>).id;
+    const hb = await call(kv, "heartbeat", {
+      schema: 1,
+      reservaId: id,
+    });
+    assertEquals(hb.status, 200, "heartbeat autorizado");
+
+    const hbNo = await call(kv, "heartbeat", {
+      schema: 1,
+      reservaId: id,
+    }, "t".repeat(40) + "X"); // Token distinto (simulando otro agente)
+    assertEquals(hbNo.status, 403, "heartbeat no autorizado (otro agente)");
+  });
+});
+
+Deno.test("reserva: release doble idempotente", async () => {
+  await withKv(async (kv) => {
+    const res = await call(kv, "claim", {
+      schema: 1,
+      agente: "claude",
+      issue: 5001,
+      rama: "feat/rel",
+      files: ["src/rel.ts"],
+      goal: "rel",
+    });
+    const id = (res.data.reserva as Record<string, unknown>).id;
+
+    assertEquals((await call(kv, "release", { schema: 1, reservaId: id })).status, 200, "primer release");
+    assertEquals((await call(kv, "release", { schema: 1, reservaId: id })).status, 200, "segundo release idempotente");
+  });
+});
+
+Deno.test("reserva: KV caído (fail closed)", async () => {
+  // Simulamos KV caído pasando un objeto que lanza errores
+  const kvFallo = {
+    get: () => { throw new Error("KV DOWN"); },
+    set: () => { throw new Error("KV DOWN"); },
+    listToJSON: () => { throw new Error("KV DOWN"); },
+    close: () => {},
+  } as unknown as Deno.Kv;
+
+  const res = await call(kvFallo, "claim", {
+    schema: 1,
+    agente: "claude",
+    issue: 6001,
+    rama: "feat/fail",
+    files: ["src/fail.ts"],
+    goal: "fail",
+  });
+  assertEquals(res.status, 503, "KV caído devuelve service_unavailable");
+});
+
+Deno.test("reserva: claim frente a reserva histórica viva de #1713", async () => {
+  await withKv(async (kv) => {
+    const res = await call(kv, "claim", {
+      schema: 1,
+      agente: "claude",
+      issue: 7001,
+      rama: "feat/hist",
+      files: ["src/hist.ts"],
+      goal: "hist",
+    });
+    assertEquals(res.status, 201, "reserva local exitosa aunque espejo falle");
+  });
+});
+
