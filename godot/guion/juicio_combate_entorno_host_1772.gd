@@ -48,8 +48,10 @@ static func usar(
 		resultado = EMPUJAR.empujar(empujar, posicion, true)
 		continuar = (
 			not bool(resultado.get("ok", false))
-			and String(resultado.get("motivo", ""))
-			in ["fuera_de_alcance", "sin_usos", "en_recarga"]
+			and (
+				String(resultado.get("motivo", ""))
+				in ["fuera_de_alcance", "sin_usos", "en_recarga"]
+			)
 		)
 	if continuar and not volcar.is_empty():
 		resultado = VOLCAR.volcar(volcar, posicion, true)
