@@ -31,6 +31,27 @@ const RESERVA_CAS_INTENTOS = 5;
 const RESERVAS_KEY: Deno.KvKey = ["agent_coord", "reservas", "v1"];
 const HORA_MS = 60 * 60 * 1000;
 
+export interface Aviso {
+  schema: 1;
+  id: string;
+  tipo: AvisoTipo;
+  texto: string;
+  refs: number[];
+  paths: string[];
+  agente: string;
+  creado: string;
+  caduca: string;
+}
+
+export interface Presencia {
+  schema: 1;
+  agente: string;
+  issue: number;
+  rama: string;
+  tarea: string;
+  visto: string;
+}
+
 export interface Reserva {
   schema: 1;
   id: string;
@@ -52,27 +73,6 @@ interface RegistroReservas {
 type ClaimResultado =
   | { ok: true; reserva: Reserva }
   | { ok: false; error: "invalid_request" | "conflict" | "limit"; conflicts?: Reserva[] };
-
-export interface Aviso {
-  schema: 1;
-  id: string;
-  tipo: AvisoTipo;
-  texto: string;
-  refs: number[];
-  paths: string[];
-  agente: string;
-  creado: string;
-  caduca: string;
-}
-
-export interface Presencia {
-  schema: 1;
-  agente: string;
-  issue: number;
-  rama: string;
-  tarea: string;
-  visto: string;
-}
 
 // El token de nivel 2 es compartido, así que el nombre lo declara el propio
 // agente dentro de la lista cerrada; el pool firma siempre como `pool`.
@@ -100,6 +100,112 @@ function limpiarPaths(value: unknown): string[] {
     if (paths.length >= 12) break;
   }
   return paths;
+}
+
+async function avisar(
+  kv: Deno.Kv,
+  raw: Record<string, unknown>,
+  identity: AgentIdentity,
+): Promise<Aviso | null> {
+  const agente = agenteDe(identity, raw.agente);
+  const tipo = cleanTitle(raw.tipo, 16) as AvisoTipo;
+  const texto = cleanTitle(raw.texto, AVISO_MAX_TEXTO);
+  if (
+    !agente ||
+    !AVISO_TIPOS.includes(tipo) ||
+    texto.length < 10 ||
+    containsPotentialSecret(texto)
+  ) {
+    return null;
+  }
+
+  const horasPedidas = Number(raw.ttl_horas ?? AVISO_TTL_HORAS_DEFECTO);
+  const horas = Number.isFinite(horasPedidas)
+    ? Math.min(Math.max(horasPedidas, 1), AVISO_TTL_HORAS_MAX)
+    : AVISO_TTL_HORAS_DEFECTO;
+  const ahora = Date.now();
+  const id = String(ahora) + "-" + crypto.randomUUID();
+  const aviso: Aviso = {
+    schema: 1,
+    id,
+    tipo,
+    texto,
+    refs: limpiarRefs(raw.refs),
+    paths: limpiarPaths(raw.paths),
+    agente,
+    creado: new Date(ahora).toISOString(),
+    caduca: new Date(ahora + horas * HORA_MS).toISOString(),
+  };
+  await kv.set(["agent_coord", "aviso", ahora, id], aviso, { expireIn: horas * HORA_MS });
+  return aviso;
+}
+
+async function avisosActivos(kv: Deno.Kv): Promise<Aviso[]> {
+  const ahora = new Date().toISOString();
+  const avisos: Aviso[] = [];
+  const iterator = kv.list<Aviso>(
+    { prefix: ["agent_coord", "aviso"] },
+    { reverse: true, limit: AVISOS_LIMITE * 2 },
+  );
+  for await (const entry of iterator) {
+    // expireIn no borra en el acto: se filtra también por la fecha guardada.
+    if (entry.value?.schema === 1 && entry.value.caduca > ahora) avisos.push(entry.value);
+    if (avisos.length >= AVISOS_LIMITE) break;
+  }
+  return avisos;
+}
+
+// Cualquier agente autenticado puede resolver: quien arregla main no tiene por
+// qué ser quien avisó de que estaba roto.
+async function resolver(kv: Deno.Kv, raw: Record<string, unknown>): Promise<boolean> {
+  const id = cleanTitle(raw.id, 80);
+  const match = /^(\d{13})-[0-9a-f-]{36}$/.exec(id);
+  if (!match) return false;
+  const key = ["agent_coord", "aviso", Number(match[1]), id];
+  const existente = await kv.get<Aviso>(key);
+  if (!existente.value) return false;
+  await kv.delete(key);
+  return true;
+}
+
+async function latido(
+  kv: Deno.Kv,
+  raw: Record<string, unknown>,
+  identity: AgentIdentity,
+): Promise<Presencia | null> {
+  const agente = agenteDe(identity, raw.agente);
+  if (!agente) return null;
+  const issue = Number(raw.issue ?? 0);
+  const tarea = cleanTitle(raw.tarea, 200);
+  if (containsPotentialSecret(tarea)) return null;
+
+  const presencia: Presencia = {
+    schema: 1,
+    agente,
+    issue: Number.isInteger(issue) && issue > 0 ? issue : 0,
+    rama: cleanTitle(raw.rama, 120),
+    tarea,
+    visto: new Date().toISOString(),
+  };
+  // El pool tiene varios workers a la vez: se distinguen por run.
+  const clave = identity.level === "pool"
+    ? "pool:" + (cleanTitle(identity.claims.run_id, 40) || "desconocido")
+    : agente;
+  await kv.set(["agent_coord", "presencia", clave], presencia, { expireIn: PRESENCIA_TTL_MS });
+  return presencia;
+}
+
+async function presentes(kv: Deno.Kv): Promise<Presencia[]> {
+  const limite = new Date(Date.now() - PRESENCIA_TTL_MS).toISOString();
+  const lista: Presencia[] = [];
+  const iterator = kv.list<Presencia>(
+    { prefix: ["agent_coord", "presencia"] },
+    { limit: PRESENCIA_LIMITE },
+  );
+  for await (const entry of iterator) {
+    if (entry.value?.schema === 1 && entry.value.visto > limite) lista.push(entry.value);
+  }
+  return lista.sort((a, b) => b.visto.localeCompare(a.visto));
 }
 
 
@@ -177,7 +283,9 @@ async function claim(
     const entry = await kv.get<RegistroReservas>(RESERVAS_KEY);
     const vivas = reservasVivas(registroReservas(entry.value).reservas);
     const conflicts = vivas.filter((reserva) =>
-      reserva.files.some((existente) => rutas.some((solicitada) => rutasSolapan(existente, solicitada)))
+      reserva.files.some((existente) =>
+        rutas.some((solicitada) => rutasSolapan(existente, solicitada))
+      )
     );
     if (conflicts.length > 0) {
       return { ok: false, error: "conflict", conflicts };
@@ -385,12 +493,16 @@ export async function handleAgentCoord(
     }
     case "/api/agent-coord/presentes":
       return json({ ok: true, presentes: await presentes(kv) });
+
     case "/api/agent-coord/claim": {
       try {
         const resultado = await claim(kv, raw, identity);
         if (!resultado.ok) {
           const status = resultado.error === "conflict" ? 409 : 400;
-          return json({ ok: false, error: resultado.error, conflicts: resultado.conflicts ?? [] }, status);
+          return json(
+            { ok: false, error: resultado.error, conflicts: resultado.conflicts ?? [] },
+            status,
+          );
         }
         const espejo = await espejo1713(repository, textoClaim(resultado.reserva));
         return json({ ok: true, reserva: resultado.reserva, espejo_1713: espejo }, 201);
