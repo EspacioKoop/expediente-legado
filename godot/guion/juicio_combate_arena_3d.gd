@@ -89,6 +89,73 @@ static func montar(
 	}
 
 
+static func montar_enjambre(
+	anfitrion: Node3D,
+	clave_base: String,
+	color: Color,
+	cantidad: int = 2,
+) -> Dictionary:
+	var total := JuicioCombateArquetipoHost.tamano_enjambre(cantidad)
+	var actores: Array = []
+	for indice in range(total):
+		var cuerpo := CharacterBody3D.new()
+		cuerpo.name = "EnjambreRival%d" % indice
+		cuerpo.position = _posicion_enjambre(indice, total)
+		anfitrion.add_child(cuerpo)
+
+		var figura := JuicioCombateEscenografia3D.rival_sin_cara(
+			cuerpo, "%s:enjambre:%d" % [clave_base, indice], color
+		)
+		var aviso := _montar_aviso_enjambre(cuerpo, indice)
+		actores.append(
+			{
+				"indice": indice,
+				"cuerpo": cuerpo,
+				"figura": figura,
+				"aviso": aviso,
+			}
+		)
+	return {"cantidad": total, "actores": actores}
+
+
+static func _posicion_enjambre(indice: int, total: int) -> Vector3:
+	if total <= 2:
+		return Vector3(-1.8 if indice == 0 else 1.8, 0.0, -2.8)
+	match indice:
+		0:
+			return Vector3(-2.1, 0.0, -2.4)
+		1:
+			return Vector3(2.1, 0.0, -2.4)
+		_:
+			return Vector3(0.0, 0.0, -4.0)
+
+
+static func _montar_aviso_enjambre(
+	cuerpo: CharacterBody3D, indice: int
+) -> MeshInstance3D:
+	var aviso := MeshInstance3D.new()
+	aviso.name = "AvisoAtaqueEnjambre%d" % indice
+	var malla := CylinderMesh.new()
+	malla.top_radius = JuicioCombateReglas.ALCANCE_RIVAL * 0.72
+	malla.bottom_radius = JuicioCombateReglas.ALCANCE_RIVAL * 0.72
+	malla.height = 0.025
+	malla.radial_segments = 24
+	aviso.mesh = malla
+	aviso.position.y = 0.025
+
+	var material := StandardMaterial3D.new()
+	material.albedo_color = Color(0.92, 0.25, 0.10, 0.30)
+	material.emission_enabled = true
+	material.emission = Color(0.92, 0.25, 0.10)
+	material.emission_energy_multiplier = 0.70
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	aviso.material_override = material
+	aviso.visible = false
+	cuerpo.add_child(aviso)
+	return aviso
+
+
 static func _montar_aviso_ataque(anfitrion: Node3D) -> MeshInstance3D:
 	var aviso := MeshInstance3D.new()
 	aviso.name = "AvisoAtaqueRival"
