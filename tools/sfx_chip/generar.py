@@ -93,6 +93,20 @@ RECETAS = {
         "clacks": ((0.018, 0.45, 0.005),),
         "wav_sha256": "a0e2c6542eaccc88789c627ee42bfd9818317aeb736e2e9d71666878878be65e",
     },
+    "teclado_tecla_02": {
+        "seed": 180614, "duration": 0.11, "tone_hz": (520, 340), "decay": 3.1,
+        "tone_mix": 0.28, "pulse_mix": 0.36, "pulse_threshold": 0.18,
+        "noise_mix": 0.22, "noise_lp": 0.36, "drive": 1.65, "gain": 0.64,
+        "clacks": ((0.014, 0.50, 0.004), (0.041, 0.12, 0.004)),
+        "wav_sha256": "d0d7092f6f3a61c581a26b19656b35a30433db1c7c3c63df6b967a225af738f9",
+    },
+    "teclado_tecla_03": {
+        "seed": 180615, "duration": 0.16, "tone_hz": (360, 205), "decay": 2.0,
+        "tone_mix": 0.42, "pulse_mix": 0.18, "pulse_threshold": -0.20,
+        "noise_mix": 0.32, "noise_lp": 0.24, "drive": 1.35, "gain": 0.69,
+        "clacks": ((0.022, 0.34, 0.007), (0.073, 0.18, 0.006)),
+        "wav_sha256": "3f932625c3e94d2c447bad2d6a9312bbeebfa9c5059eba01a3edae40574bc50c",
+    },
     "teclado_enter_01": {
         "seed": 180612, "duration": 0.18, "tone_hz": (220, 110), "decay": 2.0,
         "tone_mix": 0.45, "pulse_mix": 0.25, "pulse_threshold": -0.1,
@@ -107,8 +121,21 @@ RECETAS = {
         "clacks": ((0.02, 0.40, 0.005), (0.07, 0.38, 0.005), (0.12, 0.42, 0.005), (0.18, 0.39, 0.005), (0.23, 0.35, 0.005)),
         "wav_sha256": "f46839830706b008cd2724eb3b141d1160d414c6ecbadc164bc1a07bcd6b4da6",
     },
+    "teclado_rafaga_02": {
+        "seed": 180616, "duration": 0.32, "tone_hz": (430, 250), "decay": 1.05,
+        "tone_mix": 0.24, "pulse_mix": 0.31, "pulse_threshold": 0.28,
+        "noise_mix": 0.34, "noise_lp": 0.18, "drive": 1.55, "gain": 0.67,
+        "clacks": ((0.018, 0.46, 0.004), (0.052, 0.30, 0.005), (0.104, 0.43, 0.004), (0.154, 0.33, 0.006), (0.216, 0.45, 0.004), (0.278, 0.29, 0.005)),
+        "wav_sha256": "0a022136b43f2496ea05438f523459cba80f28e51805ecdf58f78d96b51b4909",
+    },
+    "teclado_rafaga_03": {
+        "seed": 180617, "duration": 0.24, "tone_hz": (310, 410), "decay": 0.65,
+        "tone_mix": 0.34, "pulse_mix": 0.20, "pulse_threshold": -0.05,
+        "noise_mix": 0.38, "noise_lp": 0.27, "drive": 1.30, "gain": 0.71,
+        "clacks": ((0.016, 0.35, 0.006), (0.083, 0.48, 0.004), (0.126, 0.25, 0.007), (0.195, 0.42, 0.005)),
+        "wav_sha256": "23ecf17365f8abca9a7c3002b3a83738ef5908f0ce68b2f1c78f1c5c95fac6c9",
+    },
 }
-
 
 def sintetizar(receta: dict) -> list[int]:
     duracion = float(receta["duration"])
