@@ -40,8 +40,10 @@ services:
     restart: unless-stopped
     depends_on:
       - mysql
+    # Solo localhost: es una consola de la base de datos y Docker se salta el
+    # cortafuegos del host en los puertos que publica.
     ports:
-      - "1999:8080"
+      - "127.0.0.1:1999:8080"
 
 volumes:
   mysql_data:
