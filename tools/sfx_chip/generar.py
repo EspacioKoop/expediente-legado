@@ -121,6 +121,7 @@ RECETAS = {
         "clacks": ((0.02, 0.40, 0.005), (0.07, 0.38, 0.005), (0.12, 0.42, 0.005), (0.18, 0.39, 0.005), (0.23, 0.35, 0.005)),
         "wav_sha256": "f46839830706b008cd2724eb3b141d1160d414c6ecbadc164bc1a07bcd6b4da6",
     },
+    # Presupuesto canónico de SFX cortos: duración máxima de 0,30 s.
     "teclado_rafaga_02": {
         "seed": 180616, "duration": 0.30, "tone_hz": (430, 250), "decay": 1.05,
         "tone_mix": 0.24, "pulse_mix": 0.31, "pulse_threshold": 0.28,
