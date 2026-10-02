@@ -16,6 +16,8 @@ static func plan_movimiento(
 	enredo_restante: float,
 	ritual: Dictionary,
 	delta: float,
+	camino_bloqueado: bool = false,
+	sesgo_desvio: float = 1.0,
 ) -> Dictionary:
 	var hacia := posicion_jugador - posicion_rival
 	hacia.y = 0.0
@@ -25,10 +27,15 @@ static func plan_movimiento(
 		"desplazamiento": Vector3.ZERO,
 		"rotacion_y": 0.0,
 		"iniciar_ataque": false,
+		"evitando_obstaculo": false,
 	}
 	if distancia > REGLAS.ALCANCE_RIVAL:
 		paso["mover"] = true
 		var direccion := hacia.normalized()
+		if camino_bloqueado:
+			var signo := -1.0 if sesgo_desvio < 0.0 else 1.0
+			direccion = Vector3(direccion.z, 0.0, -direccion.x) * signo
+			paso["evitando_obstaculo"] = true
 		var velocidad := velocidad_rival
 		if enredo_restante > 0.0:
 			velocidad *= float(ritual.get("velocidad_enredado_mul", 1.0))
