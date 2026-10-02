@@ -86,6 +86,8 @@ func _probar_hueco_liberado_en_mismo_tick() -> void:
 
 
 func _probar_montaje_arena_3d() -> void:
+	var estados := HOST.nuevo_enjambre(1771, 3)
+	var estados_antes := estados.duplicate(true)
 	var raiz_a := Node3D.new()
 	get_root().add_child(raiz_a)
 	var montado_a := ARENA.montar_enjambre(
@@ -115,9 +117,7 @@ func _probar_montaje_arena_3d() -> void:
 				"los cuerpos arrancan separados y legibles",
 			)
 
-	var estados := HOST.nuevo_enjambre(1771, 3)
-	var copia := estados.duplicate(true)
-	_comprobar(estados == copia, "montar cuerpos no toca estados del coordinador")
+	_comprobar(estados == estados_antes, "montar cuerpos no toca estados del coordinador")
 
 	var raiz_b := Node3D.new()
 	get_root().add_child(raiz_b)
