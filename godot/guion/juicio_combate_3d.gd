@@ -16,13 +16,12 @@ const RIVAL = preload("res://guion/juicio_combate_rival.gd")
 const DOCTRINA = preload("res://guion/juicio_combate_doctrina.gd")
 const JUGADOR = preload("res://guion/juicio_combate_jugador.gd")
 const ESTADO_TEMPORAL = preload("res://guion/juicio_combate_estado_temporal.gd")
-const AMBIENTAL_1772 = preload("res://guion/juicio_combate_ambiental_1772.gd")
-const EMPUJAR_1772 = preload("res://guion/juicio_combate_ambiental_empujar_1772.gd")
-const VOLCAR_1772 = preload("res://guion/juicio_combate_ambiental_volcar_1772.gd")
+const ENTORNO_HOST_1772 = preload("res://guion/juicio_combate_entorno_host_1772.gd")
 const ARQUETIPOS = preload("res://guion/juicio_combate_arquetipos.gd")
 const ARQUETIPO_HOST = preload("res://guion/juicio_combate_arquetipo_host.gd")
 const HOSTIGADOR_3D = preload("res://guion/juicio_combate_hostigador_3d.gd")
 const BLOQUEADOR_3D = preload("res://guion/juicio_combate_bloqueador_3d.gd")
+const ENJAMBRE_3D = preload("res://guion/juicio_combate_enjambre_runtime_1771.gd")
 const DETERMINACION_BASE := REGLAS.DETERMINACION_BASE
 const DETERMINACION_MINIMA_RIVAL := REGLAS.DETERMINACION_MINIMA_RIVAL
 const VELOCIDAD_JUGADOR := 4.8
@@ -52,6 +51,7 @@ var _ambiental_1772: Dictionary = {}
 var _empujar_1772: Dictionary = {}
 var _volcar_1772: Dictionary = {}
 var _arquetipo: Dictionary = {}
+var _enjambre_1771: Dictionary = {}
 var _guardia_rota := false
 var _escudo_guardia: MeshInstance3D
 var _linea_hostigador: MeshInstance3D
@@ -188,9 +188,10 @@ func _ready() -> void:
 	_montar_arena()
 	_montar_arquetipo()
 	if interaccion_ambiental_habilitada:
-		_ambiental_1772 = AMBIENTAL_1772.montar(self)
-		_empujar_1772 = EMPUJAR_1772.montar(self)
-		_volcar_1772 = VOLCAR_1772.montar(self)
+		var entorno := ENTORNO_HOST_1772.montar(self)
+		_ambiental_1772 = entorno["activar"]
+		_empujar_1772 = entorno["empujar"]
+		_volcar_1772 = entorno["volcar"]
 	_montar_hud()
 	_actualizar_hud()
 
@@ -220,46 +221,17 @@ func _process(delta: float) -> void:
 
 ## Avanza los runtimes ambientales temporales desde el mismo tick.
 func _avanzar_ambiental_1772(delta: float) -> void:
-	if not _empujar_1772.is_empty():
-		EMPUJAR_1772.avanzar(_empujar_1772, delta)
-	if not _volcar_1772.is_empty():
-		VOLCAR_1772.avanzar(_volcar_1772, delta)
+	ENTORNO_HOST_1772.avanzar(_empujar_1772, _volcar_1772, delta)
 
 
-## Prioridad determinista: ACTIVAR → EMPUJAR → VOLCAR.
 func usar_entorno_ambiental_1772() -> bool:
-	if not interaccion_ambiental_habilitada or _acabado:
-		return false
-	if _jugador == null or not is_instance_valid(_jugador):
-		return false
-	var posicion := _jugador.global_position
-	var resultado := {}
-	var continuar := true
-	if not _ambiental_1772.is_empty():
-		resultado = AMBIENTAL_1772.activar(_ambiental_1772, posicion, true)
-		continuar = (
-			not bool(resultado.get("ok", false))
-			and String(resultado.get("motivo", "")) in ["fuera_de_alcance", "ya_activado"]
-		)
-	if continuar and not _empujar_1772.is_empty():
-		resultado = EMPUJAR_1772.empujar(_empujar_1772, posicion, true)
-		continuar = (
-			not bool(resultado.get("ok", false))
-			and (
-				String(resultado.get("motivo", ""))
-				in ["fuera_de_alcance", "sin_usos", "en_recarga"]
-			)
-		)
-	if continuar and not _volcar_1772.is_empty():
-		resultado = VOLCAR_1772.volcar(_volcar_1772, posicion, true)
-	return bool(resultado.get("ok", false))
+	return ENTORNO_HOST_1772.usar(
+		interaccion_ambiental_habilitada, _acabado, _jugador, _ambiental_1772, _empujar_1772, _volcar_1772
+	)
 
 
 func estado_entorno_ambiental_1772() -> Dictionary:
-	if _ambiental_1772.is_empty():
-		return {}
-	var estado: Variant = _ambiental_1772.get("estado", {})
-	return (estado as Dictionary).duplicate(true) if estado is Dictionary else {}
+	return ENTORNO_HOST_1772.estado(_ambiental_1772)
 
 
 ## Los campos siguen siendo propios del nodo porque pruebas y
@@ -372,6 +344,10 @@ func _mover_jugador(delta: float) -> void:
 func _mover_rival(delta: float) -> void:
 	if _ataque_rival_pendiente:
 		_actualizar_telegrafo_rival(delta)
+		return
+	if not _enjambre_1771.is_empty():
+		ENJAMBRE_3D.mover(_enjambre_1771, _jugador.position, _radio_arena, delta)
+		_rival.position = ENJAMBRE_3D.centro(_enjambre_1771, _rival.position)
 		return
 	if String(_arquetipo.get("tipo", "")) == ARQUETIPOS.HOSTIGADOR:
 		var host := HOSTIGADOR_3D.mover(
@@ -519,34 +495,35 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 	if not compromiso_religion_bloqueante(_compromisos_religion, _rival_inicio_agresion).is_empty():
 		return
 	_recarga_jugador = recarga
-	var hacia := _rival.position - _jugador.position
+	var objetivo := {"cuerpo": _rival, "figura": _figura_rival, "indice": -1}
+	if not _enjambre_1771.is_empty():
+		objetivo = ENJAMBRE_3D.objetivo(_enjambre_1771, _jugador.position, alcance)
+		if objetivo.is_empty():
+			return
+	var cuerpo := objetivo["cuerpo"] as CharacterBody3D
+	var figura := objetivo["figura"] as Node3D
+	var hacia := cuerpo.position - _jugador.position
 	hacia.y = 0.0
 	if hacia.length() > 0.01:
 		_jugador.rotation.y = atan2(hacia.x, hacia.z)
-	if hacia.length() > alcance:
-		return
-	if _bloquear_golpe(fuerte):
+	if hacia.length() > alcance or (_enjambre_1771.is_empty() and _bloquear_golpe(fuerte)):
 		return
 
 	var efectos_jungianos := JUNGIANO.efectos_activos(self)
 	var probabilidad_critico := JUNGIANO.probabilidad_critico(efectos_jungianos)
 	var es_critico := probabilidad_critico > 0.0 and _azar.randf() < probabilidad_critico
 	JUNGIANO.registrar_golpe(self, es_critico, fuerte)
-
 	if es_critico:
 		_mostrar_aviso_jungiano("CRÍTICO", 0.65)
-	var impacto := (
-		JUGADOR
-		. resolver_impacto(
-			dano_base,
-			_dano_combo_pendiente,
-			es_critico,
-			fuerte,
-			_ritual,
-			_ataque_rival_pendiente,
-			_doctrina_activa,
-			_contraataque,
-		)
+	var impacto := JUGADOR.resolver_impacto(
+		dano_base,
+		_dano_combo_pendiente,
+		es_critico,
+		fuerte,
+		_ritual,
+		_ataque_rival_pendiente,
+		_doctrina_activa,
+		_contraataque,
 	)
 	_dano_combo_pendiente = 0
 	if bool(impacto["interrumpir_rival"]):
@@ -557,17 +534,22 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 		_contraataque = 0
 
 	var dano := int(impacto["dano"])
-	_determinacion_rival = maxi(0, _determinacion_rival - dano)
+	if _enjambre_1771.is_empty():
+		_determinacion_rival = maxi(0, _determinacion_rival - dano)
+	else:
+		ENJAMBRE_3D.aplicar_dano(_enjambre_1771, int(objetivo["indice"]), dano)
+		_determinacion_rival = ENJAMBRE_3D.restantes(_enjambre_1771)
 	_aplicar_curacion_arquetipo(efectos_jungianos)
 	var segundos_enredo := float(impacto["enredo_segundos"])
 	if segundos_enredo > 0.0:
 		_enredo = maxf(_enredo, segundos_enredo)
-	_reaccion(_figura_rival, 0.25 + float(dano) * 0.08)
+	_reaccion(figura, 0.25 + float(dano) * 0.08)
 	JuicioCombateEscenografia3D.gesto(_figura_jugador, "discutir")
-	JuicioCombateEscenografia3D.gesto(_figura_rival, "encajar")
+	JuicioCombateEscenografia3D.gesto(figura, "encajar")
 	_actualizar_hud()
-	if _determinacion_rival <= 0 and not _intentar_retorno_rival():
-		_terminar(true)
+	if _determinacion_rival <= 0:
+		if not _enjambre_1771.is_empty() or not _intentar_retorno_rival():
+			_terminar(true)
 
 
 func _intentar_retorno_rival() -> bool:
@@ -585,7 +567,17 @@ func _intentar_retorno_rival() -> bool:
 
 
 func _montar_arquetipo() -> void:
-	if not ARQUETIPO_HOST.soportado(arquetipo_onirico) or _rival == null:
+	if _rival == null:
+		return
+	if arquetipo_onirico == ARQUETIPOS.ENJAMBRE:
+		var clave := String(_acusado.get("id", _acusado.get("nombre", "enjambre")))
+		_enjambre_1771 = ENJAMBRE_3D.montar(
+			self, clave, JuicioCombateEscenografia3D.color_mito(_mito_id), _raiz, 3
+		)
+		_rival.visible = false
+		_determinacion_rival = ENJAMBRE_3D.restantes(_enjambre_1771)
+		return
+	if not ARQUETIPO_HOST.soportado(arquetipo_onirico):
 		return
 	_arquetipo = ARQUETIPOS.nuevo(arquetipo_onirico, _raiz)
 	if arquetipo_onirico == ARQUETIPOS.BLOQUEADOR:
@@ -596,6 +588,16 @@ func _montar_arquetipo() -> void:
 
 
 func _avanzar_arquetipo(delta: float) -> void:
+	if not _enjambre_1771.is_empty():
+		var paso := ENJAMBRE_3D.avanzar(_enjambre_1771, delta)
+		for ataque in paso["ataques"]:
+			_rival_inicio_agresion = true
+			_aplicar_impacto_rival(
+				ENJAMBRE_3D.resultado_ataque(ataque, _jugador.position, _esquiva)
+			)
+			if _acabado:
+				break
+		return
 	if _arquetipo.is_empty():
 		return
 	if String(_arquetipo.get("tipo", "")) == ARQUETIPOS.HOSTIGADOR:
@@ -677,6 +679,7 @@ func _terminar(gano: bool, inmediato: bool = false) -> void:
 	_ataque_rival_pendiente = false
 	JUNGIANO.salir_combate(self)
 	_ocultar_aviso_ataque()
+	ENJAMBRE_3D.ocultar(_enjambre_1771)
 	var espera := maxf(
 		JuicioCombateEscenografia3D.gesto(_figura_jugador, "celebrar" if gano else "nervioso"),
 		JuicioCombateEscenografia3D.gesto(_figura_rival, "nervioso" if gano else "aplaudir"),
@@ -917,7 +920,8 @@ func _al_combo_ejecutado(nombre: String, efectos: Dictionary) -> void:
 
 
 func _ejecutar_finisher_jungiano() -> void:
-	JUNGIANO.ejecutar_finisher_disponible(self)
+	if _enjambre_1771.is_empty():
+		JUNGIANO.ejecutar_finisher_disponible(self)
 
 
 func _al_finisher_ejecutado(nombre: String, efectos: Dictionary, es_super: bool) -> void:
