@@ -31,7 +31,9 @@ func _probar_limites() -> void:
 	_comprobar(HOST.presupuesto_enjambre(-5) == 1, "presupuesto negativo se eleva a uno")
 	_comprobar(HOST.presupuesto_enjambre(0) == 1, "presupuesto cero se eleva a uno")
 	_comprobar(HOST.presupuesto_enjambre(2) == 2, "presupuesto canónico se conserva")
-	_comprobar(HOST.presupuesto_enjambre(999) == 2, "presupuesto alto se recorta al máximo canónico")
+	_comprobar(
+		HOST.presupuesto_enjambre(999) == 2, "presupuesto alto se recorta al máximo canónico"
+	)
 
 
 func _probar_determinismo_y_copia() -> void:
