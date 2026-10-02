@@ -75,8 +75,12 @@ func _probar_hueco_liberado_en_mismo_tick() -> void:
 		String(nuevas[0]["estado"]) == ARQUETIPOS.RECUPERAR,
 		"la unidad que termina ataque libera su hueco",
 	)
-	_comprobar(_contar_atacantes(nuevas) == 2, "dos unidades nuevas pueden ocupar los huecos disponibles")
-	_comprobar(int(paso["atacantes_activos"]) == 2, "el contador local refleja salidas y entradas del tick")
+	_comprobar(
+		_contar_atacantes(nuevas) == 2, "dos unidades nuevas pueden ocupar los huecos disponibles"
+	)
+	_comprobar(
+		int(paso["atacantes_activos"]) == 2, "el contador local refleja salidas y entradas del tick"
+	)
 
 
 func _contar_atacantes(unidades: Array) -> int:
