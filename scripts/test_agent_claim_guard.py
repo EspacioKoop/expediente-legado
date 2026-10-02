@@ -49,7 +49,9 @@ class AgentClaimGuardTest(unittest.TestCase):
     def test_detecta_fuera_del_claim_e_ignora_contexto_del_agente(self):
         (self.repo / "permitido.txt").write_text("ok\n", encoding="utf-8")
         (self.repo / "bloqueado.txt").write_text("mal\n", encoding="utf-8")
-        (self.repo / "nuevo.txt").write_text("mal\n", encoding="utf-8")
+        (self.repo / "sub").mkdir()
+        (self.repo / "sub" / "nuevo.txt").write_text("mal\n", encoding="utf-8")
+        (self.repo / "suelto.txt").write_text("borrador\n", encoding="utf-8")
         (self.repo / ".agent-task.md").write_text("contexto\n", encoding="utf-8")
         (self.repo / ".qwen").mkdir()
         (self.repo / ".qwen" / "telemetry.log").write_text("x\n", encoding="utf-8")
@@ -57,7 +59,42 @@ class AgentClaimGuardTest(unittest.TestCase):
         resultado = guard.ejecutar(self.repo, self.plan, restaurar=False)
 
         self.assertEqual(resultado["changed_allowed"], ["permitido.txt"])
-        self.assertEqual(resultado["outside"], ["bloqueado.txt", "nuevo.txt"])
+        # Versionado modificado y nuevo en subdirectorio: desvío real.
+        self.assertEqual(resultado["outside"], ["bloqueado.txt", "sub/nuevo.txt"])
+        # Nuevo y suelto en la raíz: borrador, sin replan (#2106).
+        self.assertEqual(resultado["scratch"], ["suelto.txt"])
+        # Sin --restore solo se informa: no se borra nada.
+        self.assertTrue((self.repo / "suelto.txt").exists())
+
+    def test_borradores_de_la_raiz_se_borran_sin_desvio(self):
+        # #2106: nombres reales que forzaron replans (#2021, #2022, #2077,
+        # #2094) con una implementación correcta.
+        (self.repo / "permitido.txt").write_text("ok\n", encoding="utf-8")
+        borradores = ["AGENT_RESULT.md", "_tmp_compute_hash.py", "agent_result.json", "result.txt"]
+        for nombre in borradores:
+            (self.repo / nombre).write_text("x\n", encoding="utf-8")
+
+        resultado = guard.ejecutar(self.repo, self.plan, restaurar=True)
+
+        self.assertEqual(resultado["outside"], [])
+        self.assertEqual(resultado["scratch"], sorted(borradores))
+        self.assertFalse(resultado["restored"])
+        for nombre in borradores:
+            self.assertFalse((self.repo / nombre).exists(), nombre)
+        self.assertEqual(guard.rutas_cambiadas(self.repo), {"permitido.txt"})
+
+    def test_fichero_nuevo_reservado_en_la_raiz_no_es_borrador(self):
+        self.plan.write_text(
+            json.dumps({"files": ["permitido.txt", "nuevo-reservado.cfg"], "goal": "x"}),
+            encoding="utf-8",
+        )
+        (self.repo / "nuevo-reservado.cfg").write_text("x\n", encoding="utf-8")
+
+        resultado = guard.ejecutar(self.repo, self.plan, restaurar=True)
+
+        self.assertEqual(resultado["changed_allowed"], ["nuevo-reservado.cfg"])
+        self.assertEqual(resultado["scratch"], [])
+        self.assertTrue((self.repo / "nuevo-reservado.cfg").exists())
 
     def test_contexto_generado_por_el_worker_no_es_desvio(self):
         # Caso real del piloto #1656: el context packer escribe .agent-context.md.
@@ -100,6 +137,8 @@ class AgentClaimGuardTest(unittest.TestCase):
         resultado = guard.ejecutar(self.repo, self.plan, restaurar=True)
 
         self.assertTrue(resultado["restored"])
+        self.assertEqual(resultado["outside"], ["bloqueado.txt"])
+        self.assertEqual(resultado["scratch"], ["nuevo.txt"])
         self.assertEqual(
             (self.repo / "permitido.txt").read_text(encoding="utf-8"),
             "cambio válido\n",
@@ -122,7 +161,9 @@ class AgentClaimGuardTest(unittest.TestCase):
 
             resultado = guard.ejecutar(self.repo, self.plan, restaurar=True)
 
-            self.assertTrue(resultado["restored"])
+            # Suelto en la raíz: se trata como borrador, pero se borra igual
+            # y sin seguir el destino del enlace.
+            self.assertEqual(resultado["scratch"], ["enlace-fuera"])
             self.assertFalse(enlace.exists())
             self.assertFalse(enlace.is_symlink())
             self.assertEqual(objetivo.read_text(encoding="utf-8"), "no tocar\n")
