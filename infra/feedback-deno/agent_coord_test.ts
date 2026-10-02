@@ -379,7 +379,7 @@ Deno.test("reserva: release doble es idempotente y otro agente no libera", async
     assertEquals(segundo.status, 200, "segundo release idempotente");
     assertEquals(segundo.data.released as boolean, false, "ya no había reserva");
 
-    const lista = await call(kv, "claims", {});
+    const lista = await call(kv, "claims", { schema: 1 });
     assertEquals(lista.status, 200, "claims sigue disponible tras release idempotente");
     assertEquals(
       (lista.data.claims as Array<Record<string, unknown>>).length,
