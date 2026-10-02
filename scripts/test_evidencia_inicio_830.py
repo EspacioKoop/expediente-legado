@@ -10,7 +10,8 @@ README = ROOT / "docs/evidencias/inicio-830/README.md"
 class EvidenciaInicio830Test(unittest.TestCase):
     def test_captura_escena_real_a_1080p(self):
         fuente = CAPTURA.read_text(encoding="utf-8")
-        self.assertIn('load("res://escenas/inicio.tscn").instantiate()', fuente)
+        self.assertIn('const Inicio := preload("res://guion/inicio_app.gd")', fuente)
+        self.assertIn("var inicio := Inicio.new()", fuente)
         self.assertIn("const ANCHO := 1920", fuente)
         self.assertIn("const ALTO := 1080", fuente)
         self.assertIn("InicioDiorama3D", fuente)
