@@ -107,13 +107,16 @@ static func montar_enjambre(
 			cuerpo, "%s:enjambre:%d" % [clave_base, indice], color
 		)
 		var aviso := _montar_aviso_enjambre(cuerpo, indice)
-		actores.append(
-			{
-				"indice": indice,
-				"cuerpo": cuerpo,
-				"figura": figura,
-				"aviso": aviso,
-			}
+		(
+			actores
+			. append(
+				{
+					"indice": indice,
+					"cuerpo": cuerpo,
+					"figura": figura,
+					"aviso": aviso,
+				}
+			)
 		)
 	return {"cantidad": total, "actores": actores}
 
@@ -130,9 +133,7 @@ static func _posicion_enjambre(indice: int, total: int) -> Vector3:
 			return Vector3(0.0, 0.0, -4.0)
 
 
-static func _montar_aviso_enjambre(
-	cuerpo: CharacterBody3D, indice: int
-) -> MeshInstance3D:
+static func _montar_aviso_enjambre(cuerpo: CharacterBody3D, indice: int) -> MeshInstance3D:
 	var aviso := MeshInstance3D.new()
 	aviso.name = "AvisoAtaqueEnjambre%d" % indice
 	var malla := CylinderMesh.new()
