@@ -94,11 +94,11 @@ RECETAS = {
         "wav_sha256": "a0e2c6542eaccc88789c627ee42bfd9818317aeb736e2e9d71666878878be65e",
     },
     "teclado_tecla_02": {
-        "seed": 180614, "duration": 0.11, "tone_hz": (520, 340), "decay": 3.1,
+        "seed": 180614, "duration": 0.12, "tone_hz": (520, 340), "decay": 3.1,
         "tone_mix": 0.28, "pulse_mix": 0.36, "pulse_threshold": 0.18,
         "noise_mix": 0.22, "noise_lp": 0.36, "drive": 1.65, "gain": 0.64,
         "clacks": ((0.014, 0.50, 0.004), (0.041, 0.12, 0.004)),
-        "wav_sha256": "d0d7092f6f3a61c581a26b19656b35a30433db1c7c3c63df6b967a225af738f9",
+        "wav_sha256": "ae134c46503ed02b2ebac51bfc22f6f16309cb8593d345df876a7015c2a000a5",
     },
     "teclado_tecla_03": {
         "seed": 180615, "duration": 0.16, "tone_hz": (360, 205), "decay": 2.0,
