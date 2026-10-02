@@ -57,8 +57,7 @@ static func avanzar(
 		"inicio_agresion":
 		estado == ARQUETIPOS.TELEGRAFIAR and estado_anterior != ARQUETIPOS.TELEGRAFIAR,
 		"inicio_carga": estado == ARQUETIPOS.CARGAR and estado_anterior != ARQUETIPOS.CARGAR,
-		"abrir_ventana":
-		estado == ARQUETIPOS.RECUPERAR and estado_anterior != ARQUETIPOS.RECUPERAR,
+		"abrir_ventana": estado == ARQUETIPOS.RECUPERAR and estado_anterior != ARQUETIPOS.RECUPERAR,
 	}
 
 
@@ -74,7 +73,9 @@ static func mover(
 	hacia.y = 0.0
 	var estado := String(unidad.get("estado", ""))
 	var rumbo := float(unidad.get("rumbo_bloqueado", rotacion_y_rival))
-	var rotacion := rumbo if estado in [ARQUETIPOS.TELEGRAFIAR, ARQUETIPOS.CARGAR] else rotacion_y_rival
+	var rotacion := (
+		rumbo if estado in [ARQUETIPOS.TELEGRAFIAR, ARQUETIPOS.CARGAR] else rotacion_y_rival
+	)
 	var direccion := Vector3.ZERO
 
 	if estado == ARQUETIPOS.CARGAR:
