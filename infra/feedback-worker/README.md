@@ -2,8 +2,13 @@
 
 Este directorio contiene el gateway serverless primario del Parte de
 incidencias de SIGA-98. Cloudflare Workers es el proveedor recomendado; Deno
-Deploy actúa como segundo gateway y Vercel queda como tercer respaldo mientras
-siga disponible.
+Deploy actúa como segundo gateway y Vercel como tercer respaldo.
+
+Los tres gateways son deliberados: durante los partidos de fútbol, las
+operadoras españolas bloquean por orden judicial rangos de IPs de Cloudflare
+y el gateway primario deja de responder desde España. Deno Deploy y Vercel no
+dependen de Cloudflare. No retires Vercel mientras esos bloqueos sigan
+ocurriendo (decisión del 2026-10-02, #2139).
 
 El juego **no** habla directamente con la API de GitHub y **no** contiene PAT,
 tokens ni credenciales SMTP. Solo conoce URLs HTTPS públicas.
