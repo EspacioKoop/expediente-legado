@@ -22,12 +22,15 @@ func _ejecutar() -> void:
 
 
 func _probar_camino_directo() -> void:
-	var resultado := Rodeo.planear(
-		Vector3(-3.0, 0.0, -2.0),
-		Vector3(3.0, 0.0, -2.0),
-		5.0,
-		_obstaculo(Vector3.ZERO, 0.7),
-		10,
+	var resultado := (
+		Rodeo
+		. planear(
+			Vector3(-3.0, 0.0, -2.0),
+			Vector3(3.0, 0.0, -2.0),
+			5.0,
+			_obstaculo(Vector3.ZERO, 0.7),
+			10,
+		)
 	)
 	_comprobar(String(resultado["intencion"]) == "directo", "camino libre sigue directo")
 	_comprobar(not bool(resultado["bloqueado_directo"]), "camino libre no marca bloqueo")
@@ -43,11 +46,14 @@ func _probar_rodeo_estable() -> void:
 	_comprobar(int(primero["lado"]) == 1, "semilla par fija un lado")
 	var destino: Vector3 = primero["destino"]
 	_comprobar(
-		not Rodeo.segmento_bloqueado(
-			Vector2(origen.x, origen.z),
-			Vector2(destino.x, destino.z),
-			Vector2.ZERO,
-			0.7,
+		not (
+			Rodeo
+			. segmento_bloqueado(
+				Vector2(origen.x, origen.z),
+				Vector2(destino.x, destino.z),
+				Vector2.ZERO,
+				0.7,
+			)
 		),
 		"el primer tramo no entra en el volumen bloqueado",
 	)
@@ -73,12 +79,15 @@ func _probar_semilla_cambia_lado() -> void:
 
 
 func _probar_borde_arena() -> void:
-	var resultado := Rodeo.planear(
-		Vector3.ZERO,
-		Vector3(2.9, 0.0, 0.0),
-		3.0,
-		_obstaculo(Vector3(2.0, 0.0, 0.0), 0.5),
-		10,
+	var resultado := (
+		Rodeo
+		. planear(
+			Vector3.ZERO,
+			Vector3(2.9, 0.0, 0.0),
+			3.0,
+			_obstaculo(Vector3(2.0, 0.0, 0.0), 0.5),
+			10,
+		)
 	)
 	_comprobar(String(resultado["intencion"]) == "rodear", "cerca del borde aún busca paso")
 	var destino: Vector3 = resultado["destino"]
@@ -86,34 +95,45 @@ func _probar_borde_arena() -> void:
 
 
 func _probar_objetivo_ocupado_espera() -> void:
-	var resultado := Rodeo.planear(
-		Vector3(-2.0, 0.0, 0.0),
-		Vector3(0.2, 0.0, 0.0),
-		5.0,
-		_obstaculo(Vector3.ZERO, 0.7),
-		10,
+	var resultado := (
+		Rodeo
+		. planear(
+			Vector3(-2.0, 0.0, 0.0),
+			Vector3(0.2, 0.0, 0.0),
+			5.0,
+			_obstaculo(Vector3.ZERO, 0.7),
+			10,
+		)
 	)
 	_comprobar(String(resultado["intencion"]) == "esperar", "no persigue dentro del obstaculo")
-	_comprobar((resultado["direccion"] as Vector3).is_zero_approx(), "esperar no inyecta movimiento")
+	_comprobar(
+		(resultado["direccion"] as Vector3).is_zero_approx(), "esperar no inyecta movimiento"
+	)
 
 
 func _probar_obstaculo_desaparece() -> void:
 	var obstaculo := _obstaculo(Vector3.ZERO, 0.7)
-	var bloqueado := Rodeo.planear(
-		Vector3(-3.0, 0.0, 0.0),
-		Vector3(3.0, 0.0, 0.0),
-		5.0,
-		obstaculo,
-		10,
+	var bloqueado := (
+		Rodeo
+		. planear(
+			Vector3(-3.0, 0.0, 0.0),
+			Vector3(3.0, 0.0, 0.0),
+			5.0,
+			obstaculo,
+			10,
+		)
 	)
 	_comprobar(String(bloqueado["intencion"]) == "rodear", "obstaculo activo se evita")
 	obstaculo["activo"] = false
-	var libre := Rodeo.planear(
-		Vector3(-3.0, 0.0, 0.0),
-		Vector3(3.0, 0.0, 0.0),
-		5.0,
-		obstaculo,
-		10,
+	var libre := (
+		Rodeo
+		. planear(
+			Vector3(-3.0, 0.0, 0.0),
+			Vector3(3.0, 0.0, 0.0),
+			5.0,
+			obstaculo,
+			10,
+		)
 	)
 	_comprobar(String(libre["intencion"]) == "directo", "al expirar vuelve a ruta directa")
 
