@@ -33,9 +33,7 @@ func _nueva() -> Dictionary:
 
 
 func _probar_linea_bloqueada() -> void:
-	var paso := RUNTIME.avanzar(
-		_nueva(), 0.01, Vector3.ZERO, Vector3(0.0, 0.0, 6.0), false
-	)
+	var paso := RUNTIME.avanzar(_nueva(), 0.01, Vector3.ZERO, Vector3(0.0, 0.0, 6.0), false)
 	_comprobar(String(paso["unidad"]["estado"]) == ARQUETIPOS.REPOSICIONAR, "sin linea no carga")
 	_comprobar(
 		String(paso["unidad"]["_intencion_runtime"]) == "buscar_linea",
@@ -57,7 +55,9 @@ func _probar_rumbo_fijado_y_carga() -> void:
 	var jugador_movido := Vector3(-5.0, 0.0, 3.0)
 	paso = RUNTIME.avanzar(unidad, 0.30, rival, jugador_movido)
 	unidad = paso["unidad"]
-	_comprobar(float(unidad["rumbo_bloqueado"]) == rumbo, "moverse no corrige el rumbo telegrafiado")
+	_comprobar(
+		float(unidad["rumbo_bloqueado"]) == rumbo, "moverse no corrige el rumbo telegrafiado"
+	)
 	paso = RUNTIME.avanzar(unidad, 0.45, rival, jugador_movido)
 	unidad = paso["unidad"]
 	_comprobar(String(unidad["estado"]) == ARQUETIPOS.CARGAR, "entra en carga tras el aviso")
