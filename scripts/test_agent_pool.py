@@ -492,11 +492,15 @@ class AgentPoolTest(unittest.TestCase):
         pool = (ROOT / ".github" / "workflows" / "agent-pool.yml").read_text(
             encoding="utf-8"
         )
-        self.assertIn("per_page=40", pool)
+        self.assertIn(
+            "runs?event=workflow_dispatch&status=completed&per_page=100",
+            pool,
+        )
         self.assertIn("history_worker_runs=0", pool)
         self.assertIn('if (( worker_jobs == 0 )); then', pool)
         self.assertIn("history_worker_runs=$((history_worker_runs + 1))", pool)
         self.assertIn("if (( history_worker_runs >= 8 )); then", pool)
+        self.assertNotIn("runs?status=completed&per_page=40", pool)
         self.assertNotIn("runs?status=completed&per_page=8", pool)
 
     def test_fallo_se_clasifica_antes_de_decidir_retry_o_rotacion(self):
