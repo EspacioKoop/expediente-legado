@@ -155,6 +155,16 @@ static func aplicar_dano(runtime: Dictionary, indice: int, dano: int) -> bool:
 	return true
 
 
+static func aplicar_dano_repartido(runtime: Dictionary, dano: int) -> int:
+	var restante := maxi(0, dano)
+	var indice := 0
+	while restante > 0 and indice < runtime.get("actores", []).size():
+		if aplicar_dano(runtime, indice, 1):
+			restante -= 1
+		indice += 1
+	return dano - restante
+
+
 static func restantes(runtime: Dictionary) -> int:
 	var actores: Array = runtime.get("actores", [])
 	var unidades: Array = runtime.get("unidades", [])
