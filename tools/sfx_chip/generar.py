@@ -137,11 +137,11 @@ RECETAS = {
         "wav_sha256": "23ecf17365f8abca9a7c3002b3a83738ef5908f0ce68b2f1c78f1c5c95fac6c9",
     },
     "ui_pulsar_01": {
-        "seed": 181321, "duration": 0.09, "tone_hz": (780, 420), "decay": 3.0,
+        "seed": 181321, "duration": 0.12, "tone_hz": (780, 420), "decay": 3.0,
         "tone_mix": 0.28, "pulse_mix": 0.42, "pulse_threshold": 0.22,
         "noise_mix": 0.12, "noise_lp": 0.38, "drive": 1.7, "gain": 0.58,
         "clacks": ((0.014, 0.44, 0.004),),
-        "wav_sha256": "de2984911fd4a7229132c2ff3ede86a592da86399b4cad6f9397aa7338290b07",
+        "wav_sha256": "4cc6b98939f341a7a8197e52407984a68b68ef97357c7f7098a65a1363f6c811",
     },
     "ui_marcar_01": {
         "seed": 181322, "duration": 0.14, "tone_hz": (520, 720), "decay": 2.0,
