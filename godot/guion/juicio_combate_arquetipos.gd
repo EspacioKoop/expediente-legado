@@ -11,6 +11,7 @@ const ENJAMBRE := "enjambre"
 const EMBESTIDOR := "embestidor"
 const CONTROLADOR := "controlador"
 const MIMETICO := "mimetico"
+const CONSTRUCTOR := "constructor"
 
 const REPOSICIONAR := "reposicionar"
 const TELEGRAFIAR := "telegrafiar"
@@ -27,6 +28,8 @@ const ACTIVAR_ZONA := "activar_zona"
 const OBSERVAR := "observar"
 const TELEGRAFIAR_ECO := "telegrafiar_eco"
 const REPETIR := "repetir"
+const CONSTRUIR := "construir"
+const ACTIVO := "activo"
 
 const HOSTIGADOR_DISTANCIA_MIN := 5.0
 const HOSTIGADOR_DISTANCIA_MAX := 8.0
@@ -60,6 +63,13 @@ const MIMETICO_TELEGRAFO := 0.55
 const MIMETICO_REPETICION := 0.20
 const MIMETICO_RECUPERACION := 0.85
 const MIMETICO_PATRONES_PERMITIDOS := ["linea", "carga_lineal", "ataque_corto", "zona"]
+
+const CONSTRUCTOR_LIMITE_AUXILIARES := 2
+const CONSTRUCTOR_CONSTRUCCION := 0.75
+const CONSTRUCTOR_ACTIVO := 0.30
+const CONSTRUCTOR_RECUPERACION := 0.90
+const CONSTRUCTOR_RECARGA := 1.10
+const CONSTRUCTOR_AUXILIAR_POR_DEFECTO := "auxiliar"
 
 
 static func nuevo(tipo: String, raiz: int, indice: int = 0) -> Dictionary:
@@ -113,6 +123,13 @@ static func nuevo(tipo: String, raiz: int, indice: int = 0) -> Dictionary:
 				"cooldown": 0.0,
 				"patron_eco": "",
 			}
+		CONSTRUCTOR:
+			return {
+				"tipo": CONSTRUCTOR,
+				"estado": REPOSICIONAR,
+				"temporizador": 0.0,
+				"cooldown": 0.0,
+			}
 		_:
 			return {}
 
@@ -134,6 +151,8 @@ static func avanzar(unidad: Dictionary, delta: float, contexto: Dictionary = {})
 			return _avanzar_controlador(copia, delta, contexto)
 		MIMETICO:
 			return _avanzar_mimetico(copia, delta, contexto)
+		CONSTRUCTOR:
+			return _avanzar_constructor(copia, delta, contexto)
 		_:
 			return _resultado(copia, "ninguna", "", false)
 
@@ -339,6 +358,8 @@ static func arena_tiene_ventana(unidades: Array) -> bool:
 			return true
 		if tipo == MIMETICO and estado == RECUPERAR:
 			return true
+		if tipo == CONSTRUCTOR and estado in [CONSTRUIR, RECUPERAR]:
+			return true
 	return false
 
 
@@ -432,6 +453,57 @@ static func _avanzar_mimetico(unidad: Dictionary, delta: float, contexto: Dictio
 			unidad["temporizador"] = 0.0
 			unidad["patron_eco"] = ""
 			return _resultado(unidad, "observar", "", false)
+
+
+static func _avanzar_constructor(unidad: Dictionary, delta: float, contexto: Dictionary) -> Dictionary:
+	unidad["cooldown"] = maxf(0.0, float(unidad.get("cooldown", 0.0)) - delta)
+	var estado := String(unidad.get("estado", REPOSICIONAR))
+	var auxiliares := maxi(0, int(contexto.get("auxiliares_activos", 0)))
+	var limite := clampi(
+		int(contexto.get("limite_auxiliares", CONSTRUCTOR_LIMITE_AUXILIARES)),
+		0,
+		CONSTRUCTOR_LIMITE_AUXILIARES,
+	)
+	match estado:
+		REPOSICIONAR:
+			if float(unidad["cooldown"]) > 0.0 or limite <= 0 or auxiliares >= limite:
+				return _resultado(unidad, "reposicionar", "", false)
+			unidad["estado"] = CONSTRUIR
+			unidad["temporizador"] = CONSTRUCTOR_CONSTRUCCION
+			return _resultado(unidad, "construir", CONSTRUCTOR_AUXILIAR_POR_DEFECTO, true)
+		CONSTRUIR:
+			unidad["temporizador"] = maxf(0.0, float(unidad["temporizador"]) - delta)
+			if float(unidad["temporizador"]) <= 0.0:
+				# El cupo se revalida al terminar: otro constructor puede haberlo
+				# llenado durante el telegraph. En ese caso no se emite creación.
+				if limite <= 0 or auxiliares >= limite:
+					unidad["estado"] = RECUPERAR
+					unidad["temporizador"] = CONSTRUCTOR_RECUPERACION
+					return _resultado(unidad, "recuperar", "vulnerable", true)
+				unidad["estado"] = ACTIVO
+				unidad["temporizador"] = CONSTRUCTOR_ACTIVO
+				unidad["cooldown"] = CONSTRUCTOR_RECARGA
+				return _resultado(
+					unidad, "crear_auxiliar", CONSTRUCTOR_AUXILIAR_POR_DEFECTO, false
+				)
+			return _resultado(unidad, "construir", CONSTRUCTOR_AUXILIAR_POR_DEFECTO, true)
+		ACTIVO:
+			unidad["temporizador"] = maxf(0.0, float(unidad["temporizador"]) - delta)
+			if float(unidad["temporizador"]) <= 0.0:
+				unidad["estado"] = RECUPERAR
+				unidad["temporizador"] = CONSTRUCTOR_RECUPERACION
+				return _resultado(unidad, "recuperar", "vulnerable", true)
+			return _resultado(unidad, "mantener_auxiliar", "", false)
+		RECUPERAR:
+			unidad["temporizador"] = maxf(0.0, float(unidad["temporizador"]) - delta)
+			if float(unidad["temporizador"]) <= 0.0:
+				unidad["estado"] = REPOSICIONAR
+				return _resultado(unidad, "reposicionar", "", false)
+			return _resultado(unidad, "recuperar", "vulnerable", true)
+		_:
+			unidad["estado"] = REPOSICIONAR
+			unidad["temporizador"] = 0.0
+			return _resultado(unidad, "reposicionar", "", false)
 
 
 ## La reducción de movimiento solo cambia cómo se dibuja el aviso. La lógica y
