@@ -42,6 +42,9 @@ FAMILIA_EVIDENCIA = [
         "benchmark-cc0.yml",
         "laboratorio-sonoro-1475.yml",
         "cata-ambientes-119.yml",
+        "alpha-playtest.yml",
+        "evidencia-pixel-exodus-882.yml",
+        "benchmark-fachadas-vivas.yml",
     )
 ]
 
