@@ -261,6 +261,7 @@ async function claim(
   kv: Deno.Kv,
   raw: Record<string, unknown>,
   identity: AgentIdentity,
+  repository: string,
 ): Promise<ClaimResultado> {
   const agente = agenteDe(identity, raw.agente);
   const issue = Number(raw.issue ?? 0);
@@ -277,6 +278,17 @@ async function claim(
     containsPotentialSecret(goal)
   ) {
     return { ok: false, error: "invalid_request" };
+  }
+
+  const historicas = await reservasHistoricas1713(repository);
+  const conflictosHistoricos = historicas.filter((reserva) =>
+    !(reserva.issue === issue && reserva.rama === rama && reserva.agente === agente) &&
+    reserva.files.some((existente) =>
+      rutas.some((solicitada) => rutasSolapan(existente, solicitada))
+    )
+  );
+  if (conflictosHistoricos.length > 0) {
+    return { ok: false, error: "conflict", conflicts: conflictosHistoricos };
   }
 
   for (let intento = 0; intento < RESERVA_CAS_INTENTOS; intento += 1) {
@@ -385,6 +397,116 @@ async function claims(kv: Deno.Kv): Promise<Reserva[]> {
   const entry = await kv.get<RegistroReservas>(RESERVAS_KEY);
   return reservasVivas(registroReservas(entry.value).reservas)
     .sort((a, b) => a.expira.localeCompare(b.expira) || a.id.localeCompare(b.id));
+}
+
+
+function campoComentario(texto: string, nombre: string): string {
+  const match = new RegExp("(?:^|\\s)" + nombre + "=([^\\s]+)").exec(texto);
+  return match?.[1] ?? "";
+}
+
+function agenteHistorico(texto: string): string {
+  const limpio = cleanTitle(texto, 32).toLowerCase();
+  return limpio === "pool" || limpio.startsWith("pool-") ? "pool" : limpio;
+}
+
+function leaseHistoricoMinutos(texto: string): number {
+  const match = /(?:^|\s)lease=(\d+)([hm])(?:\s|$)/.exec(texto);
+  if (!match) return RESERVA_TTL_MIN_MAX;
+  const cantidad = Number(match[1]);
+  const minutos = match[2] === "h" ? cantidad * 60 : cantidad;
+  return Math.min(Math.max(minutos, 5), RESERVA_TTL_MIN_MAX);
+}
+
+async function reservasHistoricas1713(repository: string): Promise<Reserva[]> {
+  const ahora = Date.now();
+  const desde = new Date(ahora - RESERVA_TTL_MIN_MAX * 60 * 1000).toISOString();
+  const token = Deno.env.get("GITHUB_TOKEN") ?? "";
+  const headers: Record<string, string> = {
+    accept: "application/vnd.github+json",
+    "user-agent": "SIGA98-Agent-Coord",
+    "x-github-api-version": "2022-11-28",
+  };
+  if (token) headers.authorization = `Bearer ${token}`;
+
+  const comentarios: Array<{ body: string; created_at: string }> = [];
+  for (let pagina = 1; pagina <= 20; pagina += 1) {
+    const url =
+      `https://api.github.com/repos/${repository}/issues/1713/comments?per_page=100&page=${pagina}&since=${encodeURIComponent(desde)}`;
+    const response = await fetch(url, { headers });
+    if (!response.ok) {
+      throw new Error(`github_1713_${response.status}`);
+    }
+    const data = await response.json();
+    if (!Array.isArray(data)) throw new Error("github_1713_respuesta_invalida");
+    for (const item of data) {
+      const body = typeof item?.body === "string" ? item.body.trim() : "";
+      const createdAt = typeof item?.created_at === "string" ? item.created_at : "";
+      if (body && Number.isFinite(Date.parse(createdAt))) {
+        comentarios.push({ body, created_at: createdAt });
+      }
+    }
+    if (data.length < 100) break;
+    if (pagina === 20) throw new Error("github_1713_historial_demasiado_grande");
+  }
+
+  comentarios.sort((a, b) => a.created_at.localeCompare(b.created_at));
+  const activas = new Map<string, { reserva: Reserva; leaseMin: number }>();
+  for (const comentario of comentarios) {
+    const texto = comentario.body;
+    const tipo = texto.startsWith("CLAIM ")
+      ? "claim"
+      : texto.startsWith("HEARTBEAT ")
+      ? "heartbeat"
+      : texto.startsWith("RELEASE ")
+      ? "release"
+      : "";
+    if (!tipo) continue;
+
+    const issue = Number(campoComentario(texto, "issue").replace(/^#/, ""));
+    const rama = campoComentario(texto, "branch");
+    if (!Number.isInteger(issue) || issue <= 0 || !rama) continue;
+    const clave = `${issue}|${rama}`;
+
+    if (tipo === "release") {
+      activas.delete(clave);
+      continue;
+    }
+    if (tipo === "heartbeat") {
+      const actual = activas.get(clave);
+      if (!actual) continue;
+      const visto = Date.parse(comentario.created_at);
+      actual.reserva.visto = comentario.created_at;
+      actual.reserva.expira = new Date(visto + actual.leaseMin * 60 * 1000).toISOString();
+      continue;
+    }
+
+    const filesRaw = campoComentario(texto, "files");
+    const files = normalizarRutas(filesRaw ? filesRaw.split(",") : []);
+    if (!files) throw new Error("github_1713_claim_rutas_invalidas");
+    const leaseMin = leaseHistoricoMinutos(texto);
+    const creadoMs = Date.parse(comentario.created_at);
+    const agente = agenteHistorico(campoComentario(texto, "agent")) || "historico";
+    activas.set(clave, {
+      leaseMin,
+      reserva: {
+        schema: 1,
+        id: `github-1713-${issue}-${rama}`,
+        agente,
+        issue,
+        rama,
+        files,
+        goal: "reserva histórica #1713",
+        creado: comentario.created_at,
+        visto: comentario.created_at,
+        expira: new Date(creadoMs + leaseMin * 60 * 1000).toISOString(),
+      },
+    });
+  }
+
+  return [...activas.values()]
+    .map((item) => item.reserva)
+    .filter((reserva) => Date.parse(reserva.expira) > ahora);
 }
 
 async function espejo1713(repository: string, texto: string): Promise<boolean> {
@@ -496,7 +618,7 @@ export async function handleAgentCoord(
 
     case "/api/agent-coord/claim": {
       try {
-        const resultado = await claim(kv, raw, identity);
+        const resultado = await claim(kv, raw, identity, repository);
         if (!resultado.ok) {
           const status = resultado.error === "conflict" ? 409 : 400;
           return json(
