@@ -35,6 +35,10 @@ func _ejecutar() -> void:
 	ventana.content_scale_size = Vector2i(ANCHO, ALTO)
 	ventana.size = Vector2i(ANCHO, ALTO)
 
+	# La primera entrada real muestra los créditos 3D antes del menú. Este gate
+	# audita el menú, no esa cinemática, así que marca la apertura como ya vista
+	# antes de instanciar para capturar exactamente la superficie de #830.
+	Inicio._apertura_creditos_mostrada = true
 	var inicio := Inicio.new()
 	ventana.add_child(inicio)
 	for i in 20:
