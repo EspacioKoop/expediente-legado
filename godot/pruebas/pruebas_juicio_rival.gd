@@ -66,6 +66,60 @@ static func todo(comprobar: Callable) -> void:
 		Vector3(1.25, 0.0, 0.0),
 	)
 
+	var obstaculo_derecha := (
+		JuicioCombateRival
+		. plan_movimiento(
+			Vector3(3.0, 0.0, 0.0),
+			Vector3.ZERO,
+			1.0,
+			2.5,
+			0.0,
+			{},
+			1.0,
+			true,
+			1.0,
+		)
+	)
+	_caso(
+		comprobar,
+		"rival: obstáculo frontal cambia a un desvío lateral",
+		obstaculo_derecha["desplazamiento"],
+		Vector3(0.0, 0.0, -2.5),
+	)
+	_caso(
+		comprobar,
+		"rival: marca que está evitando un obstáculo",
+		obstaculo_derecha["evitando_obstaculo"],
+		true,
+	)
+
+	var obstaculo_izquierda := (
+		JuicioCombateRival
+		. plan_movimiento(
+			Vector3(3.0, 0.0, 0.0),
+			Vector3.ZERO,
+			1.0,
+			2.5,
+			0.0,
+			{},
+			1.0,
+			true,
+			-1.0,
+		)
+	)
+	_caso(
+		comprobar,
+		"rival: el sesgo negativo elige el lateral opuesto",
+		obstaculo_izquierda["desplazamiento"],
+		Vector3(0.0, 0.0, 2.5),
+	)
+	_caso(
+		comprobar,
+		"rival: sin obstáculo conserva el contrato anterior",
+		paso["evitando_obstaculo"],
+		false,
+	)
+
 	var listo := (
 		JuicioCombateRival
 		. plan_movimiento(
