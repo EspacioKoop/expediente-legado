@@ -10,6 +10,14 @@ const EMPUJAR = preload("res://guion/juicio_combate_ambiental_empujar_1772.gd")
 const VOLCAR = preload("res://guion/juicio_combate_ambiental_volcar_1772.gd")
 
 
+static func montar(anfitrion: Node3D) -> Dictionary:
+	return {
+		"activar": AMBIENTAL.montar(anfitrion),
+		"empujar": EMPUJAR.montar(anfitrion),
+		"volcar": VOLCAR.montar(anfitrion),
+	}
+
+
 static func avanzar(empujar: Dictionary, volcar: Dictionary, delta: float) -> void:
 	if not empujar.is_empty():
 		EMPUJAR.avanzar(empujar, delta)
