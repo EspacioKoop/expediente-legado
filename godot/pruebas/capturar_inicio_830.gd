@@ -1,5 +1,7 @@
 extends SceneTree
 
+const Inicio := preload("res://guion/inicio_app.gd")
+
 ## Evidencia visual reproducible del menú de inicio 3D (#830).
 ##
 ## Renderiza la escena real a 1920x1080 en dos estados: movimiento normal y
@@ -33,7 +35,7 @@ func _ejecutar() -> void:
 	ventana.content_scale_size = Vector2i(ANCHO, ALTO)
 	ventana.size = Vector2i(ANCHO, ALTO)
 
-	var inicio := load("res://escenas/inicio.tscn").instantiate()
+	var inicio := Inicio.new()
 	ventana.add_child(inicio)
 	for i in 20:
 		await process_frame
@@ -41,7 +43,9 @@ func _ejecutar() -> void:
 
 	_comprobar(inicio.get_node_or_null("FondoInicio") != null, "la escena conserva FondoInicio")
 	_comprobar(inicio._diorama is InicioDiorama3D, "el menú usa InicioDiorama3D real")
-	_comprobar(not inicio._diorama.get("_reduccion_movimiento"), "el primer estado tiene movimiento normal")
+	_comprobar(
+		not inicio._diorama.get("_reduccion_movimiento"), "el primer estado tiene movimiento normal"
+	)
 	await _capturar("inicio-normal.png", "menú con movimiento ambiental normal")
 
 	inicio._diorama.configurar_reduccion_movimiento(true)
@@ -64,12 +68,7 @@ func _ejecutar() -> void:
 		print("EVIDENCIA_INICIO_830_FALLO fallos=%d" % _fallos)
 		quit(1)
 		return
-	print(
-		(
-			"EVIDENCIA_INICIO_830_OK capturas=%d resolucion=%dx%d"
-			% [_capturas.size(), ANCHO, ALTO]
-		)
-	)
+	print("EVIDENCIA_INICIO_830_OK capturas=%d resolucion=%dx%d" % [_capturas.size(), ANCHO, ALTO])
 	quit(0)
 
 
