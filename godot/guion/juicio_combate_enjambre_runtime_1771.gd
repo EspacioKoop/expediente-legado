@@ -10,6 +10,7 @@ const HOST = preload("res://guion/juicio_combate_arquetipo_host.gd")
 const ARQUETIPOS = preload("res://guion/juicio_combate_arquetipos.gd")
 const REGLAS = preload("res://guion/juicio_combate_reglas.gd")
 const ESCENA = preload("res://guion/juicio_combate_escenografia_3d.gd")
+const RIVAL = preload("res://guion/juicio_combate_rival.gd")
 
 const VELOCIDAD := 2.25
 const DISTANCIA_CERCA := 1.35
@@ -68,6 +69,14 @@ static func avanzar(runtime: Dictionary, delta: float) -> Dictionary:
 		"resultados": resultados,
 		"atacantes_activos": int(paso.get("atacantes_activos", 0)),
 	}
+
+
+static func resultado_ataque(
+	ataque: Dictionary, posicion_jugador: Vector3, esquiva_restante: float
+) -> String:
+	var posicion: Vector3 = ataque.get("posicion", Vector3.ZERO)
+	var resolucion := RIVAL.resolver_ataque(posicion.distance_to(posicion_jugador), esquiva_restante)
+	return String(resolucion.get("resultado", "falla"))
 
 
 static func mover(
