@@ -18,6 +18,7 @@ const JUGADOR = preload("res://guion/juicio_combate_jugador.gd")
 const ESTADO_TEMPORAL = preload("res://guion/juicio_combate_estado_temporal.gd")
 const AMBIENTAL_1772 = preload("res://guion/juicio_combate_ambiental_1772.gd")
 const EMPUJAR_1772 = preload("res://guion/juicio_combate_ambiental_empujar_1772.gd")
+const VOLCAR_1772 = preload("res://guion/juicio_combate_ambiental_volcar_1772.gd")
 const ARQUETIPOS = preload("res://guion/juicio_combate_arquetipos.gd")
 const ARQUETIPO_HOST = preload("res://guion/juicio_combate_arquetipo_host.gd")
 const HOSTIGADOR_3D = preload("res://guion/juicio_combate_hostigador_3d.gd")
@@ -49,6 +50,7 @@ var arquetipo_onirico := ""
 
 var _ambiental_1772: Dictionary = {}
 var _empujar_1772: Dictionary = {}
+var _volcar_1772: Dictionary = {}
 var _arquetipo: Dictionary = {}
 var _guardia_rota := false
 var _escudo_guardia: MeshInstance3D
@@ -188,6 +190,7 @@ func _ready() -> void:
 	if interaccion_ambiental_habilitada:
 		_ambiental_1772 = AMBIENTAL_1772.montar(self)
 		_empujar_1772 = EMPUJAR_1772.montar(self)
+		_volcar_1772 = VOLCAR_1772.montar(self)
 	_montar_hud()
 	_actualizar_hud()
 
@@ -198,6 +201,7 @@ func _process(delta: float) -> void:
 	_descontar_temporizadores(delta)
 	_descontar_tregua_religion(delta)
 	_avanzar_empujar_1772(delta)
+	_avanzar_volcar_1772(delta)
 	_mover_jugador(delta)
 	_avanzar_arquetipo(delta)
 	_mover_rival(delta)
@@ -220,6 +224,13 @@ func _avanzar_empujar_1772(delta: float) -> void:
 	if _empujar_1772.is_empty():
 		return
 	EMPUJAR_1772.avanzar(_empujar_1772, delta)
+
+
+## Avanza la ventana sólida temporal de VOLCAR cuando el host está montado.
+func _avanzar_volcar_1772(delta: float) -> void:
+	if _volcar_1772.is_empty():
+		return
+	VOLCAR_1772.avanzar(_volcar_1772, delta)
 
 
 ## Primer consumidor runtime de #1772. Devuelve false sin efectos cuando el
@@ -246,7 +257,17 @@ func usar_entorno_ambiental_1772() -> bool:
 	# fuera_de_alcance o ya_activado.
 	if not _empujar_1772.is_empty():
 		var resultado_empujar := EMPUJAR_1772.empujar(_empujar_1772, posicion, true)
-		return bool(resultado_empujar.get("ok", false))
+		if bool(resultado_empujar.get("ok", false)):
+			return true
+		var motivo_empujar := String(resultado_empujar.get("motivo", ""))
+		if motivo_empujar not in ["fuera_de_alcance", "sin_usos", "en_recarga"]:
+			return false
+
+	# VOLCAR es el último verbo. Solo se intenta si los anteriores no actuaron
+	# y sus rechazos permiten continuar la prioridad ambiental.
+	if not _volcar_1772.is_empty():
+		var resultado_volcar := VOLCAR_1772.volcar(_volcar_1772, posicion, true)
+		return bool(resultado_volcar.get("ok", false))
 
 	return false
 
