@@ -201,7 +201,7 @@ static func tamano_enjambre(cantidad: int = ENJAMBRE_MINIMO) -> int:
 ## política elevase el suelo por su cuenta; aquí se respeta el mínimo de uno y
 ## se descarta cualquier sobra.
 static func presupuesto_enjambre(presupuesto: int = ARQUETIPOS.ENJAMBRE_PRESUPUESTO_ATAQUES) -> int:
-	return maxi(1, presupuesto)
+	return mini(maxi(1, presupuesto), ARQUETIPOS.ENJAMBRE_PRESUPUESTO_ATAQUES)
 
 
 ## Estados de un enjambre recién creado. Determinista: la misma raíz produce el
