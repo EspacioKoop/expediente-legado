@@ -90,9 +90,7 @@ func _probar_montaje_arena_3d() -> void:
 	var estados_antes := estados.duplicate(true)
 	var raiz_a := Node3D.new()
 	get_root().add_child(raiz_a)
-	var montado_a := ARENA.montar_enjambre(
-		raiz_a, "enjambre-regresion", Color(0.58, 0.46, 0.22), 3
-	)
+	var montado_a := ARENA.montar_enjambre(raiz_a, "enjambre-regresion", Color(0.58, 0.46, 0.22), 3)
 	var actores_a: Array = montado_a["actores"]
 	_comprobar(int(montado_a["cantidad"]) == 3, "la arena monta tres cuerpos si se solicitan")
 	_comprobar(actores_a.size() == 3, "el montaje devuelve los tres actores")
@@ -105,7 +103,9 @@ func _probar_montaje_arena_3d() -> void:
 		var aviso := actor["aviso"] as MeshInstance3D
 		_comprobar(cuerpo != null, "cada actor usa CharacterBody3D")
 		_comprobar(cuerpo.name == "EnjambreRival%d" % indice, "cada cuerpo tiene nombre estable")
-		_comprobar(figura != null and figura.get_parent() == cuerpo, "la figura pertenece a su cuerpo")
+		_comprobar(
+			figura != null and figura.get_parent() == cuerpo, "la figura pertenece a su cuerpo"
+		)
 		_comprobar(aviso != null and aviso.get_parent() == cuerpo, "el aviso sigue a su cuerpo")
 		_comprobar(not aviso.visible, "el aviso corto empieza oculto")
 		posiciones_a.append(cuerpo.position)
@@ -121,9 +121,7 @@ func _probar_montaje_arena_3d() -> void:
 
 	var raiz_b := Node3D.new()
 	get_root().add_child(raiz_b)
-	var montado_b := ARENA.montar_enjambre(
-		raiz_b, "enjambre-regresion", Color(0.58, 0.46, 0.22), 3
-	)
+	var montado_b := ARENA.montar_enjambre(raiz_b, "enjambre-regresion", Color(0.58, 0.46, 0.22), 3)
 	var actores_b: Array = montado_b["actores"]
 	var determinista := actores_b.size() == actores_a.size()
 	if determinista:
