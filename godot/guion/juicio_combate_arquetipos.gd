@@ -455,7 +455,9 @@ static func _avanzar_mimetico(unidad: Dictionary, delta: float, contexto: Dictio
 			return _resultado(unidad, "observar", "", false)
 
 
-static func _avanzar_constructor(unidad: Dictionary, delta: float, contexto: Dictionary) -> Dictionary:
+static func _avanzar_constructor(
+	unidad: Dictionary, delta: float, contexto: Dictionary
+) -> Dictionary:
 	unidad["cooldown"] = maxf(0.0, float(unidad.get("cooldown", 0.0)) - delta)
 	var estado := String(unidad.get("estado", REPOSICIONAR))
 	var auxiliares := maxi(0, int(contexto.get("auxiliares_activos", 0)))
@@ -483,9 +485,7 @@ static func _avanzar_constructor(unidad: Dictionary, delta: float, contexto: Dic
 				unidad["estado"] = ACTIVO
 				unidad["temporizador"] = CONSTRUCTOR_ACTIVO
 				unidad["cooldown"] = CONSTRUCTOR_RECARGA
-				return _resultado(
-					unidad, "crear_auxiliar", CONSTRUCTOR_AUXILIAR_POR_DEFECTO, false
-				)
+				return _resultado(unidad, "crear_auxiliar", CONSTRUCTOR_AUXILIAR_POR_DEFECTO, false)
 			return _resultado(unidad, "construir", CONSTRUCTOR_AUXILIAR_POR_DEFECTO, true)
 		ACTIVO:
 			unidad["temporizador"] = maxf(0.0, float(unidad["temporizador"]) - delta)
