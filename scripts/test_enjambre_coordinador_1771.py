@@ -11,7 +11,7 @@ from scripts.godot_pruebas import importar_proyecto
 ROOT = Path(__file__).resolve().parents[1]
 HOST = ROOT / "godot" / "guion" / "juicio_combate_arquetipo_host.gd"
 PRUEBA = "res://pruebas/pruebas_enjambre_coordinador_1771.gd"
-RESUMEN = re.compile(r"(\\d+) pasadas, 0 fallos")
+RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
 
 
 class EnjambreCoordinador1771Test(unittest.TestCase):
