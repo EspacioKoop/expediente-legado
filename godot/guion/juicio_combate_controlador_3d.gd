@@ -66,8 +66,7 @@ static func avanzar(
 		"inicio_zona":
 		estado == ARQUETIPOS.ACTIVAR_ZONA and estado_anterior != ARQUETIPOS.ACTIVAR_ZONA,
 		"zona_activa": estado == ARQUETIPOS.ACTIVAR_ZONA,
-		"abrir_ventana":
-		estado == ARQUETIPOS.RECUPERAR and estado_anterior != ARQUETIPOS.RECUPERAR,
+		"abrir_ventana": estado == ARQUETIPOS.RECUPERAR and estado_anterior != ARQUETIPOS.RECUPERAR,
 		"geometria": geometria(nueva),
 	}
 
