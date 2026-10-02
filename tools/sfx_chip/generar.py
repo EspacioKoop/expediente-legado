@@ -137,6 +137,7 @@ RECETAS = {
     },
 }
 
+
 def sintetizar(receta: dict) -> list[int]:
     duracion = float(receta["duration"])
     cantidad = round(SAMPLE_RATE * duracion)
