@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - '.github/workflows/alpha-playtest.yml'
+      - '.github/actions/upload-artifact/**'
       - 'scripts/playtest.sh'
       - 'scripts/playtest.ps1'
       - 'scripts/playtest.cmd'
@@ -22,6 +23,7 @@ on:
       - 'v*'
     paths:
       - '.github/workflows/alpha-playtest.yml'
+      - '.github/actions/upload-artifact/**'
       - 'godot/**'
       - 'gbc/minijuegos/caza_pixeles_98/**'
       - 'scripts/preparar_emulador_gb.sh'
@@ -81,7 +83,7 @@ jobs:
         shell: bash
         run: bash scripts/preparar_emulador_gb.sh boot-rom
       - name: Adjuntar boot ROM CGB
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: ./.github/actions/upload-artifact
         with:
           name: siga98-gbc-boot-rom-${{ github.sha }}
           path: godot/native/siga98_gb/.deps/bootroms/cgb_boot_fast.bin
@@ -124,7 +126,7 @@ jobs:
         shell: bash
         run: bash scripts/preparar_emulador_gb.sh windows-release
       - name: Adjuntar DLL del núcleo GB
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: ./.github/actions/upload-artifact
         with:
           name: siga98-gb-windows-${{ github.sha }}
           path: godot/addons/siga98_gb/bin/windows/*.dll
@@ -288,21 +290,21 @@ jobs:
           python3 scripts/auditar_frontera_qa.py "$modo"             dist/salida/godot-linux/SIGA-98.x86_64             dist/salida/godot-windows/SIGA-98.exe
 
       - name: Adjuntar alpha Linux
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: ./.github/actions/upload-artifact
         with:
           name: SIGA-98-godot-alpha-linux
           path: dist/salida/SIGA-98-godot-alpha-linux.zip
           if-no-files-found: error
 
       - name: Adjuntar alpha Windows
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: ./.github/actions/upload-artifact
         with:
           name: SIGA-98-godot-alpha-windows
           path: dist/salida/SIGA-98-godot-alpha-windows.zip
           if-no-files-found: error
 
       - name: Adjuntar checksums
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: ./.github/actions/upload-artifact
         with:
           name: SIGA-98-godot-alpha-checksums
           path: dist/salida/SIGA-98-godot-alpha-SHA256SUMS.txt
