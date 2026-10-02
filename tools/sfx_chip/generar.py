@@ -122,11 +122,11 @@ RECETAS = {
         "wav_sha256": "f46839830706b008cd2724eb3b141d1160d414c6ecbadc164bc1a07bcd6b4da6",
     },
     "teclado_rafaga_02": {
-        "seed": 180616, "duration": 0.32, "tone_hz": (430, 250), "decay": 1.05,
+        "seed": 180616, "duration": 0.30, "tone_hz": (430, 250), "decay": 1.05,
         "tone_mix": 0.24, "pulse_mix": 0.31, "pulse_threshold": 0.28,
         "noise_mix": 0.34, "noise_lp": 0.18, "drive": 1.55, "gain": 0.67,
         "clacks": ((0.018, 0.46, 0.004), (0.052, 0.30, 0.005), (0.104, 0.43, 0.004), (0.154, 0.33, 0.006), (0.216, 0.45, 0.004), (0.278, 0.29, 0.005)),
-        "wav_sha256": "0a022136b43f2496ea05438f523459cba80f28e51805ecdf58f78d96b51b4909",
+        "wav_sha256": "9cd00a914bc9c49c5dd972714bea5164ad157146913f304cd6f213091b217721",
     },
     "teclado_rafaga_03": {
         "seed": 180617, "duration": 0.24, "tone_hz": (310, 410), "decay": 0.65,
