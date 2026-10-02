@@ -35,6 +35,32 @@ class AgentWorkerScoreTest(unittest.TestCase):
             scores["qwen-fallback-1"]["score"],
         )
 
+    def test_formato_actual_con_backend_explicito_puntua(self):
+        scores = mod.score_jobs(
+            [
+                {
+                    "name": "run (2112, qwen, omniroute, qwen-primary) / worker",
+                    "conclusion": "success",
+                    "steps": [
+                        {
+                            "name": "Publicar PR draft y lanzar CI canonica",
+                            "conclusion": "success",
+                        }
+                    ],
+                },
+                {
+                    "name": "run (2094, qwen, nvidia, qwen-fallback-2) / worker",
+                    "conclusion": "failure",
+                },
+            ]
+        )
+        self.assertEqual(1, scores["qwen-primary"]["samples"])
+        self.assertEqual("qwen", scores["qwen-primary"]["provider"])
+        self.assertGreater(
+            scores["qwen-primary"]["score"],
+            scores["qwen-fallback-2"]["score"],
+        )
+
     def test_recencia_pesa_mas(self):
         scores = mod.score_jobs(
             [
