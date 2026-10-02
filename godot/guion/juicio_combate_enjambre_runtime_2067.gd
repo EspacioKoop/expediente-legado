@@ -27,17 +27,18 @@ func tick(delta: float) -> Dictionary:
 	var paso := JuicioCombateArquetipoHost.avanzar_enjambre(unidades, delta, presupuesto)
 	unidades = paso.get("unidades", [])
 	return {
+		"unidades": unidades.duplicate(true),
 		"resultados": paso.get("resultados", []),
-		"atacantes_activos": paso.get("atacantes_activos", 0)
+		"atacantes_activos": paso.get("atacantes_activos", 0),
 	}
 
 
-## Expone qué índices del enjambre muestran el telegraph de ataque corto.
-func get_telegraphs() -> Array:
+## Expone qué índices muestran el telegraph corto en los resultados del tick.
+func telegraphs(resultados: Array) -> Array:
 	var indices := []
-	for i in range(unidades.size()):
-		var unidad := unidades[i]
-		if String(unidad.get("estado", "")) == ARQUETIPOS.TELEGRAFIAR:
+	for i in range(resultados.size()):
+		var resultado = resultados[i]
+		if resultado is Dictionary and String(resultado.get("telegraph", "")) == "ataque_corto":
 			indices.append(i)
 	return indices
 
