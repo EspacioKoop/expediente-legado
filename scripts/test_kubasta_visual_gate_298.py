@@ -50,6 +50,12 @@ class KubastaVisualGate298Test(unittest.TestCase):
         self.assertIn('len(data["casos"]) == 8', self.workflow)
         self.assertIn("SIGA-98-kubasta-visual-gate-298-${{ github.sha }}", self.workflow)
         self.assertIn("retention-days: 14", self.workflow)
+        self.assertIn("uses: ./.github/actions/upload-artifact", self.workflow)
+        self.assertNotIn("actions/upload-artifact@", self.workflow)
+        self.assertGreaterEqual(
+            self.workflow.count(".github/actions/upload-artifact/**"),
+            2,
+        )
 
 
 if __name__ == "__main__":

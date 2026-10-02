@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - '.github/workflows/evidencia-juicio-779.yml'
+      - '.github/actions/upload-artifact/**'
       - 'godot/guion/juicio_simbolico.gd'
       - 'godot/guion/juicio_simbolico_3d.gd'
       - 'godot/guion/juicio_combate_3d.gd'
@@ -79,7 +80,7 @@ jobs:
           done
 
       - name: Publicar PNG originales como artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: ./.github/actions/upload-artifact
         with:
           name: evidencia-juicio-779
           path: ${{ runner.temp }}/juicio-779/*.png

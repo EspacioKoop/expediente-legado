@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - '.github/workflows/kubasta-visual-gate-298.yml'
+      - '.github/actions/upload-artifact/**'
       - '.godot-version'
       - 'godot/assets/fonts/Kubasta.ttf'
       - 'godot/assets/fonts/IBMPlexMono-Regular.ttf'
@@ -19,6 +20,7 @@ on:
     branches: [ main ]
     paths:
       - '.github/workflows/kubasta-visual-gate-298.yml'
+      - '.github/actions/upload-artifact/**'
       - '.godot-version'
       - 'godot/assets/fonts/Kubasta.ttf'
       - 'godot/assets/fonts/IBMPlexMono-Regular.ttf'
@@ -147,7 +149,7 @@ jobs:
 
       - name: Adjuntar matriz visual Kubasta #298
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: ./.github/actions/upload-artifact
         with:
           name: SIGA-98-kubasta-visual-gate-298-${{ github.sha }}
           path: dist/capturas-kubasta-298
