@@ -221,13 +221,15 @@ jobs:
 
           # #1621: ranking histórico sin estado adicional. Un dispatcher puede
           # completar sin lanzar workers; esos runs vacíos no deben expulsar
-          # muestras útiles de la ventana. Se inspeccionan hasta 40 runs pero se
-          # conservan como máximo los 8 más recientes que sí contienen matrix jobs.
+          # muestras útiles de la ventana. Los disparos por "issues" son muy
+          # frecuentes y casi siempre se saltan, así que el historial se limita
+          # a workflow_dispatch completados. Se inspeccionan hasta 100 y se
+          # conservan como máximo los 8 más recientes con matrix jobs.
           # Si la API falla o no hay muestras útiles, el score sigue siendo 50.
           printf '[]\n' > /tmp/worker-jobs.json
           history_worker_runs=0
           if mapfile -t history_runs < <(
-            gh api "repos/$GITHUB_REPOSITORY/actions/workflows/agent-pool.yml/runs?status=completed&per_page=40" \
+            gh api "repos/$GITHUB_REPOSITORY/actions/workflows/agent-pool.yml/runs?event=workflow_dispatch&status=completed&per_page=100" \
               --jq '.workflow_runs[].id' 2>/dev/null
           ); then
             for history_run in "${history_runs[@]}"; do
