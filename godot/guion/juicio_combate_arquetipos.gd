@@ -21,6 +21,8 @@ const RECUPERAR := "recuperar"
 const ESPERA := "espera"
 const ATACAR := "atacar"
 const CARGAR := "cargar"
+const MARCAR_ZONA := "marcar_zona"
+const ACTIVAR_ZONA := "activar_zona"
 
 const HOSTIGADOR_DISTANCIA_MIN := 5.0
 const HOSTIGADOR_DISTANCIA_MAX := 8.0
@@ -333,12 +335,12 @@ static func _avanzar_controlador(
 			if distancia < 3.0:
 				return _resultado(unidad, "alejarse", "", false)
 			if float(unidad["cooldown"]) <= 0.0 and zonas_marcadas < CONTROLADOR_MAX_ZONAS:
-				unidad["estado"] = TELEGRAFIAR
+				unidad["estado"] = MARCAR_ZONA
 				unidad["temporizador"] = CONTROLADOR_TELEGRAFO
 				unidad["zonas_marcadas"] = zonas_marcadas + 1
 				return _resultado(unidad, "telegrafiar", "zona", false)
 			return _resultado(unidad, "reposicionar", "", false)
-		TELEGRAFIAR:
+		MARCAR_ZONA:
 			unidad["temporizador"] = maxf(0.0, float(unidad["temporizador"]) - delta)
 			if float(unidad["temporizador"]) <= 0.0:
 				# No activar si cerraría todas las salidas
@@ -348,7 +350,7 @@ static func _avanzar_controlador(
 					return _resultado(unidad, "esperar_zona", "zona", false)
 				unidad["estado"] = ACTIVAR_ZONA
 				unidad["temporizador"] = CONTROLADOR_ACTIVACION
-				return _resultado(unidad, "telegrafiar", "zona", false)
+				return _resultado(unidad, "activar_zona", "zona", false)
 			return _resultado(unidad, "telegrafiar", "zona", false)
 		ACTIVAR_ZONA:
 			unidad["temporizador"] = maxf(0.0, float(unidad["temporizador"]) - delta)
