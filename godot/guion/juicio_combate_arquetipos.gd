@@ -393,9 +393,7 @@ static func _avanzar_controlador(
 			return _resultado(unidad, "reposicionar", "", false)
 
 
-static func _avanzar_mimetico(
-	unidad: Dictionary, delta: float, contexto: Dictionary
-) -> Dictionary:
+static func _avanzar_mimetico(unidad: Dictionary, delta: float, contexto: Dictionary) -> Dictionary:
 	var estado := String(unidad.get("estado", OBSERVAR))
 	var patron := String(unidad.get("patron_eco", ""))
 	match estado:
