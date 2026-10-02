@@ -245,8 +245,10 @@ func usar_entorno_ambiental_1772() -> bool:
 		resultado = EMPUJAR_1772.empujar(_empujar_1772, posicion, true)
 		continuar = (
 			not bool(resultado.get("ok", false))
-			and String(resultado.get("motivo", ""))
-			in ["fuera_de_alcance", "sin_usos", "en_recarga"]
+			and (
+				String(resultado.get("motivo", ""))
+				in ["fuera_de_alcance", "sin_usos", "en_recarga"]
+			)
 		)
 	if continuar and not _volcar_1772.is_empty():
 		resultado = VOLCAR_1772.volcar(_volcar_1772, posicion, true)
