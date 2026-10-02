@@ -70,6 +70,7 @@ const CONSTRUCTOR_ACTIVO := 0.30
 const CONSTRUCTOR_RECUPERACION := 0.90
 const CONSTRUCTOR_RECARGA := 1.10
 const CONSTRUCTOR_AUXILIAR_POR_DEFECTO := "auxiliar"
+# El límite se vuelve a comprobar al terminar CONSTRUIR para cerrar carreras entre constructores.
 
 
 static func nuevo(tipo: String, raiz: int, indice: int = 0) -> Dictionary:
