@@ -379,7 +379,7 @@ Deno.test("reserva: release doble es idempotente y otro agente no libera", async
     assertEquals(segundo.status, 200, "segundo release idempotente");
     assertEquals(segundo.data.released as boolean, false, "ya no había reserva");
 
-    const lista = await call(kv, "claims", {}, TOKEN, "GET");
+    const lista = await call(kv, "claims", {});
     assertEquals(lista.status, 200, "claims sigue disponible tras release idempotente");
     assertEquals(
       (lista.data.claims as Array<Record<string, unknown>>).length,
@@ -390,22 +390,29 @@ Deno.test("reserva: release doble es idempotente y otro agente no libera", async
 });
 
 Deno.test("reserva: KV caído impide adquirir permiso", async () => {
-  await withGithubMock(async () => {
-    const kvFallo = {
-      get: () => {
-        throw new Error("KV DOWN");
-      },
-    } as unknown as Deno.Kv;
-    const res = await call(kvFallo, "claim", {
-      schema: 1,
-      agente: "claude",
-      issue: 6001,
-      rama: "feat/fail",
-      files: ["src/fail.ts"],
-      goal: "fail closed",
+  const previous = Deno.env.get("AGENT_MEMORY_NIVEL2_TOKEN");
+  Deno.env.set("AGENT_MEMORY_NIVEL2_TOKEN", TOKEN);
+  try {
+    await withGithubMock(async () => {
+      const kvFallo = {
+        get: () => {
+          throw new Error("KV DOWN");
+        },
+      } as unknown as Deno.Kv;
+      const res = await call(kvFallo, "claim", {
+        schema: 1,
+        agente: "claude",
+        issue: 6001,
+        rama: "feat/fail",
+        files: ["src/fail.ts"],
+        goal: "fail closed",
+      });
+      assertEquals(res.status, 503, "KV caído devuelve service_unavailable");
     });
-    assertEquals(res.status, 503, "KV caído devuelve service_unavailable");
-  });
+  } finally {
+    if (previous === undefined) Deno.env.delete("AGENT_MEMORY_NIVEL2_TOKEN");
+    else Deno.env.set("AGENT_MEMORY_NIVEL2_TOKEN", previous);
+  }
 });
 
 Deno.test("reserva: claim respeta una reserva histórica viva de #1713", async () => {
