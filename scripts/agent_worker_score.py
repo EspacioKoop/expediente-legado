@@ -10,7 +10,9 @@ import re
 from typing import Any
 
 JOB_RE = re.compile(
-    r"^run \(\d+,\s*(?P<provider>qwen|gemini),\s*(?P<worker>[A-Za-z0-9._-]+)\) / worker$"
+    r"^run \(\d+,\s*(?P<provider>qwen|gemini),\s*"
+    r"(?:(?P<backend>[A-Za-z0-9._-]+),\s*)?"
+    r"(?P<worker>[A-Za-z0-9._-]+)\) / worker$"
 )
 OUTCOME_VALUE = {
     "success": 1.0,
