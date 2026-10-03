@@ -55,7 +55,7 @@ Desde el corte anterior el proyecto ha añadido profundidad jugable y, además, 
 - #1446 mantiene una alpha continua identificada por SHA; #1461 añade F9 como reporte de betatest desde el juego.
 - #1524/#1531 añaden failover alojado para feedback sin secretos en el cliente y #1556 prepara Sentry opcional para alphas.
 - #1542 integra el autopilot Qwen/Gemini; #1555/#1563 añaden memoria temporal e histórica, siempre subordinada al repo y a las Normas Platino; #1590 conecta Kev y context packer; #1595 unifica las etiquetas de cola en el dispatcher paralelo y deja el autopilot serial como entrada manual.
-- #1569/#1571/#1585 incorporan OmniRoute privado por Tailscale y fallbacks OpenAI-compatible; #1583 aporta smoke de proveedores sin permisos de escritura.
+- #1569/#1571/#1585 incorporan resiliencia de backends y fallback; #1583 aporta smoke de slots sin permisos de escritura. Los detalles de infraestructura quedan fuera del roadmap público.
 - #1572 habilita un pool opt-in de hasta seis workers; #1579/#1588 hacen que autopilot y pool descarten intentos fuera del CLAIM y replanifiquen con un máximo de dos ciclos.
 
 **Lectura de roadmap:** esta capa reduce fricción para encontrar/corregir problemas y mantener el backlog, pero no adelanta una fase por sí misma. Ningún número de PRs automáticos sustituye los gates humanos, una export real o el recorrido end-to-end.

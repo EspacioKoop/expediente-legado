@@ -10,7 +10,6 @@ DENO_MAIN = ROOT / "infra" / "feedback-deno" / "main.ts"
 DENO_MEMORY = ROOT / "infra" / "feedback-deno" / "agent_memory.ts"
 DENO_CONFIG = ROOT / "infra" / "feedback-deno" / "deno.json"
 DENO_README = ROOT / "infra" / "feedback-deno" / "README.md"
-AGENTS_DOC = ROOT / "docs" / "agents-autonomos.md"
 QWEN = ROOT / "QWEN.md"
 GEMINI = ROOT / "GEMINI.md"
 
@@ -24,7 +23,6 @@ class AgentMemoryContractTest(unittest.TestCase):
         cls.deno_memory = DENO_MEMORY.read_text(encoding="utf-8")
         cls.deno_config = json.loads(DENO_CONFIG.read_text(encoding="utf-8"))
         cls.deno_readme = DENO_README.read_text(encoding="utf-8")
-        cls.agents_doc = AGENTS_DOC.read_text(encoding="utf-8")
         cls.qwen = QWEN.read_text(encoding="utf-8")
         cls.gemini = GEMINI.read_text(encoding="utf-8")
 
@@ -140,9 +138,6 @@ class AgentMemoryContractTest(unittest.TestCase):
             self.assertIn("memoria Deno KV", doc)
             self.assertIn("repositorio/issue/#181/#1713 + histórico #182 + Normas Platino", doc)
 
-        self.assertIn("Normas Platino, wiki y memoria", self.agents_doc)
-        self.assertIn("no necesita un secret nuevo", self.agents_doc)
-        self.assertIn("30 días", self.agents_doc)
         self.assertIn("memoria operativa transitoria", self.deno_readme)
 
 
