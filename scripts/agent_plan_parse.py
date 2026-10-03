@@ -222,7 +222,16 @@ def normalize(plan: dict[str, Any], max_files: int = MAX_FILES) -> dict[str, Any
             or any(c in item for c in "*?[]")
         ):
             raise PlanError("ruta invalida")
-        if item.startswith(PROTECTED_PREFIXES) or item in PROTECTED_FILES:
+        # Git informa rutas canónicas. Los alias ./ o // rompían el CLAIM
+        # y podían evitar la comparación con ficheros protegidos.
+        item = "/".join(part for part in item.split("/") if part not in {"", "."})
+        if not item:
+            raise PlanError("ruta invalida")
+        if (
+            item.startswith(PROTECTED_PREFIXES)
+            or item in {prefix.rstrip("/") for prefix in PROTECTED_PREFIXES}
+            or item in PROTECTED_FILES
+        ):
             raise PlanError("ruta protegida")
         clean.append(item)
     unique = list(dict.fromkeys(clean))

@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -137,6 +138,30 @@ class FuentesTest(unittest.TestCase):
 
 
 class ValidacionTest(unittest.TestCase):
+    def test_alias_se_canonicalizan_antes_de_deduplicar_y_limitar(self):
+        plan = {
+            "files": ["./scripts/./a.py", "scripts//a.py", "scripts\\a.py"],
+            "goal": "corte",
+        }
+        self.assertEqual(["scripts/a.py"], mod.normalize(plan, 1)["files"])
+
+    def test_alias_no_eluden_rutas_protegidas(self):
+        for ruta in (
+            "./AGENTS.md", ".//QWEN.md", "./GEMINI.md",
+            "docs/./agents-autonomos.md", ".//.github/workflows/ci.yml",
+            "./.agent-plan.json", ".\\.github\\workflows\\ci.yml", "./.github/",
+            ".github", ".github/",
+        ):
+            with self.subTest(ruta=ruta):
+                with self.assertRaisesRegex(mod.PlanError, "ruta protegida"):
+                    mod.normalize({"files": [ruta], "goal": "x"})
+
+    def test_alias_de_raiz_y_traversal_siguen_invalidos(self):
+        for ruta in (".", "./", ".//./", "./scripts/../a.py", "//etc/passwd"):
+            with self.subTest(ruta=ruta):
+                with self.assertRaisesRegex(mod.PlanError, "ruta invalida"):
+                    mod.normalize({"files": [ruta], "goal": "x"})
+
     def test_normaliza_y_deduplica(self):
         plan = {"files": [" godot\\a.gd ", "godot/a.gd"], "goal": "x" * 500}
         normalized = mod.normalize(plan)
@@ -169,6 +194,56 @@ class CliTest(unittest.TestCase):
 
     def tearDown(self):
         self.tmp.cleanup()
+
+    def test_cli_canonico_conserva_cambio_permitido_en_claim_real(self):
+        def git(*args):
+            subprocess.run(["git", *args], cwd=self.dir, check=True, capture_output=True)
+
+        git("init", "-q")
+        git("config", "user.email", "test@example.invalid")
+        git("config", "user.name", "Test")
+        (self.dir / "scripts").mkdir()
+        permitido = self.dir / "scripts/a.py"
+        ajeno = self.dir / "scripts/b.py"
+        permitido.write_text("base\n", encoding="utf-8")
+        ajeno.write_text("base\n", encoding="utf-8")
+        git("add", ".")
+        git("commit", "-qm", "base")
+
+        fuente = self.dir / ".agent-source.json"
+        fuente.write_text(json.dumps({"found": True, "plan": {
+            "files": ["./scripts/./a.py"], "goal": "corte"
+        }}), encoding="utf-8")
+        plan = self.dir / ".agent-plan.json"
+        parser = subprocess.run([
+            sys.executable, str(MODULE_PATH), "--source", str(fuente), "--output", str(plan)
+        ], capture_output=True, text=True)
+        self.assertEqual(parser.returncode, mod.EXIT_OK, parser.stderr)
+        self.assertEqual(json.loads(plan.read_text())["files"], ["scripts/a.py"])
+
+        permitido.write_text("cambio válido\n", encoding="utf-8")
+        ajeno.write_text("desvío\n", encoding="utf-8")
+        reporte = self.dir / ".agent-guard.json"
+        guard = subprocess.run([
+            sys.executable, str(ROOT / "scripts/agent_claim_guard.py"),
+            "--root", str(self.dir), "--plan", str(plan), "--report", str(reporte), "--restore"
+        ], capture_output=True, text=True)
+        self.assertEqual(guard.returncode, 0, guard.stderr)
+        resultado = json.loads(reporte.read_text())
+        self.assertEqual(resultado["changed_allowed"], ["scripts/a.py"])
+        self.assertEqual(resultado["outside"], ["scripts/b.py"])
+        self.assertEqual(permitido.read_text(), "cambio válido\n")
+        self.assertEqual(ajeno.read_text(), "base\n")
+
+    def test_cli_rechaza_alias_protegido_sin_publicar_plan(self):
+        fuente = self.dir / "source.json"
+        fuente.write_text(json.dumps({"files": ["./AGENTS.md"], "goal": "x"}))
+        plan = self.dir / "plan.json"
+        resultado = subprocess.run([
+            sys.executable, str(MODULE_PATH), "--source", str(fuente), "--output", str(plan)
+        ], capture_output=True, text=True)
+        self.assertEqual(resultado.returncode, mod.EXIT_INVALID, resultado.stderr)
+        self.assertFalse(plan.exists())
 
     def test_primera_fuente_con_plan_gana_y_salta_las_ausentes(self):
         delegado = self.dir / "delegado.json"
