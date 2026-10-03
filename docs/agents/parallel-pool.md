@@ -1,96 +1,70 @@
 # Pool paralelo de agentes
 
-El pool es la cola operativa común de agentes y aporta concurrencia horizontal de hasta seis workers. El workflow `agent-autopilot.yml` queda como entrada manual para un issue concreto.
+Contrato específico del dispatcher de `EspacioKoop/expediente-legado`. La infraestructura que proporciona capacidad al pool se documenta fuera del repo público.
 
-## Modelo operativo
+## Cola
 
-`agent-pool.yml` reúne issues etiquetados con `agent:auto`, `agent:pool`, `agent:qwen` o `agent:gemini`, los deduplica y asigna, como máximo, una tarea por slot configurado. `agent:pool` queda como alias compatible; puede coexistir con `agent:auto` sin duplicar la tarea.
+`agent-pool.yml` reúne issues con `agent:auto`, `agent:pool`, `agent:qwen` o `agent:gemini`, los deduplica y asigna trabajo solo a workers compatibles disponibles.
 
-Los labels `agent:qwen` y `agent:gemini` fuerzan proveedor. Para `agent:auto`/`agent:pool`, Kev puede indicar una preferencia blanda entre los workers disponibles; si el slot preferido no está libre, el dispatcher usa otro disponible.
+- `agent:auto` y `agent:pool` permiten selección automática;
+- `agent:qwen` y `agent:gemini` fijan la familia de executor;
+- un mismo issue no puede ejecutarse dos veces a la vez;
+- una tarea no debe empezar si sus rutas ya están reservadas por otro trabajo.
 
-Slots:
+## Plan delegado
 
-- `qwen-primary`;
-- `gemini`;
-- `qwen-fallback-1` ... `qwen-fallback-4`.
-
-Cada slot cuenta como capacidad 1 por tanda. Asi un endpoint con limites ajustados no recibe varias tareas simultaneas por defecto.
-
-## Niveles y plan delegado
-
-El pool es el **nivel 3**. Por encima están el coordinador (nivel 1) y las sesiones asistidas de Claude/ChatGPT (nivel 2). Planificar es trabajo del nivel 2: el planificador barato del pool apenas cumplía el contrato de plan (#1636).
-
-Para delegar un issue, el nivel 2 deja el plan en el cuerpo o en un comentario, con los marcadores en líneas propias. Se pega **sin** la valla de código del ejemplo: un marcador dentro de un bloque de código se trata como documentación, no como encargo.
+El pool es nivel 3: implementa, no planifica. El nivel 2 deja un plan con los marcadores en líneas propias:
 
 ```text
 AGENT_PLAN_BEGIN
-{"files": ["godot/guion/ejemplo.gd", "godot/pruebas/pruebas_ejemplo.gd"], "goal": "Objetivo concreto del corte"}
+{"files":["godot/guion/ejemplo.gd"],"goal":"Objetivo concreto del corte"}
 AGENT_PLAN_END
 ```
 
-Después añade `agent:auto`. El worker (`scripts/agent_delegated_plan.py`) toma el plan válido más reciente de cuentas `OWNER`/`MEMBER`/`COLLABORATOR` que no sean bots, **omite el planificador** y sigue el circuito normal: validación de rutas contra #182 + #1713, CLAIM nuevo en #1713, implementación, guard, preflight y PR draft. Para corregir el plan basta un comentario nuevo. Si el plan se queda corto de rutas, el replan acaba en `agent:needs-human` y el nivel 2 lo amplía.
+El worker usa el plan válido más reciente de una cuenta de confianza. Si falta un plan seguro, el issue vuelve a planificación o a `agent:needs-human`.
 
-Sin plan delegado, el pool planifica como siempre.
+Una tarea del worker modifica un solo fichero por defecto. Los trabajos mayores deben dividirse antes de entrar al executor.
 
-## Jules (Google)
+## Reserva y aislamiento
 
-Jules es un worker externo de nivel 3: se activa al poner la label `jules` a un issue, trabaja en una VM de Google y abre su propia PR. Nivel gratuito: 15 tareas al día, 3 a la vez.
+Antes de implementar, el workflow:
 
-- Se prepara igual que un issue del pool: plan delegado `AGENT_PLAN_BEGIN … AGENT_PLAN_END` de **un fichero** y unas instrucciones que basten por sí solas. La label `jules` se pone en el mismo momento; es una label de cola, así que el nivel 2 no toma el issue y el feeder no lo propone.
-- `agent-jules.yml` publica por él el `CLAIM agent=Jules branch=jules/issue-N … lease=48h` en el registro activo, y el `RELEASE` al cerrar el issue o quitar la label. Sin plan válido no hay reserva: el issue pasa a `agent:needs-human`.
-- Su PR la integra @eGurucharri tras el CI canónico, como cualquier otra: `PR_READY` no autoriza merge.
-- Jules lee `AGENTS.md`, pero no publica reservas ni puede decidir prioridad: todo lo que necesita tiene que estar en el issue.
+1. comprueba que el issue no está ya reservado;
+2. reserva el issue y las rutas del plan;
+3. compila TaskPacket + prompt mínimo;
+4. crea una rama aislada;
+5. ejecuta al worker sin permisos de integración.
 
-## Aislamiento y control-plane
+Después de implementar, un guard compara el diff con el CLAIM. Toda ruta no autorizada se restaura antes de preflight, memoria, commit o publicación.
 
-Antes de marcar `agent:working`, cada worker intenta adquirir un **lease atómico** en el Deno KV compartido usando OIDC con audiencia `siga98-agent-pool`. El lease se identifica por issue + run, dura 30 minutos y se renueva al cambiar de fase (`planning`, `implementing`, `validating`, `publishing`). Si ya existe un lease vivo, el segundo worker termina sin tocar el estado visible de GitHub.
+## Replan
 
-El dispatcher consulta esos leases antes de construir la matrix. `agent-worker.yml` conserva además `concurrency` por número de issue, y los CLAIMs de #1713 siguen protegiendo solapes de **rutas** entre issues distintos. Son capas diferentes: lease para exclusión por issue, CLAIM para exclusión por rutas.
+Si el worker necesita rutas fuera del CLAIM:
 
-Durante la migración el control-plane es fail-open cuando Deno u OIDC no están disponibles: se conserva el comportamiento anterior de labels + `concurrency` + CLAIM. Solo un 409 explícito de lease activo bloquea el arranque. Los labels son el espejo visible, no la fuente de locking.
+- el intento se descarta de forma segura;
+- se registra el desvío;
+- el issue vuelve a planificación con ese dato;
+- los reintentos están acotados;
+- al agotarse, se usa `agent:needs-human`.
 
-El mismo control-plane mantiene el **circuit breaker por worker**. Un fallo de cuota/servicio abre un registro KV con TTL entre 5 minutos y 6 horas; el dispatcher excluye ese slot mientras siga vivo. Si el endpoint de health no está disponible, usa los marcadores históricos de #1713 como fallback. Un `Agent provider smoke` verde elimina el registro KV inmediatamente y devuelve el slot a rotación.
+El replan corrige un alcance insuficiente; nunca permite saltarse una reserva existente.
 
-## Activacion
+## Fallos de worker
 
-1. Configura al menos un proveedor: `QWEN_API_KEY`, `GEMINI_API_KEY`, o un `QWEN_FALLBACK_N_API_KEY` acompañado de `QWEN_FALLBACK_N_BASE_URL`.
-2. Añade `agent:auto` o `agent:pool`; usa `agent:qwen` / `agent:gemini` cuando el proveedor deba ser obligatorio.
-3. El evento de etiqueta lanza una tanda; además hay un barrido cada 15 minutos como red de seguridad.
-4. El dispatcher usa hasta seis workers disponibles, deduplicando cada issue y excluyendo leases activos.
-5. Al terminar la tanda, si aún queda cola elegible, se lanza otra inmediatamente; no se espera al siguiente cron.
-6. Si no hay cola ni planificación pendiente, `agent-feeder.yml` puede seleccionar un único issue conservador y enviarlo primero a `agent:decompose`; el feeder nunca implementa directamente.
+Un error de proveedor, timeout o ejecución sin diff útil puede rotar a otro worker compatible. Un preflight fallido sobre un diff real no se trata como simple fallo de proveedor: requiere revisar el cambio generado.
 
-Los CLAIM automáticos usan `lease=2h` como respaldo: suficiente para el job máximo y mucho menos dañino que las 48 h históricas si el runner desaparece sin publicar RELEASE.
+La política concreta de capacidad, cuotas, circuit breakers y backends no forma parte de esta documentación pública.
 
-## Failover después de reservar
+## Handoff y revisión
 
-Una reserva válida no convierte automáticamente cualquier fallo posterior en intervención humana. Si la Action del proveedor termina con error/timeout o el agente no deja ningún cambio dentro del CLAIM, el intento se clasifica como reintentable: se publica `AGENT_POOL_WORKER_FAILURE` con la fase, se libera el CLAIM y el dispatcher evita ese worker para ese issue en el siguiente intento. Al agotarse todos los workers compatibles se usa `agent:needs-human`.
+El worker entrega el contrato de [agent-protocol.md](../agent-protocol.md). Un ResultPacket ausente o inválido no convierte el trabajo en válido; el workflow puede recuperar un handoff degradado desde TaskPacket + diff para que reviewer/dispatcher no pierdan contexto.
 
-Un fallo de preflight sobre un diff real **no** entra en este failover: indica un problema del cambio generado y conserva la escalada humana para no rotar proveedores sobre código inválido indefinidamente.
-
-## Replan ante salidas del CLAIM
-
-Después de la implementación, el worker ejecuta un guard provider-agnostic. Si Qwen o Gemini modifican rutas no incluidas en el plan/CLAIM:
-
-1. restaura esas rutas antes de preflight, memoria, commit o push;
-2. libera la reserva del intento descartado;
-3. publica `AGENT_POOL_REPLAN` con las rutas observadas;
-4. reejecuta el mismo issue/proveedor para que el planner amplíe el corte y vuelva a comprobar #182 + #1713.
-
-Se permiten como máximo **dos replans** por issue. Si el modelo vuelve a salir del alcance, el issue pasa a `agent:needs-human`. Este mecanismo recupera errores de planificación; no autoriza a saltarse una reserva existente.
+La revisión independiente ocurre antes de considerar un draft listo. Ninguna revisión automática concede permiso de merge.
 
 ## CI
 
-El worker abre un PR draft y ejecuta `ci.yml` mediante `workflow_dispatch`, igual que el autopilot existente. Se conserva este disparo deliberadamente: un PR creado por un workflow con `GITHUB_TOKEN` puede dejar los workflows de `pull_request` esperando aprobacion, mientras que `workflow_dispatch` evita depender de esa aprobacion.
-
-La rama conserva el formato `agent/qwen-ISSUE-RUN` o `agent/gemini-ISSUE-RUN`, por lo que `agent-ci-repair.yml` puede seguir registrando `PR_READY` y reparando CI.
-
-## Contexto y memoria
-
-Cada worker conserva la jerarquia vigente: repositorio/issue/#181/#1713 + histórico #182/Normas Platino > contexto seleccionado de wiki > Deno KV > CI brain SQLite/Turso.
-
-El context packer limita la wiki antes de planificar y se vuelve a ejecutar con las rutas reservadas antes de implementar.
+El worker publica un PR draft y dispara el CI canónico. Las reparaciones automáticas están acotadas y no convierten el pool en autoridad de integración.
 
 ## Autopilot manual
 
-La migración de cola ya está completada: `agent:auto` entra por este dispatcher. `agent-autopilot.yml` no escucha labels ni hace polling horario; se conserva para `workflow_dispatch` manual, donde se indica explícitamente el issue y puede elegirse `provider=auto`, Qwen o Gemini.
+`agent-autopilot.yml` se conserva como entrada manual para un issue concreto. La cola automática común vive en el dispatcher; no hay una segunda cola horaria separada.
