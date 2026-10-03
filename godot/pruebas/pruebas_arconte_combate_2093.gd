@@ -33,7 +33,9 @@ func _probar_montaje() -> void:
 		if zona == null:
 			continue
 		_comprobar(zona.name == "ZonaControlador%d" % indice, "conserva nombre neutro de zona")
-		var copia := (\n\t\t\tanfitrion.get_node_or_null(NodePath(String(zona.name) + "_copia")) as MeshInstance3D\n\t\t)
+		var copia := (
+			anfitrion.get_node_or_null(NodePath(String(zona.name) + "_copia")) as MeshInstance3D
+		)
 		_comprobar(copia != null, "cada zona tiene plano de umbral desplazado")
 		if copia != null:
 			_comprobar(
@@ -68,12 +70,15 @@ func _probar_marca_activacion_y_recuperacion() -> void:
 	var posicion_marca := zona.position if zona != null else Vector3.ZERO
 	var rotacion_marca := zona.rotation if zona != null else Vector3.ZERO
 
-	paso = ARCONTE.avanzar(
-		unidad,
-		ARQUETIPOS.CONTROLADOR_TELEGRAFO,
-		rival,
-		Vector3(6.0, 0.0, 0.0),
-		zonas,
+	paso = (
+		ARCONTE
+		. avanzar(
+			unidad,
+			ARQUETIPOS.CONTROLADOR_TELEGRAFO,
+			rival,
+			Vector3(6.0, 0.0, 0.0),
+			zonas,
+		)
 	)
 	unidad = paso["unidad"]
 	_comprobar(unidad["estado"] == ARQUETIPOS.ACTIVAR_ZONA, "entra en ACTIVAR_ZONA")
@@ -91,12 +96,15 @@ func _probar_marca_activacion_y_recuperacion() -> void:
 				"ACTIVAR_ZONA intensifica el mismo plano",
 			)
 
-	paso = ARCONTE.avanzar(
-		unidad,
-		ARQUETIPOS.CONTROLADOR_ACTIVACION,
-		rival,
-		Vector3(-6.0, 0.0, 0.0),
-		zonas,
+	paso = (
+		ARCONTE
+		. avanzar(
+			unidad,
+			ARQUETIPOS.CONTROLADOR_ACTIVACION,
+			rival,
+			Vector3(-6.0, 0.0, 0.0),
+			zonas,
+		)
 	)
 	unidad = paso["unidad"]
 	_comprobar(unidad["estado"] == ARQUETIPOS.RECUPERAR, "entra en RECUPERAR")
@@ -129,19 +137,25 @@ func _probar_sin_reglas_paralelas() -> void:
 	var zonas_base := CONTROLADOR.montar_zonas(host_base, 2)
 	var zonas_arconte := ARCONTE.montar_zonas(host_arconte, 2)
 	var unidad := ARQUETIPOS.nuevo(ARQUETIPOS.CONTROLADOR, 2149, 2)
-	var base := CONTROLADOR.avanzar(
-		unidad,
-		0.0,
-		Vector3.ZERO,
-		Vector3(0.0, 0.0, 5.0),
-		zonas_base,
+	var base := (
+		CONTROLADOR
+		. avanzar(
+			unidad,
+			0.0,
+			Vector3.ZERO,
+			Vector3(0.0, 0.0, 5.0),
+			zonas_base,
+		)
 	)
-	var arconte := ARCONTE.avanzar(
-		unidad,
-		0.0,
-		Vector3.ZERO,
-		Vector3(0.0, 0.0, 5.0),
-		zonas_arconte,
+	var arconte := (
+		ARCONTE
+		. avanzar(
+			unidad,
+			0.0,
+			Vector3.ZERO,
+			Vector3(0.0, 0.0, 5.0),
+			zonas_arconte,
+		)
 	)
 	_comprobar(arconte == base, "Arconte no crea reglas paralelas sobre CONTROLADOR")
 	for clave in ["dano", "consecuencia", "religion", "cultura", "seleccion_cultural"]:
