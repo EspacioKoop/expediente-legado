@@ -35,6 +35,7 @@ class AgentPoolControlPlaneContractTest(unittest.TestCase):
             "/api/agent-pool/transition",
             "/api/agent-pool/release",
             "/api/agent-pool/status",
+            "/api/agent-pool/worker-status",
             "/api/agent-pool/worker-health/status",
             "/api/agent-pool/worker-health/report",
         ):
@@ -79,6 +80,15 @@ class AgentPoolControlPlaneContractTest(unittest.TestCase):
         self.assertIn("drain:", self.pool)
         self.assertIn("gh workflow run agent-pool.yml", self.pool)
         self.assertIn("requested_max", self.pool)
+
+    def test_dispatcher_filtra_slots_ocupados_sin_cambiar_refill(self):
+        self.assertIn("/api/agent-pool/worker-status", self.pool)
+        self.assertIn("occupancy_from_deno=true", self.pool)
+        self.assertIn("Slots ocupados (Deno KV)", self.pool)
+        self.assertIn("Ocupación KV no disponible", self.pool)
+        self.assertIn("{occupied:", self.pool)
+        self.assertIn("drain:\n", self.pool)
+        self.assertNotIn("worker-status" --refill", self.pool)
 
     def test_health_kv_es_primario_y_1713_solo_fallback(self):
         self.assertIn("/api/agent-pool/worker-health/status", self.pool)
