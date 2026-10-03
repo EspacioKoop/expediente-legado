@@ -116,13 +116,14 @@ static func _resolver_sueno(
 		return resultado
 
 	var escenas: Array = valor_escenas
+	if escenas.size() == 1 and not registrar_despertar.is_valid():
+		resultado["resuelto"] = false
+		resultado["error"] = "registrar_despertar_invalido"
+		return resultado
+
 	escenas.pop_front()
 	jornada["sueno_escenas"] = escenas
 	if not escenas.is_empty():
-		return resultado
-	if not registrar_despertar.is_valid():
-		resultado["resuelto"] = false
-		resultado["error"] = "registrar_despertar_invalido"
 		return resultado
 
 	registrar_despertar.call()
