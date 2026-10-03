@@ -38,6 +38,49 @@ class SlotsTest(unittest.TestCase):
         self.assertIsNone(slots.slot_de_worker("qwen-fallback-13"))
         self.assertIsNone(slots.slot_de_worker("qwen-primary"))
 
+    def test_numeros_no_convertibles_aplican_defaults_sin_abort(self):
+        valores = ["²", "⑦"]
+        if hasattr(sys, "get_int_max_str_digits") and sys.get_int_max_str_digits():
+            valores.append("9" * (sys.get_int_max_str_digits() + 1))
+        for valor in valores:
+            with self.subTest(valor=valor[:20]):
+                self.assertEqual(1, slots.tier_de({"QWEN_FALLBACK_1_TIER": valor}, 1))
+                self.assertEqual(0, slots.max_task_bytes_de_worker(
+                    {"GEMINI_MAX_TASK_BYTES": valor}, "gemini"))
+                self.assertEqual("", slots.secreto_de({"QWEN_FALLBACK_1_KEY_FROM": valor}, 1))
+                self.assertEqual({2}, slots.claves_presentes("2 " + valor))
+                self.assertIsNone(slots.slot_de_worker("qwen-fallback-1" + valor))
+
+    def test_decimales_convertibles_conservan_configuracion(self):
+        for valor in (" 2 ", "02", "٢"):
+            with self.subTest(valor=valor):
+                self.assertEqual(2, slots.tier_de({"QWEN_FALLBACK_1_TIER": valor}, 1))
+                self.assertEqual(2, slots.max_task_bytes_de_worker(
+                    {"GEMINI_MAX_TASK_BYTES": valor}, "gemini"))
+                self.assertEqual("QWEN_FALLBACK_2_API_KEY",
+                                 slots.secreto_de({"QWEN_FALLBACK_1_KEY_FROM": valor}, 1))
+
+    def test_cli_con_config_invalida_conserva_workers_y_resolver(self):
+        variables = {**VARS, "GEMINI_TIER": "²", "GEMINI_MAX_TASK_BYTES": "²",
+                     "QWEN_FALLBACK_1_KEY_FROM": "²", "QWEN_FALLBACK_2_TIER": "⑦"}
+        entorno = {**os.environ, "VARS_JSON": json.dumps(variables),
+                   "FALLBACK_KEYS": "1 2 ²", "BASE_KEYS": "gemini"}
+        script = str(ROOT / "scripts/agent_slots.py")
+        for args in (["workers"], ["resolver", "--worker", "qwen-fallback-2"]):
+            with self.subTest(args=args):
+                result = subprocess.run([sys.executable, script, *args], env=entorno,
+                                        capture_output=True, text=True, timeout=10)
+                self.assertEqual(0, result.returncode, result.stderr)
+                self.assertEqual("", result.stderr)
+                data = json.loads(result.stdout)
+                if args[0] == "workers":
+                    self.assertEqual(["gemini", "qwen-fallback-2"], [w["worker"] for w in data])
+                    self.assertEqual(1, data[0]["tier"])
+                    self.assertEqual(0, data[0]["max_task_bytes"])
+                else:
+                    self.assertEqual("QWEN_FALLBACK_2_API_KEY", data["secret"])
+                    self.assertEqual(1, data["tier"])
+
     def test_resolver_worker_y_modelo_por_defecto(self):
         self.assertEqual(
             {"worker": "qwen-fallback-7", "slot": 7, "url": NVIDIA, "model": "qwen3-coder-plus", "backend": "nvidia", "tier": 1,

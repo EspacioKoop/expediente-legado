@@ -75,25 +75,31 @@ def backend_de_url(url: str) -> str:
 def claves_presentes(texto: str) -> set[int]:
     """Números de slot con clave, tal como los emite la tabla del pool ("2 3 7")."""
 
-    return {int(t) for t in texto.split() if t.isdigit() and 1 <= int(t) <= MAX_FALLBACKS}
+    return {n for t in texto.split() if 1 <= (n := _entero_no_negativo(t)) <= MAX_FALLBACKS}
 
 
 def slot_de_worker(worker: str) -> int | None:
     match = WORKER_RE.match(worker)
     if not match:
         return None
-    n = int(match.group("n"))
-    return n if n <= MAX_FALLBACKS else None
+    n = _entero_no_negativo(match.group("n"))
+    return n if 1 <= n <= MAX_FALLBACKS else None
 
 
 def _entero_positivo(crudo: Any) -> int:
-    texto = str(crudo or "").strip()
-    return int(texto) if texto.isdigit() and int(texto) >= 1 else 1
+    return max(1, _entero_no_negativo(crudo))
 
 
 def _entero_no_negativo(crudo: Any) -> int:
     texto = str(crudo or "").strip()
-    return int(texto) if texto.isdigit() else 0
+    # isdigit incluye símbolos como ² que int no admite. Una variable inválida
+    # o que exceda el límite de conversión no debe abortar los demás workers.
+    if not texto.isdecimal():
+        return 0
+    try:
+        return int(texto)
+    except ValueError:
+        return 0
 
 
 def tier_de(variables: dict[str, Any], n: int) -> int:
@@ -126,8 +132,9 @@ def secreto_de(variables: dict[str, Any], n: int) -> str:
     origen = str(variables.get(f"QWEN_FALLBACK_{n}_KEY_FROM") or "").strip().lower()
     if not origen:
         return f"QWEN_FALLBACK_{n}_API_KEY"
-    if origen.isdigit() and 1 <= int(origen) <= MAX_FALLBACKS:
-        return f"QWEN_FALLBACK_{int(origen)}_API_KEY"
+    n_origen = _entero_no_negativo(origen)
+    if 1 <= n_origen <= MAX_FALLBACKS:
+        return f"QWEN_FALLBACK_{n_origen}_API_KEY"
     return SECRETOS_BASE.get(origen, "")
 
 
