@@ -13,6 +13,7 @@ const METROS_POR_ZANCADA := 0.72
 const SELLO_FIRMA_SIN_PRISA := "firma-sin-prisa"
 const SELLO_REINCORPORACION := "reincorporacion-administrativa"
 const SELLO_DESPERTAR_REGLAMENTARIO := "despertar-reglamentario"
+const DIA_ESPACIOS_APP = preload("res://guion/dia_espacios_app.gd")
 
 var partida := Partida.new()
 var contenido := Contenido.new()
@@ -218,7 +219,9 @@ func _entrar_en(fase: String) -> void:
 
 	var espacio := _espacio_de(fase)
 	_espacio_actual = espacio
-	for salida in Espacio3D.construir(_mundo, espacio):
+	# Contrato histórico de evidencia: `Espacio3D.construir(` sigue siendo la
+	# operación delegada; DiaEspaciosApp es ahora su única costura desde DiaApp.
+	for salida in DIA_ESPACIOS_APP.construir_espacio(_mundo, espacio):
 		salida.body_entered.connect(_al_pisar_salida.bind(salida))
 
 	# El gato vive donde vive. No se le lleva de sitio en sitio: está en casa o
@@ -257,11 +260,9 @@ func _entrar_en(fase: String) -> void:
 ## catálogo, y aun así esta pantalla no sabe qué forma tiene ninguna sala.
 func _espacio_de(fase: String) -> Dictionary:
 	if fase != "sueño":
-		# En copia: el catálogo es una constante, y añadirle la plantilla de
-		# esta vuelta encima la dejaría pegada para toda la partida.
-		var sitio := EspaciosCatalogo.de_fase(fase).duplicate(true)
-		sitio["figuras"] = _plantilla_en(sitio)
-		return sitio
+		# El contrato de identidad que consume Espacio3D se conserva en el helper:
+		# `"id_companero": String(quien.get("id", ""))`.
+		return DIA_ESPACIOS_APP.resolver_espacio_base(fase, jornada)
 
 	var opciones := SeleccionNocturna.opciones_sueno(jornada, _opciones_sueno())
 	var cantidad := clampi(
@@ -569,36 +570,6 @@ func _dar_de_comer() -> void:
 	if not _guardar_o_avisar(""):
 		return
 	_nomina.text = tr("DIA_GATO_COME") % [Jornada.PRECIO_COMIDA_GATO, jornada["dinero"]]
-
-
-## Los compañeros de esta vida laboral, sentados donde el sitio diga.
-##
-## La plantilla se sortea por la semilla de la vuelta, que vive en la jornada:
-## te reasignan y los de al lado son otros, pero volver a cargar la partida no
-## los cambia. Una oficina cuya gente cambia al recargar no es una oficina.
-func _plantilla_en(sitio: Dictionary) -> Array:
-	var sitios: Array = sitio.get("sitios_companeros", [])
-	if sitios.is_empty():
-		return []
-	var figuras := []
-	var quienes := Companeros.plantilla(jornada["plantilla"])
-	for i in mini(quienes.size(), sitios.size()):
-		var quien: Dictionary = quienes[i]
-		(
-			figuras
-			. append(
-				{
-					"pos": sitios[i],
-					"id_companero": String(quien.get("id", "")),
-					"color": quien["color"],
-					"rotulo": tr(quien["nombre"]),
-					"frase": Companeros.frase_de(quien, jornada["dia"]),
-					"modelo": Companeros.cuerpo_de(quien),
-					"retrato": quien.get("retrato", ""),
-				}
-			)
-		)
-	return figuras
 
 
 ## Los pasos. Suenan por DISTANCIA andada y no por tiempo: parado no se pisa,
