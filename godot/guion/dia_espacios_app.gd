@@ -2,7 +2,7 @@
 ##
 ## Extrae la lógica común de resolución y construcción de espacios de DiaApp,
 ## sin conocer overrides de calle/sueño/clima/gato.
-extends Reference
+extends RefCounted
 
 
 ###
