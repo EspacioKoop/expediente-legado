@@ -6,6 +6,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 CATALOGO = json.loads((ROOT / "godot/datos/sellos.json").read_text(encoding="utf-8"))
 DIA = (ROOT / "godot/guion/dia_app.gd").read_text(encoding="utf-8")
+TRANSICION = (ROOT / "godot/guion/dia_transicion_app.gd").read_text(encoding="utf-8")
 GATO = (ROOT / "godot/guion/dia_gato_app.gd").read_text(encoding="utf-8")
 COMBATE = (ROOT / "godot/guion/sueno_combate.gd").read_text(encoding="utf-8")
 
@@ -32,16 +33,18 @@ class SelloDespertarReglamentarioTests(unittest.TestCase):
         self.assertIn("Sellos.registrar_sello", bloque)
 
     def test_ruta_base_emite_antes_del_despertar_normal(self):
-        tramo = DIA.split('match jornada["fase"]:', 1)[1].split(
-            "## Reconoce una noche completada", 1
-        )[0]
-        emisor = "_registrar_despertar_reglamentario()"
-        auditoria = "Auditorias.resolver_fin_sueno(partida.estado, true)"
+        tramo = TRANSICION.split('"sueño":', 1)[1].split("\n\t\t_:", 1)[0]
+        emisor = '_llamar(acciones, "registrar_despertar")'
+        auditoria = "Auditorias.resolver_fin_sueno(estado_partida, true)"
         despertar = "Jornada.despertar(jornada)"
         for llamada in (emisor, auditoria, despertar):
             self.assertIn(llamada, tramo)
         self.assertLess(tramo.index(emisor), tramo.index(auditoria))
         self.assertLess(tramo.index(auditoria), tramo.index(despertar))
+        self.assertIn(
+            '"registrar_despertar": Callable(self, "_registrar_despertar_reglamentario")',
+            DIA,
+        )
 
     def test_ruta_de_objetivos_emite_antes_del_despertar_normal(self):
         tramo = GATO.split("func _resolver_objetivos_sueno", 1)[1].split(
