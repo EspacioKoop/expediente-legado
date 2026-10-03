@@ -1,8 +1,10 @@
 import importlib.util
+import io
 from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -93,6 +95,54 @@ class AgentFailurePolicyTest(unittest.TestCase):
         self.assertEqual("", text)
         result = mod.classify_failure(stage="implementing", text=text)
         self.assertEqual("human_review", result["action"])
+
+    def test_lectura_real_respeta_presupuesto_entre_ficheros(self):
+        lecturas = []
+
+        class LogAcotado(io.BytesIO):
+            def read(self, size=-1):
+                if size < 0 or size > 12:
+                    raise AssertionError("lectura de log sin límite")
+                data = super().read(size)
+                lecturas.append((size, len(data)))
+                return data
+
+        def abrir(path, mode):
+            self.assertEqual(mode, "rb")
+            if path.name == "a.log":
+                return LogAcotado(b"503")
+            if path.name == "b.log":
+                return LogAcotado(b"overloaded" * 1000)
+            raise AssertionError("no debe abrir logs al agotar el presupuesto")
+
+        with patch.object(Path, "open", autospec=True, side_effect=abrir):
+            text = mod.read_text_files(
+                [Path("a.log"), Path("b.log"), Path("c.log")], max_bytes=12
+            )
+        self.assertEqual("503\noverloade", text)
+        self.assertEqual([(12, 3), (9, 9)], lecturas)
+
+    def test_presupuesto_cero_no_abre_logs(self):
+        with patch.object(Path, "open", side_effect=AssertionError("no abrir")):
+            self.assertEqual("", mod.read_text_files([Path("a.log")], max_bytes=0))
+            self.assertEqual("", mod.read_text_files([Path("a.log")], max_bytes=-1))
+
+    def test_log_inaccesible_no_consume_presupuesto(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "b.log"
+            log.write_bytes(b"HTTP 429" + b"x" * 10000)
+            text = mod.read_text_files([Path(tmp), log], max_bytes=8)
+        self.assertEqual("HTTP 429", text)
+
+    def test_utf8_cortado_no_rompe_clasificacion(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "utf8.log"
+            log.write_text("503 é", encoding="utf-8")
+            text = mod.read_text_files([log], max_bytes=5)
+        self.assertEqual("503 \ufffd", text)
+        self.assertEqual(
+            "rotate_provider", mod.classify_failure(stage="implementing", text=text)["action"]
+        )
 
     def test_desconocido_escala_a_humano(self):
         result = mod.classify_failure(stage="publishing", text="fallo raro")
