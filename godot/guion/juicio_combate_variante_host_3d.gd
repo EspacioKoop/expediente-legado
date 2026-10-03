@@ -17,6 +17,8 @@ static func montar(
 	var variante := String(acusado.get("_variante_onirica", ""))
 	if variante == JuicioCombateGargolaHost3D.VARIANTE:
 		return JuicioCombateGargolaHost3D.montar(anfitrion, rival, raiz)
+	if variante == JuicioCombateArconteWiring3D.VARIANTE:
+		return JuicioCombateArconteWiring3D.montar(anfitrion, raiz)
 	return {}
 
 
@@ -24,8 +26,14 @@ static func avanzar(anfitrion, estado: Dictionary, delta: float) -> bool:
 	if JuicioCombateGargolaHost3D.es_estado(estado):
 		JuicioCombateGargolaHost3D.avanzar(anfitrion, estado, delta)
 		return true
+	if JuicioCombateArconteWiring3D.es_estado(estado):
+		JuicioCombateArconteWiring3D.avanzar(anfitrion, estado, delta)
+		return true
 	return false
 
 
 static func controla_movimiento(estado: Dictionary) -> bool:
-	return JuicioCombateGargolaHost3D.es_estado(estado)
+	return (
+		JuicioCombateGargolaHost3D.es_estado(estado)
+		or JuicioCombateArconteWiring3D.es_estado(estado)
+	)
