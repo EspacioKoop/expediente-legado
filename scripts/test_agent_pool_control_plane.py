@@ -90,6 +90,21 @@ class AgentPoolControlPlaneContractTest(unittest.TestCase):
         self.assertIn("drain:\n", self.pool)
         self.assertNotIn('worker-status" --refill', self.pool)
 
+    def test_refill_opt_in_ocurre_despues_de_release_real(self):
+        release = self.worker.index("id: release_lease")
+        refill = self.worker.index("- name: Refill opt-in tras liberar slot")
+        self.assertLess(release, refill)
+        self.assertIn('echo "released=$released" >> "$GITHUB_OUTPUT"', self.worker)
+        self.assertIn("steps.release_lease.outputs.released == 'true'", self.worker)
+        self.assertIn("vars.AGENT_POOL_REFILL_ENABLED == 'true'", self.worker)
+        self.assertIn("gh workflow run agent-pool.yml", self.worker)
+        self.assertIn('if (( pending == 0 )); then', self.worker)
+        self.assertIn("Refill: sin backlog elegible.", self.worker)
+        self.assertIn("refill_max_parallel:", self.worker)
+        self.assertIn("refill_max_parallel:", self.pool)
+        self.assertIn("needs.prepare.outputs.requested_max", self.pool)
+        self.assertIn("drain:", self.pool)
+
     def test_health_kv_es_primario_y_1713_solo_fallback(self):
         self.assertIn("/api/agent-pool/worker-health/status", self.pool)
         self.assertIn("health_from_deno=true", self.pool)
