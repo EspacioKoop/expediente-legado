@@ -1,266 +1,85 @@
-# Agentes autónomos: autopilot, pool, Qwen + Gemini
+# Agentes autónomos
 
-El repositorio puede convertir issues autorizados en PRs draft usando Qwen Code o Gemini CLI sin entregar al modelo credenciales de push. La cola operativa entra por el dispatcher paralelo de hasta seis workers; `agent-autopilot.yml` se conserva como entrada manual para ejecutar un issue concreto.
+Este documento describe **solo el contrato de agentes de este repositorio**. La topología doméstica, inventario de proveedores, routing privado, timers locales y runbooks reutilizables se mantienen fuera del repo público.
 
-## Configuración mínima
+## Entradas de trabajo
 
-Una vez fusionados los workflows, solo hacen falta las claves de los proveedores.
+La cola reconoce estas labels:
 
-### Gemini
+- `agent:auto`: trabajo automático con cualquier worker compatible disponible;
+- `agent:pool`: alias compatible de la misma cola;
+- `agent:qwen`: exige la familia Qwen;
+- `agent:gemini`: exige Gemini;
+- `agent:decompose`: requiere planificación de nivel 2 antes de implementar;
+- `agent:working`: ejecución activa;
+- `agent:pr-open`: ya existe un draft generado;
+- `agent:needs-human`: no hay un corte automático seguro o se agotó la recuperación.
 
-1. Abre Google AI Studio → **API Keys**.
-2. Crea o copia una API key válida para Gemini.
-3. En este repositorio abre **Settings → Secrets and variables → Actions → New repository secret**.
-4. Nombre: `GEMINI_API_KEY`.
-5. Pega la clave como valor y guarda.
+El workflow manual `agent-autopilot.yml` permite ejecutar un issue concreto sin convertirlo en una segunda cola.
 
-### Qwen
+## Flujo
 
-`QWEN_API_KEY` puede apuntar al proveedor configurado para Qwen Code. Con `QWEN_BASE_URL` y `QWEN_MODEL` se puede usar un backend OpenAI-compatible como FreeInference; si esas variables no existen, el workflow conserva la detección de Alibaba Cloud.
+1. El nivel 2 inspecciona issue, repo y Normas Platino y materializa un `AGENT_PLAN` acotado.
+2. El dispatcher elige un worker compatible y evita duplicar un issue ya reservado.
+3. El worker recibe un `TaskPacket` y un prompt compilado; no vuelve a planificar el proyecto.
+4. Se normaliza el diff contra el CLAIM y se restauran cambios fuera de alcance.
+5. El worker entrega un `ResultPacket`; si omite el formato, el workflow puede recuperar un sobre degradado solo con hechos autoritativos, sin marcar el contrato como válido.
+6. Se ejecuta preflight proporcional y revisión independiente.
+7. Se publica un PR **draft** y se ejecuta CI.
+8. La integración sigue siendo humana.
 
-El workflow detecta automáticamente dos tipos habituales de clave:
+## Plan delegado
 
-- **Model Studio / DashScope internacional**: claves `sk-...`; usa el endpoint internacional compatible con OpenAI.
-- **Coding Plan internacional**: claves `sk-sp-...`; usa automáticamente el endpoint de Coding Plan.
+El formato canónico está documentado en [agents/parallel-pool.md](agents/parallel-pool.md). Por defecto una tarea automática debe ser pequeña y explícita; el nivel 2 divide trabajos mayores antes de entregarlos a un worker final.
 
-Pasos:
+## Protocolo B2B
 
-1. Abre Alibaba Cloud Model Studio / Qwen Code y crea o copia la API key.
-2. En este repositorio abre **Settings → Secrets and variables → Actions → New repository secret**.
-3. Nombre: `QWEN_API_KEY`.
-4. Pega la clave como valor y guarda.
+El contrato planner → worker → reviewer está en [agent-protocol.md](agent-protocol.md).
 
-No pegues ninguna key en issues, comentarios, archivos, variables públicas ni logs.
+Propiedades obligatorias:
 
-Si solo configuras una clave, `agent:auto` usa ese proveedor. Con ambas disponibles, `agent:auto` prioriza Qwen; `agent:gemini` fuerza Gemini y `agent:qwen` fuerza Qwen.
+- versión explícita;
+- SHA base;
+- rutas autorizadas;
+- objetivo y criterios de aceptación;
+- separación entre hechos, supuestos, verificaciones e incógnitas;
+- evidencia y siguiente acción;
+- ausencia de secretos y razonamiento interno.
 
-### OmniRoute privado como backend preferente
+Un error de formato no autoriza a publicar ni integrar: CLAIM, diff, preflight, revisión y CI siguen siendo las barreras técnicas.
 
-El pool puede usar OmniRoute como primer backend de Qwen. **Este repositorio solo define el contrato cliente**; despliegue, topología doméstica, puertos, inventario de conexiones y runbooks se mantienen en la infraestructura privada.
+## Autoridad de contexto
 
-Configuración del repositorio:
+La prioridad es:
 
-| Tipo | Nombre | Uso |
-| --- | --- | --- |
-| Secret | `OMNIROUTE_API_KEY` | credencial del endpoint de inferencia |
-| Variable | `OMNIROUTE_BASE_URL` | base URL privada terminada en `/v1` |
-| Variable | `OMNIROUTE_MODEL` | modelo/alias/combo usado por el worker |
-| Secret | `TS_OAUTH_CLIENT_ID` | identidad Tailscale del runner |
-| Secret | `TS_OAUTH_SECRET` | OAuth preferente |
-| Secret | `TS_AUDIENCE` | fallback OIDC |
+1. código y tests actuales;
+2. issue y plan actual;
+3. #181, #1713 y Normas Platino;
+4. contexto auxiliar seleccionado por las herramientas del repo.
 
-El runner entra con `tag:github-autopilot`. La ACL debe limitar ese tag al endpoint de inferencia necesario; no necesita acceso al resto de servicios privados. Si Tailscale u OmniRoute no están disponibles, el worker continúa por los backends directos.
+Memoria, wiki, métricas o respuestas de modelos pueden orientar; nunca sustituyen el estado actual del código, el issue ni CI.
 
-Orden lógico:
+## Frontera de proveedores
 
-`OmniRoute privado → Qwen directo → fallbacks OpenAI-compatible`.
+El repositorio contiene adaptadores y workflows para workers configurables, pero **no documenta aquí**:
 
-Los detalles de resiliencia, rate limits y composición interna de OmniRoute no son parte del contrato de este repositorio.
+- red o máquinas que prestan inferencia;
+- endpoints privados;
+- inventario real de cuentas/proveedores;
+- tiers y cuotas personales;
+- timers o fallback doméstico;
+- runbooks de alta/baja de proveedores.
 
-### Smoke aislado de proveedores
+La interfaz necesaria para Actions es el propio workflow y sus inputs/variables; el despliegue que hay detrás no forma parte del contrato público del juego.
 
-`.github/workflows/agent-provider-smoke.yml` valida cada slot sin crear trabajo ficticio ni dar permisos de escritura al modelo. El smoke usa Qwen Code únicamente con `read_file`, obliga a leer `AGENTS.md` y exige el marcador `AGENT_PROVIDER_SMOKE_OK file=AGENTS.md`.
+## Seguridad y límites
 
-Puede ejecutarse manualmente indicando el slot. Valida secret, endpoint, modelo, compatibilidad OpenAI y tool-calling básico. Un smoke verde puede cerrar además el circuit breaker de ese worker. El smoke demuestra compatibilidad de protocolo; una tarea real pequeña sigue siendo necesaria para evaluar calidad.
+- ningún modelo recibe credenciales de push;
+- los workers no hacen commit, push, PR ni merge por su cuenta;
+- el workflow restaura cambios fuera del CLAIM;
+- un draft no equivale a integración;
+- CI verde no sustituye revisión ni validación humana;
+- no se automatizan gates visuales, mando físico ni decisiones narrativas;
+- no hay auto-merge.
 
-### Cadena de fallback OpenAI-compatible
-
-El worker Qwen admite hasta **12 backends de reserva** (#1685). Cada slot `N` usa:
-
-| Qué | Dónde | Nombre |
-| --- | --- | --- |
-| Clave | Actions **Secret** | `QWEN_FALLBACK_N_API_KEY` |
-| Endpoint | Actions **Variable** | `QWEN_FALLBACK_N_BASE_URL` |
-| Modelo | Actions **Variable** | `QWEN_FALLBACK_N_MODEL` |
-| Tier (opcional) | Actions **Variable** | `QWEN_FALLBACK_N_TIER` |
-| Presupuesto (opcional) | Actions **Variable** | `QWEN_FALLBACK_N_MAX_TASK_BYTES` |
-| Clave heredada (opcional) | Actions **Variable** | `QWEN_FALLBACK_N_KEY_FROM` |
-
-`scripts/agent_slots.py` descubre la configuración pública desde `toJSON(vars)`. Como los secrets no se pueden enumerar, `agent-pool.yml` mantiene la tabla mínima que indica qué slots tienen credencial propia. Los tests exigen coherencia entre esa tabla y el máximo de slots.
-
-**Tiers.** Un tier menor se consume antes que uno mayor. `qwen-primary` y `gemini` aceptan igualmente `QWEN_PRIMARY_TIER` y `GEMINI_TIER`.
-
-**Presupuesto por worker.** `*_MAX_TASK_BYTES` limita la huella aproximada (cuerpo del issue + ficheros del AGENT_PLAN). Valor 0/ausente conserva comportamiento ilimitado. A igualdad de tier/score se puede preferir el worker limitado más ajustado que todavía soporte la tarea.
-
-**Identidad del backend.** `provider` describe el executor (`qwen`/`gemini`) y `backend` la inferencia subyacente para observabilidad. Solo se emiten categorías conocidas; un hostname no reconocido se normaliza como `custom` y nunca se imprime la URL privada. Este metadato no modifica routing, tier ni score.
-
-**Reutilización de credencial.** `QWEN_FALLBACK_N_KEY_FROM` puede apuntar a otro slot o a los proveedores base admitidos. El workflow resuelve la credencial de forma explícita; una variable pública nunca contiene el secret.
-
-Un slot sin credencial utilizable no recibe trabajo. Antes de confiar en uno nuevo: smoke y después tarea real pequeña con plan delegado.
-
-## Único ajuste de GitHub que puede ser necesario
-
-GitHub puede impedir por política que `GITHUB_TOKEN` cree PRs. Si el primer intento implementa y hace push pero falla al abrir el draft:
-
-**Settings → Actions → General → Workflow permissions → Allow GitHub Actions to create and approve pull requests**.
-
-El workflow nunca aprueba ni fusiona PRs; el ajuste solo permite crear el draft. Si la organización ya lo permite, no hay que tocar nada.
-
-## Registro de reservas activo
-
-El registro operativo pasó de **#182** a **[#1713](https://github.com/EspacioKoop/expediente-legado/issues/1713)** al alcanzar #182 el límite de comentarios de GitHub. Los workflows deben publicar nuevas reservas en #1713 y, durante el rollover, leer también #182 para no perder reservas heredadas aún vivas.
-
-## Cola de trabajo
-
-Los labels se crean automáticamente al integrarse el workflow:
-
-- `agent:auto`: cola automática, proveedor elegido por disponibilidad/Kev;
-- `agent:pool`: alias compatible de la misma cola paralela;
-- `agent:qwen`: cola con Qwen obligatorio;
-- `agent:gemini`: cola con Gemini obligatorio;
-- `agent:working`: hay una ejecución activa;
-- `agent:pr-open`: ya existe un PR generado;
-- `agent:needs-human`: hubo ambigüedad, conflicto, falta de configuración o se agotó la reparación automática.
-
-Etiquetar un issue con `agent:auto`, `agent:pool`, `agent:qwen` o `agent:gemini` lo mete en el dispatcher común. El pool hace además un barrido cada 15 minutos y deduplica issues encontrados por varias etiquetas. **Agent autopilot** queda disponible desde Actions para ejecutar manualmente un issue concreto y un proveedor (`auto`, Qwen o Gemini).
-
-### Selección automática y contexto acotado
-
-En la cola unificada, el dispatcher consulta `scripts/kev_router.py` para obtener una **preferencia blanda** cuando no existe proveedor explícito. `agent:qwen` y `agent:gemini` son obligatorios; para `agent:auto`/`agent:pool`, si el proveedor sugerido no tiene slot libre se usa otro worker disponible. La ejecución manual de `agent-autopilot.yml` mantiene el router cuando se selecciona `provider=auto`. Sin `KEV_BASE_URL`, con timeout, baja confianza o respuesta inválida, se conserva una selección determinista.
-
-Kev recibe únicamente título, cuerpo y labels del issue. No recibe `GITHUB_TOKEN`, secretos de proveedores, logs completos ni memorias sin filtrar.
-
-El autopilot manual conserva `scripts/agent_context_pack.py` para sus ejecuciones autónomas. El **pool paralelo** separa esa responsabilidad: `agent-decompose.yml` es el nivel 2 que lee issue, normas y repositorio, y materializa un `AGENT_PLAN` sellado de un solo fichero. `agent-worker.yml` es nivel 3 y no vuelve a cargar wiki, memoria ni contexto de planificación: si no recibe un plan delegado válido, devuelve el issue a `agent:decompose` sin invocar al implementer.
-
-### Contrato de handoff B2B v1
-
-Antes de entregar trabajo al modelo final, `scripts/agent_protocol.py` compila un
-`TaskPacket` versionado en `.agent-task-packet.json` y un prompt mínimo en
-`.agent-worker-prompt.md`. El paquete fija tarea, SHA base, versión de Normas
-Platino, provider/worker, objetivo e instrucciones ya destiladas, la única ruta del
-CLAIM, presupuesto de scope, criterios de aceptación y condiciones de abortado. En
-el pool, el worker final solo lee el prompt compilado y el fichero asignado; no vuelve
-a reconstruir intención leyendo AGENTS, wiki, memorias o artefactos de planificación.
-
-La salida del worker usa un `ResultPacket` con `RESULT` y separa `facts`,
-`assumptions`, `verified` y `unknowns`, además de cambios, evidencia, pendientes y
-siguiente acción. El rollout v1 mide `contract_coverage_pct` y
-`handoff_loss_proxy_pct` sin convertir todavía un error de formato del ResultPacket
-en un gate de publicación; CLAIM, preflight, diff y CI siguen siendo las barreras
-autoritativas.
-
-Los sobres B2B admitidos son `TASK`, `CLAIM`, `EVIDENCE`, `BLOCKER`, `QUESTION`,
-`RESULT`, `REVIEW` y `HANDOFF`. Los leases Deno KV y el registro de reservas siguen
-siendo los locks técnicos; el protocolo describe intención y evidencia, no intenta
-reemplazarlos. Véase [`agent-protocol.md`](agent-protocol.md).
-
-### Pool paralelo
-
-El dispatcher documentado en [`agents/parallel-pool.md`](agents/parallel-pool.md) es la cola operativa común para `agent:auto`, `agent:pool`, `agent:qwen` y `agent:gemini`. `agent:pool` se conserva como alias compatible y ya puede coexistir con `agent:auto`: el selector deduplica por issue.
-
-El dispatcher:
-
-- reúne hasta seis issues elegibles y usa como máximo un trabajo por slot/proveedor en cada tanda;
-- separa Qwen primario, Gemini y los slots OpenAI-compatible configurados;
-- consulta el **control-plane Deno KV** y excluye issues con un lease activo antes de construir la matrix;
-- consulta el health de workers en Deno KV y deja fuera slots en cooldown; solo si ese endpoint no responde reconstruye temporalmente el estado desde los marcadores históricos de #1713;
-- cada worker adquiere atómicamente un lease por issue antes de marcar `agent:working`; el lease dura 30 minutos y se renueva al entrar en implementación, validación y publicación;
-- mantiene `concurrency` por issue y los CLAIMs de #1713 como barreras redundantes durante la migración;
-- si Deno/OIDC no están disponibles, falla abierto al mecanismo histórico de GitHub; un HTTP 409 por lease vivo sí evita arrancar un duplicado;
-- los 429/503 abren un circuit breaker por worker con TTL configurable (mínimo 5 min, máximo 6 h); el marcador `AGENT_POOL_SLOT_UNHEALTHY` en #1713 queda únicamente como fallback si el reporte KV falla;
-- exige un `AGENT_PLAN` delegado de nivel 2 antes de reservar; si falta, devuelve el issue a `agent:decompose` sin gastar un slot de implementación;
-- cada tarea del pool modifica un único fichero por defecto; el TaskPacket y el parser comparten `AGENT_POOL_MAX_FILES`;
-- ante cambios fuera del CLAIM, restaura el intento y publica un BLOCKER para que la coordinación decida el siguiente corte;
-- al terminar una tanda comprueba si siguen quedando issues elegibles y, si los hay, programa inmediatamente la siguiente tanda para mantener ocupados los slots.
-
-El barrido cada 15 minutos queda como red de seguridad; el drenado tras cada tanda evita esperar al siguiente cron cuando aún hay cola. `agent-autopilot.yml` ya no hace polling ni escucha labels: queda únicamente como ejecución manual.
-
-### Feeder conservador de backlog
-
-`agent-feeder.yml` evita que una pool sana se quede ociosa cuando no existe ninguna tarea en `agent:auto`/`agent:pool`/provider. Una vez por hora, y solo si la cola/planificación está vacía, selecciona como máximo **un** issue y lo envía primero a `agent:decompose`; nunca lo manda directamente a implementación.
-
-El selector excluye cualquier issue con labels `agent:*`, `estado:validacion-humana`, `prioridad:P0` o `agent:no-auto`, títulos de playtest/épica, registros de reservas, gates humanos detectados en el propio cuerpo (`Gate de validación humana`, `validación pendiente`, `pase humano`, `mando físico`), issues actualizados en los últimos 90 minutos y issues ya cubiertos por un PR abierto (`Refs/Fixes/Closes/Resolves #N`). Prioriza bugs, infraestructura/tests y prioridades P2/P3. `agent:no-auto` es el opt-out explícito.
-
-El feeder ejecuta `agent-decompose.yml` mediante `workflow_dispatch` porque los eventos creados por `GITHUB_TOKEN` no encadenan workflows. Del mismo modo, `agent-decompose.yml` despacha `agent-pool.yml` explícitamente cuando devuelve el padre a cola o crea subtareas independientes. El contrato de `agent-decompose` admite además `needs_human=true`: si el planner determina que solo queda gate/playtest físico o no hay cambio de código justificable, marca `agent:needs-human` y no crea ni encola trabajo.
-
-## Normas Platino, wiki y memoria
-
-La planificación de nivel 2 y las reparaciones cargan una copia fresca de `EspacioKoop/normas_platino` y leen sus fuentes operativas. El executor de nivel 3 no relee ese repositorio: recibe las restricciones ya compiladas en el TaskPacket y sella el SHA actual de Normas Platino para trazabilidad. Las reglas siguen siendo obligatorias y no se sustituyen por memoria.
-
-La jerarquía de contexto es:
-
-1. repositorio, issue, #181, #1713 y Normas Platino;
-2. wiki de Expediente Legado como memoria consolidada en solo lectura;
-3. Deno KV como memoria operativa temporal;\n4. SQLite/Turso del CI brain como memoria histórica de fallos y workarounds.
-
-La wiki, Deno KV y SQLite/Turso **no son fuentes de autoridad**. Un recuerdo puede orientar búsquedas, pero debe contrastarse con el código, el issue y CI actuales.
-
-La memoria temporal reutiliza el Deno KV del gateway F9 y no necesita un secret nuevo. GitHub Actions solicita un token OIDC de corta duración con audiencia `siga98-agent-memory`; el gateway valida firma, repositorio y workflow antes de leer o escribir. Solo se aceptan `agent-autopilot.yml` y `agent-ci-repair.yml`.
-
-Cada recuerdo:
-- caduca a los 30 días;
-- tiene un resumen de hasta 1200 caracteres;
-- admite como máximo 8 tags y 12 rutas;
-- se rechaza si parece contener tokens o credenciales;
-- solo se guarda tras una implementación o reparación validada por el preflight;
-- nunca contiene prompts completos, secretos ni datos privados.
-
-La búsqueda revisa como máximo los 50 recuerdos recientes y devuelve hasta 8 por coincidencia de issue, rutas o tags. Si Deno no está disponible, el agente sigue sin memoria temporal; si Normas Platino no pueden cargarse, se detiene.
-
-Además, cada ejecución intenta recuperar el último snapshot del **CI brain**.
-Antes del plan se seleccionan recuerdos históricos por el texto del issue; tras
-reservar, se refinan por rutas. En reparación, el selector usa el log fallido y
-las rutas del CLAIM. Los logs no se guardan completos: el CI brain persiste solo
-fingerprints normalizados y metadatos compactos.
-
-La URL de memoria y del control-plane se deriva de la variable ya existente `SIGA98_FEEDBACK_FALLBACK_URL`, sustituyendo `/api/report` por `/api/agent-memory/*` o `/api/agent-pool/*`. Ambos usan OIDC de corta duración y no requieren otra credencial en GitHub.
-
-## Flujo de seguridad y coordinación
-
-1. `agent-decompose.yml` (nivel 2) inspecciona el issue y produce un corte de exactamente un fichero o varias subtareas de un fichero con dependencias explícitas.
-2. El nivel 2 publica un `AGENT_PLAN` máquina sellado; si solo queda un gate humano, no encola implementación.
-3. El worker reusable adquiere un lease atómico del issue en Deno KV; si otro run lo posee, termina sin tocar código.
-4. Si falta un plan delegado válido, el worker devuelve el issue a `agent:decompose` y termina sin invocar Qwen/Gemini como implementer.
-5. El workflow valida el plan, publica el `CLAIM` en #1713 y rechaza solapes.
-6. Compila TaskPacket + prompt mínimo y crea la rama `agent/<proveedor>-<issue>-<run>`.
-7. El modelo final recibe una tarea ya concreta: solo el fichero asignado y, si es imprescindible, búsquedas puntuales de símbolos; no vuelve a planificar.
-8. El workflow restaura cualquier modificación fuera del `CLAIM`, normaliza ResultPacket y pasa diff/evidencia al reviewer.
-9. Ejecuta preflight proporcional.
-10. El workflow hace commit/push y abre un PR **draft** con `Refs #N`, lanza `CI` y libera el lease al terminar el job. Nunca hay auto-merge.
-
-La API key solo se inyecta en la Action oficial del proveedor correspondiente. Los pasos Git/GitHub usan el `GITHUB_TOKEN` efímero después de que el modelo haya terminado.
-
-## Reparación automática de CI
-
-`Agent CI repair` escucha el resultado del workflow `CI` para ramas generadas por el autopilot.
-
-Si CI falla:
-
-1. recupera el `CLAIM` activo de #1713;
-2. descarga los logs fallidos;
-3. entrega logs + rutas reservadas al mismo proveedor;
-4. vuelve a bloquear cambios fuera del `CLAIM`;
-5. ejecuta preflight, hace commit y relanza `CI`.
-
-Hay un máximo de **2 commits de reparación automática** por rama. Después se aplica `agent:needs-human`.
-
-Cuando CI pasa, se registra `PR_READY` en #1713 con el SHA y el PR permanece draft para revisión humana.
-
-## Variables opcionales
-
-No son necesarias para empezar:
-
-- `QWEN_BASE_URL`: sustituye el endpoint detectado automáticamente; por ejemplo, el endpoint OpenAI-compatible de FreeInference.
-- `QWEN_MODEL`: sustituye `qwen3-coder-plus`; debe ser un ID de modelo válido en el backend elegido.
-- `QWEN_CLI_VERSION`: fija una versión concreta del CLI.
-- `QWEN_FALLBACK_1_BASE_URL` … `QWEN_FALLBACK_4_BASE_URL`: endpoints OpenAI-compatible de reserva.
-- `QWEN_FALLBACK_1_MODEL` … `QWEN_FALLBACK_4_MODEL`: modelos usados por cada endpoint de reserva.
-- `GEMINI_MODEL`: fija un modelo Gemini.
-- `GEMINI_CLI_VERSION`: fija una versión concreta del CLI.
-
-## Fast-path de CI para infraestructura de agentes
-
-El check requerido sigue llamándose `CI / godot`, pero `scripts/ci_scope.py` clasifica el diff antes de descargar LFS, RGBDS o Godot. Solo usa fast-path cuando **todas** las rutas pertenecen a workflows/scripts/docs de agentes o al gateway Deno. En ese caso ejecuta la suite Python completa y deja la validación TypeScript al workflow específico de Deno.
-
-Cualquier ruta de juego, GBC, backend, script genérico o el propio `ci.yml` fuerza el recorrido completo. Un diff vacío también fuerza full. Así se conservan las reglas de branch protection mientras las PRs puramente operativas dejan de ocupar runners con ROMs y arranques headless innecesarios.
-
-## Límites deliberados
-
-- nunca merge automático;
-- la cola automática usa el pool de hasta seis workers, uno por slot y nunca dos simultáneos sobre el mismo issue; el autopilot manual conserva una ejecución concreta por invocación;
-- máximo dos replans automáticos cuando un intento sale de las rutas del CLAIM;
-- máximo 12 rutas por corte;
-- máximo dos reparaciones automáticas de CI;
-- no se automatizan validaciones humanas visuales, mando físico ni decisiones narrativas;
-- PRs externos/forks no activan el seguimiento privilegiado;
-- si no existe un corte seguro y concreto, se usa `agent:needs-human`.
+La guía normativa general sigue en [AGENTS.md](../AGENTS.md) y [CONTRIBUTING.md](../CONTRIBUTING.md).
