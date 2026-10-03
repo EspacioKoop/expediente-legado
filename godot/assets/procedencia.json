@@ -2355,6 +2355,54 @@
       "licencia": "CC0-1.0",
       "fuente": "tools/sfx_chip/generar.py",
       "sha256": "f738a8c8c04dc822f5855fb3812156027fb66f802139f2a3b34231577db58bbb"
+    },
+    {
+      "ruta": "audio/chip/teclado_tecla_01.ogg",
+      "titulo": "Foley chip · teclado tecla 01",
+      "autor": "SIGA-98 · síntesis propia",
+      "licencia": "CC0-1.0",
+      "fuente": "tools/sfx_chip/generar.py",
+      "sha256": "e5926668962c2a27197a82c5a719c1f886a991ead9179aeead096e6b341ea7d0"
+    },
+    {
+      "ruta": "audio/chip/teclado_tecla_02.ogg",
+      "titulo": "Foley chip · teclado tecla 02",
+      "autor": "SIGA-98 · síntesis propia",
+      "licencia": "CC0-1.0",
+      "fuente": "tools/sfx_chip/generar.py",
+      "sha256": "5944f66d978843e4f25d1a32e5b5cb245e87192080dcd965c61d2e73a19a71d0"
+    },
+    {
+      "ruta": "audio/chip/teclado_tecla_03.ogg",
+      "titulo": "Foley chip · teclado tecla 03",
+      "autor": "SIGA-98 · síntesis propia",
+      "licencia": "CC0-1.0",
+      "fuente": "tools/sfx_chip/generar.py",
+      "sha256": "475a4e100414d062735fdde7596a70babd50989ba649f8c5be580d1fc80772cd"
+    },
+    {
+      "ruta": "audio/chip/teclado_rafaga_01.ogg",
+      "titulo": "Foley chip · teclado ráfaga 01",
+      "autor": "SIGA-98 · síntesis propia",
+      "licencia": "CC0-1.0",
+      "fuente": "tools/sfx_chip/generar.py",
+      "sha256": "9708cc678591363981f8f5a40992e5d122b071dde462473101a25e74d5ccd7f5"
+    },
+    {
+      "ruta": "audio/chip/teclado_rafaga_02.ogg",
+      "titulo": "Foley chip · teclado ráfaga 02",
+      "autor": "SIGA-98 · síntesis propia",
+      "licencia": "CC0-1.0",
+      "fuente": "tools/sfx_chip/generar.py",
+      "sha256": "4d780cac2bc6aa8d5124c1c8fda17b4286c38b5832d419cc3e91c1b8d19e77a8"
+    },
+    {
+      "ruta": "audio/chip/teclado_rafaga_03.ogg",
+      "titulo": "Foley chip · teclado ráfaga 03",
+      "autor": "SIGA-98 · síntesis propia",
+      "licencia": "CC0-1.0",
+      "fuente": "tools/sfx_chip/generar.py",
+      "sha256": "66c24663b93482b10dc9d5a61718b16cfdaa0ea6f26c086b5ca4a1f77706ec9c"
     }
   ]
 }
