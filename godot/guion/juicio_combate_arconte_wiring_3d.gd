@@ -34,13 +34,16 @@ static func avanzar(anfitrion, estado: Dictionary, delta: float) -> void:
 
 	# Con una única unidad CONTROLADOR y una sola zona activa, el contrato
 	# actual (1.7 m de ancho en arena de radio 5 m) conserva salida lateral.
-	var paso := ARCONTE.avanzar(
-		estado,
-		delta,
-		rival.position,
-		jugador.position,
-		bool(anfitrion.get("reduccion_movimiento")),
-		true,
+	var paso := (
+		ARCONTE
+		. avanzar(
+			estado,
+			delta,
+			rival.position,
+			jugador.position,
+			bool(anfitrion.get("reduccion_movimiento")),
+			true,
+		)
 	)
 	if paso.is_empty():
 		return
@@ -57,9 +60,12 @@ static func avanzar(anfitrion, estado: Dictionary, delta: float) -> void:
 		and _contiene(paso.get("geometria", {}), jugador.position)
 	):
 		estado["_impacto_zona_emitido"] = true
-		var resultado := REGLAS.resultado_ataque_rival(
-			0.0,
-			float(anfitrion.get("_esquiva")),
+		var resultado := (
+			REGLAS
+			. resultado_ataque_rival(
+				0.0,
+				float(anfitrion.get("_esquiva")),
+			)
 		)
 		anfitrion.call("_aplicar_impacto_rival", resultado)
 
