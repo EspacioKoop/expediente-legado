@@ -496,6 +496,7 @@ jobs:
       provider: ${{ matrix.provider }}
       worker: ${{ matrix.worker }}
       fallback_keys: ${{ needs.prepare.outputs.fallback_keys }}
+      refill_max_parallel: ${{ needs.prepare.outputs.requested_max || '6' }}
     secrets: inherit
 
 
