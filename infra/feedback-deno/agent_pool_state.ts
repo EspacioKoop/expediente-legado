@@ -302,6 +302,31 @@ function leaseKey(issue: number): Deno.KvKey {
   return ["agent_pool", "lease", issue];
 }
 
+function workerLeaseKey(worker: string): Deno.KvKey {
+  return ["agent_pool", "worker_lease", worker];
+}
+
+function leaseVivo(lease: AgentPoolLease | null, now: number): lease is AgentPoolLease {
+  return Boolean(lease && Date.parse(lease.expires_at) > now);
+}
+
+function mismoLease(a: AgentPoolLease, b: AgentPoolLease): boolean {
+  return a.issue === b.issue && a.lease_id === b.lease_id && a.run_id === b.run_id;
+}
+
+async function leasesHistoricos(kv: Deno.Kv, workers: Set<string>): Promise<AgentPoolLease[]> {
+  // Durante la migración los leases anteriores no tienen índice por slot.
+  // Siguen ocupándolo hasta release/TTL; no se permite adelantarlos.
+  const leases: AgentPoolLease[] = [];
+  const now = Date.now();
+  for await (const entry of kv.list<AgentPoolLease>({ prefix: ["agent_pool", "lease"] })) {
+    if (workers.has(entry.value.worker) && leaseVivo(entry.value, now)) {
+      leases.push(entry.value);
+    }
+  }
+  return leases;
+}
+
 function fileLockKey(path: string): Deno.KvKey {
   return ["agent_pool", "file_lock", path];
 }
@@ -390,16 +415,32 @@ async function acquireLease(
   }
 
   const key = leaseKey(issue);
+  const slotKey = workerLeaseKey(worker);
   for (let attempt = 0; attempt < 5; attempt += 1) {
     const current = await kv.get<AgentPoolLease>(key);
-    if (current.value) {
+    const slot = await kv.get<AgentPoolLease>(slotKey);
+    const now = Date.now();
+    if (leaseVivo(current.value, now)) {
+      if (
+        leaseVivo(slot.value, now) && mismoLease(slot.value, current.value) &&
+        current.value.run_id === runId && current.value.worker === worker &&
+        current.value.provider === provider && current.value.branch === branch &&
+        JSON.stringify(current.value.files ?? []) === JSON.stringify(files)
+      ) {
+        return json({ ok: true, lease: publicLease(current.value), deduplicated: true }, 201);
+      }
       return json(
         { ok: false, error: "leased", lease: publicLease(current.value) },
         409,
       );
     }
 
-    const now = Date.now();
+    const ocupado = leaseVivo(slot.value, now)
+      ? slot.value
+      : (await leasesHistoricos(kv, new Set([worker])))[0];
+    if (ocupado) {
+      return json({ ok: false, error: "worker_conflict", lease: publicLease(ocupado) }, 409);
+    }
     const lease: AgentPoolLease = {
       schema: 1,
       issue,
@@ -435,7 +476,7 @@ async function acquireLease(
       }
     }
 
-    const atomic = kv.atomic().check(current);
+    const atomic = kv.atomic().check(current).check(slot);
     for (let index = 0; index < files.length; index += 1) {
       atomic
         .check(lockEntries[index])
@@ -445,6 +486,7 @@ async function acquireLease(
     }
     const committed = await atomic
       .set(key, lease, { expireIn: AGENT_POOL_LEASE_TTL_MS })
+      .set(slotKey, lease, { expireIn: AGENT_POOL_LEASE_TTL_MS })
       .set(eventKey(now), event, { expireIn: AGENT_POOL_EVENT_TTL_MS })
       .commit();
 
@@ -496,6 +538,15 @@ async function transitionLease(
     }
 
     const now = Date.now();
+    const slotKey = workerLeaseKey(lease.worker);
+    const slot = await kv.get<AgentPoolLease>(slotKey);
+    const ocupado = leaseVivo(slot.value, now)
+      ? slot.value
+      : (await leasesHistoricos(kv, new Set([lease.worker])))
+        .find((historico) => !mismoLease(historico, lease));
+    if (ocupado && !mismoLease(ocupado, lease)) {
+      return json({ ok: false, error: "worker_conflict", lease: publicLease(ocupado) }, 409);
+    }
     const previousFiles = lease.files ?? [];
     const nextFiles = Object.hasOwn(input, "files") ? cleanFiles(input.files) : previousFiles;
     const next: AgentPoolLease = {
@@ -528,7 +579,7 @@ async function transitionLease(
     }
 
     const event = newEvent(next, state, reason || "transition", now);
-    const atomic = kv.atomic().check(current);
+    const atomic = kv.atomic().check(current).check(slot);
     for (let index = 0; index < lockPaths.length; index += 1) {
       const path = lockPaths[index];
       const entry = lockEntries[index];
@@ -545,6 +596,7 @@ async function transitionLease(
     }
     const committed = await atomic
       .set(key, next, { expireIn: AGENT_POOL_LEASE_TTL_MS })
+      .set(slotKey, next, { expireIn: AGENT_POOL_LEASE_TTL_MS })
       .set(eventKey(now), event, { expireIn: AGENT_POOL_EVENT_TTL_MS })
       .commit();
     if (committed.ok) {
@@ -588,6 +640,8 @@ async function releaseLease(
     }
 
     const now = Date.now();
+    const slotKey = workerLeaseKey(lease.worker);
+    const slot = await kv.get<AgentPoolLease>(slotKey);
     const files = lease.files ?? [];
     const lockEntries = await Promise.all(
       files.map((path) => kv.get<AgentPoolFileLock>(fileLockKey(path))),
@@ -598,7 +652,10 @@ async function releaseLease(
       reason,
       now,
     );
-    const atomic = kv.atomic().check(current);
+    const atomic = kv.atomic().check(current).check(slot);
+    if (slot.value && mismoLease(slot.value, lease)) {
+      atomic.delete(slotKey);
+    }
     for (let index = 0; index < files.length; index += 1) {
       const entry = lockEntries[index];
       atomic.check(entry);
@@ -648,6 +705,29 @@ async function leaseStatus(
       .filter((lease): lease is AgentPoolLease => Boolean(lease))
       .map(publicLease),
   });
+}
+
+async function workerLeaseStatus(kv: Deno.Kv, raw: unknown): Promise<Response> {
+  if (!raw || typeof raw !== "object") {
+    return json({ ok: false, error: "invalid_request" }, 400);
+  }
+  const input = raw as Record<string, unknown>;
+  if (input.schema !== 1 || !Array.isArray(input.workers)) {
+    return json({ ok: false, error: "invalid_request" }, 400);
+  }
+  const workers = new Set(
+    input.workers.map(cleanWorker).filter(Boolean).slice(0, AGENT_POOL_HEALTH_LIMIT),
+  );
+  const entries = await Promise.all(
+    [...workers].map((worker) => kv.get<AgentPoolLease>(workerLeaseKey(worker))),
+  );
+  const leases = new Map<string, AgentPoolLease>();
+  for (
+    const lease of [...entries.map((entry) => entry.value), ...await leasesHistoricos(kv, workers)]
+  ) {
+    if (leaseVivo(lease, Date.now())) leases.set(lease.lease_id, publicLease(lease));
+  }
+  return json({ ok: true, leases: [...leases.values()] });
 }
 
 function healthKey(worker: string): Deno.KvKey {
@@ -794,6 +874,9 @@ export async function handleAgentPool(
   }
   if (url.pathname === "/api/agent-pool/status") {
     return await leaseStatus(kv, raw);
+  }
+  if (url.pathname === "/api/agent-pool/worker-status") {
+    return await workerLeaseStatus(kv, raw);
   }
   if (url.pathname === "/api/agent-pool/worker-health/status") {
     return await workerHealthStatus(kv, raw);
