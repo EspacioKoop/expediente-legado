@@ -235,6 +235,64 @@ class AgentPoolTest(unittest.TestCase):
 
         self.assertEqual("qwen-fallback-1", tasks[0]["worker"])
 
+    def test_telemetria_insuficiente_no_penaliza_routing(self):
+        worker = mod._worker(
+            {
+                "worker": "qwen-primary",
+                "provider": "qwen",
+                "score": 80,
+                "telemetry_samples": 2,
+                "contract_valid_rate_pct": 0,
+                "handoff_loss_proxy_pct": 100,
+                "rework_rate_pct": 100,
+            }
+        )
+        self.assertEqual(80.0, worker["routing_score"])
+        self.assertEqual(2, worker["telemetry_samples"])
+
+    def test_calidad_handoff_modula_score_tras_tres_muestras(self):
+        workers = [
+            {
+                "worker": "qwen-ruidoso",
+                "provider": "qwen",
+                "score": 80,
+                "telemetry_samples": 3,
+                "contract_valid_rate_pct": 0,
+                "handoff_loss_proxy_pct": 100,
+                "rework_rate_pct": 100,
+            },
+            {
+                "worker": "qwen-estable",
+                "provider": "qwen",
+                "score": 60,
+                "telemetry_samples": 3,
+                "contract_valid_rate_pct": 100,
+                "handoff_loss_proxy_pct": 0,
+                "rework_rate_pct": 0,
+            },
+        ]
+
+        normalizado = mod._worker(workers[0])
+        self.assertEqual(50.0, normalizado["routing_score"])
+        tasks = mod.select_tasks([issue(570, "agent:qwen")], workers)
+        self.assertEqual("qwen-estable", tasks[0]["worker"])
+
+    def test_telemetria_ausente_o_invalida_es_fail_open(self):
+        for samples in ("x", True, -1, None):
+            with self.subTest(samples=samples):
+                worker = mod._worker(
+                    {
+                        "worker": "qwen-primary",
+                        "provider": "qwen",
+                        "score": 72,
+                        "telemetry_samples": samples,
+                        "contract_valid_rate_pct": "mal",
+                        "handoff_loss_proxy_pct": None,
+                    }
+                )
+                self.assertEqual(72.0, worker["routing_score"])
+                self.assertEqual(0, worker["telemetry_samples"])
+
     def test_tier_superior_solo_recibe_trabajo_si_el_anterior_no_tiene_hueco(self):
         # #1685: un backend flojo (tier 2) queda de último recurso aunque su
         # score histórico sea mejor que el de los preferentes.
