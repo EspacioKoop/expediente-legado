@@ -1,4 +1,5 @@
 import importlib.util
+import itertools
 import json
 import subprocess
 import tempfile
@@ -44,6 +45,133 @@ def issue(
 
 
 class AgentPoolTest(unittest.TestCase):
+    def test_reasigna_tarea_corta_para_no_dejar_slot_compatible_ocioso(self):
+        workers = [
+            {"worker": "amplio", "provider": "qwen", "score": 90},
+            {"worker": "corto", "provider": "qwen", "score": 40, "max_task_bytes": 100},
+        ]
+        for label in ("agent:auto", "agent:qwen"):
+            with self.subTest(label=label):
+                tasks = mod.select_tasks([
+                    issue(1, label, planned_bytes=50, planned_files=["scripts/a.py"]),
+                    issue(2, label, planned_bytes=200, planned_files=["scripts/b.py"]),
+                ], workers)
+                self.assertEqual([(1, "corto"), (2, "amplio")],
+                                 [(t["issue"], t["worker"]) for t in tasks])
+
+    def test_reasignacion_encadenada_llena_seis_slots(self):
+        workers = [{"worker": f"w{i}", "provider": "qwen", "score": 100-i,
+                    "max_task_bytes": (6-i)*100} for i in range(6)]
+        issues = [issue(i, "agent:qwen", planned_bytes=i*100,
+                        planned_files=[f"scripts/{i}.py"]) for i in range(1, 7)]
+        tasks = mod.select_tasks(issues, workers)
+        self.assertEqual(list(range(1, 7)), [t["issue"] for t in tasks])
+        self.assertEqual([f"w{i}" for i in range(5, -1, -1)], [t["worker"] for t in tasks])
+
+    def test_reasignacion_puede_mover_preferencia_blanda_entre_proveedores(self):
+        workers = [{"worker": "q", "provider": "qwen", "score": 90},
+                   {"worker": "g", "provider": "gemini", "score": 40}]
+        tasks = mod.select_tasks([
+            issue(1, "agent:auto", preferred="qwen"),
+            issue(2, "agent:auto", comments=[
+                "AGENT_POOL_WORKER_FAILURE worker=g provider=gemini stage=implement"
+            ]),
+        ], workers)
+        self.assertEqual([(1, "gemini"), (2, "qwen")],
+                         [(t["issue"], t["provider"]) for t in tasks])
+
+    def test_todas_las_compatibilidades_de_tres_tareas_alcanzan_capacidad_posible(self):
+        # Oráculo independiente: enumera asignaciones en lugar de repetir la
+        # búsqueda de cadenas. Incluye grafos sin hueco y con ciclos.
+        workers = [{"worker": f"w{i}", "provider": "qwen"} for i in range(3)]
+        opciones = list(itertools.product((-1, 0, 1, 2), repeat=3))
+        for mascara in range(1 << 9):
+            compatibles = [{j for j in range(3) if mascara & (1 << (i*3+j))}
+                          for i in range(3)]
+            issues = [issue(i+1, "agent:qwen") for i in range(3)]
+            for i, candidato in enumerate(issues):
+                candidato["avoidWorkers"] = [f"w{j}" for j in range(3)
+                                               if j not in compatibles[i]]
+            maximo = max(
+                sum(w >= 0 for w in asignacion)
+                for asignacion in opciones
+                if len({w for w in asignacion if w >= 0}) == sum(w >= 0 for w in asignacion)
+                and all(w < 0 or w in compatibles[i] for i, w in enumerate(asignacion))
+            )
+            tasks = mod.select_tasks(issues, workers)
+            with self.subTest(mascara=mascara):
+                self.assertEqual(maximo, len(tasks))
+                self.assertEqual(len(tasks), len({t["worker"] for t in tasks}))
+                self.assertEqual(len(tasks), len({t["issue"] for t in tasks}))
+                for tarea in tasks:
+                    self.assertIn(int(tarea["worker"][1:]), compatibles[tarea["issue"]-1])
+
+    def test_reasignacion_respeta_evitar_worker_y_salud(self):
+        workers = [{"worker": w, "provider": "qwen", "score": score,
+                    "healthy": w != "caido"}
+                   for w, score in (("amplio", 90), ("reserva", 40), ("caido", 100))]
+        tasks = mod.select_tasks([
+            issue(1, "agent:qwen", planned_files=["scripts/a.py"]),
+            issue(2, "agent:qwen", planned_files=["scripts/b.py"], comments=[
+                "AGENT_POOL_WORKER_FAILURE worker=reserva provider=qwen stage=implement"
+            ]),
+        ], workers)
+        self.assertEqual(["reserva", "amplio"], [t["worker"] for t in tasks])
+
+    def test_reasignacion_fallida_conserva_provider_y_asignaciones_previas(self):
+        workers = [{"worker": "q", "provider": "qwen", "score": 90},
+                   {"worker": "g", "provider": "gemini", "score": 40}]
+        tasks = mod.select_tasks([
+            issue(1, "agent:qwen", planned_files=["scripts/a.py"]),
+            issue(2, "agent:auto", planned_files=["scripts/b.py"], comments=[
+                "AGENT_POOL_WORKER_FAILURE worker=g provider=gemini stage=implement"
+            ]),
+            issue(3, "agent:auto", planned_files=["scripts/c.py"]),
+        ], workers)
+        self.assertEqual([(1, "q"), (3, "g")], [(t["issue"], t["worker"]) for t in tasks])
+
+    def test_reasignacion_no_habilita_rutas_solapadas(self):
+        workers = [{"worker": "amplio", "provider": "qwen", "score": 90},
+                   {"worker": "corto", "provider": "qwen", "max_task_bytes": 100}]
+        tasks = mod.select_tasks([
+            issue(1, "agent:qwen", planned_bytes=50, planned_files=["scripts/a.py"]),
+            issue(2, "agent:qwen", planned_bytes=200, planned_files=["scripts/a.py"]),
+            issue(3, "agent:qwen", planned_bytes=200, planned_files=["scripts/b.py"]),
+        ], workers)
+        self.assertEqual([(1, "corto"), (3, "amplio")],
+                         [(t["issue"], t["worker"]) for t in tasks])
+
+    def test_capacidad_libre_conserva_score_tier_y_preferencia(self):
+        workers = [{"worker": "mejor", "provider": "qwen", "score": 90},
+                   {"worker": "corto", "provider": "qwen", "score": 40,
+                    "tier": 2, "max_task_bytes": 100}]
+        self.assertEqual("mejor", mod.select_tasks([issue(1, "agent:qwen")], workers)[0]["worker"])
+        self.assertEqual(1, len(mod.select_tasks([
+            issue(1, "agent:qwen", planned_bytes=50),
+            issue(2, "agent:qwen", planned_bytes=200),
+        ], workers, max_parallel=1)))
+
+    def test_cli_publica_dos_workers_compatibles_en_vez_de_uno(self):
+        with tempfile.TemporaryDirectory() as temporal:
+            raiz = Path(temporal)
+            issues = raiz / "issues.json"
+            workers = raiz / "workers.json"
+            issues.write_text(json.dumps([
+                issue(1, "agent:auto", planned_bytes=50),
+                issue(2, "agent:auto", planned_bytes=200),
+            ]))
+            workers.write_text(json.dumps([
+                {"worker": "amplio", "provider": "qwen", "score": 90},
+                {"worker": "corto", "provider": "qwen", "max_task_bytes": 100},
+            ]))
+            result = subprocess.run([
+                sys.executable, str(MODULE_PATH), "--issues", str(issues),
+                "--workers", str(workers),
+            ], capture_output=True, text=True, timeout=10)
+            self.assertEqual(0, result.returncode, result.stderr)
+            tasks = json.loads(result.stdout)["include"]
+            self.assertEqual(["corto", "amplio"], [t["worker"] for t in tasks])
+
     def setUp(self):
         self.workers = [
             {"worker": "qwen-primary", "provider": "qwen"},

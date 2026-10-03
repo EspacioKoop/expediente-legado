@@ -302,6 +302,45 @@ def _best_index(
     return max(candidates, key=key)
 
 
+def _asignar_slot(
+    posicion: int,
+    candidatos: list[tuple[dict[str, Any], str | None]],
+    workers: list[dict[str, Any]],
+    asignados: dict[int, int],
+    visitados: set[int],
+) -> bool:
+    """Busca un slot libre o una cadena de reasignaciones previa al dispatch."""
+    issue, obligatorio = candidatos[posicion]
+    compatibles = [
+        i for i in _usable_indices(workers, issue)
+        if i not in visitados and (obligatorio is None or workers[i]["provider"] == obligatorio)
+    ]
+    preferido = obligatorio or _preferred_provider(issue)
+
+    def mejor(indices: list[int]) -> int | None:
+        elegido = _best_index(workers, indices, provider=preferido)
+        return elegido if elegido is not None else _best_index(workers, indices)
+
+    # Con capacidad libre, conserva exactamente el routing histórico. Reubicar
+    # solo cuando falta un slot evita gastar el único executor de una tarea
+    # grande en otra corta mientras un backend compatible queda ocioso.
+    libre = mejor([i for i in compatibles if i not in asignados])
+    if libre is not None:
+        asignados[libre] = posicion
+        return True
+
+    while compatibles:
+        ocupado = mejor(compatibles)
+        assert ocupado is not None
+        compatibles.remove(ocupado)
+        visitados.add(ocupado)
+        if _asignar_slot(asignados[ocupado], candidatos, workers, asignados, visitados):
+            asignados[ocupado] = posicion
+            return True
+    # Ninguna asignación cambia hasta encontrar un extremo libre de la cadena.
+    return False
+
+
 def select_tasks(
     issues: list[dict[str, Any]],
     workers: list[dict[str, Any]],
@@ -311,10 +350,11 @@ def select_tasks(
     limit = max(0, min(int(max_parallel), MAX_ALLOWED_PARALLEL))
     if limit == 0:
         return []
-    free_workers = [
+    available_workers = [
         normalized for item in workers if (normalized := _worker(item))
     ]
-    tasks: list[dict[str, Any]] = []
+    asignados: dict[int, int] = {}
+    seleccionados: list[int] = []
     selected_paths: set[str] = set()
     eligible: list[tuple[dict[str, Any], str | None]] = []
     for issue in sorted(issues, key=_sort_key):
@@ -324,72 +364,30 @@ def select_tasks(
 
     # Reserva primero la capacidad obligatoria. Así una tarea flexible más antigua
     # no puede consumir el único slot de un proveedor exigido por otra tarea.
-    for issue, requested_provider in eligible:
-        if requested_provider is None:
-            continue
-        if len(tasks) >= limit or not free_workers:
+    eligible.sort(key=lambda candidato: candidato[1] is None)
+    for posicion, (issue, _) in enumerate(eligible):
+        if len(asignados) >= limit or len(asignados) >= len(available_workers):
             break
         if _paths_overlap(issue, selected_paths):
             continue
 
-        usable = _usable_indices(free_workers, issue)
-        choice_index = _best_index(
-            free_workers,
-            usable,
-            provider=requested_provider,
-        )
-        if choice_index is None:
+        if not _asignar_slot(posicion, eligible, available_workers, asignados, set()):
             continue
+        seleccionados.append(posicion)
+        _remember_paths(issue, selected_paths)
 
-        worker = free_workers.pop(choice_index)
+    por_tarea = {posicion: available_workers[i] for i, posicion in asignados.items()}
+    tasks: list[dict[str, Any]] = []
+    for posicion in seleccionados:
+        worker = por_tarea[posicion]
         tasks.append(
             {
-                "issue": int(issue["number"]),
+                "issue": int(eligible[posicion][0]["number"]),
                 "provider": worker["provider"],
                 "backend": worker["backend"],
                 "worker": worker["worker"],
             }
         )
-        _remember_paths(issue, selected_paths)
-
-    # Las tareas flexibles consumen únicamente la capacidad que queda después de
-    # reservar los providers explícitos. Kev sigue siendo una preferencia blanda.
-    for issue, requested_provider in eligible:
-        if requested_provider is not None:
-            continue
-        if len(tasks) >= limit or not free_workers:
-            break
-        if _paths_overlap(issue, selected_paths):
-            continue
-
-        usable = _usable_indices(free_workers, issue)
-        if not usable:
-            continue
-
-        preferred_provider = _preferred_provider(issue)
-        if preferred_provider is not None:
-            choice_index = _best_index(
-                free_workers,
-                usable,
-                provider=preferred_provider,
-            )
-            if choice_index is None:
-                choice_index = _best_index(free_workers, usable)
-        else:
-            choice_index = _best_index(free_workers, usable)
-        if choice_index is None:
-            continue
-
-        worker = free_workers.pop(choice_index)
-        tasks.append(
-            {
-                "issue": int(issue["number"]),
-                "provider": worker["provider"],
-                "backend": worker["backend"],
-                "worker": worker["worker"],
-            }
-        )
-        _remember_paths(issue, selected_paths)
 
     return tasks
 
