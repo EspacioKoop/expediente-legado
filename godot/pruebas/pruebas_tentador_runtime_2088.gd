@@ -41,7 +41,9 @@ func _probar_patrones_permitidos() -> void:
 		var paso := RUNTIME.avanzar(RUNTIME.nuevo(2254), 0.0, patron)
 		var unidad: Dictionary = paso["estado"]["unidad"]
 		_comprobar(unidad["estado"] == ARQUETIPOS.TELEGRAFIAR_ECO, "permitido entra en telegraph")
-		_comprobar(String(paso["telegraph"]) == String(patron), "telegraph publica patrón observado")
+		_comprobar(
+			String(paso["telegraph"]) == String(patron), "telegraph publica patrón observado"
+		)
 		_comprobar(String(paso["patron_eco"]) == String(patron), "congela patrón permitido")
 		_comprobar(not bool(paso["ventana_respuesta"]), "telegraph no es ventana vulnerable")
 
@@ -49,39 +51,52 @@ func _probar_patrones_permitidos() -> void:
 func _probar_patron_congelado_y_ciclo() -> void:
 	var paso := RUNTIME.avanzar(RUNTIME.nuevo(2254), 0.0, "linea")
 	paso = RUNTIME.avanzar(paso["estado"], 0.10, "zona")
-	_comprobar(String(paso["patron_eco"]) == "linea", "cambiar observado no altera eco en telegraph")
+	_comprobar(
+		String(paso["patron_eco"]) == "linea", "cambiar observado no altera eco en telegraph"
+	)
 	_comprobar(String(paso["telegraph"]) == "linea", "telegraph conserva patrón congelado")
 	_comprobar(
 		paso["estado"]["unidad"]["estado"] == ARQUETIPOS.TELEGRAFIAR_ECO,
 		"permanece telegrafiando antes de agotar tiempo",
 	)
 
-	paso = RUNTIME.avanzar(
-		paso["estado"],
-		ARQUETIPOS.MIMETICO_TELEGRAFO,
-		"ataque_corto",
+	paso = (
+		RUNTIME
+		. avanzar(
+			paso["estado"],
+			ARQUETIPOS.MIMETICO_TELEGRAFO,
+			"ataque_corto",
+		)
 	)
 	_comprobar(paso["estado"]["unidad"]["estado"] == ARQUETIPOS.REPETIR, "entra en REPETIR")
 	_comprobar(String(paso["patron_eco"]) == "linea", "repetición conserva eco")
 	_comprobar(String(paso["telegraph"]) == "linea", "repetición expone mismo patrón")
 	_comprobar(not bool(paso["ventana_respuesta"]), "repetición no abre ventana")
 
-	paso = RUNTIME.avanzar(
-		paso["estado"],
-		ARQUETIPOS.MIMETICO_REPETICION,
-		"carga_lineal",
+	paso = (
+		RUNTIME
+		. avanzar(
+			paso["estado"],
+			ARQUETIPOS.MIMETICO_REPETICION,
+			"carga_lineal",
+		)
 	)
 	_comprobar(paso["estado"]["unidad"]["estado"] == ARQUETIPOS.RECUPERAR, "entra en RECUPERAR")
 	_comprobar(String(paso["telegraph"]) == "vulnerable", "recuperación comunica vulnerabilidad")
 	_comprobar(bool(paso["ventana_respuesta"]), "recuperación abre ventana de respuesta")
 	_comprobar(String(paso["patron_eco"]) == "linea", "recuperación aún conserva patrón")
 
-	paso = RUNTIME.avanzar(
-		paso["estado"],
-		ARQUETIPOS.MIMETICO_RECUPERACION - 0.01,
-		"zona",
+	paso = (
+		RUNTIME
+		. avanzar(
+			paso["estado"],
+			ARQUETIPOS.MIMETICO_RECUPERACION - 0.01,
+			"zona",
+		)
 	)
-	_comprobar(paso["estado"]["unidad"]["estado"] == ARQUETIPOS.RECUPERAR, "no sale antes de tiempo")
+	_comprobar(
+		paso["estado"]["unidad"]["estado"] == ARQUETIPOS.RECUPERAR, "no sale antes de tiempo"
+	)
 	_comprobar(bool(paso["ventana_respuesta"]), "ventana dura toda la recuperación")
 	_comprobar(String(paso["patron_eco"]) == "linea", "observado nuevo no altera recuperación")
 
