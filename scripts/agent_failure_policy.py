@@ -46,7 +46,10 @@ def read_text_files(paths: list[Path], *, max_bytes: int = 65536) -> str:
         if remaining <= 0:
             break
         try:
-            data = path.read_bytes()[:remaining]
+            # El límite debe aplicarse al disco, antes de asignar memoria para
+            # un log de implementación o preflight potencialmente grande.
+            with path.open("rb") as log:
+                data = log.read(remaining)
         except OSError:
             continue
         remaining -= len(data)
