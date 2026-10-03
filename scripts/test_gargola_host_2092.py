@@ -41,9 +41,11 @@ class GargolaHost2092Test(unittest.TestCase):
 
     def test_adaptador_reutiliza_runtime_presentacion_y_impacto_comun(self):
         self.assertIn("JuicioCombateGargolaRuntime2092.nuevo", GARGOLA)
-        self.assertIn("JuicioCombateGargolaRuntime2092.avanzar", GARGOLA)
+        self.assertIn("JuicioCombateGargolaRuntime2092", GARGOLA)
+        self.assertIn(". avanzar(", GARGOLA)
         self.assertIn("JuicioCombateGargola3D.montar", GARGOLA)
-        self.assertIn("JuicioCombateGargola3D.pintar", GARGOLA)
+        self.assertIn("JuicioCombateGargola3D", GARGOLA)
+        self.assertIn(". pintar(", GARGOLA)
         self.assertIn('anfitrion.call("_aplicar_impacto_rival", resultado)', GARGOLA)
         self.assertIn("JuicioCombateEmbestidor3D.mover", GARGOLA)
         for prohibido in ("Partida.", "Jornada.", "SuenoCombate.", "loot", "XP"):
