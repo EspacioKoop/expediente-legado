@@ -449,6 +449,19 @@ func _crear_entrada_programa(id: String, titulo: String) -> void:
 	_preparar_boton(boton)
 	boton.pressed.connect(_abrir_desde_menu.bind(id))
 	_programas_menu.add_child(boton)
+	_ajustar_altura_menu.call_deferred()
+
+
+## El menú nació con una altura fija para pocas aplicaciones. Al crecer el
+## catálogo, el mínimo de sus hijos puede superar ese rectángulo y dibujarse
+## por encima de la barra de tareas. Recalcular tras registrar cada app mantiene
+## el panel por encima de la barra y conserva 250 px como altura mínima histórica.
+func _ajustar_altura_menu() -> void:
+	if not is_instance_valid(_menu):
+		return
+	var alto_contenido := _menu.get_combined_minimum_size().y
+	var alto := maxf(_esc(250.0), alto_contenido)
+	_menu.offset_top = -(_alto_barra + alto)
 
 
 func _al_input_lanzador(evento: InputEvent, id: String) -> void:

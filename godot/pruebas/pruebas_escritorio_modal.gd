@@ -16,6 +16,7 @@ func _probar() -> void:
 	await _probar_ciclo_de_ventana()
 	await _probar_modal_bloquea_y_atrapa_foco()
 	await _probar_foco_visible_en_piel_real()
+	await _probar_menu_crece_con_catalogo()
 	await _probar_escala_ui()
 	await _probar_capacidades_declaradas_de_app_sintetica()
 	await _probar_redimensionado_con_agarre()
@@ -165,6 +166,41 @@ func _probar_foco_visible_en_piel_real() -> void:
 	)
 
 	escritorio.queue_free()
+
+
+## Siete programas (#781) superan la altura histórica del menú de 250 px.
+## El panel debe crecer hacia arriba: el contenido no puede desbordar sobre la
+## barra de tareas ni depender del clipping accidental de sus hijos.
+func _probar_menu_crece_con_catalogo() -> void:
+	var tamano_anterior := root.size
+	root.size = Vector2i(1920, 1080)
+	await process_frame
+
+	var escritorio := await _crear_escritorio_visual()
+	for indice in 7:
+		escritorio.registrar_aplicacion(
+			"programa-%d" % indice, "Programa %d" % indice, func() -> Control: return Label.new()
+		)
+	await process_frame
+	await process_frame
+	escritorio._alternar_menu()
+	await process_frame
+
+	_comprobar(
+		escritorio._menu.get_combined_minimum_size().y <= escritorio._menu.size.y + 0.5,
+		"#781: el panel contiene las siete entradas sin overflow vertical",
+	)
+	var rect_menu := escritorio._menu.get_global_rect()
+	var rect_barra := escritorio._barra.get_global_rect()
+	_comprobar(
+		rect_menu.position.y + rect_menu.size.y <= rect_barra.position.y + 0.5,
+		"#781: el menú termina por encima de la barra de tareas",
+	)
+
+	escritorio.queue_free()
+	await process_frame
+	root.size = tamano_anterior
+	await process_frame
 
 
 func _probar_escala_ui() -> void:
