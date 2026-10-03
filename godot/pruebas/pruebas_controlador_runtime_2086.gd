@@ -26,14 +26,17 @@ func _probar_telegraph_y_geometria_congelada() -> void:
 	get_root().add_child(raiz)
 	var zonas := CONTROLADOR.montar_zonas(raiz)
 	var unidad := ARQUETIPOS.nuevo(ARQUETIPOS.CONTROLADOR, 2086)
-	var paso := CONTROLADOR.avanzar(
-		unidad,
-		0.0,
-		Vector3.ZERO,
-		Vector3(0.0, 0.0, 5.0),
-		zonas,
-		0,
-		true,
+	var paso := (
+		CONTROLADOR
+		. avanzar(
+			unidad,
+			0.0,
+			Vector3.ZERO,
+			Vector3(0.0, 0.0, 5.0),
+			zonas,
+			0,
+			true,
+		)
 	)
 	unidad = paso["unidad"]
 	_comprobar(String(unidad["estado"]), ARQUETIPOS.MARCAR_ZONA, "entra en MARCAR_ZONA")
@@ -42,14 +45,17 @@ func _probar_telegraph_y_geometria_congelada() -> void:
 	_comprobar(_visibles(zonas), 1, "muestra una zona durante el aviso")
 	var geometria: Dictionary = paso["geometria"].duplicate(true)
 
-	paso = CONTROLADOR.avanzar(
-		unidad,
-		0.1,
-		Vector3(3.0, 0.0, 2.0),
-		Vector3(-5.0, 0.0, -4.0),
-		zonas,
-		0,
-		true,
+	paso = (
+		CONTROLADOR
+		. avanzar(
+			unidad,
+			0.1,
+			Vector3(3.0, 0.0, 2.0),
+			Vector3(-5.0, 0.0, -4.0),
+			zonas,
+			0,
+			true,
+		)
 	)
 	unidad = paso["unidad"]
 	_comprobar(paso["geometria"], geometria, "mover contexto no corrige la geometria marcada")
@@ -65,9 +71,7 @@ func _probar_salida_valida_y_limite() -> void:
 		unidad, 0.0, Vector3.ZERO, Vector3(0.0, 0.0, 5.0), zonas, 0, true
 	)
 	unidad = paso["unidad"]
-	paso = CONTROLADOR.avanzar(
-		unidad, 1.0, Vector3.ZERO, Vector3(0.0, 0.0, 5.0), zonas, 0, false
-	)
+	paso = CONTROLADOR.avanzar(unidad, 1.0, Vector3.ZERO, Vector3(0.0, 0.0, 5.0), zonas, 0, false)
 	unidad = paso["unidad"]
 	_comprobar(
 		String(unidad["estado"]),
@@ -76,24 +80,27 @@ func _probar_salida_valida_y_limite() -> void:
 	)
 	_comprobar(bool(paso["zona_activa"]), false, "sin salida valida no declara autoridad")
 
-	paso = CONTROLADOR.avanzar(
-		unidad, 0.0, Vector3.ZERO, Vector3(0.0, 0.0, 5.0), zonas, 0, true
+	paso = CONTROLADOR.avanzar(unidad, 0.0, Vector3.ZERO, Vector3(0.0, 0.0, 5.0), zonas, 0, true)
+	_comprobar(
+		String(paso["unidad"]["estado"]), ARQUETIPOS.ACTIVAR_ZONA, "activa al recuperar salida"
 	)
-	_comprobar(String(paso["unidad"]["estado"]), ARQUETIPOS.ACTIVAR_ZONA, "activa al recuperar salida")
 	_comprobar(bool(paso["inicio_zona"]), true, "expone inicio de zona")
 
 	var saturada := ARQUETIPOS.nuevo(ARQUETIPOS.CONTROLADOR, 2086)
 	saturada["estado"] = ARQUETIPOS.MARCAR_ZONA
 	saturada["temporizador"] = 0.0
 	saturada["zonas_marcadas"] = ARQUETIPOS.CONTROLADOR_MAX_ZONAS
-	var bloqueada := CONTROLADOR.avanzar(
-		saturada,
-		0.0,
-		Vector3.ZERO,
-		Vector3(0.0, 0.0, 5.0),
-		zonas,
-		ARQUETIPOS.CONTROLADOR_MAX_ZONAS,
-		true,
+	var bloqueada := (
+		CONTROLADOR
+		. avanzar(
+			saturada,
+			0.0,
+			Vector3.ZERO,
+			Vector3(0.0, 0.0, 5.0),
+			zonas,
+			ARQUETIPOS.CONTROLADOR_MAX_ZONAS,
+			true,
+		)
 	)
 	_comprobar(
 		String(bloqueada["unidad"]["estado"]),
@@ -113,14 +120,10 @@ func _probar_recuperacion() -> void:
 		unidad, 0.0, Vector3.ZERO, Vector3(0.0, 0.0, 5.0), zonas, 0, true
 	)
 	unidad = paso["unidad"]
-	paso = CONTROLADOR.avanzar(
-		unidad, 1.0, Vector3.ZERO, Vector3(0.0, 0.0, 5.0), zonas, 0, true
-	)
+	paso = CONTROLADOR.avanzar(unidad, 1.0, Vector3.ZERO, Vector3(0.0, 0.0, 5.0), zonas, 0, true)
 	unidad = paso["unidad"]
 	_comprobar(String(unidad["estado"]), ARQUETIPOS.ACTIVAR_ZONA, "entra en zona activa")
-	paso = CONTROLADOR.avanzar(
-		unidad, 1.0, Vector3.ZERO, Vector3(0.0, 0.0, 5.0), zonas, 1, true
-	)
+	paso = CONTROLADOR.avanzar(unidad, 1.0, Vector3.ZERO, Vector3(0.0, 0.0, 5.0), zonas, 1, true)
 	_comprobar(String(paso["unidad"]["estado"]), ARQUETIPOS.RECUPERAR, "termina en recuperacion")
 	_comprobar(bool(paso["abrir_ventana"]), true, "recuperacion abre ventana de respuesta")
 	_comprobar(_visibles(zonas), 0, "recuperar apaga la autoridad espacial")
