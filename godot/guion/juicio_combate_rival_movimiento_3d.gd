@@ -22,14 +22,17 @@ static func avanzar(anfitrion, delta: float) -> void:
 
 	var enjambre: Dictionary = anfitrion.get("_enjambre")
 	if not enjambre.is_empty():
-		ENJAMBRE_HOST_3D.mover(
-			enjambre,
-			jugador.position,
-			float(anfitrion.get("_radio_arena")),
-			float(anfitrion.get("_velocidad_rival")),
-			float(anfitrion.get("_enredo")),
-			anfitrion.get("_ritual"),
-			delta,
+		(
+			ENJAMBRE_HOST_3D
+			. mover(
+				enjambre,
+				jugador.position,
+				float(anfitrion.get("_radio_arena")),
+				float(anfitrion.get("_velocidad_rival")),
+				float(anfitrion.get("_enredo")),
+				anfitrion.get("_ritual"),
+				delta,
+			)
 		)
 		rival.position = ENJAMBRE_HOST_3D.centro(enjambre, rival.position)
 		return
@@ -40,13 +43,16 @@ static func avanzar(anfitrion, delta: float) -> void:
 
 	var arquetipo: Dictionary = anfitrion.get("_arquetipo")
 	if String(arquetipo.get("tipo", "")) == ARQUETIPOS.HOSTIGADOR:
-		var host := HOSTIGADOR_3D.mover(
-			jugador.position,
-			rival.position,
-			rival.rotation.y,
-			arquetipo,
-			float(anfitrion.get("_radio_arena")),
-			delta,
+		var host := (
+			HOSTIGADOR_3D
+			. mover(
+				jugador.position,
+				rival.position,
+				rival.rotation.y,
+				arquetipo,
+				float(anfitrion.get("_radio_arena")),
+				delta,
+			)
 		)
 		rival.position = host["posicion"]
 		rival.rotation.y = float(host["rotacion_y"])
@@ -73,9 +79,12 @@ static func avanzar(anfitrion, delta: float) -> void:
 	JuicioCombateEscenografia3D.andar(figura_rival, bool(paso["mover"]))
 	if bool(paso["mover"]):
 		var desplazamiento: Vector3 = paso["desplazamiento"]
-		rival.position = REGLAS.limitar_a_arena(
-			rival.position + desplazamiento,
-			float(anfitrion.get("_radio_arena")),
+		rival.position = (
+			REGLAS
+			. limitar_a_arena(
+				rival.position + desplazamiento,
+				float(anfitrion.get("_radio_arena")),
+			)
 		)
 		if arquetipo.is_empty():
 			rival.rotation.y = float(paso["rotacion_y"])
