@@ -142,7 +142,10 @@ def _planned_files(issue: dict[str, Any]) -> set[str]:
             continue
         path = item.strip().replace("\\", "/")
         if path and not path.startswith("/") and ".." not in path.split("/"):
-            files.add(path)
+            # Los alias relativos no deben permitir dos CLAIMs de la misma ruta.
+            normalized = "/".join(part for part in path.split("/") if part not in {"", "."})
+            if normalized:
+                files.add(normalized)
     return files
 
 
@@ -173,7 +176,15 @@ def _worker_fits_issue(worker: dict[str, Any], issue: dict[str, Any]) -> bool:
 
 def _paths_overlap(issue: dict[str, Any], selected_paths: set[str]) -> bool:
     planned = _planned_files(issue)
-    return bool(planned and selected_paths.intersection(planned))
+    # Un plan puede reservar un directorio entero. Compara límites de componente
+    # en ambos sentidos, sin bloquear hermanos como chip y chip_extra.
+    return any(
+        path == selected
+        or path.startswith(selected + "/")
+        or selected.startswith(path + "/")
+        for path in planned
+        for selected in selected_paths
+    )
 
 
 def _remember_paths(issue: dict[str, Any], selected_paths: set[str]) -> None:
