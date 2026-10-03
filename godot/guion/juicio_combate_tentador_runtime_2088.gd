@@ -27,16 +27,22 @@ static func avanzar(
 
 	var unidad: Dictionary = copia.get("unidad", {})
 	if String(unidad.get("tipo", "")) != ARQUETIPOS.MIMETICO:
-		unidad = ARQUETIPOS.nuevo(
-			ARQUETIPOS.MIMETICO,
-			int(copia.get("_raiz", 0)),
-			int(copia.get("_indice", 0)),
+		unidad = (
+			ARQUETIPOS
+			. nuevo(
+				ARQUETIPOS.MIMETICO,
+				int(copia.get("_raiz", 0)),
+				int(copia.get("_indice", 0)),
+			)
 		)
 
-	var paso := ARQUETIPOS.avanzar(
-		unidad,
-		delta,
-		{"patron_observado": patron_observado},
+	var paso := (
+		ARQUETIPOS
+		. avanzar(
+			unidad,
+			delta,
+			{"patron_observado": patron_observado},
+		)
 	)
 	unidad = paso.get("unidad", unidad)
 	copia["unidad"] = unidad
