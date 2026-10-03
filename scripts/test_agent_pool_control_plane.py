@@ -100,6 +100,15 @@ class AgentPoolControlPlaneContractTest(unittest.TestCase):
             ROOT / "scripts" / "agent_pool.py"
         ).read_text(encoding="utf-8"))
 
+    def test_dispatcher_filtra_workers_con_lease_activo_sin_perder_fallback(self):
+        self.assertIn("/api/agent-pool/worker-status", self.pool)
+        self.assertIn("occupancy_from_deno=true", self.pool)
+        self.assertIn("Slots ocupados (Deno KV)", self.pool)
+        self.assertIn("Ocupación KV no disponible", self.pool)
+        self.assertIn('{occupied: (.worker as $w | ($occupied | index($w)) != null)}', self.pool)
+        self.assertIn('((.occupied // false) | not)', self.pool)
+        self.assertIn('url.pathname === "/api/agent-pool/worker-status"', self.deno_pool)
+
     def test_health_kv_es_primario_y_1713_solo_fallback(self):
         self.assertIn("/api/agent-pool/worker-health/status", self.pool)
         self.assertIn("health_from_deno=true", self.pool)
