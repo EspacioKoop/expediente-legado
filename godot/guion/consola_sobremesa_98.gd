@@ -11,7 +11,7 @@ const ETIQUETA_CAZA_PIXELES := "res://arte/consola98/cartuchos/caza_pixeles_98.j
 const ETIQUETA_PAPER_PLANES := "res://arte/consola98/cartuchos/paper_planes_98.jpg"
 const ETIQUETA_CROC_RIDERS := "res://arte/consola98/cartuchos/croc_riders_98.jpg"
 
-var _arcade: TurnoSerpienteApp
+var _arcade: CanvasLayer
 
 
 func _alternar(_actor: Node) -> void:
@@ -19,11 +19,30 @@ func _alternar(_actor: Node) -> void:
 		return
 	_encendida = true
 	_actualizar_pantalla()
-	_arcade = TurnoSerpienteApp.new()
-	_arcade.modo_consola = true
-	_arcade.cerrado.connect(_cerrar_arcade)
-	_arcade.rom_solicitada.connect(_abrir_catalogo_roms)
-	get_tree().root.add_child(_arcade)
+	var selector := TurnoSerpienteApp.new()
+	selector.modo_consola = true
+	selector.cerrado.connect(_cerrar_arcade)
+	selector.rom_solicitada.connect(_abrir_catalogo_roms)
+	selector.rebote_solicitado.connect(_abrir_rebote)
+	_arcade = selector
+	get_tree().root.add_child(selector)
+
+
+func _abrir_rebote() -> void:
+	if _encendida:
+		return
+	_encendida = true
+	_actualizar_pantalla()
+	var rebote := RebotePostalApp.new()
+	rebote.modo_consola = true
+	rebote.cerrado.connect(_cerrar_arcade)
+	rebote.menu_solicitado.connect(_volver_selector)
+	_arcade = rebote
+	get_tree().root.add_child(rebote)
+
+
+func _volver_selector() -> void:
+	_alternar(self)
 
 
 func _cerrar_arcade() -> void:

@@ -20,7 +20,8 @@
     "mover_adelante": "↑ Arriba",
     "mover_atras": "↓ Abajo",
     "mover_izquierda": "← Izquierda",
-    "mover_derecha": "→ Derecha"
+    "mover_derecha": "→ Derecha",
+    "rebote": "Rebote Postal 98"
   },
   "en": {
     "titulo": "SNAKE SHIFT 98",
@@ -43,6 +44,7 @@
     "mover_adelante": "↑ Up",
     "mover_atras": "↓ Down",
     "mover_izquierda": "← Left",
-    "mover_derecha": "→ Right"
+    "mover_derecha": "→ Right",
+    "rebote": "Postal Bounce 98"
   }
 }
