@@ -102,6 +102,7 @@ def ejecutar_tests(nombres: list[str], raiz: Path = RAIZ) -> dict[str, Any]:
         "sin_godot": sin_godot,
         "errores": errores,
         "fallos": fallos,
+        "exitos_inesperados": [str(test) for test in resultado.unexpectedSuccesses],
     }
 
 
@@ -132,7 +133,12 @@ def preflight(cambiadas: list[str], raiz: Path = RAIZ) -> dict[str, Any]:
     gd = [ruta for ruta in cambiadas if ruta.endswith(".gd") and (raiz / ruta).exists()]
     informe["gd"] = comprobar_gd(gd, raiz)
     python = informe["python"]
-    informe["ok"] = not python.get("errores") and not python.get("fallos") and not informe["gd"]["problemas"]
+    informe["ok"] = (
+        not python.get("errores")
+        and not python.get("fallos")
+        and not python.get("exitos_inesperados")
+        and not informe["gd"]["problemas"]
+    )
     return informe
 
 
@@ -150,10 +156,14 @@ def main() -> int:
     print(
         f"preflight: tests={len(informe['tests'])} ejecutados={python.get('ejecutados', 0)} "
         f"sin_godot={len(python.get('sin_godot', []))} errores={len(python.get('errores', []))} "
-        f"fallos={len(python.get('fallos', []))} gd_problemas={len(informe['gd']['problemas'])}"
+        f"fallos={len(python.get('fallos', []))} "
+        f"exitos_inesperados={len(python.get('exitos_inesperados', []))} "
+        f"gd_problemas={len(informe['gd']['problemas'])}"
     )
     for problema in python.get("errores", []) + python.get("fallos", []):
         print(f"--- {problema['test']}\n{problema['traza']}")
+    for test in python.get("exitos_inesperados", []):
+        print(f"--- {test}\nÉxito inesperado de una prueba marcada expectedFailure")
     for problema in informe["gd"]["problemas"]:
         print(f"--- {problema}")
     return 0 if informe["ok"] else 1
