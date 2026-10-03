@@ -1460,6 +1460,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REQUESTED_MAX: ${{ inputs.refill_max_parallel || '6' }}
+          REFILL_WORKER: ${{ inputs.worker }}
         run: |
           set -euo pipefail
           case "$REQUESTED_MAX" in
@@ -1488,4 +1489,4 @@ jobs:
           fi
           echo "Refill: slot liberado con $pending issues pendientes; nueva preparación cap=$REQUESTED_MAX."
           gh workflow run agent-pool.yml --repo "$GITHUB_REPOSITORY" --ref main \
-            -f max_parallel="$REQUESTED_MAX"
+            -f max_parallel="$REQUESTED_MAX" -f refill_worker="$REFILL_WORKER"

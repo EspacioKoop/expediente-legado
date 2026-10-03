@@ -13,6 +13,11 @@ on:
         default: '6'
         type: choice
         options: ['1', '2', '3', '4', '5', '6']
+      refill_worker:
+        description: 'Slot recién liberado; vacío para una tanda normal'
+        required: false
+        default: ''
+        type: string
   push:
     branches: [main]
     paths:
@@ -27,7 +32,9 @@ permissions:
   id-token: write
 
 concurrency:
-  group: agent-pool-dispatch-${{ github.event_name == 'issues' && github.event.issue.number || 'queue' }}
+  # El refill de A no espera al fin de B/C. Sus sucesores sí se serializan
+  # entre sí por slot; acquire sigue excluyendo otras entradas al mismo slot.
+  group: agent-pool-dispatch-${{ inputs.refill_worker && format('refill-{0}', inputs.refill_worker) || (github.event_name == 'issues' && github.event.issue.number || 'queue') }}
   cancel-in-progress: false
 
 jobs:
@@ -68,6 +75,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REQUESTED_MAX: ${{ inputs.max_parallel || '6' }}
+          REFILL_WORKER: ${{ inputs.refill_worker || '' }}
+          REFILL_ENABLED: ${{ vars.AGENT_POOL_REFILL_ENABLED || 'false' }}
           ACTIONS_BUDGET: ${{ vars.AGENT_POOL_ACTIONS_BUDGET || '12' }}
           HAS_QWEN: ${{ secrets.QWEN_API_KEY != '' }}
           HAS_OMNIROUTE: ${{ secrets.OMNIROUTE_API_KEY != '' && secrets.TS_OAUTH_CLIENT_ID != '' && (secrets.TS_OAUTH_SECRET != '' || secrets.TS_AUDIENCE != '') && vars.OMNIROUTE_BASE_URL != '' && vars.OMNIROUTE_MODEL != '' }}
@@ -97,6 +106,11 @@ jobs:
             ${{ secrets.QWEN_FALLBACK_12_API_KEY != '' && '12' || '' }}
         run: |
           set -euo pipefail
+          if [[ -n "$REFILL_WORKER" && "$REFILL_ENABLED" != true ]]; then
+            echo 'matrix={"include":[]}' >> "$GITHUB_OUTPUT"
+            echo 'count=0' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           for label in auto pool qwen gemini; do
             gh issue list --repo "$GITHUB_REPOSITORY" --state open \
               --label "agent:$label" --limit 100 \
@@ -224,6 +238,7 @@ jobs:
           # Si Deno/OIDC falla, no se marca ningún slot: acquire mantiene la
           # última defensa atómica y este corte sigue siendo fail-open.
           occupancy_from_deno=false
+          printf '%s\n' '{}' > /tmp/worker-occupancy-kv.json
           if [[ -n "${CONTROL_URL:-}" ]]; then
             base="${CONTROL_URL%/}"
             base="${base%/api/report}"
@@ -329,6 +344,7 @@ jobs:
           effective_max="$REQUESTED_MAX"
           queued_runs=0
           active_runs=0
+          actions_from_github=false
           if queued_json="$(gh run list --repo "$GITHUB_REPOSITORY" --status queued --limit 100 --json databaseId 2>/dev/null)" &&
              active_json="$(gh run list --repo "$GITHUB_REPOSITORY" --status in_progress --limit 100 --json databaseId 2>/dev/null)"; then
             queued_runs="$(jq 'length' <<<"$queued_json")"
@@ -339,6 +355,7 @@ jobs:
               --in-progress "$active_runs" \
               --budget "$ACTIONS_BUDGET")"
             effective_max="$(jq -r '.capacity' <<<"$pressure")"
+            actions_from_github=true
           fi
           echo "Backpressure Actions: requested=$REQUESTED_MAX effective=$effective_max queued=$queued_runs active=$active_runs budget=$ACTIONS_BUDGET"
 
@@ -467,11 +484,25 @@ jobs:
             mv "$tmp" /tmp/issues.json
           done
 
-          python3 scripts/agent_pool.py \
-            --issues /tmp/issues.json \
-            --workers /tmp/workers.json \
-            --max-parallel "$effective_max" \
-            --output /tmp/matrix.json >/dev/null
+          # #2239: el refill solo repone el slot liberado. Conserva el inventario
+          # completo al descontar ocupación y no usa fail-open con tandas vivas.
+          if [[ -n "$REFILL_WORKER" ]]; then
+            pressure_args=()
+            if [[ "$actions_from_github" == true ]]; then
+              pressure_args+=(--queued "$queued_runs" --in-progress "$active_runs")
+            fi
+            python3 scripts/agent_pool_refill.py \
+              --issues /tmp/issues.json --workers /tmp/workers.json \
+              --worker-status /tmp/worker-occupancy-kv.json \
+              --refill-worker "$REFILL_WORKER" --requested "$REQUESTED_MAX" \
+              --budget "$ACTIONS_BUDGET" "${pressure_args[@]}" > /tmp/matrix.json
+          else
+            python3 scripts/agent_pool.py \
+              --issues /tmp/issues.json \
+              --workers /tmp/workers.json \
+              --max-parallel "$effective_max" \
+              --output /tmp/matrix.json >/dev/null
+          fi
 
           matrix="$(cat /tmp/matrix.json)"
           count="$(jq '.include|length' /tmp/matrix.json)"
