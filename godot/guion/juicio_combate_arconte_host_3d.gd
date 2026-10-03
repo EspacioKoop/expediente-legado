@@ -16,9 +16,12 @@ static func es_estado(estado: Dictionary) -> bool:
 static func nuevo(anfitrion: Node3D, raiz: int) -> Dictionary:
 	if anfitrion == null:
 		return {}
-	var unidad := JuicioCombateArquetipos.nuevo(
-		JuicioCombateArquetipos.CONTROLADOR,
-		raiz,
+	var unidad := (
+		JuicioCombateArquetipos
+		. nuevo(
+			JuicioCombateArquetipos.CONTROLADOR,
+			raiz,
+		)
 	)
 	if unidad.is_empty():
 		return {}
@@ -52,9 +55,7 @@ static func avanzar(
 	# Solo el estado mecánico cuenta como presión activa. No se deduce desde
 	# materiales/visibilidad, que pertenecen exclusivamente a presentación.
 	var zonas_activas := (
-		1
-		if String(unidad.get("estado", "")) == JuicioCombateArquetipos.ACTIVAR_ZONA
-		else 0
+		1 if String(unidad.get("estado", "")) == JuicioCombateArquetipos.ACTIVAR_ZONA else 0
 	)
 	var salida := (
 		JuicioCombateArconte3D
@@ -80,8 +81,12 @@ static func avanzar(
 		"zona_activa": bool(salida.get("zona_activa", false)),
 		"abrir_ventana": bool(salida.get("abrir_ventana", false)),
 		"geometria": salida.get("geometria", {}),
-		"presentacion": JuicioCombateArconte3D.presentacion(
-			nueva,
-			reduccion_movimiento,
+		"presentacion":
+		(
+			JuicioCombateArconte3D
+			. presentacion(
+				nueva,
+				reduccion_movimiento,
+			)
 		),
 	}
