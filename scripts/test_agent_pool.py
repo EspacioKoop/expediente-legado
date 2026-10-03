@@ -705,6 +705,26 @@ class AgentPoolTest(unittest.TestCase):
 
         self.assertEqual("qwen-primary", tasks[0]["worker"])
 
+    def test_worker_ocupado_no_entra_en_matrix_y_libre_si(self):
+        workers = [
+            {"worker": "qwen-primary", "provider": "qwen", "occupied": True},
+            {"worker": "gemini", "provider": "gemini", "occupied": False},
+        ]
+        tasks = mod.select_tasks(
+            [issue(61, "agent:auto"), issue(62, "agent:auto")],
+            workers,
+            max_parallel=2,
+        )
+        self.assertEqual(1, len(tasks))
+        self.assertEqual("gemini", tasks[0]["worker"])
+
+    def test_worker_ocupado_no_fabrica_capacidad_por_valor_no_booleano(self):
+        workers = [
+            {"worker": "qwen-primary", "provider": "qwen", "occupied": "false"},
+        ]
+        tasks = mod.select_tasks([issue(63, "agent:auto")], workers)
+        self.assertEqual("qwen-primary", tasks[0]["worker"])
+
     def test_max_parallel_cero_aplica_backpressure_total(self):
         tasks = mod.select_tasks(
             [issue(68, "agent:auto")],
