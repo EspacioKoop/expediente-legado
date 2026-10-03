@@ -1,6 +1,7 @@
 import importlib.util
 import io
 import json
+from http.client import HTTPConnection
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import sys
 import threading
@@ -166,6 +167,50 @@ class ProxyIntegracionTest(unittest.TestCase):
     def test_health(self):
         with urllib.request.urlopen(self.base + mod.HEALTH_PATH, timeout=5) as r:
             self.assertEqual(200, r.status)
+
+    def _post_raw(self, cuerpo, longitud):
+        conexion = HTTPConnection("127.0.0.1", self.proxy.server_port, timeout=1)
+        try:
+            conexion.putrequest("POST", "/v1/chat/completions")
+            conexion.putheader("Content-Type", "application/json")
+            conexion.putheader("Content-Length", longitud)
+            conexion.endheaders(cuerpo)
+            respuesta = conexion.getresponse()
+            return respuesta.status, json.loads(respuesta.read())
+        finally:
+            conexion.close()
+
+    def test_longitud_invalida_devuelve_400_sin_leer_ni_reenviar(self):
+        for longitud in ("no-es-un-numero", "-1", "+2", "2.0"):
+            with self.subTest(longitud=longitud):
+                ProveedorFalso.recibido.clear()
+                # No envía cuerpo: el 400 debe llegar antes de cualquier read.
+                estado, cuerpo = self._post_raw(b"", longitud)
+                self.assertEqual(400, estado)
+                self.assertEqual("Content-Length invalido", cuerpo["error"]["message"])
+                self.assertEqual([], ProveedorFalso.recibido)
+
+    def test_utf8_invalido_devuelve_400_sin_reenviar(self):
+        ProveedorFalso.recibido.clear()
+        estado, cuerpo = self._post_raw(b"\xff", "1")
+        self.assertEqual(400, estado)
+        self.assertEqual("Cuerpo JSON no es UTF-8 valido", cuerpo["error"]["message"])
+        self.assertEqual([], ProveedorFalso.recibido)
+
+    def test_longitud_decimal_con_ceros_conserva_peticion_valida(self):
+        ProveedorFalso.recibido.clear()
+        conexion = HTTPConnection("127.0.0.1", self.proxy.server_port, timeout=2)
+        try:
+            conexion.request(
+                "POST", "/v1/chat/completions", body=b"{}",
+                headers={"Content-Type": "application/json", "Content-Length": "002"},
+            )
+            respuesta = conexion.getresponse()
+            self.assertEqual(200, respuesta.status)
+            self.assertIn(b"data: [DONE]", respuesta.read())
+            self.assertEqual({}, ProveedorFalso.recibido[-1]["body"])
+        finally:
+            conexion.close()
 
     def test_reenvia_adaptado_con_la_misma_clave_y_en_streaming(self):
         ProveedorFalso.recibido.clear()
