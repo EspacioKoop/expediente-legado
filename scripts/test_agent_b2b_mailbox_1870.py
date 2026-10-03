@@ -7,6 +7,7 @@ from pathlib import Path
 import sys
 import unittest
 from unittest.mock import patch
+from urllib.error import HTTPError
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
@@ -26,6 +27,61 @@ class FakeResponse(io.BytesIO):
 
 
 class AgentB2BMailbox1870Test(unittest.TestCase):
+    def test_error_http_no_expone_texto_arbitrario_del_servidor(self):
+        for valor in (
+            "Authorization: Bearer abcdefghijklmnop",
+            "fallo\n::error::mensaje inyectado",
+            "https://example.invalid/private?token=valor",
+            "x" * 81,
+            "ghp_" + "x" * 36,
+            "private_credential_value",
+        ):
+            with self.subTest(error=valor):
+                response = HTTPError(
+                    "https://example.invalid", 503, "Unavailable", {},
+                    io.BytesIO(json.dumps({"error": valor}).encode()),
+                )
+                with patch.object(mailbox, "urlopen", side_effect=response):
+                    with self.assertRaises(mailbox.MailboxError) as caught:
+                        mailbox.post_json(
+                            base_url="https://example.invalid", endpoint="/inbox",
+                            payload={}, oidc_token="a.b.c",
+                        )
+                self.assertEqual("mailbox HTTP 503: http_error", str(caught.exception))
+
+    def test_error_http_conserva_codigo_del_protocolo(self):
+        response = HTTPError(
+            "https://example.invalid", 403, "Forbidden", {},
+            io.BytesIO(b'{"error":"invalid_request"}'),
+        )
+        with patch.object(mailbox, "urlopen", side_effect=response):
+            with self.assertRaisesRegex(mailbox.MailboxError, "HTTP 403: invalid_request"):
+                mailbox.post_json(
+                    base_url="https://example.invalid", endpoint="/inbox",
+                    payload={}, oidc_token="a.b.c",
+                )
+
+    def test_cli_mailbox_caido_sale_controlado_sin_volcar_respuesta(self):
+        response = HTTPError(
+            "https://example.invalid", 503, "Unavailable", {},
+            io.BytesIO(b'{"error":"Authorization: Bearer abcdefghijklmnop"}'),
+        )
+        argv = [
+            "agent_b2b_mailbox", "--control-url", "https://example.invalid",
+            "--oidc-token", "a.b.c", "inbox", "--recipient", "reviewer",
+            "--task-id", "task-1",
+        ]
+        stderr, stdout = io.StringIO(), io.StringIO()
+        with (
+            patch.object(sys, "argv", argv),
+            patch.object(sys, "stderr", stderr),
+            patch.object(sys, "stdout", stdout),
+            patch.object(mailbox, "urlopen", side_effect=response),
+        ):
+            self.assertEqual(2, mailbox.main())
+        self.assertEqual("", stdout.getvalue())
+        self.assertEqual("agent_b2b_mailbox: mailbox HTTP 503: http_error\n", stderr.getvalue())
+
     def test_control_url_deriva_desde_report_y_exige_https(self):
         self.assertEqual(
             mailbox.control_base_url("https://example.invalid/api/report"),

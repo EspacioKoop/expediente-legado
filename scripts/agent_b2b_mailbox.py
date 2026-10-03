@@ -18,6 +18,12 @@ AUDIENCE = "siga98-agent-pool"
 SCHEMA = 1
 MESSAGE_TYPES = {"QUESTION", "BLOCKER", "EVIDENCE", "HANDOFF", "RESULT", "REVIEW"}
 RECIPIENTS = {"dispatcher", "worker", "reviewer"}
+# Códigos públicos de agent_b2b.ts. Un proxy puede devolver mensajes libres
+# con credenciales o instrucciones de log; solo se publica el protocolo conocido.
+HTTP_ERROR_CODES = {
+    "forbidden", "invalid_request", "sensitive_payload",
+    "idempotency_conflict", "message_race", "not_found",
+}
 TOKEN_RE = re.compile(r"^[A-Za-z0-9._:/#@-]+$")
 SENSITIVE_RE = re.compile(
     r"(gh[pousr]_|github_pat_|sk-[A-Za-z0-9]|Bearer\s+[A-Za-z0-9._-]{12,}|"
@@ -203,8 +209,9 @@ def post_json(
         error_name = "http_error"
         try:
             body = json.load(error)
-            if isinstance(body, dict) and isinstance(body.get("error"), str):
-                error_name = body["error"][:80]
+            candidate = body.get("error") if isinstance(body, dict) else None
+            if isinstance(candidate, str) and candidate in HTTP_ERROR_CODES:
+                error_name = candidate
         except (json.JSONDecodeError, TypeError, ValueError):
             pass
         raise MailboxError(f"mailbox HTTP {error.code}: {error_name}") from error
