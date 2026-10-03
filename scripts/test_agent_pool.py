@@ -1,4 +1,7 @@
 import importlib.util
+import json
+import subprocess
+import tempfile
 import sys
 import unittest
 from pathlib import Path
@@ -469,6 +472,64 @@ class AgentPoolTest(unittest.TestCase):
         tasks = mod.select_tasks(issues, self.workers, max_parallel=3)
 
         self.assertEqual([62, 64], [task["issue"] for task in tasks])
+
+    def test_directorio_y_descendiente_no_comparten_dispatch(self):
+        pares = [
+            ("godot/assets/audio/chip", "godot/assets/audio/chip/ui_error.ogg"),
+            ("godot/assets/audio/chip", "godot/assets/audio/chip/subdir"),
+            ("./godot//assets/audio/chip/", "godot/assets/audio/./chip/ui_error.ogg"),
+            ("godot/assets/audio/chip/ui_error.ogg", "./godot//assets/audio/chip/ui_error.ogg"),
+            ("godot\\assets\\audio\\chip", "godot/assets/audio/chip/ui_error.ogg"),
+        ]
+        for primera, segunda in pares:
+            for rutas in ((primera, segunda), (segunda, primera)):
+                with self.subTest(rutas=rutas):
+                    issues = [
+                        issue(101, "agent:auto", planned_files=[rutas[0]]),
+                        issue(102, "agent:auto", planned_files=[rutas[1]]),
+                        issue(103, "agent:auto", planned_files=["scripts/independiente.py"]),
+                    ]
+                    tasks = mod.select_tasks(issues, self.workers, max_parallel=3)
+                    self.assertEqual([101, 103], [t["issue"] for t in tasks])
+
+    def test_directorios_hermanos_y_prefijos_lexicos_son_independientes(self):
+        rutas = ["godot/assets/audio/chip", "godot/assets/audio/chip_extra/a.ogg",
+                 "godot/assets/audio/kenney/a.ogg", "godot/assets/audio/chip.gd"]
+        issues = [issue(101 + i, "agent:auto", planned_files=[ruta])
+                  for i, ruta in enumerate(rutas)]
+        tasks = mod.select_tasks(issues, self.workers)
+        self.assertEqual([101, 102, 103, 104], [t["issue"] for t in tasks])
+
+    def test_proveedor_explicito_reserva_directorio_antes_de_tarea_flexible(self):
+        issues = [
+            issue(101, "agent:auto", planned_files=["godot/assets/audio/chip/a.ogg"]),
+            issue(102, "agent:gemini", planned_files=["godot/assets/audio/chip"]),
+            issue(103, "agent:auto", planned_files=["scripts/independiente.py"]),
+        ]
+        tasks = mod.select_tasks(issues, self.workers)
+        self.assertEqual([102, 103], [t["issue"] for t in tasks])
+        self.assertEqual("gemini", tasks[0]["provider"])
+
+    def test_cli_publica_matrix_sin_solape_de_directorios(self):
+        with tempfile.TemporaryDirectory() as temporal:
+            raiz = Path(temporal)
+            issues = raiz / "issues.json"
+            workers = raiz / "workers.json"
+            output = raiz / "matrix.json"
+            issues.write_text(json.dumps([
+                issue(101, "agent:auto", planned_files=["./godot/assets/audio/chip/"]),
+                issue(102, "agent:auto", planned_files=["godot/assets/audio/chip/a.ogg"]),
+                issue(103, "agent:auto", planned_files=["godot/assets/audio/chip_extra/a.ogg"]),
+            ]))
+            workers.write_text(json.dumps(self.workers))
+            result = subprocess.run([
+                sys.executable, str(MODULE_PATH), "--issues", str(issues),
+                "--workers", str(workers), "--output", str(output),
+            ], capture_output=True, text=True, timeout=10)
+            self.assertEqual(0, result.returncode, result.stderr)
+            matrix = json.loads(result.stdout)
+            self.assertEqual([101, 103], [t["issue"] for t in matrix["include"]])
+            self.assertEqual(matrix, json.loads(output.read_text()))
 
     def test_plan_sin_rutas_no_bloquea_paralelismo(self):
         issues = [
