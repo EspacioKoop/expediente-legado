@@ -1,6 +1,9 @@
 import os
+import json
 from pathlib import Path
 import tempfile
+import subprocess
+import sys
 import textwrap
 import unittest
 from unittest import mock
@@ -92,8 +95,61 @@ class EjecucionTest(unittest.TestCase):
         self.assertEqual(1, len(resultado["errores"]))
         self.assertEqual(1, len(resultado["fallos"]))
 
+    def test_unexpected_success_se_conserva_en_informe(self):
+        resultado = self.ejecutar(
+            """
+            import unittest
+            class T(unittest.TestCase):
+                @unittest.expectedFailure
+                def test_pasa_inesperadamente(self):
+                    self.assertTrue(True)
+            """
+        )
+        self.assertEqual(1, len(resultado["exitos_inesperados"]))
+        self.assertIn("test_pasa_inesperadamente", resultado["exitos_inesperados"][0])
+
 
 class PreflightTest(unittest.TestCase):
+    def test_expected_failure_legitimo_conserva_ok(self):
+        tmp = repo_falso({"scripts/test_caso.py": """
+            import unittest
+            class T(unittest.TestCase):
+                @unittest.expectedFailure
+                def test_falla_como_se_espera(self):
+                    self.assertEqual(1, 2)
+        """})
+        self.addCleanup(tmp.cleanup)
+        informe = preflight.preflight(["scripts/test_caso.py"], Path(tmp.name))
+        self.assertTrue(informe["ok"])
+        self.assertEqual([], informe["python"]["exitos_inesperados"])
+
+    def test_unexpected_success_falla_preflight_y_cli_real(self):
+        tmp = repo_falso({"scripts/test_caso.py": """
+            import unittest
+            class T(unittest.TestCase):
+                @unittest.expectedFailure
+                def test_pasa_inesperadamente(self):
+                    self.assertTrue(True)
+        """})
+        self.addCleanup(tmp.cleanup)
+        raiz = Path(tmp.name)
+        informe = preflight.preflight(["scripts/test_caso.py"], raiz)
+        self.assertFalse(informe["ok"])
+        self.assertEqual(1, len(informe["python"]["exitos_inesperados"]))
+
+        script = raiz / "scripts/agent_preflight.py"
+        script.write_text(Path(preflight.__file__).read_text(encoding="utf-8"), encoding="utf-8")
+        reporte = raiz / "informe.json"
+        resultado = subprocess.run(
+            [sys.executable, str(script), "--changed", "scripts/test_caso.py",
+             "--report", str(reporte)],
+            cwd=raiz, capture_output=True, text=True, timeout=10,
+        )
+        self.assertEqual(1, resultado.returncode, resultado.stdout + resultado.stderr)
+        self.assertIn("exitos_inesperados=1", resultado.stdout)
+        self.assertIn("test_pasa_inesperadamente", resultado.stdout)
+        self.assertFalse(json.loads(reporte.read_text())["ok"])
+
     def test_diff_sin_tests_ni_gd_es_ok(self):
         tmp = repo_falso({"docs/x.md": "hola\n"})
         self.addCleanup(tmp.cleanup)
