@@ -90,6 +90,16 @@ class AgentPoolControlPlaneContractTest(unittest.TestCase):
         self.assertIn("drain:\n", self.pool)
         self.assertNotIn('worker-status" --refill', self.pool)
 
+    def test_dispatcher_filtra_slots_ocupados_con_fallback(self):
+        self.assertIn("/api/agent-pool/worker-status", self.pool)
+        self.assertIn("occupancy_from_deno=true", self.pool)
+        self.assertIn('occupied:', self.pool)
+        self.assertIn("Ocupación KV no disponible", self.pool)
+        self.assertIn('((.occupied // false) | not)', self.pool)
+        self.assertIn('if healthy is False or occupied is True:', (
+            ROOT / "scripts" / "agent_pool.py"
+        ).read_text(encoding="utf-8"))
+
     def test_health_kv_es_primario_y_1713_solo_fallback(self):
         self.assertIn("/api/agent-pool/worker-health/status", self.pool)
         self.assertIn("health_from_deno=true", self.pool)
