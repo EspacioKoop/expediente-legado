@@ -1430,8 +1430,8 @@ jobs:
           fi
 
 
-      - id: release_lease
-        name: Liberar lease Deno KV
+      - name: Liberar lease Deno KV
+        id: release_lease
         if: always() && steps.guard.outputs.control == 'deno' && steps.guard.outputs.lease_id != ''
         continue-on-error: true
         env:
