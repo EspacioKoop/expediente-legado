@@ -721,6 +721,42 @@ class AgentPoolTest(unittest.TestCase):
         ]
         self.assertEqual(6, len(mod.select_tasks(issues, workers, max_parallel=99)))
 
+    def test_slot_ocupado_no_entra_en_matrix(self):
+        workers = [
+            {"worker": "qwen-primary", "provider": "qwen", "occupied": True},
+            {"worker": "gemini", "provider": "gemini", "occupied": False},
+        ]
+        tasks = mod.select_tasks(
+            [issue(81, "agent:auto"), issue(82, "agent:auto")],
+            workers,
+            max_parallel=2,
+        )
+        self.assertEqual(1, len(tasks))
+        self.assertEqual("gemini", tasks[0]["worker"])
+
+    def test_todos_los_slots_ocupados_dejan_matrix_vacia(self):
+        workers = [
+            {"worker": "qwen-primary", "provider": "qwen", "occupied": True},
+            {"worker": "gemini", "provider": "gemini", "occupied": True},
+        ]
+        self.assertEqual(
+            [],
+            mod.select_tasks([issue(83, "agent:auto")], workers, max_parallel=2),
+        )
+
+    def test_occupied_ausente_o_false_es_fail_open(self):
+        workers = [
+            {"worker": "qwen-primary", "provider": "qwen"},
+            {"worker": "gemini", "provider": "gemini", "occupied": False},
+        ]
+        tasks = mod.select_tasks(
+            [issue(84, "agent:auto"), issue(85, "agent:auto")],
+            workers,
+            max_parallel=2,
+        )
+        self.assertEqual(2, len(tasks))
+        self.assertEqual({"qwen-primary", "gemini"}, {t["worker"] for t in tasks})
+
     def test_workflows_comparten_cola_y_failover(self):
         pool = (ROOT / ".github" / "workflows" / "agent-pool.yml").read_text(
             encoding="utf-8"
