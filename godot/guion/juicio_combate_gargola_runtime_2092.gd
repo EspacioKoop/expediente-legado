@@ -48,10 +48,13 @@ static func avanzar(
 		)
 
 	var bloqueador: Dictionary = copia.get("bloqueador", {})
-	var paso_bloqueador := ARQUETIPOS.avanzar(
-		bloqueador,
-		delta,
-		{"flanqueado": flanqueado, "guardia_rota": guardia_rota},
+	var paso_bloqueador := (
+		ARQUETIPOS
+		. avanzar(
+			bloqueador,
+			delta,
+			{"flanqueado": flanqueado, "guardia_rota": guardia_rota},
+		)
 	)
 	bloqueador = paso_bloqueador.get("unidad", bloqueador)
 	copia["bloqueador"] = bloqueador
@@ -96,13 +99,16 @@ static func _avanzar_embestidor(
 		0.0,
 		cos(rumbo_objetivo) * distancia_segura,
 	)
-	var paso := EMBESTIDOR.avanzar(
-		embestidor,
-		delta,
-		posicion_rival,
-		posicion_jugador,
-		linea_libre,
-		choque,
+	var paso := (
+		EMBESTIDOR
+		. avanzar(
+			embestidor,
+			delta,
+			posicion_rival,
+			posicion_jugador,
+			linea_libre,
+			choque,
+		)
 	)
 	embestidor = paso.get("unidad", embestidor)
 	estado["embestidor"] = embestidor
