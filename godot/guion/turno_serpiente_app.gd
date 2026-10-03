@@ -4,6 +4,7 @@ extends CanvasLayer
 
 signal cerrado
 signal rom_solicitada
+signal rebote_solicitado
 
 const REGLAS := preload("res://guion/turno_serpiente.gd")
 const TEXTOS := "res://datos/turno_serpiente_textos.json"
@@ -28,6 +29,7 @@ var _marcador: Label
 var _principal: Button
 var _lento: CheckButton
 var _menu_rom: Button
+var _menu_rebote: Button
 var _audio: AudioStreamPlayer
 var _sonidos: Dictionary = {}
 
@@ -136,6 +138,11 @@ func _abrir_rom() -> void:
 	rom_solicitada.emit()
 
 
+func _abrir_rebote() -> void:
+	cerrar()
+	rebote_solicitado.emit()
+
+
 func _refrescar() -> void:
 	_mejor = maxi(_mejor, juego.puntos)
 	_marcador.text = (
@@ -154,6 +161,8 @@ func _refrescar() -> void:
 	_lento.disabled = juego.fase != "preparado"
 	if _menu_rom != null:
 		_menu_rom.visible = juego.fase == "preparado" and juego.nivel == 1
+	if _menu_rebote != null:
+		_menu_rebote.visible = juego.fase == "preparado" and juego.nivel == 1
 	_tablero.queue_redraw()
 	if juego.fase in ["derrota", "victoria", "nivel_completo"]:
 		_principal.grab_focus()
@@ -195,6 +204,7 @@ func _construir_ui() -> void:
 	_lento.text = _texto("lento")
 	fila.add_child(_lento)
 	if modo_consola:
+		_menu_rebote = _boton(fila, "rebote", _abrir_rebote)
 		_menu_rom = _boton(fila, "roms", _abrir_rom)
 	_boton(fila, "salir", cerrar)
 	var cruceta := HBoxContainer.new()
