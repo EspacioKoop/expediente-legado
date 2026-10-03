@@ -2362,7 +2362,7 @@
       "autor": "SIGA-98 · síntesis propia",
       "licencia": "CC0-1.0",
       "fuente": "tools/sfx_chip/generar.py",
-      "sha256": "e5926668962c2a27197a82c5a719c1f886a991ead9179aeead096e6b341ea7d0"
+      "sha256": "124e1ae6dff47b920abb6e083e010ae3ba087151411d0ccd9403c1caaf6c0a17"
     },
     {
       "ruta": "audio/chip/teclado_tecla_02.ogg",
@@ -2370,7 +2370,7 @@
       "autor": "SIGA-98 · síntesis propia",
       "licencia": "CC0-1.0",
       "fuente": "tools/sfx_chip/generar.py",
-      "sha256": "5944f66d978843e4f25d1a32e5b5cb245e87192080dcd965c61d2e73a19a71d0"
+      "sha256": "8b2e84a596d76ee8d121a879d3384b1d4089dfc4df4d80b69f43d2e6f824a3b7"
     },
     {
       "ruta": "audio/chip/teclado_tecla_03.ogg",
@@ -2378,7 +2378,7 @@
       "autor": "SIGA-98 · síntesis propia",
       "licencia": "CC0-1.0",
       "fuente": "tools/sfx_chip/generar.py",
-      "sha256": "475a4e100414d062735fdde7596a70babd50989ba649f8c5be580d1fc80772cd"
+      "sha256": "4cfa77b19909d2e46d10733938c1cf546898650444928b1dade948db3e08d8e2"
     },
     {
       "ruta": "audio/chip/teclado_rafaga_01.ogg",
@@ -2386,7 +2386,7 @@
       "autor": "SIGA-98 · síntesis propia",
       "licencia": "CC0-1.0",
       "fuente": "tools/sfx_chip/generar.py",
-      "sha256": "9708cc678591363981f8f5a40992e5d122b071dde462473101a25e74d5ccd7f5"
+      "sha256": "b421050c407d40fc7524286e24a96dd2b506b1070c666a0b0df3b50ed77b24e3"
     },
     {
       "ruta": "audio/chip/teclado_rafaga_02.ogg",
@@ -2394,7 +2394,7 @@
       "autor": "SIGA-98 · síntesis propia",
       "licencia": "CC0-1.0",
       "fuente": "tools/sfx_chip/generar.py",
-      "sha256": "4d780cac2bc6aa8d5124c1c8fda17b4286c38b5832d419cc3e91c1b8d19e77a8"
+      "sha256": "fa0711d7f1d356bb6870d8d5492357a0c5bdfa4e6f8bd50dccbee0937ec5f877"
     },
     {
       "ruta": "audio/chip/teclado_rafaga_03.ogg",
@@ -2402,7 +2402,7 @@
       "autor": "SIGA-98 · síntesis propia",
       "licencia": "CC0-1.0",
       "fuente": "tools/sfx_chip/generar.py",
-      "sha256": "66c24663b93482b10dc9d5a61718b16cfdaa0ea6f26c086b5ca4a1f77706ec9c"
+      "sha256": "a1babff9d91b4b7b83a6c51e14599642fe1f283eacfdb9d57c2a27f671a7d8b0"
     }
   ]
 }
