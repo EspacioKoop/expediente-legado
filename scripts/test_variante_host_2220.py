@@ -34,6 +34,15 @@ class VarianteHost2220Test(unittest.TestCase):
             ROUTER,
         )
 
+
+    def test_arconte_se_despacha_sin_entrar_en_el_host_principal(self):
+        self.assertIn("JuicioCombateArconteWiring3D.VARIANTE", ROUTER)
+        self.assertIn("JuicioCombateArconteWiring3D.montar(", ROUTER)
+        self.assertIn("JuicioCombateArconteWiring3D.es_estado(estado)", ROUTER)
+        self.assertIn("JuicioCombateArconteWiring3D.avanzar(", ROUTER)
+        self.assertIn("or JuicioCombateArconteWiring3D.es_estado(estado)", ROUTER)
+        self.assertNotIn("JuicioCombateArconteHost3D", HOST)
+
     def test_variante_desconocida_hace_fallback(self):
         self.assertIn('return {}', ROUTER)
         montar = ROUTER.split("static func montar(", 1)[1].split(
