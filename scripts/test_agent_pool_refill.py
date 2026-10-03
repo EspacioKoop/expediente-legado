@@ -155,8 +155,8 @@ class RefillWorkflowTest(unittest.TestCase):
         self.worker = (ROOT / ".github/workflows/agent-worker.yml").read_text()
 
     def test_concurrencia_refill_es_distinta_y_estable_por_slot(self):
-        import yaml
-        group = yaml.safe_load(self.pool)["concurrency"]["group"]
+        concurrency = self.pool.split("\nconcurrency:", 1)[1].split("\njobs:", 1)[0]
+        group = next(line for line in concurrency.splitlines() if line.strip().startswith("group:"))
         self.assertIn("inputs.refill_worker && format('refill-{0}', inputs.refill_worker)", group)
         self.assertIn("|| 'queue'", group)
         self.assertNotIn("github.run_id", group)
