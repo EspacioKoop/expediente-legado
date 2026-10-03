@@ -29,11 +29,9 @@ class VarianteHost2220Test(unittest.TestCase):
         self.assertIn("JuicioCombateGargolaHost3D.montar(", ROUTER)
         self.assertIn("JuicioCombateGargolaHost3D.es_estado(estado)", ROUTER)
         self.assertIn("JuicioCombateGargolaHost3D.avanzar(", ROUTER)
-        self.assertIn(
-            "return JuicioCombateGargolaHost3D.es_estado(estado)",
-            ROUTER,
-        )
-
+        movimiento = ROUTER.split("static func controla_movimiento(", 1)[1]
+        self.assertIn("JuicioCombateGargolaHost3D.es_estado(estado)", movimiento)
+        self.assertIn("or JuicioCombateArconteWiring3D.es_estado(estado)", movimiento)
 
     def test_arconte_se_despacha_sin_entrar_en_el_host_principal(self):
         self.assertIn("JuicioCombateArconteWiring3D.VARIANTE", ROUTER)
