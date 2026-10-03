@@ -33,7 +33,7 @@ func _probar_montaje() -> void:
 		if zona == null:
 			continue
 		_comprobar(zona.name == "ZonaControlador%d" % indice, "conserva nombre neutro de zona")
-		var copia := anfitrion.get_node_or_null(NodePath(String(zona.name) + "_copia")) as MeshInstance3D
+		var copia := (\n\t\t\tanfitrion.get_node_or_null(NodePath(String(zona.name) + "_copia")) as MeshInstance3D\n\t\t)
 		_comprobar(copia != null, "cada zona tiene plano de umbral desplazado")
 		if copia != null:
 			_comprobar(
