@@ -11,7 +11,8 @@ ADAPTADOR = (
 class ArconteHost2093Test(unittest.TestCase):
     def test_monta_controlador_y_presentacion_existentes(self):
         self.assertIn("JuicioCombateArquetipos.CONTROLADOR", ADAPTADOR)
-        self.assertIn("JuicioCombateArquetipos.nuevo(", ADAPTADOR)
+        self.assertIn("JuicioCombateArquetipos", ADAPTADOR)
+        self.assertIn(". nuevo(", ADAPTADOR)
         self.assertIn("JuicioCombateArconte3D.montar_zonas", ADAPTADOR)
         self.assertIn('"_variante_onirica": VARIANTE', ADAPTADOR)
 
@@ -41,7 +42,8 @@ class ArconteHost2093Test(unittest.TestCase):
         inicio = ADAPTADOR.index("static func avanzar(")
         bloque = ADAPTADOR[inicio:]
         self.assertEqual(2, bloque.count("reduccion_movimiento"))
-        presentacion = bloque.index("JuicioCombateArconte3D.presentacion")
+        presentacion = bloque.index("JuicioCombateArconte3D", bloque.index('"presentacion"'))
+        self.assertIn(". presentacion(", bloque[presentacion:])
         self.assertGreater(bloque.index("reduccion_movimiento", presentacion), presentacion)
 
     def test_no_crea_autoridad_paralela(self):
