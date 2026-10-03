@@ -677,6 +677,34 @@ class AgentPoolTest(unittest.TestCase):
         )
         self.assertEqual({"godot/guion/segura.gd"}, mod._planned_files(candidate))
 
+    def test_slot_ocupado_no_entra_en_la_matrix(self):
+        issues = [issue(201, "agent:auto"), issue(202, "agent:auto")]
+        workers = [
+            {"worker": "qwen-primary", "provider": "qwen", "occupied": True},
+            {"worker": "gemini", "provider": "gemini", "occupied": False},
+        ]
+
+        tasks = mod.select_tasks(issues, workers, max_parallel=2)
+
+        self.assertEqual(1, len(tasks))
+        self.assertEqual("gemini", tasks[0]["worker"])
+
+    def test_slot_liberado_vuelve_a_ser_elegible(self):
+        issues = [issue(203, "agent:qwen")]
+        ocupado = [{"worker": "qwen-primary", "provider": "qwen", "occupied": True}]
+        libre = [{"worker": "qwen-primary", "provider": "qwen", "occupied": False}]
+
+        self.assertEqual([], mod.select_tasks(issues, ocupado))
+        self.assertEqual("qwen-primary", mod.select_tasks(issues, libre)[0]["worker"])
+
+    def test_ocupacion_no_booleana_no_fabrica_un_bloqueo(self):
+        issues = [issue(204, "agent:auto")]
+        workers = [{"worker": "qwen-primary", "provider": "qwen", "occupied": "unknown"}]
+
+        tasks = mod.select_tasks(issues, workers)
+
+        self.assertEqual("qwen-primary", tasks[0]["worker"])
+
     def test_max_parallel_cero_aplica_backpressure_total(self):
         tasks = mod.select_tasks(
             [issue(68, "agent:auto")],
@@ -718,6 +746,9 @@ class AgentPoolTest(unittest.TestCase):
         self.assertIn("gemini-client-error-", worker)
         self.assertIn("AGENT_POOL_SLOT_UNHEALTHY", pool)
         self.assertIn("healthy", pool)
+        self.assertIn("/api/agent-pool/worker-status", pool)
+        self.assertIn("occupied", pool)
+        self.assertIn("Ocupación KV no disponible", pool)
         self.assertIn("scripts/agent_pool_backpressure.py", pool)
         self.assertIn("AGENT_POOL_ACTIONS_BUDGET", pool)
         self.assertIn("plannedFiles", pool)

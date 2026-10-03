@@ -219,6 +219,40 @@ jobs:
           PY
           fi
 
+          # #2237: el lease por slot de #2230 es la fuente de ocupación. Se
+          # consulta después del health para separar "ocupado" de "en cooldown".
+          # Si Deno/OIDC falla, no se marca ningún slot: acquire mantiene la
+          # última defensa atómica y este corte sigue siendo fail-open.
+          occupancy_from_deno=false
+          if [[ -n "${CONTROL_URL:-}" ]]; then
+            base="${CONTROL_URL%/}"
+            base="${base%/api/report}"
+            if oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+              "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-pool")" &&
+              oidc_token="$(jq -er '.value' <<<"$oidc_json")"; then
+              worker_ids="$(jq -c '[.[].worker]' /tmp/workers.json)"
+              payload="$(jq -nc --argjson workers "$worker_ids" '{schema:1,workers:$workers}')"
+              if curl -fsS -X POST "$base/api/agent-pool/worker-status" \
+                -H "Authorization: Bearer $oidc_token" \
+                -H 'Content-Type: application/json' \
+                --data "$payload" -o /tmp/worker-occupancy-kv.json; then
+                occupied="$(jq -c '[.leases[]?.worker | select(type == "string")] | unique' /tmp/worker-occupancy-kv.json)"
+                tmp="$(mktemp)"
+                jq --argjson occupied "$occupied" \
+                  'map(. + {occupied: (.worker as $w | ($occupied | index($w)) != null)})' \
+                  /tmp/workers.json > "$tmp"
+                mv "$tmp" /tmp/workers.json
+                occupancy_from_deno=true
+                if [[ "$(jq 'length' <<<"$occupied")" -gt 0 ]]; then
+                  echo "Slots ocupados (Deno KV): $(jq -r 'join(",")' <<<"$occupied")"
+                fi
+              fi
+            fi
+          fi
+          if [[ "$occupancy_from_deno" != true ]]; then
+            echo "::warning::Ocupación KV no disponible; acquire conserva la exclusión atómica."
+          fi
+
           # #1621: ranking histórico sin estado adicional. Un dispatcher puede
           # completar sin lanzar workers; esos runs vacíos no deben expulsar
           # muestras útiles de la ventana. Los disparos por "issues" son muy
@@ -287,8 +321,8 @@ jobs:
           mv "$tmp" /tmp/workers.json
           jq -r '.[] | "worker-score \(.worker)=\(.score) provider=\(.provider) backend=\(.backend // .provider) samples=\(.score_samples) handoff=\(.handoff_loss_proxy_pct // "n/a") rework=\(.rework_rate_pct // "n/a") ci_ok=\(.ci_success_rate_pct // "n/a") ci_fail=\(.ci_failure_rate_pct // "n/a") window=\(.telemetry_window_days)d telemetry=\(.telemetry_samples)"' /tmp/workers.json
 
-          has_qwen="$(jq -r 'any(.[]; .provider == "qwen" and (if has("healthy") then .healthy else true end))' /tmp/workers.json)"
-          has_gemini="$(jq -r 'any(.[]; .provider == "gemini" and (if has("healthy") then .healthy else true end))' /tmp/workers.json)"
+          has_qwen="$(jq -r 'any(.[]; .provider == "qwen" and (if has("healthy") then .healthy else true end) and ((.occupied // false) | not))' /tmp/workers.json)"
+          has_gemini="$(jq -r 'any(.[]; .provider == "gemini" and (if has("healthy") then .healthy else true end) and ((.occupied // false) | not))' /tmp/workers.json)"
 
           # #1902: no añadir más workers cuando Actions ya está saturado. Si la
           # consulta falla, se conserva REQUESTED_MAX (fail-open).

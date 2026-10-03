@@ -43,6 +43,7 @@ def _worker(item: dict[str, Any]) -> dict[str, Any] | None:
     worker_id = item.get("worker")
     provider = item.get("provider")
     healthy = item.get("healthy", True)
+    occupied = item.get("occupied", False)
     raw_backend = item.get("backend", provider)
     backend = raw_backend.strip().lower() if isinstance(raw_backend, str) else str(provider)
     if not BACKEND_RE.fullmatch(backend):
@@ -51,7 +52,7 @@ def _worker(item: dict[str, Any]) -> dict[str, Any] | None:
         return None
     if provider not in {"qwen", "gemini"}:
         return None
-    if healthy is False:
+    if healthy is False or occupied is True:
         return None
     raw_score = item.get("score", 50.0)
     try:
