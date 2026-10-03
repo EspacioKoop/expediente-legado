@@ -221,11 +221,29 @@ def make_handler(upstream: str, profile: str, log):
             self._forward(None)
 
         def do_POST(self):
-            length = int(self.headers.get("Content-Length") or 0)
+            longitud = (self.headers.get("Content-Length") or "0").strip()
+            # read(-1) esperaría EOF; una cabecera malformada no debe colgar
+            # al CLI ni convertirse en una petición al proveedor.
+            try:
+                if not re.fullmatch(r"[0-9]+", longitud):
+                    raise ValueError
+                length = int(longitud)
+            except ValueError:
+                self._reply(
+                    400, b'{"error":{"message":"Content-Length invalido"}}',
+                    "application/json",
+                )
+                return
             raw = self.rfile.read(length) if length else b""
             dropped: set[str] = set()
             try:
                 body = json.loads(raw or b"{}")
+            except UnicodeDecodeError:
+                self._reply(
+                    400, b'{"error":{"message":"Cuerpo JSON no es UTF-8 valido"}}',
+                    "application/json",
+                )
+                return
             except json.JSONDecodeError:
                 body = None
             if isinstance(body, dict):
