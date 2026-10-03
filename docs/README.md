@@ -11,7 +11,7 @@ Este directorio contiene auditorías, decisiones de diseño, investigación, evi
 | Fases | [ROADMAP.md](../ROADMAP.md) | Dirección v0.6 → 1.0 |
 | Entrada al repo | [README.md](../README.md) | Estado general, stack y comandos |
 | Flujo de contribución | [AGENTS.md](../AGENTS.md), [CONTRIBUTING.md](../CONTRIBUTING.md) | Ramas, PR, CI, merge |
-| Operación de agentes | [agents/doctrina.md](agents/doctrina.md), [agents-autonomos.md](agents-autonomos.md), [agents/parallel-pool.md](agents/parallel-pool.md), [agents/euriclea.md](agents/euriclea.md) | Autopilot, pool, memoria, proveedores y límites |
+| Operación de agentes | [agents/doctrina.md](agents/doctrina.md), [agents-autonomos.md](agents-autonomos.md), [agents/parallel-pool.md](agents/parallel-pool.md), [agents/euriclea.md](agents/euriclea.md) | Cola, delegación, revisión y límites |
 | Paridad SIGA | [paridad-expedientes.md](paridad-expedientes.md) | Legado → Godot para expedientes |
 | Paridad ideologías | [paridad-ideologias.md](paridad-ideologias.md) | Legado político y contrato transversal |
 | Paridad religión | [paridad-religion.md](paridad-religion.md) | Fronteras religión/Tarot/mitología |
