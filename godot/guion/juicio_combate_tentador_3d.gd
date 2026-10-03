@@ -65,22 +65,12 @@ static func montar(rival: Node3D) -> Dictionary:
 	eco.position = Vector3(0.26, 0.04, -0.18)
 	eco.visible = false
 	raiz.add_child(eco)
-	_caja(
-		eco,
-		"EcoCuerpo",
-		Vector3(0.58, 1.08, 0.36),
-		Vector3(0.0, 1.02, 0.0),
-		COLOR_ECO,
-		true,
-	).rotation.z = deg_to_rad(-14.0)
-	_caja(
-		eco,
-		"EcoAla",
-		Vector3(0.54, 0.58, 0.12),
-		Vector3(-0.42, 1.18, -0.02),
-		COLOR_ECO,
-		true,
-	).rotation.z = deg_to_rad(38.0)
+	_caja(eco, "EcoCuerpo", Vector3(0.58, 1.08, 0.36), Vector3(0.0, 1.02, 0.0), COLOR_ECO, true).rotation.z = deg_to_rad(
+		-14.0
+	)
+	_caja(eco, "EcoAla", Vector3(0.54, 0.58, 0.12), Vector3(-0.42, 1.18, -0.02), COLOR_ECO, true).rotation.z = deg_to_rad(
+		38.0
+	)
 
 	var aviso_linea := _aviso(
 		raiz,
@@ -114,7 +104,8 @@ static func montar(rival: Node3D) -> Dictionary:
 		"ala": ala,
 		"hocico": hocico,
 		"eco": eco,
-		"avisos": {
+		"avisos":
+		{
 			"linea": aviso_linea,
 			"carga_lineal": aviso_carga,
 			"ataque_corto": aviso_corto,
@@ -144,8 +135,7 @@ static func pintar(
 	var telegraph := String(salida_runtime.get("telegraph", ""))
 	var ventana := bool(salida_runtime.get("ventana_respuesta", false))
 	var mostrando_eco := (
-		estado in [ARQUETIPOS.TELEGRAFIAR_ECO, ARQUETIPOS.REPETIR]
-		or not telegraph.is_empty()
+		estado in [ARQUETIPOS.TELEGRAFIAR_ECO, ARQUETIPOS.REPETIR] or not telegraph.is_empty()
 	)
 
 	raiz.rotation = Vector3.ZERO
