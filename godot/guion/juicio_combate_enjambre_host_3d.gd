@@ -46,10 +46,13 @@ static func avanzar(estado: Dictionary, delta: float, posicion_jugador: Vector3)
 	var unidades: Array = estado.get("unidades", [])
 	if unidades.is_empty():
 		return []
-	var paso := RUNTIME.tick(
-		unidades,
-		delta,
-		ARQUETIPO_HOST.presupuesto_enjambre(),
+	var paso := (
+		RUNTIME
+		. tick(
+			unidades,
+			delta,
+			ARQUETIPO_HOST.presupuesto_enjambre(),
+		)
 	)
 	estado["unidades"] = paso.get("unidades", unidades)
 	unidades = estado["unidades"]
