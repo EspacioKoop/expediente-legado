@@ -23,6 +23,8 @@ const ARQUETIPOS = preload("res://guion/juicio_combate_arquetipos.gd")
 const ARQUETIPO_HOST = preload("res://guion/juicio_combate_arquetipo_host.gd")
 const HOSTIGADOR_3D = preload("res://guion/juicio_combate_hostigador_3d.gd")
 const BLOQUEADOR_3D = preload("res://guion/juicio_combate_bloqueador_3d.gd")
+const ENJAMBRE_HOST_3D = preload("res://guion/juicio_combate_enjambre_host_3d.gd")
+const RIVAL_MOVIMIENTO_3D = preload("res://guion/juicio_combate_rival_movimiento_3d.gd")
 const DETERMINACION_BASE := REGLAS.DETERMINACION_BASE
 const DETERMINACION_MINIMA_RIVAL := REGLAS.DETERMINACION_MINIMA_RIVAL
 const VELOCIDAD_JUGADOR := 4.8
@@ -52,6 +54,7 @@ var _ambiental_1772: Dictionary = {}
 var _empujar_1772: Dictionary = {}
 var _volcar_1772: Dictionary = {}
 var _arquetipo: Dictionary = {}
+var _enjambre: Dictionary = {}
 var _guardia_rota := false
 var _escudo_guardia: MeshInstance3D
 var _linea_hostigador: MeshInstance3D
@@ -370,44 +373,7 @@ func _mover_jugador(delta: float) -> void:
 
 
 func _mover_rival(delta: float) -> void:
-	if _ataque_rival_pendiente:
-		_actualizar_telegrafo_rival(delta)
-		return
-	if String(_arquetipo.get("tipo", "")) == ARQUETIPOS.HOSTIGADOR:
-		var host := HOSTIGADOR_3D.mover(
-			_jugador.position, _rival.position, _rival.rotation.y, _arquetipo, _radio_arena, delta
-		)
-		_rival.position = host["posicion"]
-		_rival.rotation.y = float(host["rotacion_y"])
-		JuicioCombateEscenografia3D.andar(_figura_rival, bool(host["andando"]))
-		return
-	# La apertura del bloqueador es la ventana del jugador: quieto y sin atacar,
-	# para que se lea sin texto que ahora se le puede golpear.
-	if not ARQUETIPO_HOST.permite_iniciar_ataque(_arquetipo):
-		JuicioCombateEscenografia3D.andar(_figura_rival, false)
-		return
-
-	var paso := (
-		RIVAL
-		. plan_movimiento(
-			_jugador.position,
-			_rival.position,
-			_estado_temporal.recarga_rival,
-			_velocidad_rival,
-			_enredo,
-			_ritual,
-			delta,
-		)
-	)
-	JuicioCombateEscenografia3D.andar(_figura_rival, bool(paso["mover"]))
-	if bool(paso["mover"]):
-		var desplazamiento: Vector3 = paso["desplazamiento"]
-		_rival.position = _limitar(_rival.position + desplazamiento)
-		# Con arquetipo, la orientación es la guardia y ya la gira la política.
-		if _arquetipo.is_empty():
-			_rival.rotation.y = float(paso["rotacion_y"])
-	elif bool(paso["iniciar_ataque"]):
-		_iniciar_ataque_rival()
+	RIVAL_MOVIMIENTO_3D.avanzar(self, delta)
 
 
 func _iniciar_ataque_rival() -> void:
@@ -519,13 +485,22 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 	if not compromiso_religion_bloqueante(_compromisos_religion, _rival_inicio_agresion).is_empty():
 		return
 	_recarga_jugador = recarga
-	var hacia := _rival.position - _jugador.position
+	var objetivo := (
+		ENJAMBRE_HOST_3D.objetivo(_enjambre, _jugador.position)
+		if not _enjambre.is_empty()
+		else {"indice": -1, "cuerpo": _rival, "figura": _figura_rival}
+	)
+	if objetivo.is_empty():
+		return
+	var cuerpo: CharacterBody3D = objetivo["cuerpo"]
+	var figura: Node3D = objetivo["figura"]
+	var hacia := cuerpo.position - _jugador.position
 	hacia.y = 0.0
 	if hacia.length() > 0.01:
 		_jugador.rotation.y = atan2(hacia.x, hacia.z)
 	if hacia.length() > alcance:
 		return
-	if _bloquear_golpe(fuerte):
+	if int(objetivo["indice"]) < 0 and _bloquear_golpe(fuerte):
 		return
 
 	var efectos_jungianos := JUNGIANO.efectos_activos(self)
@@ -557,17 +532,24 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 		_contraataque = 0
 
 	var dano := int(impacto["dano"])
-	_determinacion_rival = maxi(0, _determinacion_rival - dano)
+	var indice_objetivo := int(objetivo["indice"])
+	if indice_objetivo < 0:
+		_determinacion_rival = maxi(0, _determinacion_rival - dano)
+	else:
+		_determinacion_rival = ENJAMBRE_HOST_3D.aplicar_dano(_enjambre, indice_objetivo, dano)
+		_rival.position = ENJAMBRE_HOST_3D.centro(_enjambre, _rival.position)
 	_aplicar_curacion_arquetipo(efectos_jungianos)
 	var segundos_enredo := float(impacto["enredo_segundos"])
 	if segundos_enredo > 0.0:
 		_enredo = maxf(_enredo, segundos_enredo)
-	_reaccion(_figura_rival, 0.25 + float(dano) * 0.08)
+	if is_instance_valid(figura):
+		_reaccion(figura, 0.25 + float(dano) * 0.08)
+		JuicioCombateEscenografia3D.gesto(figura, "encajar")
 	JuicioCombateEscenografia3D.gesto(_figura_jugador, "discutir")
-	JuicioCombateEscenografia3D.gesto(_figura_rival, "encajar")
 	_actualizar_hud()
-	if _determinacion_rival <= 0 and not _intentar_retorno_rival():
-		_terminar(true)
+	if _determinacion_rival <= 0:
+		if indice_objetivo >= 0 or not _intentar_retorno_rival():
+			_terminar(true)
 
 
 func _intentar_retorno_rival() -> bool:
@@ -585,7 +567,14 @@ func _intentar_retorno_rival() -> bool:
 
 
 func _montar_arquetipo() -> void:
-	if not ARQUETIPO_HOST.soportado(arquetipo_onirico) or _rival == null:
+	if _rival == null:
+		return
+	if arquetipo_onirico == ARQUETIPOS.ENJAMBRE:
+		_enjambre = ENJAMBRE_HOST_3D.montar(self, _rival, _acusado, _mito_id, _raiz)
+		_determinacion_rival = ENJAMBRE_HOST_3D.vivos(_enjambre)
+		_rival.position = ENJAMBRE_HOST_3D.centro(_enjambre, _rival.position)
+		return
+	if not ARQUETIPO_HOST.soportado(arquetipo_onirico):
 		return
 	_arquetipo = ARQUETIPOS.nuevo(arquetipo_onirico, _raiz)
 	if arquetipo_onirico == ARQUETIPOS.BLOQUEADOR:
@@ -596,6 +585,13 @@ func _montar_arquetipo() -> void:
 
 
 func _avanzar_arquetipo(delta: float) -> void:
+	if not _enjambre.is_empty():
+		for distancia in ENJAMBRE_HOST_3D.avanzar(_enjambre, delta, _jugador.position):
+			_rival_inicio_agresion = true
+			_aplicar_impacto_rival(resultado_ataque_rival(float(distancia), _esquiva))
+			if _acabado:
+				break
+		return
 	if _arquetipo.is_empty():
 		return
 	if String(_arquetipo.get("tipo", "")) == ARQUETIPOS.HOSTIGADOR:
@@ -677,9 +673,11 @@ func _terminar(gano: bool, inmediato: bool = false) -> void:
 	_ataque_rival_pendiente = false
 	JUNGIANO.salir_combate(self)
 	_ocultar_aviso_ataque()
+	ENJAMBRE_HOST_3D.ocultar_avisos(_enjambre)
+	var figura_final := ENJAMBRE_HOST_3D.figura_final(_enjambre, _figura_rival)
 	var espera := maxf(
 		JuicioCombateEscenografia3D.gesto(_figura_jugador, "celebrar" if gano else "nervioso"),
-		JuicioCombateEscenografia3D.gesto(_figura_rival, "nervioso" if gano else "aplaudir"),
+		JuicioCombateEscenografia3D.gesto(figura_final, "nervioso" if gano else "aplaudir"),
 	)
 	# El gesto final se ve antes de cerrar: quien escucha `terminado` libera la
 	# escena en ese mismo fotograma (VentanillaApp). El resultado ya es firme
@@ -687,6 +685,7 @@ func _terminar(gano: bool, inmediato: bool = false) -> void:
 	espera = minf(espera, PAUSA_FINAL_MAX)
 	if not inmediato and espera > 0.0 and is_inside_tree():
 		await get_tree().create_timer(espera).timeout
+	ENJAMBRE_HOST_3D.limpiar(_enjambre)
 	terminado.emit(gano)
 
 
