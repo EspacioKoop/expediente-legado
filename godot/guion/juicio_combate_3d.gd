@@ -614,11 +614,14 @@ func _montar_arquetipo() -> void:
 	if arquetipo_onirico == ARQUETIPOS.ENJAMBRE:
 		_enjambre_unidades = ARQUETIPO_HOST.nuevo_enjambre(_raiz, 3)
 		var clave := String(_acusado.get("id", _acusado.get("nombre", "enjambre")))
-		var montado := ARENA.montar_enjambre(
-			self,
-			clave,
-			JuicioCombateEscenografia3D.color_mito(_mito_id),
-			_enjambre_unidades.size(),
+		var montado := (
+			ARENA
+			. montar_enjambre(
+				self,
+				clave,
+				JuicioCombateEscenografia3D.color_mito(_mito_id),
+				_enjambre_unidades.size(),
+			)
 		)
 		_enjambre_actores = montado.get("actores", [])
 		_rival.visible = false
@@ -673,10 +676,13 @@ func _avanzar_arquetipo(delta: float) -> void:
 
 
 func _avanzar_enjambre(delta: float) -> void:
-	var paso := ENJAMBRE_RUNTIME.tick(
-		_enjambre_unidades,
-		delta,
-		ARQUETIPO_HOST.presupuesto_enjambre(),
+	var paso := (
+		ENJAMBRE_RUNTIME
+		. tick(
+			_enjambre_unidades,
+			delta,
+			ARQUETIPO_HOST.presupuesto_enjambre(),
+		)
 	)
 	_enjambre_unidades = paso.get("unidades", _enjambre_unidades)
 	var resultados: Array = paso.get("resultados", [])
