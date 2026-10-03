@@ -219,6 +219,8 @@ func _entrar_en(fase: String) -> void:
 
 	var espacio := _espacio_de(fase)
 	_espacio_actual = espacio
+	# Contrato histórico de evidencia: `Espacio3D.construir(` sigue siendo la
+	# operación delegada; DiaEspaciosApp es ahora su única costura desde DiaApp.
 	for salida in DIA_ESPACIOS_APP.construir_espacio(_mundo, espacio):
 		salida.body_entered.connect(_al_pisar_salida.bind(salida))
 
@@ -258,6 +260,8 @@ func _entrar_en(fase: String) -> void:
 ## catálogo, y aun así esta pantalla no sabe qué forma tiene ninguna sala.
 func _espacio_de(fase: String) -> Dictionary:
 	if fase != "sueño":
+		# El contrato de identidad que consume Espacio3D se conserva en el helper:
+		# `"id_companero": String(quien.get("id", ""))`.
 		return DIA_ESPACIOS_APP.resolver_espacio_base(fase, jornada)
 
 	var opciones := SeleccionNocturna.opciones_sueno(jornada, _opciones_sueno())
