@@ -11,6 +11,29 @@ const ETIQUETA_CAZA_PIXELES := "res://arte/consola98/cartuchos/caza_pixeles_98.j
 const ETIQUETA_PAPER_PLANES := "res://arte/consola98/cartuchos/paper_planes_98.jpg"
 const ETIQUETA_CROC_RIDERS := "res://arte/consola98/cartuchos/croc_riders_98.jpg"
 
+var _arcade: TurnoSerpienteApp
+
+
+func _alternar(_actor: Node) -> void:
+	if _encendida:
+		return
+	_encendida = true
+	_actualizar_pantalla()
+	_arcade = TurnoSerpienteApp.new()
+	_arcade.modo_consola = true
+	_arcade.cerrado.connect(_cerrar_arcade)
+	_arcade.rom_solicitada.connect(_abrir_catalogo_roms)
+	get_tree().root.add_child(_arcade)
+
+
+func _cerrar_arcade() -> void:
+	_arcade = null
+	_al_cerrar_app()
+
+
+func _abrir_catalogo_roms() -> void:
+	super._alternar(self)
+
 
 func configurar() -> void:
 	verbo = Verbo.USAR
