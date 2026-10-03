@@ -6,6 +6,7 @@ RUTA = Path("godot/guion/auditorias.gd")
 PARTIDA = Path("godot/guion/partida.gd")
 PROMETEO = Path("godot/guion/prometeo.gd")
 DIA = Path("godot/guion/dia_app.gd")
+TRANSICION = Path("godot/guion/dia_transicion_app.gd")
 CICLO_LABORAL = Path("godot/guion/dia_ciclo_laboral_app.gd")
 ASCENSOR = Path("godot/guion/dia_ascensor_app.gd")
 SUENO = Path("godot/guion/dia_sueno_app.gd")
@@ -168,22 +169,23 @@ class AuditoriasTest(unittest.TestCase):
     
     def test_sueno_completo_distingue_salidas_normales_y_forzadas(self):
         dia = DIA.read_text(encoding="utf-8")
+        transicion = TRANSICION.read_text(encoding="utf-8")
         gato = GATO.read_text(encoding="utf-8")
     
-        normal = dia.split('match jornada["fase"]:', 1)[1].split(
-            "## Reconoce una noche completada", 1
-        )[0]
-        sello = "_registrar_despertar_reglamentario()"
-        resolver_ok = "Auditorias.resolver_fin_sueno(partida.estado, true)"
+        normal = transicion.split('"sueño":', 1)[1].split("\n\t\t_:", 1)[0]
+        sello = '_llamar(acciones, "registrar_despertar")'
+        resolver_ok = "Auditorias.resolver_fin_sueno(estado_partida, true)"
         despertar = "Jornada.despertar(jornada)"
         assert sello in normal and resolver_ok in normal and despertar in normal
         assert normal.index(sello) < normal.index(resolver_ok) < normal.index(despertar)
+        assert '"registrar_despertar": Callable(self, "_registrar_despertar_reglamentario")' in dia
     
         objetivos = gato.split("func _resolver_objetivos_sueno", 1)[1].split(
             "func registrar_objetivo_puzzle_onirico", 1
         )[0]
-        assert resolver_ok in objetivos
-        assert objetivos.index(resolver_ok) < objetivos.index(despertar)
+        resolver_objetivos = "Auditorias.resolver_fin_sueno(partida.estado, true)"
+        assert resolver_objetivos in objetivos
+        assert objetivos.index(resolver_objetivos) < objetivos.index(despertar)
     
         proceso = dia.split("func _process(delta: float) -> void:", 1)[1].split(
             "func _guardar_o_avisar", 1

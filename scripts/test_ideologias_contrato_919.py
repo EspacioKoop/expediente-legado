@@ -4,6 +4,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 DIA = ROOT / "godot/guion/dia_app.gd"
+TRANSICION = ROOT / "godot/guion/dia_transicion_app.gd"
 DIA_GATO = ROOT / "godot/guion/dia_gato_app.gd"
 PROMETEO = ROOT / "godot/guion/prometeo.gd"
 
@@ -12,14 +13,26 @@ class IdeologiasContrato919Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.dia = DIA.read_text(encoding="utf-8")
+        cls.transicion = TRANSICION.read_text(encoding="utf-8")
         cls.dia_gato = DIA_GATO.read_text(encoding="utf-8")
         cls.prometeo = PROMETEO.read_text(encoding="utf-8")
 
     def test_el_despertar_normal_y_forzado_limpian_solo_exposicion_diaria(self):
-        llamada = "Prometeo.reiniciar_exposicion_ideologica_diaria(partida.estado)"
-        self.assertEqual(self.dia.count(llamada), 2)
-        self.assertIn("var dia := Jornada.despertar(jornada)\n\t\t\t\t" + llamada, self.dia)
-        self.assertIn("var dia := Jornada.despertar_de_golpe(jornada)\n\t\t" + llamada, self.dia)
+        llamada_forzada = "Prometeo.reiniciar_exposicion_ideologica_diaria(partida.estado)"
+        llamada_normal = "Prometeo.reiniciar_exposicion_ideologica_diaria(estado_partida)"
+        proceso = self.dia.split("func _process(delta: float) -> void:", 1)[1].split(
+            "func _guardar_o_avisar", 1
+        )[0]
+        self.assertEqual(proceso.count(llamada_forzada), 1)
+        self.assertEqual(self.transicion.count(llamada_normal), 1)
+        self.assertIn(
+            "var dia := Jornada.despertar(jornada)\n\t\t\t\t" + llamada_normal,
+            self.transicion,
+        )
+        self.assertIn(
+            "var dia := Jornada.despertar_de_golpe(jornada)\n\t\t" + llamada_forzada,
+            proceso,
+        )
 
     def test_la_ruta_de_objetivos_oniricos_aplica_el_mismo_reset(self):
         llamada = "Prometeo.reiniciar_exposicion_ideologica_diaria(partida.estado)"

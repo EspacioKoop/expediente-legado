@@ -6,6 +6,7 @@ ROOT = Path(__file__).resolve().parents[1]
 IMPREVISTOS = ROOT / "godot" / "guion" / "imprevistos.gd"
 JORNADA = ROOT / "godot" / "guion" / "jornada.gd"
 DIA = ROOT / "godot" / "guion" / "dia_app.gd"
+TRANSICION = ROOT / "godot" / "guion" / "dia_transicion_app.gd"
 SUENO = ROOT / "godot" / "guion" / "dia_sueno_app.gd"
 TEXTOS = ROOT / "godot" / "datos" / "textos.csv"
 SUITE = ROOT / "godot" / "pruebas" / "pruebas.gd"
@@ -17,6 +18,7 @@ class ImprevistosVueltaTest(unittest.TestCase):
         cls.imprevistos = IMPREVISTOS.read_text(encoding="utf-8")
         cls.jornada = JORNADA.read_text(encoding="utf-8")
         cls.dia = DIA.read_text(encoding="utf-8")
+        cls.transicion = TRANSICION.read_text(encoding="utf-8")
         cls.sueno = SUENO.read_text(encoding="utf-8")
         cls.textos = TEXTOS.read_text(encoding="utf-8")
         cls.suite = SUITE.read_text(encoding="utf-8")
@@ -48,7 +50,11 @@ class ImprevistosVueltaTest(unittest.TestCase):
         self.assertIn('"imprevisto": imprevisto', dormir)
 
     def test_el_jugador_recibe_feedback_del_gasto(self):
-        self.assertIn("_aviso_imprevisto(noche)", self.dia)
+        self.assertIn(
+            '"aviso_imprevisto": Callable(self, "_aviso_imprevisto")',
+            self.dia,
+        )
+        self.assertIn("aviso_imprevisto.call(noche)", self.transicion)
         self.assertIn("_aviso_imprevisto(noche)", self.sueno)
         self.assertIn("DIA_IMPREVISTO_PAGADO", self.textos)
         self.assertIn("DIA_IMPREVISTO_IMPAGADO", self.textos)

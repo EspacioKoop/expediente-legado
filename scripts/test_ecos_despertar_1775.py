@@ -14,6 +14,7 @@ RUNTIME = ROOT / "godot" / "guion" / "ecos_despertar_runtime.gd"
 PRESENTADOR = ROOT / "godot" / "guion" / "eco_despertar_presentacion_3d.gd"
 DIA_REACTIVO = ROOT / "godot" / "guion" / "dia_sueno_reactivo_app.gd"
 DIA_APP = ROOT / "godot" / "guion" / "dia_app.gd"
+DIA_TRANSICION = ROOT / "godot" / "guion" / "dia_transicion_app.gd"
 DIA_GATO = ROOT / "godot" / "guion" / "dia_gato_app.gd"
 SUENO_COMBATE = ROOT / "godot" / "guion" / "sueno_combate.gd"
 PRUEBA = "res://pruebas/pruebas_ecos_despertar_1775.gd"
@@ -28,6 +29,7 @@ class EcosDespertar1775Test(unittest.TestCase):
         cls.presentador = PRESENTADOR.read_text(encoding="utf-8")
         cls.dia_reactivo = DIA_REACTIVO.read_text(encoding="utf-8")
         cls.dia_app = DIA_APP.read_text(encoding="utf-8")
+        cls.dia_transicion = DIA_TRANSICION.read_text(encoding="utf-8")
         cls.dia_gato = DIA_GATO.read_text(encoding="utf-8")
         cls.sueno_combate = SUENO_COMBATE.read_text(encoding="utf-8")
 
@@ -72,13 +74,17 @@ class EcosDespertar1775Test(unittest.TestCase):
 
     def test_cuatro_rutas_preparan_antes_de_despertar(self):
         preparar = r"EcosDespertarRuntime\.preparar_despertar\(jornada\)"
-        self.assertEqual(2, len(re.findall(preparar, self.dia_app)))
+        self.assertEqual(1, len(re.findall(preparar, self.dia_transicion)))
         self.assertRegex(
-            self.dia_app,
+            self.dia_transicion,
             preparar + r"\s+var dia := Jornada\.despertar\(jornada\)",
         )
+        proceso = self.dia_app.split("func _process(delta: float) -> void:", 1)[1].split(
+            "func _guardar_o_avisar", 1
+        )[0]
+        self.assertEqual(1, len(re.findall(preparar, proceso)))
         self.assertRegex(
-            self.dia_app,
+            proceso,
             preparar + r"\s+var dia := Jornada\.despertar_de_golpe\(jornada\)",
         )
         self.assertEqual(1, len(re.findall(preparar, self.dia_gato)))

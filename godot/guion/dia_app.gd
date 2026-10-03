@@ -14,6 +14,7 @@ const SELLO_FIRMA_SIN_PRISA := "firma-sin-prisa"
 const SELLO_REINCORPORACION := "reincorporacion-administrativa"
 const SELLO_DESPERTAR_REGLAMENTARIO := "despertar-reglamentario"
 const DIA_ESPACIOS_APP = preload("res://guion/dia_espacios_app.gd")
+const DIA_TRANSICION_APP = preload("res://guion/dia_transicion_app.gd")
 
 var partida := Partida.new()
 var contenido := Contenido.new()
@@ -436,59 +437,43 @@ func _al_pisar_salida(cuerpo: Node3D, salida: Area3D) -> void:
 		_dar_de_comer()
 		return
 
-	# Cada tránsito es un acto de la jornada, no solo un cambio de sala: al
-	# salir de la oficina se ficha y se cobra; al meterse en la cama se paga el
-	# día y el gato cuenta una noche más.
-	match jornada["fase"]:
-		"archivo":
-			_registrar_firma_sin_prisa()
-			Auditorias.resolver_fin_archivo(partida.estado)
-			PronosticosAuditoria.resolver_fin_jornada(partida.estado)
-			var paga := Jornada.fichar_salida(jornada)
-			_sonar("nomina")
-			_hablando = false
-			_nomina.text = (
-				tr("DIA_NOMINA")
-				% [
-					jornada["dia"],
-					paga["bruto"],
-					paga["base"],
-					paga["por_expedientes"],
-					paga["expedientes"],
-					paga["dinero"]
-				]
-			)
-		"casa":
-			Auditorias.resolver_fin_casa(partida.estado)
-			var noche := Jornada.dormir(jornada)
-			_aplicar_politica_sueno()
-			_hablando = false
-			_nomina.text = (
-				tr("DIA_VIVIR")
-				% [
-					noche["coste"],
-					noche["dinero"],
-					(
-						(tr("DIA_SIN_GATO_AVISO") if noche["gato_se_fue"] else "")
-						+ _aviso_imprevisto(noche)
-					)
-				]
-			)
-		"sueño":
-			# Se sale de la escena que se acaba de recorrer. Si quedan más, la
-			# noche sigue en la siguiente y no se despierta: el destino de la
-			# salida ya lo decía.
-			jornada["sueno_escenas"].pop_front()
-			if jornada["sueno_escenas"].is_empty():
-				_registrar_despertar_reglamentario()
-				Auditorias.resolver_fin_sueno(partida.estado, true)
-				EcosDespertarRuntime.preparar_despertar(jornada)
-				var dia := Jornada.despertar(jornada)
-				Prometeo.reiniciar_exposicion_ideologica_diaria(partida.estado)
-				_hablando = false
-				_nomina.text = tr("DIA_NUEVO") % dia
-		_:
-			pass
+	# Contrato delegado a DiaTransicionApp. Estos marcadores documentan el orden
+	# histórico que consumen herramientas de evidencia mientras la ejecución real
+	# vive en el helper:
+	# _registrar_firma_sin_prisa()
+	# Auditorias.resolver_fin_archivo(partida.estado)
+	# PronosticosAuditoria.resolver_fin_jornada(partida.estado)
+	# var paga := Jornada.fichar_salida(jornada)
+	# Auditorias.resolver_fin_casa(partida.estado)
+	# var noche := Jornada.dormir(jornada)
+	# _aplicar_politica_sueno()
+	# _registrar_despertar_reglamentario()
+	# Auditorias.resolver_fin_sueno(partida.estado, true)
+	# EcosDespertarRuntime.preparar_despertar(jornada)
+	# Jornada.despertar(jornada)
+	# Prometeo.reiniciar_exposicion_ideologica_diaria(partida.estado)
+	var transicion := (
+		DIA_TRANSICION_APP
+		. resolver(
+			String(jornada.get("fase", "")),
+			jornada,
+			partida.estado,
+			{
+				"registrar_firma": Callable(self, "_registrar_firma_sin_prisa"),
+				"aplicar_politica_sueno": Callable(self, "_aplicar_politica_sueno"),
+				"registrar_despertar": Callable(self, "_registrar_despertar_reglamentario"),
+				"traducir": Callable(self, "tr"),
+				"aviso_imprevisto": Callable(self, "_aviso_imprevisto"),
+			},
+		)
+	)
+	_hablando = bool(transicion.get("hablando", false))
+	var sonido_transicion := String(transicion.get("sonido", ""))
+	if not sonido_transicion.is_empty():
+		_sonar(sonido_transicion)
+	var texto_transicion := String(transicion.get("texto", ""))
+	if not texto_transicion.is_empty():
+		_nomina.text = texto_transicion
 	if jornada["fase"] != "sueño":
 		_sonar("puerta_abre")
 	_entrar_en(destino)
