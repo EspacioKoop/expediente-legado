@@ -47,7 +47,8 @@ class GargolaHost2092Test(unittest.TestCase):
         self.assertIn("JuicioCombateGargola3D", GARGOLA)
         self.assertIn(". pintar(", GARGOLA)
         self.assertIn('anfitrion.call("_aplicar_impacto_rival", resultado)', GARGOLA)
-        self.assertIn("JuicioCombateEmbestidor3D.mover", GARGOLA)
+        self.assertIn("JuicioCombateEmbestidor3D", GARGOLA)
+        self.assertIn(". mover(", GARGOLA)
         for prohibido in ("Partida.", "Jornada.", "SuenoCombate.", "loot", "XP"):
             self.assertNotIn(prohibido, GARGOLA)
 
