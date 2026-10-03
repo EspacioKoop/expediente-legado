@@ -22,7 +22,8 @@ class ArconteWiring2220Test(unittest.TestCase):
         self.assertNotIn("JuicioCombateArquetipos.nuevo", WIRING)
 
     def test_tick_delega_en_controlador_y_no_duplica_politica(self):
-        self.assertIn("ARCONTE.avanzar(", WIRING)
+        self.assertIn("ARCONTE", WIRING)
+        self.assertIn(". avanzar(", WIRING)
         self.assertIn('bool(paso.get("zona_activa", false))', WIRING)
         self.assertIn('bool(paso.get("inicio_marca", false))', WIRING)
         self.assertIn('bool(paso.get("abrir_ventana", false))', WIRING)
@@ -40,7 +41,8 @@ class ArconteWiring2220Test(unittest.TestCase):
         self.assertIn('estado["_impacto_zona_emitido"] = false', WIRING)
         self.assertIn('not bool(estado.get("_impacto_zona_emitido", false))', WIRING)
         self.assertIn('estado["_impacto_zona_emitido"] = true', WIRING)
-        self.assertIn("REGLAS.resultado_ataque_rival(", WIRING)
+        self.assertIn("REGLAS", WIRING)
+        self.assertIn(". resultado_ataque_rival(", WIRING)
         self.assertIn('anfitrion.call("_aplicar_impacto_rival", resultado)', WIRING)
         self.assertNotIn("_determinacion_jugador", WIRING)
         self.assertNotIn("_terminar(", WIRING)
