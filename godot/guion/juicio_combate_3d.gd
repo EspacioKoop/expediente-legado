@@ -23,6 +23,7 @@ const ARQUETIPOS = preload("res://guion/juicio_combate_arquetipos.gd")
 const ARQUETIPO_HOST = preload("res://guion/juicio_combate_arquetipo_host.gd")
 const HOSTIGADOR_3D = preload("res://guion/juicio_combate_hostigador_3d.gd")
 const BLOQUEADOR_3D = preload("res://guion/juicio_combate_bloqueador_3d.gd")
+const ENJAMBRE_RUNTIME = preload("res://guion/juicio_combate_enjambre_runtime.gd")
 const DETERMINACION_BASE := REGLAS.DETERMINACION_BASE
 const DETERMINACION_MINIMA_RIVAL := REGLAS.DETERMINACION_MINIMA_RIVAL
 const VELOCIDAD_JUGADOR := 4.8
@@ -52,6 +53,8 @@ var _ambiental_1772: Dictionary = {}
 var _empujar_1772: Dictionary = {}
 var _volcar_1772: Dictionary = {}
 var _arquetipo: Dictionary = {}
+var _enjambre_unidades: Array = []
+var _enjambre_actores: Array = []
 var _guardia_rota := false
 var _escudo_guardia: MeshInstance3D
 var _linea_hostigador: MeshInstance3D
@@ -370,6 +373,10 @@ func _mover_jugador(delta: float) -> void:
 
 
 func _mover_rival(delta: float) -> void:
+	if not _enjambre_unidades.is_empty():
+		_mover_enjambre(delta)
+		_actualizar_proxy_enjambre()
+		return
 	if _ataque_rival_pendiente:
 		_actualizar_telegrafo_rival(delta)
 		return
@@ -519,13 +526,18 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 	if not compromiso_religion_bloqueante(_compromisos_religion, _rival_inicio_agresion).is_empty():
 		return
 	_recarga_jugador = recarga
-	var hacia := _rival.position - _jugador.position
+	var objetivo := _objetivo_rival()
+	if objetivo.is_empty():
+		return
+	var cuerpo: CharacterBody3D = objetivo["cuerpo"]
+	var figura: Node3D = objetivo["figura"]
+	var hacia := cuerpo.position - _jugador.position
 	hacia.y = 0.0
 	if hacia.length() > 0.01:
 		_jugador.rotation.y = atan2(hacia.x, hacia.z)
 	if hacia.length() > alcance:
 		return
-	if _bloquear_golpe(fuerte):
+	if int(objetivo["indice"]) < 0 and _bloquear_golpe(fuerte):
 		return
 
 	var efectos_jungianos := JUNGIANO.efectos_activos(self)
@@ -557,17 +569,29 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 		_contraataque = 0
 
 	var dano := int(impacto["dano"])
-	_determinacion_rival = maxi(0, _determinacion_rival - dano)
+	var indice_objetivo := int(objetivo["indice"])
+	if indice_objetivo < 0:
+		_determinacion_rival = maxi(0, _determinacion_rival - dano)
+	else:
+		var unidad: Dictionary = _enjambre_unidades[indice_objetivo].duplicate(true)
+		unidad["determinacion"] = maxi(0, int(unidad.get("determinacion", 0)) - dano)
+		_enjambre_unidades[indice_objetivo] = unidad
+		if int(unidad["determinacion"]) <= 0:
+			_retirar_actor_enjambre(indice_objetivo)
+		_determinacion_rival = _enjambre_vivos()
+		_actualizar_proxy_enjambre()
 	_aplicar_curacion_arquetipo(efectos_jungianos)
 	var segundos_enredo := float(impacto["enredo_segundos"])
 	if segundos_enredo > 0.0:
 		_enredo = maxf(_enredo, segundos_enredo)
-	_reaccion(_figura_rival, 0.25 + float(dano) * 0.08)
+	if is_instance_valid(figura):
+		_reaccion(figura, 0.25 + float(dano) * 0.08)
+		JuicioCombateEscenografia3D.gesto(figura, "encajar")
 	JuicioCombateEscenografia3D.gesto(_figura_jugador, "discutir")
-	JuicioCombateEscenografia3D.gesto(_figura_rival, "encajar")
 	_actualizar_hud()
-	if _determinacion_rival <= 0 and not _intentar_retorno_rival():
-		_terminar(true)
+	if _determinacion_rival <= 0:
+		if indice_objetivo >= 0 or not _intentar_retorno_rival():
+			_terminar(true)
 
 
 func _intentar_retorno_rival() -> bool:
@@ -585,7 +609,23 @@ func _intentar_retorno_rival() -> bool:
 
 
 func _montar_arquetipo() -> void:
-	if not ARQUETIPO_HOST.soportado(arquetipo_onirico) or _rival == null:
+	if _rival == null:
+		return
+	if arquetipo_onirico == ARQUETIPOS.ENJAMBRE:
+		_enjambre_unidades = ARQUETIPO_HOST.nuevo_enjambre(_raiz, 3)
+		var clave := String(_acusado.get("id", _acusado.get("nombre", "enjambre")))
+		var montado := ARENA.montar_enjambre(
+			self,
+			clave,
+			JuicioCombateEscenografia3D.color_mito(_mito_id),
+			_enjambre_unidades.size(),
+		)
+		_enjambre_actores = montado.get("actores", [])
+		_rival.visible = false
+		_determinacion_rival = _enjambre_vivos()
+		_actualizar_proxy_enjambre()
+		return
+	if not ARQUETIPO_HOST.soportado(arquetipo_onirico):
 		return
 	_arquetipo = ARQUETIPOS.nuevo(arquetipo_onirico, _raiz)
 	if arquetipo_onirico == ARQUETIPOS.BLOQUEADOR:
@@ -596,6 +636,9 @@ func _montar_arquetipo() -> void:
 
 
 func _avanzar_arquetipo(delta: float) -> void:
+	if not _enjambre_unidades.is_empty():
+		_avanzar_enjambre(delta)
+		return
 	if _arquetipo.is_empty():
 		return
 	if String(_arquetipo.get("tipo", "")) == ARQUETIPOS.HOSTIGADOR:
@@ -627,6 +670,194 @@ func _avanzar_arquetipo(delta: float) -> void:
 		_arquetipo, _rival.rotation.y, _rival.position, _jugador.position, delta
 	)
 	_pintar_guardia()
+
+
+func _avanzar_enjambre(delta: float) -> void:
+	var paso := ENJAMBRE_RUNTIME.tick(
+		_enjambre_unidades,
+		delta,
+		ARQUETIPO_HOST.presupuesto_enjambre(),
+	)
+	_enjambre_unidades = paso.get("unidades", _enjambre_unidades)
+	var resultados: Array = paso.get("resultados", [])
+	for indice in range(_enjambre_unidades.size()):
+		var actor := _actor_enjambre(indice)
+		if actor.is_empty():
+			continue
+		var aviso: MeshInstance3D = actor.get("aviso")
+		if aviso == null or not is_instance_valid(aviso):
+			continue
+		var resultado: Dictionary = resultados[indice] if indice < resultados.size() else {}
+		aviso.visible = (
+			int(_enjambre_unidades[indice].get("determinacion", 0)) > 0
+			and String(resultado.get("telegraph", "")) == "ataque_corto"
+		)
+
+	for indice in paso.get("inicio_ataque", []):
+		var actor := _actor_enjambre(int(indice))
+		if actor.is_empty():
+			continue
+		var cuerpo: CharacterBody3D = actor.get("cuerpo")
+		if cuerpo == null or not is_instance_valid(cuerpo):
+			continue
+		_rival_inicio_agresion = true
+		var distancia := (cuerpo.position - _jugador.position).length()
+		_aplicar_impacto_rival(resultado_ataque_rival(distancia, _esquiva))
+		if _acabado:
+			break
+
+	for indice in paso.get("abrir_ventana", []):
+		var actor := _actor_enjambre(int(indice))
+		if actor.is_empty():
+			continue
+		var figura: Node3D = actor.get("figura")
+		if figura != null and is_instance_valid(figura):
+			JuicioCombateEscenografia3D.gesto(figura, "encajar")
+
+
+func _mover_enjambre(delta: float) -> void:
+	for indice in range(_enjambre_unidades.size()):
+		var unidad: Dictionary = _enjambre_unidades[indice]
+		if int(unidad.get("determinacion", 0)) <= 0:
+			continue
+		var actor := _actor_enjambre(indice)
+		if actor.is_empty():
+			continue
+		var cuerpo: CharacterBody3D = actor.get("cuerpo")
+		var figura: Node3D = actor.get("figura")
+		if cuerpo == null or not is_instance_valid(cuerpo):
+			continue
+		var hacia := _jugador.position - cuerpo.position
+		hacia.y = 0.0
+		if hacia.length() > 0.01:
+			cuerpo.rotation.y = atan2(hacia.x, hacia.z)
+		if String(unidad.get("estado", "")) != ARQUETIPOS.ESPERA:
+			if figura != null and is_instance_valid(figura):
+				JuicioCombateEscenografia3D.andar(figura, false)
+			continue
+		var movimiento := (
+			RIVAL
+			. plan_movimiento(
+				_jugador.position,
+				cuerpo.position,
+				0.0,
+				_velocidad_rival,
+				_enredo,
+				_ritual,
+				delta,
+			)
+		)
+		if figura != null and is_instance_valid(figura):
+			JuicioCombateEscenografia3D.andar(figura, bool(movimiento["mover"]))
+		if bool(movimiento["mover"]):
+			var desplazamiento: Vector3 = movimiento["desplazamiento"]
+			cuerpo.position = _limitar(cuerpo.position + desplazamiento)
+
+
+func _objetivo_rival() -> Dictionary:
+	if _enjambre_unidades.is_empty():
+		return {"indice": -1, "cuerpo": _rival, "figura": _figura_rival}
+	var mejor := {}
+	var mejor_distancia := INF
+	for indice in range(_enjambre_unidades.size()):
+		if int(_enjambre_unidades[indice].get("determinacion", 0)) <= 0:
+			continue
+		var actor := _actor_enjambre(indice)
+		if actor.is_empty():
+			continue
+		var cuerpo: CharacterBody3D = actor.get("cuerpo")
+		if cuerpo == null or not is_instance_valid(cuerpo):
+			continue
+		var distancia := (cuerpo.position - _jugador.position).length_squared()
+		if distancia < mejor_distancia:
+			mejor_distancia = distancia
+			mejor = {
+				"indice": indice,
+				"cuerpo": cuerpo,
+				"figura": actor.get("figura"),
+			}
+	return mejor
+
+
+func _actor_enjambre(indice: int) -> Dictionary:
+	if indice < 0 or indice >= _enjambre_actores.size():
+		return {}
+	var actor = _enjambre_actores[indice]
+	return actor if actor is Dictionary else {}
+
+
+func _enjambre_vivos() -> int:
+	var vivos := 0
+	for unidad in _enjambre_unidades:
+		if unidad is Dictionary and int(unidad.get("determinacion", 0)) > 0:
+			vivos += 1
+	return vivos
+
+
+func _retirar_actor_enjambre(indice: int) -> void:
+	var actor := _actor_enjambre(indice)
+	if actor.is_empty():
+		return
+	var aviso: MeshInstance3D = actor.get("aviso")
+	if aviso != null and is_instance_valid(aviso):
+		aviso.visible = false
+	var cuerpo: CharacterBody3D = actor.get("cuerpo")
+	if cuerpo != null and is_instance_valid(cuerpo):
+		cuerpo.queue_free()
+	actor["cuerpo"] = null
+	actor["figura"] = null
+	actor["aviso"] = null
+	_enjambre_actores[indice] = actor
+
+
+func _actualizar_proxy_enjambre() -> void:
+	if _enjambre_unidades.is_empty() or _rival == null:
+		return
+	var centro := Vector3.ZERO
+	var cuerpos := 0
+	for indice in range(_enjambre_unidades.size()):
+		if int(_enjambre_unidades[indice].get("determinacion", 0)) <= 0:
+			continue
+		var actor := _actor_enjambre(indice)
+		var cuerpo: CharacterBody3D = actor.get("cuerpo") if not actor.is_empty() else null
+		if cuerpo == null or not is_instance_valid(cuerpo):
+			continue
+		centro += cuerpo.position
+		cuerpos += 1
+	if cuerpos > 0:
+		_rival.position = centro / float(cuerpos)
+
+
+func _ocultar_avisos_enjambre() -> void:
+	for actor in _enjambre_actores:
+		if actor is Dictionary:
+			var aviso: MeshInstance3D = actor.get("aviso")
+			if aviso != null and is_instance_valid(aviso):
+				aviso.visible = false
+
+
+func _figura_final_rival() -> Node3D:
+	if not _enjambre_unidades.is_empty():
+		for indice in range(_enjambre_unidades.size()):
+			if int(_enjambre_unidades[indice].get("determinacion", 0)) <= 0:
+				continue
+			var actor := _actor_enjambre(indice)
+			var figura: Node3D = actor.get("figura") if not actor.is_empty() else null
+			if figura != null and is_instance_valid(figura):
+				return figura
+	return _figura_rival
+
+
+func _limpiar_enjambre() -> void:
+	for indice in range(_enjambre_actores.size()):
+		var actor := _actor_enjambre(indice)
+		if actor.is_empty():
+			continue
+		var cuerpo: CharacterBody3D = actor.get("cuerpo")
+		if cuerpo != null and is_instance_valid(cuerpo):
+			cuerpo.queue_free()
+	_enjambre_actores.clear()
+	_enjambre_unidades.clear()
 
 
 func _bloquear_golpe(fuerte: bool) -> bool:
@@ -677,9 +908,11 @@ func _terminar(gano: bool, inmediato: bool = false) -> void:
 	_ataque_rival_pendiente = false
 	JUNGIANO.salir_combate(self)
 	_ocultar_aviso_ataque()
+	_ocultar_avisos_enjambre()
+	var figura_final := _figura_final_rival()
 	var espera := maxf(
 		JuicioCombateEscenografia3D.gesto(_figura_jugador, "celebrar" if gano else "nervioso"),
-		JuicioCombateEscenografia3D.gesto(_figura_rival, "nervioso" if gano else "aplaudir"),
+		JuicioCombateEscenografia3D.gesto(figura_final, "nervioso" if gano else "aplaudir"),
 	)
 	# El gesto final se ve antes de cerrar: quien escucha `terminado` libera la
 	# escena en ese mismo fotograma (VentanillaApp). El resultado ya es firme
@@ -687,6 +920,7 @@ func _terminar(gano: bool, inmediato: bool = false) -> void:
 	espera = minf(espera, PAUSA_FINAL_MAX)
 	if not inmediato and espera > 0.0 and is_inside_tree():
 		await get_tree().create_timer(espera).timeout
+	_limpiar_enjambre()
 	terminado.emit(gano)
 
 
