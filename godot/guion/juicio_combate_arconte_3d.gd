@@ -40,7 +40,7 @@ static func avanzar(
 	var resultado := CONTROLADOR.avanzar(
 		unidad, delta, posicion_rival, posicion_jugador, zonas, zonas_activas, queda_salida_valida
 	)
-	var nueva := resultado["unidad"]
+	var nueva: Dictionary = resultado["unidad"]
 	var estado := String(nueva.get("estado", ""))
 
 	_actualizar_estetica_umbral(zonas, nueva, estado)
