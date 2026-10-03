@@ -43,11 +43,33 @@ func abrir(
 	_ambiente = ambiente
 	_preparar_mundo()
 
+	var plano := String(decision.get("plano", ""))
+	var arquetipo := (
+		JuicioCombateArquetipoHost
+		. elegir(
+			String(objetivo.get("id", "")),
+			raiz,
+			plano,
+		)
+	)
+	var objetivo_combate := objetivo.duplicate(true)
+	var variante := (
+		JuicioCombateVarianteOnirica
+		. elegir(
+			arquetipo,
+			partida.estado,
+			jornada,
+			plano,
+		)
+	)
+	if not variante.is_empty():
+		objetivo_combate["_variante_onirica"] = variante
+
 	_combate = JuicioCombate3D.new()
 	(
 		_combate
 		. configurar(
-			objetivo,
+			objetivo_combate,
 			0,
 			bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false)),
 			raiz,
@@ -59,14 +81,7 @@ func abrir(
 	_combate.interaccion_ambiental_habilitada = true
 	# #1771: solo las figuras del sueño pueden llegar con arquetipo; la
 	# realidad y la ventanilla conservan el duelo clásico.
-	_combate.arquetipo_onirico = (
-		JuicioCombateArquetipoHost
-		. elegir(
-			String(objetivo.get("id", "")),
-			raiz,
-			String(decision.get("plano", "")),
-		)
-	)
+	_combate.arquetipo_onirico = arquetipo
 	var al_terminar := (
 		_cerrar
 		. bind(
