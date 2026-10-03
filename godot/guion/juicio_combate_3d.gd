@@ -24,6 +24,7 @@ const ARQUETIPO_HOST = preload("res://guion/juicio_combate_arquetipo_host.gd")
 const HOSTIGADOR_3D = preload("res://guion/juicio_combate_hostigador_3d.gd")
 const BLOQUEADOR_3D = preload("res://guion/juicio_combate_bloqueador_3d.gd")
 const ENJAMBRE_HOST_3D = preload("res://guion/juicio_combate_enjambre_host_3d.gd")
+const RIVAL_MOVIMIENTO_3D = preload("res://guion/juicio_combate_rival_movimiento_3d.gd")
 const DETERMINACION_BASE := REGLAS.DETERMINACION_BASE
 const DETERMINACION_MINIMA_RIVAL := REGLAS.DETERMINACION_MINIMA_RIVAL
 const VELOCIDAD_JUGADOR := 4.8
@@ -372,57 +373,7 @@ func _mover_jugador(delta: float) -> void:
 
 
 func _mover_rival(delta: float) -> void:
-	if not _enjambre.is_empty():
-		ENJAMBRE_HOST_3D.mover(
-			_enjambre,
-			_jugador.position,
-			_radio_arena,
-			_velocidad_rival,
-			_enredo,
-			_ritual,
-			delta,
-		)
-		_rival.position = ENJAMBRE_HOST_3D.centro(_enjambre, _rival.position)
-		return
-	if _ataque_rival_pendiente:
-		_actualizar_telegrafo_rival(delta)
-		return
-	if String(_arquetipo.get("tipo", "")) == ARQUETIPOS.HOSTIGADOR:
-		var host := HOSTIGADOR_3D.mover(
-			_jugador.position, _rival.position, _rival.rotation.y, _arquetipo, _radio_arena, delta
-		)
-		_rival.position = host["posicion"]
-		_rival.rotation.y = float(host["rotacion_y"])
-		JuicioCombateEscenografia3D.andar(_figura_rival, bool(host["andando"]))
-		return
-	# La apertura del bloqueador es la ventana del jugador: quieto y sin atacar,
-	# para que se lea sin texto que ahora se le puede golpear.
-	if not ARQUETIPO_HOST.permite_iniciar_ataque(_arquetipo):
-		JuicioCombateEscenografia3D.andar(_figura_rival, false)
-		return
-
-	var paso := (
-		RIVAL
-		. plan_movimiento(
-			_jugador.position,
-			_rival.position,
-			_estado_temporal.recarga_rival,
-			_velocidad_rival,
-			_enredo,
-			_ritual,
-			delta,
-		)
-	)
-	JuicioCombateEscenografia3D.andar(_figura_rival, bool(paso["mover"]))
-	if bool(paso["mover"]):
-		var desplazamiento: Vector3 = paso["desplazamiento"]
-		_rival.position = _limitar(_rival.position + desplazamiento)
-		# Con arquetipo, la orientación es la guardia y ya la gira la política.
-		if _arquetipo.is_empty():
-			_rival.rotation.y = float(paso["rotacion_y"])
-	elif bool(paso["iniciar_ataque"]):
-		_iniciar_ataque_rival()
-
+	RIVAL_MOVIMIENTO_3D.avanzar(self, delta)
 
 func _iniciar_ataque_rival() -> void:
 	if _ataque_rival_pendiente or _acabado or _tregua_religion_restante > 0.0:
