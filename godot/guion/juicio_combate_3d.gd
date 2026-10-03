@@ -375,6 +375,7 @@ func _mover_jugador(delta: float) -> void:
 func _mover_rival(delta: float) -> void:
 	RIVAL_MOVIMIENTO_3D.avanzar(self, delta)
 
+
 func _iniciar_ataque_rival() -> void:
 	if _ataque_rival_pendiente or _acabado or _tregua_religion_restante > 0.0:
 		return
