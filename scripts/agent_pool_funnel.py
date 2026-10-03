@@ -36,9 +36,18 @@ FASES: list[tuple[str, tuple[str, ...]]] = [
     ("pr_draft", ("Publicar PR draft y lanzar CI canonica",)),
 ]
 NOMBRES_FASE = [nombre for nombre, _ in FASES]
-PASO_PLAN_DELEGADO = "Buscar plan delegado por el nivel 2"
+PASOS_PLAN_DELEGADO = (
+    "Cargar plan delegado del nivel 2",
+    "Buscar plan delegado por el nivel 2",
+)
 PASOS_PLANIFICADOR = ("Plan Qwen", "Plan Gemini")
-JOB_WORKER_RE = re.compile(r"^run \((?P<issue>\d+), (?P<provider>[^,]+), (?P<worker>[^)]+)\) / worker$")
+# El backend se añadió a la matriz en #2082; el historial previo mantiene
+# tres campos. Ambos formatos deben agregarse bajo el mismo slot canónico.
+JOB_WORKER_RE = re.compile(
+    r"^run \((?P<issue>\d+),\s*(?P<provider>[A-Za-z0-9._-]+),\s*"
+    r"(?:(?P<backend>[A-Za-z0-9._-]+),\s*)?"
+    r"(?P<worker>[A-Za-z0-9._-]+)\) / worker$"
+)
 
 
 def fase_alcanzada(job: dict[str, Any]) -> str | None:
@@ -84,13 +93,13 @@ def origen_plan(job: dict[str, Any]) -> str | None:
         conclusion for paso, conclusion in conclusiones.items()
         if paso in PASOS_PLANIFICADOR
     ]
-    if not planificado and PASO_PLAN_DELEGADO not in conclusiones:
+    if not planificado and not any(paso in conclusiones for paso in PASOS_PLAN_DELEGADO):
         return None
     if any(conclusion != "skipped" for conclusion in planificado):
         return "generado"
     # Planificador omitido solo puede significar plan delegado si la búsqueda
     # del nivel 2 terminó bien; si no, el job no llegó a planificar de verdad.
-    if conclusiones.get(PASO_PLAN_DELEGADO) == "success":
+    if any(conclusiones.get(paso) == "success" for paso in PASOS_PLAN_DELEGADO):
         return "delegado"
     return None
 

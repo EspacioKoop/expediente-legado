@@ -25,6 +25,45 @@ COMPLETO = IMPLEMENTA + ["Validar diff y preflight", "Publicar PR draft y lanzar
 
 
 class EmbudoPoolTest(unittest.TestCase):
+    def test_jobs_actuales_con_backend_usan_worker_canonico(self):
+        publicado = job("qwen-primary", COMPLETO)
+        publicado["name"] = "run (2146, qwen, omniroute, qwen-primary) / worker"
+        fallido = job("qwen-fallback-2", IMPLEMENTA)
+        fallido["name"] = "run (2149, qwen, nvidia, qwen-fallback-2) / worker"
+        for muestra in (publicado, fallido):
+            muestra["steps"].append({
+                "name": "Cargar plan delegado del nivel 2", "conclusion": "success",
+            })
+        resultado = funnel.embudo([publicado, fallido])
+        self.assertEqual({"qwen-primary", "qwen-fallback-2"}, set(resultado["por_worker"]))
+        self.assertEqual(2, resultado["workers"])
+        self.assertEqual(1, resultado["embudo"]["pr_draft"])
+        self.assertEqual(2, resultado["por_origen"]["delegado"]["workers"])
+        self.assertEqual(1, resultado["por_origen"]["delegado"]["pr_draft"])
+        self.assertEqual(0.5, resultado["pr_rate"])
+
+    def test_mismo_slot_no_se_fragmenta_por_backend_ni_formato_historico(self):
+        muestras = [job("qwen-primary", COMPLETO) for _ in range(3)]
+        muestras[1]["name"] = "run (11, qwen, omniroute, qwen-primary) / worker"
+        muestras[2]["name"] = "run (12,qwen,custom,qwen-primary) / worker"
+        resultado = funnel.embudo(muestras)
+        self.assertEqual(["qwen-primary"], list(resultado["por_worker"]))
+        self.assertEqual(3, resultado["por_worker"]["qwen-primary"]["workers"])
+        self.assertEqual(3, resultado["por_worker"]["qwen-primary"]["pr_draft"])
+
+    def test_no_acepta_campos_extra_en_identidad_del_job(self):
+        muestra = job("qwen-primary", COMPLETO)
+        muestra["name"] = "run (10, qwen, custom, extra, qwen-primary) / worker"
+        self.assertEqual(0, funnel.embudo([muestra])["workers"])
+
+    def test_origen_actual_solo_cuenta_si_carga_plan_con_exito(self):
+        for conclusion, esperado in (("success", "delegado"), ("failure", None), ("skipped", None)):
+            with self.subTest(conclusion=conclusion):
+                muestra = job("qwen-primary", RESERVA, extra=[
+                    ("Cargar plan delegado del nivel 2", conclusion),
+                ])
+                self.assertEqual(esperado, funnel.origen_plan(muestra))
+
     def test_fase_mas_avanzada_de_cada_job(self):
         self.assertIsNone(funnel.fase_alcanzada(job("w", ["Validar issue y slot"])))
         self.assertEqual("arranca", funnel.fase_alcanzada(job("w", ARRANCA)))
@@ -124,6 +163,7 @@ class EmbudoPoolTest(unittest.TestCase):
                 with self.subTest(fase=fase, paso=paso):
                     self.assertIn(paso, nombres)
         self.assertIn("Replanificar pool tras desvio de CLAIM", nombres)
+        self.assertTrue(set(funnel.PASOS_PLAN_DELEGADO).intersection(nombres))
 
     def test_cli_con_jobs_descargados(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -137,6 +177,23 @@ class EmbudoPoolTest(unittest.TestCase):
             ).stdout
         self.assertIn("| pr_draft | 1 | 100% |", salida)
         self.assertIn("PR/worker: 100%.", salida)
+
+    def test_cli_json_con_nombre_y_plan_delegado_actuales(self):
+        muestra = job("qwen-primary", COMPLETO, extra=[
+            ("Cargar plan delegado del nivel 2", "success"),
+        ])
+        muestra["name"] = "run (2146, qwen, omniroute, qwen-primary) / worker"
+        with tempfile.TemporaryDirectory() as tmp:
+            datos = Path(tmp) / "jobs.json"
+            datos.write_text(json.dumps([muestra]), encoding="utf-8")
+            salida = subprocess.run(
+                [sys.executable, str(ROOT / "scripts/agent_pool_funnel.py"),
+                 "--jobs-json", str(datos), "--json"],
+                check=True, capture_output=True, text=True, timeout=10,
+            ).stdout
+        resultado = json.loads(salida)
+        self.assertEqual(1, resultado["por_worker"]["qwen-primary"]["pr_draft"])
+        self.assertEqual(1, resultado["por_origen"]["delegado"]["workers"])
 
 
 if __name__ == "__main__":
