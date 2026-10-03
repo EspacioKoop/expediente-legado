@@ -629,12 +629,15 @@ func _abrir_expediente() -> void:
 		return
 	if not _guardar_o_avisar(""):
 		return
-	_pantalla = DIA_EXPEDIENTE_APP.abrir(
-		self,
-		_caminante,
-		_nomina,
-		Callable(self, "_cerrar_expediente"),
-		Callable(self, "tr"),
+	_pantalla = (
+		DIA_EXPEDIENTE_APP
+		. abrir(
+			self,
+			_caminante,
+			_nomina,
+			Callable(self, "_cerrar_expediente"),
+			Callable(self, "tr"),
+		)
 	)
 	if _pantalla == null:
 		return
@@ -736,11 +739,14 @@ func _cerrar_expediente() -> void:
 	# puede haberla terminado y lo que vuelve del fichero sería ya la
 	# siguiente, indistinguible de la de antes.
 	var vuelta_antes := int(jornada.get("vuelta", 1))
-	DIA_EXPEDIENTE_APP.cerrar(
-		_pantalla,
-		_caminante,
-		_nomina,
-		Callable(self, "_sonar"),
+	(
+		DIA_EXPEDIENTE_APP
+		. cerrar(
+			_pantalla,
+			_caminante,
+			_nomina,
+			Callable(self, "_sonar"),
+		)
 	)
 	_pantalla = null
 
