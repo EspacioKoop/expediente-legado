@@ -21,7 +21,7 @@ static func avanzar(anfitrion, delta: float) -> void:
 		return
 
 	var arquetipo: Dictionary = anfitrion.get("_arquetipo")
-	if JuicioCombateGargolaHost3D.es_estado(arquetipo):
+	if JuicioCombateVarianteHost3D.controla_movimiento(arquetipo):
 		return
 
 	var enjambre: Dictionary = anfitrion.get("_enjambre")

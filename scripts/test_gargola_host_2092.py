@@ -9,6 +9,7 @@ HOST = (GUION / "juicio_combate_3d.gd").read_text(encoding="utf-8")
 GARGOLA = (GUION / "juicio_combate_gargola_host_3d.gd").read_text(encoding="utf-8")
 SELECTOR = (GUION / "juicio_combate_variante_onirica.gd").read_text(encoding="utf-8")
 MOVIMIENTO = (GUION / "juicio_combate_rival_movimiento_3d.gd").read_text(encoding="utf-8")
+ROUTER = (GUION / "juicio_combate_variante_host_3d.gd").read_text(encoding="utf-8")
 
 
 class GargolaHost2092Test(unittest.TestCase):
@@ -32,12 +33,11 @@ class GargolaHost2092Test(unittest.TestCase):
 
     def test_host_principal_solo_delega_y_sigue_bajo_limite(self):
         self.assertLessEqual(len(HOST.splitlines()), 1000)
-        self.assertIn(
-            'String(_acusado.get("_variante_onirica", "")) == JuicioCombateGargolaHost3D.VARIANTE',
-            HOST,
-        )
-        self.assertIn("JuicioCombateGargolaHost3D.montar(self, _rival, _raiz)", HOST)
-        self.assertIn("JuicioCombateGargolaHost3D.avanzar(self, _arquetipo, delta)", HOST)
+        self.assertIn("JuicioCombateVarianteHost3D.montar(", HOST)
+        self.assertIn("JuicioCombateVarianteHost3D.avanzar(", HOST)
+        self.assertIn("JuicioCombateGargolaHost3D.VARIANTE", ROUTER)
+        self.assertIn("JuicioCombateGargolaHost3D.montar(", ROUTER)
+        self.assertIn("JuicioCombateGargolaHost3D.avanzar(", ROUTER)
 
     def test_adaptador_reutiliza_runtime_presentacion_y_impacto_comun(self):
         self.assertIn("JuicioCombateGargolaRuntime2092.nuevo", GARGOLA)
@@ -60,7 +60,8 @@ class GargolaHost2092Test(unittest.TestCase):
         self.assertIn("ARQUETIPO_HOST.golpe", HOST)
 
     def test_movimiento_clasico_no_compite_con_gargola(self):
-        self.assertIn("JuicioCombateGargolaHost3D.es_estado(arquetipo)", MOVIMIENTO)
+        self.assertIn("JuicioCombateVarianteHost3D.controla_movimiento(arquetipo)", MOVIMIENTO)
+        self.assertIn("JuicioCombateGargolaHost3D.es_estado(estado)", ROUTER)
         self.assertIn("return", MOVIMIENTO)
 
 

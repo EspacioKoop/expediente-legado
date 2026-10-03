@@ -569,10 +569,9 @@ func _intentar_retorno_rival() -> bool:
 func _montar_arquetipo() -> void:
 	if _rival == null:
 		return
-	if String(_acusado.get("_variante_onirica", "")) == JuicioCombateGargolaHost3D.VARIANTE:
-		_arquetipo = JuicioCombateGargolaHost3D.montar(self, _rival, _raiz)
-		if not _arquetipo.is_empty():
-			return
+	_arquetipo = JuicioCombateVarianteHost3D.montar(self, _acusado, _rival, _raiz)
+	if not _arquetipo.is_empty():
+		return
 	if arquetipo_onirico == ARQUETIPOS.ENJAMBRE:
 		_enjambre = ENJAMBRE_HOST_3D.montar(self, _rival, _acusado, _mito_id, _raiz)
 		_determinacion_rival = ENJAMBRE_HOST_3D.vivos(_enjambre)
@@ -589,8 +588,7 @@ func _montar_arquetipo() -> void:
 
 
 func _avanzar_arquetipo(delta: float) -> void:
-	if JuicioCombateGargolaHost3D.es_estado(_arquetipo):
-		JuicioCombateGargolaHost3D.avanzar(self, _arquetipo, delta)
+	if JuicioCombateVarianteHost3D.avanzar(self, _arquetipo, delta):
 		return
 	if not _enjambre.is_empty():
 		for distancia in ENJAMBRE_HOST_3D.avanzar(_enjambre, delta, _jugador.position):
