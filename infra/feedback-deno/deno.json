@@ -7,7 +7,7 @@
   },
   "tasks": {
     "check": "deno check main.ts",
-    "test": "deno test --unstable-kv --allow-env=AGENT_MEMORY_NIVEL2_TOKEN,GITHUB_TOKEN agent_memory_test.ts agent_b2b_test.ts agent_coord_test.ts",
+    "test": "deno test --unstable-kv --allow-env=AGENT_MEMORY_NIVEL2_TOKEN,GITHUB_TOKEN agent_memory_test.ts agent_b2b_test.ts agent_coord_test.ts agent_mcp_test.ts",
     "start": "deno run --unstable-kv --allow-env=GITHUB_TOKEN,GITHUB_REPOSITORY,GITHUB_LABELS,AGENT_MEMORY_NIVEL2_TOKEN --allow-net=0.0.0.0:8000,api.github.com,token.actions.githubusercontent.com --allow-read --allow-write main.ts"
   },
   "deploy": {

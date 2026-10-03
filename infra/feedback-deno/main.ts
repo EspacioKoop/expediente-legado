@@ -1,6 +1,7 @@
 import { handleAgentMemory } from "./agent_memory.ts";
 import { handleAgentCoord } from "./agent_coord.ts";
 import { handleAgentPool } from "./agent_pool_state.ts";
+import { esRutaMcp, handleAgentMcp } from "./agent_mcp.ts";
 
 const DEFAULT_REPOSITORY = "EspacioKoop/expediente-legado";
 const CATEGORIES = new Set([
@@ -205,6 +206,7 @@ async function handler(
       agent_pool_worker_health: true,
       agent_b2b: true,
       agent_coord: true,
+      agent_mcp: true,
     });
   }
 
@@ -239,6 +241,18 @@ async function handler(
       return json({ ok: false, error: "service_unavailable" }, 503);
     }
     return await handleAgentPool(request, url, kv, configuredRepository());
+  }
+
+  if (esRutaMcp(url.pathname)) {
+    let kv: Deno.Kv;
+    try {
+      kv = await getKv();
+    } catch (error) {
+      console.error("Agent MCP KV unavailable", error);
+      return json({ ok: false, error: "service_unavailable" }, 503);
+    }
+    const ip = "hostname" in info.remoteAddr ? String(info.remoteAddr.hostname) : "unknown";
+    return await handleAgentMcp(request, url, kv, ip);
   }
 
   if (url.pathname !== "/api/report") {

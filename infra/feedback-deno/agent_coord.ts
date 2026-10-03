@@ -102,7 +102,7 @@ function limpiarPaths(value: unknown): string[] {
   return paths;
 }
 
-async function avisar(
+export async function avisar(
   kv: Deno.Kv,
   raw: Record<string, unknown>,
   identity: AgentIdentity,
@@ -140,7 +140,7 @@ async function avisar(
   return aviso;
 }
 
-async function avisosActivos(kv: Deno.Kv): Promise<Aviso[]> {
+export async function avisosActivos(kv: Deno.Kv): Promise<Aviso[]> {
   const ahora = new Date().toISOString();
   const avisos: Aviso[] = [];
   const iterator = kv.list<Aviso>(
@@ -157,7 +157,7 @@ async function avisosActivos(kv: Deno.Kv): Promise<Aviso[]> {
 
 // Cualquier agente autenticado puede resolver: quien arregla main no tiene por
 // qué ser quien avisó de que estaba roto.
-async function resolver(kv: Deno.Kv, raw: Record<string, unknown>): Promise<boolean> {
+export async function resolver(kv: Deno.Kv, raw: Record<string, unknown>): Promise<boolean> {
   const id = cleanTitle(raw.id, 80);
   const match = /^(\d{13})-[0-9a-f-]{36}$/.exec(id);
   if (!match) return false;
@@ -168,7 +168,7 @@ async function resolver(kv: Deno.Kv, raw: Record<string, unknown>): Promise<bool
   return true;
 }
 
-async function latido(
+export async function latido(
   kv: Deno.Kv,
   raw: Record<string, unknown>,
   identity: AgentIdentity,
@@ -195,7 +195,7 @@ async function latido(
   return presencia;
 }
 
-async function presentes(kv: Deno.Kv): Promise<Presencia[]> {
+export async function presentes(kv: Deno.Kv): Promise<Presencia[]> {
   const limite = new Date(Date.now() - PRESENCIA_TTL_MS).toISOString();
   const lista: Presencia[] = [];
   const iterator = kv.list<Presencia>(
