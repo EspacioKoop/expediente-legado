@@ -131,6 +131,30 @@ AGENT_RESULT_END
         metrics = mod.result_metrics(packet, result, ["scripts/a.py"])
         self.assertEqual(100.0, metrics["handoff_loss_proxy_pct"])
 
+    def test_recover_result_conserva_hechos_autoritativos_sin_validar_contrato(self):
+        packet = self.packet()
+        invalid = mod.parse_result("respuesta libre sin delimitadores")
+        recovered = mod.recover_result(packet, invalid, "respuesta libre sin delimitadores", ["scripts/a.py"])
+        self.assertFalse(recovered["valid"])
+        self.assertTrue(recovered["recovered"])
+        self.assertEqual("partial", recovered["status"])
+        self.assertEqual(packet["task_id"], recovered["task_id"])
+        self.assertEqual(
+            [{"path": "scripts/a.py", "reason": "cambio observado por el workflow; motivo estructurado no disponible"}],
+            recovered["changes"],
+        )
+        metrics = mod.result_metrics(packet, recovered, ["scripts/a.py"])
+        self.assertFalse(metrics["result_contract_valid"])
+        self.assertTrue(metrics["result_recovered"])
+        self.assertLess(metrics["handoff_loss_proxy_pct"], 100.0)
+        self.assertGreater(metrics["handoff_loss_proxy_pct"], 0.0)
+
+    def test_recover_result_sin_diff_queda_bloqueado(self):
+        packet = self.packet()
+        invalid = mod.parse_result("")
+        recovered = mod.recover_result(packet, invalid, "", [])
+        self.assertEqual("blocked", recovered["status"])
+        self.assertEqual([], recovered["changes"])
     def test_b2b_rechaza_tipo_desconocido_o_sin_schema(self):
         self.assertIsNone(mod.normalize_message({"schema": 1, "message_type": "CHAT"}))
         self.assertIsNone(mod.normalize_message({"message_type": "QUESTION"}))
@@ -164,6 +188,10 @@ AGENT_RESULT_END
                 sys.argv = old
             payload = json.loads(output.read_text(encoding="utf-8"))
             self.assertFalse(payload["result"]["valid"])
+            self.assertTrue(payload["result"]["recovered"])
+            self.assertEqual("partial", payload["result"]["status"])
+            self.assertTrue(payload["metrics"]["result_recovered"])
+            self.assertLess(payload["metrics"]["handoff_loss_proxy_pct"], 100.0)
 
 
 if __name__ == "__main__":

@@ -406,15 +406,68 @@ def parse_result(raw: str) -> dict[str, Any]:
     }
 
 
+def recover_result(
+    packet: dict[str, Any],
+    parsed: dict[str, Any],
+    raw: str,
+    changed_files: list[str],
+) -> dict[str, Any]:
+    """Construye un handoff degradado solo con hechos autoritativos del workflow.
+
+    No convierte una salida malformada del modelo en cumplimiento del contrato:
+    valid permanece en false. Sirve para que reviewer/dispatcher conserven
+    task/base SHA, rutas realmente cambiadas y una siguiente accion en vez de
+    tratar un diff valido como perdida total de contexto.
+    """
+    actual = sorted({_path(item) for item in changed_files if _path(item)})
+    raw_summary = _text(raw, 1000)
+    if raw_summary:
+        summary = raw_summary
+    elif actual:
+        summary = "El worker modifico el CLAIM pero no emitio un ResultPacket valido."
+    else:
+        summary = "El worker no emitio un ResultPacket valido ni dejo cambios dentro del CLAIM."
+
+    reason = _text(parsed.get("reason"), 120) or "invalid-result"
+    return {
+        "valid": False,
+        "recovered": True,
+        "reason": reason,
+        "schema": SCHEMA_VERSION,
+        "message_type": "RESULT",
+        "task_id": _text(packet.get("task_id"), 240),
+        "base_sha": _text(packet.get("base_sha"), 64),
+        "status": "partial" if actual else "blocked",
+        "summary": summary,
+        "facts": [
+            "El ResultPacket del worker falto o era invalido; este sobre procede del estado autoritativo del workflow."
+        ],
+        "assumptions": [],
+        "verified": [f"Cambio observado dentro del CLAIM: {path}" for path in actual],
+        "unknowns": [
+            "El worker no entrego facts/assumptions/verified/unknowns estructurados en el contrato v1."
+        ],
+        "changes": [
+            {"path": path, "reason": "cambio observado por el workflow; motivo estructurado no disponible"}
+            for path in actual
+        ],
+        "evidence": [{"kind": "diff", "detail": f"cambio observado en {path}"} for path in actual],
+        "unresolved": [f"Corregir o revisar la omision del ResultPacket ({reason})."],
+        "next_action": "Ejecutar preflight y revision independiente; si la omision se repite, corregir el adaptador del worker.",
+        "contract_coverage_pct": 0.0,
+    }
+
+
 def result_metrics(
     packet: dict[str, Any],
     result: dict[str, Any],
     changed_files: list[str],
 ) -> dict[str, Any]:
     actual = sorted({_path(item) for item in changed_files if _path(item)})
-    if not result.get("valid"):
+    if not result.get("valid") and not result.get("recovered"):
         return {
             "result_contract_valid": False,
+            "result_recovered": False,
             "handoff_loss_proxy_pct": 100.0,
             "actual_changed_files": actual,
             "unreported_changed_files": actual,
@@ -428,11 +481,12 @@ def result_metrics(
         not missing,
         bool(result.get("evidence")) or not actual,
         bool(result.get("next_action")),
-        float(result.get("contract_coverage_pct", 0)) == 100.0,
+        bool(result.get("valid")) and float(result.get("contract_coverage_pct", 0)) == 100.0,
     ]
     loss = round(100.0 * (len(checks) - sum(bool(x) for x in checks)) / len(checks), 1)
     return {
-        "result_contract_valid": True,
+        "result_contract_valid": bool(result.get("valid")),
+        "result_recovered": bool(result.get("recovered")),
         "handoff_loss_proxy_pct": loss,
         "contract_coverage_pct": result.get("contract_coverage_pct", 0.0),
         "actual_changed_files": actual,
@@ -507,6 +561,8 @@ def main() -> int:
     changed = []
     if args.changed_files and args.changed_files.exists():
         changed = [line.strip() for line in args.changed_files.read_text(encoding="utf-8").splitlines() if line.strip()]
+    if not parsed.get("valid"):
+        parsed = recover_result(packet, parsed, raw, changed)
     payload = {"result": parsed, "metrics": result_metrics(packet, parsed, changed)}
     _write(args.output, payload)
     print(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
