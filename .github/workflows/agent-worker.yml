@@ -25,6 +25,11 @@ on:
         required: false
         type: string
         default: ''
+      refill_max_parallel:
+        description: 'Cap solicitado al dispatcher si este worker libera un slot'
+        required: false
+        type: string
+        default: '6'
     secrets:
       QWEN_API_KEY:
         required: false
@@ -76,6 +81,12 @@ on:
         required: false
         type: string
         default: ''
+      refill_max_parallel:
+        description: 'Cap del refill opt-in'
+        required: false
+        type: choice
+        default: '6'
+        options: ['1', '2', '3', '4', '5', '6']
 
 permissions:
   contents: write
@@ -1419,7 +1430,8 @@ jobs:
           fi
 
 
-      - name: Liberar lease Deno KV
+      - id: release_lease
+        name: Liberar lease Deno KV
         if: always() && steps.guard.outputs.control == 'deno' && steps.guard.outputs.lease_id != ''
         continue-on-error: true
         env:
@@ -1436,6 +1448,44 @@ jobs:
           oidc_token="$(jq -er '.value' <<<"$oidc_json")"
           payload="$(jq -nc --argjson issue "$ISSUE" --arg lease "$LEASE_ID" --arg reason "$JOB_STATUS" \
             '{schema:1,issue:$issue,lease_id:$lease,reason:$reason}')"
-          curl -fsS -X POST "$base/api/agent-pool/release" \
+          response="$(curl -fsS -X POST "$base/api/agent-pool/release" \
             -H "Authorization: Bearer $oidc_token" \
-            -H 'Content-Type: application/json' --data "$payload" >/dev/null
+            -H 'Content-Type: application/json' --data "$payload")"
+          released="$(jq -r '.released == true' <<<"$response")"
+          echo "released=$released" >> "$GITHUB_OUTPUT"
+
+      - name: Refill opt-in tras liberar slot
+        if: always() && steps.release_lease.outputs.released == 'true' && vars.AGENT_POOL_REFILL_ENABLED == 'true'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_MAX: ${{ inputs.refill_max_parallel || '6' }}
+        run: |
+          set -euo pipefail
+          case "$REQUESTED_MAX" in
+            1|2|3|4|5|6) ;;
+            *) REQUESTED_MAX=6 ;;
+          esac
+          for label in auto pool qwen gemini; do
+            gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+              --label "agent:$label" --limit 100 \
+              --json number,labels > "/tmp/refill-$label.json"
+          done
+          jq -s '
+            add
+            | unique_by(.number)
+            | map(select(
+                ([.labels[].name] | index("agent:working")) == null and
+                ([.labels[].name] | index("agent:pr-open")) == null and
+                ([.labels[].name] | index("agent:needs-human")) == null
+              ))
+          ' /tmp/refill-auto.json /tmp/refill-pool.json \
+            /tmp/refill-qwen.json /tmp/refill-gemini.json > /tmp/refill-pending.json
+          pending="$(jq 'length' /tmp/refill-pending.json)"
+          if (( pending == 0 )); then
+            echo "Refill: sin backlog elegible."
+            exit 0
+          fi
+          echo "Refill: slot liberado con $pending issues pendientes; nueva preparación cap=$REQUESTED_MAX."
+          gh workflow run agent-pool.yml --repo "$GITHUB_REPOSITORY" --ref main \
+            -f max_parallel="$REQUESTED_MAX"
