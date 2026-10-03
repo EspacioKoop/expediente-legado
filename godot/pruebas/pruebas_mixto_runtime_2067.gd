@@ -46,10 +46,13 @@ func _probar_presupuesto_enjambre() -> void:
 		unidad["cooldown"] = 0.0
 	var maximo := HOST.presupuesto_enjambre()
 	for _tick in range(240):
-		var paso := MIXTO.avanzar(
-			estado,
-			0.02,
-			{"flanqueado": false, "guardia_rota": false},
+		var paso := (
+			MIXTO
+			. avanzar(
+				estado,
+				0.02,
+				{"flanqueado": false, "guardia_rota": false},
+			)
 		)
 		estado = paso["estado"]
 		_comprobar(
@@ -84,12 +87,15 @@ func _probar_derrotas_estables() -> void:
 
 func _probar_singular_independiente() -> void:
 	var estado := MIXTO.nuevo(2067, ARQUETIPOS.HOSTIGADOR)
-	var paso := MIXTO.avanzar(
-		estado,
-		0.01,
-		{"distancia": 6.0, "rumbo_objetivo": 0.5},
-		[],
-		true,
+	var paso := (
+		MIXTO
+		. avanzar(
+			estado,
+			0.01,
+			{"distancia": 6.0, "rumbo_objetivo": 0.5},
+			[],
+			true,
+		)
 	)
 	_comprobar(not bool(paso["singular_vivo"]), "singular puede caer sin matar enjambre")
 	_comprobar(int(paso["vivos_enjambre"]) == 2, "enjambre sigue activo sin singular")
