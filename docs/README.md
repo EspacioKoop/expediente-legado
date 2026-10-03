@@ -36,7 +36,7 @@ Cambios materiales desde el corte anterior:
 - **atrezzo cultural:** #1440 añade el bonsái inspirado en Yggdrasil y **Yggdrasil's Egg** como dressing sin desbloqueos ni economía;
 - **investigación de diseño:** #1433 versiona el corpus [referencias ludonarrativas](research/referencias-ludonarrativas.md), separando técnica reutilizable de contenido protegido y de features realmente integradas.
 - **playtest/observabilidad:** #1446 mantiene la alpha continua; #1461 habilita F9 para reportes, #1524/#1531 aportan failover de gateway y #1556 prepara Sentry opcional sin sustituir el reporte humano.
-- **agentes:** #1542 integra Qwen/Gemini; #1555/#1563 memoria subordinada a fuentes canónicas; #1569/#1571/#1585 OmniRoute privado y fallbacks; #1572 pool de hasta seis workers; #1579/#1588 replan automático; #1590 conecta Kev/context packer y #1595 unifica `agent:auto`/`agent:pool`/Qwen/Gemini en el dispatcher paralelo, dejando el autopilot como entrada manual.
+- **agentes:** #1542 integra Qwen/Gemini; #1555/#1563 memoria subordinada a fuentes canónicas; #1569/#1571/#1585 añaden resiliencia de backends y fallback; #1572 pool de hasta seis workers; #1579/#1588 replan automático; #1590 conecta Kev/context packer y #1595 unifica `agent:auto`/`agent:pool`/Qwen/Gemini en el dispatcher paralelo, dejando el autopilot como entrada manual.
 - **OS98 social:** #1591 integra la mensajería corporativa como app del shell con presencia narrativa, historial y respuestas cerradas, sin red ni progreso paralelo.
 
 El criterio de lectura sigue siendo el mismo: separar **hecho integrado**, **gate pendiente** y **propuesta**. Un artefacto de CI, screenshot automatizado o documento de investigación no cierra por sí solo un requisito humano.
