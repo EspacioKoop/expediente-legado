@@ -54,7 +54,7 @@ static func _plantilla_en(sitio: Dictionary, jornada: Dictionary) -> Array:
 					"pos": sitios[i],
 					"id_companero": String(quien.get("id", "")),
 					"color": quien["color"],
-					"rotulo": tr(quien["nombre"]),
+					"rotulo": String(TranslationServer.translate(StringName(String(quien["nombre"])))),
 					"frase": Companeros.frase_de(quien, jornada["dia"]),
 					"modelo": Companeros.cuerpo_de(quien),
 					"retrato": quien.get("retrato", ""),
