@@ -51,10 +51,13 @@ static func avanzar(
 	if singular_derrotado:
 		copia["singular_vivo"] = false
 
-	var paso_enjambre := ENJAMBRE.tick(
-		unidades,
-		delta,
-		HOST.presupuesto_enjambre(),
+	var paso_enjambre := (
+		ENJAMBRE
+		. tick(
+			unidades,
+			delta,
+			HOST.presupuesto_enjambre(),
+		)
 	)
 	copia["enjambre"] = paso_enjambre.get("unidades", unidades)
 
