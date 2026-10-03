@@ -91,7 +91,7 @@ class AgentPoolControlPlaneContractTest(unittest.TestCase):
         self.assertNotIn('worker-status" --refill', self.pool)
 
     def test_refill_opt_in_ocurre_despues_de_release_real(self):
-        release = self.worker.index("- id: release_lease")
+        release = self.worker.index("id: release_lease")
         refill = self.worker.index("- name: Refill opt-in tras liberar slot")
         self.assertLess(release, refill)
         self.assertIn('echo "released=$released" >> "$GITHUB_OUTPUT"', self.worker)
