@@ -17,6 +17,7 @@ BLOCKING_LABELS = {"agent:working", "agent:pr-open", "agent:needs-human", "agent
 QUEUE_LABELS = {"agent:auto", "agent:pool", "agent:qwen", "agent:gemini"}
 PROVIDER_LABELS = {"agent:qwen": "qwen", "agent:gemini": "gemini"}
 MAX_ALLOWED_PARALLEL = 6
+MIN_TELEMETRY_SAMPLES = 3
 WORKER_FAILURE_RE = re.compile(
     r"^AGENT_POOL_WORKER_FAILURE\s+worker=([A-Za-z0-9._-]+)\b"
 )
@@ -60,6 +61,42 @@ def _worker(item: dict[str, Any]) -> dict[str, Any] | None:
     if isinstance(raw_score, bool):
         score = 50.0
     score = max(0.0, min(100.0, score))
+
+    raw_samples = item.get("telemetry_samples", 0)
+    try:
+        telemetry_samples = int(raw_samples)
+    except (TypeError, ValueError):
+        telemetry_samples = 0
+    if isinstance(raw_samples, bool) or telemetry_samples < 0:
+        telemetry_samples = 0
+
+    def optional_pct(key: str) -> float | None:
+        raw = item.get(key)
+        if raw is None or isinstance(raw, bool):
+            return None
+        try:
+            value = float(raw)
+        except (TypeError, ValueError):
+            return None
+        return max(0.0, min(100.0, value))
+
+    # #1871: la telemetria B2B solo modula el orden dentro del mismo tier y
+    # proveedor. Tres muestras evitan castigar un slot por una salida aislada.
+    # Los campos ausentes son fail-open y no añaden penalizacion.
+    routing_score = score
+    if telemetry_samples >= MIN_TELEMETRY_SAMPLES:
+        contract_valid = optional_pct("contract_valid_rate_pct")
+        handoff_loss = optional_pct("handoff_loss_proxy_pct")
+        rework_rate = optional_pct("rework_rate_pct")
+        penalty = 0.0
+        if contract_valid is not None:
+            penalty += (100.0 - contract_valid) * 0.15
+        if handoff_loss is not None:
+            penalty += handoff_loss * 0.10
+        if rework_rate is not None:
+            penalty += rework_rate * 0.05
+        routing_score = max(0.0, min(100.0, score - penalty))
+
     # Tier (#1685): 1 = preferente. Un tier mayor solo recibe trabajo cuando los
     # anteriores no tienen hueco; sirve para dejar backends flojos de reserva.
     raw_tier = item.get("tier", 1)
@@ -81,6 +118,8 @@ def _worker(item: dict[str, Any]) -> dict[str, Any] | None:
         "provider": provider,
         "backend": backend,
         "score": score,
+        "routing_score": routing_score,
+        "telemetry_samples": telemetry_samples,
         "tier": tier,
         "max_task_bytes": max_task_bytes,
     }
@@ -243,7 +282,7 @@ def _best_index(
         cap = int(worker.get("max_task_bytes", 0) or 0)
         return (
             -int(worker.get("tier", 1)),
-            float(worker.get("score", 50.0)),
+            float(worker.get("routing_score", worker.get("score", 50.0))),
             1.0 if cap > 0 else 0.0,
             float(-cap if cap > 0 else 0),
             float(-index),
