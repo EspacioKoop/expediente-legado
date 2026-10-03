@@ -20,6 +20,10 @@ static func avanzar(anfitrion, delta: float) -> void:
 	if rival == null or jugador == null:
 		return
 
+	var arquetipo: Dictionary = anfitrion.get("_arquetipo")
+	if JuicioCombateGargolaHost3D.es_estado(arquetipo):
+		return
+
 	var enjambre: Dictionary = anfitrion.get("_enjambre")
 	if not enjambre.is_empty():
 		(
@@ -41,7 +45,6 @@ static func avanzar(anfitrion, delta: float) -> void:
 		anfitrion.call("_actualizar_telegrafo_rival", delta)
 		return
 
-	var arquetipo: Dictionary = anfitrion.get("_arquetipo")
 	if String(arquetipo.get("tipo", "")) == ARQUETIPOS.HOSTIGADOR:
 		var host := (
 			HOSTIGADOR_3D
