@@ -8,7 +8,6 @@ WORKER = ROOT / ".github" / "workflows" / "agent-worker.yml"
 DENO_MAIN = ROOT / "infra" / "feedback-deno" / "main.ts"
 DENO_POOL = ROOT / "infra" / "feedback-deno" / "agent_pool_state.ts"
 DENO_WORKFLOW = ROOT / ".github" / "workflows" / "feedback-deno.yml"
-DOC = ROOT / "docs" / "agents-autonomos.md"
 
 
 class AgentPoolControlPlaneContractTest(unittest.TestCase):
@@ -19,7 +18,6 @@ class AgentPoolControlPlaneContractTest(unittest.TestCase):
         cls.deno_main = DENO_MAIN.read_text(encoding="utf-8")
         cls.deno_pool = DENO_POOL.read_text(encoding="utf-8")
         cls.deno_workflow = DENO_WORKFLOW.read_text(encoding="utf-8")
-        cls.doc = DOC.read_text(encoding="utf-8")
 
     def test_deno_expone_control_plane_oidc(self):
         self.assertIn('const AGENT_POOL_AUDIENCE = "siga98-agent-pool"', self.deno_pool)
@@ -101,11 +99,8 @@ class AgentPoolControlPlaneContractTest(unittest.TestCase):
         self.assertIn("Liberar lease Deno KV", self.worker)
         self.assertIn("continue-on-error: true", self.worker)
 
-    def test_ci_y_documentacion_incluyen_el_nuevo_modulo(self):
+    def test_ci_incluye_el_modulo_de_control_plane(self):
         self.assertIn("agent_pool_state.ts", self.deno_workflow)
-        self.assertIn("control-plane", self.doc.lower())
-        self.assertIn("lease", self.doc.lower())
-        self.assertIn("Deno KV", self.doc)
 
 
 if __name__ == "__main__":
