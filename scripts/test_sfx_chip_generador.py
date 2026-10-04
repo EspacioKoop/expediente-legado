@@ -175,8 +175,11 @@ class SfxChipGeneradorTest(unittest.TestCase):
         pico = max(abs(muestra) for muestra in muestras) / 32767
         dc = abs(sum(muestras) / len(muestras)) / 32767
         borde = 2048
-        self.assertGreaterEqual(duracion, 0.12, nombre)
-        self.assertLessEqual(duracion, 0.30, nombre)
+        receta = generador.RECETAS[Path(nombre).stem]
+        duracion_canonica = float(receta["duration"])
+        # Vorbis puede recortar unos pocos ms de priming/final al decodificar.
+        self.assertGreaterEqual(duracion, duracion_canonica - 0.005, nombre)
+        self.assertLessEqual(duracion, duracion_canonica + 0.005, nombre)
         self.assertLess(pico, 0.92, nombre)
         self.assertLess(dc, 0.02, nombre)
         self.assertLessEqual(abs(muestras[0]), borde, nombre)
