@@ -56,6 +56,24 @@ jobs:
           gh search issues --repo "$GITHUB_REPOSITORY" --state open --limit 500 \
             --json number,title,body,labels,createdAt,updatedAt,authorAssociation \
             > /tmp/feeder-issues.json
+
+          # #2310: el feeder deja de fabricar trabajo cuando ya existe WIP
+          # suficiente. Primero consumir/reconciliar; después volver a alimentar.
+          wip="$(
+            python3 - <<'PY'
+          import json
+          from scripts.auditar_backlog import analizar_issues
+
+          with open("/tmp/feeder-issues.json", encoding="utf-8") as stream:
+              print(analizar_issues(json.load(stream))["wip_count"])
+          PY
+          )"
+          if (( wip >= 15 )); then
+            echo "WIP técnico=$wip (límite=15); feeder no prepara otro issue."
+            echo "selected=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
           gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 100 \
             --json number,body > /tmp/feeder-prs.json
 
