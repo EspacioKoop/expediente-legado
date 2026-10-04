@@ -2403,6 +2403,38 @@
       "licencia": "CC0-1.0",
       "fuente": "tools/sfx_chip/generar.py",
       "sha256": "a1babff9d91b4b7b83a6c51e14599642fe1f283eacfdb9d57c2a27f671a7d8b0"
+    },
+    {
+      "ruta": "audio/chip/ui_pulsar_01.ogg",
+      "titulo": "Foley chip · interfaz pulsar 01",
+      "autor": "SIGA-98 · síntesis propia",
+      "licencia": "CC0-1.0",
+      "fuente": "tools/sfx_chip/generar.py",
+      "sha256": "18ccd7a645c3f9c9bf6b9748c77d6d0f5d3fbf4bb5d30c9857538e4dd8aa8247"
+    },
+    {
+      "ruta": "audio/chip/ui_marcar_01.ogg",
+      "titulo": "Foley chip · interfaz marcar 01",
+      "autor": "SIGA-98 · síntesis propia",
+      "licencia": "CC0-1.0",
+      "fuente": "tools/sfx_chip/generar.py",
+      "sha256": "83752563ba2309e7e391ad52b308e06f4fa73f9e4a099ba7012a2b795ce6d264"
+    },
+    {
+      "ruta": "audio/chip/ui_firmar_01.ogg",
+      "titulo": "Foley chip · interfaz firmar 01",
+      "autor": "SIGA-98 · síntesis propia",
+      "licencia": "CC0-1.0",
+      "fuente": "tools/sfx_chip/generar.py",
+      "sha256": "64e5aa8ffe3470888af9e4b58a870e018e353242cd0cee9d4514569dbecca3bb"
+    },
+    {
+      "ruta": "audio/chip/ui_error_01.ogg",
+      "titulo": "Foley chip · interfaz error 01",
+      "autor": "SIGA-98 · síntesis propia",
+      "licencia": "CC0-1.0",
+      "fuente": "tools/sfx_chip/generar.py",
+      "sha256": "0e04ba84fc86d8524fb547b10b42295bde68a9457dfb287dafd226298bcb73da"
     }
   ]
 }
