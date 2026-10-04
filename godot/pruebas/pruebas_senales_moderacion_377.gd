@@ -101,9 +101,11 @@ func _ejecutar() -> void:
 	)
 	_comprobar(
 		"moderación entrega foco inicial a Ocultar",
-		ui != null
-		and ui.get_viewport().gui_get_focus_owner() != null
-		and ui.get_viewport().gui_get_focus_owner().name == "Ocultar",
+		(
+			ui != null
+			and ui.get_viewport().gui_get_focus_owner() != null
+			and ui.get_viewport().gui_get_focus_owner().name == "Ocultar"
+		),
 	)
 	if ui != null:
 		ui.solicitar_ocultar()
