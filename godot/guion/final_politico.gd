@@ -25,6 +25,8 @@ static func resumen(estado: Dictionary, contrato: Dictionary = {}) -> Dictionary
 	var auditoria := Auditorias.resumen_narrativo(estado)
 	var religion := ReligionTrayectoria.resumir(ReligionEventos.resumen_trayectoria(estado))
 	var ejemplos := []
+	var eco_exposicion := _eco_exposicion(estado)
+	var eco_sueno := _eco_sueno(estado)
 	var lecturas_sociales := _lecturas_sociales(estado)
 
 	for evento in elecciones:
@@ -47,6 +49,8 @@ static func resumen(estado: Dictionary, contrato: Dictionary = {}) -> Dictionary
 		"dominantes": dominantes,
 		"elecciones": elecciones.size(),
 		"ejemplos": ejemplos,
+		"eco_exposicion": eco_exposicion,
+		"eco_sueno": eco_sueno,
 		"auditoria": auditoria,
 		"religion": religion,
 		"lecturas_sociales": lecturas_sociales,
@@ -94,6 +98,78 @@ static func _patron(elecciones: Array, dominantes: Array) -> String:
 	if dominantes.size() > 1:
 		return PATRON_PLURAL
 	return PATRON_CONTEXTUAL
+
+
+## Devuelve como máximo un eco factual de exposición de la jornada actual.
+## El historial completo permanece en Prometeo.CLAVE_EXPOSICION_IDEOLOGICA.
+static func _eco_exposicion(estado: Dictionary) -> Dictionary:
+	var dia_actual := _dia_actual(estado)
+	if dia_actual <= 0:
+		return {}
+
+	var valor = estado.get(Prometeo.CLAVE_EXPOSICION_IDEOLOGICA, [])
+	if typeof(valor) != TYPE_ARRAY:
+		return {}
+
+	for exposicion in valor:
+		if typeof(exposicion) != TYPE_DICTIONARY:
+			continue
+		var entrada: Dictionary = exposicion
+		var id_crudo = entrada.get("id")
+		var fuente_cruda = entrada.get("fuente")
+		var eje_crudo = entrada.get("eje")
+		var jornada_cruda = entrada.get("jornada")
+		if (
+			typeof(id_crudo) != TYPE_STRING
+			or typeof(fuente_cruda) != TYPE_STRING
+			or typeof(eje_crudo) != TYPE_STRING
+			or (typeof(jornada_cruda) != TYPE_INT and typeof(jornada_cruda) != TYPE_FLOAT)
+		):
+			continue
+		var jornada_numero := float(jornada_cruda)
+		if not is_equal_approx(jornada_numero, roundf(jornada_numero)):
+			continue
+		if int(jornada_numero) != dia_actual:
+			continue
+		var id := String(id_crudo).strip_edges()
+		var fuente := String(fuente_cruda).strip_edges()
+		var eje := String(eje_crudo).strip_edges()
+		if id.is_empty() or fuente.is_empty() or not Prometeo.EJES.has(eje):
+			continue
+		return {"id": id, "fuente": fuente, "eje": eje}
+	return {}
+
+
+## Solo expone el eco onírico si la familia realmente ocurrida es reconstruible
+## sin semilla: una única familia de exposición para la jornada. Con dos o más
+## candidatas no se adivina cuál seleccionó #923.
+static func _eco_sueno(estado: Dictionary) -> Dictionary:
+	var dia_actual := _dia_actual(estado)
+	if dia_actual <= 0:
+		return {}
+	var familias := IdeologiaSueno923.familias_exposicion(estado, dia_actual)
+	if familias.size() != 1:
+		return {}
+	var familia := String(familias[0])
+	if not IdeologiaSueno923.FAMILIAS.has(familia):
+		return {}
+	return {
+		"familia": familia,
+		"canal": IdeologiaSueno923.CANAL_EXPOSICION,
+	}
+
+
+static func _dia_actual(estado: Dictionary) -> int:
+	var jornada = estado.get("jornada", {})
+	if typeof(jornada) != TYPE_DICTIONARY:
+		return 0
+	var dia_crudo = (jornada as Dictionary).get("dia", null)
+	if typeof(dia_crudo) != TYPE_INT and typeof(dia_crudo) != TYPE_FLOAT:
+		return 0
+	var dia_numero := float(dia_crudo)
+	if dia_numero < 1.0 or not is_equal_approx(dia_numero, roundf(dia_numero)):
+		return 0
+	return int(dia_numero)
 
 
 static func _historias_completas(estado: Dictionary) -> Dictionary:
