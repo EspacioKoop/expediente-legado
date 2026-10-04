@@ -113,6 +113,18 @@ class FinalPolitico1103Test(unittest.TestCase):
         assert "Parse Error:" not in resultado.stdout
         assert "SCRIPT ERROR:" not in resultado.stdout
 
+    def test_resumen_incluye_ecos(self) -> None:
+        modelo = fuente(MODELO)
+        # Verificar que el resumen incluye los nuevos campos eco_exposicion y eco_sueno
+        assert "eco_exposicion" in modelo
+        assert "eco_sueno" in modelo
+
+    def test_panel_muestra_ecos(self) -> None:
+        panel = fuente(PANEL)
+        # El panel debe obtener los ecos del resumen y presentar sus formatos
+        assert 'resumen.get("eco_exposicion"' in panel
+        assert 'resumen.get("eco_sueno"' in panel
+
 
 if __name__ == "__main__":
     unittest.main()
