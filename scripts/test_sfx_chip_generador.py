@@ -81,15 +81,6 @@ class SfxChipGeneradorTest(unittest.TestCase):
 
     def _assert_ogg_completo(self, ruta: Path, nombre: str):
         datos = ruta.read_bytes()
-        identificacion = datos.find(b"\\x01vorbis")
-        self.assertGreaterEqual(identificacion, 0, nombre)
-        self.assertGreaterEqual(len(datos), identificacion + 16, nombre)
-        self.assertEqual(datos[identificacion + 11], 1, nombre)
-        self.assertEqual(
-            int.from_bytes(datos[identificacion + 12 : identificacion + 16], "little"),
-            44_100,
-            nombre,
-        )
         offset = 0
         paginas = 0
         tiene_eos = False
@@ -108,6 +99,18 @@ class SfxChipGeneradorTest(unittest.TestCase):
         self.assertEqual(offset, len(datos), nombre)
         self.assertGreaterEqual(paginas, 3, nombre)
         self.assertTrue(tiene_eos, nombre)
+
+    def _assert_vorbis_mono_44100(self, ruta: Path, nombre: str):
+        datos = ruta.read_bytes()
+        identificacion = datos.find(b"\\x01vorbis")
+        self.assertGreaterEqual(identificacion, 0, nombre)
+        self.assertGreaterEqual(len(datos), identificacion + 16, nombre)
+        self.assertEqual(datos[identificacion + 11], 1, nombre)
+        self.assertEqual(
+            int.from_bytes(datos[identificacion + 12 : identificacion + 16], "little"),
+            44_100,
+            nombre,
+        )
 
     def test_ogg_runtime_tienen_hash_procedencia_y_presupuesto(self):
         sonido = SONIDO.read_text(encoding="utf-8")
@@ -142,6 +145,7 @@ class SfxChipGeneradorTest(unittest.TestCase):
             "teclado_rafaga_02.ogg",
             "teclado_rafaga_03.ogg",
         ):
+            self._assert_vorbis_mono_44100(ASSETS / "audio" / "chip" / nombre, nombre)
             self.assertIn(f"chip/{nombre}", sonido)
         self.assertIn('"tecla": ["click_001.ogg"]', sonido)
         self.assertIn('"rafaga": ["click_001.ogg"]', sonido)
