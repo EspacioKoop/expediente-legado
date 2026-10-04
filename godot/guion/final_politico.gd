@@ -25,6 +25,7 @@ static func resumen(estado: Dictionary, contrato: Dictionary = {}) -> Dictionary
 	var auditoria := Auditorias.resumen_narrativo(estado)
 	var religion := ReligionTrayectoria.resumir(ReligionEventos.resumen_trayectoria(estado))
 	var ejemplos := []
+	var exposicion := _eco_exposicion(estado)
 	var lecturas_sociales := _lecturas_sociales(estado)
 
 	for evento in elecciones:
@@ -47,6 +48,7 @@ static func resumen(estado: Dictionary, contrato: Dictionary = {}) -> Dictionary
 		"dominantes": dominantes,
 		"elecciones": elecciones.size(),
 		"ejemplos": ejemplos,
+		"exposicion": exposicion,
 		"auditoria": auditoria,
 		"religion": religion,
 		"lecturas_sociales": lecturas_sociales,
@@ -94,6 +96,34 @@ static func _patron(elecciones: Array, dominantes: Array) -> String:
 	if dominantes.size() > 1:
 		return PATRON_PLURAL
 	return PATRON_CONTEXTUAL
+
+
+## Devuelve los hechos de exposición actuales sin interpretarlos como elecciones.
+static func _eco_exposicion(estado: Dictionary) -> Array:
+	var valor = estado.get(Prometeo.CLAVE_EXPOSICION_IDEOLOGICA, [])
+	if typeof(valor) != TYPE_ARRAY:
+		return []
+	var salida := []
+	for exposicion in valor:
+		if typeof(exposicion) != TYPE_DICTIONARY:
+			continue
+		var entrada: Dictionary = exposicion
+		var id_crudo = entrada.get("id")
+		var fuente_cruda = entrada.get("fuente")
+		var eje_crudo = entrada.get("eje")
+		if (
+			typeof(id_crudo) != TYPE_STRING
+			or typeof(fuente_cruda) != TYPE_STRING
+			or typeof(eje_crudo) != TYPE_STRING
+		):
+			continue
+		var id := String(id_crudo).strip_edges()
+		var fuente := String(fuente_cruda).strip_edges()
+		var eje := String(eje_crudo).strip_edges()
+		if id.is_empty() or fuente.is_empty() or not Prometeo.EJES.has(eje):
+			continue
+		salida.append({"id": id, "fuente": fuente, "eje": eje})
+	return salida
 
 
 static func _historias_completas(estado: Dictionary) -> Dictionary:
