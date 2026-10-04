@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 import unittest
 
 
@@ -7,6 +8,7 @@ GUION = ROOT / "godot/guion"
 HOST = (GUION / "juicio_combate_tentador_host_3d.gd").read_text(encoding="utf-8")
 RUNTIME = (GUION / "juicio_combate_tentador_runtime_2088.gd").read_text(encoding="utf-8")
 PRESENTACION = (GUION / "juicio_combate_tentador_3d.gd").read_text(encoding="utf-8")
+HOST_COMPACTO = re.sub(r"\\s+", "", HOST)
 
 
 class TentadorHost2088Test(unittest.TestCase):
@@ -20,7 +22,7 @@ class TentadorHost2088Test(unittest.TestCase):
 
     def test_tick_delega_en_mimetico_y_no_duplica_timers(self):
         self.assertIn("RUNTIME.avanzar(runtime, delta, patron_observado)", HOST)
-        self.assertIn("PRESENTACION.pintar(", HOST)
+        self.assertIn("PRESENTACION.pintar(", HOST_COMPACTO)
         for duplicado in (
             "MIMETICO_TELEGRAFO",
             "MIMETICO_REPETICION",
@@ -44,8 +46,8 @@ class TentadorHost2088Test(unittest.TestCase):
         self.assertIn('"_repeticion_emitida": false', HOST)
         self.assertIn('estado["_repeticion_emitida"] = true', HOST)
         self.assertIn("fase_anterior != ARQUETIPOS.REPETIR", HOST)
-        self.assertIn('anfitrion.call(\n\t\t\t"_aplicar_impacto_rival"', HOST)
-        self.assertIn("REGLAS.resultado_ataque_rival(", HOST)
+        self.assertIn('anfitrion.call("_aplicar_impacto_rival"', HOST_COMPACTO)
+        self.assertIn("REGLAS.resultado_ataque_rival(", HOST_COMPACTO)
         self.assertNotIn("_determinacion_jugador", HOST)
         self.assertNotIn("_terminar(", HOST)
 
@@ -53,7 +55,7 @@ class TentadorHost2088Test(unittest.TestCase):
         for patron in ("ataque_corto", "linea", "carga_lineal", "zona"):
             with self.subTest(patron=patron):
                 self.assertIn(f'"{patron}"', HOST)
-        self.assertIn("ARQUETIPO_HOST.impacto_linea(", HOST)
+        self.assertIn("ARQUETIPO_HOST.impacto_linea(", HOST_COMPACTO)
         self.assertIn("REGLAS.ALCANCE_RIVAL", HOST)
         self.assertIn("RADIO_ZONA", HOST)
         for prohibido in ("dano", "Partida.", "Jornada.", "loot", "XP"):
