@@ -148,10 +148,10 @@ class CiScopeTest(unittest.TestCase):
             "test_ci_scope.py",
             "test_workflows_yaml.py",
             "test_upload_artifact_wrapper_1888.py",
-            "test_benchmark_cc0.py",
         ):
             with self.subTest(test=test):
                 self.assertIn(test, evidence)
+        self.assertIn("python -m unittest scripts.test_benchmark_cc0", evidence)
         for patron in (
             "test_evidencia_*.py",
             "test_kubasta_visual_gate_*.py",

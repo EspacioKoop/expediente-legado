@@ -61,6 +61,15 @@ COLUMNA_CERO_VALIDA = re.compile(r"^(?:[A-Za-z_][\w-]*:|#|---\s*$)")
 
 
 class WorkflowsYamlTest(unittest.TestCase):
+    def test_ci_evidence_ejecuta_benchmark_como_unittest_sin_exigir_artifacts(self):
+        ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+        self.assertIn("python -m unittest scripts.test_benchmark_cc0", ci)
+        self.assertNotIn("python scripts/test_benchmark_cc0.py\n", ci)
+        benchmark = (ROOT / ".github" / "workflows" / "benchmark-cc0.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("scripts/test_benchmark_cc0.py --report benchmark-cc0", benchmark)
+
     def test_hay_workflows(self):
         self.assertTrue(WORKFLOWS)
 
