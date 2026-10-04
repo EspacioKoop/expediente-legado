@@ -55,10 +55,13 @@ func _probar_blanco_por_degradacion() -> void:
 		"reactiva": false,
 		"vuelta_grabada": 2,
 	}
-	var salida := GrabacionOniricaDesenlace.resolver(
-		entrada,
-		sujeto,
-		{"vuelta_actual": 3},
+	var salida := (
+		GrabacionOniricaDesenlace
+		. resolver(
+			entrada,
+			sujeto,
+			{"vuelta_actual": 3},
+		)
 	)
 	_comprobar(String(salida["estado"]) == "blanco", "toma valida antigua produce BLANCO")
 	_comprobar(
@@ -69,24 +72,30 @@ func _probar_blanco_por_degradacion() -> void:
 
 func _probar_misma_vuelta_y_legacy() -> void:
 	var base := {"estado": GrabacionOniricaContrato.ESTADO_VALIDA, "motivos": []}
-	var misma_vuelta := GrabacionOniricaDesenlace.resolver(
-		base,
-		{
-			"anomalia_id": "anomalia-crt",
-			"reactiva": false,
-			"vuelta_grabada": 3,
-		},
-		{"vuelta_actual": 3},
+	var misma_vuelta := (
+		GrabacionOniricaDesenlace
+		. resolver(
+			base,
+			{
+				"anomalia_id": "anomalia-crt",
+				"reactiva": false,
+				"vuelta_grabada": 3,
+			},
+			{"vuelta_actual": 3},
+		)
 	)
 	_comprobar(
 		String(misma_vuelta["estado"]) == GrabacionOniricaContrato.ESTADO_VALIDA,
 		"una toma de la vuelta actual conserva VALIDA",
 	)
 
-	var legacy := GrabacionOniricaDesenlace.resolver(
-		base,
-		{"anomalia_id": "anomalia-crt", "reactiva": false},
-		{"vuelta_actual": 4},
+	var legacy := (
+		GrabacionOniricaDesenlace
+		. resolver(
+			base,
+			{"anomalia_id": "anomalia-crt", "reactiva": false},
+			{"vuelta_actual": 4},
+		)
 	)
 	_comprobar(
 		String(legacy["estado"]) == GrabacionOniricaContrato.ESTADO_VALIDA,
