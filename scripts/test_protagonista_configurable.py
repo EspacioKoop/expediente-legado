@@ -128,7 +128,7 @@ class ProtagonistaConfigurableTest(unittest.TestCase):
         self.assertNotIn("Partida.new()", self.cuerpo)
         self.assertNotIn(".cargar(", self.cuerpo)
         self.assertNotIn(".guardar(", self.cuerpo)
-        self.assertIn("DiaPresentacionApp.new().montar_entorno(", self.dia)
+        dia_compacto = "".join(self.dia.split())\n        self.assertIn("var_presentacion:=DiaPresentacionApp.new()", dia_compacto)\n        self.assertIn("_presentacion.montar_entorno(", dia_compacto)
         self.assertIn("partida.estado.get(\"perfil_jugador\", {})", self.dia)
         self.assertIn("cuerpo_jugador.perfil = perfil_jugador", self.presentacion_dia)
 
