@@ -107,7 +107,7 @@ static func para_caso(estado: Dictionary, caso: Dictionary) -> Dictionary:
 	proyeccion["toma_indice"] = int(asegurar_en_estado(estado).get("toma_seleccionada", SIN_TOMA))
 	var sujeto = toma.get("sujeto", {})
 	proyeccion["sujeto"] = sujeto.duplicate(true) if typeof(sujeto) == TYPE_DICTIONARY else {}
-	return proyeccion
+	return GrabacionOniricaDesenlace.resolver(proyeccion, proyeccion["sujeto"])
 
 
 static func _caso_contiene_original(caso: Dictionary, original_id: String) -> bool:
