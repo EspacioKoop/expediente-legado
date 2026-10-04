@@ -99,6 +99,12 @@ func _ejecutar() -> void:
 		"UI apunta al evento mostrado",
 		ui != null and String(ui.estado().get("event_id", "")) == "sig-mod-a",
 	)
+	_comprobar(
+		"moderación entrega foco inicial a Ocultar",
+		ui != null
+		and ui.get_viewport().gui_get_focus_owner() != null
+		and ui.get_viewport().gui_get_focus_owner().name == "Ocultar",
+	)
 	if ui != null:
 		ui.solicitar_ocultar()
 	await process_frame
@@ -123,6 +129,16 @@ func _ejecutar() -> void:
 	)
 	var interactuado_b := moderador_b.interactuar(host) if moderador_b != null else false
 	_comprobar("segunda señal también abre moderación", interactuado_b)
+	await process_frame
+	ui = host.get_node_or_null("SenalModeracionUI") as SenalModeracionUI
+	if ui != null:
+		var cancelar := InputEventAction.new()
+		cancelar.action = "ui_cancel"
+		cancelar.pressed = true
+		ui._unhandled_input(cancelar)
+	_comprobar("ui_cancel cierra la moderación", not controller.estado()["moderacion_abierta"])
+	var reabierto_b := moderador_b.interactuar(host) if moderador_b != null else false
+	_comprobar("la señal puede reabrirse tras cancelar", reabierto_b)
 	await process_frame
 	ui = host.get_node_or_null("SenalModeracionUI") as SenalModeracionUI
 	if ui != null:
