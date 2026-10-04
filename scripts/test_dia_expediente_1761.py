@@ -28,13 +28,13 @@ class DiaExpediente1761Test(unittest.TestCase):
             'const DIA_EXPEDIENTE_APP = preload("res://guion/dia_expediente_app.gd")',
             DIA,
         )
-        self.assertIn("DIA_EXPEDIENTE_APP.abrir(", abrir)
-        self.assertIn("DIA_EXPEDIENTE_APP.cerrar(", cerrar)
+        self.assertIn("DIA_EXPEDIENTE_APP.abrir(", compacto(abrir))
+        self.assertIn("DIA_EXPEDIENTE_APP.cerrar(", compacto(cerrar))
         self.assertIn("func _abrir_expediente() -> void:", DIA)
         self.assertIn("func _cerrar_expediente() -> void:", DIA)
 
     def test_guardado_bloquea_antes_de_montar_pantalla(self):
-        abrir = funcion("_abrir_expediente", DIA)
+        abrir = compacto(funcion("_abrir_expediente", DIA))
         pendiente = abrir.index("partida.guardado_pendiente")
         guardar = abrir.index('_guardar_o_avisar("")')
         montar = abrir.index("DIA_EXPEDIENTE_APP.abrir(")
@@ -77,7 +77,8 @@ class DiaExpediente1761Test(unittest.TestCase):
             "_caminante.situar(Vector3(-4, 0, 3.2))",
             "_refrescar_rotulos(",
         )
-        posiciones = [cerrar.index(token) for token in orden]
+        cerrar_compacto = compacto(cerrar)
+        posiciones = [cerrar_compacto.index(compacto(token)) for token in orden]
         self.assertEqual(posiciones, sorted(posiciones))
 
     def test_clima_y_escritorio_siguen_usando_wrappers_oficiales(self):
@@ -90,7 +91,7 @@ class DiaExpediente1761Test(unittest.TestCase):
         self.assertIn("var _pantalla: CanvasLayer", DIA)
         abrir = funcion("_abrir_expediente", DIA)
         cerrar = funcion("_cerrar_expediente", DIA)
-        self.assertIn("_pantalla = DIA_EXPEDIENTE_APP.abrir(", abrir)
+        self.assertIn("_pantalla=DIA_EXPEDIENTE_APP.abrir(", compacto(abrir))
         self.assertIn("if _pantalla == null:", cerrar)
         self.assertIn("_pantalla = null", cerrar)
 
