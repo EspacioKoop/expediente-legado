@@ -67,11 +67,8 @@ jobs:
       actions: write
       id-token: write
     env:
-      HAS_TS_OAUTH: ${{ secrets.TS_OAUTH_CLIENT_ID != '' && secrets.TS_OAUTH_SECRET != '' }}
-      HAS_TS_OIDC: ${{ secrets.TS_OAUTH_CLIENT_ID != '' && secrets.TS_AUDIENCE != '' }}
-      HAS_OMNIROUTE: ${{ secrets.OMNIROUTE_API_KEY != '' && secrets.TS_OAUTH_CLIENT_ID != '' && (secrets.TS_OAUTH_SECRET != '' || secrets.TS_AUDIENCE != '') && vars.OMNIROUTE_BASE_URL != '' && vars.OMNIROUTE_MODEL != '' }}
       HAS_QWEN: ${{ secrets.QWEN_API_KEY != '' }}
-      HAS_QWEN_ANY: ${{ (secrets.OMNIROUTE_API_KEY != '' && secrets.TS_OAUTH_CLIENT_ID != '' && (secrets.TS_OAUTH_SECRET != '' || secrets.TS_AUDIENCE != '') && vars.OMNIROUTE_BASE_URL != '' && vars.OMNIROUTE_MODEL != '') || secrets.QWEN_API_KEY != '' || secrets.QWEN_FALLBACK_1_API_KEY != '' || secrets.QWEN_FALLBACK_2_API_KEY != '' || secrets.QWEN_FALLBACK_3_API_KEY != '' || secrets.QWEN_FALLBACK_4_API_KEY != '' || secrets.QWEN_FALLBACK_5_API_KEY != '' || secrets.QWEN_FALLBACK_6_API_KEY != '' || secrets.QWEN_FALLBACK_7_API_KEY != '' || secrets.QWEN_FALLBACK_8_API_KEY != '' || secrets.QWEN_FALLBACK_9_API_KEY != '' || secrets.QWEN_FALLBACK_10_API_KEY != '' || secrets.QWEN_FALLBACK_11_API_KEY != '' || secrets.QWEN_FALLBACK_12_API_KEY != '' }}
+      HAS_QWEN_ANY: ${{ secrets.QWEN_API_KEY != '' || secrets.QWEN_FALLBACK_1_API_KEY != '' || secrets.QWEN_FALLBACK_2_API_KEY != '' || secrets.QWEN_FALLBACK_3_API_KEY != '' || secrets.QWEN_FALLBACK_4_API_KEY != '' || secrets.QWEN_FALLBACK_5_API_KEY != '' || secrets.QWEN_FALLBACK_6_API_KEY != '' || secrets.QWEN_FALLBACK_7_API_KEY != '' || secrets.QWEN_FALLBACK_8_API_KEY != '' || secrets.QWEN_FALLBACK_9_API_KEY != '' || secrets.QWEN_FALLBACK_10_API_KEY != '' || secrets.QWEN_FALLBACK_11_API_KEY != '' || secrets.QWEN_FALLBACK_12_API_KEY != '' }}
       HAS_GEMINI: ${{ secrets.GEMINI_API_KEY != '' }}
       GEMINI_CLI_TRUST_WORKSPACE: 'true'
     steps:
@@ -103,40 +100,6 @@ jobs:
           echo "run=true" >> "$GITHUB_OUTPUT"
           echo "provider=$provider" >> "$GITHUB_OUTPUT"
           echo "issue=$issue" >> "$GITHUB_OUTPUT"
-
-      - name: Conectar a OmniRoute por Tailscale (OAuth)
-        if: steps.meta.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && env.HAS_OMNIROUTE == 'true' && env.HAS_TS_OAUTH == 'true'
-        continue-on-error: true
-        uses: tailscale/github-action@d1b6cd204f8dceda5b3eaad7f1f767be390056cd # v4
-        with:
-          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
-          tags: tag:github-autopilot
-
-      - name: Conectar a OmniRoute por Tailscale (OIDC fallback)
-        if: steps.meta.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && env.HAS_OMNIROUTE == 'true' && env.HAS_TS_OAUTH != 'true' && env.HAS_TS_OIDC == 'true'
-        continue-on-error: true
-        uses: tailscale/github-action@d1b6cd204f8dceda5b3eaad7f1f767be390056cd # v4
-        with:
-          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-          audience: ${{ secrets.TS_AUDIENCE }}
-          tags: tag:github-autopilot
-
-      - id: omniroute
-        name: Comprobar OmniRoute privado
-        if: steps.meta.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && env.HAS_OMNIROUTE == 'true'
-        continue-on-error: true
-        env:
-          OMNIROUTE_BASE_URL: ${{ vars.OMNIROUTE_BASE_URL }}
-          OMNIROUTE_API_KEY: ${{ secrets.OMNIROUTE_API_KEY }}
-        run: |
-          set -euo pipefail
-          base="${OMNIROUTE_BASE_URL%/}"
-          code="$(curl -sS --max-time 12 -o /tmp/omniroute-models.json -w '%{http_code}' \
-            -H "Authorization: Bearer $OMNIROUTE_API_KEY" "$base/models" || true)"
-          [[ "$code" == 200 ]]
-          jq -e '.data | type == "array"' /tmp/omniroute-models.json >/dev/null
-          echo "ready=true" >> "$GITHUB_OUTPUT"
 
       - name: Checkout de la rama
         if: steps.meta.outputs.run == 'true'
@@ -269,22 +232,9 @@ jobs:
           fi
           echo "model=qwen3-coder-plus" >> "$GITHUB_OUTPUT"
 
-      - id: repair_omniroute
-        name: Reparar mediante OmniRoute
-        if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && steps.omniroute.outputs.ready == 'true'
-        continue-on-error: true
-        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
-        with:
-          openai_api_key: ${{ secrets.OMNIROUTE_API_KEY }}
-          openai_base_url: ${{ vars.OMNIROUTE_BASE_URL }}
-          openai_model: ${{ vars.OMNIROUTE_MODEL }}
-          qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
-          settings: '{"model":{"maxSessionTurns":30},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-ci-failure.log, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Corrige solo la causa del CI y solo rutas del CLAIM. No ejecutes shell ni Git. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable sobre el fallo y su corrección, sin secretos","tags":["ci"]} y AGENT_MEMORY_END.'
-
       - id: repair_qwen
         name: Reparar con Qwen (primario)
-        if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && env.HAS_QWEN == 'true' && steps.repair_omniroute.outcome != 'success'
+        if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && env.HAS_QWEN == 'true'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
@@ -297,7 +247,7 @@ jobs:
 
       - id: qwen_fallbacks
         name: Resolver fallbacks Qwen dinámicos
-        if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && steps.repair_omniroute.outcome != 'success' && steps.repair_qwen.outcome != 'success'
+        if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen' && steps.repair_qwen.outcome != 'success'
         env:
           VARS_JSON: ${{ toJSON(vars) }}
           FALLBACK_KEYS: >-
@@ -436,7 +386,7 @@ jobs:
           ISSUE: ${{ steps.meta.outputs.issue }}
           PROVIDER: ${{ steps.meta.outputs.provider }}
           MEMORY_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
-          SUMMARY: ${{ steps.repair_omniroute.outputs.summary || steps.repair_qwen.outputs.summary || steps.repair_qwen_fallback_1.outputs.summary || steps.repair_qwen_fallback_2.outputs.summary || steps.repair_qwen_fallback_3.outputs.summary || steps.repair_qwen_fallback_4.outputs.summary || steps.repair_gemini.outputs.summary }}
+          SUMMARY: ${{ steps.repair_qwen.outputs.summary || steps.repair_qwen_fallback_1.outputs.summary || steps.repair_qwen_fallback_2.outputs.summary || steps.repair_qwen_fallback_3.outputs.summary || steps.repair_qwen_fallback_4.outputs.summary || steps.repair_gemini.outputs.summary }}
         run: |
           set -euo pipefail
           [[ -z "${MEMORY_URL:-}" ]] && exit 0
