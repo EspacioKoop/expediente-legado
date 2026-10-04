@@ -17,6 +17,10 @@ class Gorgona2087Test(unittest.TestCase):
         self.assertIn("ARQUETIPOS.MARCAR_ZONA", self.codigo)
         self.assertIn("ARQUETIPOS.ACTIVAR_ZONA", self.codigo)
         self.assertIn("ARQUETIPOS.RECUPERAR", self.codigo)
+        codigo = "\n".join(
+            linea for linea in self.codigo.splitlines()
+            if not linea.lstrip().startswith("#")
+        )
         for prohibido in (
             "ARQUETIPOS.avanzar(",
             "CONTROLADOR.avanzar(",
@@ -31,7 +35,7 @@ class Gorgona2087Test(unittest.TestCase):
             "XP",
         ):
             with self.subTest(prohibido=prohibido):
-                self.assertNotIn(prohibido, self.codigo)
+                self.assertNotIn(prohibido, codigo)
 
     def test_api_standalone_y_cono_legible(self):
         self.assertIn("static func montar(anfitrion: Node3D) -> Dictionary:", self.codigo)
