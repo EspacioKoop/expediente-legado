@@ -1,4 +1,4 @@
-## Regresión del Eco del Kenoma (#2089 / #2401).
+## Regresión del Eco del Kenoma (#2089 / #2401 / #2394).
 extends SceneTree
 
 const ARQUETIPOS = preload("res://guion/juicio_combate_arquetipos.gd")
@@ -17,6 +17,9 @@ func _ejecutar() -> void:
 	_probar_spawn_y_repeticion_diferida()
 	_probar_reduccion_solo_presentacion()
 	_probar_destruccion_sin_crecimiento()
+	_probar_cantidades_extremas()
+	_probar_ciclo_por_patron()
+	_probar_secuencia_larga()
 	print("pruebas_kenoma_runtime_2089: %d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos > 0 else 0)
 
@@ -102,6 +105,86 @@ func _probar_destruccion_sin_crecimiento() -> void:
 	_comprobar(todos.get("solicitudes_spawn", []).is_empty(), "cero ecos no provoca crecimiento")
 	for prohibido in ["dano", "partida", "jornada"]:
 		_comprobar(not todos.has(prohibido), "la salida no crea autoridad " + prohibido)
+
+
+func _probar_cantidades_extremas() -> void:
+	for cantidad in [-99, 0, 1, 2, 3, 99]:
+		var estado := RUNTIME.nuevo(2394, cantidad)
+		var salida := RUNTIME.avanzar(estado, 0.0, "linea")
+		var esperados := clampi(cantidad, 0, 3)
+		_comprobar(estado["ecos"].size() == esperados, "acota cantidad %d" % cantidad)
+		_comprobar(
+			salida["solicitudes_spawn"].size() == esperados,
+			"solo solicita ecos existentes %d" % cantidad,
+		)
+		_comprobar(
+			salida["estado"]["ecos"].size() == esperados,
+			"el primer avance respeta cantidad %d" % cantidad,
+		)
+
+
+func _probar_ciclo_por_patron() -> void:
+	for patron in ["linea", "carga_lineal", "ataque_corto", "zona"]:
+		var observado := RUNTIME.avanzar(RUNTIME.nuevo(2394, 1), 0.0, patron)
+		_comprobar(_fase(observado) == ARQUETIPOS.TELEGRAFIAR_ECO, "anuncia antes de repetir")
+		var anuncio := RUNTIME.avanzar(
+			observado["estado"], ARQUETIPOS.MIMETICO_TELEGRAFO / 2.0, "zona"
+		)
+		_comprobar(_fase(anuncio) == ARQUETIPOS.TELEGRAFIAR_ECO, "respeta retraso del anuncio")
+		_comprobar(_patrones(anuncio) == [patron], "retiene el patrón durante el anuncio")
+		var repetido := RUNTIME.avanzar(
+			anuncio["estado"], ARQUETIPOS.MIMETICO_TELEGRAFO, "ataque_corto"
+		)
+		_comprobar(_fase(repetido) == ARQUETIPOS.REPETIR, "repite después del anuncio")
+		_comprobar(_telegraphs(repetido) == [patron], "expone el patrón repetido")
+		_comprobar(repetido["ventana_respuesta"].is_empty(), "repetir no abre recuperación")
+		var ventana := RUNTIME.avanzar(repetido["estado"], ARQUETIPOS.MIMETICO_REPETICION, "linea")
+		_comprobar(_fase(ventana) == ARQUETIPOS.RECUPERAR, "la repetición termina en recuperación")
+		_comprobar(ventana["ventana_respuesta"] == [0], "la recuperación abre respuesta")
+		var libre := RUNTIME.avanzar(ventana["estado"], ARQUETIPOS.MIMETICO_RECUPERACION, "zona")
+		_comprobar(_fase(libre) == ARQUETIPOS.OBSERVAR, "vuelve a observar tras recuperarse")
+		_comprobar(_patrones(libre) == [""], "descarta el patrón anterior al terminar")
+		var siguiente := RUNTIME.avanzar(libre["estado"], 0.0, "carga_lineal")
+		_comprobar(_patrones(siguiente) == ["carga_lineal"], "acepta un nuevo patrón en otro ciclo")
+
+
+func _probar_secuencia_larga() -> void:
+	var estado := RUNTIME.nuevo(2394, 3)
+	for paso in range(64):
+		var destruidos: Array = []
+		if paso in [8, 16, 24]:
+			var indice: int = {8: 1, 16: 0, 24: 2}[paso]
+			destruidos = [indice, indice, -1, 99]
+		var original := estado.duplicate(true)
+		var indices_originales := destruidos.duplicate()
+		var patron: String = ["linea", "zona", "carga_lineal", "ataque_corto"][paso % 4]
+		var normal := RUNTIME.avanzar(estado, 0.1, patron, destruidos, false)
+		var repetido := RUNTIME.avanzar(estado, 0.1, patron, destruidos, false)
+		var reducido := RUNTIME.avanzar(estado, 0.1, patron, destruidos, true)
+		_comprobar(normal == repetido, "misma entrada produce misma salida en tick %d" % paso)
+		_comprobar(estado == original, "no muta estado en tick %d" % paso)
+		_comprobar(destruidos == indices_originales, "no muta índices destruidos")
+		for clave in [
+			"estado",
+			"patron_copiado",
+			"ventana_respuesta",
+			"solicitudes_spawn",
+			"solicitudes_despawn"
+		]:
+			_comprobar(normal[clave] == reducido[clave], "reducción conserva " + clave)
+		_comprobar(_telegraphs(normal) == _telegraphs(reducido), "reducción conserva telegraph")
+		_comprobar(normal["estado"]["ecos"].size() <= 3, "límite duro durante toda la secuencia")
+		if paso > 0:
+			_comprobar(
+				normal["solicitudes_spawn"].is_empty(), "no reaparecen ecos tras spawn inicial"
+			)
+		if paso >= 24:
+			_comprobar(normal["estado"]["ecos"].is_empty(), "cero ecos es estable")
+		estado = normal["estado"]
+
+
+func _fase(salida: Dictionary) -> String:
+	return String(salida["estado"]["ecos"][0]["unidad"]["estado"])
 
 
 func _patrones(salida: Dictionary) -> Array:
