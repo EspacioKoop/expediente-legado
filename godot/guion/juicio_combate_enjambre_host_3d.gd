@@ -20,8 +20,10 @@ static func montar(
 	acusado: Dictionary,
 	mito_id: String,
 	raiz: int,
+	cantidad: int = 3,
+	ocultar_proxy: bool = true,
 ) -> Dictionary:
-	var unidades := ARQUETIPO_HOST.nuevo_enjambre(raiz, 3)
+	var unidades := ARQUETIPO_HOST.nuevo_enjambre(raiz, cantidad)
 	var clave := String(acusado.get("id", acusado.get("nombre", "enjambre")))
 	var montado := (
 		ARENA
@@ -32,7 +34,7 @@ static func montar(
 			unidades.size(),
 		)
 	)
-	if rival_proxy != null:
+	if rival_proxy != null and ocultar_proxy:
 		rival_proxy.visible = false
 	return {
 		"unidades": unidades,
@@ -55,7 +57,15 @@ static func avanzar(estado: Dictionary, delta: float, posicion_jugador: Vector3)
 		)
 	)
 	estado["unidades"] = paso.get("unidades", unidades)
-	unidades = estado["unidades"]
+	return presentar_paso(estado, paso, posicion_jugador)
+
+
+## Proyecta un paso ya calculado por otra composición. No vuelve a avanzar
+## la política: la arena mixta usa esta entrada para conservar un solo tick.
+static func presentar_paso(
+	estado: Dictionary, paso: Dictionary, posicion_jugador: Vector3
+) -> Array:
+	var unidades: Array = estado.get("unidades", [])
 	var resultados: Array = paso.get("resultados", [])
 	for indice in range(unidades.size()):
 		var actor := _actor(estado, indice)
