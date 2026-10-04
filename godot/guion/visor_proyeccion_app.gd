@@ -57,11 +57,14 @@ func _abrir_combate_publico_caos(resultado: Dictionary) -> void:
 	visible = false
 	var combate := JuicioCombate3D.new()
 	combate.name = "CombatePublicoCaos"
-	combate.configurar(
-		ProyeccionCaosCombate140.objetivo_publico(),
-		ProyeccionCaosCombate140.BONO_COMBATE_BREVE,
-		bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false)),
-		_raiz(),
+	(
+		combate
+		. configurar(
+			ProyeccionCaosCombate140.objetivo_publico(),
+			ProyeccionCaosCombate140.BONO_COMBATE_BREVE,
+			bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false)),
+			_raiz(),
+		)
 	)
 	combate.terminado.connect(_al_terminar_combate_publico_caos.bind(combate, resultado))
 	_combate_publico_caos = combate
