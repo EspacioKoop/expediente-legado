@@ -766,8 +766,8 @@ class AgentPoolTest(unittest.TestCase):
         self.assertIn('maxSessionTurns":40', worker)
         self.assertNotIn("- id: plan_qwen\n", worker)
         self.assertNotIn("- id: plan_gemini\n", worker)
-        self.assertRegex(worker, r"tailscale/github-action@[0-9a-f]{40}")
-        self.assertIn("steps.omniroute.outputs.ready", worker)
+        self.assertNotIn("tailscale/github-action@", worker)
+        self.assertNotIn("OMNIROUTE", worker)
         self.assertNotIn("\n  schedule:\n", autopilot)
         self.assertNotIn("\n  issues:\n", autopilot)
 

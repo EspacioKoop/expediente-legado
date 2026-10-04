@@ -11,6 +11,7 @@ import agent_slots as slots
 ROOT = Path(__file__).resolve().parents[1]
 NVIDIA = "https://integrate.api.nvidia.com/v1"
 VARS = {
+    "QWEN_BASE_URL": "https://ollama.com/v1",
     "QWEN_FALLBACK_1_BASE_URL": "https://openrouter.ai/api/v1",
     "QWEN_FALLBACK_1_MODEL": "cohere/north-mini-code:free",
     "QWEN_FALLBACK_2_BASE_URL": NVIDIA,
@@ -134,6 +135,7 @@ class SlotsTest(unittest.TestCase):
             "https://api.deepseek.com/v1": "deepseek",
             "https://api.cohere.ai/compatibility/v1": "cohere",
             "https://api.together.xyz/v1": "together",
+            "https://ollama.com/v1": "ollama-cloud",
             "https://omniroute.tailnet.example/v1": "custom",
             "not-a-url": "custom",
         }
@@ -142,9 +144,9 @@ class SlotsTest(unittest.TestCase):
                 self.assertEqual(esperado, slots.backend_de_url(url))
 
     def test_inventario_distingue_backend_de_executor(self):
-        inventario = slots.inventario(VARS, {1, 2}, {"gemini"}, omniroute=True)
+        inventario = slots.inventario(VARS, {1, 2}, {"qwen", "gemini"})
         por_worker = {w["worker"]: w for w in inventario}
-        self.assertEqual(("qwen", "omniroute"), (
+        self.assertEqual(("qwen", "ollama-cloud"), (
             por_worker["qwen-primary"]["provider"], por_worker["qwen-primary"]["backend"]
         ))
         self.assertEqual(("gemini", "gemini"), (
@@ -256,7 +258,7 @@ class ProveedoresYModelosTest(unittest.TestCase):
 
     def test_inventario_incluye_proveedores_base_con_su_tier(self):
         variables = {**VARS, "QWEN_PRIMARY_TIER": "1", "GEMINI_TIER": "2", "QWEN_FALLBACK_1_TIER": "3"}
-        inventario = slots.inventario(variables, {1, 2}, {"gemini"}, omniroute=True)
+        inventario = slots.inventario(variables, {1, 2}, {"qwen", "gemini"})
         self.assertEqual(
             [("qwen-primary", "qwen", 1), ("gemini", "gemini", 2), ("qwen-fallback-2", "qwen", 1), ("qwen-fallback-1", "qwen", 3)],
             [(w["worker"], w["provider"], w["tier"]) for w in inventario],

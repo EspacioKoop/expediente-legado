@@ -179,17 +179,8 @@ def neutralizar(texto: str) -> str:
 
 
 def cadena_principal(entorno: Mapping[str, str]) -> list[Proveedor]:
-    """Cadena de Actions: OmniRoute por Tailscale, Qwen directo y Gemini."""
+    """Cadena de Actions: Qwen directo y Gemini."""
     cadena: list[Proveedor] = []
-    if entorno.get("OMNI_READY") == "true" and entorno.get("OMNIROUTE_BASE_URL"):
-        cadena.append(
-            Proveedor(
-                "omniroute",
-                entorno["OMNIROUTE_BASE_URL"],
-                entorno.get("EURICLEA_MODELO") or "auto/reasoning",
-                "OMNIROUTE_API_KEY",
-            )
-        )
     if entorno.get("QWEN_API_KEY"):
         url = entorno.get("QWEN_BASE_URL") or (
             "https://coding-intl.dashscope.aliyuncs.com/v1"
@@ -212,28 +203,12 @@ def cadena_principal(entorno: Mapping[str, str]) -> list[Proveedor]:
 
 
 def cadena_respaldo(entorno: Mapping[str, str]) -> list[Proveedor]:
-    """Cadena local: virtuales del router en orden y, si se pide, Ollama.
+    """Fallback local mínimo cuando no hay EURICLEA_PROVEEDORES explícito.
 
-    Los virtuales van en una lista porque su salud cambia: el 2026-09-29
-    `auto/best-free` y `auto/coding:free` acababan en modelos de Cloudflare que
-    no admiten chat, mientras `auto/reasoning` respondía en 44 s. Ollama es
-    opcional: en el PC de referencia (solo CPU, 15 GB) qwen3:4b superó los 15
-    minutos con un diff de 4 kB y dejó la máquina sin memoria libre.
+    La instalación real usa EURICLEA_PROVEEDORES con una cadena directa.
+    Ollama queda como fallback local opcional para instalaciones sencillas.
     """
     cadena: list[Proveedor] = []
-    if entorno.get("EURICLEA_OMNIROUTE_URL"):
-        modelos = entorno.get("EURICLEA_MODELOS_RESPALDO") or "auto/best-free"
-        for modelo in (m.strip() for m in modelos.split(",")):
-            if modelo:
-                cadena.append(
-                    Proveedor(
-                        f"omniroute:{modelo}",
-                        entorno["EURICLEA_OMNIROUTE_URL"],
-                        modelo,
-                        "EURICLEA_OMNIROUTE_KEY",
-                        timeout=300,
-                    )
-                )
     if entorno.get("OLLAMA_MODELO"):
         cadena.append(
             Proveedor(

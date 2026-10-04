@@ -89,7 +89,7 @@ class AgentFailureCanary1907Test(unittest.TestCase):
                 "GITHUB_REPOSITORY": "example/canario", "GITHUB_RUN_ID": "7",
                 "ISSUE": "1907", "BRANCH": "agent/canario-1907", "RESERVED": "true",
                 "WORKER": "qwen-primary", "PROVIDER": "qwen",
-                "HAS_QWEN": "true", "HAS_OMNIROUTE": "false", "HAS_GEMINI": "true",
+                "HAS_QWEN": "true", "HAS_GEMINI": "true",
                 "VARS_JSON": "{}", "POOL_FALLBACK_KEYS": "", "CONTROL_URL": "",
                 "JOB_STATUS": "failure", "RETRY_STAGE": stage,
                 "RUNNER_TEMP": str(scratch), "AGENT_PROVIDER_COOLDOWN_SECONDS": "3600",

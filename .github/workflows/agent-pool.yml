@@ -79,7 +79,6 @@ jobs:
           REFILL_ENABLED: ${{ vars.AGENT_POOL_REFILL_ENABLED || 'false' }}
           ACTIONS_BUDGET: ${{ vars.AGENT_POOL_ACTIONS_BUDGET || '12' }}
           HAS_QWEN: ${{ secrets.QWEN_API_KEY != '' }}
-          HAS_OMNIROUTE: ${{ secrets.OMNIROUTE_API_KEY != '' && secrets.TS_OAUTH_CLIENT_ID != '' && (secrets.TS_OAUTH_SECRET != '' || secrets.TS_AUDIENCE != '') && vars.OMNIROUTE_BASE_URL != '' && vars.OMNIROUTE_MODEL != '' }}
           HAS_GEMINI: ${{ secrets.GEMINI_API_KEY != '' }}
           KEV_BASE_URL: ${{ vars.KEV_BASE_URL }}
           KEV_MODEL: ${{ vars.KEV_MODEL || 'kev-latest' }}
@@ -158,7 +157,7 @@ jobs:
           base_keys=""
           [[ "$HAS_QWEN" == true ]] && base_keys+=" qwen"
           [[ "$HAS_GEMINI" == true ]] && base_keys+=" gemini"
-          export BASE_KEYS="$base_keys" OMNIROUTE="$HAS_OMNIROUTE"
+          export BASE_KEYS="$base_keys"
           workers="$(python3 scripts/agent_slots.py workers)"
           echo "fallback_keys=$(python3 scripts/agent_slots.py usables)" >> "$GITHUB_OUTPUT"
           printf '%s\n' "$workers" > /tmp/workers-configured.json
