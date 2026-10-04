@@ -16,6 +16,7 @@ const SELLO_DESPERTAR_REGLAMENTARIO := "despertar-reglamentario"
 const DIA_ESPACIOS_APP = preload("res://guion/dia_espacios_app.gd")
 const DIA_TRANSICION_APP = preload("res://guion/dia_transicion_app.gd")
 const DIA_EXPEDIENTE_APP = preload("res://guion/dia_expediente_app.gd")
+const DIA_COMBATE_PANTALLA_APP = preload("res://guion/dia_combate_pantalla_app.gd")
 
 var partida := Partida.new()
 var contenido := Contenido.new()
@@ -669,15 +670,11 @@ func _abrir_combate_hack_slash(objetivo: Dictionary, zona: Area3D = null) -> boo
 	if not bool(decision.get("permitido", false)):
 		return false
 
-	_pantalla = CanvasLayer.new()
-	add_child(_pantalla)
-	var app := DiaCombateContextualApp.new()
-	_combate_contextual_app = app
-	add_child(app)
-	app.terminado.connect(_cerrar_combate_hack_slash)
-	(
-		app
+	var montado: Dictionary = (
+		DIA_COMBATE_PANTALLA_APP
+		. new()
 		. abrir(
+			self,
 			objetivo,
 			decision,
 			zona,
@@ -688,8 +685,13 @@ func _abrir_combate_hack_slash(objetivo: Dictionary, zona: Area3D = null) -> boo
 			partida,
 			jornada,
 			_raiz(),
+			Callable(self, "_cerrar_combate_hack_slash"),
 		)
 	)
+	if montado.is_empty():
+		return false
+	_pantalla = montado["pantalla"]
+	_combate_contextual_app = montado["app"]
 	_hablando = false
 	_nomina.text = ""
 	return true
@@ -702,13 +704,9 @@ func _cerrar_combate_hack_slash(
 	decision: Dictionary,
 	resultado: Dictionary,
 ) -> void:
-	var app := _combate_contextual_app
+	DIA_COMBATE_PANTALLA_APP.new().cerrar(_combate_contextual_app, _pantalla)
 	_combate_contextual_app = null
-	if is_instance_valid(app):
-		app.queue_free()
-	if _pantalla != null:
-		_pantalla.queue_free()
-		_pantalla = null
+	_pantalla = null
 
 	if String(decision.get("plano", "")) == CombateContextual.PLANO_REALIDAD:
 		var id := String(objetivo.get("id", ""))
