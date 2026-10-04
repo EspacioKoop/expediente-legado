@@ -20,6 +20,12 @@ RUNTIME = {
     "papel_coger_01.ogg": "ab7c79d10d10996bcd01f3550abdedf562e180f7b53295ad48b8e91365d075aa",
     "papel_pasar_01.ogg": "0d8c22e65257cf8f097a2225c679608a147f2b4c6e18b174b32cfac0c636a191",
     "papel_manojo_01.ogg": "f738a8c8c04dc822f5855fb3812156027fb66f802139f2a3b34231577db58bbb",
+    "teclado_tecla_01.ogg": "124e1ae6dff47b920abb6e083e010ae3ba087151411d0ccd9403c1caaf6c0a17",
+    "teclado_tecla_02.ogg": "8b2e84a596d76ee8d121a879d3384b1d4089dfc4df4d80b69f43d2e6f824a3b7",
+    "teclado_tecla_03.ogg": "4cfa77b19909d2e46d10733938c1cf546898650444928b1dade948db3e08d8e2",
+    "teclado_rafaga_01.ogg": "b421050c407d40fc7524286e24a96dd2b506b1070c666a0b0df3b50ed77b24e3",
+    "teclado_rafaga_02.ogg": "fa0711d7f1d356bb6870d8d5492357a0c5bdfa4e6f8bd50dccbee0937ec5f877",
+    "teclado_rafaga_03.ogg": "a1babff9d91b4b7b83a6c51e14599642fe1f283eacfdb9d57c2a27f671a7d8b0",
 }
 ARCHIVADOR_WAV = {
     "archivador_abrir_01": "f2ffeb6b5bdf3f7bb34e108755ec561688af9ed368f4baf7656db7b84112fdc5",
@@ -94,6 +100,18 @@ class SfxChipGeneradorTest(unittest.TestCase):
         self.assertGreaterEqual(paginas, 3, nombre)
         self.assertTrue(tiene_eos, nombre)
 
+    def _assert_vorbis_mono_44100(self, ruta: Path, nombre: str):
+        datos = ruta.read_bytes()
+        identificacion = datos.find(b"\x01vorbis")
+        self.assertGreaterEqual(identificacion, 0, nombre)
+        self.assertGreaterEqual(len(datos), identificacion + 16, nombre)
+        self.assertEqual(datos[identificacion + 11], 1, nombre)
+        self.assertEqual(
+            int.from_bytes(datos[identificacion + 12 : identificacion + 16], "little"),
+            44_100,
+            nombre,
+        )
+
     def test_ogg_runtime_tienen_hash_procedencia_y_presupuesto(self):
         sonido = SONIDO.read_text(encoding="utf-8")
         fichas = {
@@ -114,6 +132,23 @@ class SfxChipGeneradorTest(unittest.TestCase):
             self.assertEqual(ficha["licencia"], "CC0-1.0", nombre)
             self.assertEqual(ficha["fuente"], "tools/sfx_chip/generar.py", nombre)
             self.assertIn(f"chip/{nombre}", sonido)
+
+    def test_teclado_runtime_usa_familias_chip_con_fallback_completo(self):
+        sonido = SONIDO.read_text(encoding="utf-8")
+        self.assertIn('"tecla":', sonido)
+        self.assertIn('"rafaga":', sonido)
+        for nombre in (
+            "teclado_tecla_01.ogg",
+            "teclado_tecla_02.ogg",
+            "teclado_tecla_03.ogg",
+            "teclado_rafaga_01.ogg",
+            "teclado_rafaga_02.ogg",
+            "teclado_rafaga_03.ogg",
+        ):
+            self._assert_vorbis_mono_44100(ASSETS / "audio" / "chip" / nombre, nombre)
+            self.assertIn(f"chip/{nombre}", sonido)
+        self.assertIn('"tecla": ["click_001.ogg"]', sonido)
+        self.assertIn('"rafaga": ["click_001.ogg"]', sonido)
 
     def test_runtime_conserva_kenney_como_fallback(self):
         sonido = SONIDO.read_text(encoding="utf-8")
