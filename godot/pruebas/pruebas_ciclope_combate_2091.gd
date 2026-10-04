@@ -35,7 +35,7 @@ func _probar_montaje_y_telegraph() -> void:
 	var cabeza := presentacion.get("cabeza") as MeshInstance3D
 	var ojo := presentacion.get("ojo") as MeshInstance3D
 	var estela := presentacion.get("estela") as MeshInstance3D
-	_comprobar(raiz != null and cabeza != null and ojo != null and estela != null, "expone piezas canonicas")
+	_comprobar(\n\t\traiz != null and cabeza != null and ojo != null and estela != null,\n\t\t"expone piezas canonicas"\n\t)
 	if raiz == null or cabeza == null or ojo == null or estela == null:
 		return
 
@@ -143,7 +143,7 @@ func _probar_presentacion_sin_autoridad_de_gameplay() -> void:
 		"ReligionEventos",
 		"CombateContextual",
 	]:
-		_comprobar(not fuente.contains(prohibido), "presentacion no contiene autoridad: " + prohibido)
+		_comprobar(\n\t\t\tnot fuente.contains(prohibido), "presentacion no contiene autoridad: " + prohibido\n\t\t)
 
 
 func _comprobar(condicion: bool, nombre: String) -> void:
