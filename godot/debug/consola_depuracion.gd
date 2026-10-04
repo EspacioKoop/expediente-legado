@@ -258,9 +258,9 @@ func _cmd_estado() -> void:
 	var dia := _dia()
 	if dia == null:
 		return
-	var pistas = dia.partida.estado.get("pistas_descubiertas", [])
-	var cantidad_pistas := pistas.size() if typeof(pistas) == TYPE_ARRAY else 0
-	var rivales := _ids_rivales(dia)
+	var pistas: Variant = dia.partida.estado.get("pistas_descubiertas", [])
+	var cantidad_pistas: int = pistas.size() if typeof(pistas) == TYPE_ARRAY else 0
+	var rivales: Array[String] = _ids_rivales(dia)
 	_ok(
 		(
 			"Día %d · fase %s · dinero %d · pistas %d"
