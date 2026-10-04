@@ -88,10 +88,7 @@ func _al_terminar_combate_publico_caos(
 func _unhandled_input(evento: InputEvent) -> void:
 	if not is_instance_valid(_combate_publico_caos):
 		return
-	if (
-		not evento.is_action_pressed("cancelar")
-		and not evento.is_action_pressed("ui_cancel")
-	):
+	if not evento.is_action_pressed("cancelar") and not evento.is_action_pressed("ui_cancel"):
 		return
 	get_viewport().set_input_as_handled()
 	_combate_publico_caos.abandonar()
