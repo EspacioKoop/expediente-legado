@@ -164,6 +164,34 @@ RECETAS = {
         "clacks": ((0.020, 0.22, 0.005), (0.065, 0.20, 0.005)),
         "wav_sha256": "a5dc5bc889d47d9bab2d994210f6cc536414176cbf1d764cc42c7835098936cf",
     },
+    "crt_encender_01": {
+        "seed": 181331, "duration": 0.28, "tone_hz": (72, 920), "decay": 0.85,
+        "tone_mix": 0.44, "pulse_mix": 0.16, "pulse_threshold": 0.12,
+        "noise_mix": 0.22, "noise_lp": 0.10, "drive": 1.55, "gain": 0.62,
+        "clacks": ((0.018, 0.48, 0.005), (0.235, 0.12, 0.010)),
+        "wav_sha256": "e5baf924acd689c4a53805ecf3976ee942999cce86cd68f539fbe66b2bba33db",
+    },
+    "crt_apagar_01": {
+        "seed": 181332, "duration": 0.24, "tone_hz": (760, 58), "decay": 1.15,
+        "tone_mix": 0.48, "pulse_mix": 0.14, "pulse_threshold": -0.18,
+        "noise_mix": 0.24, "noise_lp": 0.12, "drive": 1.50, "gain": 0.61,
+        "clacks": ((0.026, 0.34, 0.006), (0.178, 0.18, 0.010)),
+        "wav_sha256": "850929eda2e9c49d732e51dad5cabde636aac55a4fe021d53b650ad98f311a06",
+    },
+    "crt_rele_01": {
+        "seed": 181333, "duration": 0.12, "tone_hz": (190, 105), "decay": 3.2,
+        "tone_mix": 0.22, "pulse_mix": 0.34, "pulse_threshold": 0.30,
+        "noise_mix": 0.18, "noise_lp": 0.34, "drive": 1.90, "gain": 0.58,
+        "clacks": ((0.014, 0.70, 0.004), (0.052, 0.20, 0.004)),
+        "wav_sha256": "817615dd2da6d442825f0713a37e36a0582d348cfed58c0539498844f0476c67",
+    },
+    "crt_estatica_01": {
+        "seed": 181334, "duration": 0.20, "tone_hz": (330, 210), "decay": 1.4,
+        "tone_mix": 0.08, "pulse_mix": 0.08, "pulse_threshold": 0.05,
+        "noise_mix": 0.78, "noise_lp": 0.48, "drive": 1.25, "gain": 0.54,
+        "clacks": ((0.022, 0.16, 0.006), (0.132, 0.12, 0.008)),
+        "wav_sha256": "c771ed47bed291bfe3b9ad04fe2e381404ce2ef084a025d4e9ae35d20226f6f5",
+    },
 }
 
 

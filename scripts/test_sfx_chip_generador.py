@@ -43,6 +43,12 @@ ARCHIVADOR_WAV = {
     "archivador_cerrar_02": "b52f5bfe6a0654577b45b0f51ce29f76e7f54fcaed53bed65ec879e2f0b35b3d",
     "archivador_cerrar_03": "7c6650547bbb11dfaf72afb931bf014f3686eeb19f69c583d6ada42a17898dfe",
 }
+CRT_WAV = {
+    "crt_encender_01": "e5baf924acd689c4a53805ecf3976ee942999cce86cd68f539fbe66b2bba33db",
+    "crt_apagar_01": "850929eda2e9c49d732e51dad5cabde636aac55a4fe021d53b650ad98f311a06",
+    "crt_rele_01": "817615dd2da6d442825f0713a37e36a0582d348cfed58c0539498844f0476c67",
+    "crt_estatica_01": "c771ed47bed291bfe3b9ad04fe2e381404ce2ef084a025d4e9ae35d20226f6f5",
+}
 
 spec = importlib.util.spec_from_file_location("sfx_chip_generar", GENERADOR)
 generador = importlib.util.module_from_spec(spec)
@@ -77,6 +83,31 @@ class SfxChipGeneradorTest(unittest.TestCase):
             self.assertLess(dc, 0.01, nombre)
             self.assertEqual(muestras[0], 0, nombre)
             self.assertEqual(muestras[-1], 0, nombre)
+
+    def test_crt_tiene_cuatro_eventos_diferenciados_y_reproducibles(self):
+        self.assertEqual(set(CRT_WAV), {
+            "crt_encender_01",
+            "crt_apagar_01",
+            "crt_rele_01",
+            "crt_estatica_01",
+        })
+        for nombre, esperado in CRT_WAV.items():
+            receta = generador.RECETAS[nombre]
+            real = hashlib.sha256(
+                generador.wav_bytes(generador.sintetizar(receta))
+            ).hexdigest()
+            self.assertEqual(real, esperado, nombre)
+
+        encender = generador.RECETAS["crt_encender_01"]
+        apagar = generador.RECETAS["crt_apagar_01"]
+        rele = generador.RECETAS["crt_rele_01"]
+        estatica = generador.RECETAS["crt_estatica_01"]
+        self.assertLess(encender["tone_hz"][0], encender["tone_hz"][1])
+        self.assertGreater(apagar["tone_hz"][0], apagar["tone_hz"][1])
+        self.assertGreater(max(x[1] for x in rele["clacks"]), 0.60)
+        self.assertGreater(estatica["noise_mix"], 0.70)
+        self.assertEqual(len({r["seed"] for r in (encender, apagar, rele, estatica)}), 4)
+
 
     def test_abrir_y_cerrar_tienen_tres_variaciones_distintas(self):
         abrir = [nombre for nombre in generador.RECETAS if nombre.startswith("archivador_abrir_")]
