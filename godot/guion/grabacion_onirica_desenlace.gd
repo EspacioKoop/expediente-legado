@@ -37,4 +37,9 @@ static func resolver(
 
 
 static func _vuelta_valida(valor: Variant) -> bool:
-	return typeof(valor) == TYPE_INT and int(valor) >= 1
+	if typeof(valor) == TYPE_INT:
+		return int(valor) >= 1
+	if typeof(valor) == TYPE_FLOAT:
+		var numero := float(valor)
+		return numero >= 1.0 and is_equal_approx(numero, roundf(numero))
+	return false
