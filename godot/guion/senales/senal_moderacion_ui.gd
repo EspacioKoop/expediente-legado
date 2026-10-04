@@ -17,6 +17,7 @@ const TEXTO_CANCELAR := "Cancelar"
 var _event_id := ""
 var _centro: CenterContainer
 var _texto: Label
+var _boton_ocultar: Button
 var _abierto := false
 
 
@@ -34,7 +35,15 @@ func abrir(event_id: String, texto: String = "") -> Dictionary:
 	_texto.visible = not _texto.text.is_empty()
 	_centro.visible = true
 	_abierto = true
+	if _boton_ocultar != null:
+		_boton_ocultar.grab_focus()
 	return {"ok": true, "status": "open"}
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if _abierto and event.is_action_pressed("ui_cancel"):
+		cerrar()
+		get_viewport().set_input_as_handled()
 
 
 func cerrar() -> void:
@@ -87,7 +96,7 @@ func _construir_ui() -> void:
 
 	var titulo := Label.new()
 	titulo.name = "Titulo"
-	titulo.text = TEXTO_TITULO
+	titulo.text = _traducir("signal.moderate.title", TEXTO_TITULO)
 	titulo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lista.add_child(titulo)
 
@@ -96,20 +105,27 @@ func _construir_ui() -> void:
 	_texto.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	lista.add_child(_texto)
 
-	var ocultar := Button.new()
-	ocultar.name = "Ocultar"
-	ocultar.text = TEXTO_OCULTAR
-	ocultar.pressed.connect(solicitar_ocultar)
-	lista.add_child(ocultar)
+	_boton_ocultar = Button.new()
+	_boton_ocultar.name = "Ocultar"
+	_boton_ocultar.text = _traducir("signal.moderate.hide", TEXTO_OCULTAR)
+	_boton_ocultar.pressed.connect(solicitar_ocultar)
+	lista.add_child(_boton_ocultar)
 
 	var reportar := Button.new()
 	reportar.name = "Reportar"
-	reportar.text = TEXTO_REPORTAR
+	reportar.text = _traducir("signal.moderate.report", TEXTO_REPORTAR)
 	reportar.pressed.connect(solicitar_reportar)
 	lista.add_child(reportar)
 
 	var cancelar := Button.new()
 	cancelar.name = "Cancelar"
-	cancelar.text = TEXTO_CANCELAR
+	cancelar.text = _traducir("signal.moderate.cancel", TEXTO_CANCELAR)
 	cancelar.pressed.connect(cerrar)
 	lista.add_child(cancelar)
+
+
+func _traducir(clave: String, fallback: String) -> String:
+	var traducido := TranslationServer.translate(clave)
+	if traducido == clave:
+		return fallback
+	return traducido
