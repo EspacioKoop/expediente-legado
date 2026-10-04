@@ -171,9 +171,7 @@ func _cerrar_vuelta() -> void:
 ## había ninguna. El relleno ambiental no se toca aquí —cada espacio fija el
 ## suyo al entrar con `ambiente_energia`, y este valor es solo el inicial—.
 func _montar_entorno() -> void:
-	var montado := _presentacion.montar_entorno(
-		self, partida.estado.get("perfil_jugador", {})
-	)
+	var montado := _presentacion.montar_entorno(self, partida.estado.get("perfil_jugador", {}))
 	_ambiente = montado["ambiente"]
 	_sol = montado["sol"]
 	_caminante = montado["caminante"]
@@ -182,9 +180,7 @@ func _montar_entorno() -> void:
 
 
 func _montar_interfaz() -> void:
-	var montado := _presentacion.montar_interfaz(
-		self, Callable(self, "_al_pulsar_borrar")
-	)
+	var montado := _presentacion.montar_interfaz(self, Callable(self, "_al_pulsar_borrar"))
 	_hud = montado["hud"]
 	_rotulo = montado["rotulo"]
 	_nomina = montado["nomina"]
@@ -560,12 +556,15 @@ func _dar_de_comer() -> void:
 ## y a la misma velocidad la zancada es siempre la misma. Con un temporizador,
 ## quedarse quieto contra una pared seguiría sonando a alguien caminando.
 func _andar(delta: float) -> void:
-	_presentacion.avanzar_pasos(
-		_caminante,
-		_pantalla != null,
-		_pisada,
-		_suelo_pisado(),
-		delta,
+	(
+		_presentacion
+		. avanzar_pasos(
+			_caminante,
+			_pantalla != null,
+			_pisada,
+			_suelo_pisado(),
+			delta,
+		)
 	)
 
 
