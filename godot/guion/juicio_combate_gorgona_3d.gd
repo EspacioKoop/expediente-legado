@@ -60,9 +60,12 @@ static func pintar(
 
 	var unidad: Dictionary = salida_controlador.get("unidad", {})
 	var estado := String(unidad.get("estado", ""))
-	var geometria: Dictionary = salida_controlador.get(
-		"geometria",
-		CONTROLADOR.geometria(unidad),
+	var geometria: Dictionary = (
+		salida_controlador
+		. get(
+			"geometria",
+			CONTROLADOR.geometria(unidad),
+		)
 	)
 	var rumbo := float(geometria.get("rumbo", 0.0))
 	var origen: Vector3 = geometria.get("origen", Vector3.ZERO)
