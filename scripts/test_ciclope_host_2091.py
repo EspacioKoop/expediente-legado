@@ -13,11 +13,11 @@ class CiclopeHost2091Test(unittest.TestCase):
     def test_reutiliza_embestidor_y_presentacion_sin_politica_paralela(self):
         self.assertIn('const VARIANTE := "ciclope_cantera"', CICLOPE)
         self.assertIn("ARQUETIPOS.nuevo(ARQUETIPOS.EMBESTIDOR", CICLOPE)
-        self.assertIn("RUNTIME.avanzar(", CICLOPE)
-        self.assertIn("RUNTIME.mover(", CICLOPE)
-        self.assertIn("RUNTIME.pintar_linea(", CICLOPE)
+        self.assertRegex(CICLOPE, r"RUNTIME\s*\.\s*avanzar\(")
+        self.assertRegex(CICLOPE, r"RUNTIME\s*\.\s*mover\(")
+        self.assertRegex(CICLOPE, r"RUNTIME\s*\.\s*pintar_linea\(")
         self.assertIn("PRESENTACION.montar(", CICLOPE)
-        self.assertIn("PRESENTACION.pintar(", CICLOPE)
+        self.assertRegex(CICLOPE, r"PRESENTACION\s*\.\s*pintar\(")
 
     def test_carga_conserva_rumbo_y_choque_pasa_por_impacto_comun(self):
         self.assertIn('unidad.get("rumbo_bloqueado", rival.rotation.y)', CICLOPE)
