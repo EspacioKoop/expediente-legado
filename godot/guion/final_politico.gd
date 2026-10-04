@@ -25,7 +25,7 @@ static func resumen(estado: Dictionary, contrato: Dictionary = {}) -> Dictionary
 	var auditoria := Auditorias.resumen_narrativo(estado)
 	var religion := ReligionTrayectoria.resumir(ReligionEventos.resumen_trayectoria(estado))
 	var ejemplos := []
-	var exposicion := _eco_exposicion(estado)
+	var eco_exposicion := _eco_exposicion(estado)
 	var lecturas_sociales := _lecturas_sociales(estado)
 
 	for evento in elecciones:
@@ -48,7 +48,7 @@ static func resumen(estado: Dictionary, contrato: Dictionary = {}) -> Dictionary
 		"dominantes": dominantes,
 		"elecciones": elecciones.size(),
 		"ejemplos": ejemplos,
-		"exposicion": exposicion,
+		"eco_exposicion": eco_exposicion,
 		"auditoria": auditoria,
 		"religion": religion,
 		"lecturas_sociales": lecturas_sociales,
@@ -98,12 +98,20 @@ static func _patron(elecciones: Array, dominantes: Array) -> String:
 	return PATRON_CONTEXTUAL
 
 
-## Devuelve los hechos de exposición actuales sin interpretarlos como elecciones.
-static func _eco_exposicion(estado: Dictionary) -> Array:
+## Devuelve como máximo un eco factual de exposición de la jornada actual.
+## El historial completo permanece en Prometeo.CLAVE_EXPOSICION_IDEOLOGICA.
+static func _eco_exposicion(estado: Dictionary) -> Dictionary:
+	var jornada = estado.get("jornada", {})
+	if typeof(jornada) != TYPE_DICTIONARY:
+		return {}
+	var dia_actual := int((jornada as Dictionary).get("dia", 0))
+	if dia_actual <= 0:
+		return {}
+
 	var valor = estado.get(Prometeo.CLAVE_EXPOSICION_IDEOLOGICA, [])
 	if typeof(valor) != TYPE_ARRAY:
-		return []
-	var salida := []
+		return {}
+
 	for exposicion in valor:
 		if typeof(exposicion) != TYPE_DICTIONARY:
 			continue
@@ -111,19 +119,26 @@ static func _eco_exposicion(estado: Dictionary) -> Array:
 		var id_crudo = entrada.get("id")
 		var fuente_cruda = entrada.get("fuente")
 		var eje_crudo = entrada.get("eje")
+		var jornada_cruda = entrada.get("jornada")
 		if (
 			typeof(id_crudo) != TYPE_STRING
 			or typeof(fuente_cruda) != TYPE_STRING
 			or typeof(eje_crudo) != TYPE_STRING
+			or (typeof(jornada_cruda) != TYPE_INT and typeof(jornada_cruda) != TYPE_FLOAT)
 		):
+			continue
+		var jornada_numero := float(jornada_cruda)
+		if not is_equal_approx(jornada_numero, roundf(jornada_numero)):
+			continue
+		if int(jornada_numero) != dia_actual:
 			continue
 		var id := String(id_crudo).strip_edges()
 		var fuente := String(fuente_cruda).strip_edges()
 		var eje := String(eje_crudo).strip_edges()
 		if id.is_empty() or fuente.is_empty() or not Prometeo.EJES.has(eje):
 			continue
-		salida.append({"id": id, "fuente": fuente, "eje": eje})
-	return salida
+		return {"id": id, "fuente": fuente, "eje": eje}
+	return {}
 
 
 static func _historias_completas(estado: Dictionary) -> Dictionary:
