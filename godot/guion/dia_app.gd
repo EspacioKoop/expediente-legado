@@ -677,13 +677,15 @@ func _abrir_combate_hack_slash(objetivo: Dictionary, zona: Area3D = null) -> boo
 			objetivo,
 			decision,
 			zona,
-			_caminante,
-			_mundo,
-			_hud,
-			_ambiente,
-			partida,
-			jornada,
-			_raiz(),
+			{
+				"caminante": _caminante,
+				"mundo": _mundo,
+				"hud": _hud,
+				"ambiente": _ambiente,
+				"partida": partida,
+				"jornada": jornada,
+				"raiz": _raiz(),
+			},
 			Callable(self, "_cerrar_combate_hack_slash"),
 		)
 	)
