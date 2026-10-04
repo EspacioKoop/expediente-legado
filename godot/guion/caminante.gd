@@ -18,6 +18,11 @@ const SENSIBILIDAD_RATON_BASE := 0.0022
 ## la del ratón a propósito: el dedo recorre muchos más píxeles por gesto, así
 ## que el valor queda explícito y acotado para que un barrido no pegue un volantazo.
 const SENSIBILIDAD_TACTIL_BASE := 0.0018
+## La zona izquierda reclama un dedo para desplazamiento; el resto queda libre
+## para mirar con el arrastre táctil ya integrado. El radio convierte píxeles
+## de desplazamiento en un vector analógico acotado.
+const ZONA_MOVIMIENTO_TACTIL := 0.45
+const RADIO_MOVIMIENTO_TACTIL := 96.0
 const VOLUMEN_PISADA_DB := -8.0
 const GRUPO_CAMARA := "caminante_camara"
 
@@ -69,6 +74,9 @@ var _agachado := false
 var _camara_dialogo: Camera3D
 var _objetivo_dialogo: Node3D
 var _tween_camara_dialogo: Tween
+var _dedo_movimiento_tactil := -1
+var _origen_movimiento_tactil := Vector2.ZERO
+var _movimiento_tactil := Vector2.ZERO
 
 @onready var _camara: Camera3D = $Camara
 @onready var _colision: CollisionShape3D = $Colision
@@ -386,6 +394,37 @@ func _aplicar_movimiento_raton(evento: InputEventMouseMotion) -> void:
 	)
 
 
+## El movimiento táctil usa la zona izquierda y no necesita capturar puntero.
+## Se evalúa en _unhandled_input para que cualquier Control tenga prioridad.
+static func debe_procesar_movimiento_tactil(fisica_activa: bool, arbol_pausado: bool) -> bool:
+	return fisica_activa and not arbol_pausado
+
+
+static func es_zona_movimiento_tactil(posicion: Vector2, tamano: Vector2) -> bool:
+	if tamano.x <= 0.0 or tamano.y <= 0.0:
+		return false
+	return (
+		posicion.x >= 0.0
+		and posicion.y >= 0.0
+		and posicion.x <= tamano.x * ZONA_MOVIMIENTO_TACTIL
+		and posicion.y <= tamano.y
+	)
+
+
+static func vector_movimiento_tactil(
+	origen: Vector2, posicion: Vector2, radio: float = RADIO_MOVIMIENTO_TACTIL
+) -> Vector2:
+	if radio <= 0.0:
+		return Vector2.ZERO
+	return ((posicion - origen) / radio).limit_length(1.0)
+
+
+func _limpiar_movimiento_tactil() -> void:
+	_dedo_movimiento_tactil = -1
+	_origen_movimiento_tactil = Vector2.ZERO
+	_movimiento_tactil = Vector2.ZERO
+
+
 ## El arrastre táctil mira con los mismos guardas de gameplay que el ratón,
 ## salvo la captura: el tacto no captura puntero. Que una GUI se haya quedado
 ## el gesto se resuelve escuchando el drag en `_unhandled_input`, no aquí.
@@ -411,16 +450,40 @@ func _unhandled_input(evento: InputEvent) -> void:
 	# respetar que una GUI los haya consumido, especialmente el clic de recaptura.
 	if evento is InputEventMouseMotion:
 		return
-	# Un drag que llega aquí no fue consumido por ninguna GUI; si empezó sobre
-	# una app o modal, esa interfaz se lo queda y la cámara no gira. El tacto
-	# tampoco registra dispositivo: el prompt solo distingue teclado/ratón y mando.
+	if evento is InputEventScreenTouch:
+		var toque := evento as InputEventScreenTouch
+		if not toque.pressed:
+			if toque.index == _dedo_movimiento_tactil:
+				_limpiar_movimiento_tactil()
+			return
+		if (
+			_dedo_movimiento_tactil < 0
+			and debe_procesar_movimiento_tactil(is_physics_processing(), get_tree().paused)
+			and es_zona_movimiento_tactil(
+				toque.position,
+				get_viewport().get_visible_rect().size,
+			)
+		):
+			_dedo_movimiento_tactil = toque.index
+			_origen_movimiento_tactil = toque.position
+			_movimiento_tactil = Vector2.ZERO
+		return
+	# Un drag que llega aquí no fue consumido por ninguna GUI. El dedo reclamado
+	# por movimiento nunca gira la cámara; un segundo dedo conserva el look de
+	# #2079. El tacto tampoco cambia los prompts teclado/ratón ↔ mando.
 	if evento is InputEventScreenDrag:
+		var arrastre := evento as InputEventScreenDrag
+		if arrastre.index == _dedo_movimiento_tactil:
+			_movimiento_tactil = vector_movimiento_tactil(
+				_origen_movimiento_tactil, arrastre.position
+			)
+			return
 		if debe_procesar_arrastre_tactil(
 			is_physics_processing(),
 			get_tree().paused,
 			is_instance_valid(_camara_dialogo),
 		):
-			_aplicar_arrastre_tactil(evento)
+			_aplicar_arrastre_tactil(arrastre)
 		return
 	_registrar_dispositivo_entrada(evento)
 	# El menú global es el único dueño de `cancelar`: al abrirlo libera el ratón y
@@ -443,10 +506,13 @@ func _physics_process(delta: float) -> void:
 	elif Input.is_action_just_pressed(SALTAR) and not _agachado:
 		velocity.y = IMPULSO_SALTO
 
-	var entrada := Input.get_vector(MOVER_IZQUIERDA, MOVER_DERECHA, MOVER_ADELANTE, MOVER_ATRAS)
-	# `Input.get_vector` ya limita la diagonal a longitud 1 y conserva cuánto se
-	# inclina un stick. No normalizar aquí evita convertir media inclinación en
-	# velocidad máxima y conserva diagonales sin acelerarlas.
+	var entrada := (
+		_movimiento_tactil
+		if _dedo_movimiento_tactil >= 0
+		else Input.get_vector(MOVER_IZQUIERDA, MOVER_DERECHA, MOVER_ADELANTE, MOVER_ATRAS)
+	)
+	# Ambos caminos entregan un Vector2 de longitud <= 1. No normalizar aquí
+	# conserva media inclinación del stick físico y del gesto táctil.
 	var direccion := transform.basis * Vector3(entrada.x, 0, entrada.y)
 	# Agacharse manda sobre correr: no se puede correr agachado.
 	var velocidad_base := VELOCIDAD
