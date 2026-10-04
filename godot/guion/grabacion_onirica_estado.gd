@@ -59,7 +59,9 @@ static func registrar_toma(estado: Dictionary, datos: Dictionary) -> Dictionary:
 			"cinta": {},
 		}
 
-	var resultado := GrabacionOniricaContrato.registrar_toma(cinta, datos)
+	var datos_normalizados := datos.duplicate(true)
+	_normalizar_vuelta_toma(datos_normalizados)
+	var resultado := GrabacionOniricaContrato.registrar_toma(cinta, datos_normalizados)
 	if bool(resultado.get("ok", false)):
 		contenedor["cinta"] = resultado.get("cinta", {}).duplicate(true)
 	return resultado.duplicate(true)
@@ -198,14 +200,17 @@ static func _normalizar_vueltas_grabadas(cinta: Dictionary) -> void:
 		if typeof(evaluacion) != TYPE_DICTIONARY:
 			continue
 		var toma = evaluacion.get("toma", {})
-		if typeof(toma) != TYPE_DICTIONARY:
-			continue
-		var sujeto = toma.get("sujeto", {})
-		if typeof(sujeto) != TYPE_DICTIONARY:
-			continue
-		var vuelta = sujeto.get("vuelta_grabada", null)
-		if _entero(vuelta) and int(vuelta) >= 1:
-			sujeto["vuelta_grabada"] = int(vuelta)
+		if typeof(toma) == TYPE_DICTIONARY:
+			_normalizar_vuelta_toma(toma)
+
+
+static func _normalizar_vuelta_toma(toma: Dictionary) -> void:
+	var sujeto = toma.get("sujeto", {})
+	if typeof(sujeto) != TYPE_DICTIONARY:
+		return
+	var vuelta = sujeto.get("vuelta_grabada", null)
+	if _entero(vuelta) and int(vuelta) >= 1:
+		sujeto["vuelta_grabada"] = int(vuelta)
 
 
 static func _numero_no_negativo(valor) -> bool:
