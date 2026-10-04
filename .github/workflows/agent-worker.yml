@@ -33,14 +33,6 @@ on:
     secrets:
       QWEN_API_KEY:
         required: false
-      OMNIROUTE_API_KEY:
-        required: false
-      TS_OAUTH_CLIENT_ID:
-        required: false
-      TS_OAUTH_SECRET:
-        required: false
-      TS_AUDIENCE:
-        required: false
       # Los slots de fallback se leen con secrets[format(...)] (#1685). Con el
       # `secrets: inherit` del pool llegan todos; estas declaraciones son solo
       # las históricas y no limitan el número de slots.
@@ -105,9 +97,6 @@ jobs:
     timeout-minutes: 60
     env:
       GEMINI_CLI_TRUST_WORKSPACE: 'true'
-      HAS_TS_OAUTH: ${{ secrets.TS_OAUTH_CLIENT_ID != '' && secrets.TS_OAUTH_SECRET != '' }}
-      HAS_TS_OIDC: ${{ secrets.TS_OAUTH_CLIENT_ID != '' && secrets.TS_AUDIENCE != '' }}
-      HAS_OMNIROUTE: ${{ secrets.OMNIROUTE_API_KEY != '' && secrets.TS_OAUTH_CLIENT_ID != '' && (secrets.TS_OAUTH_SECRET != '' || secrets.TS_AUDIENCE != '') && vars.OMNIROUTE_BASE_URL != '' && vars.OMNIROUTE_MODEL != '' }}
     steps:
       - id: guard
         name: Validar issue y slot
@@ -117,9 +106,6 @@ jobs:
           PROVIDER: ${{ inputs.provider }}
           WORKER: ${{ inputs.worker }}
           HAS_QWEN: ${{ secrets.QWEN_API_KEY != '' }}
-          HAS_TS_OAUTH: ${{ secrets.TS_OAUTH_CLIENT_ID != '' && secrets.TS_OAUTH_SECRET != '' }}
-          HAS_TS_OIDC: ${{ secrets.TS_OAUTH_CLIENT_ID != '' && secrets.TS_AUDIENCE != '' }}
-          HAS_OMNIROUTE: ${{ secrets.OMNIROUTE_API_KEY != '' && secrets.TS_OAUTH_CLIENT_ID != '' && (secrets.TS_OAUTH_SECRET != '' || secrets.TS_AUDIENCE != '') && vars.OMNIROUTE_BASE_URL != '' && vars.OMNIROUTE_MODEL != '' }}
           HAS_GEMINI: ${{ secrets.GEMINI_API_KEY != '' }}
           VARS_JSON: ${{ toJSON(vars) }}
           POOL_FALLBACK_KEYS: ${{ inputs.fallback_keys }}
@@ -140,7 +126,7 @@ jobs:
             exit 0
           fi
           case "$WORKER:$PROVIDER" in
-            qwen-primary:qwen) [[ "$HAS_QWEN" == true || "$HAS_OMNIROUTE" == true ]] || exit 3 ;;
+            qwen-primary:qwen) [[ "$HAS_QWEN" == true ]] || exit 3 ;;
             qwen-fallback-[1-9]*:qwen)
               # Aún sin checkout: URL desde las variables y clave según la tabla del
               # pool. qwen_config vuelve a comprobar la clave del propio slot.
@@ -256,40 +242,6 @@ jobs:
             --lease-id "$LEASE_ID" \
             --state planning >/dev/null
 
-      - name: Conectar qwen-primary a OmniRoute por Tailscale (OAuth)
-        if: steps.guard.outputs.run == 'true' && inputs.worker == 'qwen-primary' && env.HAS_OMNIROUTE == 'true' && env.HAS_TS_OAUTH == 'true'
-        continue-on-error: true
-        uses: tailscale/github-action@d1b6cd204f8dceda5b3eaad7f1f767be390056cd # v4
-        with:
-          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
-          tags: tag:github-autopilot
-
-      - name: Conectar qwen-primary a OmniRoute por Tailscale (OIDC)
-        if: steps.guard.outputs.run == 'true' && inputs.worker == 'qwen-primary' && env.HAS_OMNIROUTE == 'true' && env.HAS_TS_OAUTH != 'true' && env.HAS_TS_OIDC == 'true'
-        continue-on-error: true
-        uses: tailscale/github-action@d1b6cd204f8dceda5b3eaad7f1f767be390056cd # v4
-        with:
-          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-          audience: ${{ secrets.TS_AUDIENCE }}
-          tags: tag:github-autopilot
-
-      - id: omniroute
-        name: Comprobar OmniRoute para qwen-primary
-        if: steps.guard.outputs.run == 'true' && inputs.worker == 'qwen-primary' && env.HAS_OMNIROUTE == 'true'
-        continue-on-error: true
-        env:
-          OMNIROUTE_BASE_URL: ${{ vars.OMNIROUTE_BASE_URL }}
-          OMNIROUTE_API_KEY: ${{ secrets.OMNIROUTE_API_KEY }}
-        run: |
-          set -euo pipefail
-          base="${OMNIROUTE_BASE_URL%/}"
-          code="$(curl -sS --max-time 12 -o /tmp/omniroute-models.json -w '%{http_code}' \
-            -H "Authorization: Bearer $OMNIROUTE_API_KEY" "$base/models" || true)"
-          [[ "$code" == 200 ]]
-          jq -e '.data | type == "array"' /tmp/omniroute-models.json >/dev/null
-          echo "ready=true" >> "$GITHUB_OUTPUT"
-
       - id: slot
         name: Identificar slot de fallback
         if: steps.guard.outputs.run == 'true' && inputs.provider == 'qwen'
@@ -310,9 +262,6 @@ jobs:
         if: steps.guard.outputs.run == 'true' && inputs.provider == 'qwen'
         env:
           WORKER: ${{ inputs.worker }}
-          OMNI_READY: ${{ steps.omniroute.outputs.ready }}
-          OMNI_URL: ${{ vars.OMNIROUTE_BASE_URL }}
-          OMNI_MODEL: ${{ vars.OMNIROUTE_MODEL }}
           HAS_PRIMARY_KEY: ${{ secrets.QWEN_API_KEY != '' }}
           PRIMARY_KEY_PREFIX: ${{ startsWith(secrets.QWEN_API_KEY, 'sk-sp-') && 'sk-sp-' || '' }}
           PRIMARY_URL: ${{ vars.QWEN_BASE_URL }}
@@ -341,22 +290,15 @@ jobs:
           }
           case "$WORKER" in
             qwen-primary)
-              if [[ "$OMNI_READY" == true ]]; then
-                credential=omniroute
-                url="$OMNI_URL"
-                model="$OMNI_MODEL"
-              elif [[ "$HAS_PRIMARY_KEY" == true ]]; then
-                credential=primary
-                url="$PRIMARY_URL"
-                if [[ -z "$url" ]]; then
-                  if [[ "$PRIMARY_KEY_PREFIX" == sk-sp- ]]; then
-                    url="https://coding-intl.dashscope.aliyuncs.com/v1"
-                  else
-                    url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
-                  fi
+              [[ "$HAS_PRIMARY_KEY" == true ]] || exit 3
+              credential=primary
+              url="$PRIMARY_URL"
+              if [[ -z "$url" ]]; then
+                if [[ "$PRIMARY_KEY_PREFIX" == sk-sp- ]]; then
+                  url="https://coding-intl.dashscope.aliyuncs.com/v1"
+                else
+                  url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
                 fi
-              else
-                FALLBACK_KEYS="$POOL_FALLBACK_KEYS" fallback primera || exit 3
               fi
               ;;
             qwen-fallback-*)
@@ -630,7 +572,7 @@ jobs:
         continue-on-error: true
         uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
-          openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || secrets[steps.qwen_config.outputs.key_secret] }}
+          openai_api_key: ${{ steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || secrets[steps.qwen_config.outputs.key_secret] }}
           openai_base_url: ${{ steps.qwen_proxy.outputs.url || steps.qwen_config.outputs.url }}
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
@@ -938,7 +880,7 @@ jobs:
         continue-on-error: true
         uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
-          openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || secrets[steps.qwen_config.outputs.key_secret] }}
+          openai_api_key: ${{ steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || secrets[steps.qwen_config.outputs.key_secret] }}
           openai_base_url: ${{ steps.qwen_proxy.outputs.url || steps.qwen_config.outputs.url }}
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
@@ -1169,7 +1111,6 @@ jobs:
           PROVIDER: ${{ inputs.provider }}
           WORKER: ${{ inputs.worker }}
           HAS_QWEN: ${{ secrets.QWEN_API_KEY != '' }}
-          HAS_OMNIROUTE: ${{ secrets.OMNIROUTE_API_KEY != '' && secrets.TS_OAUTH_CLIENT_ID != '' && (secrets.TS_OAUTH_SECRET != '' || secrets.TS_AUDIENCE != '') && vars.OMNIROUTE_BASE_URL != '' && vars.OMNIROUTE_MODEL != '' }}
           VARS_JSON: ${{ toJSON(vars) }}
           POOL_FALLBACK_KEYS: ${{ inputs.fallback_keys }}
           HAS_GEMINI: ${{ secrets.GEMINI_API_KEY != '' }}
@@ -1342,7 +1283,7 @@ jobs:
                 [[ " $labels " == *" agent:qwen "* ]] && gemini_allowed=false
                 [[ " $labels " == *" agent:gemini "* ]] && qwen_allowed=false
                 if [[ "$qwen_allowed" == true ]]; then
-                  [[ "$HAS_QWEN" == true || "$HAS_OMNIROUTE" == true ]] && available+=(qwen-primary)
+                  [[ "$HAS_QWEN" == true ]] && available+=(qwen-primary)
                   if [[ -f scripts/agent_slots.py ]]; then
                     while IFS= read -r fallback_worker; do
                       [[ -n "$fallback_worker" ]] && available+=("$fallback_worker")
