@@ -104,11 +104,14 @@ func _montar_acciones_tactiles() -> void:
 
 
 func acciones_tactiles_disponibles() -> bool:
-	return AccionesTactiles98.debe_mostrarse(
-		is_physics_processing(),
-		get_tree().paused,
-		is_instance_valid(_camara_dialogo),
-		Input.mouse_mode == Input.MOUSE_MODE_CAPTURED,
+	return (
+		AccionesTactiles98
+		. debe_mostrarse(
+			is_physics_processing(),
+			get_tree().paused,
+			is_instance_valid(_camara_dialogo),
+			Input.mouse_mode == Input.MOUSE_MODE_CAPTURED,
+		)
 	)
 
 
