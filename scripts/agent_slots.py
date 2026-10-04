@@ -25,7 +25,6 @@ Los workers base admiten `QWEN_PRIMARY_MAX_TASK_BYTES` y
 
 Entorno de la CLI: `VARS_JSON`; `FALLBACK_KEYS` (slots con clave utilizable,
 "2 3"); `BASE_KEYS` (proveedores base con clave, "qwen gemini");
-`OMNIROUTE` (`true` si qwen-primary puede ir por OmniRoute).
 """
 
 from __future__ import annotations
@@ -62,6 +61,7 @@ BACKEND_HOSTS = {
     "api.cohere.ai": "cohere",
     "api.cohere.com": "cohere",
     "api.together.xyz": "together",
+    "ollama.com": "ollama-cloud",
 }
 
 
@@ -182,16 +182,16 @@ def fallbacks(
 
 
 def inventario(
-    variables: dict[str, Any], con_clave: set[int], base: set[str], omniroute: bool = False
+    variables: dict[str, Any], con_clave: set[int], base: set[str]
 ) -> list[dict[str, Any]]:
     """Todos los workers utilizables del pool, con su tier."""
 
     workers = []
-    if "qwen" in base or omniroute:
+    if "qwen" in base:
         workers.append({
             "worker": "qwen-primary",
             "provider": "qwen",
-            "backend": "omniroute" if omniroute else "qwen",
+            "backend": backend_de_url(str(variables.get("QWEN_BASE_URL") or "")),
         })
     if "gemini" in base:
         workers.append({"worker": "gemini", "provider": "gemini", "backend": "gemini"})
@@ -258,10 +258,8 @@ def main() -> int:
     variables = _variables()
     con_clave = claves_presentes(os.environ.get("FALLBACK_KEYS", ""))
     base = {p for p in os.environ.get("BASE_KEYS", "").split() if p in SECRETOS_BASE}
-    omniroute = os.environ.get("OMNIROUTE", "") == "true"
-
     if args.orden == "workers":
-        resultado: Any = inventario(variables, con_clave, base, omniroute)
+        resultado: Any = inventario(variables, con_clave, base)
     elif args.orden == "usables":
         print(" ".join(str(s["slot"]) for s in sorted(fallbacks(variables, con_clave, base), key=lambda s: s["slot"])))
         return 0
