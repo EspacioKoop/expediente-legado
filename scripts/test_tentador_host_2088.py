@@ -8,7 +8,7 @@ GUION = ROOT / "godot/guion"
 HOST = (GUION / "juicio_combate_tentador_host_3d.gd").read_text(encoding="utf-8")
 RUNTIME = (GUION / "juicio_combate_tentador_runtime_2088.gd").read_text(encoding="utf-8")
 PRESENTACION = (GUION / "juicio_combate_tentador_3d.gd").read_text(encoding="utf-8")
-HOST_COMPACTO = re.sub(r"\\s+", "", HOST)
+HOST_COMPACTO = re.sub(r"\s+", "", HOST)
 
 
 class TentadorHost2088Test(unittest.TestCase):
