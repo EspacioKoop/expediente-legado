@@ -1,7 +1,11 @@
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
+import shutil
+import struct
+import subprocess
 import unittest
 
 
@@ -26,6 +30,10 @@ RUNTIME = {
     "teclado_rafaga_01.ogg": "b421050c407d40fc7524286e24a96dd2b506b1070c666a0b0df3b50ed77b24e3",
     "teclado_rafaga_02.ogg": "fa0711d7f1d356bb6870d8d5492357a0c5bdfa4e6f8bd50dccbee0937ec5f877",
     "teclado_rafaga_03.ogg": "a1babff9d91b4b7b83a6c51e14599642fe1f283eacfdb9d57c2a27f671a7d8b0",
+    "ui_pulsar_01.ogg": "18ccd7a645c3f9c9bf6b9748c77d6d0f5d3fbf4bb5d30c9857538e4dd8aa8247",
+    "ui_marcar_01.ogg": "83752563ba2309e7e391ad52b308e06f4fa73f9e4a099ba7012a2b795ce6d264",
+    "ui_firmar_01.ogg": "64e5aa8ffe3470888af9e4b58a870e018e353242cd0cee9d4514569dbecca3bb",
+    "ui_error_01.ogg": "0e04ba84fc86d8524fb547b10b42295bde68a9457dfb287dafd226298bcb73da",
 }
 ARCHIVADOR_WAV = {
     "archivador_abrir_01": "f2ffeb6b5bdf3f7bb34e108755ec561688af9ed368f4baf7656db7b84112fdc5",
@@ -112,6 +120,89 @@ class SfxChipGeneradorTest(unittest.TestCase):
             nombre,
         )
 
+    def _audio_tool(self, nombre: str) -> str | None:
+        ruta = shutil.which(nombre)
+        if ruta is None and os.environ.get("SIGA98_EXIGIR_FFMPEG") == "1":
+            self.fail(f"{nombre} es obligatorio en el gate de audio runtime")
+        return ruta
+
+    def _assert_ogg_pcm_runtime(self, ruta: Path, nombre: str, ffmpeg: str, ffprobe: str):
+        probe = subprocess.run(
+            [
+                ffprobe,
+                "-v",
+                "error",
+                "-select_streams",
+                "a:0",
+                "-show_entries",
+                "stream=channels,sample_rate",
+                "-of",
+                "json",
+                str(ruta),
+            ],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        streams = json.loads(probe.stdout).get("streams", [])
+        self.assertEqual(len(streams), 1, nombre)
+        self.assertEqual(int(streams[0]["channels"]), 1, nombre)
+        self.assertEqual(int(streams[0]["sample_rate"]), 44_100, nombre)
+
+        decode = subprocess.run(
+            [
+                ffmpeg,
+                "-v",
+                "error",
+                "-i",
+                str(ruta),
+                "-f",
+                "s16le",
+                "-acodec",
+                "pcm_s16le",
+                "-",
+            ],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        pcm = decode.stdout
+        self.assertGreater(len(pcm), 0, nombre)
+        self.assertEqual(len(pcm) % 2, 0, nombre)
+        muestras = struct.unpack(f"<{len(pcm) // 2}h", pcm)
+        duracion = len(muestras) / 44_100
+        pico = max(abs(muestra) for muestra in muestras) / 32767
+        dc = abs(sum(muestras) / len(muestras)) / 32767
+        borde = 2048
+        receta = generador.RECETAS[Path(nombre).stem]
+        duracion_canonica = float(receta["duration"])
+        # Vorbis puede recortar unos pocos ms de priming/final al decodificar.
+        self.assertGreaterEqual(duracion, duracion_canonica - 0.005, nombre)
+        self.assertLessEqual(duracion, duracion_canonica + 0.005, nombre)
+        self.assertLess(pico, 0.92, nombre)
+        self.assertLess(dc, 0.02, nombre)
+        self.assertLessEqual(abs(muestras[0]), borde, nombre)
+        self.assertLessEqual(abs(muestras[-1]), borde, nombre)
+
+    def test_ogg_interfaz_pcm_runtime_decodificado(self):
+        ffmpeg = self._audio_tool("ffmpeg")
+        ffprobe = self._audio_tool("ffprobe")
+        if ffmpeg is None or ffprobe is None:
+            self.skipTest("ffmpeg/ffprobe no disponibles; el gate SFX chip los instala")
+        for nombre in (
+            "ui_pulsar_01.ogg",
+            "ui_marcar_01.ogg",
+            "ui_firmar_01.ogg",
+            "ui_error_01.ogg",
+        ):
+            self._assert_ogg_pcm_runtime(
+                ASSETS / "audio" / "chip" / nombre,
+                nombre,
+                ffmpeg,
+                ffprobe,
+            )
+
     def test_ogg_runtime_tienen_hash_procedencia_y_presupuesto(self):
         sonido = SONIDO.read_text(encoding="utf-8")
         fichas = {
@@ -123,6 +214,7 @@ class SfxChipGeneradorTest(unittest.TestCase):
             self.assertTrue(ruta.exists(), nombre)
             self.assertLess(ruta.stat().st_size, 30_000, nombre)
             self._assert_ogg_completo(ruta, nombre)
+            self._assert_vorbis_mono_44100(ruta, nombre)
             real = hashlib.sha256(ruta.read_bytes()).hexdigest()
             self.assertEqual(real, esperado, nombre)
             ficha = fichas.get(f"audio/chip/{nombre}")

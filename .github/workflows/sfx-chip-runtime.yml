@@ -1,0 +1,42 @@
+name: SFX chip runtime
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/sfx-chip-runtime.yml'
+      - 'scripts/test_sfx_chip_generador.py'
+      - 'tools/sfx_chip/generar.py'
+      - 'godot/guion/sonido.gd'
+      - 'godot/assets/procedencia.json'
+      - 'godot/assets/audio/chip/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - name: Instalar FFmpeg
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          ffmpeg -version | head -n 1
+          command -v ffprobe
+
+      - name: Validar SFX chip runtime
+        env:
+          SIGA98_EXIGIR_FFMPEG: '1'
+        run: python3 -m unittest -v scripts.test_sfx_chip_generador
