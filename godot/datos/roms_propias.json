@@ -67,18 +67,18 @@
       "mito": ""
     },
     {
-      "id": "ariadna_labertinto_98",
+      "id": "ariadne_98",
       "titulo": "Ariadne, el hilo del laberinto",
       "estado": "en_proyecto",
       "genero": "laberinto",
       "resumen": "Completar un recorrido o marcar una ruta en un laberinto de archivo; contraparte de vigilia del sueño del Minotauro.",
-      "fuente": "",
+      "fuente": "gbc/minijuegos/ariadne_98",
       "rom": "",
-      "cabecera": "",
-      "cgb": "",
+      "cabecera": "ARIADNE98",
+      "cgb": "dual",
       "incluida": false,
       "precio": 0,
-      "issues": [437, 442, 512],
+      "issues": [437, 442, 512, 2313, 2368, 2388, 2389],
       "mito": "minotauro"
     },
     {
