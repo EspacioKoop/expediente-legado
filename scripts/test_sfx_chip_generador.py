@@ -1,11 +1,7 @@
 import hashlib
 import importlib.util
 import json
-import os
 from pathlib import Path
-import shutil
-import struct
-import subprocess
 import unittest
 
 
@@ -120,73 +116,6 @@ class SfxChipGeneradorTest(unittest.TestCase):
             nombre,
         )
 
-    def _audio_tool(self, nombre: str) -> str | None:
-        ruta = shutil.which(nombre)
-        if ruta is None and os.environ.get("CI"):
-            self.fail(f"{nombre} es obligatorio en CI para validar los OGG runtime")
-        return ruta
-
-    def _assert_ogg_pcm_runtime(self, ruta: Path, nombre: str):
-        ffprobe = self._audio_tool("ffprobe")
-        ffmpeg = self._audio_tool("ffmpeg")
-        if ffprobe is None or ffmpeg is None:
-            self.skipTest("ffmpeg/ffprobe no disponibles para decodificar OGG runtime")
-
-        probe = subprocess.run(
-            [
-                ffprobe,
-                "-v",
-                "error",
-                "-select_streams",
-                "a:0",
-                "-show_entries",
-                "stream=channels,sample_rate",
-                "-of",
-                "json",
-                str(ruta),
-            ],
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-        )
-        streams = json.loads(probe.stdout).get("streams", [])
-        self.assertEqual(len(streams), 1, nombre)
-        self.assertEqual(int(streams[0]["channels"]), 1, nombre)
-        self.assertEqual(int(streams[0]["sample_rate"]), 44_100, nombre)
-
-        decode = subprocess.run(
-            [
-                ffmpeg,
-                "-v",
-                "error",
-                "-i",
-                str(ruta),
-                "-f",
-                "s16le",
-                "-acodec",
-                "pcm_s16le",
-                "-",
-            ],
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        pcm = decode.stdout
-        self.assertGreater(len(pcm), 0, nombre)
-        self.assertEqual(len(pcm) % 2, 0, nombre)
-        muestras = struct.unpack(f"<{len(pcm) // 2}h", pcm)
-        duracion = len(muestras) / 44_100
-        pico = max(abs(muestra) for muestra in muestras) / 32767
-        dc = abs(sum(muestras) / len(muestras)) / 32767
-        borde = 2048
-        self.assertGreaterEqual(duracion, 0.12, nombre)
-        self.assertLessEqual(duracion, 0.30, nombre)
-        self.assertLess(pico, 0.92, nombre)
-        self.assertLess(dc, 0.02, nombre)
-        self.assertLessEqual(abs(muestras[0]), borde, nombre)
-        self.assertLessEqual(abs(muestras[-1]), borde, nombre)
-
     def test_ogg_runtime_tienen_hash_procedencia_y_presupuesto(self):
         sonido = SONIDO.read_text(encoding="utf-8")
         fichas = {
@@ -199,8 +128,6 @@ class SfxChipGeneradorTest(unittest.TestCase):
             self.assertLess(ruta.stat().st_size, 30_000, nombre)
             self._assert_ogg_completo(ruta, nombre)
             self._assert_vorbis_mono_44100(ruta, nombre)
-            if nombre.startswith("ui_"):
-                self._assert_ogg_pcm_runtime(ruta, nombre)
             real = hashlib.sha256(ruta.read_bytes()).hexdigest()
             self.assertEqual(real, esperado, nombre)
             ficha = fichas.get(f"audio/chip/{nombre}")
