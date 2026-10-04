@@ -212,5 +212,72 @@ class CataCompositivaTest(unittest.TestCase):
                 self.assertFalse(destino.exists())
 
 
+class CareoTrackerTest(unittest.TestCase):
+    def test_render_determinista_manifest_y_presupuesto(self):
+        with tempfile.TemporaryDirectory() as temporal:
+            raiz = Path(temporal)
+            destino_a = raiz / "a"
+            destino_b = raiz / "b"
+
+            manifest_a = LAB.generar_careo_tracker(destino_a)
+            manifest_b = LAB.generar_careo_tracker(destino_b)
+
+            self.assertEqual(manifest_a, manifest_b)
+            self.assertEqual(manifest_a["estudio"], "careo_tracker")
+            self.assertEqual(manifest_a["escucha_humana"], "pendiente")
+            self.assertEqual(manifest_a["duracion_s"], 8)
+            self.assertEqual(manifest_a["frecuencia_hz"], 44100)
+            self.assertLessEqual(manifest_a["voces_maximas"], manifest_a["limite_voces"])
+            self.assertLessEqual(len(manifest_a["banco"]), manifest_a["banco_pequeno_max_fuentes"])
+
+            wav_a = destino_a / "careo_tracker.wav"
+            wav_b = destino_b / "careo_tracker.wav"
+            self.assertEqual(wav_a.read_bytes(), wav_b.read_bytes())
+            self.assertEqual(
+                manifest_a["renders"][0]["sha256"],
+                LAB.sha256(wav_a.read_bytes()),
+            )
+            self.assertEqual(
+                (destino_a / "manifest.json").read_bytes(),
+                (destino_b / "manifest.json").read_bytes(),
+            )
+            self.assertEqual(
+                (destino_a / "partitura.json").read_bytes(),
+                (destino_b / "partitura.json").read_bytes(),
+            )
+
+            bucle = manifest_a["bucle"]
+            self.assertEqual(bucle["inicio_muestras"], 0)
+            self.assertEqual(bucle["fin_muestras"], 8 * LAB.SR)
+            self.assertEqual(bucle["inicio_s"], 0)
+            self.assertEqual(bucle["fin_s"], 8)
+
+            render = manifest_a["renders"][0]
+            self.assertEqual(render["clipping"], 0)
+            self.assertLess(max(map(abs, render["dc_por_canal"])), 0.0001)
+            self.assertLessEqual(render["pico_dbfs"], -8.99)
+
+    def test_no_escribe_en_runtime_y_no_lee_samples_externos(self):
+        runtime = LAB.RAIZ / "godot" / "careo_tracker_test"
+        with self.assertRaisesRegex(ValueError, "no escribe dentro del runtime"):
+            LAB.generar_careo_tracker(runtime)
+
+        fuente = Path(LAB.__file__).read_text(encoding="utf-8")
+        inicio = fuente.index("def generar_careo_tracker(")
+        fin = fuente.index("\ndef main()", inicio)
+        bloque = fuente[inicio:fin]
+        for prohibido in (
+            "requests",
+            "urllib",
+            "urlopen",
+            "AudioStream",
+            "godot/assets",
+            "read_bytes()",
+            "open(",
+        ):
+            with self.subTest(prohibido=prohibido):
+                self.assertNotIn(prohibido, bloque)
+
+
 if __name__ == "__main__":
     unittest.main()
