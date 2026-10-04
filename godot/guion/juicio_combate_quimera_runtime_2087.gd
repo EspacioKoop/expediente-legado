@@ -103,7 +103,9 @@ static func _ciclo_completado(
 ) -> bool:
 	match patron:
 		ARQUETIPOS.EMBESTIDOR:
-			return estado_anterior == ARQUETIPOS.RECUPERAR and estado_actual == ARQUETIPOS.REPOSICIONAR
+			return (
+				estado_anterior == ARQUETIPOS.RECUPERAR and estado_actual == ARQUETIPOS.REPOSICIONAR
+			)
 		ARQUETIPOS.HOSTIGADOR:
 			return (
 				estado_anterior == ARQUETIPOS.VULNERABLE
