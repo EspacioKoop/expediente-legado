@@ -20,8 +20,10 @@ static func montar(
 	acusado: Dictionary,
 	mito_id: String,
 	raiz: int,
+	cantidad: int = 3,
 ) -> Dictionary:
-	var unidades := ARQUETIPO_HOST.nuevo_enjambre(raiz, 3)
+	var total := ARQUETIPO_HOST.tamano_enjambre(cantidad)
+	var unidades := ARQUETIPO_HOST.nuevo_enjambre(raiz, total)
 	var clave := String(acusado.get("id", acusado.get("nombre", "enjambre")))
 	var montado := (
 		ARENA
