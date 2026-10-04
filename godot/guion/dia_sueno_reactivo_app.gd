@@ -152,7 +152,7 @@ func iniciar_grabacion_anomalia(anomalia: AnomaliaSueno3D) -> Dictionary:
 	var sujeto := {
 		"anomalia_id": anomalia.id_catalogo(),
 		"reactiva": anomalia.reactiva(),
-		"vuelta_grabada": maxi(1, int(dia.jornada.get("vuelta", 1))),
+		"vuelta_grabada": float(maxi(1, int(dia.jornada.get("vuelta", 1)))),
 	}
 	var inicio := _grabacion_runtime.iniciar(camara, anomalia, documento, true, sujeto)
 	if bool(inicio.get("ok", false)):
