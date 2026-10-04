@@ -1,6 +1,7 @@
 ROM := build/ariadne_98.gbc
 OBJ := build/ariadne_98.o
-SRC := main.asm\n# main.asm se integra por #2389/#2415; este Makefile mantiene la fuente explícita.
+SRC := main.asm
+# main.asm se integra por #2389/#2415; este Makefile mantiene la fuente explícita.
 
 include ../comun/cartucho.mk
 
