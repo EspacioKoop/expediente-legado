@@ -79,7 +79,7 @@ class DecisionTest(unittest.TestCase):
         return {"status": "ok", "verdict": veredicto, "findings": list(hallazgos)}
 
     def test_principal_aprueba(self):
-        d = mod.decidir(self.resultado("approve"), mod.PRINCIPAL, SHA, "omniroute")
+        d = mod.decidir(self.resultado("approve"), mod.PRINCIPAL, SHA, "qwen")
         self.assertEqual([mod.ETIQUETA_OK], d.anadir)
         self.assertIn(mod.ETIQUETA_PENDIENTE, d.quitar)
         self.assertIn(f"<!-- euriclea sha={SHA} nivel=principal -->", d.cuerpo)
@@ -117,29 +117,20 @@ class DecisionTest(unittest.TestCase):
 class ProveedoresTest(unittest.TestCase):
     def test_cadena_principal_en_orden_y_sin_huecos(self):
         entorno = {
-            "OMNI_READY": "true",
-            "OMNIROUTE_BASE_URL": "http://omni/v1",
             "QWEN_API_KEY": "sk-sp-x",
             "GEMINI_API_KEY": "g",
             "GEMINI_MODEL": "gemini-x",
         }
         cadena = mod.cadena_principal(entorno)
-        self.assertEqual(["omniroute", "qwen", "gemini"], [p.nombre for p in cadena])
-        self.assertEqual("auto/reasoning", cadena[0].modelo)
-        self.assertIn("coding-intl", cadena[1].url)
-        self.assertEqual([], mod.cadena_principal({"OMNI_READY": "false", "GEMINI_API_KEY": "g"}))
+        self.assertEqual(["qwen", "gemini"], [p.nombre for p in cadena])
+        self.assertIn("coding-intl", cadena[0].url)
+        self.assertEqual([], mod.cadena_principal({"GEMINI_API_KEY": "g"}))
 
     def test_cadena_respaldo_en_orden_y_ollama_opcional(self):
-        entorno = {
-            "EURICLEA_OMNIROUTE_URL": "http://localhost:20128/v1",
-            "EURICLEA_MODELOS_RESPALDO": "auto/reasoning, auto/best-free",
-        }
-        cadena = mod.cadena_respaldo(entorno)
-        self.assertEqual(["auto/reasoning", "auto/best-free"], [p.modelo for p in cadena])
-        self.assertNotIn("ollama", [p.tipo for p in cadena])
-        cadena = mod.cadena_respaldo({**entorno, "OLLAMA_MODELO": "qwen3:4b"})
-        self.assertEqual("ollama", cadena[-1].tipo)
-        self.assertEqual("qwen3:4b", cadena[-1].modelo)
+        self.assertEqual([], mod.cadena_respaldo({}))
+        cadena = mod.cadena_respaldo({"OLLAMA_MODELO": "qwen3:4b"})
+        self.assertEqual(["ollama"], [p.tipo for p in cadena])
+        self.assertEqual("qwen3:4b", cadena[0].modelo)
 
     def test_revisar_pasa_al_siguiente_si_falla_o_no_cumple(self):
         cadena = [mod.Proveedor("a", "u", "m"), mod.Proveedor("b", "u", "m"), mod.Proveedor("c", "u", "m")]
