@@ -23,13 +23,16 @@ class TestEstadoPuesto1451(unittest.TestCase):
         abrir = _funcion("_abrir_expediente", fuente)
         cerrar = _funcion("_cerrar_expediente", fuente)
 
-        self.assertIn("DIA_EXPEDIENTE_APP.abrir(", abrir)
-        self.assertIn("DIA_EXPEDIENTE_APP.cerrar(", cerrar)
+        self.assertIn("DIA_EXPEDIENTE_APP.abrir(", _compacto(abrir))
+        self.assertIn("DIA_EXPEDIENTE_APP.cerrar(", _compacto(cerrar))
         self.assertIn('traducir.call("DIA_EN_EL_PUESTO")', presentacion)
         self.assertIn('nomina.text = ""', presentacion)
 
-        limpiar = cerrar.index("DIA_EXPEDIENTE_APP.cerrar(")
-        reasignar = cerrar.index('if int(jornada.get("vuelta", 1)) != vuelta_antes:')
+        cerrar_compacto = _compacto(cerrar)
+        limpiar = cerrar_compacto.index("DIA_EXPEDIENTE_APP.cerrar(")
+        reasignar = cerrar_compacto.index(
+            _compacto('if int(jornada.get("vuelta", 1)) != vuelta_antes:')
+        )
         self.assertLess(
             limpiar,
             reasignar,
