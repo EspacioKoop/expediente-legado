@@ -9,6 +9,7 @@ extends RefCounted
 
 const CANAL_ELECCION := "eleccion"
 const CANAL_EXPOSICION := "exposicion"
+const CLAVE_FAMILIAS_EXPOSICION := "familias_exposicion_onirica"
 
 ## Las claves describen una relación o comportamiento, no una ideología.
 ## Los tags proceden de contenido ya existente (#919/#922/#924).
@@ -124,6 +125,9 @@ static func modificadores(
 		)
 		if not exposicion.is_empty():
 			resultado.append(_modificador(exposicion, CANAL_EXPOSICION, reduccion_movimiento))
+		# Persistir familias onítricas derivadas de exposición para el epílogo.
+		if not familias_exposicion.is_empty():
+			estado[CLAVE_FAMILIAS_EXPOSICION] = familias_exposicion
 	return resultado
 
 
