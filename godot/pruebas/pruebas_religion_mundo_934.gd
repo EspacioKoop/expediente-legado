@@ -97,6 +97,20 @@ func _probar_canales() -> void:
 		"reexaminar el folleto no duplica el mismo hecho"
 	)
 	_comprobar(
+		Mundo.registrar_exposicion(
+			registro, Mundo.ID_LAMINA_WALTERS_W99, Mundo.DIA_ACTO_MEMORIA, 2
+		),
+		"examinar la lámina Walters registra exposición documentada"
+	)
+	var evento_walters: Dictionary = Eventos.eventos(registro, Eventos.CANAL_EXPOSICION)[-1]
+	_comprobar(
+		(
+			String(evento_walters["tradicion"]) == Mundo.TRADICION_ARTE_MEDIEVAL
+			and String(evento_walters["contexto"]) == Mundo.CONTEXTO_TENTADOR
+		),
+		"la exposición Walters conserva el gate exacto del Tentador"
+	)
+	_comprobar(
 		not Mundo.registrar_practica(registro, "silencio_memoria", Mundo.DIA_ACTO_MEMORIA),
 		"repetir el mismo gesto no duplica trayectoria"
 	)
@@ -159,13 +173,6 @@ func _probar_superficies_3d() -> void:
 	var eventos_exposicion := Eventos.eventos(registro, Eventos.CANAL_EXPOSICION)
 	var evento_folleto: Dictionary = eventos_exposicion[1]
 	var evento_walters: Dictionary = eventos_exposicion[2]
-	_comprobar(
-		(
-			String(evento_walters["tradicion"]) == Mundo.TRADICION_ARTE_MEDIEVAL
-			and String(evento_walters["contexto"]) == Mundo.CONTEXTO_TENTADOR
-		),
-		"la interacción 3D conserva el gate exacto del Tentador"
-	)
 	_comprobar(
 		(
 			String(evento_folleto["tradicion"]) == Mundo.TRADICION_GNOSTICA
