@@ -40,10 +40,13 @@ static func montar(anfitrion, rival: CharacterBody3D, raiz: int) -> Dictionary:
 	if figura != null:
 		anfitrion.set("_figura_rival", figura)
 
-	PRESENTACION.pintar(
-		presentacion,
-		String(unidad.get("estado", "")),
-		bool(anfitrion.get("reduccion_movimiento")),
+	(
+		PRESENTACION
+		. pintar(
+			presentacion,
+			String(unidad.get("estado", "")),
+			bool(anfitrion.get("reduccion_movimiento")),
+		)
 	)
 	RUNTIME.pintar_linea(linea, rival.position, unidad, String(salida.get("telegraph", "")))
 	return {
@@ -73,20 +76,27 @@ static func avanzar(anfitrion, estado: Dictionary, delta: float) -> void:
 	var cargando_antes := fase_anterior == ARQUETIPOS.CARGAR
 	var distancia := rival.position.distance_to(jugador.position)
 	var choque_jugador := cargando_antes and distancia <= REGLAS.ALCANCE_RIVAL
-	var choque_borde := _chocaria_borde(
-		rival.position,
-		float(unidad.get("rumbo_bloqueado", rival.rotation.y)),
-		float(anfitrion.get("_radio_arena")),
-		delta,
-	) if cargando_antes else false
+	var choque_borde := (
+		_chocaria_borde(
+			rival.position,
+			float(unidad.get("rumbo_bloqueado", rival.rotation.y)),
+			float(anfitrion.get("_radio_arena")),
+			delta,
+		)
+		if cargando_antes
+		else false
+	)
 
-	var salida := RUNTIME.avanzar(
-		unidad,
-		delta,
-		rival.position,
-		jugador.position,
-		true,
-		choque_jugador or choque_borde,
+	var salida := (
+		RUNTIME
+		. avanzar(
+			unidad,
+			delta,
+			rival.position,
+			jugador.position,
+			true,
+			choque_jugador or choque_borde,
+		)
 	)
 	unidad = salida.get("unidad", unidad)
 	estado["unidad"] = unidad
@@ -101,34 +111,46 @@ static func avanzar(anfitrion, estado: Dictionary, delta: float) -> void:
 
 	if choque_jugador and not bool(estado.get("impacto_carga_emitido", false)):
 		estado["impacto_carga_emitido"] = true
-		var resultado := REGLAS.resultado_ataque_rival(
-			distancia,
-			float(anfitrion.get("_esquiva")),
+		var resultado := (
+			REGLAS
+			. resultado_ataque_rival(
+				distancia,
+				float(anfitrion.get("_esquiva")),
+			)
 		)
 		anfitrion.call("_aplicar_impacto_rival", resultado)
 
-	var plan := RUNTIME.mover(
-		jugador.position,
-		rival.position,
-		rival.rotation.y,
-		unidad,
-		float(anfitrion.get("_radio_arena")),
-		delta,
+	var plan := (
+		RUNTIME
+		. mover(
+			jugador.position,
+			rival.position,
+			rival.rotation.y,
+			unidad,
+			float(anfitrion.get("_radio_arena")),
+			delta,
+		)
 	)
 	rival.position = plan.get("posicion", rival.position)
 	rival.rotation.y = float(plan.get("rotacion_y", rival.rotation.y))
 
 	var linea := estado.get("linea") as MeshInstance3D
-	RUNTIME.pintar_linea(
-		linea,
-		rival.position,
-		unidad,
-		String(salida.get("telegraph", "")),
+	(
+		RUNTIME
+		. pintar_linea(
+			linea,
+			rival.position,
+			unidad,
+			String(salida.get("telegraph", "")),
+		)
 	)
-	PRESENTACION.pintar(
-		estado.get("presentacion", {}),
-		String(unidad.get("estado", "")),
-		bool(anfitrion.get("reduccion_movimiento")),
+	(
+		PRESENTACION
+		. pintar(
+			estado.get("presentacion", {}),
+			String(unidad.get("estado", "")),
+			bool(anfitrion.get("reduccion_movimiento")),
+		)
 	)
 	if bool(salida.get("abrir_ventana", false)):
 		var figura: Node3D = anfitrion.get("_figura_rival")
