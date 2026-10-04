@@ -47,8 +47,10 @@ func _probar_ciclo_completo() -> void:
 		)
 		_comprobar(estado.keys().count("unidad") == 1, "el cambio mantiene una sola unidad")
 		_comprobar(
-			String((estado.get("unidad", {}) as Dictionary).get("tipo", ""))
-			== esperados[indice + 1],
+			(
+				String((estado.get("unidad", {}) as Dictionary).get("tipo", ""))
+				== esperados[indice + 1]
+			),
 			"la unidad activa coincide con el patrón siguiente",
 		)
 
@@ -62,13 +64,17 @@ func _probar_determinismo_y_no_mutacion() -> void:
 	_comprobar(a == b, "misma entrada y contexto producen la misma salida")
 	_comprobar(estado == antes, "avanzar no muta el estado de entrada")
 	_comprobar(
-		String(a.get("telegraph", ""))
-		== String((a.get("salida", {}) as Dictionary).get("telegraph", "")),
+		(
+			String(a.get("telegraph", ""))
+			== String((a.get("salida", {}) as Dictionary).get("telegraph", ""))
+		),
 		"reenvía el telegraph del arquetipo",
 	)
 	_comprobar(
-		bool(a.get("ventana_respuesta", false))
-		== bool((a.get("salida", {}) as Dictionary).get("ventana_respuesta", false)),
+		(
+			bool(a.get("ventana_respuesta", false))
+			== bool((a.get("salida", {}) as Dictionary).get("ventana_respuesta", false))
+		),
 		"reenvía la ventana de respuesta",
 	)
 
@@ -90,13 +96,17 @@ func _avanzar_hasta_cambio(estado_inicial: Dictionary) -> Dictionary:
 	for _paso in range(8):
 		var resultado := RUNTIME.avanzar(estado, 2.0, _contextos())
 		_comprobar(
-			String(resultado.get("telegraph", ""))
-			== String((resultado.get("salida", {}) as Dictionary).get("telegraph", "")),
+			(
+				String(resultado.get("telegraph", ""))
+				== String((resultado.get("salida", {}) as Dictionary).get("telegraph", ""))
+			),
 			"cada tick reenvía telegraph",
 		)
 		_comprobar(
-			bool(resultado.get("ventana_respuesta", false))
-			== bool((resultado.get("salida", {}) as Dictionary).get("ventana_respuesta", false)),
+			(
+				bool(resultado.get("ventana_respuesta", false))
+				== bool((resultado.get("salida", {}) as Dictionary).get("ventana_respuesta", false))
+			),
 			"cada tick reenvía ventana",
 		)
 		estado = resultado.get("estado", estado)
@@ -108,17 +118,20 @@ func _avanzar_hasta_cambio(estado_inicial: Dictionary) -> Dictionary:
 
 func _contextos() -> Dictionary:
 	return {
-		ARQUETIPOS.EMBESTIDOR: {
+		ARQUETIPOS.EMBESTIDOR:
+		{
 			"distancia": 5.0,
 			"linea_libre": true,
 			"choque": true,
 			"rumbo_objetivo": 0.0,
 		},
-		ARQUETIPOS.HOSTIGADOR: {
+		ARQUETIPOS.HOSTIGADOR:
+		{
 			"distancia": 6.0,
 			"rumbo_objetivo": 0.0,
 		},
-		ARQUETIPOS.BLOQUEADOR: {
+		ARQUETIPOS.BLOQUEADOR:
+		{
 			"flanqueado": true,
 			"guardia_rota": false,
 		},
