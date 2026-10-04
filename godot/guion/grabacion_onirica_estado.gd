@@ -33,6 +33,7 @@ static func completar(actual: Dictionary) -> Dictionary:
 		salida["cinta"] = {}
 	else:
 		salida["cinta"] = salida.get("cinta", {}).duplicate(true)
+		_normalizar_vueltas_grabadas(salida["cinta"])
 	var indice = salida.get("toma_seleccionada", SIN_TOMA)
 	salida["toma_seleccionada"] = int(indice) if _entero(indice) else SIN_TOMA
 	return salida
@@ -58,7 +59,9 @@ static func registrar_toma(estado: Dictionary, datos: Dictionary) -> Dictionary:
 			"cinta": {},
 		}
 
-	var resultado := GrabacionOniricaContrato.registrar_toma(cinta, datos)
+	var datos_normalizados := datos.duplicate(true)
+	_normalizar_vuelta_toma(datos_normalizados)
+	var resultado := GrabacionOniricaContrato.registrar_toma(cinta, datos_normalizados)
 	if bool(resultado.get("ok", false)):
 		contenedor["cinta"] = resultado.get("cinta", {}).duplicate(true)
 	return resultado.duplicate(true)
@@ -107,7 +110,12 @@ static func para_caso(estado: Dictionary, caso: Dictionary) -> Dictionary:
 	proyeccion["toma_indice"] = int(asegurar_en_estado(estado).get("toma_seleccionada", SIN_TOMA))
 	var sujeto = toma.get("sujeto", {})
 	proyeccion["sujeto"] = sujeto.duplicate(true) if typeof(sujeto) == TYPE_DICTIONARY else {}
-	return GrabacionOniricaDesenlace.resolver(proyeccion, proyeccion["sujeto"])
+	var jornada = estado.get("jornada", {})
+	var vuelta_actual := 1
+	if typeof(jornada) == TYPE_DICTIONARY:
+		vuelta_actual = maxi(1, int(jornada.get("vuelta", 1)))
+	var contexto := {"vuelta_actual": vuelta_actual}
+	return GrabacionOniricaDesenlace.resolver(proyeccion, proyeccion["sujeto"], contexto)
 
 
 static func _caso_contiene_original(caso: Dictionary, original_id: String) -> bool:
@@ -182,6 +190,27 @@ static func validar(actual) -> Array:
 	if _entero(indice) and int(indice) >= tomas.size():
 		errores.append("toma_seleccionada fuera de rango")
 	return errores
+
+
+static func _normalizar_vueltas_grabadas(cinta: Dictionary) -> void:
+	var tomas = cinta.get("tomas", [])
+	if typeof(tomas) != TYPE_ARRAY:
+		return
+	for evaluacion in tomas:
+		if typeof(evaluacion) != TYPE_DICTIONARY:
+			continue
+		var toma = evaluacion.get("toma", {})
+		if typeof(toma) == TYPE_DICTIONARY:
+			_normalizar_vuelta_toma(toma)
+
+
+static func _normalizar_vuelta_toma(toma: Dictionary) -> void:
+	var sujeto = toma.get("sujeto", {})
+	if typeof(sujeto) != TYPE_DICTIONARY:
+		return
+	var vuelta = sujeto.get("vuelta_grabada", null)
+	if _entero(vuelta) and int(vuelta) >= 1:
+		sujeto["vuelta_grabada"] = int(vuelta)
 
 
 static func _numero_no_negativo(valor) -> bool:
