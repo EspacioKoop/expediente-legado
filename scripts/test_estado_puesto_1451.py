@@ -16,12 +16,17 @@ def _funcion(nombre: str, fuente: str) -> str:
     return match.group(0)
 
 
+def _normalizar_accesos(fuente: str) -> str:
+    """Tolera el salto de línea que gdformat introduce antes de '. metodo('."""
+    return re.sub(r"\s*\.\s*", ".", fuente)
+
+
 class TestEstadoPuesto1451(unittest.TestCase):
     def test_estado_se_activa_solo_durante_siga(self) -> None:
         fuente = DIA_APP.read_text(encoding="utf-8")
         presentacion = DIA_EXPEDIENTE_APP.read_text(encoding="utf-8")
-        abrir = _funcion("_abrir_expediente", fuente)
-        cerrar = _funcion("_cerrar_expediente", fuente)
+        abrir = _normalizar_accesos(_funcion("_abrir_expediente", fuente))
+        cerrar = _normalizar_accesos(_funcion("_cerrar_expediente", fuente))
 
         self.assertIn("DIA_EXPEDIENTE_APP.abrir(", abrir)
         self.assertIn("DIA_EXPEDIENTE_APP.cerrar(", cerrar)
