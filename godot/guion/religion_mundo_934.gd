@@ -12,6 +12,9 @@ const DIA_ACTO_MEMORIA := 3
 const ID_FOLLETO_NAG_HAMMADI := "folleto_nag_hammadi_ii_4"
 const TRADICION_GNOSTICA := "gnosticismo"
 const CONTEXTO_ARCONTE := "nag_hammadi:ii_4:hypostasis_archons"
+const ID_LAMINA_WALTERS_W99 := "lamina_walters_w99_fol169r"
+const TRADICION_ARTE_MEDIEVAL := "arte_medieval"
+const CONTEXTO_TENTADOR := "walters:w99:fol169r:dragon_marginalia"
 
 const SUPERFICIES := [
 	{
@@ -35,6 +38,15 @@ const SUPERFICIES := [
 		"fuente": "mundo:folleto_historia_religiones_nag_hammadi_ii_4_98",
 		"contexto": CONTEXTO_ARCONTE,
 		"tradicion": TRADICION_GNOSTICA,
+		"materiales": ["papel", "cartulina"],
+	},
+	{
+		"id": ID_LAMINA_WALTERS_W99,
+		"espacio": "sala_comunitaria",
+		"funcion": "exposicion",
+		"fuente": "mundo:lamina_historia_arte_walters_w99_fol169r_98",
+		"contexto": CONTEXTO_TENTADOR,
+		"tradicion": TRADICION_ARTE_MEDIEVAL,
 		"materiales": ["papel", "cartulina"],
 	},
 ]
@@ -91,6 +103,8 @@ static func registrar_exposicion(
 		etiquetas.append("fuente_calendario:%s" % String(actividad["fuente"]))
 	if id_superficie == ID_FOLLETO_NAG_HAMMADI:
 		etiquetas.append("fuente_documental:nag_hammadi_ii_4")
+	elif id_superficie == ID_LAMINA_WALTERS_W99:
+		etiquetas.append("fuente_documental:walters_w99_fol169r")
 	var contexto := String(superficie.get("contexto", superficie["espacio"]))
 	var tradicion := String(superficie.get("tradicion", ""))
 	var evento := ReligionEventos.crear_evento(
