@@ -90,7 +90,7 @@ func _probar_destruccion_sin_crecimiento() -> void:
 	_comprobar(todos.get("solicitudes_despawn", []) == [0, 2], "los restantes desaparecen una vez")
 	_comprobar((todos["estado"]["ecos"] as Array).is_empty(), "la arena converge a cero ecos")
 	_comprobar(todos.get("solicitudes_spawn", []).is_empty(), "cero ecos no provoca crecimiento")
-	for prohibido in ("dano", "partida", "jornada"):
+	for prohibido in ["dano", "partida", "jornada"]:
 		_comprobar(not todos.has(prohibido), "la salida no crea autoridad " + prohibido)
 
 
