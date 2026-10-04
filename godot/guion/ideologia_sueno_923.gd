@@ -106,25 +106,37 @@ static func modificadores(
 	if not eleccion.is_empty():
 		resultado.append(_modificador(eleccion, CANAL_ELECCION, reduccion_movimiento))
 
-	var exposiciones = estado.get(Prometeo.CLAVE_EXPOSICION_IDEOLOGICA, [])
-	if typeof(exposiciones) == TYPE_ARRAY:
-		var del_dia := []
-		for evento_crudo in exposiciones:
-			if typeof(evento_crudo) != TYPE_DICTIONARY:
-				continue
-			var evento: Dictionary = evento_crudo
-			if int(evento.get("jornada", -1)) == jornada_actual:
-				del_dia.append(evento)
-		var familias_exposicion := _familias_de_eventos(del_dia)
-		var exposicion := _elegir_familia(
-			familias_exposicion,
-			raiz_azar,
-			jornada_actual,
-			CANAL_EXPOSICION,
-		)
-		if not exposicion.is_empty():
-			resultado.append(_modificador(exposicion, CANAL_EXPOSICION, reduccion_movimiento))
+	var exposicion := familia_exposicion(estado, jornada_actual, raiz_azar)
+	if not exposicion.is_empty():
+		resultado.append(_modificador(exposicion, CANAL_EXPOSICION, reduccion_movimiento))
 	return resultado
+
+
+static func familias_exposicion(estado: Dictionary, jornada_actual: int) -> Array:
+	var exposiciones = estado.get(Prometeo.CLAVE_EXPOSICION_IDEOLOGICA, [])
+	if typeof(exposiciones) != TYPE_ARRAY:
+		return []
+	var del_dia := []
+	for evento_crudo in exposiciones:
+		if typeof(evento_crudo) != TYPE_DICTIONARY:
+			continue
+		var evento: Dictionary = evento_crudo
+		if int(evento.get("jornada", -1)) == jornada_actual:
+			del_dia.append(evento)
+	return _familias_de_eventos(del_dia)
+
+
+static func familia_exposicion(
+	estado: Dictionary,
+	jornada_actual: int,
+	raiz_azar: int,
+) -> String:
+	return _elegir_familia(
+		familias_exposicion(estado, jornada_actual),
+		raiz_azar,
+		jornada_actual,
+		CANAL_EXPOSICION,
+	)
 
 
 static func _familias_de_eventos(eventos: Array) -> Array:
