@@ -60,10 +60,13 @@ static func _avanzar_senuelo(estado: Dictionary, delta: float) -> Dictionary:
 	var completo := anterior == ARQUETIPOS.RECUPERAR and estado_actual == ARQUETIPOS.OBSERVAR
 	if completo:
 		estado["fase"] = FASE_ATAQUE
-		estado["hostigador"] = ARQUETIPOS.nuevo(
-			ARQUETIPOS.HOSTIGADOR,
-			int(estado.get("_raiz", 0)),
-			1,
+		estado["hostigador"] = (
+			ARQUETIPOS
+			. nuevo(
+				ARQUETIPOS.HOSTIGADOR,
+				int(estado.get("_raiz", 0)),
+				1,
+			)
 		)
 
 	return {
@@ -87,10 +90,13 @@ static func _avanzar_ataque(
 		unidad = ARQUETIPOS.nuevo(ARQUETIPOS.HOSTIGADOR, int(estado.get("_raiz", 0)), 1)
 
 	var anterior := String(unidad.get("estado", ARQUETIPOS.REPOSICIONAR))
-	var salida := ARQUETIPOS.avanzar(
-		unidad,
-		maxf(0.0, delta),
-		contexto_hostigador,
+	var salida := (
+		ARQUETIPOS
+		. avanzar(
+			unidad,
+			maxf(0.0, delta),
+			contexto_hostigador,
+		)
 	)
 	var actual: Dictionary = salida.get("unidad", unidad).duplicate(true)
 	estado["hostigador"] = actual
