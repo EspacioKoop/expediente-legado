@@ -26,11 +26,12 @@ func _probar_ciclo_completo() -> void:
 	var pasos_senuelo: Array = []
 	for _paso in range(4):
 		var salida := RUNTIME.avanzar(estado, 1.0, _contexto_hostigador())
-		_comprobar(not bool(salida.get("ataque_real", false)), "el señuelo nunca aplica ataque real")
+		_comprobar(
+			not bool(salida.get("ataque_real", false)), "el señuelo nunca aplica ataque real"
+		)
 		_comprobar(
 			not (
-				bool(salida.get("senal_senuelo", false))
-				and bool(salida.get("ataque_real", false))
+				bool(salida.get("senal_senuelo", false)) and bool(salida.get("ataque_real", false))
 			),
 			"señuelo y ataque real nunca son simultáneos",
 		)
@@ -53,7 +54,9 @@ func _probar_ciclo_completo() -> void:
 	)
 
 	var primer_ataque := RUNTIME.avanzar(estado, 0.0, _contexto_hostigador())
-	_comprobar(not bool(primer_ataque.get("senal_senuelo", false)), "el ataque real oculta el señuelo")
+	_comprobar(
+		not bool(primer_ataque.get("senal_senuelo", false)), "el ataque real oculta el señuelo"
+	)
 	_comprobar(not bool(primer_ataque.get("ataque_real", false)), "el primer tick solo telegrafía")
 	estado = primer_ataque["estado"]
 
