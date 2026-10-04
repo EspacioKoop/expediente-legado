@@ -58,9 +58,12 @@ func _probar_contaminada_no_promociona() -> void:
 		"estado": GrabacionOniricaContrato.ESTADO_CONTAMINADA,
 		"motivos": ["interrupcion"],
 	}
-	var salida := GrabacionOniricaDesenlace.resolver(
-		entrada,
-		{"anomalia_id": "anomalia-crt", "reactiva": true},
+	var salida := (
+		GrabacionOniricaDesenlace
+		. resolver(
+			entrada,
+			{"anomalia_id": "anomalia-crt", "reactiva": true},
+		)
 	)
 	_comprobar(
 		String(salida["estado"]) == GrabacionOniricaContrato.ESTADO_CONTAMINADA,
