@@ -72,10 +72,6 @@ const CATALOGO := {
 	"puerta_cierra": "doorClose_1.ogg",
 	"documento": "bookFlip1.ogg",
 	"nomina": "handleCoins.ogg",
-	"pulsar": "click_001.ogg",
-	"error": "error_003.ogg",
-	"firmar": "confirmation_001.ogg",
-	"marcar": "switch_002.ogg",
 	# El mismo impacto blando ya auditado para objetos sirve como apoyo físico
 	# de la cama sin añadir un asset ni reutilizar el nombre semántico `coger`.
 	"cama": "impactSoft_medium_000.ogg",
@@ -117,6 +113,10 @@ const FAMILIAS := {
 		"chip/teclado_rafaga_02.ogg",
 		"chip/teclado_rafaga_03.ogg",
 	],
+	"pulsar": ["chip/ui_pulsar_01.ogg"],
+	"marcar": ["chip/ui_marcar_01.ogg"],
+	"firmar": ["chip/ui_firmar_01.ogg"],
+	"error": ["chip/ui_error_01.ogg"],
 	"coger": ["impactSoft_medium_000.ogg", "impactSoft_medium_001.ogg"],
 }
 const FAMILIAS_RESPALDO := {
@@ -125,6 +125,10 @@ const FAMILIAS_RESPALDO := {
 	"documento": ["bookFlip1.ogg"],
 	"tecla": ["click_001.ogg"],
 	"rafaga": ["click_001.ogg"],
+	"pulsar": ["click_001.ogg"],
+	"marcar": ["switch_002.ogg"],
+	"firmar": ["confirmation_001.ogg"],
+	"error": ["error_003.ogg"],
 }
 const VARIACION_TONO := 1.08
 
