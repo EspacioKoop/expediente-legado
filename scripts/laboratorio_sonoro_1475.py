@@ -597,11 +597,11 @@ def generar_careo_tracker(destino: Path) -> dict:
     if (RAIZ / "godot").resolve() in destino.resolve().parents or destino.resolve() == (RAIZ / "godot").resolve():
         raise ValueError("el laboratorio no escribe dentro del runtime")
     banco_cfg = {
-        "argumento": {"tipo": "fm", "hz": 220, "muestras": 13230, "semilla": 2324,
+        "argumento": {"tipo": "fm", "hz": 220, "muestras": 13216, "semilla": 2324,
                       "indice_fm": 1.8, "ratio_fm": 2, "caida": 5},
-        "replica": {"tipo": "fm", "hz": 330, "muestras": 13230, "semilla": 1475,
+        "replica": {"tipo": "fm", "hz": 330, "muestras": 13216, "semilla": 1475,
                      "indice_fm": 2.4, "ratio_fm": 3, "caida": 6},
-        "pulso": {"tipo": "ciclo", "hz": 55, "muestras": 4410, "semilla": 76,
+        "pulso": {"tipo": "ciclo", "hz": 55, "muestras": 4396, "semilla": 76,
                    "indice_fm": 0, "ratio_fm": 1, "caida": 0},
     }
     limpios, fichas = {}, []
