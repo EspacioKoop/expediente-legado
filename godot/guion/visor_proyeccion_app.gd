@@ -8,6 +8,8 @@ extends "res://guion/visor_sello_app.gd"
 
 const ESCENA_PROYECCION := preload("res://escenas/cinematica.tscn")
 
+var _combate_publico_caos: JuicioCombate3D
+
 
 func _al_firmar(resultado: Dictionary, formulario: Control) -> void:
 	var cinta: Dictionary = resultado.get("cinta_onirica", {})
@@ -43,4 +45,47 @@ func _reproducir_proyeccion(resultado: Dictionary, estado: String) -> void:
 func _al_terminar_proyeccion(reproductor: Node, resultado: Dictionary) -> void:
 	reproductor.queue_free()
 	_guardar_o_avisar()
+	if ProyeccionCaosCombate140.debe_abrir(resultado):
+		_abrir_combate_publico_caos(resultado)
+		return
 	_reproducir_sello(resultado)
+
+
+func _abrir_combate_publico_caos(resultado: Dictionary) -> void:
+	if is_instance_valid(_combate_publico_caos):
+		return
+	visible = false
+	var combate := JuicioCombate3D.new()
+	combate.name = "CombatePublicoCaos"
+	combate.configurar(
+		ProyeccionCaosCombate140.objetivo_publico(),
+		ProyeccionCaosCombate140.BONO_COMBATE_BREVE,
+		bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false)),
+		_raiz(),
+	)
+	combate.terminado.connect(_al_terminar_combate_publico_caos.bind(combate, resultado))
+	_combate_publico_caos = combate
+	add_child(combate)
+	for hijo in combate.get_children():
+		if hijo is Camera3D:
+			hijo.current = true
+			break
+
+
+func _al_terminar_combate_publico_caos(
+	_gano: bool, combate: JuicioCombate3D, resultado: Dictionary
+) -> void:
+	if is_instance_valid(combate):
+		combate.queue_free()
+	_combate_publico_caos = null
+	visible = true
+	_reproducir_sello(resultado)
+
+
+func _unhandled_input(evento: InputEvent) -> void:
+	if not is_instance_valid(_combate_publico_caos):
+		return
+	if not evento.is_action_pressed("cancelar"):
+		return
+	get_viewport().set_input_as_handled()
+	_combate_publico_caos.abandonar()
