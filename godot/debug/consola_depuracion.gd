@@ -262,20 +262,24 @@ func _cmd_estado() -> void:
 	var cantidad_pistas := pistas.size() if typeof(pistas) == TYPE_ARRAY else 0
 	var rivales := _ids_rivales(dia)
 	_ok(
-		"Día %d · fase %s · dinero %d · pistas %d"
-		% [
-			int(dia.jornada.get("dia", 1)),
-			String(dia.jornada.get("fase", "")),
-			int(dia.jornada.get("dinero", 0)),
-			cantidad_pistas,
-		]
+		(
+			"Día %d · fase %s · dinero %d · pistas %d"
+			% [
+				int(dia.jornada.get("dia", 1)),
+				String(dia.jornada.get("fase", "")),
+				int(dia.jornada.get("dinero", 0)),
+				cantidad_pistas,
+			]
+		)
 	)
 	_escribir(
-		"Sueño restante: %.1f s · guardado pendiente: %s"
-		% [
-			float(dia.jornada.get("sueno_resto", 0.0)),
-			"sí" if dia.partida.guardado_pendiente else "no",
-		]
+		(
+			"Sueño restante: %.1f s · guardado pendiente: %s"
+			% [
+				float(dia.jornada.get("sueno_resto", 0.0)),
+				"sí" if dia.partida.guardado_pendiente else "no",
+			]
+		)
 	)
 	if not rivales.is_empty():
 		_escribir("Rivales de esta sala: " + ", ".join(rivales))
@@ -333,7 +337,11 @@ func _cmd_tp(args: Array) -> void:
 	var dia := _dia()
 	if dia == null:
 		return
-	if args.size() < 2 or not String(args[0]).is_valid_float() or not String(args[1]).is_valid_float():
+	if (
+		args.size() < 2
+		or not String(args[0]).is_valid_float()
+		or not String(args[1]).is_valid_float()
+	):
 		_error("Uso: tp <x> <z>")
 		return
 	var actual: Vector3 = dia._caminante.position
