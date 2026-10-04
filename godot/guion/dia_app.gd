@@ -31,6 +31,7 @@ var _nomina: Label
 ## fallo de guardado. DiaApp conserva los wrappers porque son contrato de la
 ## cadena dia_* y de numerosos controladores.
 var _guardado := DiaGuardadoApp.new()
+var _combate_pantalla := DIA_COMBATE_PANTALLA_APP.new()
 var _borrar: Button
 var _borrar_confirmando := false
 var _pantalla: CanvasLayer
@@ -671,8 +672,7 @@ func _abrir_combate_hack_slash(objetivo: Dictionary, zona: Area3D = null) -> boo
 		return false
 
 	var montado: Dictionary = (
-		DIA_COMBATE_PANTALLA_APP
-		. new()
+		_combate_pantalla
 		. abrir(
 			self,
 			objetivo,
@@ -704,7 +704,7 @@ func _cerrar_combate_hack_slash(
 	decision: Dictionary,
 	resultado: Dictionary,
 ) -> void:
-	DIA_COMBATE_PANTALLA_APP.new().cerrar(_combate_contextual_app, _pantalla)
+	_combate_pantalla.cerrar(_combate_contextual_app, _pantalla)
 	_combate_contextual_app = null
 	_pantalla = null
 
