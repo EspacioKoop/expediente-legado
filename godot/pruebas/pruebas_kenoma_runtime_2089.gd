@@ -58,13 +58,13 @@ func _probar_reduccion_solo_presentacion() -> void:
 	var estado := RUNTIME.nuevo(91, 2)
 	var normal := RUNTIME.avanzar(estado, 0.0, "carga_lineal", [], false)
 	var reducido := RUNTIME.avanzar(estado, 0.0, "carga_lineal", [], true)
-	for clave in (
+	for clave in [
 		"estado",
 		"patron_copiado",
 		"ventana_respuesta",
 		"solicitudes_spawn",
 		"solicitudes_despawn",
-	):
+	]:
 		_comprobar(normal.get(clave) == reducido.get(clave), "reducción no cambia " + clave)
 	_comprobar(
 		_telegraphs(normal) == _telegraphs(reducido),
