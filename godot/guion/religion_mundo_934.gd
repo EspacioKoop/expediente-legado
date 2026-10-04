@@ -9,6 +9,9 @@ extends RefCounted
 
 const ID_ACTO_MEMORIA := "acto_memoria_vecinal"
 const DIA_ACTO_MEMORIA := 3
+const ID_FOLLETO_NAG_HAMMADI := "folleto_nag_hammadi_ii_4"
+const TRADICION_GNOSTICA := "gnosticismo"
+const CONTEXTO_ARCONTE := "nag_hammadi:ii_4:hypostasis_archons"
 
 const SUPERFICIES := [
 	{
@@ -24,6 +27,15 @@ const SUPERFICIES := [
 		"funcion": "practica",
 		"fuente": "mundo:mesa_recuerdo_98",
 		"materiales": ["madera", "papel"],
+	},
+	{
+		"id": ID_FOLLETO_NAG_HAMMADI,
+		"espacio": "sala_comunitaria",
+		"funcion": "exposicion",
+		"fuente": "mundo:folleto_historia_religiones_nag_hammadi_ii_4_98",
+		"contexto": CONTEXTO_ARCONTE,
+		"tradicion": TRADICION_GNOSTICA,
+		"materiales": ["papel", "cartulina"],
 	},
 ]
 
@@ -77,13 +89,17 @@ static func registrar_exposicion(
 	var etiquetas := ["cultura_material"]
 	for actividad in eventos_calendario(dia):
 		etiquetas.append("fuente_calendario:%s" % String(actividad["fuente"]))
+	if id_superficie == ID_FOLLETO_NAG_HAMMADI:
+		etiquetas.append("fuente_documental:nag_hammadi_ii_4")
+	var contexto := String(superficie.get("contexto", superficie["espacio"]))
+	var tradicion := String(superficie.get("tradicion", ""))
 	var evento := ReligionEventos.crear_evento(
 		"exposicion:%s:vuelta:%d:jornada:%d" % [id_superficie, vuelta, dia],
 		ReligionEventos.CANAL_EXPOSICION,
 		String(superficie["fuente"]),
-		String(superficie["espacio"]),
+		contexto,
 		dia,
-		"",
+		tradicion,
 		etiquetas,
 		[],
 		false,
