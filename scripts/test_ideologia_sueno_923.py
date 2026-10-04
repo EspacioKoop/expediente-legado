@@ -37,6 +37,22 @@ class IdeologiaSueno923Test(unittest.TestCase):
         assert 'CANAL_EXPOSICION := "exposicion"' in codigo
         assert 'if canal == CANAL_ELECCION else ""' in codigo
 
+    def test_exposicion_derivada_es_pura_y_reutiliza_un_solo_camino(self) -> None:
+        codigo = fuente(MODELO)
+        assert "static func familias_exposicion(" in codigo
+        assert "static func familia_exposicion(" in codigo
+        assert "CLAVE_FAMILIAS_EXPOSICION" not in codigo
+        bloque_modificadores = codigo.split("static func modificadores(", 1)[1].split(
+            "static func familias_exposicion(", 1
+        )[0]
+        assert "familia_exposicion(estado, jornada_actual, raiz_azar)" in bloque_modificadores
+        bloque_familias = codigo.split("static func familias_exposicion(", 1)[1].split(
+            "static func familia_exposicion(", 1
+        )[0]
+        assert "estado[" not in bloque_familias
+        assert "Prometeo.CLAVE_EXPOSICION_IDEOLOGICA" in bloque_familias
+
+
     def test_no_inventa_hechos_de_expediente(self) -> None:
         codigo = fuente(MODELO)
         for prohibido in (
