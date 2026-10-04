@@ -250,16 +250,11 @@ jobs:
           LEASE_ID: ${{ steps.guard.outputs.lease_id }}
         run: |
           set -euo pipefail
-          base="${CONTROL_URL%/}"
-          base="${base%/api/report}"
-          oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-pool")"
-          oidc_token="$(jq -er '.value' <<<"$oidc_json")"
-          payload="$(jq -nc --argjson issue "$ISSUE" --arg lease "$LEASE_ID" \
-            '{schema:1,issue:$issue,lease_id:$lease,state:"planning"}')"
-          curl -fsS -X POST "$base/api/agent-pool/transition" \
-            -H "Authorization: Bearer $oidc_token" \
-            -H 'Content-Type: application/json' --data "$payload" >/dev/null
+          python3 scripts/agent_pool_control_client.py transition \
+            --base-url "$CONTROL_URL" \
+            --issue "$ISSUE" \
+            --lease-id "$LEASE_ID" \
+            --state planning >/dev/null
 
       - name: Conectar qwen-primary a OmniRoute por Tailscale (OAuth)
         if: steps.guard.outputs.run == 'true' && inputs.worker == 'qwen-primary' && env.HAS_OMNIROUTE == 'true' && env.HAS_TS_OAUTH == 'true'
@@ -559,16 +554,11 @@ jobs:
           LEASE_ID: ${{ steps.guard.outputs.lease_id }}
         run: |
           set -euo pipefail
-          base="${CONTROL_URL%/}"
-          base="${base%/api/report}"
-          oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-pool")"
-          oidc_token="$(jq -er '.value' <<<"$oidc_json")"
-          payload="$(jq -nc --argjson issue "$ISSUE" --arg lease "$LEASE_ID" \
-            '{schema:1,issue:$issue,lease_id:$lease,state:"implementing"}')"
-          curl -fsS -X POST "$base/api/agent-pool/transition" \
-            -H "Authorization: Bearer $oidc_token" \
-            -H 'Content-Type: application/json' --data "$payload" >/dev/null
+          python3 scripts/agent_pool_control_client.py transition \
+            --base-url "$CONTROL_URL" \
+            --issue "$ISSUE" \
+            --lease-id "$LEASE_ID" \
+            --state implementing >/dev/null
 
       - id: protocol
         name: Compilar TaskPacket y prompt del worker
@@ -738,16 +728,11 @@ jobs:
           LEASE_ID: ${{ steps.guard.outputs.lease_id }}
         run: |
           set -euo pipefail
-          base="${CONTROL_URL%/}"
-          base="${base%/api/report}"
-          oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-pool")"
-          oidc_token="$(jq -er '.value' <<<"$oidc_json")"
-          payload="$(jq -nc --argjson issue "$ISSUE" --arg lease "$LEASE_ID" \
-            '{schema:1,issue:$issue,lease_id:$lease,state:"validating"}')"
-          curl -fsS -X POST "$base/api/agent-pool/transition" \
-            -H "Authorization: Bearer $oidc_token" \
-            -H 'Content-Type: application/json' --data "$payload" >/dev/null
+          python3 scripts/agent_pool_control_client.py transition \
+            --base-url "$CONTROL_URL" \
+            --issue "$ISSUE" \
+            --lease-id "$LEASE_ID" \
+            --state validating >/dev/null
 
       - id: replan
         name: Replanificar pool tras desvio de CLAIM
@@ -1089,16 +1074,11 @@ jobs:
           LEASE_ID: ${{ steps.guard.outputs.lease_id }}
         run: |
           set -euo pipefail
-          base="${CONTROL_URL%/}"
-          base="${base%/api/report}"
-          oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-pool")"
-          oidc_token="$(jq -er '.value' <<<"$oidc_json")"
-          payload="$(jq -nc --argjson issue "$ISSUE" --arg lease "$LEASE_ID" \
-            '{schema:1,issue:$issue,lease_id:$lease,state:"publishing"}')"
-          curl -fsS -X POST "$base/api/agent-pool/transition" \
-            -H "Authorization: Bearer $oidc_token" \
-            -H 'Content-Type: application/json' --data "$payload" >/dev/null
+          python3 scripts/agent_pool_control_client.py transition \
+            --base-url "$CONTROL_URL" \
+            --issue "$ISSUE" \
+            --lease-id "$LEASE_ID" \
+            --state publishing >/dev/null
 
       - name: Publicar PR draft y lanzar CI canonica
         if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true'
