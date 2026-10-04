@@ -31,12 +31,15 @@ func _probar_visibilidad() -> void:
 		[true, true, false, false, true, "entrada/cinematica"],
 	]:
 		_comprobar(
-			not ControlesTactiles.debe_mostrar_overlay(
-				bool(caso[0]),
-				bool(caso[1]),
-				bool(caso[2]),
-				bool(caso[3]),
-				bool(caso[4]),
+			not (
+				ControlesTactiles
+				. debe_mostrar_overlay(
+					bool(caso[0]),
+					bool(caso[1]),
+					bool(caso[2]),
+					bool(caso[3]),
+					bool(caso[4]),
+				)
 			),
 			String(caso[5]) + " oculta overlay",
 		)
