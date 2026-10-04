@@ -7,7 +7,7 @@ class_name MinotauroVigilia
 extends Interactuable3D
 
 const ID_MITO := "minotauro"
-const FUENTE := "rom:ariadna_labertinto_98"
+const FUENTE := "rom:ariadne_98"
 const INTERACCIONES_REQUERIDAS := 2
 
 var _jornada: Dictionary = {}
