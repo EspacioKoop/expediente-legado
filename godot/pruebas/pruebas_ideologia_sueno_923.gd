@@ -174,6 +174,19 @@ func _probar_exposicion_solo_visual() -> void:
 			["procedimiento", "evaluación"],
 		)
 	)
+	var estado_antes := estado.duplicate(true)
+	_comprobar(
+		IDEOLOGIA_SUENO.familias_exposicion(estado, 1) == ["procedimiento"],
+		"la exposición expone una familia derivada factual",
+	)
+	_comprobar(
+		IDEOLOGIA_SUENO.familia_exposicion(estado, 1, 923) == "procedimiento",
+		"la familia seleccionada se puede reconstruir con la misma raíz",
+	)
+	_comprobar(
+		estado == estado_antes,
+		"derivar la familia de exposición no muta la partida",
+	)
 	var modificadores := IDEOLOGIA_SUENO.modificadores(estado, 1, 923, false)
 	_comprobar(modificadores.size() == 1, "una exposición real puede modular la noche")
 	if modificadores.size() == 1:
@@ -204,6 +217,10 @@ func _probar_exposicion_solo_visual() -> void:
 	_comprobar(
 		IDEOLOGIA_SUENO.modificadores(estado, 2, 923, false).is_empty(),
 		"la exposición del día anterior no se filtra a otra noche",
+	)
+	_comprobar(
+		IDEOLOGIA_SUENO.familias_exposicion(estado, 2).is_empty(),
+		"la derivación pura respeta también el límite de jornada",
 	)
 
 
