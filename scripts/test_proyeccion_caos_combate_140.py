@@ -37,6 +37,7 @@ class ProyeccionCaosCombate140Test(unittest.TestCase):
         self.assertIn("var combate := JuicioCombate3D.new()", self.visor)
         self.assertIn("ProyeccionCaosCombate140.BONO_COMBATE_BREVE", self.visor)
         self.assertIn('evento.is_action_pressed("cancelar")', self.visor)
+        self.assertIn('evento.is_action_pressed("ui_cancel")', self.visor)
         self.assertIn("_combate_publico_caos.abandonar()", self.visor)
 
     def test_ganar_perder_o_abandonar_convergen_al_mismo_sello(self):
