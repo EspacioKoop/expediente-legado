@@ -17,6 +17,7 @@ const ARQUETIPOS = preload("res://guion/juicio_combate_arquetipos.gd")
 ## Arquetipos que el host sabe representar. Elegir otro dejaría una política
 ## viva sin cuerpo que la muestre.
 const SOPORTADOS := [ARQUETIPOS.BLOQUEADOR, ARQUETIPOS.HOSTIGADOR]
+const MIXTO := "mixto"
 
 ## Medio arco frontal de la guardia: ±60° respecto a donde mira la figura.
 ## Fuera de ese cono el golpe entra por el flanco.
@@ -50,12 +51,13 @@ static func elegir(id_figura: String, raiz: int, plano: String) -> String:
 	# pares); entre las antiguas figuras clásicas, una mitad pasa a hostigador.
 	var tirada := Azar.derivar_texto(raiz, "combate", "arquetipo_1771:%s" % id)
 	# Conservar exactamente todos los bloqueadores ya asignados (tirada par) y
-	# convertir solo la mitad del antiguo duelo clásico en hostigador.
+	# los hostigadores ya promovidos. El cuarto que seguía como duelo clásico se
+	# reserva ahora para la composición mixta de #2295.
 	if tirada % 2 == 0:
 		return ARQUETIPOS.BLOQUEADOR
 	if tirada % 4 == 1:
 		return ARQUETIPOS.HOSTIGADOR
-	return ""
+	return MIXTO
 
 
 static func soportado(tipo: String) -> bool:
