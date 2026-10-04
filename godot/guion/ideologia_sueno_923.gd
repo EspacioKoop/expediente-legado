@@ -109,6 +109,9 @@ static func modificadores(
 
 	var exposiciones = estado.get(Prometeo.CLAVE_EXPOSICION_IDEOLOGICA, [])
 	if typeof(exposiciones) == TYPE_ARRAY:
+		# El epílogo necesita la trayectoria acumulada; el sueño corriente
+		# sigue filtrando por jornada para decidir su modificador visual.
+		estado[CLAVE_FAMILIAS_EXPOSICION] = _familias_de_eventos(exposiciones)
 		var del_dia := []
 		for evento_crudo in exposiciones:
 			if typeof(evento_crudo) != TYPE_DICTIONARY:
@@ -125,9 +128,6 @@ static func modificadores(
 		)
 		if not exposicion.is_empty():
 			resultado.append(_modificador(exposicion, CANAL_EXPOSICION, reduccion_movimiento))
-		# Persistir familias onítricas derivadas de exposición para el epílogo.
-		if not familias_exposicion.is_empty():
-			estado[CLAVE_FAMILIAS_EXPOSICION] = familias_exposicion
 	return resultado
 
 
