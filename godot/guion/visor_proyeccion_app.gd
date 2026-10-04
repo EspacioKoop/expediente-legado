@@ -7,6 +7,9 @@
 extends "res://guion/visor_sello_app.gd"
 
 const ESCENA_PROYECCION := preload("res://escenas/cinematica.tscn")
+const COMBATE_CAOS = preload("res://guion/proyeccion_caos_combate_app.gd")
+
+var _combate_caos: JuicioCombate3D
 
 
 func _al_firmar(resultado: Dictionary, formulario: Control) -> void:
@@ -43,4 +46,47 @@ func _reproducir_proyeccion(resultado: Dictionary, estado: String) -> void:
 func _al_terminar_proyeccion(reproductor: Node, resultado: Dictionary) -> void:
 	reproductor.queue_free()
 	_guardar_o_avisar()
+	var cinta: Dictionary = resultado.get("cinta_onirica", {})
+	if (
+		String(cinta.get("estado", "")) == ProyeccionOniricaCinematica.ESTADO_CAOS
+		and _abrir_combate_caos(resultado)
+	):
+		return
 	_reproducir_sello(resultado)
+
+
+func _abrir_combate_caos(resultado: Dictionary) -> bool:
+	if is_instance_valid(_combate_caos):
+		return true
+	var anfitrion := get_parent()
+	if anfitrion == null:
+		return false
+	_combate_caos = COMBATE_CAOS.abrir(
+		anfitrion,
+		partida.estado,
+		Callable(self, "_al_terminar_combate_caos").bind(resultado),
+	)
+	if not is_instance_valid(_combate_caos):
+		return false
+	visible = false
+	return true
+
+
+func _al_terminar_combate_caos(_gano: bool, resultado: Dictionary) -> void:
+	var combate_actual := _combate_caos
+	_combate_caos = null
+	if is_instance_valid(combate_actual):
+		combate_actual.queue_free()
+	visible = true
+	_reproducir_sello(resultado)
+
+
+func _unhandled_input(evento: InputEvent) -> void:
+	if not is_instance_valid(_combate_caos):
+		return
+	if (
+		evento.is_action_pressed("cancelar")
+		or evento.is_action_pressed("ui_cancel")
+	):
+		get_viewport().set_input_as_handled()
+		_combate_caos.abandonar()
