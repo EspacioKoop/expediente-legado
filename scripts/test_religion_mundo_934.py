@@ -55,6 +55,26 @@ class ReligionMundo934Test(unittest.TestCase):
         self.assertIn("signal practica_registrada(id_practica: String)", escena)
         self.assertNotIn("ReligionEventos.CANAL_CONVICCION", dia)
 
+    def test_folleto_nag_hammadi_es_exposicion_opcional_y_documentada(self) -> None:
+        mundo = MUNDO.read_text(encoding="utf-8")
+        escena = MUNDO_3D.read_text(encoding="utf-8")
+
+        self.assertIn('ID_FOLLETO_NAG_HAMMADI := "folleto_nag_hammadi_ii_4"', mundo)
+        self.assertIn('TRADICION_GNOSTICA := "gnosticismo"', mundo)
+        self.assertIn(
+            'CONTEXTO_ARCONTE := "nag_hammadi:ii_4:hypostasis_archons"',
+            mundo,
+        )
+        self.assertIn('"funcion": "exposicion"', mundo)
+        self.assertIn('"fuente_documental:nag_hammadi_ii_4"', mundo)
+        self.assertIn("folleto_nag_hammadi_interactuable", escena)
+        self.assertIn("Interactuable3D.Verbo.EXAMINAR", escena)
+        self.assertIn(
+            "Mundo.registrar_exposicion(_registro, Mundo.ID_FOLLETO_NAG_HAMMADI",
+            escena,
+        )
+        self.assertNotIn("registrar_practica(_registro, Mundo.ID_FOLLETO_NAG_HAMMADI", escena)
+
     def test_regresion_runtime_standalone(self) -> None:
         motor = os.environ.get("GODOT_BIN") or shutil.which("godot4")
         if not motor:
