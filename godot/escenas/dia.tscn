@@ -1,4 +1,4 @@
-[gd_scene load_steps=67 format=3]
+[gd_scene load_steps=68 format=3]
 
 [ext_resource type="Script" path="res://guion/dia_clima_app.gd" id="1"]
 [ext_resource type="Script" path="res://guion/dia_corcho_app.gd" id="2"]
@@ -66,6 +66,7 @@
 [ext_resource type="Script" path="res://guion/dia_llamadas_internas_app.gd" id="64"]
 [ext_resource type="Script" path="res://guion/dia_ventana_floja_app.gd" id="65"]
 [ext_resource type="Script" path="res://guion/dia_incidente_impresora_app.gd" id="66"]
+[ext_resource type="Script" path="res://guion/dia_controles_tactiles_app.gd" id="67"]
 
 [node name="Dia" type="Node3D"]
 script = ExtResource("1")
@@ -120,6 +121,9 @@ script = ExtResource("65")
 
 [node name="IncidenteImpresora1768Controller" type="Node" parent="."]
 script = ExtResource("66")
+
+[node name="ControlesTactiles98Controller" type="Node" parent="."]
+script = ExtResource("67")
 
 [node name="HUDFasesController" type="Node" parent="."]
 script = ExtResource("11")
