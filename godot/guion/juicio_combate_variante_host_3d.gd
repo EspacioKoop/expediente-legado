@@ -21,6 +21,8 @@ static func montar(
 		return JuicioCombateArconteWiring3D.montar(anfitrion, raiz)
 	if variante == JuicioCombateTentadorHost3D.VARIANTE:
 		return JuicioCombateTentadorHost3D.montar(anfitrion, rival, raiz)
+	if variante == JuicioCombateCiclopeHost3D.VARIANTE:
+		return JuicioCombateCiclopeHost3D.montar(anfitrion, rival, raiz)
 	return {}
 
 
@@ -34,6 +36,9 @@ static func avanzar(anfitrion, estado: Dictionary, delta: float) -> bool:
 	if JuicioCombateTentadorHost3D.es_estado(estado):
 		JuicioCombateTentadorHost3D.avanzar(anfitrion, estado, delta)
 		return true
+	if JuicioCombateCiclopeHost3D.es_estado(estado):
+		JuicioCombateCiclopeHost3D.avanzar(anfitrion, estado, delta)
+		return true
 	return false
 
 
@@ -42,4 +47,5 @@ static func controla_movimiento(estado: Dictionary) -> bool:
 		JuicioCombateGargolaHost3D.es_estado(estado)
 		or JuicioCombateArconteWiring3D.es_estado(estado)
 		or JuicioCombateTentadorHost3D.es_estado(estado)
+		or JuicioCombateCiclopeHost3D.es_estado(estado)
 	)

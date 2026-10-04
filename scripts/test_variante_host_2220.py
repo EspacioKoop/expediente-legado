@@ -51,6 +51,15 @@ class VarianteHost2220Test(unittest.TestCase):
         self.assertNotIn("JuicioCombateTentadorHost3D", HOST)
 
 
+    def test_ciclope_se_despacha_y_posee_movimiento_embestidor(self):
+        self.assertIn("JuicioCombateCiclopeHost3D.VARIANTE", ROUTER)
+        self.assertIn("JuicioCombateCiclopeHost3D.montar(", ROUTER)
+        self.assertIn("JuicioCombateCiclopeHost3D.es_estado(estado)", ROUTER)
+        self.assertIn("JuicioCombateCiclopeHost3D.avanzar(", ROUTER)
+        movimiento = ROUTER.split("static func controla_movimiento(", 1)[1]
+        self.assertIn("or JuicioCombateCiclopeHost3D.es_estado(estado)", movimiento)
+        self.assertNotIn("JuicioCombateCiclopeHost3D", HOST)
+
     def test_variante_desconocida_hace_fallback(self):
         self.assertIn('return {}', ROUTER)
         montar = ROUTER.split("static func montar(", 1)[1].split(
