@@ -105,12 +105,26 @@ const FAMILIAS := {
 		"chip/papel_pasar_01.ogg",
 		"chip/papel_manojo_01.ogg",
 	],
+	"tecla":
+	[
+		"chip/teclado_tecla_01.ogg",
+		"chip/teclado_tecla_02.ogg",
+		"chip/teclado_tecla_03.ogg",
+	],
+	"rafaga":
+	[
+		"chip/teclado_rafaga_01.ogg",
+		"chip/teclado_rafaga_02.ogg",
+		"chip/teclado_rafaga_03.ogg",
+	],
 	"coger": ["impactSoft_medium_000.ogg", "impactSoft_medium_001.ogg"],
 }
 const FAMILIAS_RESPALDO := {
 	"abrir": ["impactMetal_light_000.ogg", "impactMetal_light_001.ogg"],
 	"cerrar": ["impactMetal_medium_000.ogg"],
 	"documento": ["bookFlip1.ogg"],
+	"tecla": ["click_001.ogg"],
+	"rafaga": ["click_001.ogg"],
 }
 const VARIACION_TONO := 1.08
 
