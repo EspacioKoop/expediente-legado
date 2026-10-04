@@ -157,6 +157,76 @@ class ExportTest(unittest.TestCase):
                 self.assertNotIn("autoplay", audio)
 
 
+class CareoTrackerTest(unittest.TestCase):
+    def test_render_doble_es_identico_y_manifest_autocontenido(self):
+        with tempfile.TemporaryDirectory() as temporal:
+            raiz = Path(temporal)
+            uno = raiz / "uno"
+            dos = raiz / "dos"
+            manifest_uno = LAB.generar_careo_tracker(uno)
+            manifest_dos = LAB.generar_careo_tracker(dos)
+
+            self.assertEqual(manifest_uno, manifest_dos)
+            self.assertEqual(
+                (uno / "careo_tracker.wav").read_bytes(),
+                (dos / "careo_tracker.wav").read_bytes(),
+            )
+            self.assertEqual(
+                (uno / "partitura.json").read_bytes(),
+                (dos / "partitura.json").read_bytes(),
+            )
+            self.assertEqual(
+                (uno / "manifest.json").read_bytes(),
+                (dos / "manifest.json").read_bytes(),
+            )
+
+            self.assertEqual(manifest_uno["estudio"], "careo_tracker")
+            self.assertEqual(manifest_uno["escucha_humana"], "pendiente")
+            self.assertEqual(manifest_uno["duracion_s"], 8)
+            self.assertLessEqual(manifest_uno["voces_maximas"], manifest_uno["limite_voces"])
+            self.assertEqual(manifest_uno["limite_voces"], 24)
+            self.assertLessEqual(len(manifest_uno["banco"]), manifest_uno["banco_pequeno_max_fuentes"])
+            self.assertEqual(manifest_uno["banco_pequeno_max_fuentes"], 4)
+
+            self.assertEqual(len(manifest_uno["renders"]), 1)
+            render = manifest_uno["renders"][0]
+            wav = uno / render["archivo"]
+            self.assertEqual(render["sha256"], LAB.sha256(wav.read_bytes()))
+            self.assertEqual(render["duracion_s"], 8)
+            self.assertEqual(render["canales"], 2)
+            self.assertEqual(render["clipping"], 0)
+            self.assertLessEqual(render["pico_dbfs"], -8.99)
+            self.assertLess(max(map(abs, render["dc_por_canal"])), 0.0001)
+
+            bucle = manifest_uno["bucle"]
+            self.assertEqual(bucle["inicio_muestras"], 0)
+            self.assertEqual(bucle["fin_muestras"], 8 * LAB.SR)
+            self.assertEqual(bucle["inicio_s"], 0)
+            self.assertEqual(bucle["fin_s"], 8)
+
+            partitura = json.loads((uno / "partitura.json").read_text())
+            self.assertEqual(
+                manifest_uno["partitura_sha256"],
+                LAB.sha256(json.dumps(partitura, sort_keys=True).encode()),
+            )
+
+            memoria = 0
+            for ficha in manifest_uno["banco"]:
+                self.assertEqual(ficha["origen"], "sintesis_original_no_grabacion")
+                pcm = LAB.pcm16(LAB.sintetizar(ficha["receta"]))
+                self.assertEqual(ficha["sha256_pcm"], LAB.sha256(pcm))
+                self.assertEqual(ficha["pcm_bytes"], len(pcm))
+                memoria += len(pcm)
+            self.assertEqual(manifest_uno["banco_pcm_bytes"], memoria)
+
+    def test_rechaza_escritura_dentro_del_runtime(self):
+        destino = LAB.RAIZ / "godot" / "careo_tracker_no_escribir_2357"
+        self.assertFalse(destino.exists())
+        with self.assertRaisesRegex(ValueError, "no escribe dentro del runtime"):
+            LAB.generar_careo_tracker(destino)
+        self.assertFalse(destino.exists())
+
+
 @unittest.skipUnless(shutil.which("ffmpeg"), "La cata calibrada exige FFmpeg; su workflow lo instala")
 class CataCompositivaTest(unittest.TestCase):
     def test_cuatro_cruces_pcm_y_calibracion_por_timbre(self):
