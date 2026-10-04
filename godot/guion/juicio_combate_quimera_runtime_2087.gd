@@ -39,10 +39,13 @@ static func avanzar(
 	if not contexto is Dictionary:
 		contexto = {}
 
-	var salida := ARQUETIPOS.avanzar(
-		unidad,
-		maxf(0.0, delta),
-		contexto,
+	var salida := (
+		ARQUETIPOS
+		. avanzar(
+			unidad,
+			maxf(0.0, delta),
+			contexto,
+		)
 	)
 	var unidad_actual: Dictionary = salida.get("unidad", unidad).duplicate(true)
 	var cambio := _ciclo_completado(
@@ -100,20 +103,14 @@ static func _ciclo_completado(
 ) -> bool:
 	match patron:
 		ARQUETIPOS.EMBESTIDOR:
-			return (
-				estado_anterior == ARQUETIPOS.RECUPERAR
-				and estado_actual == ARQUETIPOS.REPOSICIONAR
-			)
+			return estado_anterior == ARQUETIPOS.RECUPERAR and estado_actual == ARQUETIPOS.REPOSICIONAR
 		ARQUETIPOS.HOSTIGADOR:
 			return (
 				estado_anterior == ARQUETIPOS.VULNERABLE
 				and estado_actual == ARQUETIPOS.REPOSICIONAR
 			)
 		ARQUETIPOS.BLOQUEADOR:
-			return (
-				estado_anterior == ARQUETIPOS.RECUPERAR
-				and estado_actual == ARQUETIPOS.GUARDIA
-			)
+			return estado_anterior == ARQUETIPOS.RECUPERAR and estado_actual == ARQUETIPOS.GUARDIA
 		_:
 			return false
 
