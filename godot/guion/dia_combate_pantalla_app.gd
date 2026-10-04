@@ -35,17 +35,20 @@ func abrir(
 	anfitrion.add_child(_app)
 	_app.terminado.connect(al_terminar)
 
-	if not _app.abrir(
-		objetivo,
-		decision,
-		zona,
-		caminante,
-		mundo,
-		hud,
-		ambiente,
-		partida,
-		jornada,
-		raiz,
+	if not (
+		_app
+		. abrir(
+			objetivo,
+			decision,
+			zona,
+			caminante,
+			mundo,
+			hud,
+			ambiente,
+			partida,
+			jornada,
+			raiz,
+		)
 	):
 		cerrar()
 		return {"ok": false}
