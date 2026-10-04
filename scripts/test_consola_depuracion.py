@@ -56,15 +56,44 @@ class ConsolaDepuracionTest(unittest.TestCase):
             "clima",
             "desatascar",
             "dibujo",
+            "estado",
+            "guardar",
+            "sueno",
+            "combate",
+            "tp",
+            "diagnostico",
         ):
             self.assertIn(f'"{comando}":', self.qa)
         self.assertIn('res://debug/dibujo_3d.gd', self.qa)
+
+    def test_qa_incluye_utilidades_para_playtest_rapido_sin_crear_estado_paralelo(self):
+        self.assertIn('dia._guardar_o_avisar("")', self.qa)
+        self.assertIn('dia.jornada["sueno_resto"] = float(valor)', self.qa)
+        self.assertIn("dia._abrir_duelo(rival, null)", self.qa)
+        self.assertIn("dia._caminante.situar(destino)", self.qa)
+        self.assertIn("Azar.manifiesto_en_texto(dia.partida.estado)", self.qa)
+        self.assertIn("dia._rivales.keys()", self.qa)
+        for prohibido in ("JuicioCombate3D.new()", "Partida.new()", "Jornada.nueva("):
+            self.assertNotIn(prohibido, self.qa)
 
     def test_release_exige_desbloqueo_y_solo_tiene_utilidades_seguras(self):
         self.assertIn("TiendaVideojuegos.consola_trucos_desbloqueada()", self.release)
         for comando in ("clima", "desatascar", "portatil", "diagnostico"):
             self.assertIn(f'"{comando}":', self.release)
-        for handler in ("fase", "sala", "dia", "dinero", "pistas", "gato", "dibujo"):
+        for handler in (
+            "fase",
+            "sala",
+            "dia",
+            "dinero",
+            "pistas",
+            "gato",
+            "dibujo",
+            "estado",
+            "guardar",
+            "sueno",
+            "combate",
+            "tp",
+        ):
             self.assertNotIn(f"func _cmd_{handler}(", self.release)
         self.assertNotIn("dibujo_3d.gd", self.release)
         self.assertNotIn('_entrar_en("casa")', self.release)
