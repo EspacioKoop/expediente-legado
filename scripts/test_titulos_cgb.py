@@ -32,7 +32,7 @@ def _valores(ruta: Path, directiva: str) -> list[int]:
 def _prefijos():
     for rom, carpeta in ROMS.items():
         yield rom, carpeta / "assets" / "titulo", carpeta / "referencia"
-    yield "ariadna_labertinto_98", ARIADNE / "titulo", ARIADNE
+    yield "ariadne_98", ARIADNE / "titulo", ARIADNE
 
 
 class TitulosCGBTest(unittest.TestCase):
