@@ -19,10 +19,15 @@ def funcion(nombre: str, fuente: str) -> str:
     return match.group(0)
 
 
+def normalizar_accesos(fuente: str) -> str:
+    """Tolera el salto de línea que gdformat introduce antes de '. metodo('."""
+    return re.sub(r"\s*\.\s*", ".", fuente)
+
+
 class DiaExpediente1761Test(unittest.TestCase):
     def test_dia_app_delega_presentacion_y_conserva_wrappers(self):
-        abrir = funcion("_abrir_expediente", DIA)
-        cerrar = funcion("_cerrar_expediente", DIA)
+        abrir = normalizar_accesos(funcion("_abrir_expediente", DIA))
+        cerrar = normalizar_accesos(funcion("_cerrar_expediente", DIA))
         self.assertLess(len(DIA.splitlines()), 800)
         self.assertIn(
             'const DIA_EXPEDIENTE_APP = preload("res://guion/dia_expediente_app.gd")',
@@ -34,7 +39,7 @@ class DiaExpediente1761Test(unittest.TestCase):
         self.assertIn("func _cerrar_expediente() -> void:", DIA)
 
     def test_guardado_bloquea_antes_de_montar_pantalla(self):
-        abrir = funcion("_abrir_expediente", DIA)
+        abrir = normalizar_accesos(funcion("_abrir_expediente", DIA))
         pendiente = abrir.index("partida.guardado_pendiente")
         guardar = abrir.index('_guardar_o_avisar("")')
         montar = abrir.index("DIA_EXPEDIENTE_APP.abrir(")
@@ -64,7 +69,7 @@ class DiaExpediente1761Test(unittest.TestCase):
                 self.assertNotIn(prohibido, EXPEDIENTE)
 
     def test_cierre_conserva_recarga_y_prioridad_de_reasignacion(self):
-        cerrar = funcion("_cerrar_expediente", DIA)
+        cerrar = normalizar_accesos(funcion("_cerrar_expediente", DIA))
         orden = (
             'var vuelta_antes := int(jornada.get("vuelta", 1))',
             "DIA_EXPEDIENTE_APP.cerrar(",
@@ -88,9 +93,9 @@ class DiaExpediente1761Test(unittest.TestCase):
 
     def test_pantalla_sigue_siendo_estado_compartido_del_dia(self):
         self.assertIn("var _pantalla: CanvasLayer", DIA)
-        abrir = funcion("_abrir_expediente", DIA)
-        cerrar = funcion("_cerrar_expediente", DIA)
-        self.assertIn("_pantalla = DIA_EXPEDIENTE_APP.abrir(", abrir)
+        abrir = normalizar_accesos(funcion("_abrir_expediente", DIA))
+        cerrar = normalizar_accesos(funcion("_cerrar_expediente", DIA))
+        self.assertRegex(abrir, r"_pantalla\s*=\s*\(\s*DIA_EXPEDIENTE_APP\.abrir\(")
         self.assertIn("if _pantalla == null:", cerrar)
         self.assertIn("_pantalla = null", cerrar)
 
