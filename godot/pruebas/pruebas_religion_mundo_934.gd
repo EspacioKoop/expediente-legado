@@ -25,7 +25,9 @@ func _probar_contrato_material() -> void:
 		"las superficies tienen identidad propia"
 	)
 	_comprobar(
-		superficies.any(func(entrada): return String(entrada["id"]) == Mundo.ID_FOLLETO_NAG_HAMMADI),
+		superficies.any(
+			func(entrada): return String(entrada["id"]) == Mundo.ID_FOLLETO_NAG_HAMMADI
+		),
 		"el catálogo incluye el folleto documental de Nag Hammadi"
 	)
 	_comprobar(Mundo.eventos_calendario(2).is_empty(), "el calendario no inventa eventos")
@@ -75,9 +77,15 @@ func _probar_canales() -> void:
 	)
 	var exposiciones := Eventos.eventos(registro, Eventos.CANAL_EXPOSICION)
 	var folleto: Dictionary = exposiciones[exposiciones.size() - 1]
-	_comprobar(String(folleto["tradicion"]) == Mundo.TRADICION_GNOSTICA, "el folleto fija tradición")
-	_comprobar(String(folleto["contexto"]) == Mundo.CONTEXTO_ARCONTE, "el folleto fija contexto II,4")
-	_comprobar(String(folleto["canal"]) == Eventos.CANAL_EXPOSICION, "el folleto solo es exposición")
+	_comprobar(
+		String(folleto["tradicion"]) == Mundo.TRADICION_GNOSTICA, "el folleto fija tradición"
+	)
+	_comprobar(
+		String(folleto["contexto"]) == Mundo.CONTEXTO_ARCONTE, "el folleto fija contexto II,4"
+	)
+	_comprobar(
+		String(folleto["canal"]) == Eventos.CANAL_EXPOSICION, "el folleto solo es exposición"
+	)
 	_comprobar(
 		not Mundo.registrar_exposicion(
 			registro, Mundo.ID_FOLLETO_NAG_HAMMADI, Mundo.DIA_ACTO_MEMORIA, 2
@@ -135,8 +143,10 @@ func _probar_superficies_3d() -> void:
 	var eventos_exposicion := Eventos.eventos(registro, Eventos.CANAL_EXPOSICION)
 	var evento_folleto: Dictionary = eventos_exposicion[1]
 	_comprobar(
-		String(evento_folleto["tradicion"]) == Mundo.TRADICION_GNOSTICA
-		and String(evento_folleto["contexto"]) == Mundo.CONTEXTO_ARCONTE,
+		(
+			String(evento_folleto["tradicion"]) == Mundo.TRADICION_GNOSTICA
+			and String(evento_folleto["contexto"]) == Mundo.CONTEXTO_ARCONTE
+		),
 		"la interacción 3D conserva el gate exacto del Arconte"
 	)
 	_comprobar(
