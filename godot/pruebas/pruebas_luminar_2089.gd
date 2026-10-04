@@ -86,7 +86,7 @@ func _probar_determinismo_y_no_mutacion() -> void:
 	var b := RUNTIME.avanzar(antes.duplicate(true), 0.5, contexto)
 	_comprobar(a == b, "misma entrada produce la misma salida")
 	_comprobar(estado == antes, "avanzar no muta la entrada")
-	for prohibido in ("dano", "partida", "jornada", "spawn"):
+	for prohibido in ["dano", "partida", "jornada", "spawn"]:
 		_comprobar(not a.has(prohibido), "no crea autoridad " + prohibido)
 
 
