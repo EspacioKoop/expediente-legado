@@ -152,6 +152,14 @@ class CiScopeTest(unittest.TestCase):
         ):
             with self.subTest(test=test):
                 self.assertIn(test, evidence)
+        self.assertIn(
+            "python -m unittest -v scripts.test_benchmark_cc0",
+            evidence,
+        )
+        self.assertNotIn(
+            "python scripts/test_benchmark_cc0.py",
+            evidence,
+        )
         for patron in (
             "test_evidencia_*.py",
             "test_kubasta_visual_gate_*.py",
