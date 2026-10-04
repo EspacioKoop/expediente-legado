@@ -592,16 +592,89 @@ def generar(receta: Path, destino: Path, exigir_ffmpeg: bool = False) -> dict:
     return manifest
 
 
+def generar_careo_tracker(destino: Path) -> dict:
+    """Bucle breve y autosuficiente para contrastar dos voces en careo."""
+    if (RAIZ / "godot").resolve() in destino.resolve().parents or destino.resolve() == (RAIZ / "godot").resolve():
+        raise ValueError("el laboratorio no escribe dentro del runtime")
+    banco_cfg = {
+        "argumento": {"tipo": "fm", "hz": 220, "muestras": 13230, "semilla": 2324,
+                      "indice_fm": 1.8, "ratio_fm": 2, "caida": 5},
+        "replica": {"tipo": "fm", "hz": 330, "muestras": 13230, "semilla": 1475,
+                     "indice_fm": 2.4, "ratio_fm": 3, "caida": 6},
+        "pulso": {"tipo": "ciclo", "hz": 55, "muestras": 4410, "semilla": 76,
+                   "indice_fm": 0, "ratio_fm": 1, "caida": 0},
+    }
+    limpios, fichas = {}, []
+    for nombre, fuente in banco_cfg.items():
+        pcm = pcm16(sintetizar(fuente))
+        limpios[nombre] = [x[0] / 32768 for x in struct.iter_unpack("<h", pcm)]
+        fichas.append(dict(id=nombre, origen="sintesis_original_no_grabacion", receta=fuente,
+                           pcm_bytes=len(pcm), sha256_pcm=sha256(pcm)))
+    duracion_s, pasos = 8, 16
+    paso = round(SR * duracion_s / pasos)
+    partitura = []
+    for indice in range(pasos):
+        inicio = indice * paso
+        partitura.append(dict(instrumento="pulso", inicio=inicio, muestras=paso,
+                              ratio=1, ganancia=0.11, pan=0, offset=0, bucle=True))
+        if indice % 4 in (0, 2):
+            partitura.append(dict(instrumento="argumento", inicio=inicio, muestras=round(SR * 0.22),
+                                  ratio=2 ** ((0, 3, 5, 3)[indice // 4] / 12), ganancia=0.28,
+                                  pan=-0.45, offset=0, bucle=False))
+        if indice % 4 in (1, 3):
+            partitura.append(dict(instrumento="replica", inicio=inicio, muestras=round(SR * 0.18),
+                                  ratio=2 ** ((7, 5, 3, 5)[indice // 4] / 12), ganancia=0.24,
+                                  pan=0.45, offset=0, bucle=False))
+    voces = contar_voces(partitura)
+    memoria = sum(ficha["pcm_bytes"] for ficha in fichas)
+    if voces > 24 or len(fichas) > 4:
+        raise ValueError("el careo excede el presupuesto declarado")
+    render = mezclar(limpios, partitura, duracion_s * SR)
+    pico = max(abs(x) for canal in render for x in canal)
+    ganancia = 10 ** (-9 / 20) / pico
+    for canal in render:
+        for i in range(len(canal)):
+            canal[i] *= ganancia
+    destino.mkdir(parents=True, exist_ok=True)
+    ruta = destino / "careo_tracker.wav"
+    escribir_wav(ruta, render)
+    medida = medir_wav(ruta)
+    if medida["clipping"] or max(map(abs, medida["dc_por_canal"])) > 0.0001:
+        raise ValueError("el render careo_tracker no supera el gate técnico")
+    salida = dict(archivo=ruta.name, **medida)
+    manifest = dict(issue=2324, estudio="careo_tracker", generador_sha256=sha256(Path(__file__).read_bytes()),
+                    frecuencia_hz=SR, duracion_s=duracion_s, voces_maximas=voces,
+                    limite_voces=24, banco_pcm_bytes=memoria, banco_pequeno_max_fuentes=4,
+                    banco=fichas, bucle=dict(inicio_muestras=0, fin_muestras=duracion_s * SR,
+                                              inicio_s=0, fin_s=duracion_s,
+                                              descripcion="Repetir careo_tracker.wav completo desde 0 s hasta 8 s."),
+                    partitura_sha256=sha256(json.dumps(partitura, sort_keys=True).encode()),
+                    renders=[salida], escucha_humana="pendiente",
+                    limite="Boceto offline; no runtime, asset de producción ni emulación de hardware.")
+    (destino / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    (destino / "partitura.json").write_text(json.dumps(partitura, indent=2) + "\n", encoding="utf-8")
+    escribir_escucha(destino, [salida], [])
+    return manifest
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--receta", type=Path, default=RECETA)
     parser.add_argument("--destino", type=Path)
     parser.add_argument("--cata-motivos-timbres", action="store_true")
+    parser.add_argument("--careo-tracker", action="store_true")
     parser.add_argument("--exigir-ffmpeg", action="store_true")
     args = parser.parse_args()
+    if args.cata_motivos_timbres and args.careo_tracker:
+        parser.error("--cata-motivos-timbres y --careo-tracker son excluyentes")
     destino = args.destino or RAIZ / "dist/salida" / (
-        "cata_motivos_timbres_1475" if args.cata_motivos_timbres else "laboratorio_1475")
-    if args.cata_motivos_timbres:
+        "careo_tracker_2324"
+        if args.careo_tracker
+        else "cata_motivos_timbres_1475" if args.cata_motivos_timbres else "laboratorio_1475"
+    )
+    if args.careo_tracker:
+        manifest = generar_careo_tracker(destino)
+    elif args.cata_motivos_timbres:
         receta = RECETA_CATA if args.receta == RECETA else args.receta
         manifest = generar_cata(receta, destino)
     else:
