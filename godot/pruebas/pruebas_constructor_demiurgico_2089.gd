@@ -26,11 +26,14 @@ func _probar_ciclo_con_cupo() -> void:
 		"nace en reposicionar",
 	)
 
-	var construir := JuicioCombateConstructorDemiurgicoRuntime2089.avanzar(
-		inicial,
-		0.0,
-		0,
-		2,
+	var construir := (
+		JuicioCombateConstructorDemiurgicoRuntime2089
+		. avanzar(
+			inicial,
+			0.0,
+			0,
+			2,
+		)
 	)
 	_comprobar(
 		String(construir["unidad"].get("estado", "")) == JuicioCombateArquetipos.CONSTRUIR,
@@ -39,11 +42,14 @@ func _probar_ciclo_con_cupo() -> void:
 	_comprobar(bool(construir["ventana_respuesta"]), "construir abre ventana de respuesta")
 	_comprobar(not bool(construir["crear_auxiliar"]), "telegraph no crea auxiliar todavía")
 
-	var creado := JuicioCombateConstructorDemiurgicoRuntime2089.avanzar(
-		construir["unidad"],
-		JuicioCombateArquetipos.CONSTRUCTOR_CONSTRUCCION,
-		0,
-		2,
+	var creado := (
+		JuicioCombateConstructorDemiurgicoRuntime2089
+		. avanzar(
+			construir["unidad"],
+			JuicioCombateArquetipos.CONSTRUCTOR_CONSTRUCCION,
+			0,
+			2,
+		)
 	)
 	_comprobar(bool(creado["crear_auxiliar"]), "al completar construcción solicita un auxiliar")
 	_comprobar(
@@ -52,19 +58,25 @@ func _probar_ciclo_con_cupo() -> void:
 	)
 	_comprobar(float(creado["unidad"].get("cooldown", 0.0)) > 0.0, "crear inicia recarga")
 
-	var sin_duplicar := JuicioCombateConstructorDemiurgicoRuntime2089.avanzar(
-		creado["unidad"],
-		0.0,
-		1,
-		2,
+	var sin_duplicar := (
+		JuicioCombateConstructorDemiurgicoRuntime2089
+		. avanzar(
+			creado["unidad"],
+			0.0,
+			1,
+			2,
+		)
 	)
 	_comprobar(not bool(sin_duplicar["crear_auxiliar"]), "activo no repite creación")
 
-	var recuperar := JuicioCombateConstructorDemiurgicoRuntime2089.avanzar(
-		sin_duplicar["unidad"],
-		JuicioCombateArquetipos.CONSTRUCTOR_ACTIVO,
-		1,
-		2,
+	var recuperar := (
+		JuicioCombateConstructorDemiurgicoRuntime2089
+		. avanzar(
+			sin_duplicar["unidad"],
+			JuicioCombateArquetipos.CONSTRUCTOR_ACTIVO,
+			1,
+			2,
+		)
 	)
 	_comprobar(
 		String(recuperar["unidad"].get("estado", "")) == JuicioCombateArquetipos.RECUPERAR,
@@ -75,17 +87,23 @@ func _probar_ciclo_con_cupo() -> void:
 
 func _probar_revalidacion_de_cupo() -> void:
 	var inicial := JuicioCombateConstructorDemiurgicoRuntime2089.nuevo(2089, 5)
-	var construir := JuicioCombateConstructorDemiurgicoRuntime2089.avanzar(
-		inicial,
-		0.0,
-		1,
-		2,
+	var construir := (
+		JuicioCombateConstructorDemiurgicoRuntime2089
+		. avanzar(
+			inicial,
+			0.0,
+			1,
+			2,
+		)
 	)
-	var bloqueado := JuicioCombateConstructorDemiurgicoRuntime2089.avanzar(
-		construir["unidad"],
-		JuicioCombateArquetipos.CONSTRUCTOR_CONSTRUCCION,
-		2,
-		2,
+	var bloqueado := (
+		JuicioCombateConstructorDemiurgicoRuntime2089
+		. avanzar(
+			construir["unidad"],
+			JuicioCombateArquetipos.CONSTRUCTOR_CONSTRUCCION,
+			2,
+			2,
+		)
 	)
 	_comprobar(
 		String(bloqueado["unidad"].get("estado", "")) == JuicioCombateArquetipos.RECUPERAR,
@@ -96,11 +114,14 @@ func _probar_revalidacion_de_cupo() -> void:
 
 func _probar_limite_duro() -> void:
 	var inicial := JuicioCombateConstructorDemiurgicoRuntime2089.nuevo(2089, 7)
-	var lleno := JuicioCombateConstructorDemiurgicoRuntime2089.avanzar(
-		inicial,
-		0.0,
-		JuicioCombateArquetipos.CONSTRUCTOR_LIMITE_AUXILIARES,
-		99,
+	var lleno := (
+		JuicioCombateConstructorDemiurgicoRuntime2089
+		. avanzar(
+			inicial,
+			0.0,
+			JuicioCombateArquetipos.CONSTRUCTOR_LIMITE_AUXILIARES,
+			99,
+		)
 	)
 	_comprobar(
 		String(lleno["unidad"].get("estado", "")) == JuicioCombateArquetipos.REPOSICIONAR,
@@ -108,11 +129,14 @@ func _probar_limite_duro() -> void:
 	)
 	_comprobar(not bool(lleno["crear_auxiliar"]), "límite lleno no crea")
 
-	var desactivado := JuicioCombateConstructorDemiurgicoRuntime2089.avanzar(
-		inicial,
-		0.0,
-		0,
-		0,
+	var desactivado := (
+		JuicioCombateConstructorDemiurgicoRuntime2089
+		. avanzar(
+			inicial,
+			0.0,
+			0,
+			0,
+		)
 	)
 	_comprobar(
 		String(desactivado["unidad"].get("estado", "")) == JuicioCombateArquetipos.REPOSICIONAR,
@@ -122,19 +146,25 @@ func _probar_limite_duro() -> void:
 
 func _probar_reduccion_movimiento() -> void:
 	var inicial := JuicioCombateConstructorDemiurgicoRuntime2089.nuevo(2089, 11)
-	var normal := JuicioCombateConstructorDemiurgicoRuntime2089.avanzar(
-		inicial,
-		0.0,
-		0,
-		2,
-		false,
+	var normal := (
+		JuicioCombateConstructorDemiurgicoRuntime2089
+		. avanzar(
+			inicial,
+			0.0,
+			0,
+			2,
+			false,
+		)
 	)
-	var reducido := JuicioCombateConstructorDemiurgicoRuntime2089.avanzar(
-		inicial,
-		0.0,
-		0,
-		2,
-		true,
+	var reducido := (
+		JuicioCombateConstructorDemiurgicoRuntime2089
+		. avanzar(
+			inicial,
+			0.0,
+			0,
+			2,
+			true,
+		)
 	)
 	for clave in ["unidad", "intencion", "telegraph", "ventana_respuesta", "crear_auxiliar"]:
 		_comprobar(normal[clave] == reducido[clave], "reducción no cambia " + clave)
