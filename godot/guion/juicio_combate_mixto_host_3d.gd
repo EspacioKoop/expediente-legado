@@ -12,6 +12,7 @@ const ARQUETIPO_HOST = preload("res://guion/juicio_combate_arquetipo_host.gd")
 const ENJAMBRE_HOST = preload("res://guion/juicio_combate_enjambre_host_3d.gd")
 const HOSTIGADOR_3D = preload("res://guion/juicio_combate_hostigador_3d.gd")
 const BLOQUEADOR_3D = preload("res://guion/juicio_combate_bloqueador_3d.gd")
+const REGLAS = preload("res://guion/juicio_combate_reglas.gd")
 
 
 static func tipo_singular(raiz: int) -> String:
@@ -66,6 +67,7 @@ static func montar(
 		"rival_proxy": rival_proxy,
 		"guardia": guardia,
 		"linea": linea,
+		"determinacion_singular": REGLAS.DETERMINACION_MINIMA_RIVAL,
 		"ultimo_paso": {},
 	}
 
@@ -202,6 +204,62 @@ static func objetivos_vivos(
 
 static func terminado(estado: Dictionary) -> bool:
 	return bool(estado.get("ultimo_paso", {}).get("terminado", false))
+
+
+static func aplicar_dano(
+	estado: Dictionary,
+	objetivo: Dictionary,
+	dano: int,
+) -> Dictionary:
+	if estado.is_empty() or objetivo.is_empty():
+		return _resumen_dano(estado)
+
+	var grupo := String(objetivo.get("grupo", ""))
+	var cantidad := maxi(0, dano)
+	var runtime: Dictionary = estado.get("runtime", {})
+	var visual: Dictionary = estado.get("enjambre_visual", {})
+
+	if grupo == "enjambre":
+		var indice := int(objetivo.get("indice", -1))
+		ENJAMBRE_HOST.aplicar_dano(visual, indice, cantidad)
+		estado["enjambre_visual"] = visual
+		if not runtime.is_empty():
+			runtime["enjambre"] = visual.get("unidades", []).duplicate(true)
+			estado["runtime"] = runtime
+	elif grupo == "singular":
+		if bool(runtime.get("singular_vivo", false)):
+			var actual := maxi(
+				0,
+				int(
+					estado.get(
+						"determinacion_singular",
+						REGLAS.DETERMINACION_MINIMA_RIVAL,
+					)
+				),
+			)
+			actual = maxi(0, actual - cantidad)
+			estado["determinacion_singular"] = actual
+			if actual <= 0:
+				runtime["singular_vivo"] = false
+				estado["runtime"] = runtime
+				var rival := estado.get("rival_proxy") as CharacterBody3D
+				if rival != null and is_instance_valid(rival):
+					rival.visible = false
+
+	return _resumen_dano(estado)
+
+
+static func _resumen_dano(estado: Dictionary) -> Dictionary:
+	var visual: Dictionary = estado.get("enjambre_visual", {})
+	var runtime: Dictionary = estado.get("runtime", {})
+	var vivos_enjambre := ENJAMBRE_HOST.vivos(visual)
+	var singular_vivo := bool(runtime.get("singular_vivo", false))
+	return {
+		"vivos_enjambre": vivos_enjambre,
+		"singular_vivo": singular_vivo,
+		"determinacion_singular": maxi(0, int(estado.get("determinacion_singular", 0))),
+		"terminado": vivos_enjambre == 0 and not singular_vivo,
+	}
 
 
 static func limpiar(estado: Dictionary) -> void:
