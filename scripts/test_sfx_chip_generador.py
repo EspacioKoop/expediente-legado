@@ -102,7 +102,7 @@ class SfxChipGeneradorTest(unittest.TestCase):
 
     def _assert_vorbis_mono_44100(self, ruta: Path, nombre: str):
         datos = ruta.read_bytes()
-        identificacion = datos.find(b"\\x01vorbis")
+        identificacion = datos.find(b"\x01vorbis")
         self.assertGreaterEqual(identificacion, 0, nombre)
         self.assertGreaterEqual(len(datos), identificacion + 16, nombre)
         self.assertEqual(datos[identificacion + 11], 1, nombre)
