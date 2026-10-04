@@ -33,6 +33,7 @@ static func completar(actual: Dictionary) -> Dictionary:
 		salida["cinta"] = {}
 	else:
 		salida["cinta"] = salida.get("cinta", {}).duplicate(true)
+		_normalizar_vueltas_grabadas(salida["cinta"])
 	var indice = salida.get("toma_seleccionada", SIN_TOMA)
 	salida["toma_seleccionada"] = int(indice) if _entero(indice) else SIN_TOMA
 	return salida
@@ -187,6 +188,24 @@ static func validar(actual) -> Array:
 	if _entero(indice) and int(indice) >= tomas.size():
 		errores.append("toma_seleccionada fuera de rango")
 	return errores
+
+
+static func _normalizar_vueltas_grabadas(cinta: Dictionary) -> void:
+	var tomas = cinta.get("tomas", [])
+	if typeof(tomas) != TYPE_ARRAY:
+		return
+	for evaluacion in tomas:
+		if typeof(evaluacion) != TYPE_DICTIONARY:
+			continue
+		var toma = evaluacion.get("toma", {})
+		if typeof(toma) != TYPE_DICTIONARY:
+			continue
+		var sujeto = toma.get("sujeto", {})
+		if typeof(sujeto) != TYPE_DICTIONARY:
+			continue
+		var vuelta = sujeto.get("vuelta_grabada", null)
+		if _entero(vuelta) and int(vuelta) >= 1:
+			sujeto["vuelta_grabada"] = int(vuelta)
 
 
 static func _numero_no_negativo(valor) -> bool:
