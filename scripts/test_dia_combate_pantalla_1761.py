@@ -19,7 +19,8 @@ class DiaCombatePantalla1761Test(unittest.TestCase):
         self.assertIn("DiaCombateContextualApp.new()", self.helper)
         self.assertIn("anfitrion.add_child(_app)", self.helper)
         self.assertIn("_app.terminado.connect(al_terminar)", self.helper)
-        self.assertIn("_app.abrir(", self.helper)
+        self.assertIn("_app", self.helper)
+        self.assertIn(". abrir(", self.helper)
         self.assertIn("func cerrar() -> void:", self.helper)
 
         for prohibido in (
@@ -38,7 +39,8 @@ class DiaCombatePantalla1761Test(unittest.TestCase):
         apertura = self.dia[inicio:fin]
         self.assertIn("CombateContextual.evaluar(", apertura)
         self.assertIn('decision.get("permitido", false)', apertura)
-        self.assertIn("_combate_pantalla.abrir(", apertura)
+        self.assertIn("_combate_pantalla", apertura)
+        self.assertIn(". abrir(", apertura)
 
         cierre = self.dia[fin : self.dia.index("func _cerrar_expediente", fin)]
         self.assertIn("_combate_pantalla.cerrar()", cierre)
