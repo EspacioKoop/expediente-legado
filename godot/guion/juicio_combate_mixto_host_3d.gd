@@ -231,9 +231,12 @@ static func aplicar_dano(
 			var actual := maxi(
 				0,
 				int(
-					estado.get(
-						"determinacion_singular",
-						REGLAS.DETERMINACION_MINIMA_RIVAL,
+					(
+						estado
+						. get(
+							"determinacion_singular",
+							REGLAS.DETERMINACION_MINIMA_RIVAL,
+						)
 					)
 				),
 			)
