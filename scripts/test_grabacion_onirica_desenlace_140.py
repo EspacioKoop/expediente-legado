@@ -36,7 +36,7 @@ class GrabacionOniricaDesenlace140Test(unittest.TestCase):
 
         controlador = CONTROLADOR.read_text(encoding="utf-8")
         self.assertIn(
-            '"vuelta_grabada": maxi(1, int(dia.jornada.get("vuelta", 1)))',
+            '"vuelta_grabada": float(maxi(1, int(dia.jornada.get("vuelta", 1))))',
             controlador,
         )
 
@@ -48,6 +48,8 @@ class GrabacionOniricaDesenlace140Test(unittest.TestCase):
         self.assertIn('sujeto.get("vuelta_grabada", null)', resolver)
         self.assertIn('contexto.get("vuelta_actual", null)', resolver)
         self.assertIn("DESENCADENANTE_DEGRADACION_VUELTA", resolver)
+        self.assertIn("TYPE_FLOAT", resolver)
+        self.assertIn("is_equal_approx(numero, roundf(numero))", resolver)
         for prohibido in (
             "RandomNumberGenerator",
             "randf(",
