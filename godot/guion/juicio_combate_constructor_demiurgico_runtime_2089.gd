@@ -21,9 +21,7 @@ static func avanzar(
 	reduccion_movimiento: bool = false,
 ) -> Dictionary:
 	var limite := (
-		ARQUETIPOS.CONSTRUCTOR_LIMITE_AUXILIARES
-		if limite_auxiliares < 0
-		else limite_auxiliares
+		ARQUETIPOS.CONSTRUCTOR_LIMITE_AUXILIARES if limite_auxiliares < 0 else limite_auxiliares
 	)
 	limite = clampi(limite, 0, ARQUETIPOS.CONSTRUCTOR_LIMITE_AUXILIARES)
 	var paso := (
