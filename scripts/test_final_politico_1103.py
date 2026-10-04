@@ -18,6 +18,15 @@ def fuente(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def bloque_funcion(codigo: str, firma: str) -> str:
+    inicio = codigo.index(firma)
+    siguiente_static = codigo.find("\nstatic func ", inicio + len(firma))
+    siguiente_func = codigo.find("\nfunc ", inicio + len(firma))
+    candidatos = [x for x in (siguiente_static, siguiente_func) if x >= 0]
+    fin = min(candidatos) if candidatos else len(codigo)
+    return codigo[inicio:fin]
+
+
 class FinalPolitico1103Test(unittest.TestCase):
     def test_final_no_vuelve_al_desempate_por_enum(self) -> None:
         modelo = fuente(MODELO)
@@ -89,6 +98,39 @@ class FinalPolitico1103Test(unittest.TestCase):
             "OS.create_process(",
         ):
             assert prohibido not in codigo
+
+    def test_ecos_leen_fuentes_canonicas_sin_mezclarlas_con_elecciones(self) -> None:
+        modelo = fuente(MODELO)
+        resumen = bloque_funcion(modelo, "static func resumen(")
+        exposicion = bloque_funcion(modelo, "static func _eco_exposicion(")
+        sueno = bloque_funcion(modelo, "static func _eco_sueno(")
+
+        assert "Prometeo.elecciones_ideologicas(estado)" in resumen
+        assert 'estado.get(Prometeo.CLAVE_EXPOSICION_IDEOLOGICA, [])' in exposicion
+        assert "Prometeo.elecciones_ideologicas" not in exposicion
+        assert "IdeologiaSueno923.familias_exposicion(estado, dia_actual)" in sueno
+        assert "Prometeo.elecciones_ideologicas" not in sueno
+        assert '"eco_exposicion": eco_exposicion' in resumen
+        assert '"eco_sueno": eco_sueno' in resumen
+
+    def test_ecos_no_crean_persistencia_paralela(self) -> None:
+        modelo = fuente(MODELO)
+        panel = fuente(PANEL)
+        combinado = modelo + "\n" + panel
+
+        for escritura in (
+            'estado["eco_exposicion"]',
+            'estado["eco_sueno"]',
+            'estado[Prometeo.CLAVE_EXPOSICION_IDEOLOGICA]',
+            'estado["familias_exposicion_onirica"]',
+        ):
+            assert escritura not in combinado
+
+        preparar = bloque_funcion(panel, "func _preparar_ecos(")
+        assert 'resumen.get("eco_exposicion", {})' in preparar
+        assert 'resumen.get("eco_sueno", {})' in preparar
+        assert '.duplicate(true)' in preparar
+        assert "MAX_ECOS" in preparar
 
     def test_regresion_ejecutable_en_godot(self) -> None:
         motor = os.environ.get("GODOT_BIN", "godot4")
