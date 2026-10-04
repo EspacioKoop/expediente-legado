@@ -65,6 +65,7 @@ var _gato: Gato
 var _rivales: Dictionary = {}
 ## Controlador temporal del hack & slash contextual de #1752.
 var _combate_contextual_app: DiaCombateContextualApp
+var _combate_pantalla := DiaCombatePantallaApp.new()
 
 
 ## La raíz del azar de esta partida (#147). Se lee de la partida y no se guarda
@@ -669,27 +670,29 @@ func _abrir_combate_hack_slash(objetivo: Dictionary, zona: Area3D = null) -> boo
 	if not bool(decision.get("permitido", false)):
 		return false
 
-	_pantalla = CanvasLayer.new()
-	add_child(_pantalla)
-	var app := DiaCombateContextualApp.new()
-	_combate_contextual_app = app
-	add_child(app)
-	app.terminado.connect(_cerrar_combate_hack_slash)
-	(
-		app
+	var montado := (
+		_combate_pantalla
 		. abrir(
+			self,
 			objetivo,
 			decision,
 			zona,
-			_caminante,
-			_mundo,
-			_hud,
-			_ambiente,
-			partida,
-			jornada,
-			_raiz(),
+			{
+				"caminante": _caminante,
+				"mundo": _mundo,
+				"hud": _hud,
+				"ambiente": _ambiente,
+				"partida": partida,
+				"jornada": jornada,
+				"raiz": _raiz(),
+			},
+			Callable(self, "_cerrar_combate_hack_slash"),
 		)
 	)
+	if not bool(montado.get("ok", false)):
+		return false
+	_pantalla = montado.get("pantalla") as CanvasLayer
+	_combate_contextual_app = montado.get("app") as DiaCombateContextualApp
 	_hablando = false
 	_nomina.text = ""
 	return true
@@ -702,13 +705,9 @@ func _cerrar_combate_hack_slash(
 	decision: Dictionary,
 	resultado: Dictionary,
 ) -> void:
-	var app := _combate_contextual_app
+	_combate_pantalla.cerrar()
 	_combate_contextual_app = null
-	if is_instance_valid(app):
-		app.queue_free()
-	if _pantalla != null:
-		_pantalla.queue_free()
-		_pantalla = null
+	_pantalla = null
 
 	if String(decision.get("plano", "")) == CombateContextual.PLANO_REALIDAD:
 		var id := String(objetivo.get("id", ""))

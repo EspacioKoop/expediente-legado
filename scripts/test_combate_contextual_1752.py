@@ -6,6 +6,7 @@ ROOT = Path(__file__).resolve().parents[1]
 POLITICA = ROOT / "godot" / "guion" / "combate_contextual.gd"
 DIA = ROOT / "godot" / "guion" / "dia_app.gd"
 CONTROLADOR = ROOT / "godot" / "guion" / "dia_combate_contextual_app.gd"
+PANTALLA = ROOT / "godot" / "guion" / "dia_combate_pantalla_app.gd"
 PARED = ROOT / "godot" / "guion" / "dia_incidente_pared_app.gd"
 CONDUCTA = ROOT / "godot" / "guion" / "incidentes_conducta.gd"
 PREFERENCIAS = ROOT / "godot" / "guion" / "preferencias_siga.gd"
@@ -17,6 +18,7 @@ class CombateContextual1752Test(unittest.TestCase):
         cls.politica = POLITICA.read_text(encoding="utf-8")
         cls.dia = DIA.read_text(encoding="utf-8")
         cls.controlador = CONTROLADOR.read_text(encoding="utf-8")
+        cls.pantalla = PANTALLA.read_text(encoding="utf-8")
         cls.pared = PARED.read_text(encoding="utf-8")
         cls.conducta = CONDUCTA.read_text(encoding="utf-8")
         cls.preferencias = PREFERENCIAS.read_text(encoding="utf-8")
@@ -38,7 +40,8 @@ class CombateContextual1752Test(unittest.TestCase):
         fin = self.dia.index("func _cerrar_expediente()", inicio)
         bloque = self.dia[inicio:fin]
         self.assertIn("CombateContextual.evaluar", bloque)
-        self.assertIn("DiaCombateContextualApp.new()", bloque)
+        self.assertIn("_combate_pantalla", bloque)
+        self.assertIn("DiaCombateContextualApp.new()", self.pantalla)
         self.assertNotIn("SuenoDuelo.new()", bloque)
         self.assertIn("JuicioCombate3D.new()", self.controlador)
         self.assertIn("_hacer_actual_camara()", self.controlador)
@@ -50,7 +53,9 @@ class CombateContextual1752Test(unittest.TestCase):
         self.assertIn("partida = partida_actual", self.controlador)
         self.assertIn('partida.estado.get("perfil_jugador", {})', self.controlador)
         self.assertIn("partida.estado,", self.controlador)
-        self.assertIn("\t\t\tpartida,\n", self.dia)
+        self.assertIn('"partida": partida', self.dia)
+        self.assertIn("var partida := contexto.get(\"partida\") as Partida", self.pantalla)
+        self.assertIn("partida,", self.pantalla)
 
     def test_realidad_expone_entrada_autorizada_y_consecuencia(self):
         self.assertIn("func abrir_combate_real(objetivo: Dictionary) -> bool:", self.dia)
