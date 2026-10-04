@@ -26,6 +26,12 @@ const COMANDOS := {
 	"desatascar": "desatascar — vuelve a la entrada del espacio actual",
 	"portatil": "portatil — abre la Portátil Color 98",
 	"dibujo": "dibujo [on|off|refrescar] — geometría 3D deducida",
+	"estado": "estado — resume jornada, sueño, guardado y rivales",
+	"guardar": "guardar — fuerza el guardado normal de la partida",
+	"sueno": "sueno <segundos> — ajusta el tiempo restante del sueño actual",
+	"combate": "combate [id] — abre un rival ya presente en la sala de sueño",
+	"tp": "tp <x> <z> — mueve al caminante manteniendo su altura",
+	"diagnostico": "diagnostico — muestra semilla/manifiesto reproducible",
 	"limpiar": "limpiar — borra el registro",
 }
 
@@ -133,6 +139,18 @@ func ejecutar(texto: String) -> void:
 			_cmd_portatil()
 		"dibujo", "debugdraw":
 			_cmd_dibujo(args)
+		"estado", "status":
+			_cmd_estado()
+		"guardar", "save":
+			_cmd_guardar()
+		"sueno", "sueño":
+			_cmd_sueno(args)
+		"combate", "fight":
+			_cmd_combate(args)
+		"tp", "teleport":
+			_cmd_tp(args)
+		"diagnostico", "diagnóstico", "diag":
+			_cmd_diagnostico()
 		_:
 			_error("No conozco «%s». Escribe ayuda." % comando)
 
@@ -234,6 +252,109 @@ func _cmd_clima(args: Array) -> void:
 		dia.jornada["clima_forzado"] = args[0]
 	_cerrar_y(func(): dia._entrar_en(dia.jornada["fase"]))
 	_ok("Clima: %s (solo se ve en espacios exteriores)" % args[0])
+
+
+func _cmd_estado() -> void:
+	var dia := _dia()
+	if dia == null:
+		return
+	var pistas = dia.partida.estado.get("pistas_descubiertas", [])
+	var cantidad_pistas := pistas.size() if typeof(pistas) == TYPE_ARRAY else 0
+	var rivales := _ids_rivales(dia)
+	_ok(
+		"Día %d · fase %s · dinero %d · pistas %d"
+		% [
+			int(dia.jornada.get("dia", 1)),
+			String(dia.jornada.get("fase", "")),
+			int(dia.jornada.get("dinero", 0)),
+			cantidad_pistas,
+		]
+	)
+	_escribir(
+		"Sueño restante: %.1f s · guardado pendiente: %s"
+		% [
+			float(dia.jornada.get("sueno_resto", 0.0)),
+			"sí" if dia.partida.guardado_pendiente else "no",
+		]
+	)
+	if not rivales.is_empty():
+		_escribir("Rivales de esta sala: " + ", ".join(rivales))
+
+
+func _cmd_guardar() -> void:
+	var dia := _dia()
+	if dia == null:
+		return
+	if bool(dia._guardar_o_avisar("")):
+		_ok("Partida guardada")
+	else:
+		_error("El guardado quedó pendiente; la siguiente interacción reintentará")
+
+
+func _cmd_sueno(args: Array) -> void:
+	var dia := _dia()
+	if dia == null:
+		return
+	if String(dia.jornada.get("fase", "")) != "sueño":
+		_error("sueno solo se puede ajustar dentro del sueño")
+		return
+	var valor := String(args[0]) if not args.is_empty() else ""
+	if not valor.is_valid_float() or float(valor) < 0.0:
+		_error("Uso: sueno <segundos>, con segundos ≥ 0")
+		return
+	dia.jornada["sueno_resto"] = float(valor)
+	_ok("Sueño restante: %.1f s" % float(valor))
+
+
+func _cmd_combate(args: Array) -> void:
+	var dia := _dia()
+	if dia == null:
+		return
+	if String(dia.jornada.get("fase", "")) != "sueño":
+		_error("combate solo usa rivales ya montados en una sala de sueño")
+		return
+	if dia._pantalla != null:
+		_error("Ya hay una pantalla o combate abierto")
+		return
+	var ids := _ids_rivales(dia)
+	if ids.is_empty():
+		_error("Esta sala no tiene rivales de sueño disponibles")
+		return
+	var rival_id := String(args[0]) if not args.is_empty() else ids[0]
+	if rival_id not in ids:
+		_error("Uso: combate [%s]" % "|".join(ids))
+		return
+	var rival: Dictionary = dia._rivales[rival_id]
+	_ok("Combate QA: %s" % rival_id)
+	_cerrar_y(func(): dia._abrir_duelo(rival, null))
+
+
+func _cmd_tp(args: Array) -> void:
+	var dia := _dia()
+	if dia == null:
+		return
+	if args.size() < 2 or not String(args[0]).is_valid_float() or not String(args[1]).is_valid_float():
+		_error("Uso: tp <x> <z>")
+		return
+	var actual: Vector3 = dia._caminante.position
+	var destino := Vector3(float(args[0]), actual.y, float(args[1]))
+	dia._caminante.situar(destino)
+	_ok("Posición: x=%.2f y=%.2f z=%.2f" % [destino.x, destino.y, destino.z])
+
+
+func _cmd_diagnostico() -> void:
+	var dia := _dia()
+	if dia == null:
+		return
+	_ok(Azar.manifiesto_en_texto(dia.partida.estado))
+
+
+func _ids_rivales(dia: Node) -> Array[String]:
+	var ids: Array[String] = []
+	for rival_id in dia._rivales.keys():
+		ids.append(String(rival_id))
+	ids.sort()
+	return ids
 
 
 func _cmd_desatascar() -> void:
@@ -429,6 +550,17 @@ func _montar() -> void:
 	)
 	_grupo(
 		lista,
+		"Playtest rápido",
+		[
+			["estado", "Estado"],
+			["guardar", "Guardar"],
+			["sueno 5", "Sueño: 5 s"],
+			["combate", "Combate"],
+			["diagnostico", "Diagnóstico"],
+		]
+	)
+	_grupo(
+		lista,
 		"Utilidades",
 		[
 			["desatascar", "Desatascar"],
@@ -463,7 +595,7 @@ func _montar() -> void:
 	derecha.add_child(_registro)
 
 	_linea = LineEdit.new()
-	_linea.placeholder_text = "fase casa · sala patio · dinero +500 · clima lluvia · ayuda"
+	_linea.placeholder_text = "estado · fase casa · combate · sueno 5 · tp 0 0 · ayuda"
 	_linea.add_theme_font_override("font", fuente_terminal)
 	_linea.add_theme_font_size_override("font_size", 18)
 	_linea.text_submitted.connect(
