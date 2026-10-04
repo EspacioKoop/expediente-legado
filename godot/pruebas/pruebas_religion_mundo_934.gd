@@ -19,10 +19,14 @@ func _init() -> void:
 
 func _probar_contrato_material() -> void:
 	var superficies := Mundo.superficies()
-	_comprobar(superficies.size() == 2, "hay dos superficies materiales distintas")
+	_comprobar(superficies.size() == 3, "hay tres superficies materiales distintas")
 	_comprobar(
 		String(superficies[0]["id"]) != String(superficies[1]["id"]),
 		"las superficies tienen identidad propia"
+	)
+	_comprobar(
+		superficies.any(func(entrada): return String(entrada["id"]) == Mundo.ID_FOLLETO_NAG_HAMMADI),
+		"el catálogo incluye el folleto documental de Nag Hammadi"
 	)
 	_comprobar(Mundo.eventos_calendario(2).is_empty(), "el calendario no inventa eventos")
 	var dia_tres := Mundo.eventos_calendario(Mundo.DIA_ACTO_MEMORIA)
@@ -64,6 +68,23 @@ func _probar_canales() -> void:
 		"participar no infiere convicción"
 	)
 	_comprobar(
+		Mundo.registrar_exposicion(
+			registro, Mundo.ID_FOLLETO_NAG_HAMMADI, Mundo.DIA_ACTO_MEMORIA, 2
+		),
+		"examinar el folleto registra exposición documentada"
+	)
+	var exposiciones := Eventos.eventos(registro, Eventos.CANAL_EXPOSICION)
+	var folleto: Dictionary = exposiciones[exposiciones.size() - 1]
+	_comprobar(String(folleto["tradicion"]) == Mundo.TRADICION_GNOSTICA, "el folleto fija tradición")
+	_comprobar(String(folleto["contexto"]) == Mundo.CONTEXTO_ARCONTE, "el folleto fija contexto II,4")
+	_comprobar(String(folleto["canal"]) == Eventos.CANAL_EXPOSICION, "el folleto solo es exposición")
+	_comprobar(
+		not Mundo.registrar_exposicion(
+			registro, Mundo.ID_FOLLETO_NAG_HAMMADI, Mundo.DIA_ACTO_MEMORIA, 2
+		),
+		"reexaminar el folleto no duplica el mismo hecho"
+	)
+	_comprobar(
 		not Mundo.registrar_practica(registro, "silencio_memoria", Mundo.DIA_ACTO_MEMORIA),
 		"repetir el mismo gesto no duplica trayectoria"
 	)
@@ -88,19 +109,35 @@ func _probar_superficies_3d() -> void:
 	)
 	_comprobar(escena.tablon_interactuable() != null, "el tablón se puede examinar sin menú")
 	_comprobar(escena.practica_interactuable() != null, "la práctica se activa desde el mundo")
+	_comprobar(
+		escena.folleto_nag_hammadi_interactuable() != null,
+		"el folleto solo se registra mediante una interacción EXAMINAR"
+	)
+	_comprobar(
+		Eventos.eventos(registro, Eventos.CANAL_EXPOSICION).is_empty(),
+		"montar la escena no registra exposición por proximidad"
+	)
 	escena.tablon_interactuable().interactuar(null)
 	escena.practica_interactuable().interactuar(null)
+	escena.folleto_nag_hammadi_interactuable().interactuar(null)
 	_comprobar(
-		exposiciones_emitidas == ["tablon_calendario"],
-		"la superficie avisa solo cuando registra una exposición nueva"
+		exposiciones_emitidas == ["tablon_calendario", Mundo.ID_FOLLETO_NAG_HAMMADI],
+		"cada superficie avisa solo cuando registra una exposición nueva"
 	)
 	_comprobar(
 		practicas_emitidas == ["silencio_memoria"],
 		"la superficie avisa solo cuando registra una práctica nueva"
 	)
 	_comprobar(
-		Eventos.eventos(registro, Eventos.CANAL_EXPOSICION).size() == 1,
-		"la interacción 3D registra exposición"
+		Eventos.eventos(registro, Eventos.CANAL_EXPOSICION).size() == 2,
+		"las dos interacciones EXAMINAR registran exposiciones separadas"
+	)
+	var eventos_exposicion := Eventos.eventos(registro, Eventos.CANAL_EXPOSICION)
+	var evento_folleto: Dictionary = eventos_exposicion[1]
+	_comprobar(
+		String(evento_folleto["tradicion"]) == Mundo.TRADICION_GNOSTICA
+		and String(evento_folleto["contexto"]) == Mundo.CONTEXTO_ARCONTE,
+		"la interacción 3D conserva el gate exacto del Arconte"
 	)
 	_comprobar(
 		Eventos.eventos(registro, Eventos.CANAL_PRACTICA).size() == 1,
@@ -112,7 +149,8 @@ func _probar_superficies_3d() -> void:
 	)
 	escena.tablon_interactuable().interactuar(null)
 	escena.practica_interactuable().interactuar(null)
-	_comprobar(exposiciones_emitidas.size() == 1, "reexaminar no pide otro guardado")
+	escena.folleto_nag_hammadi_interactuable().interactuar(null)
+	_comprobar(exposiciones_emitidas.size() == 2, "reexaminar no pide otro guardado")
 	_comprobar(practicas_emitidas.size() == 1, "repetir la práctica no pide otro guardado")
 	escena.free()
 
@@ -128,6 +166,8 @@ func _probar_reduccion_movimiento() -> void:
 	escena_reducida.configurar(reducido, Mundo.DIA_ACTO_MEMORIA, true)
 	escena_normal.practica_interactuable().interactuar(null)
 	escena_reducida.practica_interactuable().interactuar(null)
+	escena_normal.folleto_nag_hammadi_interactuable().interactuar(null)
+	escena_reducida.folleto_nag_hammadi_interactuable().interactuar(null)
 	_comprobar(escena_reducida.reduccion_movimiento_activa(), "la preferencia llega al componente")
 	_comprobar(
 		(
@@ -135,6 +175,13 @@ func _probar_reduccion_movimiento() -> void:
 			== JSON.stringify(Eventos.eventos(reducido, Eventos.CANAL_PRACTICA))
 		),
 		"reducción de movimiento no cambia el significado de la práctica"
+	)
+	_comprobar(
+		(
+			JSON.stringify(Eventos.eventos(normal, Eventos.CANAL_EXPOSICION))
+			== JSON.stringify(Eventos.eventos(reducido, Eventos.CANAL_EXPOSICION))
+		),
+		"reducción de movimiento no cambia la exposición de Nag Hammadi"
 	)
 	escena_normal.free()
 	escena_reducida.free()
