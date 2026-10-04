@@ -55,6 +55,7 @@ var _empujar_1772: Dictionary = {}
 var _volcar_1772: Dictionary = {}
 var _arquetipo: Dictionary = {}
 var _enjambre: Dictionary = {}
+var _mixto: Dictionary = {}
 var _guardia_rota := false
 var _escudo_guardia: MeshInstance3D
 var _linea_hostigador: MeshInstance3D
@@ -485,11 +486,16 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 	if not compromiso_religion_bloqueante(_compromisos_religion, _rival_inicio_agresion).is_empty():
 		return
 	_recarga_jugador = recarga
-	var objetivo := (
-		ENJAMBRE_HOST_3D.objetivo(_enjambre, _jugador.position)
-		if not _enjambre.is_empty()
-		else {"indice": -1, "cuerpo": _rival, "figura": _figura_rival}
-	)
+	var objetivo := {}
+	if not _mixto.is_empty():
+		objetivo = (
+			JuicioCombateMixtoHost3D
+			. objetivo(_mixto, _jugador.position, _rival, _figura_rival)
+		)
+	elif not _enjambre.is_empty():
+		objetivo = ENJAMBRE_HOST_3D.objetivo(_enjambre, _jugador.position)
+	else:
+		objetivo = {"indice": -1, "cuerpo": _rival, "figura": _figura_rival}
 	if objetivo.is_empty():
 		return
 	var cuerpo: CharacterBody3D = objetivo["cuerpo"]
@@ -533,7 +539,13 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 
 	var dano := int(impacto["dano"])
 	var indice_objetivo := int(objetivo["indice"])
-	if indice_objetivo < 0:
+	var mixto_terminado := false
+	if not _mixto.is_empty():
+		var dano_mixto := JuicioCombateMixtoHost3D.aplicar_dano(_mixto, objetivo, dano)
+		_determinacion_rival = int(dano_mixto.get("determinacion_total", 0))
+		_arquetipo = JuicioCombateMixtoHost3D.singular(_mixto)
+		mixto_terminado = bool(dano_mixto.get("terminado", false))
+	elif indice_objetivo < 0:
 		_determinacion_rival = maxi(0, _determinacion_rival - dano)
 	else:
 		_determinacion_rival = ENJAMBRE_HOST_3D.aplicar_dano(_enjambre, indice_objetivo, dano)
@@ -547,7 +559,9 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 		JuicioCombateEscenografia3D.gesto(figura, "encajar")
 	JuicioCombateEscenografia3D.gesto(_figura_jugador, "discutir")
 	_actualizar_hud()
-	if _determinacion_rival <= 0:
+	if mixto_terminado:
+		_terminar(true)
+	elif _mixto.is_empty() and _determinacion_rival <= 0:
 		if indice_objetivo >= 0 or not _intentar_retorno_rival():
 			_terminar(true)
 
@@ -572,6 +586,11 @@ func _montar_arquetipo() -> void:
 	_arquetipo = JuicioCombateVarianteHost3D.montar(self, _acusado, _rival, _raiz)
 	if not _arquetipo.is_empty():
 		return
+	if arquetipo_onirico == ARQUETIPO_HOST.MIXTO:
+		_mixto = JuicioCombateMixtoHost3D.montar(self, _rival, _acusado, _mito_id, _raiz)
+		_arquetipo = JuicioCombateMixtoHost3D.singular(_mixto)
+		_determinacion_rival = JuicioCombateMixtoHost3D.determinacion_total(_mixto)
+		return
 	if arquetipo_onirico == ARQUETIPOS.ENJAMBRE:
 		_enjambre = ENJAMBRE_HOST_3D.montar(self, _rival, _acusado, _mito_id, _raiz)
 		_determinacion_rival = ENJAMBRE_HOST_3D.vivos(_enjambre)
@@ -589,6 +608,12 @@ func _montar_arquetipo() -> void:
 
 func _avanzar_arquetipo(delta: float) -> void:
 	if JuicioCombateVarianteHost3D.avanzar(self, _arquetipo, delta):
+		return
+	if not _mixto.is_empty():
+		JuicioCombateMixtoHost3D.avanzar(self, _mixto, delta)
+		_arquetipo = JuicioCombateMixtoHost3D.singular(_mixto)
+		_determinacion_rival = JuicioCombateMixtoHost3D.determinacion_total(_mixto)
+		_actualizar_hud()
 		return
 	if not _enjambre.is_empty():
 		for distancia in ENJAMBRE_HOST_3D.avanzar(_enjambre, delta, _jugador.position):
@@ -679,7 +704,11 @@ func _terminar(gano: bool, inmediato: bool = false) -> void:
 	JUNGIANO.salir_combate(self)
 	_ocultar_aviso_ataque()
 	ENJAMBRE_HOST_3D.ocultar_avisos(_enjambre)
-	var figura_final := ENJAMBRE_HOST_3D.figura_final(_enjambre, _figura_rival)
+	var figura_final := (
+		JuicioCombateMixtoHost3D.figura_final(_mixto, _figura_rival)
+		if not _mixto.is_empty()
+		else ENJAMBRE_HOST_3D.figura_final(_enjambre, _figura_rival)
+	)
 	var espera := maxf(
 		JuicioCombateEscenografia3D.gesto(_figura_jugador, "celebrar" if gano else "nervioso"),
 		JuicioCombateEscenografia3D.gesto(figura_final, "nervioso" if gano else "aplaudir"),
@@ -691,6 +720,7 @@ func _terminar(gano: bool, inmediato: bool = false) -> void:
 	if not inmediato and espera > 0.0 and is_inside_tree():
 		await get_tree().create_timer(espera).timeout
 	ENJAMBRE_HOST_3D.limpiar(_enjambre)
+	JuicioCombateMixtoHost3D.limpiar(_mixto)
 	terminado.emit(gano)
 
 
