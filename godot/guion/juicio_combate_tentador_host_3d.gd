@@ -54,10 +54,13 @@ static func montar(anfitrion, rival: CharacterBody3D, raiz: int) -> Dictionary:
 		"_rumbo_eco": rival.rotation.y,
 		"_repeticion_emitida": false,
 	}
-	PRESENTACION.pintar(
-		presentacion,
-		salida,
-		bool(anfitrion.get("reduccion_movimiento")),
+	(
+		PRESENTACION
+		. pintar(
+			presentacion,
+			salida,
+			bool(anfitrion.get("reduccion_movimiento")),
+		)
 	)
 	return estado
 
@@ -95,27 +98,31 @@ static func avanzar(anfitrion, estado: Dictionary, delta: float) -> void:
 
 	if fase != ARQUETIPOS.REPETIR:
 		estado["_repeticion_emitida"] = false
-	elif fase_anterior != ARQUETIPOS.REPETIR and not bool(
-		estado.get("_repeticion_emitida", false)
-	):
+	elif fase_anterior != ARQUETIPOS.REPETIR and not bool(estado.get("_repeticion_emitida", false)):
 		# Un patrón repetido produce como máximo una resolución lógica. Permanecer
 		# varios frames en REPETIR no vuelve a aplicar daño.
 		estado["_repeticion_emitida"] = true
-		anfitrion.call(
-			"_aplicar_impacto_rival",
-			_resultado_patron(
-				patron,
-				rival.position,
-				float(estado.get("_rumbo_eco", rival.rotation.y)),
-				jugador.position,
-				float(anfitrion.get("_esquiva")),
-			),
+		(
+			anfitrion
+			. call(
+				"_aplicar_impacto_rival",
+				_resultado_patron(
+					patron,
+					rival.position,
+					float(estado.get("_rumbo_eco", rival.rotation.y)),
+					jugador.position,
+					float(anfitrion.get("_esquiva")),
+				),
+			)
 		)
 
-	PRESENTACION.pintar(
-		estado.get("presentacion", {}),
-		salida,
-		bool(anfitrion.get("reduccion_movimiento")),
+	(
+		PRESENTACION
+		. pintar(
+			estado.get("presentacion", {}),
+			salida,
+			bool(anfitrion.get("reduccion_movimiento")),
+		)
 	)
 	if bool(salida.get("ventana_respuesta", false)):
 		var figura: Node3D = anfitrion.get("_figura_rival")
@@ -143,14 +150,10 @@ static func _resultado_patron(
 		"ataque_corto":
 			distancia_logica = distancia
 		"linea":
-			if ARQUETIPO_HOST.impacto_linea(
-				origen, rumbo, objetivo, ALCANCE_LINEA, RADIO_LINEA
-			):
+			if ARQUETIPO_HOST.impacto_linea(origen, rumbo, objetivo, ALCANCE_LINEA, RADIO_LINEA):
 				distancia_logica = 0.0
 		"carga_lineal":
-			if ARQUETIPO_HOST.impacto_linea(
-				origen, rumbo, objetivo, ALCANCE_LINEA, RADIO_CARGA
-			):
+			if ARQUETIPO_HOST.impacto_linea(origen, rumbo, objetivo, ALCANCE_LINEA, RADIO_CARGA):
 				distancia_logica = 0.0
 		"zona":
 			if distancia <= RADIO_ZONA:
