@@ -188,7 +188,7 @@ class CareoTrackerTest(unittest.TestCase):
             self.assertLessEqual(len(manifest_uno["banco"]), manifest_uno["banco_pequeno_max_fuentes"])
             self.assertEqual(manifest_uno["banco_pequeno_max_fuentes"], 4)
 
-            render = manifest_uno["renders"][0]
+            self.assertEqual(len(manifest_uno["renders"]), 1)\n            render = manifest_uno["renders"][0]
             wav = uno / render["archivo"]
             self.assertEqual(render["sha256"], LAB.sha256(wav.read_bytes()))
             self.assertEqual(render["duracion_s"], 8)
