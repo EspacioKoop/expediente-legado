@@ -1,7 +1,11 @@
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
+import shutil
+import struct
+import subprocess
 import unittest
 
 
@@ -115,6 +119,86 @@ class SfxChipGeneradorTest(unittest.TestCase):
             44_100,
             nombre,
         )
+
+    def _audio_tool(self, nombre: str) -> str | None:
+        ruta = shutil.which(nombre)
+        if ruta is None and os.environ.get("SIGA98_EXIGIR_FFMPEG") == "1":
+            self.fail(f"{nombre} es obligatorio en el gate de audio runtime")
+        return ruta
+
+    def _assert_ogg_pcm_runtime(self, ruta: Path, nombre: str, ffmpeg: str, ffprobe: str):
+        probe = subprocess.run(
+            [
+                ffprobe,
+                "-v",
+                "error",
+                "-select_streams",
+                "a:0",
+                "-show_entries",
+                "stream=channels,sample_rate",
+                "-of",
+                "json",
+                str(ruta),
+            ],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        streams = json.loads(probe.stdout).get("streams", [])
+        self.assertEqual(len(streams), 1, nombre)
+        self.assertEqual(int(streams[0]["channels"]), 1, nombre)
+        self.assertEqual(int(streams[0]["sample_rate"]), 44_100, nombre)
+
+        decode = subprocess.run(
+            [
+                ffmpeg,
+                "-v",
+                "error",
+                "-i",
+                str(ruta),
+                "-f",
+                "s16le",
+                "-acodec",
+                "pcm_s16le",
+                "-",
+            ],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        pcm = decode.stdout
+        self.assertGreater(len(pcm), 0, nombre)
+        self.assertEqual(len(pcm) % 2, 0, nombre)
+        muestras = struct.unpack(f"<{len(pcm) // 2}h", pcm)
+        duracion = len(muestras) / 44_100
+        pico = max(abs(muestra) for muestra in muestras) / 32767
+        dc = abs(sum(muestras) / len(muestras)) / 32767
+        borde = 2048
+        self.assertGreaterEqual(duracion, 0.12, nombre)
+        self.assertLessEqual(duracion, 0.30, nombre)
+        self.assertLess(pico, 0.92, nombre)
+        self.assertLess(dc, 0.02, nombre)
+        self.assertLessEqual(abs(muestras[0]), borde, nombre)
+        self.assertLessEqual(abs(muestras[-1]), borde, nombre)
+
+    def test_ogg_interfaz_pcm_runtime_decodificado(self):
+        ffmpeg = self._audio_tool("ffmpeg")
+        ffprobe = self._audio_tool("ffprobe")
+        if ffmpeg is None or ffprobe is None:
+            self.skipTest("ffmpeg/ffprobe no disponibles; el gate SFX chip los instala")
+        for nombre in (
+            "ui_pulsar_01.ogg",
+            "ui_marcar_01.ogg",
+            "ui_firmar_01.ogg",
+            "ui_error_01.ogg",
+        ):
+            self._assert_ogg_pcm_runtime(
+                ASSETS / "audio" / "chip" / nombre,
+                nombre,
+                ffmpeg,
+                ffprobe,
+            )
 
     def test_ogg_runtime_tienen_hash_procedencia_y_presupuesto(self):
         sonido = SONIDO.read_text(encoding="utf-8")
