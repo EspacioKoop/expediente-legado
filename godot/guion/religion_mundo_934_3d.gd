@@ -43,6 +43,10 @@ func folleto_nag_hammadi_interactuable() -> Interactuable3D:
 	return get_node_or_null("CulturaMaterial/FolletoNagHammadi/Interactuar") as Interactuable3D
 
 
+func lamina_walters_w99_interactuable() -> Interactuable3D:
+	return get_node_or_null("CulturaMaterial/LaminaWaltersW99/Interactuar") as Interactuable3D
+
+
 func reduccion_movimiento_activa() -> bool:
 	return _reduccion_movimiento
 
@@ -54,6 +58,7 @@ func _montar_superficies() -> void:
 	_montar_tablon(raiz)
 	_montar_mesa(raiz)
 	_montar_folleto_nag_hammadi(raiz)
+	_montar_lamina_walters_w99(raiz)
 
 
 func _montar_tablon(padre: Node3D) -> void:
@@ -143,6 +148,34 @@ func _montar_folleto_nag_hammadi(padre: Node3D) -> void:
 	zona.activado.connect(_on_folleto_nag_hammadi_activado)
 
 
+func _montar_lamina_walters_w99(padre: Node3D) -> void:
+	var lamina := Node3D.new()
+	lamina.name = "LaminaWaltersW99"
+	padre.add_child(lamina)
+	_caja(
+		lamina,
+		"Cartulina",
+		Vector3(-0.75, 1.12, -0.08),
+		Vector3(0.62, 0.035, 0.44),
+		Color(0.66, 0.52, 0.32)
+	)
+	_caja(
+		lamina,
+		"ReproduccionMarginal",
+		Vector3(-0.75, 1.145, -0.08),
+		Vector3(0.48, 0.018, 0.30),
+		Color(0.24, 0.20, 0.16)
+	)
+	var zona := _zona_interactiva(
+		lamina,
+		"Interactuar",
+		Vector3(-0.75, 1.18, -0.32),
+		Vector3(0.90, 0.68, 0.70),
+		Interactuable3D.Verbo.EXAMINAR
+	)
+	zona.activado.connect(_on_lamina_walters_w99_activada)
+
+
 func _on_tablon_activado(_actor: Node) -> void:
 	if Mundo.registrar_exposicion(_registro, "tablon_calendario", _dia, _vuelta):
 		exposicion_registrada.emit("tablon_calendario")
@@ -156,6 +189,11 @@ func _on_practica_activada(_actor: Node) -> void:
 func _on_folleto_nag_hammadi_activado(_actor: Node) -> void:
 	if Mundo.registrar_exposicion(_registro, Mundo.ID_FOLLETO_NAG_HAMMADI, _dia, _vuelta):
 		exposicion_registrada.emit(Mundo.ID_FOLLETO_NAG_HAMMADI)
+
+
+func _on_lamina_walters_w99_activada(_actor: Node) -> void:
+	if Mundo.registrar_exposicion(_registro, Mundo.ID_LAMINA_WALTERS_W99, _dia, _vuelta):
+		exposicion_registrada.emit(Mundo.ID_LAMINA_WALTERS_W99)
 
 
 static func _zona_interactiva(

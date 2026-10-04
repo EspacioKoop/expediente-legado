@@ -75,6 +75,28 @@ class ReligionMundo934Test(unittest.TestCase):
         )
         self.assertNotIn("registrar_practica(_registro, Mundo.ID_FOLLETO_NAG_HAMMADI", escena)
 
+    def test_lamina_walters_es_exposicion_opcional_y_documentada(self) -> None:
+        mundo = MUNDO.read_text(encoding="utf-8")
+        escena = MUNDO_3D.read_text(encoding="utf-8")
+
+        self.assertIn('ID_LAMINA_WALTERS_W99 := "lamina_walters_w99_fol169r"', mundo)
+        self.assertIn('TRADICION_ARTE_MEDIEVAL := "arte_medieval"', mundo)
+        self.assertIn(
+            'CONTEXTO_TENTADOR := "walters:w99:fol169r:dragon_marginalia"',
+            mundo,
+        )
+        self.assertIn('"fuente_documental:walters_w99_fol169r"', mundo)
+        self.assertIn("lamina_walters_w99_interactuable", escena)
+        self.assertIn("Interactuable3D.Verbo.EXAMINAR", escena)
+        self.assertIn(
+            "Mundo.registrar_exposicion(_registro, Mundo.ID_LAMINA_WALTERS_W99",
+            escena,
+        )
+        self.assertNotIn(
+            "registrar_practica(_registro, Mundo.ID_LAMINA_WALTERS_W99",
+            escena,
+        )
+
     def test_regresion_runtime_standalone(self) -> None:
         motor = os.environ.get("GODOT_BIN") or shutil.which("godot4")
         if not motor:

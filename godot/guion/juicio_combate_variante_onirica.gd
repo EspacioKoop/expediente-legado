@@ -7,8 +7,11 @@ extends RefCounted
 
 const GARGOLA_UMBRAL := "gargola_umbral"
 const ARCONTE_UMBRAL := "arconte_umbral"
+const TENTADOR_MINIADO := "tentador_miniado"
 const TRADICION_GNOSTICA := "gnosticismo"
 const CONTEXTO_ARCONTE := "nag_hammadi:ii_4:hypostasis_archons"
+const TRADICION_ARTE_MEDIEVAL := "arte_medieval"
+const CONTEXTO_TENTADOR := "walters:w99:fol169r:dragon_marginalia"
 
 
 static func elegir(
@@ -30,6 +33,8 @@ static func elegir(
 		return GARGOLA_UMBRAL if _hay_exposicion_gargola(registro, dia) else ""
 	if arquetipo == JuicioCombateArquetipos.CONTROLADOR:
 		return ARCONTE_UMBRAL if _hay_exposicion_arconte(registro, dia) else ""
+	if arquetipo == JuicioCombateArquetipos.MIMETICO:
+		return TENTADOR_MINIADO if _hay_exposicion_tentador(registro, dia) else ""
 	return ""
 
 
@@ -56,5 +61,18 @@ static func _hay_exposicion_arconte(registro: Dictionary, dia: int) -> bool:
 		var tradicion := String(valor.get("tradicion", "")).strip_edges()
 		var contexto := String(valor.get("contexto", "")).strip_edges()
 		if tradicion == TRADICION_GNOSTICA and contexto == CONTEXTO_ARCONTE:
+			return true
+	return false
+
+
+static func _hay_exposicion_tentador(registro: Dictionary, dia: int) -> bool:
+	for valor in ReligionEventos.eventos(registro, ReligionEventos.CANAL_EXPOSICION):
+		if typeof(valor) != TYPE_DICTIONARY:
+			continue
+		if int(valor.get("jornada", -1)) != dia:
+			continue
+		var tradicion := String(valor.get("tradicion", "")).strip_edges()
+		var contexto := String(valor.get("contexto", "")).strip_edges()
+		if tradicion == TRADICION_ARTE_MEDIEVAL and contexto == CONTEXTO_TENTADOR:
 			return true
 	return false
