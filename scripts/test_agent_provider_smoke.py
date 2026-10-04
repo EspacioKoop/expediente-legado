@@ -29,8 +29,12 @@ class AgentProviderSmokeTest(unittest.TestCase):
         ):
             self.assertNotIn(prohibido, self.workflow)
 
-    def test_cualquier_slot_y_fallback1_es_smoke_de_merge(self):
-        # #1685: un solo paso para cualquier QWEN_FALLBACK_N; nada de pasos por slot.
+    def test_primary_y_cualquier_slot_comparten_smoke(self):
+        # #1685: un solo paso para cualquier QWEN_FALLBACK_N y un modo explícito para primary.
+        self.assertIn("primary:", self.workflow)
+        self.assertIn("PRIMARY: ${{ github.event_name == 'workflow_dispatch' && inputs.primary || false }}", self.workflow)
+        self.assertIn("Smoke de qwen-primary directo", self.workflow)
+        self.assertIn("openai_api_key: ${{ secrets.QWEN_API_KEY }}", self.workflow)
         self.assertIn("SLOT_N: ${{ github.event_name == 'push' && 1 || inputs.slot }}", self.workflow)
         self.assertIn("format('qwen-fallback-{0}'", self.workflow)
         self.assertIn("python3 scripts/agent_slots.py resolver", self.workflow)
@@ -45,7 +49,8 @@ class AgentProviderSmokeTest(unittest.TestCase):
         self.assertIn("grep -Fq", self.workflow)
 
     def test_smoke_verde_cierra_circuit_breaker(self):
-        self.assertIn("Cerrar circuit breaker del slot", self.workflow)
+        self.assertIn("Cerrar circuit breaker del worker", self.workflow)
+        self.assertIn("steps.config.outputs.worker", self.workflow)
         self.assertIn("siga98-agent-pool", self.workflow)
         self.assertIn("/api/agent-pool/worker-health/report", self.workflow)
         self.assertIn('status:"healthy"', self.workflow)

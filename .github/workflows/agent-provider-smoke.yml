@@ -3,8 +3,13 @@ name: Agent provider smoke
 on:
   workflow_dispatch:
     inputs:
+      primary:
+        description: 'Validar qwen-primary directo en vez de un slot de fallback'
+        required: true
+        default: false
+        type: boolean
       slot:
-        description: 'Número de slot de fallback a validar (QWEN_FALLBACK_N_*)'
+        description: 'Número de slot de fallback a validar (se ignora con primary=true)'
         required: true
         default: 1
         type: number
@@ -22,6 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
+      PRIMARY: ${{ github.event_name == 'workflow_dispatch' && inputs.primary || false }}
       SLOT_N: ${{ github.event_name == 'push' && 1 || inputs.slot }}
       SLOT: ${{ format('qwen-fallback-{0}', github.event_name == 'push' && 1 || inputs.slot) }}
     steps:
@@ -31,6 +37,7 @@ jobs:
 
       - id: slot
         name: Secret del slot
+        if: env.PRIMARY != 'true'
         env:
           VARS_JSON: ${{ toJSON(vars) }}
         run: |
@@ -42,16 +49,31 @@ jobs:
         name: Resolver backend
         env:
           # Slots dinámicos (#1685): URL/modelo desde las variables; la clave se
-          # comprueba sin exponerla al shell.
+          # comprueba sin exponerla al shell. Primary usa su conexión directa.
           VARS_JSON: ${{ toJSON(vars) }}
           SLOT_HAS_KEY: ${{ steps.slot.outputs.secret != '' && secrets[steps.slot.outputs.secret] != '' }}
+          PRIMARY_HAS_KEY: ${{ secrets.QWEN_API_KEY != '' }}
+          PRIMARY_URL: ${{ vars.QWEN_BASE_URL }}
+          PRIMARY_MODEL: ${{ vars.QWEN_MODEL }}
         run: |
           set -euo pipefail
+          if [[ "$PRIMARY" == true ]]; then
+            [[ "$PRIMARY_HAS_KEY" == true ]] || { echo "Falta QWEN_API_KEY para qwen-primary" >&2; exit 3; }
+            [[ -n "$PRIMARY_URL" ]] || { echo "Falta QWEN_BASE_URL para qwen-primary" >&2; exit 3; }
+            [[ -n "$PRIMARY_MODEL" ]] || { echo "Falta QWEN_MODEL para qwen-primary" >&2; exit 3; }
+            echo "worker=qwen-primary" >> "$GITHUB_OUTPUT"
+            echo "url=$PRIMARY_URL" >> "$GITHUB_OUTPUT"
+            echo "model=$PRIMARY_MODEL" >> "$GITHUB_OUTPUT"
+            echo "Validando qwen-primary directo con modelo $PRIMARY_MODEL"
+            exit 0
+          fi
+
           [[ "$SLOT" =~ ^qwen-fallback-([1-9][0-9]*)$ ]] || { echo "Slot no permitido: $SLOT" >&2; exit 2; }
           [[ "$SLOT_HAS_KEY" == true ]] || { echo "Falta la clave del slot $SLOT_N (propia o KEY_FROM)" >&2; exit 3; }
           resuelto="$(FALLBACK_KEYS="$SLOT_N" python3 scripts/agent_slots.py resolver --worker "$SLOT")"
           model="$(jq -r '.model' <<<"$resuelto")"
           [[ -n "$model" ]] || { echo "Falta MODEL para $SLOT" >&2; exit 3; }
+          echo "worker=$SLOT" >> "$GITHUB_OUTPUT"
           echo "url=$(jq -r '.url' <<<"$resuelto")" >> "$GITHUB_OUTPUT"
           echo "model=$model" >> "$GITHUB_OUTPUT"
           echo "Validando $SLOT con modelo $model"
@@ -76,8 +98,21 @@ jobs:
           curl -fsS http://127.0.0.1:18080/__health >/dev/null
           echo "url=http://127.0.0.1:18080/v1" >> "$GITHUB_OUTPUT"
 
+      - id: smoke_primary
+        name: Smoke de qwen-primary directo
+        if: env.PRIMARY == 'true'
+        uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
+        with:
+          openai_api_key: ${{ secrets.QWEN_API_KEY }}
+          openai_base_url: ${{ steps.proxy.outputs.url || steps.config.outputs.url }}
+          openai_model: ${{ steps.config.outputs.model }}
+          qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
+          settings: '{"model":{"maxSessionTurns":6},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file"]}}'
+          prompt: 'Usa obligatoriamente read_file para leer AGENTS.md. No edites nada y no intentes ejecutar comandos. Después responde con una última línea exactamente: AGENT_PROVIDER_SMOKE_OK file=AGENTS.md'
+
       - id: smoke
         name: Smoke del slot
+        if: env.PRIMARY != 'true'
         uses: QwenLM/qwen-code-action@05f81718976f3b7da657422e6e8e4d372b8621d7 # v1
         with:
           openai_api_key: ${{ secrets[steps.slot.outputs.secret] }}
@@ -93,14 +128,14 @@ jobs:
 
       - name: Verificar marcador
         env:
-          SUMMARY: ${{ steps.smoke.outputs.summary }}
+          SUMMARY: ${{ steps.smoke_primary.outputs.summary || steps.smoke.outputs.summary }}
         run: |
           set -euo pipefail
           grep -Fq 'AGENT_PROVIDER_SMOKE_OK file=AGENTS.md' <<<"$SUMMARY"
-          echo "Smoke de $SLOT validado."
+          echo "Smoke de ${{ steps.config.outputs.worker }} validado."
 
 
-      - name: Cerrar circuit breaker del slot
+      - name: Cerrar circuit breaker del worker
         continue-on-error: true
         env:
           CONTROL_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
@@ -112,9 +147,9 @@ jobs:
           oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
             "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-pool")"
           oidc_token="$(jq -er '.value' <<<"$oidc_json")"
-          payload="$(jq -nc --arg worker "$SLOT" \
+          payload="$(jq -nc --arg worker "${{ steps.config.outputs.worker }}" \
             '{schema:1,worker:$worker,provider:"qwen",status:"healthy",reason:"provider-smoke"}')"
           curl -fsS -X POST "$base/api/agent-pool/worker-health/report" \
             -H "Authorization: Bearer $oidc_token" \
             -H 'Content-Type: application/json' --data "$payload" >/dev/null
-          echo "Circuit breaker de $SLOT cerrado en Deno KV."
+          echo "Circuit breaker de ${{ steps.config.outputs.worker }} cerrado en Deno KV."
