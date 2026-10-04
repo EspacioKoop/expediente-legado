@@ -39,6 +39,10 @@ func practica_interactuable() -> Interactuable3D:
 	return get_node_or_null("CulturaMaterial/MesaRecuerdo/Practica") as Interactuable3D
 
 
+func folleto_nag_hammadi_interactuable() -> Interactuable3D:
+	return get_node_or_null("CulturaMaterial/FolletoNagHammadi/Interactuar") as Interactuable3D
+
+
 func reduccion_movimiento_activa() -> bool:
 	return _reduccion_movimiento
 
@@ -49,6 +53,7 @@ func _montar_superficies() -> void:
 	add_child(raiz)
 	_montar_tablon(raiz)
 	_montar_mesa(raiz)
+	_montar_folleto_nag_hammadi(raiz)
 
 
 func _montar_tablon(padre: Node3D) -> void:
@@ -110,6 +115,34 @@ func _montar_mesa(padre: Node3D) -> void:
 	zona.activado.connect(_on_practica_activada)
 
 
+func _montar_folleto_nag_hammadi(padre: Node3D) -> void:
+	var folleto := Node3D.new()
+	folleto.name = "FolletoNagHammadi"
+	padre.add_child(folleto)
+	_caja(
+		folleto,
+		"Portada",
+		Vector3(0.10, 1.10, -0.10),
+		Vector3(0.58, 0.035, 0.40),
+		Color(0.34, 0.28, 0.20)
+	)
+	_caja(
+		folleto,
+		"Paginas",
+		Vector3(0.10, 1.125, -0.10),
+		Vector3(0.53, 0.02, 0.36),
+		Color(0.78, 0.75, 0.64)
+	)
+	var zona := _zona_interactiva(
+		folleto,
+		"Interactuar",
+		Vector3(0.10, 1.18, -0.32),
+		Vector3(0.85, 0.65, 0.70),
+		Interactuable3D.Verbo.EXAMINAR
+	)
+	zona.activado.connect(_on_folleto_nag_hammadi_activado)
+
+
 func _on_tablon_activado(_actor: Node) -> void:
 	if Mundo.registrar_exposicion(_registro, "tablon_calendario", _dia, _vuelta):
 		exposicion_registrada.emit("tablon_calendario")
@@ -118,6 +151,11 @@ func _on_tablon_activado(_actor: Node) -> void:
 func _on_practica_activada(_actor: Node) -> void:
 	if Mundo.registrar_practica(_registro, "silencio_memoria", _dia, _vuelta):
 		practica_registrada.emit("silencio_memoria")
+
+
+func _on_folleto_nag_hammadi_activado(_actor: Node) -> void:
+	if Mundo.registrar_exposicion(_registro, Mundo.ID_FOLLETO_NAG_HAMMADI, _dia, _vuelta):
+		exposicion_registrada.emit(Mundo.ID_FOLLETO_NAG_HAMMADI)
 
 
 static func _zona_interactiva(
