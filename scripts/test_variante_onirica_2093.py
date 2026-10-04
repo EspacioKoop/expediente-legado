@@ -67,6 +67,42 @@ class VarianteOnirica2093Test(unittest.TestCase):
             SELECTOR,
         )
 
+    def test_tentador_solo_entra_por_mimetico_en_sueno(self):
+        self.assertIn('const TENTADOR_MINIADO := "tentador_miniado"', SELECTOR)
+        self.assertIn(
+            "if arquetipo == JuicioCombateArquetipos.MIMETICO:",
+            SELECTOR,
+        )
+        self.assertIn(
+            "return TENTADOR_MINIADO if _hay_exposicion_tentador(registro, dia) else",
+            SELECTOR,
+        )
+
+    def test_tentador_exige_exposicion_walters_exacta(self):
+        helper = SELECTOR.split(
+            "static func _hay_exposicion_tentador(", 1
+        )[1]
+        self.assertIn("ReligionEventos.CANAL_EXPOSICION", helper)
+        self.assertIn('const TRADICION_ARTE_MEDIEVAL := "arte_medieval"', SELECTOR)
+        self.assertIn(
+            'const CONTEXTO_TENTADOR := "walters:w99:fol169r:dragon_marginalia"',
+            SELECTOR,
+        )
+        self.assertIn('valor.get("tradicion", "")', helper)
+        self.assertIn('valor.get("contexto", "")', helper)
+        self.assertIn("tradicion == TRADICION_ARTE_MEDIEVAL", helper)
+        self.assertIn("contexto == CONTEXTO_TENTADOR", helper)
+        self.assertIn('valor.get("jornada", -1)', helper)
+        for prohibido in (
+            "CANAL_PRACTICA",
+            "CANAL_VINCULO",
+            "CANAL_CONVICCION",
+            "ultima_declaracion",
+            "declaracion",
+        ):
+            with self.subTest(prohibido=prohibido):
+                self.assertNotIn(prohibido, helper)
+
     def test_selector_no_registra_hechos_ni_toca_autoridades(self):
         for prohibido in (
             "ReligionEventos.registrar(",
