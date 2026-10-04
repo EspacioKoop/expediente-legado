@@ -31,9 +31,7 @@ func _probar_contrato_material() -> void:
 		"el catálogo incluye el folleto documental de Nag Hammadi"
 	)
 	_comprobar(
-		superficies.any(
-			func(entrada): return String(entrada["id"]) == Mundo.ID_LAMINA_WALTERS_W99
-		),
+		superficies.any(func(entrada): return String(entrada["id"]) == Mundo.ID_LAMINA_WALTERS_W99),
 		"el catálogo incluye la lámina documental Walters W.99"
 	)
 	_comprobar(Mundo.eventos_calendario(2).is_empty(), "el calendario no inventa eventos")
@@ -66,13 +64,6 @@ func _probar_canales() -> void:
 	_comprobar(
 		Mundo.registrar_practica(registro, "silencio_memoria", Mundo.DIA_ACTO_MEMORIA),
 		"la práctica presencial se registra en su contexto"
-	)
-	_comprobar(
-		(
-			String(evento_walters["tradicion"]) == Mundo.TRADICION_ARTE_MEDIEVAL
-			and String(evento_walters["contexto"]) == Mundo.CONTEXTO_TENTADOR
-		),
-		"la interacción 3D conserva el gate exacto del Tentador"
 	)
 	_comprobar(
 		Eventos.eventos(registro, Eventos.CANAL_PRACTICA).size() == 1,
@@ -147,12 +138,14 @@ func _probar_superficies_3d() -> void:
 	escena.folleto_nag_hammadi_interactuable().interactuar(null)
 	escena.lamina_walters_w99_interactuable().interactuar(null)
 	_comprobar(
-		exposiciones_emitidas
-		== [
-			"tablon_calendario",
-			Mundo.ID_FOLLETO_NAG_HAMMADI,
-			Mundo.ID_LAMINA_WALTERS_W99,
-		],
+		(
+			exposiciones_emitidas
+			== [
+				"tablon_calendario",
+				Mundo.ID_FOLLETO_NAG_HAMMADI,
+				Mundo.ID_LAMINA_WALTERS_W99,
+			]
+		),
 		"cada superficie avisa solo cuando registra una exposición nueva"
 	)
 	_comprobar(
@@ -166,6 +159,13 @@ func _probar_superficies_3d() -> void:
 	var eventos_exposicion := Eventos.eventos(registro, Eventos.CANAL_EXPOSICION)
 	var evento_folleto: Dictionary = eventos_exposicion[1]
 	var evento_walters: Dictionary = eventos_exposicion[2]
+	_comprobar(
+		(
+			String(evento_walters["tradicion"]) == Mundo.TRADICION_ARTE_MEDIEVAL
+			and String(evento_walters["contexto"]) == Mundo.CONTEXTO_TENTADOR
+		),
+		"la interacción 3D conserva el gate exacto del Tentador"
+	)
 	_comprobar(
 		(
 			String(evento_folleto["tradicion"]) == Mundo.TRADICION_GNOSTICA
