@@ -23,7 +23,7 @@ class CiclopeHost2091Test(unittest.TestCase):
         self.assertIn('unidad.get("rumbo_bloqueado", rival.rotation.y)', CICLOPE)
         self.assertIn("JuicioCombateArquetipoHost.direccion_linea(rumbo)", CICLOPE)
         self.assertIn("REGLAS.limitar_a_arena(", CICLOPE)
-        self.assertIn("REGLAS.resultado_ataque_rival(", CICLOPE)
+        self.assertRegex(CICLOPE, r"REGLAS\s*\.\s*resultado_ataque_rival\(")
         self.assertIn('anfitrion.call("_aplicar_impacto_rival", resultado)', CICLOPE)
         self.assertIn('"impacto_carga_emitido": false', CICLOPE)
         self.assertIn('estado["impacto_carga_emitido"] = true', CICLOPE)
