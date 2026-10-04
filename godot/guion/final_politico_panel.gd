@@ -47,31 +47,23 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _preparar_ecos(resumen: Dictionary) -> Array:
-	var candidatos: Array = []
-	var lecturas = resumen.get("lecturas_sociales", [])
-	if typeof(lecturas) != TYPE_ARRAY:
-		return candidatos
+	var ecos: Array = []
+	var exposicion = resumen.get("eco_exposicion", {})
+	if typeof(exposicion) == TYPE_DICTIONARY:
+		var detalle_exposicion: Dictionary = exposicion
+		var fuente := String(detalle_exposicion.get("fuente", "")).strip_edges()
+		var eje := String(detalle_exposicion.get("eje", "")).strip_edges()
+		if not fuente.is_empty() and not eje.is_empty():
+			ecos.append({"tipo": "exposicion", "detalle": detalle_exposicion.duplicate(true)})
 
-	for lectura in lecturas:
-		if typeof(lectura) != TYPE_DICTIONARY:
-			continue
-		var actor := String(lectura.get("actor", "")).strip_edges()
-		var evento := String(lectura.get("evento_observado", "")).strip_edges()
-		if actor.is_empty() or evento.is_empty():
-			continue
-		(
-			candidatos
-			. append(
-				{
-					"tipo": "social",
-					"id": "%s:%s" % [actor, evento],
-					"detalle": (lectura as Dictionary).duplicate(true),
-				}
-			)
-		)
+	var sueno = resumen.get("eco_sueno", {})
+	if typeof(sueno) == TYPE_DICTIONARY:
+		var detalle_sueno: Dictionary = sueno
+		var familia := String(detalle_sueno.get("familia", "")).strip_edges()
+		if not familia.is_empty():
+			ecos.append({"tipo": "sueno", "detalle": detalle_sueno.duplicate(true)})
 
-	candidatos.sort_custom(func(a, b): return String(a["id"]) < String(b["id"]))
-	return candidatos.slice(0, MAX_ECOS)
+	return ecos.slice(0, MAX_ECOS)
 
 
 static func _cargar_textos() -> Dictionary:
@@ -157,22 +149,31 @@ func _montar_ecos(caja: VBoxContainer) -> void:
 
 
 func _texto_eco(eco: Dictionary) -> String:
-	if String(eco.get("tipo", "")) != "social":
-		return ""
 	var detalle_crudo = eco.get("detalle", {})
 	if typeof(detalle_crudo) != TYPE_DICTIONARY:
 		return ""
-	return _eco_social(detalle_crudo as Dictionary)
+	var detalle: Dictionary = detalle_crudo
+	match String(eco.get("tipo", "")):
+		"exposicion":
+			return _eco_exposicion(detalle)
+		"sueno":
+			return _eco_sueno(detalle)
+		_:
+			return ""
 
 
-func _eco_social(detalle: Dictionary) -> String:
-	var actor := String(detalle.get("actor", "")).strip_edges()
-	if actor.is_empty():
-		return ""
-	var reaccion := String(detalle.get("reaccion", "")).strip_edges()
-	if reaccion.is_empty():
-		return _t("eco_social_formato") % actor
-	return _t("eco_social_formato_detallado") % [actor, _legible(reaccion)]
+func _eco_exposicion(detalle: Dictionary) -> String:
+	return (
+		"%s · %s"
+		% [
+			_legible(String(detalle.get("fuente", ""))),
+			_nombre_eje(String(detalle.get("eje", ""))),
+		]
+	)
+
+
+func _eco_sueno(detalle: Dictionary) -> String:
+	return _legible(String(detalle.get("familia", "")))
 
 
 func _montar_religion(caja: VBoxContainer) -> void:
