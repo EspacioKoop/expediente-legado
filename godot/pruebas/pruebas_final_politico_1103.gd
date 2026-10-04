@@ -203,9 +203,21 @@ func _un_eco_social_aparece_una_vez() -> void:
 	var ecos: Array = panel._preparar_ecos(resumen)
 	_comprobar(ecos.size() == 1, "el presentador muestra el eco una sola vez")
 	panel.free()
-	# Los ejes y conteos no cambian por el eco.
-	var conteo: Dictionary = FinalPolitico.resumen(estado).get("conteo", {})
-	_comprobar(conteo.get("comunismo", 0) == 8, "el conteo conserva el eje real")
+	var sin_ecos := _estado_base()
+	sin_ecos["historias_cartas"] = _historias(_ocho("comunismo"))
+	var resumen_sin_ecos := FinalPolitico.resumen(sin_ecos)
+	_comprobar(
+		resumen.get("conteo", {}) == resumen_sin_ecos.get("conteo", {}),
+		"los ecos no alteran los conteos",
+	)
+	_comprobar(
+		resumen.get("dominantes", []) == resumen_sin_ecos.get("dominantes", []),
+		"los ecos no alteran los dominantes",
+	)
+	_comprobar(
+		FinalPolitico.confirmar_cierre(estado) == FinalPolitico.confirmar_cierre(sin_ecos),
+		"los ecos no alteran los logros",
+	)
 
 
 func _maximo_dos_ecos_y_orden_estable() -> void:
