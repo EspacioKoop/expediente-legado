@@ -427,8 +427,8 @@ ActivarLCD:
 LimpiarFondo:
     ld hl, BG_MAP
     ld bc, 32 * 32
-    xor a
 .bucle:
+    xor a
     ld [hli], a
     dec bc
     ld a, b
