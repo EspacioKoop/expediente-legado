@@ -15,7 +15,7 @@ ROUTER = (GUION / "juicio_combate_variante_host_3d.gd").read_text(encoding="utf-
 class GargolaHost2092Test(unittest.TestCase):
     def test_selector_exige_sueno_bloqueador_y_hecho_observable(self):
         self.assertIn("plano != CombateContextual.PLANO_SUENO", SELECTOR)
-        self.assertIn("arquetipo != JuicioCombateArquetipos.BLOQUEADOR", SELECTOR)
+        self.assertIn("if arquetipo == JuicioCombateArquetipos.BLOQUEADOR:", SELECTOR)
         for canal in (
             "ReligionEventos.CANAL_EXPOSICION",
             "ReligionEventos.CANAL_PRACTICA",
