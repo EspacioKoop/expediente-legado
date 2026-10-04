@@ -26,6 +26,7 @@ static func resumen(estado: Dictionary, contrato: Dictionary = {}) -> Dictionary
 	var religion := ReligionTrayectoria.resumir(ReligionEventos.resumen_trayectoria(estado))
 	var ejemplos := []
 	var eco_exposicion := _eco_exposicion(estado)
+	var eco_sueno := _eco_sueno(estado)
 	var lecturas_sociales := _lecturas_sociales(estado)
 
 	for evento in elecciones:
@@ -49,6 +50,7 @@ static func resumen(estado: Dictionary, contrato: Dictionary = {}) -> Dictionary
 		"elecciones": elecciones.size(),
 		"ejemplos": ejemplos,
 		"eco_exposicion": eco_exposicion,
+		"eco_sueno": eco_sueno,
 		"auditoria": auditoria,
 		"religion": religion,
 		"lecturas_sociales": lecturas_sociales,
@@ -101,10 +103,7 @@ static func _patron(elecciones: Array, dominantes: Array) -> String:
 ## Devuelve como máximo un eco factual de exposición de la jornada actual.
 ## El historial completo permanece en Prometeo.CLAVE_EXPOSICION_IDEOLOGICA.
 static func _eco_exposicion(estado: Dictionary) -> Dictionary:
-	var jornada = estado.get("jornada", {})
-	if typeof(jornada) != TYPE_DICTIONARY:
-		return {}
-	var dia_actual := int((jornada as Dictionary).get("dia", 0))
+	var dia_actual := _dia_actual(estado)
 	if dia_actual <= 0:
 		return {}
 
@@ -139,6 +138,38 @@ static func _eco_exposicion(estado: Dictionary) -> Dictionary:
 			continue
 		return {"id": id, "fuente": fuente, "eje": eje}
 	return {}
+
+
+## Solo expone el eco onírico si la familia realmente ocurrida es reconstruible
+## sin semilla: una única familia de exposición para la jornada. Con dos o más
+## candidatas no se adivina cuál seleccionó #923.
+static func _eco_sueno(estado: Dictionary) -> Dictionary:
+	var dia_actual := _dia_actual(estado)
+	if dia_actual <= 0:
+		return {}
+	var familias := IdeologiaSueno923.familias_exposicion(estado, dia_actual)
+	if familias.size() != 1:
+		return {}
+	var familia := String(familias[0])
+	if not IdeologiaSueno923.FAMILIAS.has(familia):
+		return {}
+	return {
+		"familia": familia,
+		"canal": IdeologiaSueno923.CANAL_EXPOSICION,
+	}
+
+
+static func _dia_actual(estado: Dictionary) -> int:
+	var jornada = estado.get("jornada", {})
+	if typeof(jornada) != TYPE_DICTIONARY:
+		return 0
+	var dia_crudo = (jornada as Dictionary).get("dia", null)
+	if typeof(dia_crudo) != TYPE_INT and typeof(dia_crudo) != TYPE_FLOAT:
+		return 0
+	var dia_numero := float(dia_crudo)
+	if dia_numero < 1.0 or not is_equal_approx(dia_numero, roundf(dia_numero)):
+		return 0
+	return int(dia_numero)
 
 
 static func _historias_completas(estado: Dictionary) -> Dictionary:
