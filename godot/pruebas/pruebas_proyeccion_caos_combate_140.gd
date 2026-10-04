@@ -47,8 +47,10 @@ func _probar_objetivo() -> void:
 
 func _probar_duracion() -> void:
 	_comprobar(
-		JuicioCombateReglas.determinacion_rival(ProyeccionCaosCombate140.BONO_COMBATE_BREVE)
-		== JuicioCombateReglas.DETERMINACION_MINIMA_RIVAL,
+		(
+			JuicioCombateReglas.determinacion_rival(ProyeccionCaosCombate140.BONO_COMBATE_BREVE)
+			== JuicioCombateReglas.DETERMINACION_MINIMA_RIVAL
+		),
 		"el remate usa la duracion minima del Juicio comun",
 	)
 
