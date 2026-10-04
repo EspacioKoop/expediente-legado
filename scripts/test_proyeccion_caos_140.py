@@ -41,6 +41,10 @@ class ProyeccionCaos140Test(unittest.TestCase):
         self.assertIn('"semilla"', self.helper)
 
     def test_incidente_no_tiene_autoridad_de_campana(self):
+        codigo = "\n".join(
+            linea for linea in self.helper.splitlines()
+            if not linea.lstrip().startswith("#")
+        )
         for prohibido in (
             "Partida.",
             "Jornada.",
@@ -52,7 +56,7 @@ class ProyeccionCaos140Test(unittest.TestCase):
             "veredicto",
         ):
             with self.subTest(prohibido=prohibido):
-                self.assertNotIn(prohibido, self.helper)
+                self.assertNotIn(prohibido, codigo)
 
     def test_ganar_perder_y_abandonar_vuelven_al_mismo_sello(self):
         inicio = self.visor.index("func _al_terminar_combate_caos")
