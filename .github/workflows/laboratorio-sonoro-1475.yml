@@ -47,3 +47,15 @@ jobs:
           path: cata-1475/
           if-no-files-found: error
           retention-days: 14
+      - name: Renderizar careo_tracker y verificar repetibilidad
+        run: |
+          python3 scripts/laboratorio_sonoro_1475.py --careo-tracker --destino cata-careo-tracker --exigir-ffmpeg
+          python3 scripts/laboratorio_sonoro_1475.py --careo-tracker --destino cata-careo-tracker-repetida --exigir-ffmpeg
+          diff -r cata-careo-tracker cata-careo-tracker-repetida
+      - name: Adjuntar cata reproducible de careo_tracker
+        uses: ./.github/actions/upload-artifact
+        with:
+          name: careo-tracker-1475-${{ github.sha }}
+          path: cata-careo-tracker/
+          if-no-files-found: error
+          retention-days: 14
