@@ -38,6 +38,8 @@
     "cambio": "cambio declarado"
   },
   "ecos_titulo": "Ecos sociales registrados:",
+  "eco_exposicion_formato": "• Exposición: %s · %s.",
+  "eco_sueno_formato": "• Sueño: %s.",
   "eco_social_formato": "• %s reaccionó a una decisión registrada.",
   "eco_social_formato_detallado": "• %s dejó registrada esta reacción: %s."
 }
