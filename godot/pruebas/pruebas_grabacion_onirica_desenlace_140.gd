@@ -24,9 +24,12 @@ func _probar_valida_reactiva() -> void:
 		"motivos": [],
 		"original_id": "folio-1",
 	}
-	var salida := GrabacionOniricaDesenlace.resolver(
-		entrada,
-		{"anomalia_id": "anomalia-crt", "reactiva": true},
+	var salida := (
+		GrabacionOniricaDesenlace
+		. resolver(
+			entrada,
+			{"anomalia_id": "anomalia-crt", "reactiva": true},
+		)
 	)
 	_comprobar(String(salida["estado"]) == "caos", "toma valida + sujeto reactivo produce CAOS")
 	_comprobar(
@@ -73,9 +76,12 @@ func _probar_inmutabilidad() -> void:
 		"anidado": {"valor": 1},
 	}
 	var original := entrada.duplicate(true)
-	var salida := GrabacionOniricaDesenlace.resolver(
-		entrada,
-		{"anomalia_id": "a", "reactiva": true},
+	var salida := (
+		GrabacionOniricaDesenlace
+		. resolver(
+			entrada,
+			{"anomalia_id": "a", "reactiva": true},
+		)
 	)
 	salida["anidado"]["valor"] = 7
 	_comprobar(entrada == original, "resolver no muta la proyeccion recibida")
