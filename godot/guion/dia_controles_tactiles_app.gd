@@ -28,14 +28,14 @@ func _process(_delta: float) -> void:
 		return
 	var dia := get_parent()
 	var caminante = dia.get("_caminante") if dia != null else null
-	var fisica_activa := (
+	var fisica_activa: bool = (
 		is_instance_valid(caminante)
 		and caminante.has_method("is_physics_processing")
 		and caminante.is_physics_processing()
 	)
-	var pantalla_abierta := dia != null and dia.get("_pantalla") != null
-	var entrada_activa := dia != null and dia.get("_entrada") != null
-	var visible := debe_mostrar_overlay(
+	var pantalla_abierta: bool = dia != null and dia.get("_pantalla") != null
+	var entrada_activa: bool = dia != null and dia.get("_entrada") != null
+	var visible: bool = debe_mostrar_overlay(
 		DisplayServer.is_touchscreen_available(),
 		fisica_activa,
 		get_tree().paused,
