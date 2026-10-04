@@ -41,6 +41,13 @@ class SenalesModeracion377RuntimeTest(unittest.TestCase):
         self.assertNotIn("VisorExpediente", codigo)
         self.assertIn("ocultar_evento", codigo)
         self.assertIn("reportar_evento", codigo)
+        moderacion = rutas[0].read_text(encoding="utf-8")
+        self.assertIn('signal.moderate.title', moderacion)
+        self.assertIn('signal.moderate.hide', moderacion)
+        self.assertIn('signal.moderate.report', moderacion)
+        self.assertIn('signal.moderate.cancel', moderacion)
+        self.assertIn("_boton_ocultar.grab_focus()", moderacion)
+        self.assertIn('event.is_action_pressed("ui_cancel")', moderacion)
 
 
 if __name__ == "__main__":
