@@ -25,6 +25,7 @@ const ZONA_MOVIMIENTO_TACTIL := 0.45
 const RADIO_MOVIMIENTO_TACTIL := 96.0
 const VOLUMEN_PISADA_DB := -8.0
 const GRUPO_CAMARA := "caminante_camara"
+const AccionesTactiles98Overlay = preload("res://guion/acciones_tactiles_98.gd")
 
 const MOVER_IZQUIERDA := "mover_izquierda"
 const MOVER_DERECHA := "mover_derecha"
@@ -77,6 +78,7 @@ var _tween_camara_dialogo: Tween
 var _dedo_movimiento_tactil := -1
 var _origen_movimiento_tactil := Vector2.ZERO
 var _movimiento_tactil := Vector2.ZERO
+var _acciones_tactiles: AccionesTactiles98
 
 @onready var _camara: Camera3D = $Camara
 @onready var _colision: CollisionShape3D = $Colision
@@ -87,11 +89,27 @@ func _ready() -> void:
 	recargar_preferencias_camara()
 	_asegurar_controles_movimiento()
 	_montar_interaccion()
+	_montar_acciones_tactiles()
 	# `Dia` añade el reproductor 3D de pasos justo después de meter el caminante
 	# en el árbol. Diferir un turno permite atenuarlo aquí, junto al cuerpo que
 	# los produce, sin crear un bus global que también bajaría puertas o voces.
 	call_deferred("_ajustar_volumen_pisadas")
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+
+func _montar_acciones_tactiles() -> void:
+	_acciones_tactiles = AccionesTactiles98Overlay.new()
+	_acciones_tactiles.name = "AccionesTactiles98"
+	add_child(_acciones_tactiles)
+
+
+func acciones_tactiles_disponibles() -> bool:
+	return AccionesTactiles98.debe_mostrarse(
+		is_physics_processing(),
+		get_tree().paused,
+		is_instance_valid(_camara_dialogo),
+		Input.mouse_mode == Input.MOUSE_MODE_CAPTURED,
+	)
 
 
 func recargar_preferencias_camara() -> void:
