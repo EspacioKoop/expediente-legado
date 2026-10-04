@@ -8,6 +8,7 @@ WORKER = ROOT / ".github" / "workflows" / "agent-worker.yml"
 DENO_MAIN = ROOT / "infra" / "feedback-deno" / "main.ts"
 DENO_POOL = ROOT / "infra" / "feedback-deno" / "agent_pool_state.ts"
 DENO_WORKFLOW = ROOT / ".github" / "workflows" / "feedback-deno.yml"
+CONTROL_CLIENT = ROOT / "scripts" / "agent_pool_control_client.py"
 
 
 class AgentPoolControlPlaneContractTest(unittest.TestCase):
@@ -18,6 +19,7 @@ class AgentPoolControlPlaneContractTest(unittest.TestCase):
         cls.deno_main = DENO_MAIN.read_text(encoding="utf-8")
         cls.deno_pool = DENO_POOL.read_text(encoding="utf-8")
         cls.deno_workflow = DENO_WORKFLOW.read_text(encoding="utf-8")
+        cls.control_client = CONTROL_CLIENT.read_text(encoding="utf-8")
 
     def test_deno_expone_control_plane_oidc(self):
         self.assertIn('const AGENT_POOL_AUDIENCE = "siga98-agent-pool"', self.deno_pool)
@@ -119,7 +121,10 @@ class AgentPoolControlPlaneContractTest(unittest.TestCase):
         self.assertIn("/api/agent-pool/acquire", self.worker)
         self.assertIn('"$control_code" == 409', self.worker)
         self.assertIn("control=deno-conflict", self.worker)
-        self.assertIn("/api/agent-pool/transition", self.worker)
+        self.assertEqual(self.worker.count("agent_pool_control_client.py transition"), 4)
+        self.assertNotIn("/api/agent-pool/transition", self.worker)
+        self.assertIn("/api/agent-pool/transition", self.control_client)
+        self.assertIn('AUDIENCE = "siga98-agent-pool"', self.control_client)
         self.assertIn("/api/agent-pool/release", self.worker)
         self.assertIn("Liberar lease Deno KV", self.worker)
         self.assertIn("continue-on-error: true", self.worker)
