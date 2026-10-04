@@ -21,6 +21,12 @@ RUNTIME = {
     "papel_pasar_01.ogg": "0d8c22e65257cf8f097a2225c679608a147f2b4c6e18b174b32cfac0c636a191",
     "papel_manojo_01.ogg": "f738a8c8c04dc822f5855fb3812156027fb66f802139f2a3b34231577db58bbb",
 }
+INTERFAZ_RUNTIME = (
+    "ui_pulsar_01.ogg",
+    "ui_marcar_01.ogg",
+    "ui_firmar_01.ogg",
+    "ui_error_01.ogg",
+)
 ARCHIVADOR_WAV = {
     "archivador_abrir_01": "f2ffeb6b5bdf3f7bb34e108755ec561688af9ed368f4baf7656db7b84112fdc5",
     "archivador_abrir_02": "955612e51f50cfee151f61be36faadc441bc55b5013580d491d364a85af70024",
@@ -72,6 +78,21 @@ class SfxChipGeneradorTest(unittest.TestCase):
         self.assertEqual(len({generador.RECETAS[n]["seed"] for n in abrir}), 3)
         self.assertEqual(len({generador.RECETAS[n]["seed"] for n in cerrar}), 3)
 
+    def test_pcm_interfaz_es_mono_44100_sin_clipping_dc_ni_click_de_borde(self):
+        for nombre_ogg in INTERFAZ_RUNTIME:
+            nombre = Path(nombre_ogg).stem
+            receta = generador.RECETAS[nombre]
+            muestras = generador.sintetizar(receta)
+            duracion = len(muestras) / generador.SAMPLE_RATE
+            pico = max(abs(muestra) for muestra in muestras) / 32767
+            dc = abs(sum(muestras) / len(muestras)) / 32767
+            self.assertEqual(generador.SAMPLE_RATE, 44_100, nombre)
+            self.assertGreaterEqual(duracion, 0.12, nombre)
+            self.assertLessEqual(duracion, 0.30, nombre)
+            self.assertLess(pico, 0.90, nombre)
+            self.assertLess(dc, 0.01, nombre)
+            self.assertEqual(muestras[0], 0, nombre)
+            self.assertEqual(muestras[-1], 0, nombre)
 
     def _assert_ogg_completo(self, ruta: Path, nombre: str):
         datos = ruta.read_bytes()
@@ -110,6 +131,25 @@ class SfxChipGeneradorTest(unittest.TestCase):
             ficha = fichas.get(f"audio/chip/{nombre}")
             self.assertIsNotNone(ficha, nombre)
             self.assertEqual(ficha["sha256"], esperado, nombre)
+            self.assertEqual(ficha["autor"], "SIGA-98 · síntesis propia", nombre)
+            self.assertEqual(ficha["licencia"], "CC0-1.0", nombre)
+            self.assertEqual(ficha["fuente"], "tools/sfx_chip/generar.py", nombre)
+            self.assertIn(f"chip/{nombre}", sonido)
+
+    def test_ogg_interfaz_tienen_hash_procedencia_y_wiring(self):
+        sonido = SONIDO.read_text(encoding="utf-8")
+        fichas = {
+            ficha["ruta"]: ficha
+            for ficha in json.loads(PROCEDENCIA.read_text(encoding="utf-8"))["assets"]
+        }
+        for nombre in INTERFAZ_RUNTIME:
+            ruta = ASSETS / "audio" / "chip" / nombre
+            self.assertTrue(ruta.exists(), nombre)
+            self.assertLess(ruta.stat().st_size, 30_000, nombre)
+            self._assert_ogg_completo(ruta, nombre)
+            ficha = fichas.get(f"audio/chip/{nombre}")
+            self.assertIsNotNone(ficha, nombre)
+            self.assertEqual(hashlib.sha256(ruta.read_bytes()).hexdigest(), ficha["sha256"], nombre)
             self.assertEqual(ficha["autor"], "SIGA-98 · síntesis propia", nombre)
             self.assertEqual(ficha["licencia"], "CC0-1.0", nombre)
             self.assertEqual(ficha["fuente"], "tools/sfx_chip/generar.py", nombre)
