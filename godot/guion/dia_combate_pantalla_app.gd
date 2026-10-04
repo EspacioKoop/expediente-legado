@@ -14,16 +14,19 @@ func abrir(
 	objetivo: Dictionary,
 	decision: Dictionary,
 	zona: Area3D,
-	caminante: CharacterBody3D,
-	mundo: Node3D,
-	hud: CanvasLayer,
-	ambiente: Environment,
-	partida: Partida,
-	jornada: Dictionary,
-	raiz: int,
+	contexto: Dictionary,
 	al_terminar: Callable,
 ) -> Dictionary:
 	if activa() or anfitrion == null or not al_terminar.is_valid():
+		return {"ok": false}
+	var caminante := contexto.get("caminante") as CharacterBody3D
+	var mundo := contexto.get("mundo") as Node3D
+	var hud := contexto.get("hud") as CanvasLayer
+	var ambiente := contexto.get("ambiente") as Environment
+	var partida := contexto.get("partida") as Partida
+	var jornada: Dictionary = contexto.get("jornada", {})
+	var raiz := int(contexto.get("raiz", 0))
+	if caminante == null or partida == null:
 		return {"ok": false}
 
 	_pantalla = CanvasLayer.new()
