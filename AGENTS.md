@@ -55,6 +55,25 @@ Las reservas legacy anteriores al corte de migración del 15 de septiembre de 20
 
 Usa `Closes #N` solo si el PR satisface el issue entero. Para entregas parciales, `Refs #N` y explica lo que queda.
 
+## Disciplina de backlog
+
+Un issue no es un recordatorio: representa trabajo ejecutable o un bloqueo verificable. Antes de abrir uno nuevo, intenta primero cerrar, reconciliar o ampliar un issue existente sin mezclar responsabilidades.
+
+Reglas obligatorias:
+
+- **No crear subissues “para luego”.** Un agente solo abre un subissue si va a ejecutarlo en esa misma sesión o si existe un bloqueo externo concreto que necesita seguimiento independiente.
+- **Cerrar features técnicamente terminadas.** Si implementación, persistencia y regresiones del alcance acordado ya están integradas, la feature se cierra aunque quede un pase humano transversal. La validación se concentra en sus gates canónicos (#9 recorrido completo, #113 mando/foco, #398 identidad visual, #399 materiales y #431 profundidad SIGA) o en un gate especializado explícito. Si el pase falla, se abre un bug reproducible.
+- **`estado:validacion-humana` no convierte una feature en backlog técnico.** Solo los issues cuyo propósito principal sea el propio pase humano deben permanecer abiertos por ese motivo.
+- **`estado:parcial` exige un siguiente corte ejecutable.** El cuerpo o el último comentario debe decir exactamente qué falta, qué archivos/contrato afecta y por qué puede trabajarse ahora. Si no existe ese corte, reconciliar o cerrar.
+- **`estado:bloqueado` exige condición de desbloqueo.** Debe citar qué evento, PR, asset, credencial, decisión o dependencia lo desbloquea. “Más adelante” no es un bloqueo válido.
+- **Las épicas extensibles tienen alcance v1.** Catálogos, assets, deformaciones, expedientes y contenido no permanecen abiertos porque “siempre se puede añadir más”. Al cumplir los criterios v1 se cierran; cualquier ampliación futura nace de una necesidad observable.
+- **Después de cada merge, primero reducir backlog.** Antes de abrir otro issue, revisar el padre y 1–2 issues relacionados para cerrarlos, actualizar su estado o eliminar pendientes que ya entraron indirectamente.
+- **WIP técnico limitado.** Mantener como referencia un máximo de 15 issues realmente ejecutables entre P0/P1, `estado:parcial` y colas de agentes. Si la cola ya está llena, priorizar/terminar/reconciliar antes de preparar más trabajo.
+- **`duplicado-o-sustituido` implica cierre.** La etiqueta documenta por qué se cerró; no es un estado abierto.
+- **No abrir expansión mientras exista un gate humano sin evidencia nueva.** Un fallo observado sí justifica un issue nuevo; una posibilidad hipotética no.
+
+La pregunta operativa antes de crear cualquier issue es: **“¿alguien puede empezar este trabajo hoy con un resultado verificable?”** Si la respuesta es no, documenta la idea en el padre/ROADMAP y no aumentes el backlog.
+
 ## Niveles de trabajo
 
 - **Nivel 1:** @eGurucharri decide prioridad, integra y valida en playtest.

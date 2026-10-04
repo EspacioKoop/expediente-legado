@@ -1,0 +1,42 @@
+name: Higiene backlog
+
+on:
+  schedule:
+    - cron: '15 7 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  auditar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+          ref: main
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+
+      - name: Regresión del auditor
+        run: python -m unittest scripts.test_auditar_backlog
+
+      - name: Auditar backlog
+        id: audit
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/auditar_backlog.py             --repo "${GITHUB_REPOSITORY}"             --markdown-out /tmp/backlog.md             --fail-on-hard
+          cat /tmp/backlog.md >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Avisar al plan maestro si se supera el límite
+        if: steps.audit.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh issue comment 181 --body-file /tmp/backlog.md
