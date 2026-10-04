@@ -55,9 +55,7 @@ func _preparar_ecos(resumen: Dictionary) -> Array:
 		var fuente := String(detalle_exposicion.get("fuente", "")).strip_edges()
 		var eje := String(detalle_exposicion.get("eje", "")).strip_edges()
 		if not fuente.is_empty() and not eje.is_empty():
-			ecos.append(
-				{"tipo": "exposicion", "detalle": detalle_exposicion.duplicate(true)}
-			)
+			ecos.append({"tipo": "exposicion", "detalle": detalle_exposicion.duplicate(true)})
 
 	var sueno = resumen.get("eco_sueno", {})
 	if ecos.size() < MAX_ECOS and typeof(sueno) == TYPE_DICTIONARY:
@@ -91,12 +89,15 @@ func _ecos_sociales(resumen: Dictionary) -> Array:
 		var evento := String(lectura.get("evento_observado", "")).strip_edges()
 		if actor.is_empty() or evento.is_empty():
 			continue
-		candidatos.append(
-			{
-				"tipo": "social",
-				"id": "%s:%s" % [actor, evento],
-				"detalle": (lectura as Dictionary).duplicate(true),
-			}
+		(
+			candidatos
+			. append(
+				{
+					"tipo": "social",
+					"id": "%s:%s" % [actor, evento],
+					"detalle": (lectura as Dictionary).duplicate(true),
+				}
+			)
 		)
 
 	candidatos.sort_custom(func(a, b): return String(a["id"]) < String(b["id"]))
@@ -202,10 +203,13 @@ func _texto_eco(eco: Dictionary) -> String:
 
 
 func _eco_exposicion(detalle: Dictionary) -> String:
-	return _t("eco_exposicion_formato", "%s · %s") % [
-		_legible(String(detalle.get("fuente", ""))),
-		_nombre_eje(String(detalle.get("eje", ""))),
-	]
+	return (
+		_t("eco_exposicion_formato", "%s · %s")
+		% [
+			_legible(String(detalle.get("fuente", ""))),
+			_nombre_eje(String(detalle.get("eje", ""))),
+		]
+	)
 
 
 func _eco_sueno(detalle: Dictionary) -> String:
