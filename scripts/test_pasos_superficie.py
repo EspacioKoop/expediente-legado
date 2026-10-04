@@ -40,7 +40,7 @@ class PasosSuperficieTest(unittest.TestCase):
         dia = DIA.read_text(encoding="utf-8")
         presentacion = PRESENTACION.read_text(encoding="utf-8")
         self.assertIn("var _presentacion := DiaPresentacionApp.new()", dia)
-        self.assertIn("_presentacion.avanzar_pasos(", dia)
+        dia_compacto = "".join(dia.split())\n        self.assertIn("_presentacion.avanzar_pasos(", dia_compacto)
         self.assertIn("return _presentacion.suelo_pisado(jornada, _espacio_actual)", dia)
         self.assertIn("_presentacion.sonar(_voz, nombre)", dia)
         self.assertNotIn("var _desde_paso", dia)
