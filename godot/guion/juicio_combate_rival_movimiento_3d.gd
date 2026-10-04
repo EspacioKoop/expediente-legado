@@ -25,6 +25,10 @@ static func avanzar(anfitrion, delta: float) -> void:
 	if JuicioCombateVarianteHost3D.controla_movimiento(arquetipo):
 		return
 
+	var mixto: Dictionary = anfitrion.get("_mixto")
+	if not mixto.is_empty():
+		return
+
 	var enjambre: Dictionary = anfitrion.get("_enjambre")
 	if not enjambre.is_empty():
 		(
