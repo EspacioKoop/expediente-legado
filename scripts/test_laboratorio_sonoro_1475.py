@@ -272,8 +272,8 @@ class CareoTrackerTest(unittest.TestCase):
             "urlopen",
             "AudioStream",
             "godot/assets",
-            "read_bytes()",
-            "open(",
+            "referencia/audio/",
+            "samples/",
         ):
             with self.subTest(prohibido=prohibido):
                 self.assertNotIn(prohibido, bloque)
