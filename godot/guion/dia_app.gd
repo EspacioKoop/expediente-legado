@@ -15,6 +15,7 @@ const SELLO_REINCORPORACION := "reincorporacion-administrativa"
 const SELLO_DESPERTAR_REGLAMENTARIO := "despertar-reglamentario"
 const DIA_ESPACIOS_APP = preload("res://guion/dia_espacios_app.gd")
 const DIA_TRANSICION_APP = preload("res://guion/dia_transicion_app.gd")
+const DIA_EXPEDIENTE_APP = preload("res://guion/dia_expediente_app.gd")
 
 var partida := Partida.new()
 var contenido := Contenido.new()
@@ -628,27 +629,19 @@ func _abrir_expediente() -> void:
 		return
 	if not _guardar_o_avisar(""):
 		return
-	_caminante.set_physics_process(false)
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-
-	_pantalla = CanvasLayer.new()
-	add_child(_pantalla)
-	_pantalla.add_child(load("res://escenas/visor.tscn").instantiate())
-
-	# El botón de volver lo pone el DÍA y no el visor: el visor también se usa
-	# suelto, y no tiene por qué saber que hay una oficina alrededor.
-	var volver := Button.new()
-	volver.theme = EstiloSiga.tema()
-	volver.text = tr("PUESTO_LEVANTARSE")
-	volver.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	volver.offset_left = -190
-	volver.offset_top = 4
-	volver.offset_right = -8
-	volver.pressed.connect(_cerrar_expediente)
-	_pantalla.add_child(volver)
-
+	_pantalla = (
+		DIA_EXPEDIENTE_APP
+		. abrir(
+			self,
+			_caminante,
+			_nomina,
+			Callable(self, "_cerrar_expediente"),
+			Callable(self, "tr"),
+		)
+	)
+	if _pantalla == null:
+		return
 	_hablando = false
-	_nomina.text = tr("DIA_EN_EL_PUESTO")
 
 
 ## El duelo onírico, encima de la sala y sin salir de ella.
@@ -741,25 +734,26 @@ func _cerrar_combate_hack_slash(
 func _cerrar_expediente() -> void:
 	if _pantalla == null:
 		return
-	_pantalla.queue_free()
-	_pantalla = null
-	_sonar("puerta_cierra")
 
 	# De qué vida laboral se levantó. Se apunta ANTES de releer, porque firmar
 	# puede haberla terminado y lo que vuelve del fichero sería ya la
 	# siguiente, indistinguible de la de antes.
 	var vuelta_antes := int(jornada.get("vuelta", 1))
+	(
+		DIA_EXPEDIENTE_APP
+		. cerrar(
+			_pantalla,
+			_caminante,
+			_nomina,
+			Callable(self, "_sonar"),
+		)
+	)
+	_pantalla = null
 
 	partida.cargar()
 	_vincular_literatura_partida()
 	jornada = Jornada.completar(partida.estado.get("jornada", Jornada.nueva(_raiz())), _raiz())
 	partida.estado["jornada"] = jornada
-
-	_caminante.set_physics_process(true)
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	# #1451: este mensaje solo describe el estado mientras SIGA está abierto.
-	# Al levantarse no debe sobrevivir como si el jugador siguiera sentado.
-	_nomina.text = ""
 
 	# Le han reasignado mientras firmaba: se levanta otra persona de esa silla.
 	if int(jornada.get("vuelta", 1)) != vuelta_antes:

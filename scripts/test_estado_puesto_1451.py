@@ -5,6 +5,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 DIA_APP = ROOT / "godot" / "guion" / "dia_app.gd"
+DIA_EXPEDIENTE_APP = ROOT / "godot" / "guion" / "dia_expediente_app.gd"
 
 
 def _funcion(nombre: str, fuente: str) -> str:
@@ -18,13 +19,16 @@ def _funcion(nombre: str, fuente: str) -> str:
 class TestEstadoPuesto1451(unittest.TestCase):
     def test_estado_se_activa_solo_durante_siga(self) -> None:
         fuente = DIA_APP.read_text(encoding="utf-8")
+        presentacion = DIA_EXPEDIENTE_APP.read_text(encoding="utf-8")
         abrir = _funcion("_abrir_expediente", fuente)
         cerrar = _funcion("_cerrar_expediente", fuente)
 
-        self.assertIn('_nomina.text = tr("DIA_EN_EL_PUESTO")', abrir)
-        self.assertIn('_nomina.text = ""', cerrar)
+        self.assertIn("DIA_EXPEDIENTE_APP.abrir(", abrir)
+        self.assertIn("DIA_EXPEDIENTE_APP.cerrar(", cerrar)
+        self.assertIn('traducir.call("DIA_EN_EL_PUESTO")', presentacion)
+        self.assertIn('nomina.text = ""', presentacion)
 
-        limpiar = cerrar.index('_nomina.text = ""')
+        limpiar = cerrar.index("DIA_EXPEDIENTE_APP.cerrar(")
         reasignar = cerrar.index('if int(jornada.get("vuelta", 1)) != vuelta_antes:')
         self.assertLess(
             limpiar,
