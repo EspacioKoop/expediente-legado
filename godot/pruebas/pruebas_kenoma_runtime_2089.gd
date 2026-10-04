@@ -40,13 +40,19 @@ func _probar_spawn_y_repeticion_diferida() -> void:
 	var primero := RUNTIME.avanzar(estado, 0.0, "linea")
 	_comprobar(estado == original, "avanzar no muta el estado de entrada")
 	_comprobar(primero.get("solicitudes_spawn", []) == [0, 1], "spawn inicial aparece una sola vez")
-	_comprobar(primero.get("ventana_respuesta", []).is_empty(), "el señuelo inicial no abre ventana")
+	_comprobar(
+		primero.get("ventana_respuesta", []).is_empty(), "el señuelo inicial no abre ventana"
+	)
 	_comprobar(_patrones(primero) == ["linea", "linea"], "ambos ecos recuerdan el patrón observado")
 
 	var segundo := RUNTIME.avanzar(primero["estado"], 1.0, "carga_lineal")
 	_comprobar(segundo.get("solicitudes_spawn", []).is_empty(), "el spawn no se repite")
-	_comprobar(_patrones(segundo) == ["linea", "linea"], "un patrón nuevo no sustituye al pendiente")
-	_comprobar(_telegraphs(segundo) == ["linea", "linea"], "la repetición anuncia el patrón copiado")
+	_comprobar(
+		_patrones(segundo) == ["linea", "linea"], "un patrón nuevo no sustituye al pendiente"
+	)
+	_comprobar(
+		_telegraphs(segundo) == ["linea", "linea"], "la repetición anuncia el patrón copiado"
+	)
 
 	var tercero := RUNTIME.avanzar(segundo["estado"], 1.0, "zona")
 	_comprobar(_patrones(tercero) == ["linea", "linea"], "mantiene el patrón hasta cerrar el ciclo")
@@ -78,12 +84,16 @@ func _probar_destruccion_sin_crecimiento() -> void:
 	_comprobar(inicial.get("solicitudes_spawn", []) == [0, 1, 2], "consume el spawn inicial")
 
 	var uno := RUNTIME.avanzar(estado, 0.0, "", [1, 1, -1])
-	_comprobar(uno.get("solicitudes_despawn", []) == [1], "destruir duplicado genera un solo despawn")
+	_comprobar(
+		uno.get("solicitudes_despawn", []) == [1], "destruir duplicado genera un solo despawn"
+	)
 	_comprobar(uno.get("solicitudes_spawn", []).is_empty(), "destruir no genera spawn")
 	_comprobar((uno["estado"]["ecos"] as Array).size() == 2, "queda exactamente un eco menos")
 
 	var repetido := RUNTIME.avanzar(uno["estado"], 0.0, "", [1])
-	_comprobar(repetido.get("solicitudes_despawn", []).is_empty(), "destruir de nuevo es idempotente")
+	_comprobar(
+		repetido.get("solicitudes_despawn", []).is_empty(), "destruir de nuevo es idempotente"
+	)
 	_comprobar((repetido["estado"]["ecos"] as Array).size() == 2, "no reaparece el eco destruido")
 
 	var todos := RUNTIME.avanzar(repetido["estado"], 0.0, "", [0, 2, 0])
