@@ -95,12 +95,15 @@ static func avanzar(
 		posicion_jugador,
 		guardia_rota,
 	)
-	var paso := RUNTIME.avanzar(
-		runtime,
-		maxf(0.0, delta),
-		contexto,
-		derrotados_enjambre,
-		singular_derrotado,
+	var paso := (
+		RUNTIME
+		. avanzar(
+			runtime,
+			maxf(0.0, delta),
+			contexto,
+			derrotados_enjambre,
+			singular_derrotado,
+		)
 	)
 	runtime = paso.get("estado", runtime)
 	estado["runtime"] = runtime
@@ -161,31 +164,33 @@ static func objetivos_vivos(
 		var cuerpo := actor.get("cuerpo") as CharacterBody3D
 		if cuerpo == null or not is_instance_valid(cuerpo):
 			continue
-		objetivos.append(
-			{
-				"grupo": "enjambre",
-				"indice": indice,
-				"cuerpo": cuerpo,
-				"figura": actor.get("figura"),
-				"distancia2": cuerpo.position.distance_squared_to(posicion_jugador),
-			}
+		(
+			objetivos
+			. append(
+				{
+					"grupo": "enjambre",
+					"indice": indice,
+					"cuerpo": cuerpo,
+					"figura": actor.get("figura"),
+					"distancia2": cuerpo.position.distance_squared_to(posicion_jugador),
+				}
+			)
 		)
 
 	var runtime: Dictionary = estado.get("runtime", {})
 	var rival := estado.get("rival_proxy") as CharacterBody3D
-	if (
-		bool(runtime.get("singular_vivo", false))
-		and rival != null
-		and is_instance_valid(rival)
-	):
-		objetivos.append(
-			{
-				"grupo": "singular",
-				"indice": -1,
-				"cuerpo": rival,
-				"figura": figura_singular,
-				"distancia2": rival.position.distance_squared_to(posicion_jugador),
-			}
+	if bool(runtime.get("singular_vivo", false)) and rival != null and is_instance_valid(rival):
+		(
+			objetivos
+			. append(
+				{
+					"grupo": "singular",
+					"indice": -1,
+					"cuerpo": rival,
+					"figura": figura_singular,
+					"distancia2": rival.position.distance_squared_to(posicion_jugador),
+				}
+			)
 		)
 
 	objetivos.sort_custom(
@@ -266,12 +271,15 @@ static func _presentar_enjambre(
 		var cuerpo := (actores[indice] as Dictionary).get("cuerpo") as CharacterBody3D
 		if cuerpo == null or not is_instance_valid(cuerpo):
 			continue
-		ataques.append(
-			{
-				"grupo": "enjambre",
-				"indice": indice,
-				"distancia": cuerpo.position.distance_to(posicion_jugador),
-			}
+		(
+			ataques
+			. append(
+				{
+					"grupo": "enjambre",
+					"indice": indice,
+					"distancia": cuerpo.position.distance_to(posicion_jugador),
+				}
+			)
 		)
 
 	for indice_variant in paso_enjambre.get("abrir_ventana", []):
@@ -297,20 +305,21 @@ static func _presentar_singular(
 
 	var guardia := estado.get("guardia") as MeshInstance3D
 	if guardia != null and is_instance_valid(guardia):
-		guardia.visible = (
-			vivo and String(singular.get("estado", "")) == ARQUETIPOS.GUARDIA
-		)
+		guardia.visible = (vivo and String(singular.get("estado", "")) == ARQUETIPOS.GUARDIA)
 
 	var linea := estado.get("linea") as MeshInstance3D
 	if linea != null and is_instance_valid(linea):
 		if not vivo:
 			linea.visible = false
 		else:
-			HOSTIGADOR_3D.pintar_linea(
-				linea,
-				posicion_singular,
-				singular,
-				String(paso_singular.get("telegraph", "")),
+			(
+				HOSTIGADOR_3D
+				. pintar_linea(
+					linea,
+					posicion_singular,
+					singular,
+					String(paso_singular.get("telegraph", "")),
+				)
 			)
 
 
