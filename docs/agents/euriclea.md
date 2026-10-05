@@ -48,3 +48,13 @@ gh workflow run agent-review.yml -f pr=<N>
 ```
 
 El resultado sigue sujeto a CI y a integración humana.
+
+## Señales para tablero
+
+Estas señales permiten a un kanban externo interpretar el estado de revisión sin confundirlas con permiso de merge:
+
+- `revision:pendiente`: falta revisión independiente; el PR no está listo.
+- `revision:hallazgos`: Euriclea encontró problemas; requiere intervención/corrección.
+- `revision:ok`: revisión independiente sin hallazgos, pero no autoriza merge ni sustituye CI.
+- Un SHA nuevo invalida la señal anterior y el tablero debe tratarlo como pendiente hasta nueva revisión.
+- El tablero puede agrupar estas señales como columnas/estados, pero la autoridad sigue en GitHub labels, checks y decisión humana.
