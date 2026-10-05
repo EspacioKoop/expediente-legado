@@ -32,6 +32,32 @@ func _init() -> void:
 	comprobar("persiste eco", not Dictionary(resolucion.get("eco_onirico", {})).is_empty(), true)
 	comprobar("solicita guardado", guardados, [""])
 
+	var base_sueno := {
+		"entrada": Vector3.ZERO,
+		"carteles": [],
+		"luces": [],
+		"figuras": [],
+	}
+	var deformado := Entrada49Sueno.aplicar(base_sueno, estado, 0)
+	comprobar("primera sala recibe eco", deformado.has("entrada49_eco"), true)
+	comprobar(
+		"eco no afirma metafisica",
+		deformado.get("entrada49_eco", {}).get("afirmacion_metafisica"),
+		false
+	)
+	var segunda := Entrada49Sueno.aplicar(base_sueno, estado, 1)
+	comprobar("segunda sala queda limpia", segunda.has("entrada49_eco"), false)
+	comprobar(
+		"companero puede reaccionar",
+		not Entrada49Dialogo.resolver("becario", estado).is_empty(),
+		true
+	)
+	comprobar(
+		"actor sin reaccion no inventa dialogo",
+		Entrada49Dialogo.resolver("telefono", estado),
+		""
+	)
+
 	terminar()
 
 
