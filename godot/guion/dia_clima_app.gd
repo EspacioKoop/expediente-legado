@@ -537,6 +537,12 @@ func _clave_conversacion_contextual(
 			_guardar_o_avisar("")
 		return clave_social
 
+	# #2477: reacción read-only al registro 49. No descubre una pista, no cambia
+	# reputación y cede prioridad a reacciones ideológicas/religiosas ya ganadas.
+	var entrada49 := Entrada49Dialogo.resolver(actor_id, partida.estado)
+	if not entrada49.is_empty():
+		return entrada49
+
 	# #965: el desorden del archivado ya es estado derivado y visible. Se usa
 	# como reacción narrativa antes del fallback horario, sin registrar memoria
 	# social, reputación ni consecuencias nuevas.
