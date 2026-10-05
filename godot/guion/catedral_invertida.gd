@@ -71,9 +71,7 @@ static func validar_anclas(anclas: Dictionary) -> bool:
 
 
 static func estado_reproducible(
-	orientacion: String,
-	anclas: Dictionary,
-	reduccion_movimiento: bool = false
+	orientacion: String, anclas: Dictionary, reduccion_movimiento: bool = false
 ) -> Dictionary:
 	var actual := orientacion if orientacion_valida(orientacion) else SUELO
 	return {
