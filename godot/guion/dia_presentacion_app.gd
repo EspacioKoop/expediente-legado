@@ -7,8 +7,10 @@ extends RefCounted
 
 const ESCENA_CAMINANTE := preload("res://escenas/caminante.tscn")
 const METROS_POR_ZANCADA := 0.72
+const PITCH_PASOS := [0.96, 1.03, 0.99, 1.05, 0.95, 1.01]
 
 var _desde_paso := 0.0
+var _indice_paso := 0
 
 
 func montar_entorno(parent: Node3D, perfil_jugador: Dictionary) -> Dictionary:
@@ -113,7 +115,8 @@ func avanzar_pasos(
 		return
 	_desde_paso = 0.0
 	pisada.stream = Sonido.paso_sobre(suelo)
-	pisada.pitch_scale = randf_range(0.94, 1.06)
+	pisada.pitch_scale = PITCH_PASOS[_indice_paso % PITCH_PASOS.size()]
+	_indice_paso += 1
 	pisada.play()
 
 
