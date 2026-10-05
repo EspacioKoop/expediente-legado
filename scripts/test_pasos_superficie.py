@@ -49,6 +49,10 @@ class PasosSuperficieTest(unittest.TestCase):
 
         self.assertIn("var _desde_paso := 0.0", presentacion)
         self.assertIn("const METROS_POR_ZANCADA := 0.72", presentacion)
+        self.assertIn("const PITCH_PASOS := [0.96, 1.03, 0.99, 1.05, 0.95, 1.01]", presentacion)
+        self.assertIn("var _indice_paso := 0", presentacion)
+        self.assertIn("PITCH_PASOS[_indice_paso % PITCH_PASOS.size()]", presentacion)
+        self.assertNotIn("randf_range(", presentacion)
         self.assertIn("Sonido.paso_sobre(suelo)", presentacion)
         self.assertIn("Clima.NIEVE", presentacion)
         self.assertIn("Sonido.NIEVE", presentacion)
