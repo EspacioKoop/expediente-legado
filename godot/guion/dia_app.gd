@@ -321,7 +321,12 @@ func _espacio_de(fase: String) -> Dictionary:
 	var espacio_sueno := Sueno.espacio(id, jornada["sueno_escenas"].size() - 1, trozo)
 	# #1182: literatura modula la PRESENTACION de una sala que el sueño ya
 	# selecciono. No toca Sueno.noche(), fuentes #87, salidas ni hechos SIGA.
-	return SuenoLiteratura.aplicar(espacio_sueno, _registro_literario_para_sueno(), cual)
+	espacio_sueno = SuenoLiteratura.aplicar(
+		espacio_sueno, _registro_literario_para_sueno(), cual
+	)
+	# #2477: Entrada 49 solo deforma la primera sala de la noche a partir de una
+	# decisión ya persistida. No altera selección, duración, salidas ni progreso.
+	return Entrada49Sueno.aplicar(espacio_sueno, partida.estado, cual)
 
 
 ## #1182: el autoload literario es una dependencia opcional de presentacion.
