@@ -825,6 +825,20 @@ class AgentPoolTest(unittest.TestCase):
         self.assertNotIn("AGENT_POOL_WORKER_FAILURE", cancel_block)
         self.assertNotIn("AGENT_POOL_SLOT_UNHEALTHY", cancel_block)
 
+    def test_worker_reusable_no_tiene_concurrencia_global_por_issue(self):
+        worker = (ROOT / ".github" / "workflows" / "agent-worker.yml").read_text(
+            encoding="utf-8"
+        )
+        header = worker.split("\njobs:", 1)[0]
+        self.assertNotIn("\nconcurrency:", header)
+        self.assertNotIn("agent-pool-issue-${{ inputs.issue }}", worker)
+
+        pool = (ROOT / ".github" / "workflows" / "agent-pool.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("/api/agent-pool/worker-status", pool)
+        self.assertIn("Validar plan y reservar rutas", worker)
+
     def test_memoria_oidc_reconoce_worker_reusable_sin_abrir_dispatcher(self):
         memory = (ROOT / "infra" / "feedback-deno" / "agent_memory.ts").read_text(
             encoding="utf-8"
