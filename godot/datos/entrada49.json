@@ -1,0 +1,46 @@
+{
+  "id": "entrada49",
+  "titulo": "La Entrada 49",
+  "fuentes": [
+    {
+      "id": "tablilla_uruk",
+      "fecha_aprox": "-2450",
+      "soporte": "tablilla",
+      "trabajadores": 48,
+      "raciones": 49,
+      "nota": "La última ración carece de nombre legible."
+    },
+    {
+      "id": "catalogo_1887",
+      "fecha_aprox": "1887",
+      "soporte": "catalogo",
+      "trabajadores": 48,
+      "raciones": 49,
+      "nota": "El editor atribuye la discrepancia a una rotura del original."
+    },
+    {
+      "id": "transcripcion_1998",
+      "fecha_aprox": "1998",
+      "soporte": "transcripcion",
+      "trabajadores": 48,
+      "raciones": 49,
+      "nota": "La importación conserva 49 líneas válidas."
+    }
+  ],
+  "registro_extra": {
+    "id": "E49-SIN-NOMBRE",
+    "nombre": "",
+    "estado_inicial": "importado",
+    "procedencia": [
+      "transcripcion_1998",
+      "catalogo_1887",
+      "tablilla_uruk"
+    ]
+  },
+  "decisiones": [
+    "aislar",
+    "validar",
+    "borrar",
+    "investigar"
+  ]
+}
