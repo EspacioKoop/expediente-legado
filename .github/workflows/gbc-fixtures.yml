@@ -20,6 +20,7 @@ on:
       - "gbc/minijuegos/vitral_98/**"
       - "gbc/minijuegos/sarnath_98/**"
       - "gbc/minijuegos/sueno_98/**"
+      - "gbc/minijuegos/ariadne_98/**"
       - "gbc/minijuegos/hydra_loop_98/**"
       - "gbc/minijuegos/hydra_loop/assets/**"
       - "gbc/minijuegos/webkeeper_98/**"
@@ -235,6 +236,13 @@ jobs:
           make -C gbc/minijuegos/sueno_98 clean test PYTHON=/tmp/pyboy/bin/python
           cp gbc/minijuegos/sueno_98/build/sueno_98.gbc gbc-fixtures/
 
+      - name: Build ARIADNE 98 prototype
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C gbc/minijuegos/ariadne_98 clean all
+          cp gbc/minijuegos/ariadne_98/build/ariadne_98.gbc gbc-fixtures/
+
       - name: Build and play-test HYDRA LOOP prototype
         shell: bash
         run: |
@@ -255,7 +263,7 @@ jobs:
           set -euo pipefail
           (
             cd gbc-fixtures
-            sha256sum joypad.gb vblank.gb cgb-acid2.gbc cgb_only_smoke.gbc caza_pixeles_98.gbc paper_planes_98.gbc croc_riders_98.gbc aquiles_98.gbc ryu_flow_98.gbc jali_98.gbc vitral_98.gbc sarnath_98.gbc sueno_98.gbc hydra_loop_98.gbc webkeeper_98.gbc | tee SHA256SUMS
+            sha256sum joypad.gb vblank.gb cgb-acid2.gbc cgb_only_smoke.gbc caza_pixeles_98.gbc paper_planes_98.gbc croc_riders_98.gbc aquiles_98.gbc ryu_flow_98.gbc jali_98.gbc vitral_98.gbc sarnath_98.gbc sueno_98.gbc ariadne_98.gbc hydra_loop_98.gbc webkeeper_98.gbc | tee SHA256SUMS
             echo "${CGB_ACID2_SHA256}  cgb-acid2.gbc" | sha256sum --check --strict
           )
           : > gbc-fixtures/rom-metadata.jsonl

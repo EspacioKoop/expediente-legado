@@ -16,7 +16,7 @@ class MinotauroVerticalTest(unittest.TestCase):
 
     def test_vigilia_requiere_interaccion_deliberada_fuera_de_oficina(self):
         self.assertIn("extends Interactuable3D", self.vigilia)
-        self.assertIn('const FUENTE := "rom:ariadna_labertinto_98"', self.vigilia)
+        self.assertIn('const FUENTE := "rom:ariadne_98"', self.vigilia)
         self.assertIn("const INTERACCIONES_REQUERIDAS := 2", self.vigilia)
         self.assertIn("_interacciones < INTERACCIONES_REQUERIDAS", self.vigilia)
         self.assertRegex(

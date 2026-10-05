@@ -1,6 +1,6 @@
 # Procedencia — Ariadne, el hilo del laberinto
 
-- Épica: #808. Id del catálogo: `ariadna_labertinto_98`.
+- Épica: #808. Id del catálogo: `ariadne_98`.
 - Autoría: lámina de concept art generada con el modelo de imágenes de OpenAI para EspacioKoop a petición de @eGurucharri, aprobada el 2026-09-17 (título, pantalla de juego, sprites animados, tileset 8×8, HUD y 8 paletas).
 - Original: `lamina.png` (SHA-256 `cb405c31b41087d6e7c360cfa273fe52e995acbfaa64b0cb4e375864ebd0293e`).
 - Pantalla de título GBC: `docs/visuales/ariadne/titulo_*.inc`, generada con

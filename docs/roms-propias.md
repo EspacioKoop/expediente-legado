@@ -35,10 +35,12 @@ Contrapartes de vigilia de los sueños mitológicos (#435, #442). Permanecen fue
 
 | id | Título | Sueño | Idea / estado | Issues |
 |---|---|---|---|---|
-| `ariadna_labertinto_98` | Ariadne, el hilo del laberinto | Minotauro | laberinto de archivo; ya existe su cartucho 3D en casa | #437 #512 |
+| `ariadne_98` | Ariadne, el hilo del laberinto | Minotauro | **fuente prototipo**: portada + primer laberinto cenital determinista; todavía sin hilo/Minotauro/SRAM | #2313 #2368 #437 #512 |
 | `uruk_98` | URUK 98 | Gilgamesh | ciudad mínima y tablilla que reconstruir | #436 |
 | `hydra_loop_98` | HYDRA LOOP | Hidra | **fuente prototipo jugable**: cortar hace brotar dos cabezas; sellar un nodo exige haber leído dos cabezas suyas; tres niveles y handshake `$C100 = 0xA5` al romper el bucle | #439 #600 |
 | `duat_98` | DUAT 98 | Duat | cámaras y contrapesos | #441 |
+
+`ARIADNE 98` ya tiene fuente prototipo en `gbc/minijuegos/ariadne_98`: portada y primer laberinto navegable, compilados como fixture con cabecera `ARIADNE98`. Sigue `en_proyecto`, con `rom` vacío, precio 0 y fuera de consola/tienda/runtime hasta completar el vertical #2313. El id histórico con typo `ariadna_labertinto_98` queda migrado al canónico `ariadne_98`.
 
 `HYDRA LOOP` tiene ya fuente prototipo en `gbc/minijuegos/hydra_loop_98` (portada de `gbc/minijuegos/hydra_loop`) y se compila y prueba con PyBoy en el workflow GBC. Sigue fuera del runtime: `HidraVigilia` no lee todavía su handshake.
 
