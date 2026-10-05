@@ -57,14 +57,15 @@ static func _crear(
 
 
 static func _capar(valor: Dictionary) -> Dictionary:
+	var reaccion := clampf(
+		float(valor.get("desplazamiento_reaccion", 0.0)),
+		0.0,
+		REACCION_MAX,
+	)
 	return {
 		"hitstop": clampf(float(valor.get("hitstop", 0.0)), 0.0, HITSTOP_MAX),
 		"shake": clampf(float(valor.get("shake", 0.0)), 0.0, SHAKE_MAX),
-		"desplazamiento_reaccion": clampf(
-			float(valor.get("desplazamiento_reaccion", 0.0)),
-			0.0,
-			REACCION_MAX,
-		),
+		"desplazamiento_reaccion": reaccion,
 		"particulas": maxi(0, int(valor.get("particulas", 0))),
 		"flash": bool(valor.get("flash", false)),
 		"senal_estatica": bool(valor.get("senal_estatica", false)),
