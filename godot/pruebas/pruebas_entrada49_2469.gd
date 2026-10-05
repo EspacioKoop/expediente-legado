@@ -28,11 +28,7 @@ func _init() -> void:
 		)
 		var eco: Dictionary = resultado.get("eco_onirico", {})
 		comprobar("%s deja eco" % decision, not eco.is_empty(), true)
-		comprobar(
-			"%s no confirma metafísica" % decision,
-			eco.get("afirmacion_metafisica"),
-			false
-		)
+		comprobar("%s no confirma metafísica" % decision, eco.get("afirmacion_metafisica"), false)
 
 	var borrado := Entrada49.procesar_importacion(datos, "borrar")
 	comprobar("borrar provoca reaparición", borrado.get("reaparece"), true)
