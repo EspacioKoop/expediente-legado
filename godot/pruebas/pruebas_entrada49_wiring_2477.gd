@@ -53,9 +53,7 @@ func _init() -> void:
 		true
 	)
 	comprobar(
-		"actor sin reaccion no inventa dialogo",
-		Entrada49Dialogo.resolver("telefono", estado),
-		""
+		"actor sin reaccion no inventa dialogo", Entrada49Dialogo.resolver("telefono", estado), ""
 	)
 
 	terminar()
