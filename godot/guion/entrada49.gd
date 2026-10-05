@@ -24,11 +24,14 @@ static func analizar_fuentes(datos: Dictionary) -> Dictionary:
 		max_trabajadores = maxi(max_trabajadores, trabajadores)
 		max_raciones = maxi(max_raciones, raciones)
 		if raciones != trabajadores:
-			discrepancias.append(
-				{
-					"fuente": String(fuente.get("id", "")),
-					"diferencia": raciones - trabajadores,
-				}
+			(
+				discrepancias
+				. append(
+					{
+						"fuente": String(fuente.get("id", "")),
+						"diferencia": raciones - trabajadores,
+					}
+				)
 			)
 	return {
 		"fuentes_validas": fuentes.size(),
