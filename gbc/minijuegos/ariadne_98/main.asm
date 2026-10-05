@@ -1,6 +1,6 @@
-; ARIADNE 98 - primer vertical navegable (#2313/#2368/#2389).
-; Laberinto cenital manual y determinista. Este corte NO implementa hilo,
-; Minotauro, SRAM ni handshake SIGA; solo portada -> laberinto -> salida.
+; ARIADNE 98 - vertical navegable (#2313/#2368/#2369).
+; Laberinto cenital manual y determinista con hilo limitado y reversible.
+; Este corte NO implementa Minotauro, SRAM ni handshake SIGA.
 ; Arte geométrico original del proyecto. Licencia MIT.
 
 DEF rP1    EQU $FF00
@@ -44,6 +44,9 @@ DEF TILE_1       EQU 12
 DEF TILE_H       EQU 13
 DEF TILE_L       EQU 14
 DEF TILE_ALERTA  EQU 15
+DEF TILE_HILO    EQU 16
+
+DEF HILO_MAX EQU 9
 
 DEF LAB_ANCHO EQU 16
 DEF LAB_ALTO  EQU 12
@@ -112,6 +115,18 @@ EstadoTitulo:
 
 EstadoJuego:
     ld a, [wTeclasNuevas]
+    and KEY_START
+    jr z, .no_reiniciar
+    call IniciarJuego
+    jr Bucle
+.no_reiniciar:
+    ld a, [wTeclasNuevas]
+    and KEY_A
+    jr z, .no_hilo
+    call AlternarHilo
+    jr Bucle
+.no_hilo:
+    ld a, [wTeclasNuevas]
     and KEY_LEFT
     jr nz, .izquierda
     ld a, [wTeclasNuevas]
@@ -153,6 +168,7 @@ IniciarJuego:
     ld [wJugadorY], a
     ld a, ESTADO_JUEGO
     ld [wEstado], a
+    call ReiniciarHilo
     call DibujarHUD
     call DibujarLaberinto
     call DibujarJugador
@@ -196,10 +212,12 @@ IntentarMover:
     ret z
     push af
     call BorrarJugador
+    call GestionarHilo
     ld a, b
     ld [wJugadorX], a
     ld a, c
     ld [wJugadorY], a
+    call RedibujarHilo
     call DibujarJugador
     pop af
     cp TILE_SALIDA
@@ -284,7 +302,7 @@ MostrarSalida:
     ret
 
 DibujarHUD:
-    ; Reserva estable para nivel, hilo y alerta. Este corte solo fija el layout.
+    ; Nivel a la izquierda; hilo en el centro con nueve marcas consumibles.
     ld a, TILE_L
     ld [BG_MAP], a
     ld a, TILE_1
@@ -292,7 +310,214 @@ DibujarHUD:
     ld a, TILE_H
     ld [BG_MAP + 7], a
     ld a, TILE_ALERTA
-    ld [BG_MAP + 14], a
+    ld [BG_MAP + 19], a
+    call ActualizarHUDHilo
+    ret
+
+AlternarHilo:
+    ld a, [wHiloActivo]
+    xor 1
+    and 1
+    ld [wHiloActivo], a
+    call ActualizarHUDHilo
+    ret
+
+ReiniciarHilo:
+    ld a, HILO_MAX
+    ld [wHiloRestante], a
+    ld a, 1
+    ld [wHiloActivo], a
+    xor a
+    ld [wHiloSegmentos], a
+    ld hl, wHiloDesde
+    ld b, HILO_MAX * 2
+.limpiar:
+    ld [hli], a
+    dec b
+    jr nz, .limpiar
+    ret
+
+ActualizarHUDHilo:
+    ; Una marca junto a H indica que el tendido está activo.
+    xor a
+    ld [BG_MAP + 6], a
+    ld a, [wHiloActivo]
+    or a
+    jr z, .marcas
+    ld a, TILE_HILO
+    ld [BG_MAP + 6], a
+.marcas:
+    ld hl, BG_MAP + 8
+    ld a, [wHiloRestante]
+    ld c, a
+    ld b, HILO_MAX
+.bucle:
+    ld a, c
+    or a
+    jr z, .vacia
+    ld a, TILE_HILO
+    ld [hli], a
+    dec c
+    jr .siguiente
+.vacia:
+    xor a
+    ld [hli], a
+.siguiente:
+    dec b
+    jr nz, .bucle
+    ret
+
+; B=x destino, C=y destino. Mantiene una pila de aristas tendidas.
+; Solo cruzar la última arista en sentido inverso recupera hilo. Atravesar una
+; arista ya marcada nunca duplica ni consume recurso.
+GestionarHilo:
+    push bc
+
+    ; Empaquetar destino (yyyyxxxx).
+    ld a, c
+    swap a
+    and $F0
+    or b
+    ld [wMovimientoHasta], a
+
+    ; Empaquetar origen actual.
+    ld a, [wJugadorY]
+    swap a
+    and $F0
+    ld c, a
+    ld a, [wJugadorX]
+    or c
+    ld [wMovimientoDesde], a
+
+    ; ¿Es exactamente el último tramo en sentido inverso?
+    ld a, [wHiloSegmentos]
+    or a
+    jr z, .tender
+    dec a
+    ld e, a
+    ld d, 0
+    ld hl, wHiloDesde
+    add hl, de
+    ld a, [wMovimientoHasta]
+    cp [hl]
+    jr nz, .buscar_existente
+    ld hl, wHiloHasta
+    add hl, de
+    ld a, [wMovimientoDesde]
+    cp [hl]
+    jr nz, .buscar_existente
+
+    ld a, [wHiloSegmentos]
+    dec a
+    ld [wHiloSegmentos], a
+    ld a, [wHiloRestante]
+    cp HILO_MAX
+    jr nc, .actualizar_recogida
+    inc a
+    ld [wHiloRestante], a
+.actualizar_recogida:
+    call ActualizarHUDHilo
+    jr .fin
+
+.buscar_existente:
+    ; Evita duplicar una arista ya tendida, en cualquiera de sus sentidos.
+    ld a, [wHiloSegmentos]
+    ld b, a
+    xor a
+    ld c, a
+.buscar:
+    ld a, b
+    or a
+    jr z, .tender
+    ld e, c
+    ld d, 0
+
+    ld hl, wHiloDesde
+    add hl, de
+    ld a, [wMovimientoDesde]
+    cp [hl]
+    jr nz, .probar_inversa
+    ld hl, wHiloHasta
+    add hl, de
+    ld a, [wMovimientoHasta]
+    cp [hl]
+    jr z, .fin
+
+.probar_inversa:
+    ld hl, wHiloDesde
+    add hl, de
+    ld a, [wMovimientoHasta]
+    cp [hl]
+    jr nz, .siguiente_existente
+    ld hl, wHiloHasta
+    add hl, de
+    ld a, [wMovimientoDesde]
+    cp [hl]
+    jr z, .fin
+
+.siguiente_existente:
+    inc c
+    dec b
+    jr .buscar
+
+.tender:
+    ld a, [wHiloActivo]
+    or a
+    jr z, .fin
+    ld a, [wHiloRestante]
+    or a
+    jr z, .fin
+    ld a, [wHiloSegmentos]
+    cp HILO_MAX
+    jr nc, .fin
+
+    ld c, a
+    ld e, c
+    ld d, 0
+    ld hl, wHiloDesde
+    add hl, de
+    ld a, [wMovimientoDesde]
+    ld [hl], a
+    ld hl, wHiloHasta
+    add hl, de
+    ld a, [wMovimientoHasta]
+    ld [hl], a
+
+    ld a, [wHiloSegmentos]
+    inc a
+    ld [wHiloSegmentos], a
+    ld a, [wHiloRestante]
+    dec a
+    ld [wHiloRestante], a
+    call ActualizarHUDHilo
+.fin:
+    pop bc
+    ret
+
+RedibujarHilo:
+    ld a, [wHiloSegmentos]
+    or a
+    ret z
+    ld d, a
+    ld hl, wHiloHasta
+.bucle:
+    ld a, [hli]
+    push hl
+    push de
+    ld c, a
+    and $0F
+    ld b, a
+    ld a, c
+    swap a
+    and $0F
+    ld c, a
+    call PosicionBGBC
+    ld a, TILE_HILO
+    ld [hl], a
+    pop de
+    pop hl
+    dec d
+    jr nz, .bucle
     ret
 
 DibujarLaberinto:
@@ -535,6 +760,9 @@ Tiles:
     ; 15 alerta
     db %00011000,0, %00011000,0, %00011000,0, %00011000,0
     db %00011000,0, 0,0, %00011000,0, 0,0
+    ; 16 hilo / marca de recurso
+    db 0,0, %00011000,0, %00111100,0, %01111110,0
+    db %01111110,0, %00111100,0, %00011000,0, 0,0
 TilesFin:
 
 SECTION "Estado", WRAM0
@@ -544,3 +772,10 @@ wJugadorY: ds 1
 wTeclas: ds 1
 wTeclasPrevias: ds 1
 wTeclasNuevas: ds 1
+wHiloRestante: ds 1
+wHiloActivo: ds 1
+wHiloSegmentos: ds 1
+wMovimientoDesde: ds 1
+wMovimientoHasta: ds 1
+wHiloDesde: ds HILO_MAX
+wHiloHasta: ds HILO_MAX
