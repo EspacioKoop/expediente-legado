@@ -3,6 +3,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 CAMINANTE = ROOT / "godot" / "guion" / "caminante.gd"
+PRESENTACION = ROOT / "godot" / "guion" / "dia_presentacion_app.gd"
 
 
 def fuente() -> str:
@@ -41,11 +42,14 @@ class ControlesPisadasTest(unittest.TestCase):
 
     def test_pisadas_quedan_atenuadas_sin_tocar_pitch(self) -> None:
         caminante = fuente()
-        dia = (ROOT / "godot" / "guion" / "dia_app.gd").read_text(encoding="utf-8")
+        presentacion = PRESENTACION.read_text(encoding="utf-8")
         assert "const VOLUMEN_PISADA_DB := -8.0" in caminante
         assert "hijo.volume_db = VOLUMEN_PISADA_DB" in caminante
         assert 'call_deferred("_ajustar_volumen_pisadas")' in caminante
-        assert "_pisada.pitch_scale = randf_range(0.94, 1.06)" in dia
+        assert "const PITCH_PASOS := [0.96, 1.03, 0.99, 1.05, 0.95, 1.01]" in presentacion
+        assert "pisada.pitch_scale = PITCH_PASOS[_indice_paso % PITCH_PASOS.size()]" in presentacion
+        assert "randf_range(" not in presentacion
+        assert "pitch_scale" not in caminante
 
 
 if __name__ == "__main__":

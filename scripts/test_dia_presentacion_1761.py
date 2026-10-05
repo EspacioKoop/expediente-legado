@@ -19,11 +19,13 @@ class DiaPresentacion1761Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.dia = DIA.read_text(encoding="utf-8")
+        cls.dia_compacto = "".join(cls.dia.split())
         cls.presentacion = PRESENTACION.read_text(encoding="utf-8")
 
     def test_dia_delega_entorno_e_interfaz(self):
-        self.assertIn("DiaPresentacionApp.new().montar_entorno(", self.dia)
-        self.assertIn("DiaPresentacionApp.new().montar_interfaz(", self.dia)
+        self.assertIn("var_presentacion:=DiaPresentacionApp.new()", self.dia_compacto)
+        self.assertIn("_presentacion.montar_entorno(", self.dia_compacto)
+        self.assertIn("_presentacion.montar_interfaz(", self.dia_compacto)
         self.assertNotIn("WorldEnvironment.new()", self.dia)
         self.assertNotIn("DirectionalLight3D.new()", self.dia)
 

@@ -7,9 +7,6 @@ extends Node3D
 
 signal combate_real_terminado(objetivo_id: String, gano: bool, consecuencia: Dictionary)
 
-## Lo que se anda entre paso y paso. Una zancada de persona son unos setenta
-## centímetros.
-const METROS_POR_ZANCADA := 0.72
 const SELLO_FIRMA_SIN_PRISA := "firma-sin-prisa"
 const SELLO_REINCORPORACION := "reincorporacion-administrativa"
 const SELLO_DESPERTAR_REGLAMENTARIO := "despertar-reglamentario"
@@ -30,6 +27,7 @@ var _nomina: Label
 ## fallo de guardado. DiaApp conserva los wrappers porque son contrato de la
 ## cadena dia_* y de numerosos controladores.
 var _guardado := DiaGuardadoApp.new()
+var _presentacion := DiaPresentacionApp.new()
 var _borrar: Button
 var _borrar_confirmando := false
 var _pantalla: CanvasLayer
@@ -53,7 +51,6 @@ var _ambiente: Environment
 var _sol: DirectionalLight3D
 var _voz: AudioStreamPlayer
 var _pisada: AudioStreamPlayer3D
-var _desde_paso := 0.0
 ## Si lo que se lee ahora mismo es algo que dijo alguien. Lo que dice un
 ## compañero es de la oficina y del momento: llevárselo a la calle o al sueño
 ## lo convierte en una voz que te sigue.
@@ -174,9 +171,7 @@ func _cerrar_vuelta() -> void:
 ## había ninguna. El relleno ambiental no se toca aquí —cada espacio fija el
 ## suyo al entrar con `ambiente_energia`, y este valor es solo el inicial—.
 func _montar_entorno() -> void:
-	var montado := DiaPresentacionApp.new().montar_entorno(
-		self, partida.estado.get("perfil_jugador", {})
-	)
+	var montado := _presentacion.montar_entorno(self, partida.estado.get("perfil_jugador", {}))
 	_ambiente = montado["ambiente"]
 	_sol = montado["sol"]
 	_caminante = montado["caminante"]
@@ -185,9 +180,7 @@ func _montar_entorno() -> void:
 
 
 func _montar_interfaz() -> void:
-	var montado := DiaPresentacionApp.new().montar_interfaz(
-		self, Callable(self, "_al_pulsar_borrar")
-	)
+	var montado := _presentacion.montar_interfaz(self, Callable(self, "_al_pulsar_borrar"))
 	_hud = montado["hud"]
 	_rotulo = montado["rotulo"]
 	_nomina = montado["nomina"]
@@ -563,34 +556,26 @@ func _dar_de_comer() -> void:
 ## y a la misma velocidad la zancada es siempre la misma. Con un temporizador,
 ## quedarse quieto contra una pared seguiría sonando a alguien caminando.
 func _andar(delta: float) -> void:
-	if _pantalla != null or not _caminante.is_physics_processing():
-		return
-	var avance := Vector2(_caminante.velocity.x, _caminante.velocity.z).length() * delta
-	_desde_paso += avance
-	if _desde_paso < METROS_POR_ZANCADA:
-		return
-	_desde_paso = 0.0
-	_pisada.stream = Sonido.paso_sobre(_suelo_pisado())
-	_pisada.pitch_scale = randf_range(0.94, 1.06)
-	_pisada.play()
+	(
+		_presentacion
+		. avanzar_pasos(
+			_caminante,
+			_pantalla != null,
+			_pisada,
+			_suelo_pisado(),
+			delta,
+		)
+	)
 
 
-## Qué se pisa: el suelo que declara el espacio, salvo que nieve en la calle. El
-## sueño no declara suelo y conserva los pasos genéricos.
+## Wrapper heredable: la selección física del suelo pertenece a presentación.
 func _suelo_pisado() -> String:
-	if (
-		String(jornada.get("fase", "")) == "trayecto"
-		and Clima.estado(int(jornada.get("dia", 1))) == Clima.NIEVE
-	):
-		return Sonido.NIEVE
-	return String(_espacio_actual.get("textura_suelo", ""))
+	return _presentacion.suelo_pisado(jornada, _espacio_actual)
 
 
+## Wrapper heredable consumido por la cadena dia_*.
 func _sonar(nombre: String) -> void:
-	var stream := Sonido.stream(nombre)
-	if stream != null:
-		_voz.stream = stream
-		_voz.play()
+	_presentacion.sonar(_voz, nombre)
 
 
 ## El expediente, encima del día y sin salir de él.
