@@ -143,9 +143,37 @@ jobs:
             > /tmp/issues.json
 
           # Control-plane Deno KV (#1728): un lease activo gana sobre labels
-          # rezagadas. Si Deno no responde, la selección conserva el mecanismo
-          # histórico para que la migración sea fail-open.
-          if [[ -n "${CONTROL_URL:-}" && "$(jq 'length' /tmp/issues.json)" -gt 0 ]]; then
+          # rezagadas. Durante el canario se intenta primero el standalone de
+          # infra-casa; si falla, se conserva el control-plane actual y después
+          # el mecanismo histórico de GitHub (fail-open).
+          lease_status_from_deno=false
+          if [[ "$(jq 'length' /tmp/issues.json)" -gt 0 && -n "${STANDALONE_CONTROL_URL:-}" ]]; then
+            base="${STANDALONE_CONTROL_URL%/}"
+            if oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+              "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=infra-control-plane")" &&
+              oidc_token="$(jq -er '.value' <<<"$oidc_json")"; then
+              resources="$(jq -c '[.[].number | "issue:" + tostring]' /tmp/issues.json)"
+              payload="$(jq -nc --argjson resources "$resources" '{resources:$resources}')"
+              if curl -fsS -X POST "$base/api/lease/status-bulk" \
+                -H "Authorization: Bearer $oidc_token" \
+                -H 'Content-Type: application/json' \
+                --data "$payload" -o /tmp/standalone-lease-status.json; then
+                leased="$(jq -c '[.leases[]?.resource | strings | select(startswith("issue:")) | sub("^issue:";"") | tonumber] | unique' /tmp/standalone-lease-status.json)"
+                tmp="$(mktemp)"
+                jq --argjson leased "$leased" \
+                  'map(select(.number as $n | ($leased | index($n) | not)))' \
+                  /tmp/issues.json > "$tmp"
+                mv "$tmp" /tmp/issues.json
+                lease_status_from_deno=true
+                echo "Leases leídos del control-plane standalone: $(jq 'length' <<<"$leased") activos excluidos."
+              fi
+            fi
+            if [[ "$lease_status_from_deno" != true ]]; then
+              echo "::warning::Status de leases standalone no disponible; se intenta el control-plane actual."
+            fi
+          fi
+
+          if [[ "$lease_status_from_deno" != true && -n "${CONTROL_URL:-}" && "$(jq 'length' /tmp/issues.json)" -gt 0 ]]; then
             base="${CONTROL_URL%/}"
             base="${base%/api/report}"
             if oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
@@ -163,13 +191,13 @@ jobs:
                   'map(select(.number as $n | ($leased | index($n) | not)))' \
                   /tmp/issues.json > "$tmp"
                 mv "$tmp" /tmp/issues.json
-                echo "Control-plane: $(jq 'length' <<<"$leased") leases activos excluidos."
-              else
-                echo "::warning::Control-plane Deno no disponible al filtrar la cola; se usa fallback GitHub."
+                lease_status_from_deno=true
+                echo "Leases leídos del control-plane actual: $(jq 'length' <<<"$leased") activos excluidos."
               fi
-            else
-              echo "::warning::No se pudo obtener OIDC para el control-plane; se usa fallback GitHub."
             fi
+          fi
+          if [[ "$lease_status_from_deno" != true && "$(jq 'length' /tmp/issues.json)" -gt 0 ]]; then
+            echo "::warning::Status de leases Deno no disponible; se usa fallback GitHub."
           fi
 
           # Inventario único de workers (#1685): qwen-primary, gemini y cada slot
