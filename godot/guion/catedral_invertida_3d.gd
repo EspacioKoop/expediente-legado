@@ -22,11 +22,22 @@ func preparar() -> void:
 	_arquitectura.name = "Arquitectura"
 	add_child(_arquitectura)
 
-	_crear_caja("Suelo", Vector3(12.0, 0.24, 8.0), Vector3(0.0, -0.12, 0.0), Color(0.16, 0.15, 0.18))
+	_crear_caja(
+		"Suelo", Vector3(12.0, 0.24, 8.0), Vector3(0.0, -0.12, 0.0), Color(0.16, 0.15, 0.18)
+	)
 	_crear_caja("Techo", Vector3(12.0, 0.24, 8.0), Vector3(0.0, 5.0, 0.0), Color(0.12, 0.11, 0.14))
-	_crear_caja("MuroDerecho", Vector3(0.24, 5.2, 8.0), Vector3(6.0, 2.5, 0.0), Color(0.23, 0.21, 0.25))
-	_crear_caja("MuroIzquierdo", Vector3(0.24, 5.2, 8.0), Vector3(-6.0, 2.5, 0.0), Color(0.23, 0.21, 0.25))
-	_crear_caja("ReferenciaCentral", Vector3(0.40, 3.8, 0.40), Vector3(0.0, 1.9, 0.0), Color(0.58, 0.52, 0.42))
+	_crear_caja(
+		"MuroDerecho", Vector3(0.24, 5.2, 8.0), Vector3(6.0, 2.5, 0.0), Color(0.23, 0.21, 0.25)
+	)
+	_crear_caja(
+		"MuroIzquierdo", Vector3(0.24, 5.2, 8.0), Vector3(-6.0, 2.5, 0.0), Color(0.23, 0.21, 0.25)
+	)
+	_crear_caja(
+		"ReferenciaCentral",
+		Vector3(0.40, 3.8, 0.40),
+		Vector3(0.0, 1.9, 0.0),
+		Color(0.58, 0.52, 0.42)
+	)
 
 
 func orientacion_actual() -> String:
@@ -34,7 +45,9 @@ func orientacion_actual() -> String:
 
 
 func plan_hasta(destino: String) -> Dictionary:
-	return CatedralInvertida.plan_transicion(_orientacion, destino, reduccion_movimiento, global_position)
+	return CatedralInvertida.plan_transicion(
+		_orientacion, destino, reduccion_movimiento, global_position
+	)
 
 
 func aplicar_orientacion(destino: String) -> Dictionary:
