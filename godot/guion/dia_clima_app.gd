@@ -550,13 +550,15 @@ func _clave_conversacion_contextual(
 		actor_id, _archivado_sesion.desorden_total()
 	)
 	if not clave_archivado.is_empty():
-		return clave_archivado
-
-	# #963: la hora solo entra como último fallback contextual. No tapa una
-	# reacción ideológica/religiosa ya ganada y no modifica presencia o estado.
-	var clave_horaria := DialogoHorarioCompaneros.resolver(actor_id, Jornada.hora_decimal(jornada))
-	if not clave_horaria.is_empty():
-		return clave_horaria
+		clave_dialogo = clave_archivado
+	else:
+		# #963: la hora solo entra como último fallback contextual. No tapa una
+		# reacción ideológica/religiosa ya ganada y no modifica presencia o estado.
+		var clave_horaria := DialogoHorarioCompaneros.resolver(
+			actor_id, Jornada.hora_decimal(jornada)
+		)
+		if not clave_horaria.is_empty():
+			clave_dialogo = clave_horaria
 	return clave_dialogo
 
 
