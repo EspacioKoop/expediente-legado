@@ -39,18 +39,21 @@ static func aplicar(espacio: Dictionary, estado: Dictionary, indice_sala: int) -
 			carteles.append(_cartel("EXPEDIENTE AISLADO · 49", entrada + Vector3(2.2, 1.5, -1.8)))
 		"puesto_vacio_ocupado":
 			var figuras: Array = salida.get("figuras", []).duplicate(true)
-			figuras.append(
-				{
-					"pos": entrada + Vector3(2.4, 0.0, 2.2),
-					"color": Color(0.08, 0.08, 0.09, 0.82),
-					"rotulo": "",
-					"color_rotulo": Color(0.55, 0.55, 0.57),
-					"duelo": "",
-					"ataques": [],
-					"movimiento_idle": false,
-					"fase_idle": 0.0,
-					"mirar_jugador": true,
-				}
+			(
+				figuras
+				. append(
+					{
+						"pos": entrada + Vector3(2.4, 0.0, 2.2),
+						"color": Color(0.08, 0.08, 0.09, 0.82),
+						"rotulo": "",
+						"color_rotulo": Color(0.55, 0.55, 0.57),
+						"duelo": "",
+						"ataques": [],
+						"movimiento_idle": false,
+						"fase_idle": 0.0,
+						"mirar_jugador": true,
+					}
+				)
 			)
 			salida["figuras"] = figuras
 		"tablilla_reescrita":
@@ -59,20 +62,26 @@ static func aplicar(espacio: Dictionary, estado: Dictionary, indice_sala: int) -
 			)
 		"sala_de_tablillas":
 			for i in range(4):
-				carteles.append(
-					_cartel(
-						"RACIÓN %02d / 49" % [46 + i],
-						entrada + Vector3(-2.4 + float(i) * 1.5, 1.35, 2.0),
+				(
+					carteles
+					. append(
+						_cartel(
+							"RACIÓN %02d / 49" % [46 + i],
+							entrada + Vector3(-2.4 + float(i) * 1.5, 1.35, 2.0),
+						)
 					)
 				)
-			luces.append(
-				{
-					"pos": entrada + Vector3(0.0, 1.8, 2.4),
-					"color": Color(0.78, 0.58, 0.30),
-					"energia": 0.75,
-					"alcance": 4.0,
-					"carcasa": false,
-				}
+			(
+				luces
+				. append(
+					{
+						"pos": entrada + Vector3(0.0, 1.8, 2.4),
+						"color": Color(0.78, 0.58, 0.30),
+						"energia": 0.75,
+						"alcance": 4.0,
+						"carcasa": false,
+					}
+				)
 			)
 		_:
 			return salida
