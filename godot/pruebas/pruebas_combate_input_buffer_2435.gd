@@ -107,7 +107,9 @@ func _probar_estado_desconocido() -> void:
 		"estado desconocido no obtiene cancelación gratis",
 	)
 	var invalido := BUFFER.encolar(BUFFER.nuevo(), "parry")
-	_comprobar(\n\t\tString(invalido["accion"]).is_empty(), "acción fuera del contrato no entra al buffer"\n\t)
+	_comprobar(
+		String(invalido["accion"]).is_empty(), "acción fuera del contrato no entra al buffer"
+	)
 
 
 func _probar_determinismo() -> void:
