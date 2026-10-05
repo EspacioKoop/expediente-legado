@@ -51,6 +51,26 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Canario pasivo del control-plane standalone
+        if: ${{ vars.AGENT_CONTROL_PLANE_URL != '' }}
+        continue-on-error: true
+        env:
+          AGENT_CONTROL_PLANE_URL: ${{ vars.AGENT_CONTROL_PLANE_URL }}
+        run: |
+          set -euo pipefail
+          base="${AGENT_CONTROL_PLANE_URL%/}"
+          if ! health="$(curl -fsS --max-time 5 "$base/health")"; then
+            echo "::warning::Control-plane standalone no disponible; el pool sigue usando el control-plane actual."
+            exit 0
+          fi
+          ok="$(jq -r '.ok == true' <<<"$health")"
+          service="$(jq -r '.service // empty' <<<"$health")"
+          if [[ "$ok" != true || "$service" != infra-control-plane ]]; then
+            echo "::warning::/health del canario no cumple el contrato esperado; no cambia ninguna decisión del pool."
+            exit 0
+          fi
+          echo "Control-plane standalone saludable (canario pasivo; sin autoridad de scheduling)."
+
       - name: Crear etiquetas de cola
         env:
           GH_TOKEN: ${{ github.token }}
