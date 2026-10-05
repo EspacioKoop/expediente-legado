@@ -147,57 +147,62 @@ jobs:
           # infra-casa; si falla, se conserva el control-plane actual y después
           # el mecanismo histórico de GitHub (fail-open).
           lease_status_from_deno=false
-          if [[ "$(jq 'length' /tmp/issues.json)" -gt 0 && -n "${STANDALONE_CONTROL_URL:-}" ]]; then
-            base="${STANDALONE_CONTROL_URL%/}"
-            if oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-              "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=infra-control-plane")" &&
-              oidc_token="$(jq -er '.value' <<<"$oidc_json")"; then
-              resources="$(jq -c '[.[].number | "issue:" + tostring]' /tmp/issues.json)"
-              payload="$(jq -nc --argjson resources "$resources" '{resources:$resources}')"
-              if curl -fsS -X POST "$base/api/lease/status-bulk" \
-                -H "Authorization: Bearer $oidc_token" \
-                -H 'Content-Type: application/json' \
-                --data "$payload" -o /tmp/standalone-lease-status.json; then
-                leased="$(jq -c '[.leases[]?.resource | strings | select(startswith("issue:")) | sub("^issue:";"") | tonumber] | unique' /tmp/standalone-lease-status.json)"
-                tmp="$(mktemp)"
-                jq --argjson leased "$leased" \
-                  'map(select(.number as $n | ($leased | index($n) | not)))' \
-                  /tmp/issues.json > "$tmp"
-                mv "$tmp" /tmp/issues.json
-                lease_status_from_deno=true
-                echo "Leases leídos del control-plane standalone: $(jq 'length' <<<"$leased") activos excluidos."
-              fi
-            fi
-            if [[ "$lease_status_from_deno" != true ]]; then
-              echo "::warning::Status de leases standalone no disponible; se intenta el control-plane actual."
-            fi
-          fi
+          cp /tmp/issues.json /tmp/issues-before-lease.json
+          leased_current='[]'
 
-          if [[ "$lease_status_from_deno" != true && -n "${CONTROL_URL:-}" && "$(jq 'length' /tmp/issues.json)" -gt 0 ]]; then
+          # La autoridad sigue siendo el control-plane actual mientras el
+          # standalone no reciba las mismas escrituras. El standalone se usa
+          # solo como shadow-read para detectar divergencias.
+          if [[ -n "${CONTROL_URL:-}" && "$(jq 'length' /tmp/issues-before-lease.json)" -gt 0 ]]; then
             base="${CONTROL_URL%/}"
             base="${base%/api/report}"
             if oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
               "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-pool")" &&
               oidc_token="$(jq -er '.value' <<<"$oidc_json")"; then
-              issue_ids="$(jq -c '[.[].number]' /tmp/issues.json)"
+              issue_ids="$(jq -c '[.[].number]' /tmp/issues-before-lease.json)"
               payload="$(jq -nc --argjson issues "$issue_ids" '{schema:1,issues:$issues}')"
               if curl -fsS -X POST "$base/api/agent-pool/status" \
                 -H "Authorization: Bearer $oidc_token" \
                 -H 'Content-Type: application/json' \
                 --data "$payload" -o /tmp/agent-pool-status.json; then
-                leased="$(jq -c '[.leases[]?.issue]' /tmp/agent-pool-status.json)"
+                leased_current="$(jq -c '[.leases[]?.issue] | unique | sort' /tmp/agent-pool-status.json)"
                 tmp="$(mktemp)"
-                jq --argjson leased "$leased" \
+                jq --argjson leased "$leased_current" \
                   'map(select(.number as $n | ($leased | index($n) | not)))' \
-                  /tmp/issues.json > "$tmp"
+                  /tmp/issues-before-lease.json > "$tmp"
                 mv "$tmp" /tmp/issues.json
                 lease_status_from_deno=true
-                echo "Leases leídos del control-plane actual: $(jq 'length' <<<"$leased") activos excluidos."
+                echo "Leases autoritativos (control-plane actual): $(jq 'length' <<<"$leased_current") activos excluidos."
               fi
             fi
           fi
+
+          if [[ -n "${STANDALONE_CONTROL_URL:-}" && "$(jq 'length' /tmp/issues-before-lease.json)" -gt 0 ]]; then
+            base="${STANDALONE_CONTROL_URL%/}"
+            if oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+              "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=infra-control-plane")" &&
+              oidc_token="$(jq -er '.value' <<<"$oidc_json")"; then
+              resources="$(jq -c '[.[].number | "issue:" + tostring]' /tmp/issues-before-lease.json)"
+              payload="$(jq -nc --argjson resources "$resources" '{resources:$resources}')"
+              if curl -fsS -X POST "$base/api/lease/status-bulk" \
+                -H "Authorization: Bearer $oidc_token" \
+                -H 'Content-Type: application/json' \
+                --data "$payload" -o /tmp/standalone-lease-status.json; then
+                leased_shadow="$(jq -c '[.leases[]?.resource | strings | select(startswith("issue:")) | sub("^issue:";"") | tonumber] | unique | sort' /tmp/standalone-lease-status.json)"
+                echo "Shadow leases standalone: $(jq 'length' <<<"$leased_shadow") activos."
+                if [[ "$lease_status_from_deno" == true && "$leased_shadow" != "$leased_current" ]]; then
+                  echo "::warning::Divergencia de leases: actual=$leased_current standalone=$leased_shadow"
+                fi
+              else
+                echo "::warning::Shadow-read de leases standalone no disponible."
+              fi
+            else
+              echo "::warning::No se pudo obtener OIDC para shadow-read de leases standalone."
+            fi
+          fi
+
           if [[ "$lease_status_from_deno" != true && "$(jq 'length' /tmp/issues.json)" -gt 0 ]]; then
-            echo "::warning::Status de leases Deno no disponible; se usa fallback GitHub."
+            echo "::warning::Status autoritativo de leases Deno no disponible; se usa fallback GitHub."
           fi
 
           # Inventario único de workers (#1685): qwen-primary, gemini y cada slot
@@ -215,6 +220,36 @@ jobs:
           # worker. Si el endpoint no está desplegado o falla, se conserva el
           # parser histórico de #1713 como fallback durante la migración.
           health_from_deno=false
+          unhealthy_current='[]'
+          worker_ids="$(jq -c '[.[].worker]' /tmp/workers-configured.json)"
+
+          # La decisión de cooldown sigue viniendo del control-plane actual.
+          if [[ -n "${CONTROL_URL:-}" ]]; then
+            base="${CONTROL_URL%/}"
+            base="${base%/api/report}"
+            if oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+              "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-pool")" &&
+              oidc_token="$(jq -er '.value' <<<"$oidc_json")"; then
+              payload="$(jq -nc --argjson workers "$worker_ids" '{schema:1,workers:$workers}')"
+              if curl -fsS -X POST "$base/api/agent-pool/worker-health/status" \
+                -H "Authorization: Bearer $oidc_token" \
+                -H 'Content-Type: application/json' \
+                --data "$payload" -o /tmp/worker-health-kv.json; then
+                unhealthy_current="$(jq -c '[.unhealthy[]?.worker] | unique | sort' /tmp/worker-health-kv.json)"
+                jq --argjson unhealthy "$unhealthy_current" \
+                  'map(. + {healthy: (.worker as $w | ($unhealthy | index($w) | not))})' \
+                  /tmp/workers-configured.json > /tmp/workers.json
+                health_from_deno=true
+                echo "Worker health autoritativo leído del control-plane actual."
+                if [[ "$(jq 'length' <<<"$unhealthy_current")" -gt 0 ]]; then
+                  echo "Slots en cooldown (Deno KV): $(jq -r 'join(",")' <<<"$unhealthy_current")"
+                fi
+              fi
+            fi
+          fi
+
+          # Shadow-read: nunca decide disponibilidad hasta que el standalone
+          # reciba las mismas escrituras o se migre el estado.
           if [[ -n "${STANDALONE_CONTROL_URL:-}" ]]; then
             base="${STANDALONE_CONTROL_URL%/}"
             if oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
@@ -224,42 +259,13 @@ jobs:
                 -H "Authorization: Bearer $oidc_token" \
                 -H 'Content-Type: application/json' \
                 --data '{}' -o /tmp/worker-health-standalone.json; then
-              unhealthy="$(jq -c '[.workers[]?.worker | select(type == "string")] | unique' /tmp/worker-health-standalone.json)"
-              jq --argjson unhealthy "$unhealthy" \
-                'map(. + {healthy: (.worker as $w | ($unhealthy | index($w) | not))})' \
-                /tmp/workers-configured.json > /tmp/workers.json
-              health_from_deno=true
-              echo "Worker health leído del control-plane standalone (canario)."
-              if [[ "$(jq 'length' <<<"$unhealthy")" -gt 0 ]]; then
-                echo "Slots en cooldown (standalone): $(jq -r 'join(",")' <<<"$unhealthy")"
+              unhealthy_shadow="$(jq -c --argjson configured "$worker_ids" '[.workers[]?.worker | select(type == "string") | select(. as $w | $configured | index($w))] | unique | sort' /tmp/worker-health-standalone.json)"
+              echo "Shadow worker-health standalone: $(jq 'length' <<<"$unhealthy_shadow") slots unhealthy."
+              if [[ "$health_from_deno" == true && "$unhealthy_shadow" != "$unhealthy_current" ]]; then
+                echo "::warning::Divergencia worker-health: actual=$unhealthy_current standalone=$unhealthy_shadow"
               fi
             else
-              echo "::warning::Lectura worker-health del standalone falló; se intenta el control-plane actual."
-            fi
-          fi
-
-          if [[ "$health_from_deno" != true && -n "${CONTROL_URL:-}" ]]; then
-            base="${CONTROL_URL%/}"
-            base="${base%/api/report}"
-            if oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-              "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-pool")" &&
-              oidc_token="$(jq -er '.value' <<<"$oidc_json")"; then
-              worker_ids="$(jq -c '[.[].worker]' /tmp/workers-configured.json)"
-              payload="$(jq -nc --argjson workers "$worker_ids" '{schema:1,workers:$workers}')"
-              if curl -fsS -X POST "$base/api/agent-pool/worker-health/status" \
-                -H "Authorization: Bearer $oidc_token" \
-                -H 'Content-Type: application/json' \
-                --data "$payload" -o /tmp/worker-health-kv.json; then
-                unhealthy="$(jq -c '[.unhealthy[]?.worker]' /tmp/worker-health-kv.json)"
-                jq --argjson unhealthy "$unhealthy" \
-                  'map(. + {healthy: (.worker as $w | ($unhealthy | index($w) | not))})' \
-                  /tmp/workers-configured.json > /tmp/workers.json
-                health_from_deno=true
-                echo "Worker health leído del control-plane actual (fallback)."
-                if [[ "$(jq 'length' <<<"$unhealthy")" -gt 0 ]]; then
-                  echo "Slots en cooldown (Deno KV): $(jq -r 'join(",")' <<<"$unhealthy")"
-                fi
-              fi
+              echo "::warning::Shadow-read worker-health standalone no disponible."
             fi
           fi
 
