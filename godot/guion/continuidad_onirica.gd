@@ -110,14 +110,17 @@ static func aplicar(espacio: Dictionary, seleccion: Array[Dictionary]) -> Dictio
 		return resultado
 	var presentacion: Array[Dictionary] = []
 	for motivo in seleccion:
-		presentacion.append(
-			{
-				"id": String(motivo.get("id", "")),
-				"origen": String(motivo.get("origen", "")),
-				"presentacion": motivo.get("presentacion", {}).duplicate(true),
-				"afecta_navegacion": false,
-				"afecta_objetivo": false,
-			}
+		(
+			presentacion
+			. append(
+				{
+					"id": String(motivo.get("id", "")),
+					"origen": String(motivo.get("origen", "")),
+					"presentacion": motivo.get("presentacion", {}).duplicate(true),
+					"afecta_navegacion": false,
+					"afecta_objetivo": false,
+				}
+			)
 		)
 	resultado["contaminacion_onirica"] = presentacion
 	return resultado
