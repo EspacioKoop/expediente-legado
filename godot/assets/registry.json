@@ -1,0 +1,16 @@
+{
+  "_regla": "Registro de assets intrusos cargados en fases narrativas específicas. Cada entrada declara el asset, su fase de carga y su propósito diegético. Ver LEEME.md para procedencia.",
+  "assets": [
+    {
+      "id": "intruso_fase4",
+      "ruta": "modelos/intruso_fase4.glb",
+      "titulo": "Intruso fase 4 — silueta onírica",
+      "fase": 4,
+      "proposito": "Manifestación visual del handoff hacia Hastur en la contaminación OS98",
+      "autor": "Equipo Expediente Legado",
+      "licencia": "GPL-2.0-only",
+      "fuente": "Creado internamente para Expediente Legado",
+      "sha256": "PENDIENTE_CALCULAR_AL_ANADIR_FICHERO"
+    }
+  ]
+}
