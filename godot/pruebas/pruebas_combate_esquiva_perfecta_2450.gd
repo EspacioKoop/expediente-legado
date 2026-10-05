@@ -31,9 +31,7 @@ func _probar_ventana_valida() -> void:
 		"devuelve la amenaza consumida",
 	)
 	_comprobar(
-		is_equal_approx(
-			float(resultado["ventana_contraataque"]), PERFECTA.VENTANA_CONTRAATAQUE
-		),
+		is_equal_approx(float(resultado["ventana_contraataque"]), PERFECTA.VENTANA_CONTRAATAQUE),
 		"perfecta abre contraataque declarativo",
 	)
 	_comprobar(
