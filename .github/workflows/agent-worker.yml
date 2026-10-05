@@ -87,10 +87,6 @@ permissions:
   actions: write
   id-token: write
 
-concurrency:
-  group: agent-pool-issue-${{ inputs.issue }}
-  cancel-in-progress: false
-
 jobs:
   worker:
     runs-on: ubuntu-latest
