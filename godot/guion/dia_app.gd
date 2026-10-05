@@ -638,6 +638,8 @@ func _abrir_expediente() -> void:
 			_nomina,
 			Callable(self, "_cerrar_expediente"),
 			Callable(self, "tr"),
+			partida.estado,
+			Callable(self, "_guardar_o_avisar"),
 		)
 	)
 	if _pantalla == null:
