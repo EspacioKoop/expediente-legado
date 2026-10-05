@@ -43,15 +43,14 @@ static func elegir(
 		if id == objetivo_actual:
 			puntuacion += BONUS_OBJETIVO_ACTUAL
 
-		opciones.append(
-			{
-				"id": id,
-				"direccion": direccion,
-				"distancia": distancia,
-				"angulo": angulo,
-				"puntuacion": puntuacion,
-			}
-		)
+		var opcion := {
+			"id": id,
+			"direccion": direccion,
+			"distancia": distancia,
+			"angulo": angulo,
+			"puntuacion": puntuacion,
+		}
+		opciones.append(opcion)
 
 	if opciones.is_empty():
 		return _vacio()
