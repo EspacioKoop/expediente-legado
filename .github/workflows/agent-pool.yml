@@ -105,6 +105,7 @@ jobs:
           KEV_ROUTER_MIN_CONFIDENCE: ${{ vars.KEV_ROUTER_MIN_CONFIDENCE || '0.45' }}
           KEV_API_KEY: ${{ secrets.KEV_API_KEY }}
           CONTROL_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
+          STANDALONE_CONTROL_URL: ${{ vars.AGENT_CONTROL_PLANE_URL }}
           # Slots de fallback (#1685): URL y modelo se descubren desde las variables
           # con scripts/agent_slots.py. Los secretos no se pueden enumerar, así que
           # esta tabla es el único sitio con números de slot: añade una línea por
@@ -186,7 +187,30 @@ jobs:
           # worker. Si el endpoint no está desplegado o falla, se conserva el
           # parser histórico de #1713 como fallback durante la migración.
           health_from_deno=false
-          if [[ -n "${CONTROL_URL:-}" ]]; then
+          if [[ -n "${STANDALONE_CONTROL_URL:-}" ]]; then
+            base="${STANDALONE_CONTROL_URL%/}"
+            if oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+              "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=infra-control-plane")" &&
+              oidc_token="$(jq -er '.value' <<<"$oidc_json")" &&
+              curl -fsS -X POST "$base/api/worker-health/list" \
+                -H "Authorization: Bearer $oidc_token" \
+                -H 'Content-Type: application/json' \
+                --data '{}' -o /tmp/worker-health-standalone.json; then
+              unhealthy="$(jq -c '[.workers[]?.worker | select(type == "string")] | unique' /tmp/worker-health-standalone.json)"
+              jq --argjson unhealthy "$unhealthy" \
+                'map(. + {healthy: (.worker as $w | ($unhealthy | index($w) | not))})' \
+                /tmp/workers-configured.json > /tmp/workers.json
+              health_from_deno=true
+              echo "Worker health leído del control-plane standalone (canario)."
+              if [[ "$(jq 'length' <<<"$unhealthy")" -gt 0 ]]; then
+                echo "Slots en cooldown (standalone): $(jq -r 'join(",")' <<<"$unhealthy")"
+              fi
+            else
+              echo "::warning::Lectura worker-health del standalone falló; se intenta el control-plane actual."
+            fi
+          fi
+
+          if [[ "$health_from_deno" != true && -n "${CONTROL_URL:-}" ]]; then
             base="${CONTROL_URL%/}"
             base="${base%/api/report}"
             if oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
@@ -203,6 +227,7 @@ jobs:
                   'map(. + {healthy: (.worker as $w | ($unhealthy | index($w) | not))})' \
                   /tmp/workers-configured.json > /tmp/workers.json
                 health_from_deno=true
+                echo "Worker health leído del control-plane actual (fallback)."
                 if [[ "$(jq 'length' <<<"$unhealthy")" -gt 0 ]]; then
                   echo "Slots en cooldown (Deno KV): $(jq -r 'join(",")' <<<"$unhealthy")"
                 fi
