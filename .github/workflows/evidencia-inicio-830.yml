@@ -35,7 +35,7 @@ jobs:
       XDG_CONFIG_HOME: ${{ github.workspace }}/.tmp-evidencia-830/config
       XDG_CACHE_HOME: ${{ github.workspace }}/.tmp-evidencia-830/cache
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           lfs: true
 
