@@ -10,6 +10,7 @@ IDS = [
     "psico-jardin-colgante-siga",
     "psico-identidades-superpuestas",
     "psico-gran-ruptura-siga",
+    "psico-procesion-archivados",
 ]
 
 FUNCS = [
@@ -19,6 +20,7 @@ FUNCS = [
     "_jardin_colgante_siga",
     "_identidades_superpuestas",
     "_gran_ruptura_siga",
+    "_procesion_de_los_archivados",
 ]
 
 
@@ -73,3 +75,13 @@ def test_gran_ruptura_combina_historia_edades_y_gato():
     assert "jubilación" in chunk
     assert "Babilonia" in chunk
     assert "Alejandría" in chunk
+
+
+def test_procesion_es_coral_y_cruza_todos_los_mundos():
+    chunk = _chunk("_procesion_de_los_archivados")
+    assert chunk.count("_plano(") >= 11
+    assert "Cuatro personas esperan" in chunk
+    assert "Babilonia" in chunk
+    assert "Alejandría" in chunk
+    assert "gato OS98" in chunk
+    assert "TURNO ACTUAL" in chunk
