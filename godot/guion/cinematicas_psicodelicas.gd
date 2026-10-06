@@ -12,6 +12,7 @@ const ARCHIVO_BAJO_LA_CIUDAD := "psico-archivo-bajo-ciudad"
 const JARDIN_COLGANTE_SIGA := "psico-jardin-colgante-siga"
 const IDENTIDADES_SUPERPUESTAS := "psico-identidades-superpuestas"
 const GRAN_RUPTURA_SIGA := "psico-gran-ruptura-siga"
+const PROCESION_DE_LOS_ARCHIVADOS := "psico-procesion-archivados"
 
 const IDS := [
 	EXPEDIENTE_SUENA,
@@ -20,6 +21,7 @@ const IDS := [
 	JARDIN_COLGANTE_SIGA,
 	IDENTIDADES_SUPERPUESTAS,
 	GRAN_RUPTURA_SIGA,
+	PROCESION_DE_LOS_ARCHIVADOS,
 ]
 
 
@@ -45,6 +47,8 @@ static func _declarados(id: String) -> Array:
 			return _identidades_superpuestas()
 		GRAN_RUPTURA_SIGA:
 			return _gran_ruptura_siga()
+		PROCESION_DE_LOS_ARCHIVADOS:
+			return _procesion_de_los_archivados()
 	return []
 
 
@@ -789,4 +793,131 @@ static func _gran_ruptura_siga() -> Array:
 	planos[10]["fundido_hasta"] = 0.5
 	planos[13]["fundido_desde"] = 0.0
 	planos[13]["fundido_hasta"] = 1.0
+	return planos
+
+
+static func _procesion_de_los_archivados() -> Array:
+	var piel := Color("c6a18b")
+	var azul := Color("3f526d")
+	var rojo := Color("70434b")
+	var gris := Color("555861")
+	var dorado := Color("807057")
+	var fila := [
+		_figura(Vector3(-2.0, 0, -2.2), azul, piel),
+		_figura(Vector3(-0.7, 0, -2.2), rojo, piel),
+		_figura(Vector3(0.7, 0, -2.2), gris, piel),
+		_figura(Vector3(2.0, 0, -2.2), dorado, piel),
+	]
+	var fila_lejana := [
+		_figura(Vector3(-2.5, 0, -5.0), azul, piel, 1.2),
+		_figura(Vector3(-0.8, 0, -5.2), rojo, piel, 1.2),
+		_figura(Vector3(0.9, 0, -5.1), gris, piel, 1.2),
+		_figura(Vector3(2.6, 0, -5.3), dorado, piel, 1.2),
+	]
+	var fila_gigante := [
+		_figura(Vector3(-2.8, 0, -7.0), azul, piel, 2.2),
+		_figura(Vector3(0.0, 0, -7.2), rojo, piel, 2.4),
+		_figura(Vector3(2.9, 0, -7.0), gris, piel, 2.2),
+	]
+	var planos := [
+		_plano(
+			"fila-oficina",
+			_oficina(fila),
+			Vector3(0, 1.8, 3.3),
+			Vector3(0, 1.4, -2.0),
+			4.0,
+			"Cuatro personas esperan frente a una ventanilla que no existe."
+		),
+		_plano(
+			"fila-archivo",
+			_archivo(fila),
+			Vector3(-1.8, 1.8, 3.1),
+			Vector3(0, 1.4, -2.1),
+			4.0,
+			"El archivo conserva exactamente la misma cola."
+		),
+		_plano(
+			"fila-aula",
+			_escuela(fila),
+			Vector3(1.8, 1.7, 3.0),
+			Vector3(0, 1.4, -2.0),
+			4.0,
+			"En el aula siguen esperando."
+		),
+		_plano(
+			"fila-jardin",
+			_jardin_colgante(fila_lejana),
+			Vector3(-2.4, 2.4, 5.2),
+			Vector3(0, 2.0, -5.1),
+			4.8,
+			"En Babilonia, la cola llega hasta la terraza superior."
+		),
+		_plano(
+			"fila-faro",
+			_faro(fila_lejana),
+			Vector3(2.4, 2.4, 5.3),
+			Vector3(0, 2.4, -5.1),
+			4.8,
+			"En Alejandría esperan a que el faro abra turno."
+		),
+		_plano(
+			"fila-desierto",
+			_desierto(fila_lejana),
+			Vector3(0, 1.9, 5.2),
+			Vector3(0, 1.7, -5.0),
+			4.6,
+			"En el desierto nadie abandona su sitio."
+		),
+		_plano(
+			"fila-castillo",
+			_castillo(fila),
+			Vector3(0, 2.1, 4.2),
+			Vector3(0, 1.6, -3.0),
+			4.4,
+			"Tras la muralla, la cola gira otra vez."
+		),
+		_plano(
+			"fila-vacio",
+			_vacio(fila_gigante),
+			Vector3(0, 2.2, 6.0),
+			Vector3(0, 2.8, -6.5),
+			5.2,
+			"Cuando ya no queda mundo, siguen esperando."
+		),
+		_plano(
+			"ventanilla-gato",
+			_oficina(
+				[
+					_figura(Vector3(-1.2, 0, -1.8), azul, piel),
+					_figura(Vector3(1.2, 0, -1.8), rojo, piel),
+					_gato_os98(Vector3(0, 0, -0.9), 1.4),
+				]
+			),
+			Vector3(0, 1.7, 2.8),
+			Vector3(0, 1.2, -1.4),
+			4.2,
+			"El gato OS98 ocupa ahora la ventanilla."
+		),
+		_plano(
+			"turno",
+			_archivo([]),
+			Vector3(0, 1.7, 2.4),
+			Vector3(0, 1.5, -2.5),
+			3.8,
+			"En la pantalla aparece tu número."
+		),
+		_plano(
+			"cierre-procesion",
+			_vacio([]),
+			Vector3(0, 1.7, 3.2),
+			Vector3(0, 1.7, -4.5),
+			3.2,
+			"TURNO ACTUAL: {expediente}"
+		),
+	]
+	planos[0]["camara_desde"] = Vector3(3.0, 1.8, 3.8)
+	planos[7]["fundido_desde"] = 0.0
+	planos[7]["fundido_hasta"] = 0.35
+	planos[10]["fundido_desde"] = 0.0
+	planos[10]["fundido_hasta"] = 1.0
 	return planos
