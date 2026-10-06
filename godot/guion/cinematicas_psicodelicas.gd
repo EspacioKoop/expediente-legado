@@ -57,9 +57,7 @@ static func _plano(
 	}
 
 
-static func _pieza(
-	pos: Vector3, tam: Vector3, color: Color, emisivo: bool = false
-) -> Dictionary:
+static func _pieza(pos: Vector3, tam: Vector3, color: Color, emisivo: bool = false) -> Dictionary:
 	var pieza := {"pos": pos, "tam": tam, "color": color}
 	if emisivo:
 		pieza["emisivo"] = true
@@ -68,41 +66,28 @@ static func _pieza(
 
 static func _figura(pos: Vector3, ropa: Color, piel: Color, escala: float = 1.0) -> Array:
 	return [
-		_pieza(
-			pos + Vector3(0, 0.95, 0) * escala,
-			Vector3(0.46, 0.85, 0.28) * escala,
-			ropa
-		),
-		_pieza(
-			pos + Vector3(0, 1.55, 0) * escala,
-			Vector3(0.34, 0.34, 0.30) * escala,
-			piel
-		),
-		_pieza(
-			pos + Vector3(-0.13, 0.38, 0) * escala,
-			Vector3(0.14, 0.62, 0.18) * escala,
-			ropa
-		),
-		_pieza(
-			pos + Vector3(0.13, 0.38, 0) * escala,
-			Vector3(0.14, 0.62, 0.18) * escala,
-			ropa
-		),
+		_pieza(pos + Vector3(0, 0.95, 0) * escala, Vector3(0.46, 0.85, 0.28) * escala, ropa),
+		_pieza(pos + Vector3(0, 1.55, 0) * escala, Vector3(0.34, 0.34, 0.30) * escala, piel),
+		_pieza(pos + Vector3(-0.13, 0.38, 0) * escala, Vector3(0.14, 0.62, 0.18) * escala, ropa),
+		_pieza(pos + Vector3(0.13, 0.38, 0) * escala, Vector3(0.14, 0.62, 0.18) * escala, ropa),
 	]
 
 
 static func _decorado(piezas: Array, luz: Color, energia: float = 1.0) -> Dictionary:
-	return MesaCinematica.con(
-		piezas,
-		[
-			{
-				"pos": Vector3(0.0, 3.5, 1.0),
-				"color": luz,
-				"energia": energia,
-				"alcance": 8.0,
-				"carcasa": false,
-			}
-		]
+	return (
+		MesaCinematica
+		. con(
+			piezas,
+			[
+				{
+					"pos": Vector3(0.0, 3.5, 1.0),
+					"color": luz,
+					"energia": energia,
+					"alcance": 8.0,
+					"carcasa": false,
+				}
+			]
+		)
 	)
 
 
