@@ -7,11 +7,12 @@ TEXT = SRC.read_text(encoding="utf-8")
 IDS = [
     "umbral-expediente-imposible",
     "umbral-siga-fantasma",
-    "umbral-entrada-sueno",
+    "umbral-llamada-sin-linea",
+    "umbral-archivo-se-reordena",
     "umbral-regreso-oficina",
 ]
 
-def test_catalogo_declara_cuatro_ids_estables():
+def test_catalogo_declara_cinco_ids_estables():
     for cinematic_id in IDS:
         assert cinematic_id in TEXT
 
@@ -19,7 +20,8 @@ def test_cada_cinematica_tiene_tres_planos_3d():
     funcs = [
         "_expediente_imposible",
         "_siga_fantasma",
-        "_entrada_sueno",
+        "_llamada_sin_linea",
+        "_archivo_se_reordena",
         "_regreso_oficina",
     ]
     for i, name in enumerate(funcs):
