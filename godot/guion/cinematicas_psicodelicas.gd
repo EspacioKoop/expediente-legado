@@ -9,11 +9,15 @@ extends RefCounted
 const EXPEDIENTE_SUENA := "psico-expediente-suena"
 const COMITE_IMPOSIBLE := "psico-comite-imposible"
 const ARCHIVO_BAJO_LA_CIUDAD := "psico-archivo-bajo-ciudad"
+const JARDIN_COLGANTE_SIGA := "psico-jardin-colgante-siga"
+const IDENTIDADES_SUPERPUESTAS := "psico-identidades-superpuestas"
 
 const IDS := [
 	EXPEDIENTE_SUENA,
 	COMITE_IMPOSIBLE,
 	ARCHIVO_BAJO_LA_CIUDAD,
+	JARDIN_COLGANTE_SIGA,
+	IDENTIDADES_SUPERPUESTAS,
 ]
 
 
@@ -33,6 +37,10 @@ static func _declarados(id: String) -> Array:
 			return _comite_imposible()
 		ARCHIVO_BAJO_LA_CIUDAD:
 			return _archivo_bajo_la_ciudad()
+		JARDIN_COLGANTE_SIGA:
+			return _jardin_colgante_siga()
+		IDENTIDADES_SUPERPUESTAS:
+			return _identidades_superpuestas()
 	return []
 
 
@@ -410,3 +418,201 @@ static func _archivo_bajo_la_ciudad() -> Array:
 	planos[5]["fundido_desde"] = 0.1
 	planos[5]["fundido_hasta"] = 0.5
 	return planos
+
+
+static func _jardin_colgante(figuras: Array = []) -> Dictionary:
+	var piezas := [
+		_pieza(Vector3(0, 0.0, -2.0), Vector3(9.0, 0.16, 9.0), Color("8c744f")),
+		_pieza(Vector3(-2.8, 1.4, -4.2), Vector3(1.2, 2.8, 1.2), Color("726044")),
+		_pieza(Vector3(2.8, 2.1, -4.8), Vector3(1.4, 4.2, 1.4), Color("726044")),
+		_pieza(Vector3(0, 1.5, -5.5), Vector3(4.6, 0.18, 2.6), Color("6f8b61")),
+		_pieza(Vector3(-1.2, 2.3, -5.5), Vector3(1.6, 0.18, 1.6), Color("739b67")),
+		_pieza(Vector3(1.4, 2.8, -5.8), Vector3(1.8, 0.18, 1.5), Color("789e6a")),
+		_pieza(Vector3(0, 3.9, -7.2), Vector3(5.5, 0.12, 0.5), Color("91b978"), true),
+	]
+	for figura in figuras:
+		piezas.append_array(figura)
+	return _decorado(piezas, Color("c5a86d"), 1.25)
+
+
+static func _faro(figuras: Array = []) -> Dictionary:
+	var piezas := [
+		_pieza(Vector3(0, -0.05, -2.0), Vector3(10.0, 0.12, 10.0), Color("24313f")),
+		_pieza(Vector3(0, 2.4, -5.5), Vector3(1.6, 4.8, 1.6), Color("c0b59b")),
+		_pieza(Vector3(0, 5.1, -5.5), Vector3(2.0, 0.4, 2.0), Color("d3c5a2")),
+		_pieza(Vector3(0, 5.4, -5.2), Vector3(0.6, 0.45, 0.6), Color("e4d48b"), true),
+		_pieza(Vector3(2.7, 0.3, -4.6), Vector3(3.2, 0.45, 1.2), Color("394b5c")),
+	]
+	for figura in figuras:
+		piezas.append_array(figura)
+	return _decorado(piezas, Color("8495a8"), 1.15)
+
+
+static func _jardin_colgante_siga() -> Array:
+	var piel := Color("c5a088")
+	var verde := Color("536a55")
+	var negro := Color("303138")
+	var archivera := _figura(Vector3(0, 0, -1.8), verde, piel)
+	var operador := _figura(Vector3(1.4, 0, -2.2), negro, piel)
+	var operador_gigante := _figura(Vector3(0, 0, -6.0), negro, piel, 2.7)
+	return [
+		_plano(
+			"terminal",
+			_oficina([archivera]),
+			Vector3(0, 1.6, 2.3),
+			Vector3(0, 1.3, -1.6),
+			3.0,
+			"SIGA abre un expediente sin número."
+		),
+		_plano(
+			"jardin",
+			_jardin_colgante([archivera]),
+			Vector3(-2.2, 2.0, 4.0),
+			Vector3(0, 2.0, -4.8),
+			4.0,
+			"La pantalla muestra un jardín que no cabe en la oficina."
+		),
+		_plano(
+			"terraza",
+			_jardin_colgante([archivera, operador]),
+			Vector3(2.0, 2.4, 3.5),
+			Vector3(0, 1.8, -4.2),
+			3.8,
+			"Alguien ha fichado aquí hace dos mil años."
+		),
+		_plano(
+			"faro",
+			_faro([operador]),
+			Vector3(-2.5, 2.2, 4.8),
+			Vector3(0, 3.2, -5.2),
+			4.2,
+			"El faro responde a la consulta.",
+			"Registro localizado."
+		),
+		_plano(
+			"archivo",
+			_archivo([archivera, operador]),
+			Vector3(1.8, 1.8, 3.0),
+			Vector3(0, 1.4, -2.1),
+			3.3,
+			"Las cajas tienen sellos de ciudades que aún no existen."
+		),
+		_plano(
+			"gigante",
+			_vacio([operador_gigante]),
+			Vector3(0, 1.5, 5.0),
+			Vector3(0, 3.4, -5.8),
+			4.6,
+			"El operador pronuncia tu contraseña antes de que la elijas."
+		),
+		_plano(
+			"retorno-jardin",
+			_jardin_colgante([]),
+			Vector3(0, 2.0, 4.2),
+			Vector3(0, 2.0, -5.3),
+			3.8,
+			"Las terrazas se pliegan como carpetas."
+		),
+		_plano(
+			"retorno-terminal",
+			_oficina([archivera]),
+			Vector3(0, 1.7, 2.0),
+			Vector3(0, 1.25, -1.7),
+			3.1,
+			"SIGA pregunta si deseas guardar los cambios."
+		),
+		_plano(
+			"negro",
+			_vacio([]),
+			Vector3(0, 1.6, 3.0),
+			Vector3(0, 1.6, -4.0),
+			2.8,
+			"CAMBIOS GUARDADOS"
+		),
+	]
+
+
+static func _identidades_superpuestas() -> Array:
+	var piel := Color("c7a088")
+	var azul := Color("46566e")
+	var rojo := Color("74414a")
+	var gris := Color("64646b")
+	var figura_azul := _figura(Vector3(0, 0, -1.8), azul, piel)
+	var figura_roja := _figura(Vector3(0, 0, -1.8), rojo, piel)
+	var figura_gris := _figura(Vector3(0, 0, -1.8), gris, piel)
+	var figura_blanca := _figura(Vector3(0, 0, -1.8), Color("c4c4c4"), Color("ededed"))
+	return [
+		_plano(
+			"companero",
+			_oficina([figura_azul]),
+			Vector3(0, 1.6, 2.2),
+			Vector3(0, 1.3, -1.8),
+			3.2,
+			"{nombre} te pregunta si recuerdas su cara."
+		),
+		_plano(
+			"jefa",
+			_oficina([figura_roja]),
+			Vector3(0, 1.6, 2.2),
+			Vector3(0, 1.3, -1.8),
+			3.0,
+			"En el siguiente parpadeo es tu superior."
+		),
+		_plano(
+			"profesor",
+			_escuela([figura_gris]),
+			Vector3(0, 1.6, 2.2),
+			Vector3(0, 1.3, -1.8),
+			3.2,
+			"Después es quien te enseñó a escribir tu nombre."
+		),
+		_plano(
+			"archivero",
+			_archivo([figura_blanca]),
+			Vector3(0, 1.6, 2.2),
+			Vector3(0, 1.3, -1.8),
+			3.4,
+			"Después no tiene rostro."
+		),
+		_plano(
+			"castillo",
+			_castillo([figura_roja]),
+			Vector3(0, 1.8, 3.0),
+			Vector3(0, 1.4, -2.0),
+			3.6,
+			"Pero conserva exactamente la misma postura."
+		),
+		_plano(
+			"desierto",
+			_desierto([figura_azul]),
+			Vector3(0, 1.8, 3.2),
+			Vector3(0, 1.4, -2.0),
+			3.8,
+			"El escenario cambia. Él no."
+		),
+		_plano(
+			"vacio",
+			_vacio([figura_blanca]),
+			Vector3(0, 1.6, 3.0),
+			Vector3(0, 1.3, -1.8),
+			4.0,
+			"Preguntas quién es.",
+			"Responde con tu nombre."
+		),
+		_plano(
+			"duplicacion",
+			_oficina([figura_azul, _figura(Vector3(1.2, 0, -1.8), rojo, piel)]),
+			Vector3(0.6, 1.7, 2.5),
+			Vector3(0, 1.3, -1.8),
+			3.5,
+			"Ahora hay dos versiones."
+		),
+		_plano(
+			"cierre-identidad",
+			_archivo([figura_gris]),
+			Vector3(0, 1.7, 2.1),
+			Vector3(0, 1.3, -1.8),
+			3.0,
+			"La carpeta dice: IDENTIDAD PROVISIONAL."
+		),
+	]
