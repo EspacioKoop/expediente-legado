@@ -9,6 +9,7 @@ IDS = [
     "psico-archivo-bajo-ciudad",
     "psico-jardin-colgante-siga",
     "psico-identidades-superpuestas",
+    "psico-gran-ruptura-siga",
 ]
 
 FUNCS = [
@@ -17,6 +18,7 @@ FUNCS = [
     "_archivo_bajo_la_ciudad",
     "_jardin_colgante_siga",
     "_identidades_superpuestas",
+    "_gran_ruptura_siga",
 ]
 
 
@@ -60,3 +62,14 @@ def test_nuevas_piezas_extienden_montaje_y_personajes():
     assert "static func _faro(" in TEXT
     assert "CAMBIOS GUARDADOS" in TEXT
     assert "IDENTIDAD PROVISIONAL" in TEXT
+
+
+def test_gran_ruptura_combina_historia_edades_y_gato():
+    chunk = _chunk("_gran_ruptura_siga")
+    assert chunk.count("_plano(") >= 14
+    assert "Puyi" in chunk
+    assert "Pessoa" in chunk
+    assert "_gato_os98(" in chunk
+    assert "jubilación" in chunk
+    assert "Babilonia" in chunk
+    assert "Alejandría" in chunk
