@@ -7,12 +7,16 @@ IDS = [
     "psico-expediente-suena",
     "psico-comite-imposible",
     "psico-archivo-bajo-ciudad",
+    "psico-jardin-colgante-siga",
+    "psico-identidades-superpuestas",
 ]
 
 FUNCS = [
     "_expediente_suena",
     "_comite_imposible",
     "_archivo_bajo_la_ciudad",
+    "_jardin_colgante_siga",
+    "_identidades_superpuestas",
 ]
 
 
@@ -49,3 +53,10 @@ def test_figuras_humanas_forman_parte_del_montaje():
 def test_no_hay_autoplay_ni_mutacion_de_partida():
     for token in ("change_scene", "Partida.", "get_tree().", ".reproducir("):
         assert token not in TEXT
+
+
+def test_nuevas_piezas_extienden_montaje_y_personajes():
+    assert "static func _jardin_colgante(" in TEXT
+    assert "static func _faro(" in TEXT
+    assert "CAMBIOS GUARDADOS" in TEXT
+    assert "IDENTIDAD PROVISIONAL" in TEXT
