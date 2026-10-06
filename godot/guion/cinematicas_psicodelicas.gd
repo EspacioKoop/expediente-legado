@@ -11,6 +11,7 @@ const COMITE_IMPOSIBLE := "psico-comite-imposible"
 const ARCHIVO_BAJO_LA_CIUDAD := "psico-archivo-bajo-ciudad"
 const JARDIN_COLGANTE_SIGA := "psico-jardin-colgante-siga"
 const IDENTIDADES_SUPERPUESTAS := "psico-identidades-superpuestas"
+const GRAN_RUPTURA_SIGA := "psico-gran-ruptura-siga"
 
 const IDS := [
 	EXPEDIENTE_SUENA,
@@ -18,6 +19,7 @@ const IDS := [
 	ARCHIVO_BAJO_LA_CIUDAD,
 	JARDIN_COLGANTE_SIGA,
 	IDENTIDADES_SUPERPUESTAS,
+	GRAN_RUPTURA_SIGA,
 ]
 
 
@@ -41,6 +43,8 @@ static func _declarados(id: String) -> Array:
 			return _jardin_colgante_siga()
 		IDENTIDADES_SUPERPUESTAS:
 			return _identidades_superpuestas()
+		GRAN_RUPTURA_SIGA:
+			return _gran_ruptura_siga()
 	return []
 
 
@@ -616,3 +620,173 @@ static func _identidades_superpuestas() -> Array:
 			"La carpeta dice: IDENTIDAD PROVISIONAL."
 		),
 	]
+
+
+static func _gato_os98(pos: Vector3, escala: float = 1.0) -> Array:
+	return [
+		_pieza(
+			pos + Vector3(0, 0.35, 0) * escala,
+			Vector3(0.55, 0.32, 0.28) * escala,
+			Color("b9b2a2")
+		),
+		_pieza(
+			pos + Vector3(0.28, 0.48, 0) * escala,
+			Vector3(0.28, 0.28, 0.25) * escala,
+			Color("c7c0ae")
+		),
+		_pieza(
+			pos + Vector3(-0.34, 0.45, 0) * escala,
+			Vector3(0.42, 0.08, 0.08) * escala,
+			Color("b0a998")
+		),
+		_pieza(
+			pos + Vector3(0.34, 0.53, 0.12) * escala,
+			Vector3(0.06, 0.06, 0.04) * escala,
+			Color("7fa08b"),
+			true
+		),
+	]
+
+
+static func _gran_ruptura_siga() -> Array:
+	var piel := Color("c6a18b")
+	var traje_puyi := Color("4d5666")
+	var traje_pessoa := Color("66534a")
+	var uniforme := Color("565861")
+	var puyi := _figura(Vector3(-1.1, 0, -1.9), traje_puyi, piel)
+	var pessoa := _figura(Vector3(1.1, 0, -1.9), traje_pessoa, piel)
+	var funcionario := _figura(Vector3(0, 0, -2.2), uniforme, piel)
+	var gato := _gato_os98(Vector3(0.9, 0, -1.0))
+	var gato_gigante := _gato_os98(Vector3(0, 0, -6.0), 3.0)
+	var nino := _figura(Vector3(0, 0, -1.8), Color("73809a"), piel, 0.7)
+	var adulto := _figura(Vector3(0, 0, -1.8), Color("59606f"), piel, 1.0)
+	var anciano := _figura(Vector3(0, 0, -1.8), Color("454850"), Color("b8a89c"), 0.95)
+	var planos := [
+		_plano(
+			"oficina-1998",
+			_oficina([funcionario, gato]),
+			Vector3(0, 1.7, 2.6),
+			Vector3(0, 1.25, -1.6),
+			4.0,
+			"1998. El turno continúa aunque todas las pantallas marcan una fecha distinta."
+		),
+		_plano(
+			"archivo-puyi",
+			_archivo([puyi]),
+			Vector3(-1.8, 1.7, 3.0),
+			Vector3(-1.0, 1.4, -1.9),
+			4.2,
+			"Puyi ordena expedientes que todavía no han sido escritos."
+		),
+		_plano(
+			"correspondencia-pessoa",
+			_escuela([pessoa]),
+			Vector3(1.7, 1.6, 2.7),
+			Vector3(1.0, 1.3, -1.9),
+			4.0,
+			"Pessoa copia una carta dirigida a alguien que usa tu nombre."
+		),
+		_plano(
+			"jardin-archivo",
+			_jardin_colgante([puyi, pessoa]),
+			Vector3(-2.4, 2.3, 4.5),
+			Vector3(0, 2.0, -4.8),
+			4.8,
+			"Las terrazas de Babilonia se convierten en archivadores."
+		),
+		_plano(
+			"faro-terminal",
+			_faro([funcionario]),
+			Vector3(2.5, 2.5, 5.0),
+			Vector3(0, 3.4, -5.2),
+			4.8,
+			"El faro de Alejandría emite la luz verde de SIGA.",
+			"Sincronización completada."
+		),
+		_plano(
+			"edad-nino",
+			_oficina([nino, gato]),
+			Vector3(0, 1.4, 2.1),
+			Vector3(0, 1.1, -1.8),
+			3.8,
+			"En tu silla hay un niño."
+		),
+		_plano(
+			"edad-adulto",
+			_oficina([adulto, gato]),
+			Vector3(0, 1.55, 2.1),
+			Vector3(0, 1.2, -1.8),
+			3.6,
+			"Parpadeas. Ahora tiene tu edad."
+		),
+		_plano(
+			"edad-anciano",
+			_oficina([anciano, gato]),
+			Vector3(0, 1.55, 2.1),
+			Vector3(0, 1.2, -1.8),
+			4.0,
+			"Parpadeas otra vez. Sigue esperando tu jubilación."
+		),
+		_plano(
+			"desierto-gato",
+			_desierto([gato_gigante]),
+			Vector3(-2.2, 1.8, 5.0),
+			Vector3(0, 2.0, -5.8),
+			4.6,
+			"El gato de OS98 cruza el horizonte como si conociera el camino."
+		),
+		_plano(
+			"castillo-comite",
+			_castillo([puyi, pessoa, funcionario]),
+			Vector3(0, 2.2, 4.4),
+			Vector3(0, 1.7, -3.2),
+			4.6,
+			"El comité lleva siglos esperando tu expediente."
+		),
+		_plano(
+			"vacio-duplicado",
+			_vacio(
+				[
+					_figura(Vector3(-1.7, 0, -4.5), traje_puyi, piel, 1.5),
+					_figura(Vector3(1.7, 0, -4.5), traje_pessoa, piel, 1.5),
+					_gato_os98(Vector3(0, 0, -5.2), 1.8),
+				]
+			),
+			Vector3(0, 2.1, 5.5),
+			Vector3(0, 2.2, -4.8),
+			5.0,
+			"Todos miran hacia una puerta que no existe."
+		),
+		_plano(
+			"retorno-archivo",
+			_archivo([funcionario, gato]),
+			Vector3(0.8, 1.7, 2.5),
+			Vector3(0, 1.3, -2.1),
+			4.2,
+			"Al volver, tu expediente pesa más."
+		),
+		_plano(
+			"retorno-terminal",
+			_oficina([]),
+			Vector3(0, 1.7, 2.2),
+			Vector3(0, 1.25, -1.8),
+			3.8,
+			"SIGA registra la incidencia como: SIN NOVEDAD."
+		),
+		_plano(
+			"negro-final",
+			_vacio([]),
+			Vector3(0, 1.6, 3.0),
+			Vector3(0, 1.6, -4.0),
+			3.0,
+			"FECHA DEL SISTEMA: {fecha}"
+		),
+	]
+	planos[0]["camara_desde"] = Vector3(2.4, 1.7, 3.0)
+	planos[4]["fundido_desde"] = 0.0
+	planos[4]["fundido_hasta"] = 0.25
+	planos[10]["fundido_desde"] = 0.15
+	planos[10]["fundido_hasta"] = 0.5
+	planos[13]["fundido_desde"] = 0.0
+	planos[13]["fundido_hasta"] = 1.0
+	return planos
