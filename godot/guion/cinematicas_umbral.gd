@@ -7,13 +7,15 @@ extends RefCounted
 
 const EXPEDIENTE_IMPOSIBLE := "umbral-expediente-imposible"
 const SIGA_FANTASMA := "umbral-siga-fantasma"
-const ENTRADA_SUENO := "umbral-entrada-sueno"
+const LLAMADA_SIN_LINEA := "umbral-llamada-sin-linea"
+const ARCHIVO_SE_REORDENA := "umbral-archivo-se-reordena"
 const REGRESO_OFICINA := "umbral-regreso-oficina"
 
 const IDS := [
 	EXPEDIENTE_IMPOSIBLE,
 	SIGA_FANTASMA,
-	ENTRADA_SUENO,
+	LLAMADA_SIN_LINEA,
+	ARCHIVO_SE_REORDENA,
 	REGRESO_OFICINA,
 ]
 
@@ -32,8 +34,10 @@ static func _declarados(id: String) -> Array:
 			return _expediente_imposible()
 		SIGA_FANTASMA:
 			return _siga_fantasma()
-		ENTRADA_SUENO:
-			return _entrada_sueno()
+		LLAMADA_SIN_LINEA:
+			return _llamada_sin_linea()
+		ARCHIVO_SE_REORDENA:
+			return _archivo_se_reordena()
 		REGRESO_OFICINA:
 			return _regreso_oficina()
 	return []
@@ -185,50 +189,89 @@ static func _siga_fantasma() -> Array:
 	]
 
 
-static func _entrada_sueno() -> Array:
-	var azul := Color("75819b")
+static func _llamada_sin_linea() -> Array:
+	var rojo := Color("8a2f36")
 	var decorado := _mesa(
 		[
-			_pieza(Vector3(0, 0.45, -0.6), Vector3(4.6, 0.08, 4.6), Color("32343b")),
-			_pieza(Vector3(0, 1.3, -0.9), Vector3(0.12, 2.3, 0.12), azul, true),
-			_pieza(Vector3(-0.7, 1.0, -0.7), Vector3(0.08, 1.4, 0.08), azul, true),
-			_pieza(Vector3(0.8, 1.6, -1.0), Vector3(0.08, 2.6, 0.08), azul, true),
+			_pieza(Vector3(0, 1.02, 0), Vector3(0.9, 0.09, 0.55), Color("3a3a40")),
+			_pieza(Vector3(-0.22, 1.14, 0), Vector3(0.18, 0.14, 0.38), Color("25252a")),
+			_pieza(Vector3(0.25, 1.13, 0.04), Vector3(0.26, 0.05, 0.2), rojo, true),
+			_pieza(Vector3(0.0, 1.08, -0.18), Vector3(0.52, 0.025, 0.04), Color("5a5a61")),
 		],
-		Color("65758d")
+		Color("c7b7a0")
 	)
-	var entrada := _plano(
-		"oficina-se-despega",
-		Vector3(0.0, 1.8, 1.25),
-		Vector3(0.0, 1.5, -0.9),
-		1.35,
+	var acercamiento := _plano(
+		"telefono",
+		Vector3(0.0, 1.45, 1.35),
+		Vector3(0.0, 1.08, 0.0),
+		1.0,
 		decorado,
-		"El techo queda demasiado lejos."
+		"El teléfono suena sin estar conectado."
 	)
-	entrada["camara_desde"] = Vector3(0.0, 1.65, 2.0)
-	entrada["mira_desde"] = Vector3(0.0, 1.2, -0.4)
-	var fundido := _plano(
-		"entrada",
-		Vector3(0.0, 1.65, 0.3),
-		Vector3(0.0, 1.4, -1.0),
-		0.85,
-		decorado
-	)
-	fundido["fundido_desde"] = 0.0
-	fundido["fundido_hasta"] = 1.0
+	acercamiento["camara_desde"] = Vector3(0.7, 1.65, 1.8)
 	return [
-		entrada,
+		acercamiento,
 		_plano(
-			"umbral",
-			Vector3(0.0, 1.7, 0.7),
-			Vector3(0.0, 1.3, -0.9),
-			1.25,
+			"auricular",
+			Vector3(-0.35, 1.32, 0.8),
+			Vector3(-0.22, 1.14, 0.0),
+			1.15,
 			decorado,
-			"{sueno}",
-			"No recuerdas haberte dormido."
+			"EXTENSIÓN {extension}",
+			"Una voz repite tu número de expediente."
 		),
-		fundido,
+		_plano(
+			"corte",
+			Vector3(0.2, 1.35, 0.9),
+			Vector3(0.25, 1.13, 0.04),
+			0.7,
+			decorado,
+			"LLAMADA FINALIZADA"
+		),
 	]
 
+
+static func _archivo_se_reordena() -> Array:
+	var gris := Color("555860")
+	var papel := Color("b8b29e")
+	var decorado := _mesa(
+		[
+			_pieza(Vector3(-0.5, 1.2, -0.2), Vector3(0.18, 1.4, 0.55), gris),
+			_pieza(Vector3(0.0, 1.2, -0.2), Vector3(0.18, 1.4, 0.55), gris),
+			_pieza(Vector3(0.5, 1.2, -0.2), Vector3(0.18, 1.4, 0.55), gris),
+			_pieza(Vector3(-0.48, 1.55, 0.1), Vector3(0.12, 0.28, 0.38), papel),
+			_pieza(Vector3(0.48, 0.95, 0.1), Vector3(0.12, 0.28, 0.38), papel),
+		],
+		Color("b8b1a2")
+	)
+	var giro := _plano(
+		"pasillo",
+		Vector3(0.0, 1.55, 1.7),
+		Vector3(0.0, 1.2, -0.2),
+		1.0,
+		decorado,
+		"El archivo estaba ordenado por número."
+	)
+	giro["camara_desde"] = Vector3(-0.9, 1.55, 1.7)
+	return [
+		giro,
+		_plano(
+			"cambio",
+			Vector3(0.55, 1.45, 1.0),
+			Vector3(0.48, 0.95, 0.1),
+			1.1,
+			decorado,
+			"Ahora está ordenado por fecha de defunción."
+		),
+		_plano(
+			"remate",
+			Vector3(-0.55, 1.42, 1.0),
+			Vector3(-0.48, 1.55, 0.1),
+			0.85,
+			decorado,
+			"Tu carpeta está en la primera balda."
+		),
+	]
 
 static func _regreso_oficina() -> Array:
 	var fluorescente := Color("d9d7c5")
