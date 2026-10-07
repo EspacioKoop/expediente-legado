@@ -260,6 +260,7 @@ static func _archivo_se_reordena() -> Array:
 		),
 	]
 
+
 static func _regreso_oficina() -> Array:
 	var fluorescente := Color("d9d7c5")
 	var decorado := _mesa(
