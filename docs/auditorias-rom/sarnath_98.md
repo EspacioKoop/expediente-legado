@@ -7,20 +7,20 @@ Auditoría de `gbc/minijuegos/sarnath_98/main.asm` frente al listón de calidad 
 **Estado**: Parcial.
 
 **Evidencia**:
-- Flujo completo: Presente en `main.asm`. El estado inicial es título (`ESTADO_TITULO`, líneas 85-92), pasa a juego (`ESTADO_JUEGO`, líneas 94-114), alcanza la pantalla final (`ESTADO_FIN`, líneas 116-123) y la pulsación de A o START en el final reinicia la partida llamando a `IniciarJuego` (líneas 121 y 125-136).
-- Menú e instrucciones: En `DibujarTitulo` (líneas 269-281) se muestra una composición estática de tiles sin menú de opciones ni pantalla de instrucciones explicativas con texto («no encontrado»).
+- Flujo completo: Presente en `main.asm`. El estado inicial es título (`ESTADO_TITULO`), pasa a juego (`ESTADO_JUEGO`), alcanza la pantalla final (`ESTADO_FIN`) y la pulsación de A o START en el final reinicia la partida llamando a `IniciarJuego`.
+- Menú e instrucciones: En `DibujarTitulo` se muestra una composición estática de tiles sin menú de opciones ni pantalla de instrucciones explicativas con texto («no encontrado»).
 
 ## 2. Estructura: número de niveles o fases y qué cambia entre ellos
 
 **Estado**: Cumple.
 
 **Evidencia**:
-- Tres rondas o fases deterministas controladas por la variable `wRonda` en WRAM (línea 428).
+- Tres rondas o fases deterministas controladas por la variable `wRonda` en WRAM.
 - Cambia la secuencia de rumbos a memorizar y la longitud del trayecto:
-  - Ronda 1 (`Ruta0`, línea 357): 3 pasos (Arriba → Derecha → Arriba).
-  - Ronda 2 (`Ruta1`, línea 359): 4 pasos (Izquierda → Arriba → Derecha → Abajo).
-  - Ronda 3 (`Ruta2`, línea 361): 5 pasos (Arriba → Arriba → Derecha → Abajo → Izquierda).
-- Las subrutinas `ObtenerRuta` (líneas 318-333) y `LongitudRuta` (líneas 335-347) ajustan la ruta activa. `DibujarNumeroRonda` (líneas 302-316) cambia el tile numérico (`TILE_1`, `TILE_2`, `TILE_3`) y resetea el índice (`wIndice`, líneas 183-184).
+  - Ronda 1 (`Ruta0`): 3 pasos (Arriba → Derecha → Arriba).
+  - Ronda 2 (`Ruta1`): 4 pasos (Izquierda → Arriba → Derecha → Abajo).
+  - Ronda 3 (`Ruta2`): 5 pasos (Arriba → Arriba → Derecha → Abajo → Izquierda).
+- Las subrutinas `ObtenerRuta` y `LongitudRuta` ajustan la ruta activa. `DibujarNumeroRonda` cambia el tile numérico (`TILE_1`, `TILE_2`, `TILE_3`) y resetea el índice (`wIndice`).
 
 ## 3. Récord o progreso persistente en SRAM (el cartucho común MBC5 ya lo permite)
 
@@ -28,7 +28,7 @@ Auditoría de `gbc/minijuegos/sarnath_98/main.asm` frente al listón de calidad 
 
 **Evidencia**:
 - La ROM no habilita la RAM del cartucho MBC5 (`rRAMG`, `$0A`).
-- Solo define la sección `SECTION "Handshake", WRAM0[$C100]` (línea 424) para comunicar el estado a Godot.
+- Solo define la sección `SECTION "Handshake", WRAM0[$C100]` para comunicar el estado a Godot.
 - Guardado en SRAM, registro de récords o persistencia de progreso tras apagar la consola: «no encontrado».
 
 ## 4. Música y sonido
@@ -36,18 +36,18 @@ Auditoría de `gbc/minijuegos/sarnath_98/main.asm` frente al listón de calidad 
 **Estado**: Parcial.
 
 **Evidencia**:
-- `ConfigurarAudio` (líneas 388-394) habilita el chip de sonido APU.
-- Contiene 5 efectos de sonido efímeros en el canal 1 de pulsos: `SonidoInicio` (líneas 396-403), `SonidoMover` (líneas 405-412), `SonidoError` (líneas 414-421), `SonidoRonda` (líneas 423-430) y `SonidoVictoria` (líneas 432-439).
-- Música de fondo o reproductor BGM en bucle dentro de `Bucle` (líneas 72-83): «no encontrado».
+- `ConfigurarAudio` habilita el chip de sonido APU.
+- Contiene 5 efectos de sonido efímeros en el canal 1 de pulsos: `SonidoInicio`, `SonidoMover`, `SonidoError`, `SonidoRonda` y `SonidoVictoria`.
+- Música de fondo o reproductor BGM en bucle dentro de `Bucle`: «no encontrado».
 
 ## 5. Arte CGB propio: paletas, atributos con rVBK y sprites
 
 **Estado**: Parcial.
 
 **Evidencia**:
-- Cabecera CGB dual declarada (`db $80`, línea 48).
-- Grafismo propio en tiles de VRAM (`Tiles` a `TilesFin`, líneas 366-422).
-- `ConfigurarPaletas` (líneas 377-386) escribe 1 paleta BG en CGB mediante `rBCPS`/`rBCPD` a partir de `PaletaCGB` (línea 364).
+- Cabecera CGB dual declarada (`db $80`).
+- Grafismo propio en tiles de VRAM (`Tiles` a `TilesFin`).
+- `ConfigurarPaletas` escribe 1 paleta BG en CGB mediante `rBCPS`/`rBCPD` a partir de `PaletaCGB`.
 - Uso del banco 1 de VRAM (`rVBK`) para atributos de tiles: «no encontrado».
 - Sprites u objetos OAM: «no encontrado».
 
@@ -57,7 +57,7 @@ Auditoría de `gbc/minijuegos/sarnath_98/main.asm` frente al listón de calidad 
 
 **Evidencia**:
 - No hay animación de tiles, fotogramas articulados ni cinemáticas.
-- Las transiciones entre pantallas borran el mapa de fondo (`LimpiarFondo`, línea 350) apagando y encendiendo la pantalla LCD de golpe (`DesactivarLCD`, `ActivarLCD`, líneas 337 y 343).
+- Las transiciones entre pantallas borran el mapa de fondo (`LimpiarFondo`) apagando y encendiendo la pantalla LCD de golpe (`DesactivarLCD`, `ActivarLCD`, líneas 337 y 343).
 - Animación o cinemática: «no encontrado».
 
 ## 7. Evidencia de partida completa (tests en scripts/ con PyBoy o Siga98GB)
@@ -65,7 +65,7 @@ Auditoría de `gbc/minijuegos/sarnath_98/main.asm` frente al listón de calidad 
 **Estado**: Parcial.
 
 **Evidencia**:
-- `gbc/minijuegos/sarnath_98/test_rom.py` incluye la clase `Sarnath98PlayTest` (líneas 48-111) que simula una partida completa en PyBoy (error, ronda 1, ronda 2, ronda 3, verificación de `$A5` en `$C100` y reinicio).
+- `gbc/minijuegos/sarnath_98/test_rom.py` incluye la clase `Sarnath98PlayTest` que simula una partida completa en PyBoy (error, ronda 1, ronda 2, ronda 3, verificación de `$A5` en `$C100` y reinicio).
 - Test de partida completa con emulador dentro del directorio `scripts/`: «no encontrado».
 
 ## Defectos verificables y cortes propuestos
