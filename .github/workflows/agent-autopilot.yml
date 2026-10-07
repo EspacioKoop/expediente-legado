@@ -135,7 +135,7 @@ jobs:
             if [[ -n "$requested" ]]; then
               message="El proveedor solicitado ($requested) no esta disponible con la configuracion actual."
             else
-              message="No hay ningun backend de agente configurado: OmniRoute privado, Qwen directo/fallbacks o Gemini."
+              message="No hay ningún backend de agente configurado: Qwen directo, slots de fallback o Gemini."
             fi
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "$message"
             echo "run=false" >> "$GITHUB_OUTPUT"
