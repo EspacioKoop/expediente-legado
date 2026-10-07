@@ -538,7 +538,7 @@ func _clave_conversacion_contextual(
 		return clave_social
 
 	# #2477: reacción read-only al registro 49. No descubre una pista, no cambia
-	# reputación y cede prioridad a reacciones ideológicas/religiosas ya ganadas.
+	# reputación y cede prioridad a reacciones ideológicas/religiosas ya resueltas.
 	var entrada49 := Entrada49Dialogo.resolver(actor_id, partida.estado)
 	if not entrada49.is_empty():
 		return entrada49
