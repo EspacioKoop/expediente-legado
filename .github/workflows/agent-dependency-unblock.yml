@@ -21,6 +21,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: scripts/agent_unblock_destino.py
+          sparse-checkout-cone-mode: false
       - name: Desbloquear subtareas cuyas dependencias cerraron
         env:
           GH_TOKEN: ${{ github.token }}
@@ -28,6 +32,7 @@ jobs:
           set -euo pipefail
           gh label create agent:blocked --repo "$GITHUB_REPOSITORY" --color D4C5F9 --description "Subtarea bloqueada por dependencias" --force
           gh label create agent:auto --repo "$GITHUB_REPOSITORY" --color 5319E7 --description "Cola automatica de agentes" --force
+          gh label create jules --repo "$GITHUB_REPOSITORY" --color FBCA04 --description "Encargo para Jules" --force
 
           gh issue list --repo "$GITHUB_REPOSITORY" --state open --label agent:blocked --limit 100 --json number,body > /tmp/blocked.json
 
@@ -59,7 +64,7 @@ jobs:
             provider="$(
               BODY="$body" python3 - <<'PY'
           import os, re
-          match=re.search(r"<!--\s*agent-provider:\s*(auto|qwen|gemini)\s*-->", os.environ.get("BODY",""))
+          match=re.search(r"<!--\s*agent-provider:\s*(auto|qwen|gemini|jules)\s*-->", os.environ.get("BODY",""))
           print(match.group(1) if match else "auto")
           PY
             )"
@@ -77,6 +82,10 @@ jobs:
             queue_label=agent:auto
             [[ "$provider" == qwen ]] && queue_label=agent:qwen
             [[ "$provider" == gemini ]] && queue_label=agent:gemini
+            # #2553: lo que no toca Godot (ASM, Python, docs, workflows) va a Jules.
+            if [[ "$provider" == auto || "$provider" == jules ]]; then
+              queue_label="$(BODY="$body" python3 scripts/agent_unblock_destino.py)"
+            fi
             gh issue edit "$issue" --repo "$GITHUB_REPOSITORY" --remove-label agent:blocked --add-label "$queue_label" >/dev/null
             gh issue comment "$issue" --repo "$GITHUB_REPOSITORY" --body "Agent dependencies: todas las dependencias declaradas están cerradas; la subtarea entra en $queue_label." >/dev/null || true
             echo "$issue" >> /tmp/agent-unblocked.txt
