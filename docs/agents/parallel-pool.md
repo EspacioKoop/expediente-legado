@@ -65,6 +65,14 @@ La revisión independiente ocurre antes de considerar un draft listo. Ninguna re
 
 El worker publica un PR draft y dispara el CI canónico. Las reparaciones automáticas están acotadas y no convierten el pool en autoridad de integración.
 
+## Visualización externa
+
+- El pool puede alimentar tableros externos con un *snapshot* sanitizado de estado.
+- El snapshot debe contener solo metadatos seguros: número de issue/PR, fase, cola, resultado reciente, enlace público de GitHub y timestamps.
+- No debe incluir prompts completos, secretos, rutas locales, hostnames privados, IPs, logs crudos ni memoria privada.
+- GitHub Issues/PRs siguen siendo la fuente visible; el tablero es observabilidad, no autoridad.
+- Un estado en tablero no sustituye los labels del repositorio: `agent:working`, `agent:pr-open`, `agent:needs-human`, `revision:*` y CI siguen mandando.
+
 ## Autopilot manual
 
 `agent-autopilot.yml` se conserva como entrada manual para un issue concreto. La cola automática común vive en el dispatcher; no hay una segunda cola horaria separada.
