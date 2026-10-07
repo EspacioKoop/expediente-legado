@@ -84,10 +84,15 @@ const CONTACTOS := [
 		"nombre": "Centralita SIGA",
 		"numero": "555-0198",
 		"texto": "Centralita SIGA. El edificio está cerrado; vuelva a llamar durante la jornada.",
-		"variantes": [
+		"variantes":
+		[
 			{
 				"min_llamadas_previas": 1,
-				"texto": "Centralita SIGA. Reiteramos que el edificio permanece cerrado fuera del horario laboral. Por favor, no insista.",
+				"texto":
+				(
+					"Centralita SIGA. Reiteramos que el edificio permanece "
+					+ "cerrado fuera del horario laboral. Por favor, no insista."
+				),
 			},
 		],
 	},
@@ -96,11 +101,16 @@ const CONTACTOS := [
 		"nombre": "Ultramarinos La Esquina",
 		"numero": "555-0142",
 		"texto": "Ultramarinos La Esquina. Han cerrado por hoy; mañana abren con normalidad.",
-		"variantes": [
+		"variantes":
+		[
 			{
 				"min_llamadas_previas": 1,
 				"dia_diferente": true,
-				"texto": "Ultramarinos La Esquina. Le atiende el contestador. Volvemos a abrir mañana a primera hora, como de costumbre.",
+				"texto":
+				(
+					"Ultramarinos La Esquina. Le atiende el contestador. Volvemos "
+					+ "a abrir mañana a primera hora, como de costumbre."
+				),
 			},
 		],
 	},
@@ -109,10 +119,15 @@ const CONTACTOS := [
 		"nombre": "Videoclub Mirador",
 		"numero": "555-0177",
 		"texto": "Videoclub Mirador. Mensaje grabado: recuerde devolver las cintas rebobinadas.",
-		"variantes": [
+		"variantes":
+		[
 			{
 				"min_llamadas_previas": 1,
-				"texto": "Videoclub Mirador. Grabación automática: si consulta por el catálogo de novedades, se actualiza los viernes.",
+				"texto":
+				(
+					"Videoclub Mirador. Grabación automática: si consulta por "
+					+ "el catálogo de novedades, se actualiza los viernes."
+				),
 			},
 		],
 	},
@@ -126,10 +141,15 @@ const CONTACTOS := [
 			+ "del barrio o vuelva mañana por la tarde."
 		),
 		"religion_actor": DialogoReligion933.ACTOR_TELEFONO_COMUNITARIO,
-		"variantes": [
+		"variantes":
+		[
 			{
 				"min_llamadas_previas": 1,
-				"texto": "Centro comunitario. Grabación: las oficinas están cerradas a esta hora. Para inscripciones, acuda en horario de tarde.",
+				"texto":
+				(
+					"Centro comunitario. Grabación: las oficinas están cerradas "
+					+ "a esta hora. Para inscripciones, acuda en horario de tarde."
+				),
 			},
 		],
 	},
@@ -328,7 +348,10 @@ static func _resolver_texto_contacto(contacto: Dictionary, jornada: Dictionary) 
 	for entrada in historial:
 		if typeof(entrada) != TYPE_DICTIONARY:
 			continue
-		if String(entrada.get("tipo", "")) == "saliente" and String(entrada.get("id", "")) == contacto_id:
+		if (
+			String(entrada.get("tipo", "")) == "saliente"
+			and String(entrada.get("id", "")) == contacto_id
+		):
 			llamadas_previas += 1
 			var dia_entrada := int(entrada.get("dia", 1))
 			if dia_entrada == dia_actual:
