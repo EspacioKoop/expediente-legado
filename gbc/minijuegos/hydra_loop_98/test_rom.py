@@ -16,12 +16,14 @@ SIMBOLOS = RAIZ / "build/hydra_loop_98.sym"
 NIVEL_1 = [2, 0, 2, 0, 0, 0, 2, 0, 2, 0]
 NIVEL_2 = [1, 3, 0, 1, 0, 3, 0, 1, 0, 2]
 BG = 0x9800
-# Indices de tile de main.asm (EQU no exportadas al .sym).
+# Estados e indices de tile de main.asm (EQU no exportadas al .sym).
+ESTADO_TITULO, ESTADO_JUEGO, ESTADO_FALLO, ESTADO_VICTORIA, ESTADO_INSTRUCCIONES = 0, 1, 2, 3, 4
 TILE_CABEZA, TILE_HUECO, TILE_SELLO, TILE_CUELLO_LUZ = 3, 9, 21, 27
 TILE_CABEZA_OBSERVADA = 59
 TILE_PLACA_AGUA, TILE_PLACA_DUDA, TILE_GLIFO, TILE_DIGITO = 34, 35, 36, 39
 TILE_L, TILE_O, TILE_P, TILE_R, TILE_T = 49, 50, 51, 52, 53
 TILE_ICONO, TILE_RELOJ_ON = 54, 55
+TILE_A, TILE_B, TILE_C, TILE_E, TILE_I, TILE_N, TILE_S, TILE_U, TILE_V, TILE_DOS_PUNTOS = 65, 66, 67, 69, 73, 77, 79, 80, 81, 87
 
 
 def celda(fila, col):
@@ -57,7 +59,7 @@ class PruebasHydraLoop(unittest.TestCase):
         emulador.tick(90, False)
         return emulador
 
-    def pulsar(self, emulador, boton, espera=2):
+    def pulsar(self, emulador, boton, espera=6):
         emulador.button_press(boton)
         emulador.tick(2, False)
         emulador.button_release(boton)
@@ -66,8 +68,32 @@ class PruebasHydraLoop(unittest.TestCase):
     def jugar(self, cgb=True):
         emulador = self.arrancar(cgb)
         self.pulsar(emulador, "start")
-        self.assertEqual(self.leer(emulador, "wEstado"), 1)
+        self.assertEqual(self.leer(emulador, "wEstado"), ESTADO_INSTRUCCIONES)
+        self.pulsar(emulador, "start")
+        self.assertEqual(self.leer(emulador, "wEstado"), ESTADO_JUEGO)
         return emulador
+
+    def test_portada_a_instrucciones_y_juego(self):
+        emulador = self.arrancar(cgb=True)
+        self.assertEqual(self.leer(emulador, "wEstado"), ESTADO_TITULO)
+
+        # Primera pulsacion muestra la pantalla de instrucciones con texto y controles reales.
+        self.pulsar(emulador, "a")
+        self.assertEqual(self.leer(emulador, "wEstado"), ESTADO_INSTRUCCIONES)
+        # "INSTRUCCIONES" en fila 1, cols 2-14.
+        self.assertEqual(emulador.memory[celda(1, 2):celda(1, 15)],
+                         [TILE_I, TILE_N, TILE_S, TILE_T, TILE_R, TILE_U, TILE_C, TILE_C, TILE_I, TILE_O, TILE_N, TILE_E, TILE_S])
+        # "A: CORTAR O SELLAR" en fila 4, cols 1-18.
+        self.assertEqual(emulador.memory[celda(4, 1):celda(4, 19)],
+                         [TILE_A, TILE_DOS_PUNTOS, 0, TILE_C, TILE_O, TILE_R, TILE_T, TILE_A, TILE_R, 0, TILE_O, 0, TILE_S, TILE_E, TILE_L, TILE_L, TILE_A, TILE_R])
+        # "B: OBSERVAR" en fila 5, cols 1-11.
+        self.assertEqual(emulador.memory[celda(5, 1):celda(5, 12)],
+                         [TILE_B, TILE_DOS_PUNTOS, 0, TILE_O, TILE_B, TILE_S, TILE_E, TILE_R, TILE_V, TILE_A, TILE_R])
+
+        # Segunda pulsacion inicia el Nivel 1.
+        self.pulsar(emulador, "start")
+        self.assertEqual(self.leer(emulador, "wEstado"), ESTADO_JUEGO)
+        self.assertEqual(self.leer(emulador, "wNivel"), 0)
 
     def leer(self, emulador, nombre, cuantos=None):
         base = self.simbolos[nombre]
