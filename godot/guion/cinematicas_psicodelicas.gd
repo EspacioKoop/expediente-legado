@@ -986,16 +986,9 @@ static func _archivo_infinito(figuras: Array = []) -> Dictionary:
 	var modelos := []
 	for fila in range(5):
 		var z := -1.5 - float(fila) * 2.2
+		modelos.append(_modelo("oficina_psx/file_cabinet_large", Vector3(-2.4, 0.0, z), 1.0))
 		modelos.append(
-			_modelo("oficina_psx/file_cabinet_large", Vector3(-2.4, 0.0, z), 1.0)
-		)
-		modelos.append(
-			_modelo(
-				"oficina_psx/file_cabinet_large",
-				Vector3(2.4, 0.0, z),
-				1.0,
-				Vector3(0, 180, 0)
-			)
+			_modelo("oficina_psx/file_cabinet_large", Vector3(2.4, 0.0, z), 1.0, Vector3(0, 180, 0))
 		)
 	modelos.append(_modelo("bookcaseClosed", Vector3(0, 0.0, -10.5), 1.4))
 	return _decorado(piezas, Color("b9b197"), 0.72, figuras, modelos)
@@ -1008,29 +1001,13 @@ static func _oficina_vertical(figuras: Array = []) -> Dictionary:
 	]
 	var modelos := [
 		_modelo("oficina_psx/desk1", Vector3(-1.4, 0.0, -0.8), 1.0),
+		_modelo("oficina_psx/desk2", Vector3(2.3, 1.6, -4.0), 1.0, Vector3(0, 0, 90)),
 		_modelo(
-			"oficina_psx/desk2",
-			Vector3(2.3, 1.6, -4.0),
-			1.0,
-			Vector3(0, 0, 90)
+			"oficina_psx/office_chair_black", Vector3(-2.0, 4.4, -3.7), 1.0, Vector3(180, 0, 0)
 		),
+		_modelo("oficina_psx/computer_monitor", Vector3(2.2, 2.3, -4.0), 0.95, Vector3(0, 0, 90)),
 		_modelo(
-			"oficina_psx/office_chair_black",
-			Vector3(-2.0, 4.4, -3.7),
-			1.0,
-			Vector3(180, 0, 0)
-		),
-		_modelo(
-			"oficina_psx/computer_monitor",
-			Vector3(2.2, 2.3, -4.0),
-			0.95,
-			Vector3(0, 0, 90)
-		),
-		_modelo(
-			"oficina_psx/file_cabinet_smaller",
-			Vector3(-2.5, 1.3, -4.0),
-			1.0,
-			Vector3(0, 0, -90)
+			"oficina_psx/file_cabinet_smaller", Vector3(-2.5, 1.3, -4.0), 1.0, Vector3(0, 0, -90)
 		),
 	]
 	return _decorado(piezas, Color("d3c9ad"), 0.9, figuras, modelos)
@@ -1055,20 +1032,10 @@ static func _calle_subterranea(figuras: Array = []) -> Dictionary:
 static func _ciudad_bajo_el_archivo() -> Array:
 	var piel := Color("c6a18b")
 	var archivista := _figura(
-		Vector3(0, 0, -1.8),
-		Color("4f5966"),
-		piel,
-		1.0,
-		"rocketbox/business_female_02",
-		"",
-		"work"
+		Vector3(0, 0, -1.8), Color("4f5966"), piel, 1.0, "rocketbox/business_female_02", "", "work"
 	)
 	var visitante := _figura(
-		Vector3(1.4, 0, -2.2),
-		Color("5e5148"),
-		piel,
-		1.0,
-		"rocketbox/male_adult_05"
+		Vector3(1.4, 0, -2.2), Color("5e5148"), piel, 1.0, "rocketbox/male_adult_05"
 	)
 	var planos := [
 		_plano(
