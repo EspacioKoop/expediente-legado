@@ -118,7 +118,16 @@ static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 	# Tres formas de declarar un sitio. `contorno` es la generalización 3D no
 	# ortogonal; `planta` conserva celdas arbitrarias y `suelo`, el rectángulo.
 	# Ninguna ruta conoce el nombre del sitio que está construyendo.
-	if espacio.has("contorno"):
+	# #795: un sitio que solo declara `escena` ya trae su arquitectura (las
+	# verticales de sueño son .tscn completos); levantar la sala por defecto lo
+	# encerraría en una caja gris.
+	var solo_escena := (
+		espacio.has("escena")
+		and not (espacio.has("suelo") or espacio.has("planta") or espacio.has("contorno"))
+	)
+	if solo_escena:
+		pass
+	elif espacio.has("contorno"):
 		_por_contorno(
 			raiz,
 			espacio["contorno"],
@@ -164,6 +173,8 @@ static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 				float(espacio.get("techo_emision", EMISION_PLENA))
 			)
 		_muros(raiz, medidas, color_muro, espacio.get("textura_muro", ""), centro)
+
+	_escena(raiz, espacio)
 
 	# #231 / #479: una mancha es dressing visual del espacio. Se monta después
 	# de la arquitectura para que pueda separarse de ella, pero no crea física.
@@ -365,6 +376,26 @@ static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 	for salida in espacio.get("salidas", []):
 		salidas.append(_salida(raiz, salida))
 	return salidas
+
+
+## Monta la escena que declare el sitio (#795). Va antes que figuras, gatos y
+## luces para que un decorado pueda poblar una vertical de sueño con su reparto.
+## Una ruta que no existe se avisa y se ignora: un plano roto no debe tumbar la
+## cinemática entera.
+static func _escena(raiz: Node3D, espacio: Dictionary) -> void:
+	var ruta := String(espacio.get("escena", ""))
+	if ruta.is_empty():
+		return
+	var empaquetada: PackedScene = null
+	if ResourceLoader.exists(ruta):
+		empaquetada = load(ruta) as PackedScene
+	if empaquetada == null:
+		push_warning("Espacio3D: no hay escena montable en %s" % ruta)
+		return
+	var nodo := empaquetada.instantiate()
+	if nodo is Node3D:
+		(nodo as Node3D).position = espacio.get("escena_posicion", Vector3.ZERO)
+	raiz.add_child(nodo)
 
 
 ## Una lámpara. Va con su carcasa: una luz sin nada que la emita es una luz que
