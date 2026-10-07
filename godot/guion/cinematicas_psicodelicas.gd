@@ -80,17 +80,30 @@ static func _pieza(pos: Vector3, tam: Vector3, color: Color, emisivo: bool = fal
 	return pieza
 
 
-static func _figura(pos: Vector3, ropa: Color, piel: Color, escala: float = 1.0) -> Array:
-	return [
-		_pieza(pos + Vector3(0, 0.95, 0) * escala, Vector3(0.46, 0.85, 0.28) * escala, ropa),
-		_pieza(pos + Vector3(0, 1.55, 0) * escala, Vector3(0.34, 0.34, 0.30) * escala, piel),
-		_pieza(pos + Vector3(-0.13, 0.38, 0) * escala, Vector3(0.14, 0.62, 0.18) * escala, ropa),
-		_pieza(pos + Vector3(0.13, 0.38, 0) * escala, Vector3(0.14, 0.62, 0.18) * escala, ropa),
-	]
+static func _figura(
+	pos: Vector3,
+	_ropa: Color,
+	_piel: Color,
+	escala: float = 1.0,
+	modelo: String = "rocketbox/male_adult_13",
+	retrato: String = "",
+	gesto: String = "idle"
+) -> Dictionary:
+	return {
+		"modelo": modelo,
+		"retrato": retrato,
+		"pos": pos,
+		"rumbo": 180.0,
+		"escala": escala,
+		"gesto": gesto,
+		"desfase": float(absi(hash("%s:%s" % [modelo, pos])) % 1000) / 1000.0,
+	}
 
 
-static func _decorado(piezas: Array, luz: Color, energia: float = 1.0) -> Dictionary:
-	return (
+static func _decorado(
+	piezas: Array, luz: Color, energia: float = 1.0, personas: Array = []
+) -> Dictionary:
+	var decorado := (
 		MesaCinematica
 		. con(
 			piezas,
@@ -105,6 +118,8 @@ static func _decorado(piezas: Array, luz: Color, energia: float = 1.0) -> Dictio
 			]
 		)
 	)
+	decorado["personas"] = personas
+	return decorado
 
 
 static func _oficina(figuras: Array = []) -> Dictionary:
@@ -115,9 +130,7 @@ static func _oficina(figuras: Array = []) -> Dictionary:
 		_pieza(Vector3(1.4, 0.65, -0.6), Vector3(1.5, 0.1, 0.8), Color("57575e")),
 		_pieza(Vector3(0, 1.25, -2.3), Vector3(1.0, 0.7, 0.08), Color("233528"), true),
 	]
-	for figura in figuras:
-		piezas.append_array(figura)
-	return _decorado(piezas, Color("d6d0b7"), 0.95)
+	return _decorado(piezas, Color("d6d0b7"), 0.95, figuras)
 
 
 static func _archivo(figuras: Array = []) -> Dictionary:
@@ -127,9 +140,7 @@ static func _archivo(figuras: Array = []) -> Dictionary:
 		_pieza(Vector3(1.7, 1.7, -1.8), Vector3(0.5, 3.3, 4.5), Color("555861")),
 		_pieza(Vector3(0, 2.9, -3.2), Vector3(1.0, 0.08, 0.5), Color("b9b197"), true),
 	]
-	for figura in figuras:
-		piezas.append_array(figura)
-	return _decorado(piezas, Color("b9b197"), 0.7)
+	return _decorado(piezas, Color("b9b197"), 0.7, figuras)
 
 
 static func _escuela(figuras: Array = []) -> Dictionary:
@@ -141,9 +152,7 @@ static func _escuela(figuras: Array = []) -> Dictionary:
 		_pieza(Vector3(0, 0.55, -0.7), Vector3(1.2, 0.08, 0.6), Color("705946")),
 		_pieza(Vector3(1.5, 0.55, -0.7), Vector3(1.2, 0.08, 0.6), Color("705946")),
 	]
-	for figura in figuras:
-		piezas.append_array(figura)
-	return _decorado(piezas, Color("d5c69f"), 1.0)
+	return _decorado(piezas, Color("d5c69f"), 1.0, figuras)
 
 
 static func _desierto(figuras: Array = []) -> Dictionary:
@@ -153,9 +162,7 @@ static func _desierto(figuras: Array = []) -> Dictionary:
 		_pieza(Vector3(2.8, 1.3, -5.0), Vector3(0.7, 2.8, 0.7), Color("8b6548")),
 		_pieza(Vector3(0, 4.5, -8.0), Vector3(7.0, 0.15, 2.0), Color("dfb47a"), true),
 	]
-	for figura in figuras:
-		piezas.append_array(figura)
-	return _decorado(piezas, Color("e2a66d"), 1.4)
+	return _decorado(piezas, Color("e2a66d"), 1.4, figuras)
 
 
 static func _castillo(figuras: Array = []) -> Dictionary:
@@ -166,9 +173,7 @@ static func _castillo(figuras: Array = []) -> Dictionary:
 		_pieza(Vector3(0, 2.5, -4.3), Vector3(3.4, 4.8, 0.6), Color("32343c")),
 		_pieza(Vector3(0, 2.8, -3.9), Vector3(0.3, 3.5, 0.1), Color("824f68"), true),
 	]
-	for figura in figuras:
-		piezas.append_array(figura)
-	return _decorado(piezas, Color("726d93"), 0.9)
+	return _decorado(piezas, Color("726d93"), 0.9, figuras)
 
 
 static func _vacio(figuras: Array = []) -> Dictionary:
@@ -178,16 +183,14 @@ static func _vacio(figuras: Array = []) -> Dictionary:
 		_pieza(Vector3(-3.0, 2.0, -6.0), Vector3(0.12, 4.0, 0.12), Color("5f8b9c"), true),
 		_pieza(Vector3(3.5, 3.0, -7.0), Vector3(0.12, 6.0, 0.12), Color("a97474"), true),
 	]
-	for figura in figuras:
-		piezas.append_array(figura)
-	return _decorado(piezas, Color("6e6384"), 0.65)
+	return _decorado(piezas, Color("6e6384"), 0.65, figuras)
 
 
 static func _expediente_suena() -> Array:
 	var piel := Color("c7a58f")
 	var gris := Color("555862")
 	var rojo := Color("7c3845")
-	var eco := _figura(Vector3(0, 0, -1.8), gris, piel)
+	var eco := _figura(Vector3(0, 0, -1.8), gris, piel, 1.0, "rocketbox/male_adult_14")
 	var doble := _figura(Vector3(1.2, 0, -2.0), rojo, piel)
 	var gigante := _figura(Vector3(0, 0, -5.4), rojo, piel, 3.2)
 	var planos := [
@@ -438,9 +441,7 @@ static func _jardin_colgante(figuras: Array = []) -> Dictionary:
 		_pieza(Vector3(1.4, 2.8, -5.8), Vector3(1.8, 0.18, 1.5), Color("789e6a")),
 		_pieza(Vector3(0, 3.9, -7.2), Vector3(5.5, 0.12, 0.5), Color("91b978"), true),
 	]
-	for figura in figuras:
-		piezas.append_array(figura)
-	return _decorado(piezas, Color("c5a86d"), 1.25)
+	return _decorado(piezas, Color("c5a86d"), 1.25, figuras)
 
 
 static func _faro(figuras: Array = []) -> Dictionary:
@@ -451,9 +452,7 @@ static func _faro(figuras: Array = []) -> Dictionary:
 		_pieza(Vector3(0, 5.4, -5.2), Vector3(0.6, 0.45, 0.6), Color("e4d48b"), true),
 		_pieza(Vector3(2.7, 0.3, -4.6), Vector3(3.2, 0.45, 1.2), Color("394b5c")),
 	]
-	for figura in figuras:
-		piezas.append_array(figura)
-	return _decorado(piezas, Color("8495a8"), 1.15)
+	return _decorado(piezas, Color("8495a8"), 1.15, figuras)
 
 
 static func _jardin_colgante_siga() -> Array:
@@ -545,9 +544,9 @@ static func _identidades_superpuestas() -> Array:
 	var azul := Color("46566e")
 	var rojo := Color("74414a")
 	var gris := Color("64646b")
-	var figura_azul := _figura(Vector3(0, 0, -1.8), azul, piel)
-	var figura_roja := _figura(Vector3(0, 0, -1.8), rojo, piel)
-	var figura_gris := _figura(Vector3(0, 0, -1.8), gris, piel)
+	var figura_azul := _figura(Vector3(0, 0, -1.8), azul, piel, 1.0, "rocketbox/male_adult_02")
+	var figura_roja := _figura(Vector3(0, 0, -1.8), rojo, piel, 1.0, "rocketbox/female_adult_09")
+	var figura_gris := _figura(Vector3(0, 0, -1.8), gris, piel, 1.0, "rocketbox/male_adult_14")
 	var figura_blanca := _figura(Vector3(0, 0, -1.8), Color("c4c4c4"), Color("ededed"))
 	return [
 		_plano(
@@ -657,9 +656,9 @@ static func _gran_ruptura_siga() -> Array:
 	var traje_puyi := Color("4d5666")
 	var traje_pessoa := Color("66534a")
 	var uniforme := Color("565861")
-	var puyi := _figura(Vector3(-1.1, 0, -1.9), traje_puyi, piel)
-	var pessoa := _figura(Vector3(1.1, 0, -1.9), traje_pessoa, piel)
-	var funcionario := _figura(Vector3(0, 0, -2.2), uniforme, piel)
+	var puyi := _figura(Vector3(-1.1, 0, -1.9), traje_puyi, piel, 1.0, "rocketbox/business_male_02", "emperador", "work")
+	var pessoa := _figura(Vector3(1.1, 0, -1.9), traje_pessoa, piel, 1.0, "rocketbox/business_male_03", "correspondencia", "work")
+	var funcionario := _figura(Vector3(0, 0, -2.2), uniforme, piel, 1.0, "rocketbox/business_female_02", "", "work")
 	var gato := _gato_os98(Vector3(0.9, 0, -1.0))
 	var gato_gigante := _gato_os98(Vector3(0, 0, -6.0), 3.0)
 	var nino := _figura(Vector3(0, 0, -1.8), Color("73809a"), piel, 0.7)
