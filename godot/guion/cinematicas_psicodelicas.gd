@@ -13,6 +13,7 @@ const JARDIN_COLGANTE_SIGA := "psico-jardin-colgante-siga"
 const IDENTIDADES_SUPERPUESTAS := "psico-identidades-superpuestas"
 const GRAN_RUPTURA_SIGA := "psico-gran-ruptura-siga"
 const PROCESION_DE_LOS_ARCHIVADOS := "psico-procesion-archivados"
+const CIUDAD_BAJO_EL_ARCHIVO := "psico-ciudad-bajo-archivo"
 
 const IDS := [
 	EXPEDIENTE_SUENA,
@@ -22,6 +23,7 @@ const IDS := [
 	IDENTIDADES_SUPERPUESTAS,
 	GRAN_RUPTURA_SIGA,
 	PROCESION_DE_LOS_ARCHIVADOS,
+	CIUDAD_BAJO_EL_ARCHIVO,
 ]
 
 
@@ -49,6 +51,8 @@ static func _declarados(id: String) -> Array:
 			return _gran_ruptura_siga()
 		PROCESION_DE_LOS_ARCHIVADOS:
 			return _procesion_de_los_archivados()
+		CIUDAD_BAJO_EL_ARCHIVO:
+			return _ciudad_bajo_el_archivo()
 	return []
 
 
@@ -967,4 +971,186 @@ static func _procesion_de_los_archivados() -> Array:
 	planos[7]["fundido_hasta"] = 0.35
 	planos[10]["fundido_desde"] = 0.0
 	planos[10]["fundido_hasta"] = 1.0
+	return planos
+
+
+static func _archivo_infinito(figuras: Array = []) -> Dictionary:
+	var piezas := [
+		_pieza(Vector3(0, 0.0, -3.0), Vector3(8.0, 0.12, 14.0), Color("303238")),
+		_pieza(Vector3(0, 4.8, -8.0), Vector3(0.12, 9.0, 0.12), Color("c6b891"), true),
+	]
+	var modelos := []
+	for fila in range(5):
+		var z := -1.5 - float(fila) * 2.2
+		modelos.append(
+			_modelo("oficina_psx/file_cabinet_large", Vector3(-2.4, 0.0, z), 1.0)
+		)
+		modelos.append(
+			_modelo(
+				"oficina_psx/file_cabinet_large",
+				Vector3(2.4, 0.0, z),
+				1.0,
+				Vector3(0, 180, 0)
+			)
+		)
+	modelos.append(_modelo("bookcaseClosed", Vector3(0, 0.0, -10.5), 1.4))
+	return _decorado(piezas, Color("b9b197"), 0.72, figuras, modelos)
+
+
+static func _oficina_vertical(figuras: Array = []) -> Dictionary:
+	var piezas := [
+		_pieza(Vector3(0, 0.0, -2.0), Vector3(7.0, 0.12, 7.0), Color("46484f")),
+		_pieza(Vector3(0, 3.5, -4.2), Vector3(7.0, 7.0, 0.12), Color("555861")),
+	]
+	var modelos := [
+		_modelo("oficina_psx/desk1", Vector3(-1.4, 0.0, -0.8), 1.0),
+		_modelo(
+			"oficina_psx/desk2",
+			Vector3(2.3, 1.6, -4.0),
+			1.0,
+			Vector3(0, 0, 90)
+		),
+		_modelo(
+			"oficina_psx/office_chair_black",
+			Vector3(-2.0, 4.4, -3.7),
+			1.0,
+			Vector3(180, 0, 0)
+		),
+		_modelo(
+			"oficina_psx/computer_monitor",
+			Vector3(2.2, 2.3, -4.0),
+			0.95,
+			Vector3(0, 0, 90)
+		),
+		_modelo(
+			"oficina_psx/file_cabinet_smaller",
+			Vector3(-2.5, 1.3, -4.0),
+			1.0,
+			Vector3(0, 0, -90)
+		),
+	]
+	return _decorado(piezas, Color("d3c9ad"), 0.9, figuras, modelos)
+
+
+static func _calle_subterranea(figuras: Array = []) -> Dictionary:
+	var piezas := [
+		_pieza(Vector3(0, -0.05, -3.0), Vector3(12.0, 0.1, 14.0), Color("282b30")),
+		_pieza(Vector3(0, 5.0, -8.0), Vector3(9.0, 0.08, 0.7), Color("69717a"), true),
+	]
+	var modelos := [
+		_modelo("traffic_road/Manhole_Cover", Vector3(-1.2, 0.02, -1.6), 1.0),
+		_modelo("traffic_road/Road_Block", Vector3(2.0, 0.0, -3.2), 1.0),
+		_modelo("traffic_road/Traffic_Cone", Vector3(-2.2, 0.0, -4.2), 1.0),
+		_modelo("street_furniture/TrashCan", Vector3(2.7, 0.0, -5.4), 1.0),
+		_modelo("street_furniture/GarbageBag", Vector3(2.3, 0.0, -5.1), 1.0),
+		_modelo("psx_cars/Car03", Vector3(0.0, 0.0, -7.0), 1.0, Vector3(0, 180, 0)),
+	]
+	return _decorado(piezas, Color("8290a2"), 0.8, figuras, modelos)
+
+
+static func _ciudad_bajo_el_archivo() -> Array:
+	var piel := Color("c6a18b")
+	var archivista := _figura(
+		Vector3(0, 0, -1.8),
+		Color("4f5966"),
+		piel,
+		1.0,
+		"rocketbox/business_female_02",
+		"",
+		"work"
+	)
+	var visitante := _figura(
+		Vector3(1.4, 0, -2.2),
+		Color("5e5148"),
+		piel,
+		1.0,
+		"rocketbox/male_adult_05"
+	)
+	var planos := [
+		_plano(
+			"archivo-normal",
+			_archivo([archivista]),
+			Vector3(0, 1.7, 2.5),
+			Vector3(0, 1.35, -2.0),
+			3.8,
+			"El último pasillo debería terminar aquí."
+		),
+		_plano(
+			"archivo-infinito",
+			_archivo_infinito([archivista]),
+			Vector3(0, 1.9, 4.8),
+			Vector3(0, 1.5, -7.5),
+			4.6,
+			"Los archivadores continúan más allá del edificio."
+		),
+		_plano(
+			"oficina-vertical",
+			_oficina_vertical([visitante]),
+			Vector3(-2.2, 2.1, 4.4),
+			Vector3(0, 2.4, -3.6),
+			4.5,
+			"En la siguiente planta, la gravedad pertenece a otro departamento."
+		),
+		_plano(
+			"techo",
+			_oficina_vertical([archivista, visitante]),
+			Vector3(2.4, 3.6, 3.8),
+			Vector3(-1.0, 3.2, -3.7),
+			4.2,
+			"Hay empleados trabajando en la pared."
+		),
+		_plano(
+			"calle-subterranea",
+			_calle_subterranea([archivista]),
+			Vector3(-2.8, 1.6, 5.0),
+			Vector3(0, 1.2, -5.8),
+			4.8,
+			"Debajo del archivo aparece una calle sin cielo."
+		),
+		_plano(
+			"coche",
+			_calle_subterranea([visitante]),
+			Vector3(2.2, 1.4, 3.6),
+			Vector3(0, 1.0, -6.8),
+			4.0,
+			"Un coche lleva años esperando un semáforo que no existe."
+		),
+		_plano(
+			"archivo-sobre-calle",
+			_archivo_infinito([archivista, visitante]),
+			Vector3(0, 2.5, 5.5),
+			Vector3(0, 2.0, -8.5),
+			4.8,
+			"Los edificios de la ciudad son archivadores vistos desde dentro."
+		),
+		_plano(
+			"oficina-caida",
+			_oficina_vertical([archivista]),
+			Vector3(0, 4.2, 3.0),
+			Vector3(0, 1.2, -3.5),
+			4.4,
+			"Tu mesa cae hacia arriba."
+		),
+		_plano(
+			"retorno",
+			_archivo([archivista]),
+			Vector3(0, 1.7, 2.3),
+			Vector3(0, 1.35, -2.0),
+			3.6,
+			"La puerta vuelve a ser una puerta."
+		),
+		_plano(
+			"remate-ciudad",
+			_vacio([]),
+			Vector3(0, 1.8, 3.3),
+			Vector3(0, 1.8, -4.0),
+			3.0,
+			"PLANTA ACTUAL: -∞"
+		),
+	]
+	planos[0]["camara_desde"] = Vector3(2.0, 1.8, 3.0)
+	planos[4]["fundido_desde"] = 0.0
+	planos[4]["fundido_hasta"] = 0.3
+	planos[9]["fundido_desde"] = 0.0
+	planos[9]["fundido_hasta"] = 1.0
 	return planos
