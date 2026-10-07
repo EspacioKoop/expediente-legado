@@ -2,6 +2,8 @@ from pathlib import Path
 import re
 
 TEXT = Path("godot/guion/cinematicas_psicodelicas.gd").read_text(encoding="utf-8")
+IMPOSSIBLE_TEXT = Path("godot/guion/cinematicas_psicodelicas_imposibles.gd").read_text(encoding="utf-8")
+ALL_TEXT = TEXT + "\n" + IMPOSSIBLE_TEXT
 
 IDS = [
     "psico-expediente-suena",
@@ -23,15 +25,16 @@ FUNCS = [
     "_identidades_superpuestas",
     "_gran_ruptura_siga",
     "_procesion_de_los_archivados",
-    "_ciudad_bajo_el_archivo",
-    "_cinco_oficinas_del_tiempo",
+    "ciudad_bajo_el_archivo",
+    "cinco_oficinas_del_tiempo",
 ]
 
 
 def _chunk(name: str) -> str:
-    start = TEXT.index(f"static func {name}()")
-    end = TEXT.find("\n\nstatic func ", start + 1)
-    return TEXT[start:] if end < 0 else TEXT[start:end]
+    source = TEXT if f"static func {name}()" in TEXT else IMPOSSIBLE_TEXT
+    start = source.index(f"static func {name}()")
+    end = source.find("\n\nstatic func ", start + 1)
+    return source[start:] if end < 0 else source[start:end]
 
 
 def test_ids_estables_y_motor_comun():
@@ -60,7 +63,7 @@ def test_figuras_humanas_forman_parte_del_montaje():
 
 def test_no_hay_autoplay_ni_mutacion_de_partida():
     for token in ("change_scene", "Partida.", "get_tree().", ".reproducir("):
-        assert token not in TEXT
+        assert token not in ALL_TEXT
 
 
 def test_nuevas_piezas_extienden_montaje_y_personajes():
@@ -121,7 +124,7 @@ def test_decorados_cotidianos_reutilizan_props_3d_del_repo():
 
 
 def test_ciudad_imposible_usa_props_reales_y_gravedad_invertida():
-    chunk = _chunk("_ciudad_bajo_el_archivo")
+    chunk = _chunk("ciudad_bajo_el_archivo")
     assert chunk.count("_plano(") >= 10
     assert "_archivo_infinito(" in chunk
     assert "_oficina_vertical(" in chunk
@@ -133,11 +136,11 @@ def test_ciudad_imposible_usa_props_reales_y_gravedad_invertida():
         "psx_cars/Car03",
         "oficina_psx/file_cabinet_large",
     ):
-        assert modelo in TEXT
+        assert modelo in IMPOSSIBLE_TEXT
 
 
 def test_coral_historico_usa_cinco_identidades_reales():
-    chunk = _chunk("_cinco_oficinas_del_tiempo")
+    chunk = _chunk("cinco_oficinas_del_tiempo")
     assert chunk.count("_plano(") >= 10
     for persona in (
         "Puyi",
@@ -155,3 +158,8 @@ def test_coral_historico_usa_cinco_identidades_reales():
         '"fielato"',
     ):
         assert retrato in chunk
+
+
+def test_catalogo_principal_respeta_limite_de_lineas():
+    assert len(TEXT.splitlines()) <= 1000
+    assert len(IMPOSSIBLE_TEXT.splitlines()) <= 1000
