@@ -331,6 +331,15 @@ SUENO_PREPARAR_CONFIRMAR,Dormir
 SUENO_PREPARAR_CANCELAR,Volver
 SUENO_PREPARAR_SIN_DOCUMENTOS,Hoy no hay documentos que llevarse.
 SUENO_PREPARAR_COMPLETA,Los tres huecos están ocupados. Quite uno para añadir otro.
+SUENO_MUSEO_HUIDA_INICIAL,La vida en la que el primer día no subiste a la cuarta planta y cogiste un tren sin billete de vuelta.
+SUENO_MUSEO_RECHAZO_OFERTA,La vida en la que dijiste que no a SIGA y la carta de aceptación se quedó sin abrir en el buzón.
+SUENO_MUSEO_DESPIDO_PREMATURO,La vida en la que te despidieron la primera semana y nadie volvió a preguntar por tus expedientes.
+SUENO_MUSEO_ABANDONO_DIA_1,La vida en la que al segundo día ya no volviste y el puesto 4-B se quedó vacío.
+SUENO_MUSEO_RENDICION_VUELTA_1,La vida en la que diste la primera vuelta por buena y no hubo una segunda.
+SUENO_MUSEO_ATRAPADO_ARCHIVO,La vida en la que nunca saliste del archivo y las estanterías siguieron creciendo hacia dentro.
+SUENO_MUSEO_PERDIDO_CALLE,La vida en la que tomaste otra calle al volver a casa y el trayecto no terminó nunca.
+SUENO_MUSEO_AISLAMIENTO,La vida en la que no hablaste con ningún compañero y sus nombres se borraron de la plantilla.
+SUENO_MUSEO_ABRUMADO_EVENTOS,La vida en la que todo lo de aquel día te alcanzó a la vez y no hubo forma de dormir.
 TAROT_ROTULO,{carta}
 TAROT_SIN_NOMBRE,Una carta sin nombre
 TAROT_VOZ,"Estaba dentro del expediente, escrita como si nada."
