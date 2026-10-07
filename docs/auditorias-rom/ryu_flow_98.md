@@ -6,7 +6,7 @@ Informe de auditoría frente al listón de calidad de #808 («cada ROM propia ti
 - **Estado:** Cumple.
 - **Evidencia:**
   - **Pantalla de título:** `EstadoTitulo` y `DibujarTitulo`. Carga la pantalla completa `TituloCGB` en GBC o muestra texto en DMG (`TextoTitulo`). Pulso de `A` o `START` inicia la campaña normal; `B` inicia el postgame «Cauce inverso» si está desbloqueado.
-  - **Instrucciones:** Diálogos del anciano en GBC al inicio de cada nivel (`EstadoDialogo`, líneas 242-250; `AbrirDialogo`, líneas 976-981; `DialogosCGB`), que el jugador avanza con `A` o `START`. En DMG muestra la guía `A GIRA` (`TextoGira`, línea 1373; `DibujarJuego`).
+  - **Instrucciones:** Diálogos del anciano en GBC al inicio de cada nivel (`EstadoDialogo`; `AbrirDialogo`; `DialogosCGB`), que el jugador avanza con `A` o `START`. En DMG muestra la guía `A GIRA` (`TextoGira`; `DibujarJuego`).
   - **Bucle de juego:** `EstadoJuego` e `IniciarJuego` / `IniciarNivel`.
   - **Pantalla final:** `MostrarFinal` y `EstadoFin`. Carga `VictoriaCGB` en GBC o texto en DMG (`DibujarFinal`).
   - **Vuelta:** Desde `EstadoFin`, pulsar `A` o `START` reinicia el flujo completo vía `IniciarJuego` (nivel 1); pulsar `B` ejecuta `IniciarDesafio`.
@@ -14,17 +14,17 @@ Informe de auditoría frente al listón de calidad de #808 («cada ROM propia ti
 ## 2. Estructura: número de niveles o fases y qué cambia entre ellos
 - **Estado:** Cumple.
 - **Evidencia:**
-  - **Estructura de niveles:** 3 niveles en campaña normal (`NUM_NIVELES EQU 3`, `main.asm`, línea 80; tabla `Niveles`) y 3 niveles en postgame Cauce inverso (`NivelesDesafio`). En DMG solo se juega el primer nivel.
+  - **Estructura de niveles:** 3 niveles en campaña normal (`NUM_NIVELES EQU 3`; tabla `Niveles`) y 3 niveles en postgame Cauce inverso (`NivelesDesafio`). En DMG solo se juega el primer nivel.
   - **Cambio de mecánicas:**
     - Nivel 1-1 (Día): 3 compuertas independientes, 2 estados (abierta/cerrada), `NIVEL_ACOPLADO = 0`. Mínimo 3 movimientos.
     - Nivel 1-2 (Amanecer): 3 compuertas independientes, 3 estados (abierta/media/cerrada), `NIVEL_ACOPLADO = 0`. Mínimo 6 movimientos.
     - Nivel 1-3 (Noche): 3 compuertas acopladas (`NIVEL_ACOPLADO = 1`, mover una compuerta altera también la de su derecha), 3 estados. Mínimo 6 movimientos.
     - Postgame Cauce inverso: 3 niveles con estados iniciales y soluciones distintas (3, 6 y 7 movimientos mínimos).
   - **Cambios visuales entre niveles:**
-    - Paletas de fondo CGB por nivel (`PaletasNivelCGB`, `main.asm`, líneas 1559-1560; `PaletasAmanecerCGB`, línea 1640; `PaletasNocheCGB`, línea 1642; aplicadas en `CargarPaletasNivelCGB`).
-    - Paleta del dragón CGB por nivel (`PaletasDragonCGB`, `main.asm`, líneas 1588-1590; aplicadas en `CargarPaletaDragonCGB`).
+    - Paletas de fondo CGB por nivel (`PaletasNivelCGB`; `PaletasAmanecerCGB`; `PaletasNocheCGB`; aplicadas en `CargarPaletasNivelCGB`).
+    - Paleta del dragón CGB por nivel (`PaletasDragonCGB`; aplicadas en `CargarPaletaDragonCGB`).
     - Diálogos CGB específicos por nivel (`DialogosCGB`, `main.asm`).
-    - Brillo y color del agua animados según la paleta del nivel actual (`AguaCGB`, `main.asm`, línea 1644; `AnimarAgua`).
+    - Brillo y color del agua animados según la paleta del nivel actual (`AguaCGB`; `AnimarAgua`).
 
 ## 3. Récord o progreso persistente en SRAM (el cartucho común MBC5 ya lo permite)
 - **Estado:** Parcial.
@@ -44,14 +44,14 @@ Informe de auditoría frente al listón de calidad de #808 («cada ROM propia ti
   - **Cabecera dual CGB:** `0x80` en `$0143` y título `RYUFLOW98`.
   - **Láminas CGB a pantalla completa:** `CARGAR_PANTALLA_CGB` (`pantalla_cgb.asm`) carga `TituloCGB`, `JuegoCGB` y `VictoriaCGB`.
   - **Atributos y VRAM2 (rVBK):** Acceso a banco 1 de VRAM vía `rVBK` para transferir tiles de sprites y gestionar atributos por tile en pantallas GBC.
-  - **Paletas CGB:** Control de paletas de fondo con `rBCPS`/`rBCPD` (`CargarPaletasNivelCGB`, `main.asm`) y de objetos con `rOCPS`/`rOCPD` (`ConfigurarPaletas`, líneas 1291-1318; `DibujarJuegoCGB`).
-  - **Sprites y OAM:** Buffer OAM en sombra `wOAMSombra` en `$C200` (`OAM_BASE`, `main.asm`, línea 34; `OAM_REAL` en `$FE00`). Copia 28 sprites en VBlank (`VolcarOAM`). Muestra cursor flotante (`ActualizarSpritesCGB`), indicador de nivel, dragones despiertos, contador de 3 dígitos, cabeza del dragón animada (`DragonCabezaFotogramas`) y dragón rugiendo en victoria (`ActualizarRugidoCGB`).
+  - **Paletas CGB:** Control de paletas de fondo con `rBCPS`/`rBCPD` (`CargarPaletasNivelCGB`, `main.asm`) y de objetos con `rOCPS`/`rOCPD` (`ConfigurarPaletas`; `DibujarJuegoCGB`).
+  - **Sprites y OAM:** Buffer OAM en sombra `wOAMSombra` en `$C200` (`OAM_BASE`; `OAM_REAL` en `$FE00`). Copia 28 sprites en VBlank (`VolcarOAM`). Muestra cursor flotante (`ActualizarSpritesCGB`), indicador de nivel, dragones despiertos, contador de 3 dígitos, cabeza del dragón animada (`DragonCabezaFotogramas`) y dragón rugiendo en victoria (`ActualizarRugidoCGB`).
 
 ## 6. Animación o cinemática
 - **Estado:** Cumple.
 - **Evidencia:**
-  - **Animación de paletas (agua):** `AnimarAgua` alterna el color del cauce cada 10 fotogramas (`AGUA_FOTOGRAMAS EQU 10`) sobre `PALETA_AGUA` siguiendo `SecuenciaBrilloAgua` (`0, 1, 2, 1`, `main.asm`, línea 1562; `AguaCGB`).
-  - **Animación de sprites (Dragón en juego):** En reposo cicla 4 fotogramas (`DragonCabezaFotogramas`, `main.asm`, líneas 1051-1052, 1580). Al orientar una compuerta correctamente, el dragón abre el ojo durante 40 fotogramas (`wReaccion`).
+  - **Animación de paletas (agua):** `AnimarAgua` alterna el color del cauce cada 10 fotogramas (`AGUA_FOTOGRAMAS EQU 10`) sobre `PALETA_AGUA` siguiendo `SecuenciaBrilloAgua` (`0, 1, 2, 1`; `AguaCGB`).
+  - **Animación de sprites (Dragón en juego):** En reposo cicla 4 fotogramas (`DragonCabezaFotogramas`). Al orientar una compuerta correctamente, el dragón abre el ojo durante 40 fotogramas (`wReaccion`).
   - **Animación de victoria (Dragón rugiendo):** En la pantalla final, `ActualizarRugidoCGB` anima el rugido alternando 2 fotogramas (`DragonRugido0`, `DragonRugido1`).
   - **Cinemática:** no encontrado. No se incluyen cinemáticas de vídeo o secuencias precalculadas independientes; las animaciones funcionan por sprites y paletas en tiempo real.
 
