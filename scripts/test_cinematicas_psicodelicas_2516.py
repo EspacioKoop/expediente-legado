@@ -12,6 +12,7 @@ IDS = [
     "psico-gran-ruptura-siga",
     "psico-procesion-archivados",
     "psico-ciudad-bajo-archivo",
+    "psico-cinco-oficinas-tiempo",
 ]
 
 FUNCS = [
@@ -23,6 +24,7 @@ FUNCS = [
     "_gran_ruptura_siga",
     "_procesion_de_los_archivados",
     "_ciudad_bajo_el_archivo",
+    "_cinco_oficinas_del_tiempo",
 ]
 
 
@@ -132,3 +134,24 @@ def test_ciudad_imposible_usa_props_reales_y_gravedad_invertida():
         "oficina_psx/file_cabinet_large",
     ):
         assert modelo in TEXT
+
+
+def test_coral_historico_usa_cinco_identidades_reales():
+    chunk = _chunk("_cinco_oficinas_del_tiempo")
+    assert chunk.count("_plano(") >= 10
+    for persona in (
+        "Puyi",
+        "Melville",
+        "Pessoa",
+        "Cavafis",
+        "Rousseau",
+    ):
+        assert persona in chunk
+    for retrato in (
+        '"emperador"',
+        '"aduanero_ny"',
+        '"correspondencia"',
+        '"riegos"',
+        '"fielato"',
+    ):
+        assert retrato in chunk
