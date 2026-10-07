@@ -24,6 +24,7 @@ const ZONAS_POR_BOTON := {
 	"_extras": "extras",
 	"_personaje": "extras",
 	"_portatil": "extras",
+	"_creditos": "extras",
 	"_ventanilla": "extras",
 	"_ajustes": "opciones",
 	"_salir": "salir",
@@ -43,12 +44,14 @@ var _extras: Button
 var _extras_contenedor: VBoxContainer
 var _personaje: Button
 var _portatil: Button
+var _creditos: Button
 var _ventanilla: Button
 var _ajustes: Button
 var _salir: Button
 var _aviso: Label
 var _confirmacion: ConfirmationDialog
 var _portatil_app: EmuladorPortatilApp = null
+var _pantalla_creditos: PantallaCreditos = null
 var _reinicio_pendiente := false
 var _entrando := false
 
@@ -175,6 +178,10 @@ func _construir_interfaz() -> void:
 	_personaje = _crear_boton(tr("INICIO_PERSONAJE"), _abrir_personaje)
 	_personaje.tooltip_text = tr("INICIO_PERSONAJE_TOOLTIP")
 	_extras_contenedor.add_child(_personaje)
+	# Créditos va antes que la portátil: el último acceso de Extras es el que
+	# entrega el foco del mando a Ajustes (#98) y ese contrato no cambia.
+	_creditos = _crear_boton(tr("INICIO_CREDITOS"), _abrir_creditos)
+	_extras_contenedor.add_child(_creditos)
 	_portatil = _crear_boton("Portátil Color 98", _abrir_portatil)
 	_extras_contenedor.add_child(_portatil)
 
@@ -210,10 +217,16 @@ func _configurar_foco_menu_principal() -> void:
 	_personaje.focus_neighbor_top = _personaje.get_path_to(_extras)
 	_personaje.focus_neighbor_left = _personaje.focus_neighbor_top
 	_personaje.focus_previous = _personaje.focus_neighbor_top
-	_personaje.focus_neighbor_bottom = _personaje.get_path_to(_portatil)
+	_personaje.focus_neighbor_bottom = _personaje.get_path_to(_creditos)
 	_personaje.focus_neighbor_right = _personaje.focus_neighbor_bottom
 	_personaje.focus_next = _personaje.focus_neighbor_bottom
-	_portatil.focus_neighbor_top = _portatil.get_path_to(_personaje)
+	_creditos.focus_neighbor_top = _creditos.get_path_to(_personaje)
+	_creditos.focus_neighbor_left = _creditos.focus_neighbor_top
+	_creditos.focus_previous = _creditos.focus_neighbor_top
+	_creditos.focus_neighbor_bottom = _creditos.get_path_to(_portatil)
+	_creditos.focus_neighbor_right = _creditos.focus_neighbor_bottom
+	_creditos.focus_next = _creditos.focus_neighbor_bottom
+	_portatil.focus_neighbor_top = _portatil.get_path_to(_creditos)
 	_portatil.focus_neighbor_left = _portatil.focus_neighbor_top
 	_portatil.focus_previous = _portatil.focus_neighbor_top
 	_portatil.focus_neighbor_bottom = _portatil.get_path_to(_ajustes)
@@ -432,3 +445,25 @@ func _entrar() -> void:
 		_entrando = false
 		_actualizar()
 		_aviso.text = tr("INICIO_ERROR_ENTRADA")
+
+
+func _abrir_creditos() -> void:
+	if _entrando or _pantalla_creditos != null:
+		return
+	var pantalla := PantallaCreditos.new()
+	pantalla.cerrada.connect(_al_cerrar_creditos)
+	_pantalla_creditos = pantalla
+	_envoltorio.visible = false
+	_diorama.configurar_activo(false)
+	add_child(pantalla)
+
+
+func _al_cerrar_creditos() -> void:
+	if is_instance_valid(_pantalla_creditos):
+		_pantalla_creditos.queue_free()
+	_pantalla_creditos = null
+	_envoltorio.visible = true
+	if is_instance_valid(_diorama):
+		_diorama.configurar_activo(true)
+	if is_instance_valid(_creditos):
+		_creditos.grab_focus()

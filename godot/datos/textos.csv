@@ -434,6 +434,9 @@ INICIO_VENTANILLA,Ventanilla de reclamaciones
 INICIO_ERROR_AJUSTES,No se pudieron abrir los ajustes.
 INICIO_PERSONAJE,Crear / editar personaje
 INICIO_PERSONAJE_TOOLTIP,Apariencia física y trasfondo del protagonista.
+INICIO_CREDITOS,Créditos
+CREDITOS_TITULO,Créditos
+CREDITOS_CERRAR,Cerrar
 PERSONAJE_TITULO,EXPEDIENTE PERSONAL · ALTA DE EMPLEADO
 PERSONAJE_SUBTITULO,La apariencia no modifica colisiones ni estadísticas. El trasfondo describe tu vida anterior a SIGA.
 PERSONAJE_APARIENCIA,APARIENCIA
