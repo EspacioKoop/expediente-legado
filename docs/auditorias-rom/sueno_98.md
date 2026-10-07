@@ -53,7 +53,7 @@ Estado real de `gbc/minijuegos/sueno_98/main.asm` frente al listón de calidad d
 **Resultado:** Parcial
 
 **Evidencia:**
-- **Paletas CGB:** La función `ConfigurarPaletas` define una única paleta de fondo CGB en `PaletaCGB` (líneas 354-355: `dw $0000, $18C6, $3DEF, $7FFF`).
+- **Paletas CGB:** La función `ConfigurarPaletas` define una única paleta de fondo CGB en `PaletaCGB` (`dw $0000, $18C6, $3DEF, $7FFF`).
 - **Atributos de fondo con rVBK:** No encontrado. No se utiliza la banca 1 de VRAM (`rVBK` = `$FF4F`) ni mapa de atributos CGB.
 - **Sprites:** No encontrado. El registro `rLCDC` se configura sin habilitar objetos/sprites (`ld a, $91`) y no hay llamadas a OAM o DMA.
 
