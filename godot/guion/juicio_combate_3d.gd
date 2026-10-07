@@ -23,7 +23,7 @@ const ARQUETIPOS = preload("res://guion/juicio_combate_arquetipos.gd")
 const ARQUETIPO_HOST = preload("res://guion/juicio_combate_arquetipo_host.gd")
 const HOSTIGADOR_3D = preload("res://guion/juicio_combate_hostigador_3d.gd")
 const BLOQUEADOR_3D = preload("res://guion/juicio_combate_bloqueador_3d.gd")
-const ENJAMBRE_HOST_3D = preload("res://guion/juicio_combate_enjambre_host_3d.gd")
+const ENJAMBRES = preload("res://guion/juicio_combate_3d_enjambres.gd")
 const RIVAL_MOVIMIENTO_3D = preload("res://guion/juicio_combate_rival_movimiento_3d.gd")
 const DETERMINACION_BASE := REGLAS.DETERMINACION_BASE
 const DETERMINACION_MINIMA_RIVAL := REGLAS.DETERMINACION_MINIMA_RIVAL
@@ -486,7 +486,7 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 		return
 	_recarga_jugador = recarga
 	var objetivo := (
-		ENJAMBRE_HOST_3D.objetivo(_enjambre, _jugador.position)
+		ENJAMBRES.objetivo(_enjambre, _jugador.position)
 		if not _enjambre.is_empty()
 		else {"indice": -1, "cuerpo": _rival, "figura": _figura_rival}
 	)
@@ -532,12 +532,11 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 		_contraataque = 0
 
 	var dano := int(impacto["dano"])
-	var indice_objetivo := int(objetivo["indice"])
-	if indice_objetivo < 0:
-		_determinacion_rival = maxi(0, _determinacion_rival - dano)
+	if not _enjambre.is_empty():
+		_determinacion_rival = ENJAMBRES.aplicar_dano(_enjambre, objetivo, dano)
+		_rival.position = ENJAMBRES.centro(_enjambre, _rival.position)
 	else:
-		_determinacion_rival = ENJAMBRE_HOST_3D.aplicar_dano(_enjambre, indice_objetivo, dano)
-		_rival.position = ENJAMBRE_HOST_3D.centro(_enjambre, _rival.position)
+		_determinacion_rival = maxi(0, _determinacion_rival - dano)
 	_aplicar_curacion_arquetipo(efectos_jungianos)
 	var segundos_enredo := float(impacto["enredo_segundos"])
 	if segundos_enredo > 0.0:
@@ -572,11 +571,12 @@ func _montar_arquetipo() -> void:
 	_arquetipo = JuicioCombateVarianteHost3D.montar(self, _acusado, _rival, _raiz)
 	if not _arquetipo.is_empty():
 		return
-	if arquetipo_onirico == ARQUETIPOS.ENJAMBRE:
-		_enjambre = ENJAMBRE_HOST_3D.montar(self, _rival, _acusado, _mito_id, _raiz)
-		_determinacion_rival = ENJAMBRE_HOST_3D.vivos(_enjambre)
-		_rival.position = ENJAMBRE_HOST_3D.centro(_enjambre, _rival.position)
-		return
+	if arquetipo_onirico in [ARQUETIPOS.ENJAMBRE, "mixto"]:
+		_enjambre = ENJAMBRES.montar(self, _rival, _acusado, _mito_id, _raiz, arquetipo_onirico)
+		if not _enjambre.is_empty():
+			_determinacion_rival = ENJAMBRES.vivos(_enjambre)
+			_rival.position = ENJAMBRES.centro(_enjambre, _rival.position)
+			return
 	if not ARQUETIPO_HOST.soportado(arquetipo_onirico):
 		return
 	_arquetipo = ARQUETIPOS.nuevo(arquetipo_onirico, _raiz)
@@ -591,11 +591,20 @@ func _avanzar_arquetipo(delta: float) -> void:
 	if JuicioCombateVarianteHost3D.avanzar(self, _arquetipo, delta):
 		return
 	if not _enjambre.is_empty():
-		for distancia in ENJAMBRE_HOST_3D.avanzar(_enjambre, delta, _jugador.position):
+		for impacto in ENJAMBRES.avanzar(
+			_enjambre,
+			delta,
+			_jugador.position,
+			_rival.position,
+			_rival.rotation.y,
+			_guardia_rota,
+			_esquiva
+		):
 			_rival_inicio_agresion = true
-			_aplicar_impacto_rival(resultado_ataque_rival(float(distancia), _esquiva))
+			_aplicar_impacto_rival(String(impacto))
 			if _acabado:
 				break
+		_guardia_rota = false
 		return
 	if _arquetipo.is_empty():
 		return
@@ -631,10 +640,11 @@ func _avanzar_arquetipo(delta: float) -> void:
 
 
 func _bloquear_golpe(fuerte: bool) -> bool:
-	if _arquetipo.is_empty():
+	var arq := _arquetipo if not _arquetipo.is_empty() else ENJAMBRES.arquetipo_singular(_enjambre)
+	if arq.is_empty():
 		return false
 	var flanco := ARQUETIPO_HOST.flanqueado(_rival.position, _rival.rotation.y, _jugador.position)
-	var guardia := ARQUETIPO_HOST.golpe(_arquetipo, flanco, fuerte)
+	var guardia := ARQUETIPO_HOST.golpe(arq, flanco, fuerte)
 	if not bool(guardia["bloqueado"]):
 		return false
 	var rompe := bool(guardia["rompe_guardia"])
@@ -678,8 +688,8 @@ func _terminar(gano: bool, inmediato: bool = false) -> void:
 	_ataque_rival_pendiente = false
 	JUNGIANO.salir_combate(self)
 	_ocultar_aviso_ataque()
-	ENJAMBRE_HOST_3D.ocultar_avisos(_enjambre)
-	var figura_final := ENJAMBRE_HOST_3D.figura_final(_enjambre, _figura_rival)
+	ENJAMBRES.ocultar_avisos(_enjambre)
+	var figura_final := ENJAMBRES.figura_final(_enjambre, _figura_rival)
 	var espera := maxf(
 		JuicioCombateEscenografia3D.gesto(_figura_jugador, "celebrar" if gano else "nervioso"),
 		JuicioCombateEscenografia3D.gesto(figura_final, "nervioso" if gano else "aplaudir"),
@@ -690,7 +700,7 @@ func _terminar(gano: bool, inmediato: bool = false) -> void:
 	espera = minf(espera, PAUSA_FINAL_MAX)
 	if not inmediato and espera > 0.0 and is_inside_tree():
 		await get_tree().create_timer(espera).timeout
-	ENJAMBRE_HOST_3D.limpiar(_enjambre)
+	ENJAMBRES.limpiar(_enjambre)
 	terminado.emit(gano)
 
 
