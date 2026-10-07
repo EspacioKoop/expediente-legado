@@ -84,18 +84,37 @@ const CONTACTOS := [
 		"nombre": "Centralita SIGA",
 		"numero": "555-0198",
 		"texto": "Centralita SIGA. El edificio está cerrado; vuelva a llamar durante la jornada.",
+		"variantes": [
+			{
+				"min_llamadas_previas": 1,
+				"texto": "Centralita SIGA. Reiteramos que el edificio permanece cerrado fuera del horario laboral. Por favor, no insista.",
+			},
+		],
 	},
 	{
 		"id": "ultramarinos_esquina",
 		"nombre": "Ultramarinos La Esquina",
 		"numero": "555-0142",
 		"texto": "Ultramarinos La Esquina. Han cerrado por hoy; mañana abren con normalidad.",
+		"variantes": [
+			{
+				"min_llamadas_previas": 1,
+				"dia_diferente": true,
+				"texto": "Ultramarinos La Esquina. Le atiende el contestador. Volvemos a abrir mañana a primera hora, como de costumbre.",
+			},
+		],
 	},
 	{
 		"id": "videoclub_mirador",
 		"nombre": "Videoclub Mirador",
 		"numero": "555-0177",
 		"texto": "Videoclub Mirador. Mensaje grabado: recuerde devolver las cintas rebobinadas.",
+		"variantes": [
+			{
+				"min_llamadas_previas": 1,
+				"texto": "Videoclub Mirador. Grabación automática: si consulta por el catálogo de novedades, se actualiza los viernes.",
+			},
+		],
 	},
 	{
 		"id": "centro_comunitario",
@@ -107,6 +126,12 @@ const CONTACTOS := [
 			+ "del barrio o vuelva mañana por la tarde."
 		),
 		"religion_actor": DialogoReligion933.ACTOR_TELEFONO_COMUNITARIO,
+		"variantes": [
+			{
+				"min_llamadas_previas": 1,
+				"texto": "Centro comunitario. Grabación: las oficinas están cerradas a esta hora. Para inscripciones, acuda en horario de tarde.",
+			},
+		],
 	},
 ]
 
@@ -273,6 +298,7 @@ static func llamar(jornada: Dictionary, contacto_id: String) -> Dictionary:
 	var contacto := _buscar_contacto(contacto_id)
 	if contacto.is_empty():
 		return _fallo("numero_no_declarado")
+	var texto_contextual := _resolver_texto_contacto(contacto, jornada)
 	var entrada := contacto.duplicate(true)
 	entrada["hora"] = "21:00"
 	_agregar_historial(telefono, jornada, "saliente", entrada)
@@ -280,8 +306,60 @@ static func llamar(jornada: Dictionary, contacto_id: String) -> Dictionary:
 		"ok": true,
 		"tipo": "saliente",
 		"contacto": contacto.duplicate(true),
-		"texto": String(contacto.get("texto", "")),
+		"texto": texto_contextual,
 	}
+
+
+static func _resolver_texto_contacto(contacto: Dictionary, jornada: Dictionary) -> String:
+	var texto_defecto := String(contacto.get("texto", ""))
+	var variantes = contacto.get("variantes", [])
+	if typeof(variantes) != TYPE_ARRAY or variantes.is_empty():
+		return texto_defecto
+
+	var contacto_id := String(contacto.get("id", ""))
+	var telefono := estado(jornada)
+	var historial: Array = telefono.get(HISTORIAL, [])
+	var dia_actual := int(jornada.get("dia", 1))
+
+	var llamadas_previas := 0
+	var tuvo_mismo_dia := false
+	var tuvo_otro_dia := false
+
+	for entrada in historial:
+		if typeof(entrada) != TYPE_DICTIONARY:
+			continue
+		if String(entrada.get("tipo", "")) == "saliente" and String(entrada.get("id", "")) == contacto_id:
+			llamadas_previas += 1
+			var dia_entrada := int(entrada.get("dia", 1))
+			if dia_entrada == dia_actual:
+				tuvo_mismo_dia = true
+			else:
+				tuvo_otro_dia = true
+
+	for variante in variantes:
+		if typeof(variante) != TYPE_DICTIONARY:
+			continue
+		var coincide := true
+		if variante.has("min_llamadas_previas"):
+			if llamadas_previas < int(variante.get("min_llamadas_previas", 0)):
+				coincide = false
+		if variante.has("max_llamadas_previas"):
+			if llamadas_previas > int(variante.get("max_llamadas_previas", 999999)):
+				coincide = false
+		if variante.has("mismo_dia"):
+			if bool(variante.get("mismo_dia")) != tuvo_mismo_dia:
+				coincide = false
+		if variante.has("dia_diferente"):
+			if bool(variante.get("dia_diferente")) != tuvo_otro_dia:
+				coincide = false
+		if variante.has("min_cerrados_hoy"):
+			if int(jornada.get("cerrados_hoy", 0)) < int(variante.get("min_cerrados_hoy", 0)):
+				coincide = false
+
+		if coincide and variante.has("texto"):
+			return String(variante.get("texto", ""))
+
+	return texto_defecto
 
 
 static func _guardar_mensaje(
