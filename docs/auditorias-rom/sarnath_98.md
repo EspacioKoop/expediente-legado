@@ -57,7 +57,7 @@ Auditoría de `gbc/minijuegos/sarnath_98/main.asm` frente al listón de calidad 
 
 **Evidencia**:
 - No hay animación de tiles, fotogramas articulados ni cinemáticas.
-- Las transiciones entre pantallas borran el mapa de fondo (`LimpiarFondo`) apagando y encendiendo la pantalla LCD de golpe (`DesactivarLCD`, `ActivarLCD`, líneas 337 y 343).
+- Las transiciones entre pantallas borran el mapa de fondo (`LimpiarFondo`) apagando y encendiendo la pantalla LCD de golpe (`DesactivarLCD`, `ActivarLCD`).
 - Animación o cinemática: «no encontrado».
 
 ## 7. Evidencia de partida completa (tests en scripts/ con PyBoy o Siga98GB)
