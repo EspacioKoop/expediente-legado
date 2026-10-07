@@ -14,6 +14,7 @@ const IDENTIDADES_SUPERPUESTAS := "psico-identidades-superpuestas"
 const GRAN_RUPTURA_SIGA := "psico-gran-ruptura-siga"
 const PROCESION_DE_LOS_ARCHIVADOS := "psico-procesion-archivados"
 const CIUDAD_BAJO_EL_ARCHIVO := "psico-ciudad-bajo-archivo"
+const CINCO_OFICINAS_DEL_TIEMPO := "psico-cinco-oficinas-tiempo"
 
 const IDS := [
 	EXPEDIENTE_SUENA,
@@ -24,6 +25,7 @@ const IDS := [
 	GRAN_RUPTURA_SIGA,
 	PROCESION_DE_LOS_ARCHIVADOS,
 	CIUDAD_BAJO_EL_ARCHIVO,
+	CINCO_OFICINAS_DEL_TIEMPO,
 ]
 
 
@@ -53,6 +55,8 @@ static func _declarados(id: String) -> Array:
 			return _procesion_de_los_archivados()
 		CIUDAD_BAJO_EL_ARCHIVO:
 			return _ciudad_bajo_el_archivo()
+		CINCO_OFICINAS_DEL_TIEMPO:
+			return _cinco_oficinas_del_tiempo()
 	return []
 
 
@@ -1151,6 +1155,144 @@ static func _ciudad_bajo_el_archivo() -> Array:
 	planos[0]["camara_desde"] = Vector3(2.0, 1.8, 3.0)
 	planos[4]["fundido_desde"] = 0.0
 	planos[4]["fundido_hasta"] = 0.3
+	planos[9]["fundido_desde"] = 0.0
+	planos[9]["fundido_hasta"] = 1.0
+	return planos
+
+
+static func _cinco_oficinas_del_tiempo() -> Array:
+	var piel := Color("c5a18a")
+	var puyi := _figura(
+		Vector3(-2.0, 0, -2.1),
+		Color("4d5666"),
+		piel,
+		1.0,
+		"rocketbox/business_male_02",
+		"emperador",
+		"work"
+	)
+	var melville := _figura(
+		Vector3(-1.0, 0, -2.0),
+		Color("485263"),
+		piel,
+		1.0,
+		"rocketbox/male_adult_05",
+		"aduanero_ny",
+		"work"
+	)
+	var pessoa := _figura(
+		Vector3(0, 0, -2.0),
+		Color("66534a"),
+		piel,
+		1.0,
+		"rocketbox/business_male_03",
+		"correspondencia",
+		"work"
+	)
+	var cavafis := _figura(
+		Vector3(1.0, 0, -2.0),
+		Color("5b6268"),
+		piel,
+		1.0,
+		"rocketbox/business_male_04",
+		"riegos",
+		"work"
+	)
+	var rousseau := _figura(
+		Vector3(2.0, 0, -2.1),
+		Color("556050"),
+		piel,
+		1.0,
+		"rocketbox/male_adult_03",
+		"fielato",
+		"work"
+	)
+	var cinco := [puyi, melville, pessoa, cavafis, rousseau]
+	var planos := [
+		_plano(
+			"fichaje",
+			_oficina(cinco),
+			Vector3(0, 1.8, 4.2),
+			Vector3(0, 1.35, -2.0),
+			4.5,
+			"Cinco empleados fichan con un siglo de diferencia."
+		),
+		_plano(
+			"puyi",
+			_archivo([puyi]),
+			Vector3(-1.7, 1.7, 2.8),
+			Vector3(-1.8, 1.4, -2.0),
+			4.0,
+			"Puyi ordena documentos de un imperio convertido en departamento."
+		),
+		_plano(
+			"melville",
+			_calle_subterranea([melville]),
+			Vector3(2.2, 1.6, 4.5),
+			Vector3(-0.8, 1.35, -2.2),
+			4.2,
+			"Melville inspecciona una aduana sin puerto."
+		),
+		_plano(
+			"pessoa",
+			_oficina_vertical([pessoa]),
+			Vector3(-2.0, 2.1, 3.8),
+			Vector3(0, 1.5, -3.6),
+			4.2,
+			"Pessoa redacta cartas para empresas que todavía no existen."
+		),
+		_plano(
+			"cavafis",
+			_faro([cavafis]),
+			Vector3(2.4, 2.4, 5.0),
+			Vector3(0.8, 2.4, -5.2),
+			4.4,
+			"Cavafis registra el agua mientras Alejandría arde fuera de horario."
+		),
+		_plano(
+			"rousseau",
+			_jardin_colgante([rousseau]),
+			Vector3(-2.5, 2.2, 4.7),
+			Vector3(1.8, 1.8, -4.8),
+			4.4,
+			"Rousseau pinta una selva detrás del mostrador del fielato."
+		),
+		_plano(
+			"cinco-archivo",
+			_archivo_infinito(cinco),
+			Vector3(0, 2.1, 5.6),
+			Vector3(0, 1.8, -7.8),
+			5.0,
+			"Sus expedientes ocupan el mismo pasillo."
+		),
+		_plano(
+			"cinco-pared",
+			_oficina_vertical(cinco),
+			Vector3(2.6, 3.0, 4.8),
+			Vector3(0, 2.5, -3.8),
+			4.8,
+			"Cuando la oficina gira, ninguno deja de trabajar."
+		),
+		_plano(
+			"cinco-vacio",
+			_vacio(cinco),
+			Vector3(0, 2.0, 5.4),
+			Vector3(0, 1.8, -3.0),
+			4.8,
+			"Cinco biografías terminan en la misma nómina."
+		),
+		_plano(
+			"cierre-historico",
+			_archivo([]),
+			Vector3(0, 1.7, 2.4),
+			Vector3(0, 1.5, -2.8),
+			3.6,
+			"ANTIGÜEDAD RECONOCIDA: NO CONSTA"
+		),
+	]
+	planos[0]["camara_desde"] = Vector3(3.2, 1.9, 4.8)
+	planos[6]["fundido_desde"] = 0.0
+	planos[6]["fundido_hasta"] = 0.25
 	planos[9]["fundido_desde"] = 0.0
 	planos[9]["fundido_hasta"] = 1.0
 	return planos
