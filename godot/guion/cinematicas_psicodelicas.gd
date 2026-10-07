@@ -976,5 +976,3 @@ static func _procesion_de_los_archivados() -> Array:
 	planos[10]["fundido_desde"] = 0.0
 	planos[10]["fundido_hasta"] = 1.0
 	return planos
-
-
