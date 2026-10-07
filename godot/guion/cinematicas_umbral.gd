@@ -44,23 +44,24 @@ static func _declarados(id: String) -> Array:
 
 
 static func _mesa(piezas: Array, luz: Color) -> Dictionary:
-	return MesaCinematica.con(
-		piezas,
-		[
-			{
-				"pos": Vector3(0.0, 2.2, 0.8),
-				"color": luz,
-				"energia": 1.1,
-				"alcance": 4.5,
-				"carcasa": false,
-			}
-		]
+	return (
+		MesaCinematica
+		. con(
+			piezas,
+			[
+				{
+					"pos": Vector3(0.0, 2.2, 0.8),
+					"color": luz,
+					"energia": 1.1,
+					"alcance": 4.5,
+					"carcasa": false,
+				}
+			]
+		)
 	)
 
 
-static func _pieza(
-	pos: Vector3, tam: Vector3, color: Color, emisivo: bool = false
-) -> Dictionary:
+static func _pieza(pos: Vector3, tam: Vector3, color: Color, emisivo: bool = false) -> Dictionary:
 	var pieza := {"pos": pos, "tam": tam, "color": color}
 	if emisivo:
 		pieza["emisivo"] = true
@@ -96,11 +97,7 @@ static func _expediente_imposible() -> Array:
 			_pieza(Vector3(0, 1.02, 0), Vector3(0.72, 0.02, 0.95), papel),
 			_pieza(Vector3(0, 1.035, 0.12), Vector3(0.52, 0.008, 0.04), tinta),
 			_pieza(Vector3(0, 1.035, -0.02), Vector3(0.58, 0.008, 0.025), tinta),
-			_pieza(
-				Vector3(0.18, 1.04, -0.28),
-				Vector3(0.18, 0.012, 0.18),
-				Color("6f2020")
-			),
+			_pieza(Vector3(0.18, 1.04, -0.28), Vector3(0.18, 0.012, 0.18), Color("6f2020")),
 		],
 		Color("e8dfba")
 	)
@@ -139,19 +136,9 @@ static func _siga_fantasma() -> Array:
 	var decorado := _mesa(
 		[
 			_pieza(Vector3(0, 1.35, 0), Vector3(1.15, 0.72, 0.06), Color("24272b")),
-			_pieza(
-				Vector3(0, 1.35, 0.035),
-				Vector3(0.92, 0.52, 0.01),
-				Color("14251b"),
-				true
-			),
+			_pieza(Vector3(0, 1.35, 0.035), Vector3(0.92, 0.52, 0.01), Color("14251b"), true),
 			_pieza(Vector3(0, 1.43, 0.045), Vector3(0.72, 0.025, 0.008), verde, true),
-			_pieza(
-				Vector3(-0.12, 1.31, 0.045),
-				Vector3(0.54, 0.02, 0.008),
-				verde,
-				true
-			),
+			_pieza(Vector3(-0.12, 1.31, 0.045), Vector3(0.54, 0.02, 0.008), verde, true),
 		],
 		Color("739984")
 	)
@@ -277,23 +264,13 @@ static func _regreso_oficina() -> Array:
 	var fluorescente := Color("d9d7c5")
 	var decorado := _mesa(
 		[
-			_pieza(
-				Vector3(0, 2.4, -0.3), Vector3(1.8, 0.06, 0.22), fluorescente, true
-			),
+			_pieza(Vector3(0, 2.4, -0.3), Vector3(1.8, 0.06, 0.22), fluorescente, true),
 			_pieza(Vector3(0, 0.55, -0.7), Vector3(3.8, 0.08, 3.8), Color("626269")),
-			_pieza(
-				Vector3(0.7, 1.05, -0.55), Vector3(0.7, 0.9, 0.7), Color("4b4c52")
-			),
+			_pieza(Vector3(0.7, 1.05, -0.55), Vector3(0.7, 0.9, 0.7), Color("4b4c52")),
 		],
 		Color("e3e0c8")
 	)
-	var flash := _plano(
-		"flash",
-		Vector3(0.0, 1.55, 1.0),
-		Vector3(0.0, 1.5, -0.3),
-		0.35,
-		decorado
-	)
+	var flash := _plano("flash", Vector3(0.0, 1.55, 1.0), Vector3(0.0, 1.5, -0.3), 0.35, decorado)
 	flash["fundido_desde"] = 1.0
 	flash["fundido_hasta"] = 0.0
 	return [
