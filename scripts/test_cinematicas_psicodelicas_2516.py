@@ -103,3 +103,14 @@ def test_plato_admite_personas_y_modelos_3d_reales():
     assert 'decorado.get("modelos", [])' in puente
     assert "Modelos.cargar(nombre)" in puente
     assert "CinematicaPersonas3D.montar(_decorado, decorado)" in app
+
+
+def test_decorados_cotidianos_reutilizan_props_3d_del_repo():
+    for modelo in (
+        "oficina_psx/desk1",
+        "oficina_psx/file_cabinet_large",
+        "styloo_school/principal_office_desk",
+        "styloo_school/computer_pc_old",
+    ):
+        assert modelo in TEXT
+    assert 'decorado["modelos"] = modelos' in TEXT
