@@ -13,9 +13,19 @@ DEF rNR11  EQU $FF11
 DEF rNR12  EQU $FF12
 DEF rNR13  EQU $FF13
 DEF rNR14  EQU $FF14
+DEF rNR21  EQU $FF16
+DEF rNR22  EQU $FF17
+DEF rNR23  EQU $FF18
+DEF rNR24  EQU $FF19
 DEF rNR50  EQU $FF24
 DEF rNR51  EQU $FF25
 DEF rNR52  EQU $FF26
+
+DEF MUSICA_SILENCIO EQU 0
+DEF MUSICA_TITULO   EQU 1
+DEF MUSICA_JUEGO    EQU 2
+DEF MUSICA_FIN      EQU 3
+DEF MUSICA_STEP_FRAMES EQU 16
 DEF rLCDC  EQU $FF40
 DEF rSTAT  EQU $FF41
 DEF rSCY   EQU $FF42
@@ -137,6 +147,15 @@ INCLUDE "../comun/pantalla_cgb.asm"
 
 SECTION "VBlank", ROM0[$0040]
 VBlank:
+    push af
+    push bc
+    push de
+    push hl
+    call ActualizarMusica
+    pop hl
+    pop de
+    pop bc
+    pop af
     reti
 
 SECTION "Header", ROM0[$0100]
@@ -322,6 +341,7 @@ IniciarNivel:
     call DesactivarLCD
     call LimpiarOAM
     call LimpiarFondo
+    call IniciarMusicaJuego
 
     xor a
     ld [wSeleccion], a
@@ -515,6 +535,7 @@ CompletarDesafio:
 
 MostrarFinal:
     call SonidoExito
+    call IniciarMusicaFinal
 
     call DesactivarLCD
     call LimpiarOAM
@@ -1322,9 +1343,9 @@ ConfigurarAudio:
     ldh [rNR52], a
     ld a, $77
     ldh [rNR50], a
-    ld a, $11
+    ld a, $33
     ldh [rNR51], a
-    ret
+    jp IniciarMusicaTitulo
 
 SonidoInicio:
     xor a
@@ -1365,6 +1386,138 @@ SonidoExito:
     ldh [rNR14], a
     ret
 
+IniciarMusicaTitulo:
+    ld a, MUSICA_TITULO
+    jp CargarMusica
+
+IniciarMusicaJuego:
+    ld a, [wMusicaModo]
+    cp MUSICA_JUEGO
+    ret z
+    ld a, MUSICA_JUEGO
+    jp CargarMusica
+
+IniciarMusicaFinal:
+    ld a, MUSICA_FIN
+    jp CargarMusica
+
+CargarMusica:
+    ld [wMusicaModo], a
+    xor a
+    ld [wMusicaTick], a
+    ld [wMusicaPaso], a
+    call TocarPasoMusica
+    ret
+
+ActualizarMusica:
+    ld a, [wMusicaModo]
+    or a
+    ret z
+
+    ld a, [wMusicaTick]
+    inc a
+    cp MUSICA_STEP_FRAMES
+    jr c, .guardar_tick
+    xor a
+    ld [wMusicaTick], a
+    call TocarPasoMusica
+    ret
+.guardar_tick:
+    ld [wMusicaTick], a
+    ret
+
+TocarPasoMusica:
+    ld a, [wMusicaModo]
+    cp MUSICA_TITULO
+    jr z, .titulo
+    cp MUSICA_JUEGO
+    jr z, .juego
+    cp MUSICA_FIN
+    jr z, .final
+    ret
+.titulo:
+    ld hl, PatronTitulo
+    ld b, 12
+    jr .reproducir_bucle
+.juego:
+    ld hl, PatronJuego
+    ld b, 12
+    jr .reproducir_bucle
+.final:
+    ld hl, PatronFinal
+    ld b, 5
+    ld a, [wMusicaPaso]
+    cp b
+    jr nc, .silenciar
+    add a
+    ld e, a
+    ld d, 0
+    add hl, de
+    ld a, [hli]
+    ld e, a
+    ld a, [hl]
+    cp $FF
+    jr z, .silenciar
+
+    ld c, a
+    ld a, $80
+    ldh [rNR21], a
+    ld a, $62
+    ldh [rNR22], a
+    ld a, e
+    ldh [rNR23], a
+    ld a, c
+    and 7
+    or $80
+    ldh [rNR24], a
+
+    ld a, [wMusicaPaso]
+    inc a
+    ld [wMusicaPaso], a
+    ret
+
+.silenciar:
+    xor a
+    ld [wMusicaModo], a
+    ld [wMusicaPaso], a
+    ldh [rNR22], a
+    ret
+
+.reproducir_bucle:
+    ld a, [wMusicaPaso]
+    cp b
+    jr c, .paso_ok
+    xor a
+.paso_ok:
+    add a
+    ld e, a
+    ld d, 0
+    add hl, de
+    ld a, [hli]
+    ld e, a
+    ld a, [hl]
+
+    ld c, a
+    ld a, $80
+    ldh [rNR21], a
+    ld a, $62
+    ldh [rNR22], a
+    ld a, e
+    ldh [rNR23], a
+    ld a, c
+    and 7
+    or $80
+    ldh [rNR24], a
+
+    ld a, [wMusicaPaso]
+    inc a
+    cp b
+    jr c, .guardar_paso
+    xor a
+.guardar_paso:
+    ld [wMusicaPaso], a
+    ret
+
 SECTION "Datos", ROM0
 TextoTitulo:
     db TILE_R, TILE_Y, TILE_U, TILE_VACIO, TILE_F, TILE_L, TILE_O, TILE_W, $FF
@@ -1374,6 +1527,14 @@ TextoGira:
     db TILE_A, TILE_VACIO, TILE_G, TILE_I, TILE_R, TILE_A, $FF
 TextoFlowOk:
     db TILE_F, TILE_L, TILE_O, TILE_W, TILE_VACIO, TILE_O, TILE_K, $FF
+
+; Motivos tranquilos de río (parejas NR23/NR24)
+PatronTitulo:
+    db $AC,$05, $0B,$06, $72,$06, $B2,$06, $D6,$06, $B2,$06, $72,$06, $0B,$06, $AC,$05, $0B,$06, $72,$06, $B2,$06
+PatronJuego:
+    db $42,$06, $89,$06, $D6,$06, $06,$07, $21,$07, $06,$07, $D6,$06, $89,$06, $B2,$06, $D6,$06, $06,$07, $D6,$06
+PatronFinal:
+    db $0B,$06, $72,$06, $B2,$06, $06,$07, $39,$07
 
 ; Progreso postgame: solo habilita el modo Cauce inverso dentro de esta ROM.
 CargarProgreso:
@@ -1589,6 +1750,9 @@ PaletasDragonCGB:
     INCLUDE "assets/dragon_paletas.inc"
 
 SECTION "Variables", WRAM0
+wMusicaModo:    ds 1
+wMusicaTick:    ds 1
+wMusicaPaso:    ds 1
 wEstado:        ds 1
 wSeleccion:     ds 1
 wNivel:         ds 1
