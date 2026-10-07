@@ -101,7 +101,11 @@ static func _figura(
 
 
 static func _decorado(
-	piezas: Array, luz: Color, energia: float = 1.0, personas: Array = []
+	piezas: Array,
+	luz: Color,
+	energia: float = 1.0,
+	personas: Array = [],
+	modelos: Array = []
 ) -> Dictionary:
 	var decorado := (
 		MesaCinematica
@@ -119,28 +123,56 @@ static func _decorado(
 		)
 	)
 	decorado["personas"] = personas
+	decorado["modelos"] = modelos
 	return decorado
+
+
+static func _modelo(
+	modelo: String,
+	pos: Vector3,
+	escala: float = 1.0,
+	rotacion: Vector3 = Vector3.ZERO,
+	nombre: String = ""
+) -> Dictionary:
+	return {
+		"modelo": modelo,
+		"pos": pos,
+		"escala": escala,
+		"rotacion": rotacion,
+		"nombre": nombre,
+	}
 
 
 static func _oficina(figuras: Array = []) -> Dictionary:
 	var piezas := [
 		_pieza(Vector3(0, 0.05, -1.2), Vector3(6.0, 0.1, 5.0), Color("68686f")),
 		_pieza(Vector3(0, 3.0, -1.4), Vector3(6.0, 0.08, 0.18), Color("d8d4bc"), true),
-		_pieza(Vector3(-1.4, 0.65, -0.6), Vector3(1.5, 0.1, 0.8), Color("57575e")),
-		_pieza(Vector3(1.4, 0.65, -0.6), Vector3(1.5, 0.1, 0.8), Color("57575e")),
-		_pieza(Vector3(0, 1.25, -2.3), Vector3(1.0, 0.7, 0.08), Color("233528"), true),
 	]
-	return _decorado(piezas, Color("d6d0b7"), 0.95, figuras)
+	var modelos := [
+		_modelo("oficina_psx/desk1", Vector3(-1.35, 0.0, -0.55), 1.0),
+		_modelo("oficina_psx/desk2", Vector3(1.35, 0.0, -0.55), 1.0),
+		_modelo("oficina_psx/computer_monitor", Vector3(-1.25, 0.78, -0.72), 0.95),
+		_modelo("oficina_psx/computer_monitor", Vector3(1.25, 0.78, -0.72), 0.95),
+		_modelo("oficina_psx/desk_phone", Vector3(0.0, 0.78, -0.35), 0.95),
+		_modelo("oficina_psx/office_chair_black", Vector3(-0.55, 0.0, 0.35), 0.95),
+		_modelo("oficina_psx/office_chair_black", Vector3(0.55, 0.0, 0.35), 0.95),
+	]
+	return _decorado(piezas, Color("d6d0b7"), 0.95, figuras, modelos)
 
 
 static func _archivo(figuras: Array = []) -> Dictionary:
 	var piezas := [
 		_pieza(Vector3(0, 0.05, -1.5), Vector3(5.0, 0.1, 7.0), Color("4d4e55")),
-		_pieza(Vector3(-1.7, 1.7, -1.8), Vector3(0.5, 3.3, 4.5), Color("555861")),
-		_pieza(Vector3(1.7, 1.7, -1.8), Vector3(0.5, 3.3, 4.5), Color("555861")),
 		_pieza(Vector3(0, 2.9, -3.2), Vector3(1.0, 0.08, 0.5), Color("b9b197"), true),
 	]
-	return _decorado(piezas, Color("b9b197"), 0.7, figuras)
+	var modelos := [
+		_modelo("oficina_psx/file_cabinet_large", Vector3(-1.7, 0.0, -2.0), 1.0),
+		_modelo("oficina_psx/file_cabinet_large", Vector3(1.7, 0.0, -2.0), 1.0),
+		_modelo("oficina_psx/file_cabinet_smaller", Vector3(-1.7, 0.0, 0.2), 1.0),
+		_modelo("oficina_psx/file_cabinet_smaller", Vector3(1.7, 0.0, 0.2), 1.0),
+		_modelo("cardboardBoxClosed", Vector3(0.0, 0.0, -2.8), 0.75),
+	]
+	return _decorado(piezas, Color("b9b197"), 0.7, figuras, modelos)
 
 
 static func _escuela(figuras: Array = []) -> Dictionary:
@@ -148,11 +180,15 @@ static func _escuela(figuras: Array = []) -> Dictionary:
 		_pieza(Vector3(0, 0.05, -1.2), Vector3(6.0, 0.1, 5.0), Color("776f65")),
 		_pieza(Vector3(0, 1.65, -3.0), Vector3(4.5, 2.8, 0.12), Color("d0c6ae")),
 		_pieza(Vector3(0, 1.8, -2.9), Vector3(2.8, 1.4, 0.04), Color("263d34")),
-		_pieza(Vector3(-1.5, 0.55, -0.7), Vector3(1.2, 0.08, 0.6), Color("705946")),
-		_pieza(Vector3(0, 0.55, -0.7), Vector3(1.2, 0.08, 0.6), Color("705946")),
-		_pieza(Vector3(1.5, 0.55, -0.7), Vector3(1.2, 0.08, 0.6), Color("705946")),
 	]
-	return _decorado(piezas, Color("d5c69f"), 1.0, figuras)
+	var modelos := [
+		_modelo("styloo_school/principal_office_desk", Vector3(0.0, 0.0, -1.1), 1.0),
+		_modelo("styloo_school/principal_office_chair", Vector3(0.0, 0.0, 0.15), 1.0),
+		_modelo("styloo_school/principal_office_shelf", Vector3(-2.0, 0.0, -2.45), 0.9),
+		_modelo("styloo_school/principal_office_telephone", Vector3(0.65, 0.78, -1.1), 0.9),
+		_modelo("styloo_school/computer_pc_old", Vector3(-0.65, 0.78, -1.1), 0.85),
+	]
+	return _decorado(piezas, Color("d5c69f"), 1.0, figuras, modelos)
 
 
 static func _desierto(figuras: Array = []) -> Dictionary:
