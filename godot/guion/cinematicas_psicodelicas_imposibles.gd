@@ -172,8 +172,6 @@ static func _vacio(figuras: Array = []) -> Dictionary:
 	return _decorado(piezas, Color("6e6384"), 0.65, figuras)
 
 
-
-
 static func _jardin_colgante(figuras: Array = []) -> Dictionary:
 	var piezas := [
 		_pieza(Vector3(0, 0.0, -2.0), Vector3(9.0, 0.16, 9.0), Color("8c744f")),
@@ -196,8 +194,6 @@ static func _faro(figuras: Array = []) -> Dictionary:
 		_pieza(Vector3(2.7, 0.3, -4.6), Vector3(3.2, 0.45, 1.2), Color("394b5c")),
 	]
 	return _decorado(piezas, Color("8495a8"), 1.15, figuras)
-
-
 
 
 static func _archivo_infinito(figuras: Array = []) -> Dictionary:
@@ -485,4 +481,3 @@ static func cinco_oficinas_del_tiempo() -> Array:
 	planos[9]["fundido_desde"] = 0.0
 	planos[9]["fundido_hasta"] = 1.0
 	return planos
-
