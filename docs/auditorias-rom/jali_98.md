@@ -9,47 +9,47 @@ Restricción cultural respetada: `docs/religion-rom-jali-932.md` prohíbe la gam
 ## 1. Menú, instrucciones y flujo completo (título → juego → final → vuelta)
 - **Estado:** Parcial
 - **Evidencia:**
-  - Pantalla de título: `EstadoTitulo` (líneas 123-129) y `DibujarTitulo` (líneas 220-239).
-  - Estado de juego: `EstadoJuego` (líneas 131-155) y `DibujarJuego` (líneas 241-249).
-  - Pantalla de final: `EstadoFin` (líneas 157-163) y `DibujarVictoria` (líneas 294-316).
-  - Vuelta al juego: `EstadoFin` reinicia el puzle al pulsar A o Start llamando a `IniciarJuego` (líneas 157-163 y 165-179).
+  - Pantalla de título: `EstadoTitulo` y `DibujarTitulo`.
+  - Estado de juego: `EstadoJuego` y `DibujarJuego`.
+  - Pantalla de final: `EstadoFin` y `DibujarVictoria`.
+  - Vuelta al juego: `EstadoFin` reinicia el puzle al pulsar A o Start llamando a `IniciarJuego`.
   - Instrucciones: no encontrado. No hay pantalla de ayuda ni texto explicativo sobre el control o la meta.
 
 ## 2. Estructura: número de niveles o fases y qué cambia entre ellos
 - **Estado:** No cumple
 - **Evidencia:**
-  - `main.asm` contiene únicamente un puzle de 3 bandas (`wFases`, línea 394) con solución fija 1/3/2 (líneas 196-206).
-  - No hay niveles progresivos, fases adicionales ni cambios de reglas o escenario (líneas 131-155).
+  - `main.asm` contiene únicamente un puzle de 3 bandas (`wFases`) con solución fija 1/3/2.
+  - No hay niveles progresivos, fases adicionales ni cambios de reglas o escenario.
 
 ## 3. Récord o progreso persistente en SRAM (el cartucho común MBC5 ya lo permite)
 - **Estado:** No cumple
 - **Evidencia:**
   - No existe `SECTION "SRAM"` en `main.asm`.
-  - El cartucho incluye `cartucho.asm` (línea 68), pero solo utiliza WRAM0 (`SECTION "Handshake", WRAM0[$C100]`, líneas 390-398). No guarda récord, número de intentos ni estado resuelto en la SRAM con batería ($A000-$BFFF).
+  - El cartucho incluye `cartucho.asm`, pero solo utiliza WRAM0 (`SECTION "Handshake", WRAM0[$C100]`). No guarda récord, número de intentos ni estado resuelto en la SRAM con batería ($A000-$BFFF).
 
 ## 4. Música y sonido
 - **Estado:** Parcial
 - **Evidencia:**
-  - Efectos de sonido: implementa tres efectos en el canal 1 mediante `SonidoInicio` (líneas 361-369), `SonidoMover` (líneas 371-379) y `SonidoVictoria` (líneas 381-389).
-  - Música: no encontrado. No hay motor de audio ni melodía continua de fondo en el bucle principal (`Bucle`, líneas 112-121) ni en la interrupción `VBlank` (líneas 70-72).
+  - Efectos de sonido: implementa tres efectos en el canal 1 mediante `SonidoInicio`, `SonidoMover` y `SonidoVictoria`.
+  - Música: no encontrado. No hay motor de audio ni melodía continua de fondo en el bucle principal (`Bucle`) ni en la interrupción `VBlank`.
 
 ## 5. Arte CGB propio: paletas, atributos con rVBK y sprites
 - **Estado:** Parcial
 - **Evidencia:**
-  - Paletas CGB: carga una única paleta CGB de 4 colores (`PaletaCGB`, líneas 346-347) con `rBCPS` y `rBCPD` en `ConfigurarPaletas` (líneas 338-344).
+  - Paletas CGB: carga una única paleta CGB de 4 colores (`PaletaCGB`) con `rBCPS` y `rBCPD` en `ConfigurarPaletas`.
   - Atributos con `rVBK`: no encontrado. No se usa el registro `rVBK` para direccionar el banco 1 de VRAM ni asignar paletas por tile.
-  - Sprites: no encontrado. No habilita OAM ni usa sprites hardware. El cursor de selección se dibuja como un tile de fondo en la VRAM BG (`DibujarCursor`, líneas 274-292).
+  - Sprites: no encontrado. No habilita OAM ni usa sprites hardware. El cursor de selección se dibuja como un tile de fondo en la VRAM BG (`DibujarCursor`).
 
 ## 6. Animación o cinemática
 - **Estado:** No cumple
 - **Evidencia:**
-  - Animación: no encontrado. La interrupción `VBlank` ejecuta `reti` directamente (líneas 70-72). No hay animación de tiles ni ciclado de paleta.
-  - Cinemática: no encontrado. La pantalla de victoria (`DibujarVictoria`, líneas 294-316) es un redibujado estático del mapa de fondo.
+  - Animación: no encontrado. La interrupción `VBlank` ejecuta `reti` directamente. No hay animación de tiles ni ciclado de paleta.
+  - Cinemática: no encontrado. La pantalla de victoria (`DibujarVictoria`) es un redibujado estático del mapa de fondo.
 
 ## 7. Evidencia de partida completa (tests en scripts/ con PyBoy o Siga98GB)
 - **Estado:** Cumple
 - **Evidencia:**
-  - Test con PyBoy: `gbc/minijuegos/jali_98/test_rom.py` en la clase `Jali98PlayTest` (líneas 49-98) simula la partida completa (arranque, rotación de bandas, resolución y verificación de WRAM `$C100 == $A5`).
+  - Test con PyBoy: `gbc/minijuegos/jali_98/test_rom.py` en la clase `Jali98PlayTest` simula la partida completa (arranque, rotación de bandas, resolución y verificación de WRAM `$C100 == $A5`).
   - Test de integración: `scripts/test_religion_rom_932.py` comprueba el cumplimiento del contrato técnico y la frontera documental definida en `docs/religion-rom-jali-932.md`.
 
 ---
