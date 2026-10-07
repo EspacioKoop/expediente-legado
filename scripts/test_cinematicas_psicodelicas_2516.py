@@ -85,3 +85,21 @@ def test_procesion_es_coral_y_cruza_todos_los_mundos():
     assert "Alejandría" in chunk
     assert "gato OS98" in chunk
     assert "TURNO ACTUAL" in chunk
+
+
+def test_personajes_largos_usan_rocketbox_y_no_maniquies_de_cajas():
+    assert '"rocketbox/male_adult_13"' in TEXT
+    assert '"rocketbox/business_male_02"' in TEXT
+    assert '"rocketbox/business_male_03"' in TEXT
+    figura = TEXT[TEXT.index("static func _figura("):TEXT.index("static func _decorado(")]
+    assert '"modelo": modelo' in figura
+    assert "_pieza(pos + Vector3" not in figura
+
+
+def test_plato_admite_personas_y_modelos_3d_reales():
+    puente = Path("godot/guion/cinematica_personas_3d.gd").read_text(encoding="utf-8")
+    app = Path("godot/guion/cinematica_app.gd").read_text(encoding="utf-8")
+    assert "Modelos.persona(" in puente
+    assert 'decorado.get("modelos", [])' in puente
+    assert "Modelos.cargar(nombre)" in puente
+    assert "CinematicaPersonas3D.montar(_decorado, decorado)" in app
