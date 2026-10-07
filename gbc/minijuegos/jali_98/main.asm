@@ -266,12 +266,17 @@ CompletarJali:
     call ActivarLCD
     ret
 
+; Se llama en cada frame justo después del `halt` de VBlank: el redibujado
+; (unas 30 escrituras en BG_MAP) cabe en VBlank sin apagar la LCD. Apagarla y
+; encenderla en cada frame dejaba la partida en blanco, porque el primer frame
+; tras encender la LCD no se muestra.
 ActualizarJuego:
-    call DesactivarLCD
+    ld a, [wEstado]
+    cp ESTADO_JUEGO
+    ret nz
     call DibujarBandas
     call DibujarMarcas
     call DibujarCursor
-    call ActivarLCD
     ret
 
 DibujarTitulo:
