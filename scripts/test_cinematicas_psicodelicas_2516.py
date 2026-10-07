@@ -11,6 +11,7 @@ IDS = [
     "psico-identidades-superpuestas",
     "psico-gran-ruptura-siga",
     "psico-procesion-archivados",
+    "psico-ciudad-bajo-archivo",
 ]
 
 FUNCS = [
@@ -21,6 +22,7 @@ FUNCS = [
     "_identidades_superpuestas",
     "_gran_ruptura_siga",
     "_procesion_de_los_archivados",
+    "_ciudad_bajo_el_archivo",
 ]
 
 
@@ -114,3 +116,19 @@ def test_decorados_cotidianos_reutilizan_props_3d_del_repo():
     ):
         assert modelo in TEXT
     assert 'decorado["modelos"] = modelos' in TEXT
+
+
+def test_ciudad_imposible_usa_props_reales_y_gravedad_invertida():
+    chunk = _chunk("_ciudad_bajo_el_archivo")
+    assert chunk.count("_plano(") >= 10
+    assert "_archivo_infinito(" in chunk
+    assert "_oficina_vertical(" in chunk
+    assert "_calle_subterranea(" in chunk
+    assert "PLANTA ACTUAL: -∞" in chunk
+    for modelo in (
+        "traffic_road/Manhole_Cover",
+        "street_furniture/TrashCan",
+        "psx_cars/Car03",
+        "oficina_psx/file_cabinet_large",
+    ):
+        assert modelo in TEXT
