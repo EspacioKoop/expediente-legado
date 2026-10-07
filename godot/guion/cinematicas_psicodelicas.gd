@@ -101,11 +101,7 @@ static func _figura(
 
 
 static func _decorado(
-	piezas: Array,
-	luz: Color,
-	energia: float = 1.0,
-	personas: Array = [],
-	modelos: Array = []
+	piezas: Array, luz: Color, energia: float = 1.0, personas: Array = [], modelos: Array = []
 ) -> Dictionary:
 	var decorado := (
 		MesaCinematica
@@ -664,9 +660,7 @@ static func _identidades_superpuestas() -> Array:
 static func _gato_os98(pos: Vector3, escala: float = 1.0) -> Array:
 	return [
 		_pieza(
-			pos + Vector3(0, 0.35, 0) * escala,
-			Vector3(0.55, 0.32, 0.28) * escala,
-			Color("b9b2a2")
+			pos + Vector3(0, 0.35, 0) * escala, Vector3(0.55, 0.32, 0.28) * escala, Color("b9b2a2")
 		),
 		_pieza(
 			pos + Vector3(0.28, 0.48, 0) * escala,
@@ -692,9 +686,27 @@ static func _gran_ruptura_siga() -> Array:
 	var traje_puyi := Color("4d5666")
 	var traje_pessoa := Color("66534a")
 	var uniforme := Color("565861")
-	var puyi := _figura(Vector3(-1.1, 0, -1.9), traje_puyi, piel, 1.0, "rocketbox/business_male_02", "emperador", "work")
-	var pessoa := _figura(Vector3(1.1, 0, -1.9), traje_pessoa, piel, 1.0, "rocketbox/business_male_03", "correspondencia", "work")
-	var funcionario := _figura(Vector3(0, 0, -2.2), uniforme, piel, 1.0, "rocketbox/business_female_02", "", "work")
+	var puyi := _figura(
+		Vector3(-1.1, 0, -1.9),
+		traje_puyi,
+		piel,
+		1.0,
+		"rocketbox/business_male_02",
+		"emperador",
+		"work"
+	)
+	var pessoa := _figura(
+		Vector3(1.1, 0, -1.9),
+		traje_pessoa,
+		piel,
+		1.0,
+		"rocketbox/business_male_03",
+		"correspondencia",
+		"work"
+	)
+	var funcionario := _figura(
+		Vector3(0, 0, -2.2), uniforme, piel, 1.0, "rocketbox/business_female_02", "", "work"
+	)
 	var gato := _gato_os98(Vector3(0.9, 0, -1.0))
 	var gato_gigante := _gato_os98(Vector3(0, 0, -6.0), 3.0)
 	var nino := _figura(Vector3(0, 0, -1.8), Color("73809a"), piel, 0.7)
