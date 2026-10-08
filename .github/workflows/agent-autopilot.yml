@@ -708,9 +708,9 @@ jobs:
           title="$(gh issue view "$ISSUE" --json title --jq .title)"
           url="$(gh pr create --base main --head "$BRANCH" --draft \
             --title "agent($PROVIDER): #$ISSUE $title" \
-            --body "Refs #$ISSUE
+            --body "Closes #$ISSUE
 
-          Implementación autónoma. Plan reservado en #182; cambios limitados al CLAIM; preflight ejecutado. PR draft, sin auto-merge.")"
+          Implementación autónoma. Plan reservado en #1713; cambios limitados al CLAIM; preflight ejecutado. PR draft, sin auto-merge.")"
           echo "url=$url" >> "$GITHUB_OUTPUT"
           gh issue edit "$ISSUE" --add-label agent:pr-open --remove-label agent:working --remove-label agent:auto --remove-label agent:qwen --remove-label agent:gemini >/dev/null 2>&1 || true
           gh issue comment "$ISSUE" --body "Agent autopilot ($PROVIDER): $url"
