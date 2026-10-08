@@ -45,7 +45,7 @@ class PuenteJulesTest(unittest.TestCase):
     def test_valida_con_las_herramientas_del_pool(self):
         self.assertIn("scripts/agent_delegated_plan.py", self.texto)
         self.assertIn("scripts/agent_plan_parse.py", self.texto)
-        self.assertIn("vars.AGENT_POOL_MAX_FILES || '1'", self.texto)
+        self.assertIn("scripts/agent_scope_limit.py --issue-json /tmp/issue.json", self.texto)
         self.assertRegex(self.texto, r'--max-files\s+"\$MAX_FILES"')
 
     def test_claim_y_release_en_el_registro_activo(self):
@@ -131,7 +131,7 @@ class PuenteJulesTest(unittest.TestCase):
             self.assertIn(f'.name == "{check}"', self.script_ready)
 
     def test_pr_ready_exige_diff_exacto_del_plan_delegado(self):
-        self.assertIn("vars.AGENT_POOL_MAX_FILES || '1'", self.texto)
+        self.assertIn("scripts/agent_scope_limit.py --issue-json /tmp/issue.json", self.texto)
         self.assertIn("scripts/agent_delegated_plan.py", self.script_ready)
         self.assertIn("scripts/agent_plan_parse.py", self.script_ready)
         self.assertIn("jq -r '.files[]' /tmp/plan.json | sort -u", self.script_ready)

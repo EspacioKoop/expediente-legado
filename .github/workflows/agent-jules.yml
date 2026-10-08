@@ -3,7 +3,7 @@ name: Agent Jules
 # Jules (Google) es un worker de nivel 3 externo: se activa al poner la label
 # `jules` a un issue y abre su propia PR (#1917). No publica reservas, así que
 # este puente las publica por él con las mismas reglas del pool: plan delegado
-# de confianza, un solo fichero y rutas no protegidas.
+# de confianza, una ruta por defecto o hasta tres con opt-in, sin rutas protegidas.
 
 on:
   issues:
@@ -50,7 +50,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           ISSUE: ${{ github.event.issue.number }}
           ACTION: ${{ github.event.action }}
-          MAX_FILES: ${{ vars.AGENT_POOL_MAX_FILES || '1' }}
         run: |
           set -euo pipefail
           branch="jules/issue-$ISSUE"
@@ -73,6 +72,7 @@ jobs:
           python3 scripts/agent_delegated_plan.py --issue /tmp/entrada.json --output /tmp/delegado.json >/dev/null
 
           status=0
+          MAX_FILES="$(python3 scripts/agent_scope_limit.py --issue-json /tmp/issue.json)"
           python3 scripts/agent_plan_parse.py \
             --source /tmp/delegado.json \
             --max-files "$MAX_FILES" \
@@ -247,6 +247,7 @@ jobs:
           python3 scripts/agent_delegated_plan.py --issue /tmp/entrada.json --output /tmp/delegado.json >/dev/null
 
           status=0
+          MAX_FILES="$(python3 scripts/agent_scope_limit.py --issue-json /tmp/issue.json)"
           python3 scripts/agent_plan_parse.py --source /tmp/delegado.json --max-files "$MAX_FILES" --output /tmp/plan.json || status=$?
           if (( status != 0 )) || [[ "$(jq -r '.found' /tmp/delegado.json)" != true ]]; then
             echo "PR no lista: no se pudo reconstruir un AGENT_PLAN delegado valido."
@@ -334,7 +335,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           ISSUE: ${{ github.event.issue.number }}
-          MAX_FILES: ${{ vars.AGENT_POOL_MAX_FILES || '1' }}
         run: |
           set -euo pipefail
 
@@ -367,6 +367,7 @@ jobs:
             --issue /tmp/entrada.json --output /tmp/delegado.json >/dev/null
 
           status=0
+          MAX_FILES="$(python3 scripts/agent_scope_limit.py --issue-json /tmp/issue.json)"
           python3 scripts/agent_plan_parse.py \
             --source /tmp/delegado.json \
             --max-files "$MAX_FILES" \
