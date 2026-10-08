@@ -18,10 +18,7 @@ const TIEMPO_FADE_OUT := 1.5
 ## se podrá sustituir por un texto autorizado sin modificar la lógica.
 ## No añadas versos ni letra nueva.
 static var citas := [
-	{
-		"texto": '"We shall not cease from exploration… first time"',
-		"atribucion": "— T. S. Eliot"
-	},
+	{"texto": '"We shall not cease from exploration… first time"', "atribucion": "— T. S. Eliot"},
 	{"texto": '"There must be some kind of way out of here"', "atribucion": "— Bob Dylan"},
 ]
 
