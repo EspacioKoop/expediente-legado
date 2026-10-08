@@ -86,6 +86,9 @@ const CATALOGO := {
 ## con tres variaciones realmente distintas; `coger` conserva Impact Sounds.
 ## Los Kenney originales siguen como respaldo para una reversión barata si el
 ## gate A/B no aprueba todavía el carácter chip.
+##
+## Acentos sonoros del montaje onírico 1998: interrupción CRT y superposición
+## tipográfica. Síntesis chip reproducible, sin assets grabados (#1813).
 const FAMILIAS := {
 	"abrir":
 	[
@@ -106,11 +109,25 @@ const FAMILIAS := {
 		"chip/papel_manojo_01.ogg",
 	],
 	"coger": ["impactSoft_medium_000.ogg", "impactSoft_medium_001.ogg"],
+	"crt_interrupcion":
+	[
+		"chip/crt_interrupcion_01.ogg",
+		"chip/crt_interrupcion_02.ogg",
+		"chip/crt_interrupcion_03.ogg",
+	],
+	"texto_superposicion":
+	[
+		"chip/texto_glitch_01.ogg",
+		"chip/texto_glitch_02.ogg",
+		"chip/texto_glitch_03.ogg",
+	],
 }
 const FAMILIAS_RESPALDO := {
 	"abrir": ["impactMetal_light_000.ogg", "impactMetal_light_001.ogg"],
 	"cerrar": ["impactMetal_medium_000.ogg"],
 	"documento": ["bookFlip1.ogg"],
+	"crt_interrupcion": ["error_003.ogg"],
+	"texto_superposicion": ["click_001.ogg"],
 }
 const VARIACION_TONO := 1.08
 

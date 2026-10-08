@@ -58,6 +58,10 @@ var _fondo: ColorRect
 var _figuras: Node2D
 var _fundido: ColorRect
 var _grano: ColorRect
+## Interrupción CRT opt-in: scanlines, desincronía, ruido y corte a negro breve.
+var _crt: ColorRect
+## Superposición tipográfica irregular opt-in: texto "roto" sobre la imagen.
+var _superposicion: ColorRect
 var _franja_superior: ColorRect
 var _franja_inferior: ColorRect
 ## Reloj de toda la cinemática, no del plano: las franjas entran al empezar la
@@ -87,7 +91,10 @@ func reproducir(rodaje: Array, id: String = "", estado: Dictionary = {}) -> void
 	_reloj = 0.0
 	_total = Cinematica.duracion(rodaje)
 	_grano.material.set_shader_parameter("quieto", _reduccion_movimiento)
+	_grano.material.set_shader_parameter("no_estroboscopico", false)
 	_grano.visible = true
+	_crt.material.set_shader_parameter("quieto", _reduccion_movimiento)
+	_superposicion.material.set_shader_parameter("quieto", _reduccion_movimiento)
 	_actualizar_franjas()
 	_siguiente()
 
@@ -144,6 +151,10 @@ func _siguiente() -> void:
 	_rotulo.add_theme_font_size_override("font_size", 34 if _rotulo.text.length() > 28 else 48)
 
 	_actualizar_fundido(plano, 0.0)
+
+	# Configurar efectos opt-in del plano
+	_configurar_efectos_plano(plano)
+
 	plano_entrado.emit(_plano, plano)
 	_sonar_plano(plano)
 
@@ -169,6 +180,12 @@ func _sonar_plano(plano: Dictionary) -> void:
 	var tono := float(plano.get("sonido_tono", 1.0))
 	Sonido.sonar(self, nombre, tono)
 
+	# Acentos sonoros originales para efectos opt-in del montaje onírico 1998
+	if bool(plano.get("interrupcion_crt", false)):
+		Sonido.sonar(self, "crt_interrupcion", 1.0)
+	if not String(plano.get("superposicion_texto", "")).is_empty():
+		Sonido.sonar(self, "texto_superposicion", 1.2)
+
 
 func _terminar() -> void:
 	_reproduciendo = false
@@ -183,6 +200,8 @@ func _terminar() -> void:
 	_rotulo.text = ""
 	_voz.text = ""
 	_grano.visible = false
+	_crt.visible = false
+	_superposicion.visible = false
 	_actualizar_franjas()
 	_fondo.visible = false
 	_figuras.visible = false
@@ -190,6 +209,67 @@ func _terminar() -> void:
 		_fundido.color = Color(0.0, 0.0, 0.0, 0.0)
 	_preparar_plato({})
 	terminada.emit()
+
+
+## Configura efectos opt-in del plano actual:
+## CRT, superposición tipográfica, grano no estroboscópico.
+func _configurar_efectos_plano(plano: Dictionary) -> void:
+	# Interrupción CRT
+	var crt_activo := bool(plano.get("interrupcion_crt", false))
+	_crt.visible = crt_activo
+	if crt_activo:
+		var mat_crt := _crt.material
+		mat_crt.set_shader_parameter("intensidad", float(plano.get("crt_intensidad", 0.6)))
+		mat_crt.set_shader_parameter("duracion", float(plano.get("crt_duracion", 0.15)))
+		mat_crt.set_shader_parameter("semilla", float(plano.get("crt_semilla", _plano * 13.7)))
+		mat_crt.set_shader_parameter("quieto", _reduccion_movimiento)
+
+	# Superposición tipográfica
+	var sup_texto := String(plano.get("superposicion_texto", ""))
+	var sup_activo := not sup_texto.is_empty()
+	_superposicion.visible = sup_activo
+	if sup_activo:
+		var mat_sup := _superposicion.material
+		mat_sup.set_shader_parameter("intensidad", float(plano.get("sup_intensidad", 0.8)))
+		mat_sup.set_shader_parameter("ruido_amplitud", float(plano.get("sup_ruido", 0.02)))
+		mat_sup.set_shader_parameter("scanline_fuerza", float(plano.get("sup_scanline", 0.3)))
+		mat_sup.set_shader_parameter("semilla", float(plano.get("sup_semilla", _plano * 7.3)))
+		mat_sup.set_shader_parameter("quieto", _reduccion_movimiento)
+		# Crear textura con el texto para el shader
+		_actualizar_textura_superposicion(sup_texto)
+
+	# Grano no estroboscópico
+	var grano_no_estrobo := bool(plano.get("grano_no_estroboscopico", false))
+	if grano_no_estrobo:
+		var mat_grano := _grano.material
+		mat_grano.set_shader_parameter("no_estroboscopico", true)
+		mat_grano.set_shader_parameter("quieto", _reduccion_movimiento)
+	else:
+		var mat_grano := _grano.material
+		mat_grano.set_shader_parameter("no_estroboscopico", false)
+		mat_grano.set_shader_parameter("quieto", _reduccion_movimiento)
+
+
+## Genera una textura con el texto de superposición para el shader.
+func _actualizar_textura_superposicion(texto: String) -> void:
+	var etiqueta := Label.new()
+	etiqueta.theme = EstiloSiga.tema()
+	etiqueta.add_theme_font_size_override("font_size", 42)
+	etiqueta.add_theme_color_override("font_color", EstiloSiga.BLANCO)
+	etiqueta.add_theme_color_override("font_outline_color", EstiloSiga.NEGRO)
+	etiqueta.add_theme_constant_override("outline_size", 3)
+	etiqueta.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	etiqueta.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	etiqueta.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	etiqueta.text = texto
+	etiqueta.size = _lienzo.size
+
+	var viewport := SubViewport.new()
+	viewport.size = _lienzo.size
+	viewport.add_child(etiqueta)
+
+	var textura := viewport.get_texture()
+	_superposicion.material.set_shader_parameter("texto_textura", textura)
 
 
 func _tiene_mundo_3d() -> bool:
@@ -386,6 +466,26 @@ func _montar() -> void:
 	_grano.material = material
 	_grano.visible = false
 	_lienzo.add_child(_grano)
+
+	# Interrupción CRT opt-in: sobre la imagen, bajo franjas y textos.
+	_crt = ColorRect.new()
+	_crt.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_crt.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var material_crt := ShaderMaterial.new()
+	material_crt.shader = preload("res://arte/interrupcion_crt.gdshader")
+	_crt.material = material_crt
+	_crt.visible = false
+	_lienzo.add_child(_crt)
+
+	# Superposición tipográfica irregular opt-in: sobre la imagen, bajo franjas y textos.
+	_superposicion = ColorRect.new()
+	_superposicion.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_superposicion.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var material_sup := ShaderMaterial.new()
+	material_sup.shader = preload("res://arte/superposicion_tipografica.gdshader")
+	_superposicion.material = material_sup
+	_superposicion.visible = false
+	_lienzo.add_child(_superposicion)
 
 	_franja_superior = _franja()
 	_franja_inferior = _franja()
