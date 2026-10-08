@@ -1,0 +1,15 @@
+{
+  "_regla": "Todo fichero bajo assets/ necesita su ficha aquí, con sha256. Una prueba lo exige en las dos direcciones: ni ficheros sin ficha ni fichas sin fichero. Ver LEEME.md.",
+  "assets": [
+    {
+      "ruta": "modelos/intruso/intruso.glb",
+      "titulo": "Intruso — Asset de fase 4",
+      "autor": "Desconocido",
+      "licencia": "CC0-1.0",
+      "fuente": "pendiente",
+      "sha256": "TODO",
+      "archivo_origen": "INTRUSO/intruso.glb",
+      "paquete_sha256": "TODO"
+    }
+  ]
+}
