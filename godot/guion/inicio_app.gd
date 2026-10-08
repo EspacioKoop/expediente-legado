@@ -9,6 +9,7 @@ extends Control
 
 const SYSTEM_MARK: Texture2D = preload("res://arte/os98/system_mark.svg")
 const CINEMATICA_APP := preload("res://guion/cinematica_app.gd")
+const EPIGRAFES_INICIO := preload("res://guion/epigrafes_inicio.gd")
 const COLOR_TEXTO := Color(0.92, 0.93, 0.90)
 const COLOR_TEXTO_DESACTIVADO := Color(0.55, 0.56, 0.53)
 const COLOR_CONTORNO := Color(0.0, 0.0, 0.0, 0.85)
@@ -36,6 +37,7 @@ var partida := Partida.new()
 var _diorama: InicioDiorama3D
 var _envoltorio: MarginContainer
 var _apertura_creditos: Node3D = null
+var _epigrafes: Control = null
 var _continuar: Button
 var _nueva: Button
 var _cargar: Button
@@ -89,6 +91,27 @@ func _iniciar_apertura_creditos() -> void:
 	_apertura_creditos_mostrada = true
 	_envoltorio.visible = false
 	_diorama.configurar_activo(false)
+	var epigrafes := EPIGRAFES_INICIO.new()
+	epigrafes.name = "EpigrafesInicio"
+	epigrafes.terminada.connect(_iniciar_cinematica_creditos)
+	_epigrafes = epigrafes
+	add_child(epigrafes)
+	epigrafes.iniciar()
+
+
+func _terminar_apertura_creditos() -> void:
+	if is_instance_valid(_apertura_creditos):
+		_apertura_creditos.queue_free()
+	_apertura_creditos = null
+	_envoltorio.visible = true
+	_diorama.configurar_activo(true)
+	_enfocar_menu_inicial()
+
+
+func _iniciar_cinematica_creditos() -> void:
+	if is_instance_valid(_epigrafes):
+		_epigrafes.queue_free()
+	_epigrafes = null
 	var rodaje := CreditosInicioCinematica.planos()
 	if rodaje.is_empty():
 		_terminar_apertura_creditos()
@@ -101,16 +124,11 @@ func _iniciar_apertura_creditos() -> void:
 	app.reproducir(rodaje, CreditosInicioCinematica.ID)
 
 
-func _terminar_apertura_creditos() -> void:
-	if is_instance_valid(_apertura_creditos):
-		_apertura_creditos.queue_free()
-	_apertura_creditos = null
-	_envoltorio.visible = true
-	_diorama.configurar_activo(true)
-	_enfocar_menu_inicial()
-
-
 func _unhandled_input(evento: InputEvent) -> void:
+	if is_instance_valid(_epigrafes):
+		_epigrafes.call("saltar")
+		get_viewport().set_input_as_handled()
+		return
 	if not is_instance_valid(_apertura_creditos):
 		return
 	if evento is InputEventMouseButton:
