@@ -1,7 +1,8 @@
 ## Prólogo de epígrafes antes de la cinemática 3D de créditos.
 ##
 ## Fondo NEGRO puro, texto blanco centrado, fundidos de entrada/salida por cita.
-## Respeta reducción de movimiento (texto estático, sin fundido), permite saltar con acción semántica
+## Respeta reducción de movimiento (texto estático, sin fundido).
+## Se puede saltar con una acción semántica.
 ## y transiciona limpio a _iniciar_apertura_creditos().
 class_name EpigrafesInicio
 extends Control
