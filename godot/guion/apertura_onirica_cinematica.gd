@@ -88,6 +88,17 @@ static func planos() -> Array:
 		Vector3(-2.0, 1.65, 3.0), Vector3(-4.0, 1.0, 0.6),
 		Vector3(-2.9, 1.5, 2.4), Vector3(-4.0, 1.0, 0.6), 36.0, 0.0, 0.82)
 
+	# CODA: tres planos cuya duracion devuelve aire antes de los creditos.
+	_agregar(tomas, "ACCESO DENEGADO", "No queda ningun operador conectado", "oficina", 5.0,
+		Vector3(-3.1, 1.66, 2.5), Vector3(-4.3, 0.98, -2.0),
+		Vector3(-3.7, 1.33, 1.35), Vector3(-4.3, 0.98, -2.0), 26.0)
+	_agregar(tomas, "EL ULTIMO TREN", "La ciudad se refleja dentro de la pantalla", "calle", 5.8,
+		Vector3(0.0, 1.7, -15.0), Vector3(0.0, 1.2, 10.0),
+		Vector3(0.2, 1.6, -9.0), Vector3(-3.5, 1.8, -7.5), 54.0)
+	_agregar(tomas, "NO EXISTE REGISTRO", "", "oficina", 4.2,
+		Vector3(-1.6, 1.62, 3.4), Vector3(-4.0, 1.0, 1.0),
+		Vector3(-1.6, 1.62, 3.4), Vector3(-4.0, 1.0, 1.0), 40.0, 0.0, 1.0)
+
 	# Ninguna imagen ajena: cada plano utiliza espacio y assets propios.
 	return Cinematica.resolver(tomas)
 
