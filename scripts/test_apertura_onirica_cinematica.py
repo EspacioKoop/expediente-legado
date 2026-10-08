@@ -28,7 +28,7 @@ class OpeningMontageTests(unittest.TestCase):
         self.assertNotIn('"tipo": "2d"', self.montage)
 
     def test_24_original_shots_with_durations_70_to_110_seconds(self):
-        shots = re.findall(r'^\s*_agregar\(tomas,\s*"([^"]+)",\s*"[^"]*",\s*'
+        shots = re.findall(r'_agregar\(\s*tomas,\s*"([^"]+)",\s*"[^"]*",\s*'
                            r'"(oficina|calle|casa)",\s*([\d.]+)', self.montage, re.M)
         self.assertEqual(len(shots), 24)
         self.assertGreaterEqual(sum(float(t) for _, _, t in shots), 70)
