@@ -1,6 +1,5 @@
 ; ARIADNE 98 - vertical navegable (#2313/#2368/#2369).
-; Laberinto cenital manual y determinista con hilo limitado y reversible.
-; Este corte NO implementa Minotauro, SRAM ni handshake SIGA.
+; Laberinto cenital manual y determinista en 3 niveles con Minotauro telegráfico.
 ; Arte geométrico original del proyecto. Licencia MIT.
 
 DEF rP1    EQU $FF00
@@ -28,23 +27,33 @@ DEF ESTADO_TITULO EQU 0
 DEF ESTADO_JUEGO  EQU 1
 DEF ESTADO_SALIDA EQU 2
 
-DEF TILE_SUELO   EQU 0
-DEF TILE_MURO    EQU 1
-DEF TILE_ARIADNE EQU 2
-DEF TILE_SALIDA  EQU 3
-DEF TILE_A       EQU 4
-DEF TILE_R       EQU 5
-DEF TILE_I       EQU 6
-DEF TILE_D       EQU 7
-DEF TILE_N       EQU 8
-DEF TILE_E       EQU 9
-DEF TILE_9       EQU 10
-DEF TILE_8       EQU 11
-DEF TILE_1       EQU 12
-DEF TILE_H       EQU 13
-DEF TILE_L       EQU 14
-DEF TILE_ALERTA  EQU 15
-DEF TILE_HILO    EQU 16
+DEF NIVEL_ENTRADA  EQU 0
+DEF NIVEL_GALERIAS EQU 1
+DEF NIVEL_CENTRO   EQU 2
+
+DEF TILE_SUELO          EQU 0
+DEF TILE_MURO           EQU 1
+DEF TILE_ARIADNE        EQU 2
+DEF TILE_SALIDA         EQU 3
+DEF TILE_A              EQU 4
+DEF TILE_R              EQU 5
+DEF TILE_I              EQU 6
+DEF TILE_D              EQU 7
+DEF TILE_N              EQU 8
+DEF TILE_E              EQU 9
+DEF TILE_9              EQU 10
+DEF TILE_8              EQU 11
+DEF TILE_1              EQU 12
+DEF TILE_H              EQU 13
+DEF TILE_L              EQU 14
+DEF TILE_ALERTA         EQU 15
+DEF TILE_HILO           EQU 16
+DEF TILE_PUERTA         EQU 17
+DEF TILE_CENTRO         EQU 18
+DEF TILE_TRANSICION     EQU 19
+DEF TILE_MINOTAURO      EQU 20
+DEF TILE_2              EQU 21
+DEF TILE_3              EQU 22
 
 DEF HILO_MAX EQU 9
 
@@ -52,8 +61,6 @@ DEF LAB_ANCHO EQU 16
 DEF LAB_ALTO  EQU 12
 DEF LAB_X     EQU 2
 DEF LAB_Y     EQU 4
-DEF INICIO_X  EQU 1
-DEF INICIO_Y  EQU 1
 
 INCLUDE "../comun/cartucho.asm"
 
@@ -89,6 +96,8 @@ Inicio:
     ld [wTeclas], a
     ld [wTeclasPrevias], a
     ld [wTeclasNuevas], a
+    ld [wCentroAlcanzado], a
+    ld [wPuertaGaleriasAbierta], a
 
     call CargarTiles
     call ConfigurarPaletas
@@ -162,16 +171,38 @@ EstadoSalida:
 IniciarJuego:
     call DesactivarLCD
     call LimpiarFondo
-    ld a, INICIO_X
-    ld [wJugadorX], a
-    ld a, INICIO_Y
-    ld [wJugadorY], a
+    xor a
+    ld [wNivelActual], a
+    ld [wCentroAlcanzado], a
+    ld [wPuertaGaleriasAbierta], a
     ld a, ESTADO_JUEGO
     ld [wEstado], a
     call ReiniciarHilo
+    ld a, 1
+    ld b, 1
+    call CargarNivel
+    call ActivarLCD
+    ret
+
+; Cargar nivel en A, con posicion inicial B=x, C=y.
+CargarNivel:
+    push bc
+    ld [wNivelActual], a
+    call ReiniciarMinotauro
+    pop bc
+    ld a, b
+    ld [wJugadorX], a
+    ld [wCruceSeguroX], a
+    ld a, c
+    ld [wJugadorY], a
+    ld [wCruceSeguroY], a
+
+    call DesactivarLCD
+    call LimpiarFondo
     call DibujarHUD
     call DibujarLaberinto
     call DibujarJugador
+    call DibujarMinotauro
     call ActivarLCD
     ret
 
@@ -210,6 +241,13 @@ IntentarMover:
     call TileMapaBC
     cp TILE_MURO
     ret z
+    cp TILE_PUERTA
+    jr nz, .no_puerta
+    ; Si la puerta está cerrada, bloquea
+    ld a, [wPuertaGaleriasAbierta]
+    or a
+    ret z
+.no_puerta:
     push af
     call BorrarJugador
     call GestionarHilo
@@ -217,12 +255,254 @@ IntentarMover:
     ld [wJugadorX], a
     ld a, c
     ld [wJugadorY], a
+
+    ; El Minotauro avanza en su patrón determinista tras cada intento de paso
+    call AvanzarMinotauro
+
+    ; Comprobar contacto con Minotauro primero (tras el movimiento de ambos)
+    call ComprobarContactoMinotauro
+
+    ; Actualizar cruce seguro solo si Ariadne no sufrió colisión en esta casilla
+    call ActualizarCruceSeguro
+
     call RedibujarHilo
     call DibujarJugador
+    call DibujarMinotauro
+    call ActualizarHUDHilo
+
     pop af
+
+    ; Comprobar celdas especiales (Transiciones, Centro, Salida)
+    cp TILE_TRANSICION
+    jr z, .transicion
+    cp TILE_CENTRO
+    jr z, .centro
     cp TILE_SALIDA
-    ret nz
+    jr z, .salida
+    ret
+
+.transicion:
+    call ProcesarTransicion
+    ret
+
+.centro:
+    ld a, 1
+    ld [wCentroAlcanzado], a
+    ld [wPuertaGaleriasAbierta], a ; Al alcanzar el centro se abre el atajo en Galerias
+    call RedibujarCasillaCentro
+    call ActualizarHUDHilo
+    ret
+
+.salida:
+    ; Victoria solo si ya se alcanzo el Centro y se regreso a Entrada
+    ld a, [wCentroAlcanzado]
+    or a
+    ret z
     call MostrarSalida
+    ret
+
+ProcesarTransicion:
+    ld a, [wNivelActual]
+    cp NIVEL_ENTRADA
+    jr z, .de_entrada_a_galerias
+    cp NIVEL_GALERIAS
+    jr z, .de_galerias
+    cp NIVEL_CENTRO
+    jr z, .de_centro_a_galerias
+    ret
+
+.de_entrada_a_galerias:
+    ld a, NIVEL_GALERIAS
+    ld b, 1
+    ld c, 1
+    call CargarNivel
+    ret
+
+.de_galerias:
+    ; En Galerias, la transicion en (1,1) regresa a Entrada, en (14,10) va a Centro.
+    ld a, [wJugadorX]
+    cp 8
+    jr c, .de_galerias_a_entrada
+    ld a, NIVEL_CENTRO
+    ld b, 1
+    ld c, 1
+    call CargarNivel
+    ret
+.de_galerias_a_entrada:
+    ld a, NIVEL_ENTRADA
+    ld b, 14
+    ld c, 1
+    call CargarNivel
+    ret
+
+.de_centro_a_galerias:
+    ld a, NIVEL_GALERIAS
+    ld b, 14
+    ld c, 10
+    call CargarNivel
+    ret
+
+ActualizarCruceSeguro:
+    ; Un cruce seguro se actualiza solo si Ariadne no está en la misma celda que el Minotauro
+    ld a, [wMinotauroActivo]
+    or a
+    jr z, .guardar
+    ld a, [wJugadorX]
+    ld b, a
+    ld a, [wMinotauroX]
+    cp b
+    jr nz, .guardar
+    ld a, [wJugadorY]
+    ld b, a
+    ld a, [wMinotauroY]
+    cp b
+    ret z
+.guardar:
+    ld a, [wJugadorX]
+    ld [wCruceSeguroX], a
+    ld a, [wJugadorY]
+    ld [wCruceSeguroY], a
+    ret
+
+ComprobarContactoMinotauro:
+    ld a, [wMinotauroActivo]
+    or a
+    ret z
+    ld a, [wJugadorX]
+    ld b, a
+    ld a, [wMinotauroX]
+    cp b
+    ret nz
+    ld a, [wJugadorY]
+    ld b, a
+    ld a, [wMinotauroY]
+    cp b
+    ret nz
+
+    ; Contacto! Ariadne reaparece en el ultimo cruce seguro.
+    ; NUNCA borra progreso externo (wCentroAlcanzado / wPuertaGaleriasAbierta).
+    call BorrarJugador
+    ld a, [wCruceSeguroX]
+    ld [wJugadorX], a
+    ld a, [wCruceSeguroY]
+    ld [wJugadorY], a
+    call DibujarJugador
+    ret
+
+ReiniciarMinotauro:
+    xor a
+    ld [wMinotauroPaso], a
+    ld [wMinotauroAlerta], a
+    ld a, [wNivelActual]
+    cp NIVEL_GALERIAS
+    jr z, .activo_galerias
+    cp NIVEL_CENTRO
+    jr z, .activo_centro
+    xor a
+    ld [wMinotauroActivo], a
+    ret
+
+.activo_galerias:
+    ld a, 1
+    ld [wMinotauroActivo], a
+    ld a, 8
+    ld [wMinotauroX], a
+    ld a, 3
+    ld [wMinotauroY], a
+    ret
+
+.activo_centro:
+    ld a, 1
+    ld [wMinotauroActivo], a
+    ld a, 7
+    ld [wMinotauroX], a
+    ld a, 5
+    ld [wMinotauroY], a
+    ret
+
+AvanzarMinotauro:
+    ld a, [wMinotauroActivo]
+    or a
+    ret z
+
+    call BorrarMinotauro
+
+    ld a, [wNivelActual]
+    cp NIVEL_GALERIAS
+    jr z, .patron_galerias
+    cp NIVEL_CENTRO
+    jr z, .patron_centro
+    ret
+
+.patron_galerias:
+    ld a, [wMinotauroPaso]
+    inc a
+    and $07 ; 8 pasos
+    ld [wMinotauroPaso], a
+    ld e, a
+    ld d, 0
+    ld hl, PatronMinotauroGalerias
+    add hl, de
+    ld a, [hl]
+    ld b, a
+    swap a
+    and $0F
+    ld [wMinotauroY], a
+    ld a, b
+    and $0F
+    ld [wMinotauroX], a
+    call EvaluarAlertaMinotauro
+    ret
+
+.patron_centro:
+    ld a, [wMinotauroPaso]
+    inc a
+    and $07 ; 8 pasos
+    ld [wMinotauroPaso], a
+    ld e, a
+    ld d, 0
+    ld hl, PatronMinotauroCentro
+    add hl, de
+    ld a, [hl]
+    ld b, a
+    swap a
+    and $0F
+    ld [wMinotauroY], a
+    ld a, b
+    and $0F
+    ld [wMinotauroX], a
+    call EvaluarAlertaMinotauro
+    ret
+
+EvaluarAlertaMinotauro:
+    ; Alerta telegráfica si el Minotauro está a distancia Manhattan <= 3 de Ariadne
+    ld a, [wJugadorX]
+    ld b, a
+    ld a, [wMinotauroX]
+    sub b
+    jr nc, .dx_pos
+    cpl
+    inc a
+.dx_pos:
+    ld c, a
+
+    ld a, [wJugadorY]
+    ld b, a
+    ld a, [wMinotauroY]
+    sub b
+    jr nc, .dy_pos
+    cpl
+    inc a
+.dy_pos:
+    add c
+    cp 4
+    jr c, .alerta_on
+    xor a
+    ld [wMinotauroAlerta], a
+    ret
+.alerta_on:
+    ld a, 1
+    ld [wMinotauroAlerta], a
     ret
 
 MostrarTitulo:
@@ -275,7 +555,7 @@ MostrarSalida:
     call DesactivarLCD
     call LimpiarFondo
 
-    ; La primera salida solo confirma navegación; aún no publica progreso.
+    ; Pantalla de victoria tras alcanzar el Centro y regresar
     ld a, TILE_SALIDA
     ld [BG_MAP + (7 * 32) + 9], a
     ld a, TILE_ARIADNE
@@ -302,15 +582,27 @@ MostrarSalida:
     ret
 
 DibujarHUD:
-    ; Nivel a la izquierda; hilo en el centro con nueve marcas consumibles.
+    ; Nivel a la izquierda (L1, L2, L3); hilo en el centro; alerta a la derecha.
     ld a, TILE_L
     ld [BG_MAP], a
+    ld a, [wNivelActual]
+    or a
+    jr z, .n1
+    cp NIVEL_GALERIAS
+    jr z, .n2
+    ld a, TILE_3
+    jr .set_num
+.n2:
+    ld a, TILE_2
+    jr .set_num
+.n1:
     ld a, TILE_1
+.set_num:
     ld [BG_MAP + 1], a
+
     ld a, TILE_H
     ld [BG_MAP + 7], a
-    ld a, TILE_ALERTA
-    ld [BG_MAP + 19], a
+
     call ActualizarHUDHilo
     ret
 
@@ -365,11 +657,19 @@ ActualizarHUDHilo:
 .siguiente:
     dec b
     jr nz, .bucle
+
+.alerta:
+    ; Icono de alerta telegráfica en HUD
+    xor a
+    ld [BG_MAP + 19], a
+    ld a, [wMinotauroAlerta]
+    or a
+    ret z
+    ld a, TILE_ALERTA
+    ld [BG_MAP + 19], a
     ret
 
 ; B=x destino, C=y destino. Mantiene una pila de aristas tendidas.
-; Solo cruzar la última arista en sentido inverso recupera hilo. Atravesar una
-; arista ya marcada nunca duplica ni consume recurso.
 GestionarHilo:
     push bc
 
@@ -520,8 +820,23 @@ RedibujarHilo:
     jr nz, .bucle
     ret
 
+ObtenerPunteroLaberinto:
+    ld a, [wNivelActual]
+    or a
+    jr z, .entrada
+    cp NIVEL_GALERIAS
+    jr z, .galerias
+    ld de, LaberintoCentro
+    ret
+.entrada:
+    ld de, LaberintoEntrada
+    ret
+.galerias:
+    ld de, LaberintoGalerias
+    ret
+
 DibujarLaberinto:
-    ld de, Laberinto
+    call ObtenerPunteroLaberinto
     ld hl, BG_MAP + (LAB_Y * 32) + LAB_X
     ld c, LAB_ALTO
 .fila:
@@ -529,11 +844,38 @@ DibujarLaberinto:
 .columna:
     ld a, [de]
     inc de
+    ; Si es la puerta de Galerías y está abierta, dibujarla como suelo
+    cp TILE_PUERTA
+    jr nz, .comprobar_centro
+    push af
+    ld a, [wPuertaGaleriasAbierta]
+    or a
+    jr z, .puerta_cerrada
+    pop af
+    ld a, TILE_SUELO
+    jr .dibujar
+.puerta_cerrada:
+    pop af
+    jr .dibujar
+
+.comprobar_centro:
+    cp TILE_CENTRO
+    jr nz, .dibujar
+    push af
+    ld a, [wCentroAlcanzado]
+    or a
+    jr z, .centro_no_alcanzado
+    pop af
+    ld a, TILE_SUELO
+    jr .dibujar
+.centro_no_alcanzado:
+    pop af
+
+.dibujar:
     ld [hli], a
     dec b
     jr nz, .columna
 
-    ; El tilemap tiene 32 columnas; el laberinto ocupa solo 16.
     ld a, l
     add 32 - LAB_ANCHO
     ld l, a
@@ -542,6 +884,14 @@ DibujarLaberinto:
 .sin_carry:
     dec c
     jr nz, .fila
+    ret
+
+RedibujarCasillaCentro:
+    ld b, 14
+    ld c, 10
+    call PosicionBGBC
+    ld a, TILE_SUELO
+    ld [hl], a
     ret
 
 DibujarJugador:
@@ -559,12 +909,86 @@ BorrarJugador:
     ld b, a
     ld a, [wJugadorY]
     ld c, a
-    call PosicionBGBC
+    call TileMapaBC
+    ; Si la celda era la puerta y está abierta, borrar a suelo
+    cp TILE_PUERTA
+    jr nz, .comprobar_centro
+    ld a, [wPuertaGaleriasAbierta]
+    or a
+    jr z, .restaurar_tile
     ld a, TILE_SUELO
+    jr .restaurar_tile
+
+.comprobar_centro:
+    cp TILE_CENTRO
+    jr nz, .restaurar_tile
+    ld a, [wCentroAlcanzado]
+    or a
+    jr z, .restaurar_tile
+    ld a, TILE_SUELO
+
+.restaurar_tile:
+    ld d, a
+    ld a, [wJugadorX]
+    ld b, a
+    ld a, [wJugadorY]
+    ld c, a
+    call PosicionBGBC
+    ld a, d
     ld [hl], a
     ret
 
-; B=x, C=y. Devuelve en A el tile lógico del mapa manual.
+DibujarMinotauro:
+    ld a, [wMinotauroActivo]
+    or a
+    ret z
+    ld a, [wMinotauroX]
+    ld b, a
+    ld a, [wMinotauroY]
+    ld c, a
+    call PosicionBGBC
+    ld a, TILE_MINOTAURO
+    ld [hl], a
+    ret
+
+BorrarMinotauro:
+    ld a, [wMinotauroActivo]
+    or a
+    ret z
+    ld a, [wMinotauroX]
+    ld b, a
+    ld a, [wMinotauroY]
+    ld c, a
+    call TileMapaBC
+    ; Si la celda era la puerta o centro alcanzado, borrar a suelo
+    cp TILE_PUERTA
+    jr nz, .comprobar_centro_mino
+    ld a, [wPuertaGaleriasAbierta]
+    or a
+    jr z, .restaurar_tile_mino
+    ld a, TILE_SUELO
+    jr .restaurar_tile_mino
+
+.comprobar_centro_mino:
+    cp TILE_CENTRO
+    jr nz, .restaurar_tile_mino
+    ld a, [wCentroAlcanzado]
+    or a
+    jr z, .restaurar_tile_mino
+    ld a, TILE_SUELO
+
+.restaurar_tile_mino:
+    ld d, a
+    ld a, [wMinotauroX]
+    ld b, a
+    ld a, [wMinotauroY]
+    ld c, a
+    call PosicionBGBC
+    ld a, d
+    ld [hl], a
+    ret
+
+; B=x, C=y. Devuelve en A el tile lógico del mapa manual actual.
 TileMapaBC:
     ld a, c
     swap a
@@ -572,7 +996,7 @@ TileMapaBC:
     add b
     ld e, a
     ld d, 0
-    ld hl, Laberinto
+    call ObtenerPunteroLaberinto
     add hl, de
     ld a, [hl]
     ret
@@ -691,12 +1115,13 @@ ConfigurarPaletas:
 
 SECTION "Datos", ROM0
 
-; 16x12, borde cerrado. 0=suelo, 1=muro, 3=salida.
-; La ruta desde (1,1) hasta (14,10) es única en varios tramos, pero siempre
-; reversible: no hay RNG ni puertas de un solo sentido.
-Laberinto:
+; 16x12, borde cerrado.
+; Tiles: 0=suelo, 1=muro, 3=salida, 17=puerta/atajo, 18=centro, 19=transicion
+
+; Nivel 1: Entrada. Conecta con Salida (14,10) y Transición a Galerías (14,1).
+LaberintoEntrada:
     db 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
-    db 1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1
+    db 1,0,0,0,0,1,0,0,0,0,0,0,0,0,19,1
     db 1,1,1,1,0,1,0,1,1,1,1,1,1,1,0,1
     db 1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,1
     db 1,0,1,1,1,1,1,1,1,1,1,1,0,1,0,1
@@ -707,6 +1132,49 @@ Laberinto:
     db 1,0,0,0,0,0,0,1,0,1,0,0,0,0,0,1
     db 1,1,1,1,1,1,0,0,0,1,1,1,1,1,3,1
     db 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+
+; Nivel 2: Galerías.
+; Transición a Entrada en (1,1). Transición a Centro en (14,10).
+; Bifurcación:
+;  - Ruta larga segura: Pasillo superior/izquierdo bordeando las salas.
+;  - Ruta corta expuesta: Pasillo central directo con compuerta (17) y patrulla del Minotauro.
+LaberintoGalerias:
+    db 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+    db 1,19,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+    db 1,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1
+    db 1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1
+    db 1,0,1,1,1,1,1,1,17,1,1,1,0,1,0,1
+    db 1,0,1,0,0,0,0,0,0,0,0,1,0,1,0,1
+    db 1,0,1,0,1,1,1,1,1,1,0,1,0,1,0,1
+    db 1,0,0,0,1,0,0,0,0,1,0,0,0,0,0,1
+    db 1,1,1,0,1,0,1,1,0,1,1,1,1,1,0,1
+    db 1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1
+    db 1,0,1,1,1,1,1,1,1,1,1,1,1,1,19,1
+    db 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+
+; Nivel 3: Centro.
+; Transición de retorno a Galerías en (1,1). Centro/Altar en (14,10).
+LaberintoCentro:
+    db 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+    db 1,19,0,0,0,1,0,0,0,0,0,0,0,0,0,1
+    db 1,1,1,1,0,1,0,1,1,1,1,1,1,1,0,1
+    db 1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1
+    db 1,0,1,1,1,1,1,1,1,1,0,1,0,1,1,1
+    db 1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1
+    db 1,1,1,1,1,1,0,1,0,1,1,1,1,1,0,1
+    db 1,0,0,0,0,1,0,1,0,0,0,0,0,1,0,1
+    db 1,0,1,1,0,1,0,1,1,1,1,1,0,1,0,1
+    db 1,0,0,1,0,0,0,0,0,0,0,1,0,0,0,1
+    db 1,1,0,1,1,1,1,1,1,1,0,1,1,1,18,1
+    db 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+
+; Secuencia determinista de coordenadas (yyyyxxxx) para la patrulla del Minotauro en Galerías.
+PatronMinotauroGalerias:
+    db $38, $39, $3A, $3B, $3B, $3A, $39, $38
+
+; Secuencia determinista de coordenadas (yyyyxxxx) para el Minotauro en Centro.
+PatronMinotauroCentro:
+    db $57, $58, $59, $69, $79, $69, $59, $58
 
 PaletaCGB:
     dw $7FFF, $56B5, $2D6B, $1084
@@ -763,6 +1231,24 @@ Tiles:
     ; 16 hilo / marca de recurso
     db 0,0, %00011000,0, %00111100,0, %01111110,0
     db %01111110,0, %00111100,0, %00011000,0, 0,0
+    ; 17 puerta / compuerta atajo
+    db %11111111,%11111111, %10000001,%10000001, %10111101,%10111101, %10100101,%10100101
+    db %10100101,%10100101, %10111101,%10111101, %10000001,%10000001, %11111111,%11111111
+    ; 18 centro del laberinto / altar
+    db %00111100,0, %01111110,0, %11011011,0, %11111111,0
+    db %11111111,0, %11011011,0, %01111110,0, %00111100,0
+    ; 19 transicion de nivel
+    db %00000000,0, %00111100,0, %01111110,0, %01100110,0
+    db %01100110,0, %01111110,0, %00111100,0, %00000000,0
+    ; 20 minotauro
+    db %11000011,%11000011, %01100110,%01100110, %00111100,%00111100, %01111110,%01111110
+    db %11111111,%11111111, %01100110,%01100110, %11000011,%11000011, %10000001,%10000001
+    ; 21 2
+    db %00111100,0, %01100110,0, %00000110,0, %00011100,0
+    db %00110000,0, %01100000,0, %11111111,0, %11111111,0
+    ; 22 3
+    db %00111100,0, %01100110,0, %00000110,0, %00011100,0
+    db %00000110,0, %01100110,0, %00111100,0, %00000000,0
 TilesFin:
 
 SECTION "Estado", WRAM0
@@ -779,3 +1265,15 @@ wMovimientoDesde: ds 1
 wMovimientoHasta: ds 1
 wHiloDesde: ds HILO_MAX
 wHiloHasta: ds HILO_MAX
+
+wNivelActual: ds 1
+wCentroAlcanzado: ds 1
+wPuertaGaleriasAbierta: ds 1
+wCruceSeguroX: ds 1
+wCruceSeguroY: ds 1
+
+wMinotauroActivo: ds 1
+wMinotauroX: ds 1
+wMinotauroY: ds 1
+wMinotauroPaso: ds 1
+wMinotauroAlerta: ds 1
