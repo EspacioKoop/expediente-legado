@@ -95,11 +95,13 @@ class EpigrafesInicioTest(unittest.TestCase):
     def test_inicio_instancia_epigrafes_y_conecta_terminada(self) -> None:
         self.assertIn("EPIGRAFES_INICIO.new()", self.inicio)
         self.assertIn("EpigrafesInicio", self.inicio)
-        self.assertIn("terminada.connect(_iniciar_cinematica_creditos)", self.inicio)
+        self.assertIn("terminada.connect(_iniciar_montaje_onirico)", self.inicio)
         self.assertIn("epigrafes.iniciar()", self.inicio)
 
     def test_iniciar_cinematica_creditos_limpia_y_llama_cinematica(self) -> None:
+        self.assertIn("func _iniciar_montaje_onirico", self.inicio)
         self.assertIn("func _iniciar_cinematica_creditos", self.inicio)
+        self.assertIn("reproductor.terminada.connect(_iniciar_cinematica_creditos)", self.inicio)
         self.assertIn("_epigrafes.queue_free()", self.inicio)
         self.assertIn("CreditosInicioCinematica.planos()", self.inicio)
         self.assertIn("CINEMATICA_APP.new()", self.inicio)
