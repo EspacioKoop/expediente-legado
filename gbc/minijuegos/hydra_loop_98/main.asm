@@ -34,10 +34,11 @@ DEF PAD_START EQU $08
 DEF LCDC_FONDO EQU $91
 DEF LCDC_JUEGO EQU $93
 
-DEF ESTADO_TITULO   EQU 0
-DEF ESTADO_JUEGO    EQU 1
-DEF ESTADO_FALLO    EQU 2
-DEF ESTADO_VICTORIA EQU 3
+DEF ESTADO_TITULO        EQU 0
+DEF ESTADO_JUEGO         EQU 1
+DEF ESTADO_FALLO         EQU 2
+DEF ESTADO_VICTORIA      EQU 3
+DEF ESTADO_INSTRUCCIONES EQU 4
 
 DEF NUM_HUECOS            EQU 10
 DEF NUM_NODOS             EQU 3
@@ -78,6 +79,29 @@ DEF TILE_P              EQU 51
 DEF TILE_R              EQU 52
 DEF TILE_T              EQU 53
 DEF TILE_RELOJ_OFF      EQU 56
+DEF TILE_A              EQU 65
+DEF TILE_B              EQU 66
+DEF TILE_C              EQU 67
+DEF TILE_D              EQU 68
+DEF TILE_E              EQU 69
+DEF TILE_F              EQU 70
+DEF TILE_G              EQU 71
+DEF TILE_H              EQU 72
+DEF TILE_I              EQU 73
+DEF TILE_J              EQU 74
+DEF TILE_K              EQU 75
+DEF TILE_M              EQU 76
+DEF TILE_N              EQU 77
+DEF TILE_Q              EQU 78
+DEF TILE_S              EQU 79
+DEF TILE_U              EQU 80
+DEF TILE_V              EQU 81
+DEF TILE_W              EQU 82
+DEF TILE_X              EQU 83
+DEF TILE_Y              EQU 84
+DEF TILE_Z              EQU 85
+DEF TILE_PUNTO          EQU 86
+DEF TILE_DOS_PUNTOS     EQU 87
 
 
 INCLUDE "../comun/cartucho.asm"
@@ -138,10 +162,15 @@ BuclePrincipal:
     jr z, BuclePrincipal
     ld a, [wEstado]
     cp ESTADO_TITULO
+    jr z, .instrucciones
+    cp ESTADO_INSTRUCCIONES
     jr z, .empezar
     cp ESTADO_FALLO
     jr z, .reintentar
     call PrepararTitulo
+    jr BuclePrincipal
+.instrucciones:
+    call PrepararInstrucciones
     jr BuclePrincipal
 .empezar:
     xor a
@@ -152,6 +181,38 @@ BuclePrincipal:
 .juego:
     call ActualizarJuego
     jr BuclePrincipal
+
+PrepararInstrucciones:
+    call ApagarLCD
+    call BorrarOAM
+    ld hl, TilesJuego
+    ld de, VRAM_TILES
+    ld bc, TilesJuegoFin - TilesJuego
+    call CopiarMemoria
+
+    ld a, 1
+    ldh [rVBK], a
+    call LimpiarBG
+    xor a
+    ldh [rVBK], a
+    call LimpiarBG
+
+    ld hl, MapaInstrucciones
+    call CopiarMapa
+
+    ld hl, PaletaJuego
+    ld b, PaletaJuegoFin - PaletaJuego
+    call CargarPaletaBG
+
+    ld a, %11100100
+    ldh [rBGP], a
+
+    ld a, ESTADO_INSTRUCCIONES
+    ld [wEstado], a
+
+    ld a, LCDC_FONDO
+    ldh [rLCDC], a
+    ret
 
 PrepararTitulo:
     call ApagarLCD
@@ -1293,7 +1354,99 @@ TilesJuego:
     dw `00003111, `00031121, `00311111, `03333333
     dw `11130000, `21130000, `11130000, `12130000
     dw `11130000, `21113000, `11111300, `33333330
+    ; 65-87 Fuente adicional A-Z, punto y dos puntos
+    ; 65 A
+    dw `00333300, `03000030, `03000030, `03333330
+    dw `03000030, `03000030, `03000030, `00000000
+    ; 66 B
+    dw `03333300, `03000030, `03000030, `03333300
+    dw `03000030, `03000030, `03333300, `00000000
+    ; 67 C
+    dw `00333330, `03000000, `03000000, `03000000
+    dw `03000000, `03000000, `00333330, `00000000
+    ; 68 D
+    dw `03333300, `03000030, `03000030, `03000030
+    dw `03000030, `03000030, `03333300, `00000000
+    ; 69 E
+    dw `03333330, `03000000, `03000000, `03333300
+    dw `03000000, `03000000, `03333330, `00000000
+    ; 70 F
+    dw `03333330, `03000000, `03000000, `03333300
+    dw `03000000, `03000000, `03000000, `00000000
+    ; 71 G
+    dw `00333330, `03000000, `03000000, `03003330
+    dw `03000030, `03000030, `00333330, `00000000
+    ; 72 H
+    dw `03000030, `03000030, `03000030, `03333330
+    dw `03000030, `03000030, `03000030, `00000000
+    ; 73 I
+    dw `00333330, `00003000, `00003000, `00003000
+    dw `00003000, `00003000, `00333330, `00000000
+    ; 74 J
+    dw `00000030, `00000030, `00000030, `00000030
+    dw `03000030, `03000030, `00333300, `00000000
+    ; 75 K
+    dw `03000030, `03000300, `03003000, `03330000
+    dw `03003000, `03000300, `03000030, `00000000
+    ; 76 M
+    dw `03000030, `03300330, `03033030, `03000030
+    dw `03000030, `03000030, `03000030, `00000000
+    ; 77 N
+    dw `03000030, `03300030, `03030030, `03003030
+    dw `03000330, `03000030, `03000030, `00000000
+    ; 78 Q
+    dw `00333300, `03000030, `03000030, `03000030
+    dw `03000330, `03000030, `00333330, `00000000
+    ; 79 S
+    dw `00333330, `03000000, `03000000, `00333300
+    dw `00000030, `00000030, `00333300, `00000000
+    ; 80 U
+    dw `03000030, `03000030, `03000030, `03000030
+    dw `03000030, `03000030, `00333300, `00000000
+    ; 81 V
+    dw `03000030, `03000030, `03000030, `03000030
+    dw `00300300, `00300300, `00033000, `00000000
+    ; 82 W
+    dw `03000030, `03000030, `03000030, `03000030
+    dw `03033030, `03300330, `03000030, `00000000
+    ; 83 X
+    dw `03000030, `00300300, `00033000, `00003000
+    dw `00033000, `00300300, `03000030, `00000000
+    ; 84 Y
+    dw `03000030, `00300300, `00033000, `00003000
+    dw `00003000, `00003000, `00003000, `00000000
+    ; 85 Z
+    dw `03333330, `00000030, `00000300, `00003000
+    dw `00030000, `00300000, `03333330, `00000000
+    ; 86 . (PUNTO)
+    dw `00000000, `00000000, `00000000, `00000000
+    dw `00000000, `00033000, `00033000, `00000000
+    ; 87 : (DOS PUNTOS)
+    dw `00000000, `00033000, `00033000, `00000000
+    dw `00000000, `00033000, `00033000, `00000000
 TilesJuegoFin:
+
+DEF _ EQU 0
+
+MapaInstrucciones:
+    db _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _
+    db _, _, TILE_I, TILE_N, TILE_S, TILE_T, TILE_R, TILE_U, TILE_C, TILE_C, TILE_I, TILE_O, TILE_N, TILE_E, TILE_S, _, _, _, _, _
+    db _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _
+    db _, TILE_C, TILE_O, TILE_N, TILE_T, TILE_R, TILE_O, TILE_L, TILE_E, TILE_S, TILE_DOS_PUNTOS, _, _, _, _, _, _, _, _, _
+    db _, TILE_A, TILE_DOS_PUNTOS, _, TILE_C, TILE_O, TILE_R, TILE_T, TILE_A, TILE_R, _, TILE_O, _, TILE_S, TILE_E, TILE_L, TILE_L, TILE_A, TILE_R, _
+    db _, TILE_B, TILE_DOS_PUNTOS, _, TILE_O, TILE_B, TILE_S, TILE_E, TILE_R, TILE_V, TILE_A, TILE_R, _, _, _, _, _, _, _, _
+    db _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _
+    db _, TILE_O, TILE_B, TILE_J, TILE_E, TILE_T, TILE_I, TILE_V, TILE_O, TILE_DOS_PUNTOS, _, _, _, _, _, _, _, _, _, _
+    db _, TILE_O, TILE_B, TILE_S, TILE_E, TILE_R, TILE_V, TILE_A, _, TILE_C, TILE_A, TILE_B, TILE_E, TILE_Z, TILE_A, TILE_S, _, _, _, _
+    db _, TILE_P, TILE_A, TILE_R, TILE_A, _, TILE_R, TILE_E, TILE_V, TILE_E, TILE_L, TILE_A, TILE_R, _, TILE_L, TILE_A, _, _, _, _
+    db _, TILE_R, TILE_A, TILE_I, TILE_Z, TILE_PUNTO, _, _, _, _, _, _, _, _, _, _, _, _, _, _
+    db _, TILE_S, TILE_E, TILE_L, TILE_L, TILE_A, _, TILE_C, TILE_A, TILE_D, TILE_A, _, TILE_R, TILE_A, TILE_I, TILE_Z, _, _, _, _
+    db _, TILE_P, TILE_A, TILE_R, TILE_A, _, TILE_L, TILE_I, TILE_M, TILE_P, TILE_I, TILE_A, TILE_R, _, TILE_S, TILE_U, TILE_S, _, _, _
+    db _, TILE_C, TILE_A, TILE_B, TILE_E, TILE_Z, TILE_A, TILE_S, TILE_PUNTO, _, _, _, _, _, _, _, _, _, _, _
+    db _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _
+    db _, _, _, TILE_P, TILE_U, TILE_L, TILE_S, TILE_A, _, TILE_S, TILE_T, TILE_A, TILE_R, TILE_T, _, TILE_O, _, TILE_A, _, _
+    db _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _
+    db _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _
 
 FondoJuego:
     db  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
