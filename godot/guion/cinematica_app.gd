@@ -316,6 +316,7 @@ func _preparar_plato(decorado: Dictionary) -> void:
 		_decorado = Node3D.new()
 		_vista_plato.add_child(_decorado)
 		Espacio3D.construir(_decorado, decorado)
+		CinematicaPersonas3D.montar(_decorado, decorado)
 		_huella_decorado = huella
 	if _camara.get_parent() != _vista_plato:
 		_camara.reparent(_vista_plato, false)
