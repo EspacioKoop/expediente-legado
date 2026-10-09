@@ -422,10 +422,10 @@ jobs:
           ISSUE: ${{ inputs.issue }}
           PROVIDER: ${{ inputs.provider }}
           BRANCH: ${{ steps.guard.outputs.branch }}
-          MAX_FILES: ${{ vars.AGENT_POOL_MAX_FILES || '1' }}
         run: |
           set -euo pipefail
           status=0
+          MAX_FILES="$(python3 scripts/agent_scope_limit.py --issue-json /tmp/agent-issue.json)"
           python3 scripts/agent_plan_parse.py \
             --source /tmp/delegado.json \
             --max-files "$MAX_FILES" \
@@ -504,12 +504,12 @@ jobs:
         env:
           PROVIDER: ${{ inputs.provider }}
           WORKER: ${{ inputs.worker }}
-          MAX_FILES: ${{ vars.AGENT_POOL_MAX_FILES || '1' }}
           RETRY_HINT: ${{ inputs.retry_hint || '' }}
         run: |
           set -euo pipefail
           base_sha="$(git rev-parse HEAD)"
           policy_sha="$(tr -d '\r\n' < .agent-platino-sha)"
+          MAX_FILES="$(python3 scripts/agent_scope_limit.py --issue-json /tmp/agent-issue.json)"
           python3 scripts/agent_protocol.py task \
             --issue-json /tmp/agent-issue.json \
             --plan .agent-plan.json \
@@ -530,7 +530,7 @@ jobs:
               echo "## Feedback del intento anterior"
               printf '%s\n' "$RETRY_HINT" | head -c 1200
               echo
-              echo "Corrige únicamente esta causa manteniendo el mismo objetivo y fichero."
+              echo "Corrige únicamente esta causa manteniendo el mismo objetivo y las rutas permitidas."
             } >> .agent-worker-prompt.md
           fi
           [[ "$(jq -r '.base_sha' .agent-task-packet.json)" == "$base_sha" ]]

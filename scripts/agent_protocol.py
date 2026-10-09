@@ -268,6 +268,12 @@ def render_worker_prompt(packet: dict[str, Any], provider: str) -> str:
     scope = packet.get("scope") if isinstance(packet.get("scope"), dict) else {}
     files = scope.get("allowed_files") if isinstance(scope.get("allowed_files"), list) else []
     rendered_files = "\n".join(f"- {item}" for item in files) or "- (ninguna)"
+    multifile = len(files) > 1
+    scope_header = "Rutas permitidas (lista cerrada)" if multifile else "Único fichero que puedes modificar"
+    read_step = (
+        "Lee las rutas asignadas y cambia solamente las necesarias; crea las nuevas si así lo pide el objetivo."
+        if multifile else "Lee el fichero asignado. Si no existe y la tarea pide crearlo, créalo."
+    )
     domain = scope.get("domain_constraints") if isinstance(scope.get("domain_constraints"), list) else []
     rendered_domain = "\n".join(f"- {item}" for item in domain) or "- (sin reglas extra)"
     provider_guidance = PROVIDER_GUIDANCE.get(
@@ -283,7 +289,7 @@ Base: {base_sha}
 ## Objetivo
 {goal}
 
-## Único fichero que puedes modificar
+## {scope_header}
 {rendered_files}
 
 ## Instrucciones
@@ -294,7 +300,7 @@ Este documento contiene TODO lo que necesitas. No leas AGENTS.md, QWEN.md,
 GEMINI.md, los ficheros .agent-*, .agent-platino/ ni la wiki: gastan turnos y no
 aportan nada a esta tarea.
 
-1. Lee el fichero asignado. Si no existe y la tarea pide crearlo, créalo.
+1. {read_step}
 2. Si necesitas ver cómo se usa un símbolo, haz un grep_search puntual; no
    explores el repositorio.
 3. Haz el cambio mínimo con el estilo del propio fichero: comentarios y nombres
@@ -302,9 +308,9 @@ aportan nada a esta tarea.
 4. {provider_guidance}
 5. Termina con el bloque de salida. No hagas commit, push, PR ni merge.
 
-Reglas fijas: no toques ningún otro fichero; nunca rebajes un test para ponerlo
+Reglas fijas: no toques ninguna ruta fuera de la lista; nunca rebajes un test para ponerlo
 en verde; no inventes hechos, datos ni procedencias; no escribas secretos. Si la
-tarea exige otro fichero, ya está hecha o necesita una decisión humana, no
+tarea exige otra ruta, ya está hecha o necesita una decisión humana, no
 edites nada y devuelve status "blocked" explicando por qué.
 
 ## Restricciones de dominio
