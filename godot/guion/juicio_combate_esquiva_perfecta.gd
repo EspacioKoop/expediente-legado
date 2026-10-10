@@ -1,7 +1,17 @@
-## Política pura de esquiva perfecta (#2450).
+## Política pura de esquiva perfecta (#2450, #2567).
 ##
 ## No conoce animaciones, daño, cámara, momentum real ni Partida. El host
 ## identifica una amenaza que iba a impactar y entrega tiempos explícitos.
+##
+## Contrato monofichero del issue #2567:
+## - Entradas: amenaza válida y no consumida, segundos hasta impacto,
+##   esquiva activa, segundos desde inicio de la esquiva, identificador de amenaza
+## - Salida: perfecta, amenaza_consumida, ventana_contraataque, bonus_momentum
+## - Ventana real (ver constantes): tiempo_hasta_impacto en [0.0, VENTANA_IMPACTO]
+##   y tiempo_desde_esquiva en [ESQUIVA_MINIMA, ESQUIVA_MAXIMA]; ambos bordes
+##   son inclusivos y no dependen de FPS ni de un reloj global.
+## - Una amenaza no concede dos premios; entradas tempranas/tardías y límites exactos estables
+## - Sin RNG, física ni SceneTree
 class_name JuicioCombateEsquivaPerfecta
 extends RefCounted
 
@@ -18,10 +28,19 @@ const VENTANA_CONTRAATAQUE := 0.30
 const BONUS_MOMENTUM := 1
 
 
+## Crea un estado nuevo para rastrear amenazas consumidas.
 static func nuevo() -> Dictionary:
 	return {"amenazas_consumidas": {}}
 
 
+## Evalúa una amenaza contra el estado de esquiva.
+## Entradas posicionales para compatibilidad con la regresión headless existente:
+##   estado           - dict con "amenazas_consumidas"
+##   amenaza_id       - identificador único de la amenaza
+##   amenaza_valida   - la amenaza realmente va a impactar
+##   esquivando       - el jugador está esquivando ahora
+##   tiempo_hasta_impacto - tiempo restante hasta que la amenaza impactaría
+##   tiempo_desde_esquiva - tiempo transcurrido desde que empezó la esquiva
 static func evaluar(
 	estado: Dictionary,
 	amenaza_id: String,
@@ -56,11 +75,13 @@ static func evaluar(
 	}
 
 
+## Comprueba si una amenaza ya fue consumida en el estado dado.
 static func consumida(estado: Dictionary, amenaza_id: String) -> bool:
 	var salida := _normalizar(estado)
 	return salida["amenazas_consumidas"].has(amenaza_id.strip_edges())
 
 
+## Normaliza el estado para que siempre tenga "amenazas_consumidas" como dict.
 static func _normalizar(estado: Dictionary) -> Dictionary:
 	var consumidas := {}
 	var origen = estado.get("amenazas_consumidas", {})
