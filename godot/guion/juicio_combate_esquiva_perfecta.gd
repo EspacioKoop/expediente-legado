@@ -7,7 +7,9 @@
 ## - Entradas: amenaza válida y no consumida, segundos hasta impacto,
 ##   esquiva activa, segundos desde inicio de la esquiva, identificador de amenaza
 ## - Salida: perfecta, amenaza_consumida, ventana_contraataque, bonus_momentum
-## - Ventana: 0.05–0.15 s antes del impacto (no frame-perfect, estable a FPS)
+## - Ventana real (ver constantes): tiempo_hasta_impacto en [0.0, VENTANA_IMPACTO]
+##   y tiempo_desde_esquiva en [ESQUIVA_MINIMA, ESQUIVA_MAXIMA]; ambos bordes
+##   son inclusivos y no dependen de FPS ni de un reloj global.
 ## - Una amenaza no concede dos premios; entradas tempranas/tardías y límites exactos estables
 ## - Sin RNG, física ni SceneTree
 class_name JuicioCombateEsquivaPerfecta
