@@ -139,3 +139,31 @@ func sonar(voz: AudioStreamPlayer, nombre: String) -> void:
 		return
 	voz.stream = stream
 	voz.play()
+
+
+## Composición textual del rótulo visible de la jornada.
+##
+## No pregunta a Jornada ni a Partida: recibe la foto ya resuelta del día y el
+## traductor del host para seguir usando las mismas claves visibles.
+func texto_de_rotulo(jornada: Dictionary, sitio: String, traducir: Callable) -> String:
+	var gato: Dictionary = jornada.get("gato", {})
+	return (
+		String(traducir.call("DIA_ROTULO"))
+		% [
+			int(jornada.get("dia", 1)),
+			sitio,
+			int(jornada.get("dinero", 0)),
+			"" if bool(gato.get("presente", true)) else String(traducir.call("DIA_SIN_GATO"))
+		]
+	)
+
+
+func refrescar_rotulo(
+	rotulo: Label,
+	jornada: Dictionary,
+	sitio: String,
+	traducir: Callable,
+) -> void:
+	if rotulo == null:
+		return
+	rotulo.text = texto_de_rotulo(jornada, sitio, traducir)

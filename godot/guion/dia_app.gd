@@ -373,7 +373,7 @@ func _process(delta: float) -> void:
 			return
 		_entrar_en("archivo")
 		return
-	_rotulo.text = _texto_de_rotulo(Sueno.senal_de_noche(Jornada.noche_restante(jornada)))
+	_refrescar_rotulos({"rotulo": Sueno.senal_de_noche(Jornada.noche_restante(jornada))})
 
 
 ## Escribe la partida y dice si pudo. Si no pudo, apunta el tránsito que se
@@ -767,16 +767,13 @@ func _reasignar() -> void:
 
 
 func _refrescar_rotulos(espacio: Dictionary) -> void:
-	_rotulo.text = _texto_de_rotulo(tr(espacio.get("rotulo", "")))
+	_presentacion.refrescar_rotulo(
+		_rotulo,
+		jornada,
+		tr(String(espacio.get("rotulo", ""))),
+		Callable(self, "tr"),
+	)
 
 
 func _texto_de_rotulo(sitio: String) -> String:
-	return (
-		tr("DIA_ROTULO")
-		% [
-			jornada["dia"],
-			sitio,
-			jornada["dinero"],
-			"" if jornada["gato"]["presente"] else tr("DIA_SIN_GATO")
-		]
-	)
+	return _presentacion.texto_de_rotulo(jornada, sitio, Callable(self, "tr"))
