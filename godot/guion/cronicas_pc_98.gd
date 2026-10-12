@@ -7,7 +7,7 @@ signal cerrar_solicitado
 signal prologo_completado
 
 const ESCENA_BASTION := preload("res://escenas/cronicas/bastion_nombres_ausentes.tscn")
-const TITULO := "Crónicas de las Siete Esferas: El Hijo del Nigromante"
+const TITULO := "CRONICAS_PC_TITULO"
 
 var _portada: Control
 var _boton_jugar: Button
@@ -52,7 +52,7 @@ func _al_finalizar() -> void:
 	_sala = null
 	_portada.show()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	_estado.text = "Prólogo terminado. Este recuerdo no constituye evidencia para SIGA-98."
+	_estado.text = tr("CRONICAS_PC_FINAL")
 	_boton_jugar.grab_focus.call_deferred()
 	prologo_completado.emit()
 
@@ -84,36 +84,32 @@ func _montar_portada() -> void:
 	panel.add_child(columna)
 	var titulo := Label.new()
 	titulo.name = "TituloCronicas"
-	titulo.text = TITULO
+	titulo.text = tr(TITULO)
 	titulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	titulo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	titulo.add_theme_font_size_override("font_size", 30)
 	columna.add_child(titulo)
 	var subtitulo := Label.new()
-	subtitulo.text = "CD-ROM ficticio · 1998 · Edición de demostración"
+	subtitulo.text = tr("CRONICAS_PC_SUBTITULO")
 	subtitulo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	columna.add_child(subtitulo)
 	_boton_jugar = Button.new()
 	_boton_jugar.name = "JugarPrologo"
-	_boton_jugar.text = "Jugar el prólogo"
+	_boton_jugar.text = tr("CRONICAS_PC_JUGAR")
 	_boton_jugar.pressed.connect(comenzar)
 	columna.add_child(_boton_jugar)
 	var instrucciones := Label.new()
 	instrucciones.name = "Instrucciones"
-	instrucciones.text = (
-		"Usa los controles habituales de Expediente Legado. Lee dos veces "
-		+ "el atril, desafía al custodio y atraviesa el umbral. "
-		+ "Tras perder un duelo puedes volver a intentarlo."
-	)
+	instrucciones.text = tr("CRONICAS_PC_INSTRUCCIONES")
 	instrucciones.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	columna.add_child(instrucciones)
 	_estado = Label.new()
 	_estado.name = "EstadoLocal"
-	_estado.text = "Demostración local: no altera la partida principal."
+	_estado.text = tr("CRONICAS_PC_DEMO")
 	_estado.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	columna.add_child(_estado)
 	var cerrar := Button.new()
 	cerrar.name = "CerrarPrograma"
-	cerrar.text = "Cerrar programa"
+	cerrar.text = tr("CRONICAS_PC_CERRAR")
 	cerrar.pressed.connect(func(): cerrar_solicitado.emit())
 	columna.add_child(cerrar)
