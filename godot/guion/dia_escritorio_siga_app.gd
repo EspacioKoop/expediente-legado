@@ -10,6 +10,7 @@ var _siga_app: EscritorioSigaApp
 var _explorador_app: EscritorioSigaApp
 var _navegador_app: EscritorioSigaApp
 var _software_app: EscritorioSigaApp
+var _cronicas_app: EscritorioSigaApp
 var _correo_app: EscritorioSigaApp
 var _chat_app: EscritorioSigaApp
 var _bloc_notas_app: EscritorioSigaApp
@@ -194,9 +195,11 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	# #2589: un juego ficticio de PC, NO cartucho de la consola GB/GBC.
 	# La visita sigue siendo local hasta que exista una fuente canónica de
 	# progreso aprobada. No se introduce nada en Partida ni en SemillasOniricas.
-	var cronicas_app := CronicasOs98Enlace.registrar(escritorio)
-	if cronicas_app != null:
-		_apps.append(cronicas_app)
+	_cronicas_app = CronicasOs98Enlace.registrar(
+		escritorio, Callable(self, "_al_prologo_cronicas_verificado")
+	)
+	if _cronicas_app != null:
+		_apps.append(_cronicas_app)
 
 	# Correo es otra app del contrato común: su contenido se resuelve contra la
 	# jornada viva y la plantilla real de esta vuelta. Solo persiste qué mensajes
@@ -392,6 +395,19 @@ func _crear_software() -> Control:
 		software.configurar_estado(_software_app.obtener_estado_local("estado", {}))
 	software.estado_cambiado.connect(_registrar_estado_software)
 	return software
+
+
+
+## Solo registra una visita cuando el programa emite prologo_completado,
+## tras salir del Bastión. Nunca se llama al instalar/abrir/iniciar el juego.
+## El dato es procedencia cultural en OS98, no un evento de sueño o de SIGA.
+func _al_prologo_cronicas_verificado() -> void:
+	var dia := get_parent()
+	if dia == null or _cronicas_app == null:
+		return
+	if not CronicasExposicion2589.registrar_prologo(_cronicas_app, dia.jornada):
+		return
+	guardar_estado_aplicaciones()
 
 
 func _crear_correo() -> Control:
