@@ -66,7 +66,6 @@ func _al_finalizar() -> void:
 	prologo_completado.emit()
 
 
-
 ## SubViewport propio: Crónicas 3D no debe dibujarse sobre el puesto real.
 ## El programa standalone continúa usando el viewport original.
 func _montar_visor_3d() -> void:

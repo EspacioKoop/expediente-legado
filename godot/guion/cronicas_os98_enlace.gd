@@ -21,11 +21,14 @@ static func registrar(escritorio: EscritorioSiga) -> EscritorioSigaApp:
 		)
 		return programa
 
-	var app := EscritorioSigaApp.new(
-		ID_APP,
-		TranslationServer.translate("CRONICAS_PC_TITULO"),
-		crear,
-		"software",
+	var app := (
+		EscritorioSigaApp
+		. new(
+			ID_APP,
+			TranslationServer.translate("CRONICAS_PC_TITULO"),
+			crear,
+			"software",
+		)
 	)
 	app.tamano_minimo = Vector2(680, 520)
 	app.tamano_preferido = Vector2(990, 730)
