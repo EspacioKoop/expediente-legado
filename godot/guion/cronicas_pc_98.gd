@@ -9,6 +9,8 @@ signal prologo_completado
 const ESCENA_BASTION := preload("res://escenas/cronicas/bastion_nombres_ausentes.tscn")
 const TITULO := "CRONICAS_PC_TITULO"
 
+var modo_ventana_os98 := false
+var _marco_3d: SubViewportContainer
 var _portada: Control
 var _boton_jugar: Button
 var _estado: Label
@@ -19,6 +21,7 @@ var _prologos_locales := 0
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_montar_portada()
+	visibility_changed.connect(_al_visibilidad_cambiada)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_boton_jugar.grab_focus.call_deferred()
 
@@ -39,7 +42,10 @@ func comenzar() -> bool:
 		return false
 	_sala.name = "PartidaCronicas"
 	_sala.completado.connect(_al_finalizar)
-	add_child(_sala)
+	if modo_ventana_os98:
+		_montar_visor_3d()
+	else:
+		add_child(_sala)
 	_portada.hide()
 	return true
 
@@ -50,11 +56,51 @@ func _al_finalizar() -> void:
 	_prologos_locales += 1
 	_sala.queue_free()
 	_sala = null
+	if is_instance_valid(_marco_3d):
+		_marco_3d.queue_free()
+	_marco_3d = null
 	_portada.show()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_estado.text = tr("CRONICAS_PC_FINAL")
 	_boton_jugar.grab_focus.call_deferred()
 	prologo_completado.emit()
+
+
+
+## SubViewport propio: Crónicas 3D no debe dibujarse sobre el puesto real.
+## El programa standalone continúa usando el viewport original.
+func _montar_visor_3d() -> void:
+	_marco_3d = SubViewportContainer.new()
+	_marco_3d.name = "Area3DCronicas"
+	_marco_3d.stretch = true
+	_marco_3d.mouse_filter = Control.MOUSE_FILTER_STOP
+	_marco_3d.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(_marco_3d)
+
+	var viewport := SubViewport.new()
+	viewport.name = "ViewportCronicas"
+	viewport.size = Vector2i(960, 720)
+	viewport.own_world_3d = true
+	viewport.handle_input_locally = true
+	_marco_3d.add_child(viewport)
+	viewport.add_child(_sala)
+
+
+## Minimizar o cerrar OS98 libera el cursor y suspende el duelo local.
+## Restaurar NO recaptura el ratón a la fuerza; exige intención del jugador.
+func _al_visibilidad_cambiada() -> void:
+	if not is_instance_valid(_sala):
+		return
+	if not is_visible_in_tree():
+		_sala.process_mode = Node.PROCESS_MODE_DISABLED
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	else:
+		_sala.process_mode = Node.PROCESS_MODE_INHERIT
+
+
+func _exit_tree() -> void:
+	if is_instance_valid(_sala):
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
 func _montar_portada() -> void:
