@@ -14,7 +14,7 @@ class CronicasOs98Enlace2589Test(unittest.TestCase):
             (ROOT / "godot/guion/cronicas_os98_enlace.gd").read_text(encoding="utf-8")
             + (ROOT / "godot/guion/cronicas_pc_98.gd").read_text(encoding="utf-8")
         )
-        self.assertRegex(fuentes, r"EscritorioSigaApp\\s*\\.\\s*new\\(")
+        self.assertRegex(fuentes, r"EscritorioSigaApp\s*\.\s*new\(")
         self.assertIn("SubViewport.new()", fuentes)
         self.assertIn("own_world_3d = true", fuentes)
         for prohibido in (
