@@ -6,7 +6,9 @@ extends RefCounted
 const ID_APP := "cronicas-pc-98"
 
 
-static func registrar(escritorio: EscritorioSiga, al_completar: Callable = Callable()) -> EscritorioSigaApp:
+static func registrar(
+	escritorio: EscritorioSiga, al_completar: Callable = Callable()
+) -> EscritorioSigaApp:
 	if escritorio == null:
 		return null
 

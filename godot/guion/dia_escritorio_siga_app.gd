@@ -397,7 +397,6 @@ func _crear_software() -> Control:
 	return software
 
 
-
 ## Solo registra una visita cuando el programa emite prologo_completado,
 ## tras salir del Bastión. Nunca se llama al instalar/abrir/iniciar el juego.
 ## El dato es procedencia cultural en OS98, no un evento de sueño o de SIGA.

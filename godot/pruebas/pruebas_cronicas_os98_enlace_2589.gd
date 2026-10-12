@@ -16,9 +16,7 @@ func _probar() -> void:
 	await process_frame
 
 	var avisos := [0]
-	var app := CronicasOs98Enlace.registrar(
-		escritorio, func(): avisos[0] += 1
-	)
+	var app := CronicasOs98Enlace.registrar(escritorio, func(): avisos[0] += 1)
 	_comprobar(app != null, "alta con EscritorioSigaApp existente")
 	if app == null:
 		escritorio.queue_free()
