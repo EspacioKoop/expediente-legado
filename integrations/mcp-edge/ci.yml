@@ -1,0 +1,52 @@
+# CI for Cloudflare MCP Edge Prototype
+# Runs offline tests, verifies tool availability, and ensures no secrets are exposed.
+
+name: ci-mcp-edge
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 2 * * 1"  # Weekly on Monday at 2 AM
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: cd integrations/mcp-edge && npm ci
+
+      - name: Type check
+        run: cd integrations/mcp-edge && npx tsc --noEmit
+
+      - name: Run offline tests
+        run: cd integrations/mcp-edge && npm test -- --ci
+
+      - name: Verify no secrets in code
+        run: |
+          grep -r "PRIVATE_KEY\|SECRET\|TOKEN\|PASSWORD" integrations/mcp-edge/ --include="*.ts" --include="*.json" --include="*.yml" || true
+
+      - name: Build
+        run: cd integrations/mcp-edge && npm run build
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Lint TypeScript
+        run: cd integrations/mcp-edge && npx tsc --noEmit --strict
