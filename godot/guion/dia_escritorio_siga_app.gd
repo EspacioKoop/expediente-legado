@@ -191,6 +191,13 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	_software_app.registrar_en(escritorio)
 	_apps.append(_software_app)
 
+	# #2589: un juego ficticio de PC, NO cartucho de la consola GB/GBC.
+	# La visita sigue siendo local hasta que exista una fuente canónica de
+	# progreso aprobada. No se introduce nada en Partida ni en SemillasOniricas.
+	var cronicas_app := CronicasOs98Enlace.registrar(escritorio)
+	if cronicas_app != null:
+		_apps.append(cronicas_app)
+
 	# Correo es otra app del contrato común: su contenido se resuelve contra la
 	# jornada viva y la plantilla real de esta vuelta. Solo persiste qué mensajes
 	# se leyeron y qué respuestas eligió el jugador; no guarda una copia de la
