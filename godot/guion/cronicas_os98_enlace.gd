@@ -1,5 +1,6 @@
 ## Adaptador opt-in de Crónicas como aplicación real del escritorio OS98 (#2589).
-## No persiste EstadoAplicacionesSiga ni altera Partida, sueño o clímax.
+## Persiste solo procedencia OS98 del prólogo completado; no altera Partida,
+## SemillasOniricas, sueños ni el clímax de Hastur.
 class_name CronicasOs98Enlace
 extends RefCounted
 
