@@ -193,8 +193,9 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	_apps.append(_software_app)
 
 	# #2589: un juego ficticio de PC, NO cartucho de la consola GB/GBC.
-	# La visita sigue siendo local hasta que exista una fuente canónica de
-	# progreso aprobada. No se introduce nada en Partida ni en SemillasOniricas.
+	# La finalización real del prólogo deja solo procedencia cultural en
+	# EstadoAplicacionesSiga, por raíz y vuelta. No altera Partida ni activa
+	# SemillasOniricas: el puente al sueño requiere interacción doméstica.
 	_cronicas_app = CronicasOs98Enlace.registrar(
 		escritorio, Callable(self, "_al_prologo_cronicas_verificado")
 	)
