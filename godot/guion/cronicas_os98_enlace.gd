@@ -6,7 +6,7 @@ extends RefCounted
 const ID_APP := "cronicas-pc-98"
 
 
-static func registrar(escritorio: EscritorioSiga) -> EscritorioSigaApp:
+static func registrar(escritorio: EscritorioSiga, al_completar: Callable = Callable()) -> EscritorioSigaApp:
 	if escritorio == null:
 		return null
 
@@ -14,6 +14,8 @@ static func registrar(escritorio: EscritorioSiga) -> EscritorioSigaApp:
 	var crear := func() -> Control:
 		var programa := CronicasPc98.new()
 		programa.modo_ventana_os98 = true
+		if al_completar.is_valid():
+			programa.prologo_completado.connect(al_completar)
 		programa.cerrar_solicitado.connect(
 			func() -> void:
 				if is_instance_valid(escritorio):
@@ -33,7 +35,7 @@ static func registrar(escritorio: EscritorioSiga) -> EscritorioSigaApp:
 	app.tamano_minimo = Vector2(680, 520)
 	app.tamano_preferido = Vector2(990, 730)
 	app.redimensionable = true
-	app.persistir_estado = false
+	app.persistir_estado = true  # Solo metadatos verificables; nunca el progreso de Partida.
 	if not app.registrar_en(escritorio):
 		return null
 	return app
