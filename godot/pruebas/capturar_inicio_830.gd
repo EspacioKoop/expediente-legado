@@ -41,6 +41,19 @@ func _ejecutar() -> void:
 	Inicio._apertura_creditos_mostrada = true
 	var inicio := Inicio.new()
 	ventana.add_child(inicio)
+	# La escena .tscn de producción pone la raíz a tamaño completo.
+	# El test instancia el script directamente; sin esa geometría, FondoInicio
+	# tiene tamaño cero y se captura solo el gris de la ventana (#2597).
+	inicio.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_comprobar(
+		inicio.size.x >= ANCHO and inicio.size.y >= ALTO,
+		"la raíz del menú ocupa el viewport de 1920x1080",
+	)
+	var fondo_rect := inicio.get_node_or_null("FondoInicio") as TextureRect
+	_comprobar(
+		fondo_rect != null and fondo_rect.size.x >= ANCHO and fondo_rect.size.y >= ALTO,
+		"el diorama tiene una superficie de fondo a pantalla completa",
+	)
 	for i in 20:
 		await process_frame
 	await RenderingServer.frame_post_draw
