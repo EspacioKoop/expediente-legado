@@ -18,6 +18,16 @@ class EvidenciaInicio830Test(unittest.TestCase):
         self.assertIn("InicioDiorama3D", fuente)
         self.assertIn('"FondoInicio"', fuente)
 
+    def test_gate_rechaza_fondo_gris_sin_escena_3d(self):
+        fuente = CAPTURA.read_text(encoding="utf-8")
+        self.assertIn("static func _fondo_3d_visible(imagen: Image) -> bool:", fuente)
+        self.assertIn("_fondo_3d_visible(imagen)", fuente)
+        self.assertIn("colores.size() >= 8", fuente)
+        self.assertIn("imagen.get_pixel(x, y)", fuente)
+        flujo = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("--rendering-method forward_plus", flujo)
+        self.assertNotIn("--rendering-method gl_compatibility", flujo)
+
     def test_compara_movimiento_normal_y_reducido(self):
         fuente = CAPTURA.read_text(encoding="utf-8")
         self.assertIn('"inicio-normal.png"', fuente)
