@@ -128,11 +128,14 @@ func _montar_onboarding_archivo() -> void:
 	# La zona de proximidad original del puesto se desactiva en DiaClimaApp.
 	# SIGA solo se abre si el jugador MIRA al terminal y usa Interactuar.
 	# La acción es remapeable; el prompt del detector enseña su botón real.
-	texto.text = "%s\n%s\n%s" % [
-		tr(CLAVE_PUESTO_ONBOARDING),
-		tr(CLAVE_ACCION_ONBOARDING),
-		"Mira al terminal: al ver «Usar», pulsa el control indicado abajo.",
-	]
+	texto.text = (
+		"%s\n%s\n%s"
+		% [
+			tr(CLAVE_PUESTO_ONBOARDING),
+			tr(CLAVE_ACCION_ONBOARDING),
+			"Mira al terminal: al ver «Usar», pulsa el control indicado abajo.",
+		]
+	)
 	texto.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	texto.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	texto.custom_minimum_size.x = 820
