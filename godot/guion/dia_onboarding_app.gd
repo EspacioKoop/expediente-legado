@@ -191,16 +191,35 @@ func _consejo_de_fase() -> String:
 	match String(jornada.get("fase", "")):
 		"archivo":
 			if int(jornada.get("acciones", 0)) > 0:
-				return "OBJETIVO · ARCHIVO\nVe a un terminal SIGA-98. Lee un expediente, investiga las pistas y decide si firmarlo. Interactuar: E."
-			return "OBJETIVO · FIN DE TURNO\nHas agotado las acciones de hoy. Busca la salida de la oficina para cobrar y continuar."
+				return (
+					"OBJETIVO · ARCHIVO\n"
+					+ "Ve a un terminal SIGA-98. Lee un expediente, "
+					+ "investiga las pistas y decide si firmarlo. Interactuar: E."
+				)
+			return (
+				"OBJETIVO · FIN DE TURNO\n"
+				+ "Has agotado las acciones de hoy. "
+				+ "Busca la salida de la oficina para cobrar y continuar."
+			)
 		"trayecto":
-			return "OBJETIVO · REGRESAR A CASA\nRecorre la calle hasta tu vivienda. WASD: moverte · Ratón: mirar · E: interactuar."
+			return (
+				"OBJETIVO · REGRESAR A CASA\n"
+				+ "Recorre la calle hasta tu vivienda. "
+				+ "WASD: moverte · Ratón: mirar · E: interactuar."
+			)
 		"casa":
-			return "OBJETIVO · DESCANSAR\nExplora la casa, atiende al gato y busca dónde dormir para empezar la noche."
+			return (
+				"OBJETIVO · DESCANSAR\n"
+				+ "Explora la casa, atiende al gato "
+				+ "y busca dónde dormir para empezar la noche."
+			)
 		"sueño":
-			return "OBJETIVO · SUEÑO\nExplora la escena y completa sus objetivos. Busca las salidas; la noche tiene un límite de tiempo."
+			return (
+				"OBJETIVO · SUEÑO\n"
+				+ "Explora la escena y completa sus objetivos. "
+				+ "Busca las salidas; la noche tiene un límite de tiempo."
+			)
 	return ""
-
 
 func _refrescar_guia_fase() -> void:
 	if not is_instance_valid(_guia_fase) or not is_instance_valid(_texto_guia_fase):
