@@ -63,6 +63,14 @@ class OpeningMontageTests(unittest.TestCase):
         self.assertIn('_montaje_onirico.call("saltar")', self.intro)
         self.assertIn('if tomas.is_empty():', self.intro)
 
+    def test_reutiliza_foley_real_del_juego_en_lugar_de_audio_falso(self):
+        self.assertIn('const ACENTOS := {', self.montage)
+        self.assertIn('"sonido": String(ACENTOS.get(nombre, ""))', self.montage)
+        sonido = (ROOT / "godot/guion/sonido.gd").read_text(encoding="utf-8")
+        for nombre in ("tecla", "rafaga", "abrir", "puerta_cierra", "documento", "error", "cerrar"):
+            self.assertIn(f'"{nombre}"', sonido)
+        self.assertIn('Sonido.sonar(self, nombre, tono)', self.player)
+
     def test_original_text_not_copyrighted_media(self):
         self.assertNotIn("Lain", self.montage)
         self.assertNotIn("Evangelion", self.montage)
