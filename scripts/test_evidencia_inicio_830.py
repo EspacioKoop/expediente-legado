@@ -16,6 +16,9 @@ class EvidenciaInicio830Test(unittest.TestCase):
         self.assertIn("const ANCHO := 1920", fuente)
         self.assertIn("const ALTO := 1080", fuente)
         self.assertIn("InicioDiorama3D", fuente)
+        self.assertIn("inicio.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)", fuente)
+        self.assertIn("fondo_rect.size.x >= ANCHO", fuente)
+        self.assertIn("fondo_rect.size.y >= ALTO", fuente)
         self.assertIn('"FondoInicio"', fuente)
 
     def test_gate_rechaza_fondo_gris_sin_escena_3d(self):
