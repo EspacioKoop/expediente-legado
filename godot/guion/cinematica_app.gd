@@ -262,7 +262,7 @@ func _actualizar_franjas() -> void:
 	_rotulo.offset_bottom = -hueco - 16.0
 	_rotulo.offset_top = _rotulo.offset_bottom - 110.0
 	_voz.offset_bottom = -hueco * 0.5 + 16.0
-	_voz.offset_top = _voz.offset_bottom - 40.0
+	_voz.offset_top = _voz.offset_bottom - 80.0
 
 
 ## Fundido opt-in para transiciones donde la acción es perder continuidad visual,
@@ -405,7 +405,7 @@ func _montar() -> void:
 	_rotulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_lienzo.add_child(_rotulo)
 
-	_voz = _texto(18)
+	_voz = _texto(27)
 	_voz.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	_voz.offset_top = -60
 	_voz.offset_left = 16
@@ -413,6 +413,8 @@ func _montar() -> void:
 	_voz.offset_bottom = -20
 	_voz.add_theme_color_override("font_color", Color(0.85, 0.82, 0.55))
 	_voz.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_voz.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_voz.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_lienzo.add_child(_voz)
 
 
