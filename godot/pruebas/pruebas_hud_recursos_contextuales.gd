@@ -99,6 +99,11 @@ func _probar_prioridades() -> void:
 	_comprobar(hud.debe_ser_visible(HUDLayer.RECURSOS), "recursos conviven con prompt breve")
 	hud.activar(HUDLayer.TUTORIAL)
 	_comprobar(not hud.debe_ser_visible(HUDLayer.RECURSOS), "tutorial despeja la banda de recursos")
+	_comprobar(hud.debe_ser_visible(HUDLayer.TUTORIAL), "objetivo sigue visible arriba")
+	_comprobar(
+		hud.debe_ser_visible(HUDLayer.INTERACCION),
+		"tecla remapeada de interacción sigue visible abajo durante tutorial",
+	)
 	hud.desactivar(HUDLayer.TUTORIAL)
 	hud.activar(HUDLayer.FASE)
 	_comprobar(not hud.debe_ser_visible(HUDLayer.RECURSOS), "tarjeta de fase despeja recursos")
@@ -153,15 +158,26 @@ func _probar_prioridades_exhaustivas() -> void:
 				prioridad_esperada = prioridad
 				esperada = tipo
 
+		# Excepción deliberada: tutoría superior e interacción inferior
+		# conviven para que el botón remapeado nunca desaparezca al mirar SIGA.
+		var dos_primarias := (
+			esperada == HUDLayer.TUTORIAL and hud.esta_activa(HUDLayer.INTERACCION)
+		)
+		var numero_esperado := 0 if esperada == StringName() else 1
+		if dos_primarias:
+			numero_esperado += 1
 		var visibles_primarias := 0
 		for tipo in primarias:
 			var control: Control = controles[tipo]
 			if control.visible:
 				visibles_primarias += 1
-				_comprobar(tipo == esperada, "solo gana la primaria de mayor prioridad")
+				_comprobar(
+					tipo == esperada or (dos_primarias and tipo == HUDLayer.INTERACCION),
+					"solo gana la primaria, salvo el prompt durante el tutorial",
+				)
 		_comprobar(
-			visibles_primarias == (0 if esperada == StringName() else 1),
-			"cada combinación expone como máximo una superficie primaria",
+			visibles_primarias == numero_esperado,
+			"tutorial e interacción pueden convivir sin tapar diálogo ni fase",
 		)
 		_comprobar(
 			bool((controles[HUDLayer.ESTADO] as Control).visible),
