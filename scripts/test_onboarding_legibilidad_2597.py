@@ -42,6 +42,15 @@ class GuiaContextualTest(unittest.TestCase):
         self.assertIn('not is_instance_valid(_pista_puesto)', CODE)
         self.assertIsNotNone(re.search(r"func _abrir_expediente\(\).*?_retirar_onboarding_archivo\(\).*?_refrescar_guia_fase\(\)", CODE, re.S))
 
+    def test_temas_globales_tienen_cuerpo_legible(self):
+        raiz = ROOT / "godot/guion"
+        siga = (raiz / "estilo_siga.gd").read_text(encoding="utf-8")
+        juego = (raiz / "estilo_juego.gd").read_text(encoding="utf-8")
+        hud = (raiz / "dia_hud_fases_app.gd").read_text(encoding="utf-8")
+        self.assertIn("tema.default_font_size = 18", siga)
+        self.assertIn("tema.default_font_size = 20", juego)
+        self.assertIn('add_theme_font_size_override("font_size", 18)', hud)
+
     def test_texto_legible_con_ancho_real_en_banda_lateral(self):
         self.assertIn('offset_left = -644', CODE)
         self.assertIn('offset_right = -24', CODE)
