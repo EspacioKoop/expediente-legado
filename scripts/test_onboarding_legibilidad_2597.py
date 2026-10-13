@@ -40,6 +40,7 @@ class GuiaContextualTest(unittest.TestCase):
         self.assertIn('Label3D.new()', CODE)
         self.assertIn('"SenalSalidaFinTurno"', CODE)
         self.assertIn('_senal_fin_turno.shaded = false', CODE)
+        self.assertIn('hacia_sala = hacia_sala.normalized() * 0.75', CODE)
         self.assertIn('_sincronizar_salida_turno()', CODE)
         # Nunca crear un segundo Area3D que pudiera disparar la transición dos veces.
         self.assertNotIn('Area3D.new()', CODE)
