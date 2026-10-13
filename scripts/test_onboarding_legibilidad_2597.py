@@ -29,8 +29,27 @@ class GuiaContextualTest(unittest.TestCase):
         self.assertIn('func _montar_guia_fase() -> void:', CODE)
 
     def test_instrucciones_muestran_accion_y_controles(self):
-        for pista in ("SIGA-98", "WASD", "Interactuar: E", "FIN DE TURNO"):
+        for pista in ("SIGA-98", "WASD", "FIN DE TURNO", "umbral de salida"):
             self.assertIn(pista, CODE)
+
+    def test_salida_real_se_senaliza_solo_tras_agotar_acciones(self):
+        self.assertIn('func _sincronizar_salida_turno() -> void:', CODE)
+        self.assertIn('int(jornada.get("acciones", 0)) <= 0', CODE)
+        self.assertIn('String(salida.get("destino", "")) == "trayecto"', CODE)
+        self.assertIn('salida_puesto = salida.get("pos", Vector3.ZERO)', CODE)
+        self.assertIn('Label3D.new()', CODE)
+        self.assertIn('"SenalSalidaFinTurno"', CODE)
+        self.assertIn('_senal_fin_turno.shaded = false', CODE)
+        self.assertIn('_sincronizar_salida_turno()', CODE)
+        # Nunca crear un segundo Area3D que pudiera disparar la transición dos veces.
+        self.assertNotIn('Area3D.new()', CODE)
+
+    def test_objetivos_describen_la_interaccion_verdadera(self):
+        self.assertIn("al acercarte se abre SIGA-98", CODE)
+        self.assertIn("atraviesa la puerta de salida", CODE)
+        self.assertIn("Entra al acercarte", CODE)
+        self.assertIn("Busca la cama y acércate para dormir", CODE)
+        self.assertNotIn("Interactuar: E", CODE)
 
     def test_indicaciones_se_refrescan_en_cambios_de_progreso(self):
         self.assertIn('_segundos_hasta_guia = 0.25', CODE)
