@@ -12,6 +12,18 @@ const ID := "montaje-onirico-1998"
 const DURACION_OBJETIVO_MIN := 70.0
 const DURACION_OBJETIVO_MAX := 110.0
 
+## Acentos reales de la biblioteca chip ya incluida (#1813): pocos golpes,
+## separados por silencios deliberados. No añade assets sin procedencia.
+const ACENTOS := {
+	"00:07:03": "tecla",
+	"REGISTRO": "rafaga",
+	"ARCHIVO / NIVEL -1": "abrir",
+	"NO ABRAS": "puerta_cierra",
+	"EXPEDIENTE": "documento",
+	"ACCESO DENEGADO": "error",
+	"NO EXISTE REGISTRO": "cerrar",
+}
+
 
 static func planos() -> Array:
 	var tomas: Array = []
@@ -380,6 +392,7 @@ static func _agregar(
 				"fov": fov,
 				"fundido_desde": fundido_desde,
 				"fundido_hasta": fundido_hasta,
+				"sonido": String(ACENTOS.get(nombre, "")),
 			}
 		)
 	)
