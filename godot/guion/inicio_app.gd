@@ -281,7 +281,7 @@ func _crear_cabecera(caja: VBoxContainer) -> void:
 	var marca := TextureRect.new()
 	marca.name = "MarcaInicio"
 	marca.texture = SYSTEM_MARK
-	marca.custom_minimum_size = Vector2(22, 22)
+	marca.custom_minimum_size = Vector2(44, 44)
 	marca.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	marca.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	marca.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -290,7 +290,7 @@ func _crear_cabecera(caja: VBoxContainer) -> void:
 	var titulo := Label.new()
 	titulo.text = tr("INICIO_TITULO")
 	_aplicar_contraste(titulo)
-	titulo.add_theme_font_size_override("font_size", 16)
+	titulo.add_theme_font_size_override("font_size", 36)
 	titulo.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	fila.add_child(titulo)
 
@@ -299,7 +299,8 @@ func _crear_estado(caja: VBoxContainer) -> void:
 	_aviso = Label.new()
 	_aviso.name = "EstadoInicio"
 	_aviso.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_aviso.custom_minimum_size.x = 360
+	_aviso.custom_minimum_size.x = 460
+	_aviso.add_theme_font_size_override("font_size", 21)
 	_aplicar_contraste(_aviso)
 	_aviso.accessibility_live = AccessibilityServer.LIVE_POLITE
 	caja.add_child(_aviso)
@@ -311,7 +312,8 @@ func _crear_boton(texto: String, accion: Callable) -> Button:
 	boton.accessibility_name = texto
 	# #1449 / #830: el menú debe leerse como una lista compacta superpuesta al
 	# diorama, no como una botonera que ocupa todo el viewport.
-	boton.custom_minimum_size = Vector2(380, 40)
+	boton.custom_minimum_size = Vector2(460, 58)
+	boton.add_theme_font_size_override("font_size", 27)
 	boton.size_flags_horizontal = Control.SIZE_SHRINK_END
 	boton.focus_mode = Control.FOCUS_ALL
 	boton.alignment = HORIZONTAL_ALIGNMENT_LEFT
