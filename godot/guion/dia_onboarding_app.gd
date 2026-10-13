@@ -14,6 +14,10 @@ const UMBRAL_RESCATE_CAIDA := -8.0
 
 var _pista_puesto: PanelContainer
 var _luz_puesto: OmniLight3D
+var _guia_fase: PanelContainer
+var _texto_guia_fase: Label
+var _ultimo_consejo := ""
+var _segundos_hasta_guia := 0.0
 
 
 ## Red de seguridad del playtest (#784). Se mantiene aquí para que la cadena
@@ -23,6 +27,10 @@ var _luz_puesto: OmniLight3D
 func _process(_delta: float) -> void:
 	super(_delta)
 	_rescatar_caida()
+	_segundos_hasta_guia -= _delta
+	if _segundos_hasta_guia <= 0.0:
+		_segundos_hasta_guia = 0.25
+		_refrescar_guia_fase()
 
 
 ## `body_entered` llega durante el paso de física. Las capas superiores pueden
@@ -56,6 +64,8 @@ func _entrar_en(fase: String) -> void:
 	super._entrar_en(fase)
 	if _onboarding_pendiente(fase):
 		_montar_onboarding_archivo()
+	_montar_guia_fase()
+	_refrescar_guia_fase()
 
 
 func _onboarding_pendiente(fase: String) -> bool:
@@ -130,6 +140,7 @@ func _abrir_expediente() -> void:
 	# fallo de guardado conserva la pista para que el jugador pueda reintentar.
 	if _pantalla != null:
 		_retirar_onboarding_archivo()
+		_refrescar_guia_fase()
 
 
 func _retirar_onboarding_archivo() -> void:
@@ -139,3 +150,74 @@ func _retirar_onboarding_archivo() -> void:
 	if is_instance_valid(_luz_puesto):
 		_luz_puesto.queue_free()
 	_luz_puesto = null
+
+
+## La guía no desaparece para siempre tras abrir SIGA. El jugador necesita
+## saber qué hacer también DESPUÉS del primer expediente y en cada fase.
+## Esta pista es una ayuda funcional, no sustituye la narración diegética.
+func _montar_guia_fase() -> void:
+	if is_instance_valid(_guia_fase):
+		return
+	if _hud == null:
+		return
+	_guia_fase = PanelContainer.new()
+	_guia_fase.name = "GuiaFaseJugable"
+	_guia_fase.theme = EstiloSiga.tema()
+	_guia_fase.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_guia_fase.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	_guia_fase.offset_left = -644
+	_guia_fase.offset_top = 222
+	_guia_fase.offset_right = -24
+	_guia_fase.offset_bottom = 346
+	_guia_fase.add_theme_stylebox_override("panel", HUDEstilo.caja_tutorial())
+	_hud.add_child(_guia_fase)
+
+	_texto_guia_fase = Label.new()
+	_texto_guia_fase.name = "TextoGuiaFaseJugable"
+	_texto_guia_fase.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_texto_guia_fase.custom_minimum_size.x = 575
+	_texto_guia_fase.custom_minimum_size.y = 92
+	_texto_guia_fase.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_texto_guia_fase.add_theme_font_size_override("font_size", 23)
+	_texto_guia_fase.add_theme_color_override("font_color", HUDEstilo.TEXTO_TUTORIAL)
+	_texto_guia_fase.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_guia_fase.add_child(_texto_guia_fase)
+	_ultimo_consejo = ""
+
+
+## Instrucciones orientativas basadas en la fase real y el progreso; ninguna
+## instrucción altera la jornada, marca expedientes ni modifica guardados.
+func _consejo_de_fase() -> String:
+	match String(jornada.get("fase", "")):
+		"archivo":
+			if int(jornada.get("acciones", 0)) > 0:
+				return "OBJETIVO · ARCHIVO\nVe a un terminal SIGA-98. Lee un expediente, investiga las pistas y decide si firmarlo. Interactuar: E."
+			return "OBJETIVO · FIN DE TURNO\nHas agotado las acciones de hoy. Busca la salida de la oficina para cobrar y continuar."
+		"trayecto":
+			return "OBJETIVO · REGRESAR A CASA\nRecorre la calle hasta tu vivienda. WASD: moverte · Ratón: mirar · E: interactuar."
+		"casa":
+			return "OBJETIVO · DESCANSAR\nExplora la casa, atiende al gato y busca dónde dormir para empezar la noche."
+		"sueño":
+			return "OBJETIVO · SUEÑO\nExplora la escena y completa sus objetivos. Busca las salidas; la noche tiene un límite de tiempo."
+	return ""
+
+
+func _refrescar_guia_fase() -> void:
+	if not is_instance_valid(_guia_fase) or not is_instance_valid(_texto_guia_fase):
+		return
+	var mostrar := (
+		_pantalla == null
+		and not is_instance_valid(_pista_puesto)
+		and _hud != null
+		and _hud.visible
+		and _caminante != null
+		and _caminante.is_physics_processing()
+	)
+	_guia_fase.visible = mostrar
+	if not mostrar:
+		return
+	var consejo := _consejo_de_fase()
+	if _ultimo_consejo != consejo:
+		_ultimo_consejo = consejo
+		_texto_guia_fase.text = consejo
+	_guia_fase.visible = not consejo.is_empty()
