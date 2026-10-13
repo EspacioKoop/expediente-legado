@@ -84,3 +84,17 @@ Los recuentos proceden del árbol recursivo de `main` (4.163 entradas); son **ar
 3. Probar mezcla efectiva de efectos/ambiente/música en una build exportada, con umbrales de volumen y capturas espectrales o grabación; en gráficos, inspeccionar cámara, escala, coherencia de materiales y luces, incluido menú y primer espacio.
 4. Corregir primero el primer recorrido. Una escena fantástica deliberada puede ser extraña, pero el jugador siempre debe poder leer instrucciones, identificar acciones y completar su objetivo.
 5. Considerar #2597 un gate de producto y evitar abrir expansiones de arte/audio antes de demostrar avances jugables.
+
+
+### Inventario de ramas y precisión sobre trabajo supuestamente perdido
+
+El listado paginado de ramas devolvió **1.494 ramas remotas** (15 páginas, último lote de 94). Los nombres contienen numerosas líneas históricas de audio, arte, menú, tipografías, shaders, HUD y animaciones. **No se puede asumir que 1.494 ramas sean 1.494 cambios pendientes:** las ramas fusionadas por squash pueden conservar commits propios no alcanzables desde `main`. Un `compare_commits` que diga `diverged` o `ahead>0` tampoco prueba que el contenido no exista ya.
+
+Muestras auditadas con comparación de commits:
+- `audio/2356-careo-tracker`: diverged, 1 commit adelante, 77 detrás; afecta `scripts/laboratorio_sonoro_1475.py`. **Su función `generar_careo_tracker` y el CLI `--careo-tracker` YA ESTÁN EN MAIN** (confirmado comparando el contenido de ambos ficheros), pese a que #2362 se cerró sin merge. La parte realmente pendiente es convertir/aprobar/instalar un fichero musical bajo `assets/audio/musica`, registrar procedencia y conectarlo en `Musica.CATALOGO`, como documenta #76.
+- `feature/567-menu-inicio-visual`, `feature/515-profundidad-visual-siga`, `odiseo/780-tipografia-siga-legible`, `fix/1449-menu-ancho`: ramas históricas con commits fuera de la ancestría actual y muchos commits de atraso. **Solo revisar diffs de lógica concreta**, no restaurar versiones completas porque destruiría meses de cambios.
+- `feature/701-previsualizacion-personaje-3d` y `feature/779-feedback-audiovisual-rondas`: lo mismo para avatares/escenas, que podrían estar presentes bajo implementaciones fusionadas por otras PR.
+
+**Reconciliación correcta**: para una entrega sospechosa, localizar issue/PR sustitutiva → comparar ficheros y consumidor entre rama histórica y `main` → determinar qué comportamiento no existe hoy → abrir PR de *mínimo cambio* con evidencia runtime. Nunca hacer un merge masivo de ramas antiguas.
+
+Con esto, el diagnóstico distingue tres estados: (A) integrado pero no visible/legible; (B) aún en PR abierta, no ejecutado; (C) pieza preparada pero no activada por decisión deliberada (por ejemplo música sin OGG autorizada).
