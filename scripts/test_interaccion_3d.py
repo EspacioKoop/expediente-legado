@@ -74,6 +74,14 @@ class Interaccion3dTest(unittest.TestCase):
         assert "objetivo_cambiado.connect(_mostrar_prompt_interaccion)" in texto
         assert "objetivo_perdido.connect(_ocultar_prompt_interaccion)" in texto
 
+    def test_prompt_es_legible_y_no_intercepta_el_raton(self) -> None:
+        texto = fuente(CAMINANTE)
+        assert 'add_theme_font_size_override("font_size", 26)' in texto
+        assert 'add_theme_constant_override("outline_size", 6)' in texto
+        assert "Control.MOUSE_FILTER_IGNORE" in texto
+        assert "_prompt_interaccion.offset_left = -380" in texto
+        assert "_prompt_interaccion.offset_right = 380" in texto
+
     def test_prompt_es_contextual_remapeable_y_no_hardcodea_tecla(self) -> None:
         texto = fuente(CAMINANTE)
         assert "Control.PRESET_CENTER_BOTTOM" in texto
