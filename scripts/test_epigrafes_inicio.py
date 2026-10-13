@@ -95,8 +95,27 @@ class EpigrafesInicioTest(unittest.TestCase):
     def test_inicio_instancia_epigrafes_y_conecta_terminada(self) -> None:
         self.assertIn("EPIGRAFES_INICIO.new()", self.inicio)
         self.assertIn("EpigrafesInicio", self.inicio)
-        self.assertIn("terminada.connect(_iniciar_cinematica_creditos)", self.inicio)
+        self.assertIn("terminada.connect(_iniciar_montaje_onirico)", self.inicio)
         self.assertIn("epigrafes.iniciar()", self.inicio)
+
+    def test_wrap_horizontal_reserva_ancho_real(self) -> None:
+        self.assertIn("caja.custom_minimum_size.x = ancho_lectura", self.epigrafes)
+        self.assertIn("_texto.custom_minimum_size.x = ancho_lectura", self.epigrafes)
+        self.assertIn("_atribucion.custom_minimum_size.x = ancho_lectura", self.epigrafes)
+        self.assertEqual(
+            self.epigrafes.count("Control.SIZE_EXPAND_FILL"), 2,
+            "Los dos textos deben rellenar el ancho de lectura, no encogerse."
+        )
+        self.assertNotIn("Control.SIZE_SHRINK_CENTER", self.epigrafes)
+
+    def test_menu_fuentes_legibles(self) -> None:
+        for snippet in (
+            'titulo.add_theme_font_size_override("font_size", 36)',
+            '_aviso.add_theme_font_size_override("font_size", 21)',
+            'boton.add_theme_font_size_override("font_size", 27)',
+            'boton.custom_minimum_size = Vector2(460, 58)',
+        ):
+            self.assertIn(snippet, self.inicio)
 
     def test_iniciar_cinematica_creditos_limpia_y_llama_cinematica(self) -> None:
         self.assertIn("func _iniciar_cinematica_creditos", self.inicio)
