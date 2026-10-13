@@ -235,6 +235,11 @@ func _mover_camara(plano: Dictionary, avance: float) -> void:
 ## Focal y foco del plano: la óptica de cine, o la que el plano declare.
 func _ajustar_optica(plano: Dictionary) -> void:
 	_camara.fov = LenguajeCine.fov_de(plano)
+	# DOF no existe en Compatibility: si Godot cae a OpenGL, mantener
+	# el plano nítido en lugar de generar errores de renderizado por toma.
+	if RenderingServer.get_current_rendering_method() == "gl_compatibility":
+		_camara.attributes = null
+		return
 	var camara: Vector3 = plano.get("camara", Vector3.ZERO)
 	var mira: Vector3 = plano.get("mira", Vector3.FORWARD)
 	_camara.attributes = LenguajeCine.atributos(LenguajeCine.foco_de(plano, camara, mira))
