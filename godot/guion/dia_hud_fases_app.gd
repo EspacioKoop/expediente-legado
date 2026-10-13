@@ -196,7 +196,7 @@ func _asegurar_recursos(hud: HUDLayer) -> void:
 	_texto_recursos.custom_minimum_size = Vector2(0.0, 30.0)
 	_texto_recursos.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_texto_recursos.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_texto_recursos.add_theme_font_size_override("font_size", 14)
+	_texto_recursos.add_theme_font_size_override("font_size", 18)
 	fila.add_child(_texto_recursos)
 
 	hud.registrar(HUDLayer.RECURSOS, _recursos_panel)

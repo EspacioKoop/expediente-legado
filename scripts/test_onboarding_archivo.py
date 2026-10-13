@@ -37,7 +37,14 @@ class OnboardingArchivoTest(unittest.TestCase):
         self.assertIn('"ONBOARDING_ACCION_SIGA"', self.capa)
         self.assertIn("PUESTO 4-B · SIGA-98", self.textos)
         self.assertIn("terminal verde", self.textos)
-        self.assertNotIn('Label3D', self.capa)
+        inicio = self.capa.split("func _montar_onboarding_archivo()", 1)[1].split(
+            "\n\nfunc ", 1
+        )[0]
+        self.assertNotIn("Label3D.new()", inicio)
+        # La señal tridimensional se reserva al FIN DEL TURNO, no al tutorial
+        # inicial: se evita un waypoint permanente en mitad de la oficina.
+        self.assertIn('Label3D.new()', self.capa)
+        self.assertIn('int(jornada.get("acciones", 0)) <= 0', self.capa)
         self.assertNotIn('NavigationAgent', self.capa)
 
     def test_el_objetivo_es_una_superficie_tutorial_inequivoca(self):
