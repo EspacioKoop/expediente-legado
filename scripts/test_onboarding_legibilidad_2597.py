@@ -13,7 +13,7 @@ CODE = (ROOT / "godot/guion/dia_onboarding_app.gd").read_text(encoding="utf-8")
 class GuiaContextualTest(unittest.TestCase):
     def test_reutiliza_cadena_y_proceso_base(self):
         self.assertIn('extends "res://guion/dia_gato_app.gd"', CODE)
-        self.assertRegex(CODE, r"func _process\(_delta: float\).*?super\(_delta\)", re.S)
+        self.assertIsNotNone(re.search(r"func _process\(_delta: float\).*?super\(_delta\)", CODE, re.S))
 
     def test_panel_inicial_con_ancho_y_tipografia(self):
         self.assertIn("_pista_puesto.offset_left = -450", CODE)
@@ -40,7 +40,7 @@ class GuiaContextualTest(unittest.TestCase):
     def test_no_estorbar_al_modal_de_expediente(self):
         self.assertIn('_pantalla == null', CODE)
         self.assertIn('not is_instance_valid(_pista_puesto)', CODE)
-        self.assertRegex(CODE, r"func _abrir_expediente\(\).*?_retirar_onboarding_archivo\(\).*?_refrescar_guia_fase\(\)", re.S)
+        self.assertIsNotNone(re.search(r"func _abrir_expediente\(\).*?_retirar_onboarding_archivo\(\).*?_refrescar_guia_fase\(\)", CODE, re.S))
 
     def test_texto_legible_con_ancho_real_en_banda_lateral(self):
         self.assertIn('offset_left = -644', CODE)
