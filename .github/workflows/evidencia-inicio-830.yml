@@ -31,6 +31,7 @@ jobs:
     env:
       LIBGL_ALWAYS_SOFTWARE: '1'
       GALLIUM_DRIVER: llvmpipe
+      VK_ICD_FILENAMES: /usr/share/vulkan/icd.d/lvp_icd.x86_64.json
       XDG_DATA_HOME: ${{ github.workspace }}/.tmp-evidencia-830/data
       XDG_CONFIG_HOME: ${{ github.workspace }}/.tmp-evidencia-830/config
       XDG_CACHE_HOME: ${{ github.workspace }}/.tmp-evidencia-830/cache
@@ -61,6 +62,15 @@ jobs:
 
       - name: Validar contrato de evidencia
         run: python3 -m unittest -v scripts/test_evidencia_inicio_830.py
+
+      - name: Instalar Vulkan por software para Forward+
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends mesa-vulkan-drivers vulkan-tools
+          test -f "$VK_ICD_FILENAMES"
+          xvfb-run -a vulkaninfo --summary
 
       - name: Renderizar menú normal y reducido
         shell: bash
