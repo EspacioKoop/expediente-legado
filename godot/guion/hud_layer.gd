@@ -66,6 +66,17 @@ func debe_ser_visible(tipo: StringName) -> bool:
 		return false
 	if esta_activa(MODAL):
 		return tipo == MODAL
+	# El primer tutorial exige mirar un terminal y pulsar la acción mostrada.
+	# Si el cartel superior tapa el prompt inferior, la explicación se convierte
+	# en un bloqueo de orientación. Son zonas distintas y pueden coexistir,
+	# excepto durante diálogo o el anuncio temporal de cambio de fase.
+	if (
+		tipo == INTERACCION
+		and esta_activa(TUTORIAL)
+		and not esta_activa(FASE)
+		and not esta_activa(DIALOGO)
+	):
+		return true
 	if tipo == ESTADO:
 		return true
 	if tipo == RECURSOS:
