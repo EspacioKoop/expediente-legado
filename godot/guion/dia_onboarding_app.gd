@@ -87,10 +87,12 @@ func _montar_onboarding_archivo() -> void:
 	# El diálogo vive abajo. El objetivo inicial ocupa una banda superior y,
 	# cuando HUDLayer lo arbitra, nunca compite con fase/diálogo/modal.
 	_pista_puesto.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-	_pista_puesto.offset_left = -310
-	_pista_puesto.offset_top = 96
-	_pista_puesto.offset_right = 310
-	_pista_puesto.offset_bottom = 180
+	# #2597: el primer objetivo tiene que ser legible a 1080p desde el Beelink.
+	# Reservar ancho REAL, no confiar en el tamaño mínimo de un Label con wrap.
+	_pista_puesto.offset_left = -450
+	_pista_puesto.offset_top = 90
+	_pista_puesto.offset_right = 450
+	_pista_puesto.offset_bottom = 240
 	_pista_puesto.add_theme_stylebox_override("panel", HUDEstilo.caja_tutorial())
 	_hud.add_child(_pista_puesto)
 
@@ -102,6 +104,8 @@ func _montar_onboarding_archivo() -> void:
 	var rol := Label.new()
 	rol.name = "RolPistaPuesto"
 	rol.text = tr(CLAVE_ROL_ONBOARDING)
+	rol.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	rol.add_theme_font_size_override("font_size", 28)
 	rol.add_theme_font_override("font", EstiloSiga.fuente_titulo())
 	rol.add_theme_color_override("font_color", HUDEstilo.TITULO_TUTORIAL)
 	contenido.add_child(rol)
@@ -111,7 +115,10 @@ func _montar_onboarding_archivo() -> void:
 	texto.text = "%s\n%s" % [tr(CLAVE_PUESTO_ONBOARDING), tr(CLAVE_ACCION_ONBOARDING)]
 	texto.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	texto.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	texto.custom_minimum_size.x = 580
+	texto.custom_minimum_size.x = 820
+	texto.custom_minimum_size.y = 68
+	texto.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	texto.add_theme_font_size_override("font_size", 24)
 	texto.add_theme_color_override("font_color", HUDEstilo.TEXTO_TUTORIAL)
 	texto.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	contenido.add_child(texto)
