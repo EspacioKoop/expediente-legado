@@ -55,7 +55,11 @@ func _montar() -> void:
 
 	var caja := VBoxContainer.new()
 	caja.alignment = BoxContainer.ALIGNMENT_CENTER
-	caja.custom_minimum_size.x = minf(get_viewport_rect().size.x * 0.82, 1100.0)
+	# Los Labels con SHRINK_CENTER reducían su anchura efectiva hasta producir
+	# columnas de una sola palabra/letra al mostrar las citas en el Beelink.
+	# El ancho debe pertenecer a la caja Y a cada Label que hace autowrap.
+	var ancho_lectura := minf(get_viewport_rect().size.x * 0.82, 1100.0)
+	caja.custom_minimum_size.x = ancho_lectura
 	caja.add_theme_constant_override("separation", 16)
 	contenedor.add_child(caja)
 
@@ -67,7 +71,8 @@ func _montar() -> void:
 	_texto.add_theme_color_override("font_outline_color", Color.BLACK)
 	_texto.add_theme_constant_override("outline_size", 3)
 	_texto.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_texto.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_texto.custom_minimum_size.x = ancho_lectura
+	_texto.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	caja.add_child(_texto)
 
 	_atribucion = Label.new()
@@ -78,7 +83,8 @@ func _montar() -> void:
 	_atribucion.add_theme_color_override("font_outline_color", Color.BLACK)
 	_atribucion.add_theme_constant_override("outline_size", 2)
 	_atribucion.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_atribucion.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_atribucion.custom_minimum_size.x = ancho_lectura
+	_atribucion.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	caja.add_child(_atribucion)
 
 
