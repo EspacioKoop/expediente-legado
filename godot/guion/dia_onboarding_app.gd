@@ -221,6 +221,7 @@ func _consejo_de_fase() -> String:
 			)
 	return ""
 
+
 func _refrescar_guia_fase() -> void:
 	if not is_instance_valid(_guia_fase) or not is_instance_valid(_texto_guia_fase):
 		return
