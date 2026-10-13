@@ -45,6 +45,11 @@ func _ejecutar() -> void:
 		await process_frame
 	await RenderingServer.frame_post_draw
 
+	var metodo := RenderingServer.get_current_rendering_method()
+	_comprobar(
+		metodo == "forward_plus",
+		"el runner debe renderizar con Forward+ real, no fallback a %s" % metodo,
+	)
 	_comprobar(inicio.get_node_or_null("FondoInicio") != null, "la escena conserva FondoInicio")
 	_comprobar(inicio._diorama is InicioDiorama3D, "el menú usa InicioDiorama3D real")
 	_comprobar(
