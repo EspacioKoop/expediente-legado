@@ -275,7 +275,14 @@ func _sincronizar_salida_turno() -> void:
 	_senal_fin_turno = Label3D.new()
 	_senal_fin_turno.name = "SenalSalidaFinTurno"
 	_senal_fin_turno.text = "FIN DE TURNO  ·  SALIDA"
-	_senal_fin_turno.position = salida_puesto + Vector3(0.0, 0.9, 0.0)
+	# La salida está justo junto al muro exterior (x=-6.4). Colocar el
+	# cartel en su coordenada exacta lo deja oculto DENTRO de la pared.
+	var entrada: Vector3 = _espacio_actual.get("entrada", Vector3.ZERO)
+	var hacia_sala := entrada - salida_puesto
+	hacia_sala.y = 0.0
+	if hacia_sala.length() > 0.01:
+		hacia_sala = hacia_sala.normalized() * 0.75
+	_senal_fin_turno.position = salida_puesto + hacia_sala + Vector3(0.0, 0.9, 0.0)
 	_senal_fin_turno.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
 	_senal_fin_turno.font = EstiloSiga.fuente_titulo()
 	_senal_fin_turno.font_size = 40
