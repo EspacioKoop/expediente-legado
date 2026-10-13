@@ -18,6 +18,7 @@ var _guia_fase: PanelContainer
 var _texto_guia_fase: Label
 var _ultimo_consejo := ""
 var _segundos_hasta_guia := 0.0
+var _senal_fin_turno: Label3D
 
 
 ## Red de seguridad del playtest (#784). Se mantiene aquí para que la cadena
@@ -31,6 +32,7 @@ func _process(_delta: float) -> void:
 	if _segundos_hasta_guia <= 0.0:
 		_segundos_hasta_guia = 0.25
 		_refrescar_guia_fase()
+		_sincronizar_salida_turno()
 
 
 ## `body_entered` llega durante el paso de física. Las capas superiores pueden
@@ -66,6 +68,7 @@ func _entrar_en(fase: String) -> void:
 		_montar_onboarding_archivo()
 	_montar_guia_fase()
 	_refrescar_guia_fase()
+	_sincronizar_salida_turno()
 
 
 func _onboarding_pendiente(fase: String) -> bool:
@@ -193,31 +196,31 @@ func _consejo_de_fase() -> String:
 			if int(jornada.get("acciones", 0)) > 0:
 				return (
 					"OBJETIVO · ARCHIVO\n"
-					+ "Ve a un terminal SIGA-98. Lee un expediente, "
-					+ "investiga las pistas y decide si firmarlo. Interactuar: E."
+					+ "Busca tu puesto: al acercarte se abre SIGA-98. "
+					+ "Lee expedientes y decide qué hacer con las pruebas."
 				)
 			return (
 				"OBJETIVO · FIN DE TURNO\n"
-				+ "Has agotado las acciones de hoy. "
-				+ "Busca la salida de la oficina para cobrar y continuar."
+				+ "No quedan acciones. Sigue la señal FIN DE TURNO, "
+				+ "atraviesa la puerta de salida y recoge tu nómina."
 			)
 		"trayecto":
 			return (
 				"OBJETIVO · REGRESAR A CASA\n"
-				+ "Recorre la calle hasta tu vivienda. "
-				+ "WASD: moverte · Ratón: mirar · E: interactuar."
+				+ "Camina hasta el portal del otro extremo de la calle. "
+				+ "WASD: caminar · Ratón: mirar. Entra al acercarte."
 			)
 		"casa":
 			return (
 				"OBJETIVO · DESCANSAR\n"
-				+ "Explora la casa, atiende al gato "
-				+ "y busca dónde dormir para empezar la noche."
+				+ "Busca la cama y acércate para dormir. "
+				+ "Si tienes comida, pasa junto al cuenco del gato."
 			)
 		"sueño":
 			return (
 				"OBJETIVO · SUEÑO\n"
-				+ "Explora la escena y completa sus objetivos. "
-				+ "Busca las salidas; la noche tiene un límite de tiempo."
+				+ "Busca el umbral de salida: su luz azulada aparece al acercarte. "
+				+ "Atraviesa cada salida antes de agotar la noche."
 			)
 	return ""
 
@@ -241,3 +244,44 @@ func _refrescar_guia_fase() -> void:
 		_ultimo_consejo = consejo
 		_texto_guia_fase.text = consejo
 	_guia_fase.visible = not consejo.is_empty()
+
+
+## El portal de la oficina es deliberadamente invisible en el mapa (#90),
+## pero eso no puede convertir el fin de turno en un softlock de orientación.
+## La indicación se monta sobre la salida REAL del espacio y solo al agotarse
+## las acciones. No crea otra zona física ni modifica el flujo de la jornada.
+func _sincronizar_salida_turno() -> void:
+	var mostrar := (
+		String(jornada.get("fase", "")) == "archivo"
+		and int(jornada.get("acciones", 0)) <= 0
+		and is_instance_valid(_mundo)
+	)
+	if not mostrar:
+		if is_instance_valid(_senal_fin_turno):
+			_senal_fin_turno.queue_free()
+		_senal_fin_turno = null
+		return
+	if is_instance_valid(_senal_fin_turno):
+		return
+	var salida_puesto := Vector3.ZERO
+	var encontrada := false
+	for salida in _espacio_actual.get("salidas", []):
+		if String(salida.get("destino", "")) == "trayecto":
+			salida_puesto = salida.get("pos", Vector3.ZERO)
+			encontrada = true
+			break
+	if not encontrada:
+		return
+	_senal_fin_turno = Label3D.new()
+	_senal_fin_turno.name = "SenalSalidaFinTurno"
+	_senal_fin_turno.text = "FIN DE TURNO  ·  SALIDA"
+	_senal_fin_turno.position = salida_puesto + Vector3(0.0, 0.9, 0.0)
+	_senal_fin_turno.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
+	_senal_fin_turno.font = EstiloSiga.fuente_titulo()
+	_senal_fin_turno.font_size = 40
+	_senal_fin_turno.pixel_size = 0.006
+	_senal_fin_turno.shaded = false
+	_senal_fin_turno.modulate = Color(1.0, 0.93, 0.70)
+	_senal_fin_turno.outline_size = 12
+	_senal_fin_turno.outline_modulate = Color(0.02, 0.02, 0.03)
+	_mundo.add_child(_senal_fin_turno)
