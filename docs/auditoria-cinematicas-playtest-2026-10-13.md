@@ -49,3 +49,38 @@ Este registro separa **código integrado**, **trabajo publicado en PR**, **uso e
 7. Gate de aceptación humana: prólogo legible → intro narrativa que realmente se vea → créditos legibles → menú comprensible → instrucciones persistentes → SIGA → jornada → casa → sueño **sin intervención de consola**. No cerrar #9/#395/#795/#2596/#2597 antes de esa prueba.
 
 Esta auditoría enumera **entregas localizadas**, no una afirmación de cobertura total de ramas externas, artefactos no publicados o assets locales del Beelink (acceso remoto no disponible al revisarla).
+
+
+## Auditoría ampliada · audio, gráficos y UI (13/10)
+
+Los recuentos proceden del árbol recursivo de `main` (4.163 entradas); son **archivos existentes**, no pruebas de su presentación en el build. Sin acceso al Beelink y sin grabación de una sesión no se puede verificar audible/visible.
+
+| Área | Localizado en `main` | Integración concreta y huecos |
+|---|---|---|
+| Audio | **52 archivos** `godot/assets/audio/*.ogg|wav|mp3`; `sonido.gd`, `ambiente.gd`, `mezcla_audio.gd`, `musica.gd`, audio específico de varios sueños. | `dia_clima_app.gd` llama a `Ambiente.reproducir` al entrar en cada fase. `Sonido` soporta familias chip/fallback. **Pero `Musica.CATALOGO` define `"careo": ""` y `"final": ""`**: `Musica.stream()` devuelve nulo para ambos. Esto es música silenciosa por diseño del catálogo, NO un fallo de volumen o mezclador. Falta fichero musical con procedencia verificable o síntesis aprobada. |
+| Gráficos | **197 archivos** `.glb/.gltf/.fbx/.obj/.tscn`, **255 imágenes** `.png/.jpg/.webp/.svg`, **21 shaders**. | `efectos_ligeros.gd` monta lluvia, polvo, chispas, charcos y vapor, llamado desde `dia_clima_app.gd`. `inicio_diorama_3d.gd` crea fondo 3D de menú con CRT. Diversas escenas y modelos están presentes, pero pueden verse como placeholders o quedar sin montar. Evaluar modelos y materiales en contexto real, no por nombre de fichero. |
+| Interfaz | **10 fuentes** empaquetadas, **43 scripts** relacionados con HUD, OS98, menú, visores y presentación. | `EstiloSiga.tema().default_font_size = 14`; `EstiloJuego.tema().default_font_size = 16`; `inicio_app.gd` asigna 16 px a cabecera y 380×40 a botones. Son **datos del código** compatibles con la queja de texto minúsculo. `dia_onboarding_app.gd` solo enseñaba pista del puesto en primera visita y la retiraba al abrir SIGA: no había guía persistente del objetivo al cambiar de fase. La rama de esta auditoría incluye corrección aislada y no integrada aún. |
+
+### Cambios de audio/UI/arte que **sí** llegaron a `main` (no reimplementarlos a ciegas)
+
+- [#2309](https://github.com/EspacioKoop/expediente-legado/pull/2309) — enrutado chip con fallback, fusionada en lugar de #2304 (cerrada sin merge).
+- [#2288](https://github.com/EspacioKoop/expediente-legado/pull/2288), [#2275](https://github.com/EspacioKoop/expediente-legado/pull/2275), [#2246](https://github.com/EspacioKoop/expediente-legado/pull/2246), [#2347](https://github.com/EspacioKoop/expediente-legado/pull/2347), [#2355](https://github.com/EspacioKoop/expediente-legado/pull/2355) — foley y eventos chip integrados; verificar disparadores y balance audible.
+- [#2418](https://github.com/EspacioKoop/expediente-legado/pull/2418) — pasos y audio común movidos a presentación de jornada.
+- [#1760](https://github.com/EspacioKoop/expediente-legado/pull/1760) y [#1469](https://github.com/EspacioKoop/expediente-legado/pull/1469) — pulido de menús y escalado de 4K; **el pase 1080p real los contradice**, revisar jerarquía de tamaños y reversiones posteriores.
+- [#1367](https://github.com/EspacioKoop/expediente-legado/pull/1367), [#1401](https://github.com/EspacioKoop/expediente-legado/pull/1401), [#1735](https://github.com/EspacioKoop/expediente-legado/pull/1735) — contraste de menús y HUD contextual con tests de prioridad. Falta gate de lectura visual.
+- [#1380](https://github.com/EspacioKoop/expediente-legado/pull/1380), [#1382](https://github.com/EspacioKoop/expediente-legado/pull/1382), [#1370](https://github.com/EspacioKoop/expediente-legado/pull/1370), [#1315](https://github.com/EspacioKoop/expediente-legado/pull/1315) — partículas, props 3D PBR y ventana: integrados en código, **sin garantía de aspecto correcto en tu escena actual**.
+
+### Qué no se debe clasificar como trabajo perdido sin investigar
+
+- [#2326](https://github.com/EspacioKoop/expediente-legado/pull/2326) cerrada sin merge, pero [#2331](https://github.com/EspacioKoop/expediente-legado/pull/2331) sí incorporó regresión de interfaz chip. Comparar diffs antes de reabrir.
+- [#2304](https://github.com/EspacioKoop/expediente-legado/pull/2304) cerrada sin merge, sustituida por la entrega fusionada #2309.
+- [#2362](https://github.com/EspacioKoop/expediente-legado/pull/2362) (generador de música de careo) cerrada sin integrar: revisar si el fichero/idea fue sustituido; no asumir que existe una pista real.
+- Las cinemáticas en #2515/#2517 no tienen autoplay, no aparecen automáticamente en la partida y no deben usarse como maquillaje de un tutorial roto.
+
+### Reconciliación de trabajo necesaria
+
+1. Extraer un manifiesto `asset → fuente/licencia → ruta → consumidor runtime → fase → pruebas/captura o escucha` para **sonido**, **materiales/modelos** y **pantallas**.
+2. Asegurar que cada recurso prioritario tiene una llamada real; **si falta música**, seleccionar una pieza autorizada o solución original sin inventar licencias ni rutas. No poner una ruta inexistente en `Musica.CATALOGO` para simular integración.
+3. Probar mezcla efectiva de efectos/ambiente/música en una build exportada, con umbrales de volumen y capturas espectrales o grabación; en gráficos, inspeccionar cámara, escala, coherencia de materiales y luces, incluido menú y primer espacio.
+4. Corregir primero el primer recorrido. Una escena fantástica deliberada puede ser extraña, pero el jugador siempre debe poder leer instrucciones, identificar acciones y completar su objetivo.
+5. Considerar #2597 un gate de producto y evitar abrir expansiones de arte/audio antes de demostrar avances jugables.
