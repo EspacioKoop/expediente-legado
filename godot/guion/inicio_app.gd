@@ -10,6 +10,7 @@ extends Control
 const SYSTEM_MARK: Texture2D = preload("res://arte/os98/system_mark.svg")
 const CINEMATICA_APP := preload("res://guion/cinematica_app.gd")
 const EPIGRAFES_INICIO := preload("res://guion/epigrafes_inicio.gd")
+const APERTURA_ONIRICA := preload("res://guion/apertura_onirica_cinematica.gd")
 const COLOR_TEXTO := Color(0.92, 0.93, 0.90)
 const COLOR_TEXTO_DESACTIVADO := Color(0.55, 0.56, 0.53)
 const COLOR_CONTORNO := Color(0.0, 0.0, 0.0, 0.85)
@@ -38,6 +39,7 @@ var _diorama: InicioDiorama3D
 var _envoltorio: MarginContainer
 var _apertura_creditos: Node3D = null
 var _epigrafes: Control = null
+var _montaje_onirico: Node3D = null
 var _continuar: Button
 var _nueva: Button
 var _cargar: Button
@@ -93,13 +95,33 @@ func _iniciar_apertura_creditos() -> void:
 	_diorama.configurar_activo(false)
 	var epigrafes := EPIGRAFES_INICIO.new()
 	epigrafes.name = "EpigrafesInicio"
-	epigrafes.terminada.connect(_iniciar_cinematica_creditos)
+	epigrafes.terminada.connect(_iniciar_montaje_onirico)
 	_epigrafes = epigrafes
 	add_child(epigrafes)
 	epigrafes.iniciar()
 
 
+func _iniciar_montaje_onirico() -> void:
+	# Las citas preceden a la sucesion de planos, no sustituyen los creditos.
+	if is_instance_valid(_epigrafes):
+		_epigrafes.queue_free()
+	_epigrafes = null
+	var tomas := APERTURA_ONIRICA.planos()
+	if tomas.is_empty():
+		_iniciar_cinematica_creditos()
+		return
+	var reproductor := CINEMATICA_APP.new()
+	reproductor.name = "MontajeOnirico1998"
+	reproductor.terminada.connect(_iniciar_cinematica_creditos)
+	_montaje_onirico = reproductor
+	add_child(reproductor)
+	reproductor.reproducir(tomas, AperturaOniricaCinematica.ID)
+
+
 func _iniciar_cinematica_creditos() -> void:
+	if is_instance_valid(_montaje_onirico):
+		_montaje_onirico.queue_free()
+	_montaje_onirico = null
 	if is_instance_valid(_epigrafes):
 		_epigrafes.queue_free()
 	_epigrafes = null
@@ -135,6 +157,11 @@ func _unhandled_input(evento: InputEvent) -> void:
 			if click_epigrafe.pressed and click_epigrafe.button_index == MOUSE_BUTTON_LEFT:
 				_epigrafes.call("saltar")
 				get_viewport().set_input_as_handled()
+		return
+	if is_instance_valid(_montaje_onirico):
+		if evento.is_action_pressed("interactuar") or evento.is_action_pressed("cancelar"):
+			_montaje_onirico.call("saltar")
+			get_viewport().set_input_as_handled()
 		return
 	if not is_instance_valid(_apertura_creditos):
 		return
@@ -254,7 +281,7 @@ func _crear_cabecera(caja: VBoxContainer) -> void:
 	var marca := TextureRect.new()
 	marca.name = "MarcaInicio"
 	marca.texture = SYSTEM_MARK
-	marca.custom_minimum_size = Vector2(22, 22)
+	marca.custom_minimum_size = Vector2(44, 44)
 	marca.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	marca.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	marca.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -263,7 +290,7 @@ func _crear_cabecera(caja: VBoxContainer) -> void:
 	var titulo := Label.new()
 	titulo.text = tr("INICIO_TITULO")
 	_aplicar_contraste(titulo)
-	titulo.add_theme_font_size_override("font_size", 16)
+	titulo.add_theme_font_size_override("font_size", 36)
 	titulo.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	fila.add_child(titulo)
 
@@ -272,7 +299,8 @@ func _crear_estado(caja: VBoxContainer) -> void:
 	_aviso = Label.new()
 	_aviso.name = "EstadoInicio"
 	_aviso.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_aviso.custom_minimum_size.x = 360
+	_aviso.custom_minimum_size.x = 460
+	_aviso.add_theme_font_size_override("font_size", 21)
 	_aplicar_contraste(_aviso)
 	_aviso.accessibility_live = AccessibilityServer.LIVE_POLITE
 	caja.add_child(_aviso)
@@ -284,7 +312,8 @@ func _crear_boton(texto: String, accion: Callable) -> Button:
 	boton.accessibility_name = texto
 	# #1449 / #830: el menú debe leerse como una lista compacta superpuesta al
 	# diorama, no como una botonera que ocupa todo el viewport.
-	boton.custom_minimum_size = Vector2(380, 40)
+	boton.custom_minimum_size = Vector2(460, 58)
+	boton.add_theme_font_size_override("font_size", 27)
 	boton.size_flags_horizontal = Control.SIZE_SHRINK_END
 	boton.focus_mode = Control.FOCUS_ALL
 	boton.alignment = HORIZONTAL_ALIGNMENT_LEFT
