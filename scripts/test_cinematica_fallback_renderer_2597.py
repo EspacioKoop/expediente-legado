@@ -18,6 +18,11 @@ class RenderizadorCinematicaTest(unittest.TestCase):
         guardia = CINE.split(metodo, 1)[1].split("return", 1)[0]
         self.assertIn("_camara.attributes = null", guardia)
 
+    def test_subtitulos_cinematograficos_legibles(self):
+        self.assertIn("_voz = _texto(27)", CINE)
+        self.assertIn("_voz.offset_top = _voz.offset_bottom - 80.0", CINE)
+        self.assertIn("_voz.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART", CINE)
+
     def test_forward_plus_preserva_fov_y_profundidad_de_campo(self):
         self.assertIn("_camara.fov = LenguajeCine.fov_de(plano)", CINE)
         self.assertIn(
