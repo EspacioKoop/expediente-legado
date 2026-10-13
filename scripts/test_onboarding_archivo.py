@@ -53,9 +53,12 @@ class OnboardingArchivoTest(unittest.TestCase):
         self.assertIn('"ONBOARDING_ACCION_SIGA"', self.capa)
         self.assertIn("rol.text = tr(CLAVE_ROL_ONBOARDING)", self.capa)
         self.assertIn(
-            'texto.text = "%s\\n%s" % [tr(CLAVE_PUESTO_ONBOARDING), tr(CLAVE_ACCION_ONBOARDING)]',
+            'texto.text = "%s\\n%s\\n%s" % [',
             self.capa,
         )
+        self.assertIn("tr(CLAVE_PUESTO_ONBOARDING)", self.capa)
+        self.assertIn("tr(CLAVE_ACCION_ONBOARDING)", self.capa)
+        self.assertIn("Mira al terminal: al ver «Usar»", self.capa)
         self.assertIn("Control.PRESET_CENTER_TOP", self.capa)
         self.assertIn("HUDEstilo.caja_tutorial()", self.capa)
         self.assertIn("HUDEstilo.TITULO_TUTORIAL", self.capa)
