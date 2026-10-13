@@ -160,9 +160,7 @@ func _probar_prioridades_exhaustivas() -> void:
 
 		# Excepción deliberada: tutoría superior e interacción inferior
 		# conviven para que el botón remapeado nunca desaparezca al mirar SIGA.
-		var dos_primarias := (
-			esperada == HUDLayer.TUTORIAL and hud.esta_activa(HUDLayer.INTERACCION)
-		)
+		var dos_primarias := esperada == HUDLayer.TUTORIAL and hud.esta_activa(HUDLayer.INTERACCION)
 		var numero_esperado := 0 if esperada == StringName() else 1
 		if dos_primarias:
 			numero_esperado += 1
