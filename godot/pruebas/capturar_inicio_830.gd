@@ -83,6 +83,11 @@ func _capturar(nombre_archivo: String, superficie: String) -> void:
 		imagen.get_width() == ANCHO and imagen.get_height() == ALTO,
 		"%s mantiene 1920x1080" % superficie,
 	)
+	# #2597: la evidencia anterior aprobaba PNG grandes con todo el
+	# fondo gris (#4d4d4d). Eso no demuestra que el diorama exista a la vista.
+	_comprobar(
+		_fondo_3d_visible(imagen), "%s muestra realmente el diorama, no gris plano" % superficie
+	)
 	var png := imagen.save_png_to_buffer()
 	_comprobar(png.size() >= MINIMO_BYTES_PNG, "%s codifica PNG no trivial" % superficie)
 	var error := imagen.save_png(_salida.path_join(nombre_archivo))
@@ -97,6 +102,21 @@ func _capturar(nombre_archivo: String, superficie: String) -> void:
 			}
 		)
 	)
+
+
+## Muestra una región libre de controles del menú: su zona derecha debe
+## contener detalle 3D. Exigir sólo un PNG no sirve: en la evidencia anterior
+## había 88 muestras idénticas (77,77,77), pese a ser un PNG de 78 KB.
+static func _fondo_3d_visible(imagen: Image) -> bool:
+	if imagen.is_empty() or imagen.get_width() < ANCHO or imagen.get_height() < ALTO:
+		return false
+	var colores := {}
+	for y in range(120, ALTO - 60, 120):
+		for x in range(800, ANCHO - 60, 120):
+			var p := imagen.get_pixel(x, y)
+			var clave := Vector3i(int(p.r * 24.0), int(p.g * 24.0), int(p.b * 24.0))
+			colores[clave] = true
+	return colores.size() >= 8
 
 
 func _guardar_manifest() -> void:
