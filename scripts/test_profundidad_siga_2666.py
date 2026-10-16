@@ -118,6 +118,24 @@ class ProfundidadSiga2666Test(unittest.TestCase):
                     self.assertEqual(nuevas_relaciones, contrato["pares"])
                     self.assertEqual(pistas_nuevas_de_frase, 2)
 
+    def test_relaciones_heredadas_estan_respaldadas_por_folios(self):
+        for idioma, catalogo in self.catalogos.items():
+            caso_silla = catalogo["caso2@2"]
+            docs_silla = {r["id"]: r for r in caso_silla["registros"]}
+            circular = docs_silla["circular2@2"]["contenido"]
+            if idioma == "es":
+                self.assertIn("firma de la Jefatura de Bienestar Laboral", circular)
+            else:
+                self.assertIn("signature of the Head of Workplace Welfare", circular)
+
+            caso_montalvo = catalogo["caso3@3"]
+            docs_montalvo = {r["id"]: r for r in caso_montalvo["registros"]}
+            self.assertIn(
+                docs_montalvo["empleado3@3"]["folio"],
+                docs_montalvo["acta3@3"]["contenido"],
+                "La clave citada por la relación heredada debe estar en el acta.",
+            )
+
     def test_espejo_ingles_conserva_reglas_e_ids_y_traduce_pistas(self):
         for caso_id, contrato in AMPLIACIONES.items():
             es, en = (self.catalogos[lang][caso_id] for lang in ("es", "en"))
