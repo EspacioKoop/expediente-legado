@@ -2,56 +2,52 @@
 
 [ext_resource type="Script" path="res://guion/sueno_museo_vidas_no_ocurridas.gd" id="1"]
 
+[sub_resource type="PlaneMesh" id="Suelo"]
+size = Vector2(20, 15)
+
+[sub_resource type="StandardMaterial3D" id="MatSuelo"]
+albedo_color = Color(0.1, 0.1, 0.1, 1)
+roughness = 1.0
+
+[sub_resource type="CylinderMesh" id="Vitrina"]
+top_radius = 1.0
+bottom_radius = 1.0
+height = 2.0
+
+[sub_resource type="StandardMaterial3D" id="MatVitrina"]
+albedo_color = Color(0.8, 0.7, 0.6, 1)
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="MatExplorable"]
+albedo_color = Color(1.0, 0.9, 0.8, 1)
+roughness = 0.5
+
 [node name="MuseoVidasNoOcurridas" type="Node3D"]
 script = ExtResource("1")
 
 [node name="SueloMuseo" type="MeshInstance3D" parent="."]
-mesh = RectMesh.new()
-mesh.size = Vector2(20, 15)
-material_override = StandardMaterial3D.new()
-material_override.albedo_color = Color(0.1, 0.1, 0.1, 1)
-material_override.roughness = 1.0
+mesh = SubResource("Suelo")
+material_override = SubResource("MatSuelo")
 
 [node name="Vitrina1" type="MeshInstance3D" parent="."]
-position = Vector3(-5, 0, -5)
-rotation_degrees = Vector3(0, 90, 0)
-mesh = CylinderMesh.new()
-mesh.radius = 1.0
-mesh.height = 2.0
-material_override = StandardMaterial3D.new()
-material_override.albedo_color = Color(0.8, 0.7, 0.6, 1)
-material_override.roughness = 0.8
+position = Vector3(-5, 1, -5)
+mesh = SubResource("Vitrina")
+material_override = SubResource("MatVitrina")
 
 [node name="Vitrina2" type="MeshInstance3D" parent="."]
-position = Vector3(0, 0, -5)
-rotation_degrees = Vector3(0, 90, 0)
-mesh = CylinderMesh.new()
-mesh.radius = 1.0
-mesh.height = 2.0
-material_override = StandardMaterial3D.new()
-material_override.albedo_color = Color(0.8, 0.7, 0.6, 1)
-material_override.roughness = 0.8
+position = Vector3(0, 1, -5)
+mesh = SubResource("Vitrina")
+material_override = SubResource("MatVitrina")
 
 [node name="Vitrina3" type="MeshInstance3D" parent="."]
-position = Vector3(5, 0, -5)
-rotation_degrees = Vector3(0, 90, 0)
-mesh = CylinderMesh.new()
-mesh.radius = 1.0
-mesh.height = 2.0
-material_override = StandardMaterial3D.new()
-material_override.albedo_color = Color(0.8, 0.7, 0.6, 1)
-material_override.roughness = 0.8
+position = Vector3(5, 1, -5)
+mesh = SubResource("Vitrina")
+material_override = SubResource("MatVitrina")
 
-[node name="VitrinaExplorable" type="MeshInstance3D" parent="."]
-position = Vector3(0, 0, 5)
-rotation_degrees = Vector3(0, 0, 0)
-mesh = CylinderMesh.new()
-mesh.radius = 1.0
-mesh.height = 2.0
-material_override = StandardMaterial3D.new()
-material_override.albedo_color = Color(1.0, 0.9, 0.8, 1)
-material_override.roughness = 0.5
-groups = ["explorable"]
+[node name="VitrinaExplorable" type="MeshInstance3D" parent="." groups=["explorable"]]
+position = Vector3(0, 1, 5)
+mesh = SubResource("Vitrina")
+material_override = SubResource("MatExplorable")
 
 [node name="LuzMuseo" type="OmniLight3D" parent="."]
 position = Vector3(0, 2, 0)
