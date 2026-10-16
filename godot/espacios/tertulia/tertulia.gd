@@ -27,97 +27,178 @@ func _cargar_dialogos() -> void:
 			"ramas": []
 		},
 		{
-			"texto": "He leído tu camino. La Sombra y la Anima bailan en ti.",
+			"texto":
+			(
+				"En el cruce de lecturas se sugiere una hipótesis: la Sombra y el Ánima no se"
+				+ " repelen, sino que articulan la tensión del relato."
+			),
 			"requisito": {"arquetipos": ["sombra", "anima"]},
 			"ramas": []
 		},
 		{
-			"texto": "Cervantes me susurró sobre la experiencia y los caminos.",
+			"texto":
+			(
+				"Las páginas de Cervantes proponen que la fricción entre la ficción y la"
+				+ " costumbre reordena la visión del viaje."
+			),
 			"requisito": {"autor": "cervantes"},
 			"ramas":
 			[
 				{
 					"enfoque": "analitico",
 					"opcion": "Analizar la estructura del viaje e ideales",
-					"respuesta": "«Cervantes contrasta el idealismo con la realidad cotidiana.»"
+					"respuesta":
+					(
+						"«El idealismo no se desmorona por ingenuidad, sino por ignorar la"
+						+ " resistencia del entorno; al contrastar el libro con el polvo del"
+						+ " camino, la ficción pierde su rigidez dogmática y obliga a"
+						+ " reinterpretar cada conflicto.»"
+					)
 				},
 				{
 					"enfoque": "personal",
 					"opcion": "Reflexionar sobre los caminos recorridos",
-					"respuesta": "«Cada paso en tu travesía transforma las lecturas pasadas.»"
+					"respuesta":
+					(
+						"«Revisitar una lectura no borra los tropiezos pasados; al admitir el"
+						+ " desacierto como parte del itinerario, el lector deja de"
+						+ " justificarse y descubre un horizonte menos artificioso.»"
+					)
 				},
 				{
 					"enfoque": "pragmatico",
 					"opcion": "Preguntar qué cambia en la siguiente decisión",
-					"respuesta": "«Saber más te permite anticipar las curvas del camino.»"
+					"respuesta":
+					(
+						"«Saber qué espera el terreno no exige renunciar al impulso; medir la"
+						+ " distancia antes del impacto reduce el daño sin desactivar la"
+						+ " voluntad de avanzar.»"
+					)
 				}
 			]
 		},
 		{
 			"texto":
-			"Kafka guardó el secreto de la Metamorfosis para quienes transforman su momentum.",
+			(
+				"La lectura de La metamorfosis abre la sospecha de que la norma burocrática"
+				+ " proyecta una Sombra ineludible."
+			),
 			"requisito": {"obra": "metamorfosis", "arquetipo": "sombra"},
 			"ramas":
 			[
 				{
 					"enfoque": "analitico",
 					"opcion": "Examinar la tensión de la transformación",
-					"respuesta": "«La metamorfosis muestra cómo la estructura externa asfixia.»"
+					"respuesta":
+					(
+						"«La metamorfosis no representa un castigo fantástico, sino la"
+						+ " respuesta del cuerpo a una norma asfixiante; cuando la estructura"
+						+ " niega la individualidad, la parálisis externa precipita el"
+						+ " colapso del sistema entero.»"
+					)
 				},
 				{
 					"enfoque": "personal",
 					"opcion": "Relacionar la sombra con la metamorfosis personal",
 					"respuesta":
-					"«Aceptar la propia sombra evita quedar atrapado en formas ajenas.»"
+					(
+						"«Reconocer la Sombra no absuelve la culpa acumulada; sin embargo,"
+						+ " examinar ese enclaustramiento frena la inercia de complacer"
+						+ " mandatos ajenos.»"
+					)
 				},
 				{
 					"enfoque": "pragmatico",
 					"opcion": "Determinar cómo canalizar esa energía en la acción",
-					"respuesta": "«Canalizar esa tensión convierte la parálisis en impulso.»"
+					"respuesta":
+					(
+						"«Resistir la angustia con obstinación pura solo acelera el desgaste;"
+						+ " encauzar esa fricción hacia una grieta concreta rompe el"
+						+ " encierro y reabre el margen de maniobra.»"
+					)
 				}
 			]
 		},
 		{
-			"texto": "El Self se revela en la no-linealidad. Cortázar lo sabía.",
+			"texto":
+			(
+				"En Rayuela surge la hipótesis de que la búsqueda del Self requiere abandonar"
+				+ " la ilusión de un itinerario fijo."
+			),
 			"requisito": {"obra": "rayuela", "arquetipo": "self"},
 			"ramas":
 			[
 				{
 					"enfoque": "analitico",
 					"opcion": "Descomponer la lectura no lineal de Rayuela",
-					"respuesta": "«La estructura en saltos desmonta la ilusión de un sentido fijo.»"
+					"respuesta":
+					(
+						"«Saltar entre capítulos no produce caos arbitrario, sino la quiebra"
+						+ " del sentido prefijado; al desmantelar la secuencia lineal, la"
+						+ " responsabilidad del texto se traslada por entero a la decisión"
+						+ " del lector.»"
+					)
 				},
 				{
 					"enfoque": "personal",
 					"opcion": "Conectar la búsqueda del centro con el Self",
-					"respuesta": "«El mapa se descubre al saltar libremente entre casillas.»"
+					"respuesta":
+					(
+						"«El centro de la rayuela no aguarda en una casilla fija; el equilibrio"
+						+ " exige asumir la incertidumbre de cada brinco sin aferrarse a un"
+						+ " destino inmutable.»"
+					)
 				},
 				{
 					"enfoque": "pragmatico",
 					"opcion": "Aplicar la flexibilidad de elecciones al siguiente paso",
-					"respuesta": "«Alterar el orden de tus acciones abre atajos insospechados.»"
+					"respuesta":
+					(
+						"«Alterar el orden habitual no equivale a improvisar a ciegas; explorar"
+						+ " combinaciones imprevistas permite esquivar el bloqueo frontal y"
+						+ " descubrir atajos inaccesibles para la rutina.»"
+					)
 				}
 			]
 		},
 		{
-			"texto": "Tu momentum es fuerte. ¿Has probado a citar a Homero en medio del combate?",
+			"texto":
+			(
+				"El poema homérico sugiere que el ritmo de la épica sostiene la determinación"
+				+ " ante el caos del trayecto."
+			),
 			"requisito": {"momentum": 50, "obra": "odisea"},
 			"ramas":
 			[
 				{
 					"enfoque": "analitico",
 					"opcion": "Estudiar la métrica y el ritmo de la épica",
-					"respuesta": "«El ritmo épico sostiene la atención y marca la cadencia.»"
+					"respuesta":
+					(
+						"«El verso medido no actúa como mero adorno retórico; al pautar el"
+						+ " relato con cadencia constante, la memoria retiene el rumbo donde"
+						+ " el estruendo del combate dispersaría la atención.»"
+					)
 				},
 				{
 					"enfoque": "personal",
 					"opcion": "Sentir el impulso del viaje y el retorno",
-					"respuesta": "«Recordar el origen mantiene el rumbo firme ante tempestades.»"
+					"respuesta":
+					(
+						"«Evocar Ítaca no debe convertirse en un refugio melancólico; recordar el"
+						+ " origen preserva la templanza ante las distracciones del trayecto sin"
+						+ " negar la dureza del mar.»"
+					)
 				},
 				{
 					"enfoque": "pragmatico",
 					"opcion": "Aprovechar la tensión para el siguiente movimiento",
-					"respuesta": "«Proyectar esa cadencia en el momento justo maximiza tu empuje.»"
+					"respuesta":
+					(
+						"«Acumular impulso no sirve si la embestida carece de temple;"
+						+ " canalizar la cadencia en el instante exacto concentra la fuerza y"
+						+ " evita desperdiciar la inercia en un ademán fallido.»"
+					)
 				}
 			]
 		},
