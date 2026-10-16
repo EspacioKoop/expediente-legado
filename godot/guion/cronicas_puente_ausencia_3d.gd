@@ -99,8 +99,7 @@ func _al_fallar_tramo(tramo: int) -> void:
 	_mensaje(
 		(
 			"La pisada errónea se desvanece en la bruma. "
-			+ "Vuelves al checkpoint local del Tramo %d (intento %d)."
-			% [tramo, _intentos_fallidos]
+			+ "Vuelves al checkpoint local del Tramo %d (intento %d)." % [tramo, _intentos_fallidos]
 		)
 	)
 
@@ -184,7 +183,7 @@ func _construir_baldosas_tramo(tramo: int, z_centro: float) -> void:
 
 	for i in range(3):
 		var x: float = xs[i]
-		var es_seguro := (i == carril_seguro)
+		var es_seguro := i == carril_seguro
 		var color_losa := COLOR_PIEDRA_CLARA if es_seguro else COLOR_PIEDRA
 
 		_pieza(
@@ -204,8 +203,7 @@ func _construir_baldosas_tramo(tramo: int, z_centro: float) -> void:
 		var c_idx := i
 		var t_idx := tramo
 		losa_interactiva.activado.connect(
-			func(_actor: Node): avanzar_tramo(t_idx, c_idx),
-			CONNECT_DEFERRED
+			func(_actor: Node): avanzar_tramo(t_idx, c_idx), CONNECT_DEFERRED
 		)
 
 
@@ -274,12 +272,13 @@ func _montar_interactuables() -> void:
 		"inscripción I"
 	)
 	insc_1.activado.connect(
-		func(_actor: Node): _mensaje(
-			(
-				"Inscripción I — Quien camine la ausencia debe pisar firme "
-				+ "en el centro para superar el primer tramo."
+		func(_actor: Node):
+			_mensaje(
+				(
+					"Inscripción I — Quien camine la ausencia debe pisar firme "
+					+ "en el centro para superar el primer tramo."
+				)
 			)
-		)
 	)
 	_inscripciones.append(insc_1)
 
@@ -291,12 +290,13 @@ func _montar_interactuables() -> void:
 		"inscripción II"
 	)
 	insc_2.activado.connect(
-		func(_actor: Node): _mensaje(
-			(
-				"Inscripción II — En la memoria distorsionada, "
-				+ "el segundo paso se desvía siempre a la izquierda."
+		func(_actor: Node):
+			_mensaje(
+				(
+					"Inscripción II — En la memoria distorsionada, "
+					+ "el segundo paso se desvía siempre a la izquierda."
+				)
 			)
-		)
 	)
 	_inscripciones.append(insc_2)
 
@@ -308,12 +308,10 @@ func _montar_interactuables() -> void:
 		"inscripción III"
 	)
 	insc_3.activado.connect(
-		func(_actor: Node): _mensaje(
-			(
-				"Inscripción III — Al borde del abismo, "
-				+ "el paso definitivo nace en la derecha."
+		func(_actor: Node):
+			_mensaje(
+				"Inscripción III — Al borde del abismo, " + "el paso definitivo nace en la derecha."
 			)
-		)
 	)
 	_inscripciones.append(insc_3)
 
@@ -329,11 +327,7 @@ func _montar_interactuables() -> void:
 
 
 func _objeto(
-	nombre: String,
-	posicion: Vector3,
-	tamano: Vector3,
-	verbo: int,
-	titulo: String
+	nombre: String, posicion: Vector3, tamano: Vector3, verbo: int, titulo: String
 ) -> Interactuable3D:
 	var objeto := Interactuable3D.new()
 	objeto.name = nombre
