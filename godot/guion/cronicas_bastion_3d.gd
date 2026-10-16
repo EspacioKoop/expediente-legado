@@ -13,6 +13,7 @@ const COLOR_BRONCE := Color(0.48, 0.31, 0.18)
 const COLOR_INSCRIPCION := Color(0.82, 0.71, 0.47)
 
 var _lecturas := 0
+var _interpretacion := 1
 var _duelo_resuelto := false
 var _en_combate := false
 var _completado := false
@@ -42,6 +43,7 @@ func _ready() -> void:
 func estado_local() -> Dictionary:
 	return {
 		"lecturas": _lecturas,
+		"interpretacion": _interpretacion,
 		"duelo_resuelto": _duelo_resuelto,
 		"en_combate": _en_combate,
 		"completado": _completado,
@@ -51,19 +53,34 @@ func estado_local() -> Dictionary:
 func registrar_lectura() -> void:
 	if _en_combate or _completado:
 		return
-	_lecturas = mini(_lecturas + 1, LECTURAS_NECESARIAS)
-	if _lecturas == 1:
-		_mensaje(
-			(
-				"Crónica I — La torre cayó antes del juramento. "
-				+ "El escriba insiste en que nadie la defendió. Vuelve a leer."
+	if _lecturas < LECTURAS_NECESARIAS:
+		_lecturas += 1
+		if _lecturas == 1:
+			_mensaje(
+				(
+					"Crónica I — La torre cayó antes del juramento. "
+					+ "El escriba insiste en que nadie la defendió. Vuelve a leer."
+				)
 			)
-		)
+		else:
+			_mensaje(
+				(
+					"Crónica II — La torre sigue en pie en otro registro. "
+					+ "Dos interpretaciones elegibles: [1] La Torre Caída / [2] El Bastión Inviolable. "
+					+ "Acércate al custodio o interactúa de nuevo para revisar la lectura."
+				)
+			)
 	else:
+		_interpretacion = 2 if _interpretacion == 1 else 1
+		var texto_interp := (
+			"Interpretación I: La torre cayó por abandono del juramento."
+			if _interpretacion == 1
+			else "Interpretación II: El bastión perdura en la memoria inviolable."
+		)
 		_mensaje(
 			(
-				"Crónica II — La torre sigue en pie en otro registro. "
-				+ "El custodio posee ambas versiones. Acércate a él."
+				"Revisión de lectura — %s " % texto_interp
+				+ "La respuesta del custodio cambiará ante el duelo. Acércate a él o interactúa de nuevo."
 			)
 		)
 	_actualizar_interacciones()
@@ -83,12 +100,17 @@ func registrar_resultado_duelo(gano: bool) -> void:
 		_duelo_resuelto = true
 		_mensaje(
 			(
-				"El custodio cede. La verdad del reino sigue disputada: "
+				"El custodio cede ante tu interpretación. La verdad del reino sigue disputada: "
 				+ "esta victoria no constituye prueba para SIGA. Busca el umbral."
 			)
 		)
 	else:
-		_mensaje("El custodio no te ha vencido para siempre. Puedes volver a desafiarlo.")
+		_mensaje(
+			(
+				"El custodio rechaza tu interpretación, pero no te ha vencido para siempre. "
+				+ "Puedes revisar las crónicas o volver a desafiarlo."
+			)
+		)
 	_actualizar_interacciones()
 
 
@@ -292,12 +314,25 @@ func _iniciar_combate() -> void:
 	_actualizar_interacciones()
 	_caminante.process_mode = Node.PROCESS_MODE_DISABLED
 	_caminante.visible = false
+
+	var respuesta_custodio := (
+		"Custodio: 'Defiendes la caída de la torre. Demuestra en duelo que la ruina justifica tu paso.'"
+		if _interpretacion == 1
+		else "Custodio: 'Proclamas que el bastión sigue en pie. Sombra e historia juzgarán tu certeza.'"
+	)
+	_mensaje(respuesta_custodio)
+
 	_combate = JuicioCombate3D.new()
 	_combate.name = "DueloCustodio"
+	var nombre_enemigo := (
+		"Custodio del umbral (Juicio de la Ruina)"
+		if _interpretacion == 1
+		else "Custodio del umbral (Juicio del Bastión)"
+	)
 	(
 		_combate
 		. configurar(
-			{"id": "cronicas_custodio_umbral", "nombre": "Custodio del umbral", "ataques": []},
+			{"id": "cronicas_custodio_umbral", "nombre": nombre_enemigo, "ataques": []},
 			0,
 			bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false)),
 			2589,
