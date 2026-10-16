@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3]
 
 [sub_resource type="StandardMaterial3D" id="MatFabric"]
-albedo_color = Color(0.8, 0.8, 0.8, 1)
+albedo_color = Color(0.10, 0.15, 0.19, 1)
 roughness = 0.90
 cull_mode = 2
 
