@@ -11,6 +11,7 @@ extends Node3D
 const TAM_VIEWPORT := Vector2i(384, 216)
 # El fondo no necesita renderizarse a 60/120 Hz: la UI sigue a FPS nativos.
 const INTERVALO_RENDER := 1.0 / 30.0
+const ENERGIA_AMBIENTAL_BASE := 0.42
 const DURACION_PARPADEO := 0.12
 const CRT_SHADER: Shader = preload("res://arte/crt_menu_inicio.gdshader")
 
@@ -151,20 +152,22 @@ func _input(event: InputEvent) -> void:
 func _process(delta: float) -> void:
 	# Un único frame 3D cada ~33 ms. Los controles 2D no se limitan.
 	_acumulador_render += delta
-	if _acumulador_render >= INTERVALO_RENDER:
-		_acumulador_render = fposmod(_acumulador_render, INTERVALO_RENDER)
-		_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+	if _acumulador_render < INTERVALO_RENDER:
+		return
+	var paso := _acumulador_render
+	_acumulador_render = 0.0
+	_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 	if _reduccion_movimiento:
 		return
-	_tiempo += delta
-	_procesar_attract(delta)
+	_tiempo += paso
+	_procesar_attract(paso)
 	var datos: Dictionary = ZONAS.get(_zona_actual, ZONAS.continuar)
 	var velocidad := VELOCIDAD_DERIVA_ATTRACT if _attract_activo else VELOCIDAD_DERIVA
 	if not _reduccion_movimiento:
-		_offset_pos = _offset_pos.lerp(datos.pos, minf(1.0, velocidad * delta))
-		_offset_mira = _offset_mira.lerp(datos.mira, minf(1.0, velocidad * delta))
-		_oscurecer = lerpf(_oscurecer, datos.oscurecer, minf(1.0, velocidad * delta))
-		_camara.fov = lerpf(_camara.fov, _fov_objetivo, minf(1.0, velocidad * delta))
+		_offset_pos = _offset_pos.lerp(datos.pos, minf(1.0, velocidad * paso))
+		_offset_mira = _offset_mira.lerp(datos.mira, minf(1.0, velocidad * paso))
+		_oscurecer = lerpf(_oscurecer, datos.oscurecer, minf(1.0, velocidad * paso))
+		_camara.fov = lerpf(_camara.fov, _fov_objetivo, minf(1.0, velocidad * paso))
 		_actualizar_ambiente()
 		_actualizar_fluorescente()
 		_actualizar_detalles_ambientales()
@@ -242,7 +245,7 @@ func _actualizar_ambiente() -> void:
 	if _entorno == null:
 		return
 	_entorno.ambient_light_energy = maxf(
-		0.05, 0.30 * (1.0 - _oscurecer) * _multiplicador_luz_attract
+		0.05, ENERGIA_AMBIENTAL_BASE * (1.0 - _oscurecer) * _multiplicador_luz_attract
 	)
 
 
@@ -298,7 +301,7 @@ func _construir() -> void:
 	_entorno.background_color = Color(0.015, 0.017, 0.02)
 	_entorno.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	_entorno.ambient_light_color = Color(0.30, 0.34, 0.38)
-	_entorno.ambient_light_energy = 0.30
+	_entorno.ambient_light_energy = ENERGIA_AMBIENTAL_BASE
 	world_environment.environment = _entorno
 	mundo.add_child(world_environment)
 	FiltroPantalla.aplicar(world_environment, PreferenciasSiga.cargar())
@@ -319,8 +322,8 @@ func _construir() -> void:
 
 
 func _construir_sala(raiz: Node3D) -> void:
-	var color_pared := Color(0.10, 0.10, 0.11)
-	var color_suelo := Color(0.07, 0.07, 0.075)
+	var color_pared := Color(0.12, 0.12, 0.13)
+	var color_suelo := Color(0.09, 0.09, 0.095)
 	_agregar_caja(raiz, "Suelo", Vector3(0.0, -0.05, -1.0), Vector3(6.0, 0.10, 7.0), color_suelo)
 
 	# Marco de pared con hueco central: la ventana exterior asoma por él sin
