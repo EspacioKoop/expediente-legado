@@ -25,6 +25,33 @@ El worker usa el plan válido más reciente de una cuenta de confianza. Si falta
 
 Una tarea del worker modifica un solo fichero por defecto. Los trabajos mayores deben dividirse antes de entrar al executor.
 
+### Piloto multifichero opt-in (#2569)
+
+El coordinador puede añadir la label exacta `agent:multi-file` al issue
+para permitir **hasta tres rutas explícitas**, incluyendo tests. Un issue sin
+esa label mantiene el límite de **un fichero**. No cambia el máximo técnico
+interno del parser, las rutas protegidas, los CLAIM de #1713 ni los gates de CI.
+
+El workflow determina el máximo a partir del JSON de la API de GitHub con
+`scripts/agent_scope_limit.py`; no confía en texto del issue ni en el
+nombre del worker. Se usa el mismo límite en la reserva, TaskPacket, validación
+de PR de Jules y su fallback. Si la label se retira, las validaciones
+posteriores vuelven al límite de un fichero.
+
+Ejemplo de una sola funcionalidad con prueba:
+
+```text
+AGENT_PLAN_BEGIN
+{"files":["scripts/politica.py","scripts/test_politica.py"],"goal":"Implementación y regresión del mismo contrato"}
+AGENT_PLAN_END
+```
+
+Solo usarlo con componentes pequeños cerrados y rutas sin colisiones.
+El decomposer y el feeder siguen trabajando por defecto en cortes monofichero.
+La label es una decisión del nivel 2; no autoriza hacer merge ni ampliar
+los ficheros reservados durante un trabajo en ejecución.
+
+
 ## Reserva y aislamiento
 
 Antes de implementar, el workflow:
@@ -64,6 +91,14 @@ La revisión independiente ocurre antes de considerar un draft listo. Ninguna re
 ## CI
 
 El worker publica un PR draft y dispara el CI canónico. Las reparaciones automáticas están acotadas y no convierten el pool en autoridad de integración.
+
+## Visualización externa
+
+- El pool puede alimentar tableros externos con un *snapshot* sanitizado de estado.
+- El snapshot debe contener solo metadatos seguros: número de issue/PR, fase, cola, resultado reciente, enlace público de GitHub y timestamps.
+- No debe incluir prompts completos, secretos, rutas locales, hostnames privados, IPs, logs crudos ni memoria privada.
+- GitHub Issues/PRs siguen siendo la fuente visible; el tablero es observabilidad, no autoridad.
+- Un estado en tablero no sustituye los labels del repositorio: `agent:working`, `agent:pr-open`, `agent:needs-human`, `revision:*` y CI siguen mandando.
 
 ## Autopilot manual
 

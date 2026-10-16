@@ -96,7 +96,7 @@ static func secundario(etiqueta: Control) -> void:
 static func tema() -> Theme:
 	var tema := Theme.new()
 	tema.default_font = EstiloSiga.fuente_interfaz()
-	tema.default_font_size = 16
+	tema.default_font_size = 20
 	tema.set_font("title_font", "Label", EstiloSiga.fuente_titulo())
 	tema.set_font("title_font", "Window", EstiloSiga.fuente_titulo())
 	_configurar_paneles(tema)

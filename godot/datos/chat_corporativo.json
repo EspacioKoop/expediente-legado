@@ -302,6 +302,87 @@
       "requiere_eventos": []
     },
     {
+      "id": "cunado-tostador-cafe",
+      "canal": "cafe",
+      "autor": "cunado",
+      "dia": 2,
+      "hora": "13:05",
+      "tipo": "mensaje",
+      "texto": "vaya susto en la cocina con el tostador viejo. he tenido que apagarlo de un manotazo antes de que saliera ardiendo.",
+      "requiere_conocimiento": [],
+      "requiere_eventos": [],
+      "opciones": [
+        {"id": "chispas", "texto": "¿Llegaron a salir chispas?", "efecto": "caracterizacion", "contestacion": "chispas no, pero el tufo a pan quemado se va a quedar en el pasillo hasta el viernes."},
+        {"id": "desayuno", "texto": "Habrá que desayunar fuera.", "efecto": "caracterizacion", "contestacion": "totalmente, aquí los electrodomésticos son de la época del Ministerio."}
+      ]
+    },
+    {
+      "id": "correspondencia-tostador-planta4",
+      "canal": "planta4",
+      "autor": "correspondencia",
+      "dia": 2,
+      "hora": "13:12",
+      "tipo": "mensaje",
+      "texto": "aclaro que nadie apagó nada de un manotazo. el tostador simplemente saltó solo cuando venció el temporizador de rosca.",
+      "requiere_conocimiento": [],
+      "requiere_eventos": []
+    },
+    {
+      "id": "becario-tostador-sistemas",
+      "canal": "sistemas",
+      "autor": "becario",
+      "dia": 2,
+      "hora": "13:20",
+      "tipo": "mensaje",
+      "texto": "si se va la luz en la cuarta planta no ha sido el tostador, ha sido la regleta que alimentaba la cafetera y tres terminales a la vez.",
+      "requiere_conocimiento": [],
+      "requiere_eventos": []
+    },
+    {
+      "id": "telefono-tostador-cafe",
+      "canal": "cafe",
+      "autor": "telefono",
+      "dia": 2,
+      "hora": "13:28",
+      "tipo": "mensaje",
+      "texto": "confirmado desde centralita: saltó el magneto del sector B por exceso de carga. nada de fuego ni manotazos heroicos.",
+      "requiere_conocimiento": [],
+      "requiere_eventos": []
+    },
+    {
+      "id": "cunado-tostador-planta4",
+      "canal": "planta4",
+      "autor": "cunado",
+      "dia": 2,
+      "hora": "13:35",
+      "tipo": "mensaje",
+      "texto": "el caso es que el pan salió negro y la culpa vuelve a ser del cuadro eléctrico de la casa.",
+      "requiere_conocimiento": [],
+      "requiere_eventos": []
+    },
+    {
+      "id": "becario-tostador-cartel",
+      "canal": "sistemas",
+      "autor": "becario",
+      "dia": 2,
+      "hora": "13:40",
+      "tipo": "mensaje",
+      "texto": "ya he dejado un cartel en la regleta del office: una cosa a la vez. a ver cuánto dura pegado.",
+      "requiere_conocimiento": [],
+      "requiere_eventos": []
+    },
+    {
+      "id": "correspondencia-tostador-cartel",
+      "canal": "cafe",
+      "autor": "correspondencia",
+      "dia": 2,
+      "hora": "13:45",
+      "tipo": "mensaje",
+      "texto": "el cartel ya se ha caído. lo he guardado en la bandeja de entrada para no ensuciar el mostrador.",
+      "requiere_conocimiento": [],
+      "requiere_eventos": []
+    },
+    {
       "id": "cunado-despues",
       "canal": "despues",
       "autor": "cunado",

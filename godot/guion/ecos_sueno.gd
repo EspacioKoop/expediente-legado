@@ -65,14 +65,18 @@ static func de_sala(jornada: Dictionary, quedan: int) -> Dictionary:
 	var dependiente: Dictionary
 	var clave := ""
 	if not hablados.is_empty():
-		dependiente = DependientesTiendas.de(hablados[quedan % hablados.size()])
-		# La variante rota con el día y con la sala: la misma persona en dos
-		# salas de la misma noche no repite.
+		var n_hablados := hablados.size()
+		var pos_hablado := posmod(quedan, n_hablados)
+		var ciclo := quedan / n_hablados
+		dependiente = DependientesTiendas.de(hablados[pos_hablado])
+		# La variante rota con el día, la posición del dependiente y el ciclo
+		# de apariciones en la noche: la misma persona en dos salas no repite.
 		var suenos: Array = dependiente["suenos"]
-		clave = String(suenos[(dia + quedan - 1) % suenos.size()])
+		var indice := posmod(dia + ciclo + pos_hablado - 1, suenos.size())
+		clave = String(suenos[indice])
 	elif quedan == 0:
 		var todos := DependientesTiendas.todos()
-		dependiente = todos[(dia - 1) % todos.size()]
+		dependiente = todos[posmod(dia - 1, todos.size())]
 		clave = String(dependiente["extrano"])
 	else:
 		return {}

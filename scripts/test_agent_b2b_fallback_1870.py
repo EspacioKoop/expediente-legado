@@ -169,7 +169,7 @@ class AgentB2BFallback1870Test(unittest.TestCase):
             )
             cuerpo = creacion["args"][creacion["args"].index("--body") + 1]
             self.assertIn("--draft", creacion["args"])
-            self.assertIn("Refs #1870", cuerpo)
+            self.assertIn("Closes #1870", cuerpo)
             self.assertIn(f"ok/{verdict}", cuerpo)
             self.assertIn("ResultPacket true/done", cuerpo)
             self.assertIn("handoff-loss proxy 0%", cuerpo)

@@ -186,8 +186,10 @@ static func frase(
 	var turnos: Array[String] = []
 	if climas.has(clima):
 		turnos.append(String(climas[clima]))
-	elif es_cliente(dependiente, jornada):
-		turnos.append(String(dependiente["frase_cliente"]))
+	if es_cliente(dependiente, jornada):
+		var frase_cli := String(dependiente.get("frase_cliente", ""))
+		if not frase_cli.is_empty():
+			turnos.append(frase_cli)
 	turnos.append(String(saludos[(dia - 1) % saludos.size()]))
 	turnos.append(String(dependiente["insiste"]))
 	return turnos[clampi(charla, 0, turnos.size() - 1)]

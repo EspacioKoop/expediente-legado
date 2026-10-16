@@ -5,19 +5,19 @@
       "espera_acciones": 1,
       "opciones": [
         {
-          "id": "cafe-y-asuntos",
-          "texto": "Me apunto al café. Y RE: solo si estoy respondiendo.",
-          "contestacion": "Vale, café hecho. Lo de RE: te lo decía porque aquí da sensación de que el asunto ya viene hablado y la gente pregunta menos. No digo que esté bien, digo que funciona.\n\nTe aviso cuando baje."
-        },
-        {
           "id": "quien-lo-dijo",
-          "texto": "¿Quién te dijo lo de poner los asuntos en mayúsculas?",
+          "texto": "¿Quién te dijo exactamente lo de escribir los asuntos en mayúsculas?",
           "contestacion": "Ahora me haces dudar. Creo que el de Sistemas. O Personal. También puede ser que se lo oyera al de la mesa de en medio y él lo dijera por otra cosa.\n\nTú ponlos normales de momento. Si alguien se queja, ya sabemos que sí era una norma."
         },
         {
-          "id": "gracias",
-          "texto": "Gracias por avisar.",
-          "contestacion": "De nada. Si descubro si era obligatorio de verdad te digo. Lo del café sigue en pie, que eso sí lo tengo confirmado."
+          "id": "mayusculas-norma-no-escrita",
+          "texto": "Entiendo la intención, pero gritar en el asunto no aclara si es urgente.",
+          "contestacion": "Bueno, visto así tienes razón. Igual lo de las mayúsculas es más costumbre de la planta que norma oficial. No le des más vueltas, yo te aviso cuando baje a por café."
+        },
+        {
+          "id": "cafe-y-asuntos",
+          "texto": "Bajo al café contigo, pero las mayúsculas las dejo para cuando responda algo real.",
+          "contestacion": "Trato hecho, café y minúsculas. Tampoco conviene sobrecargar el servidor con tanto grito. Nos vemos abajo en diez minutos."
         }
       ]
     },
@@ -25,14 +25,19 @@
       "espera_acciones": 1,
       "opciones": [
         {
-          "id": "ayudar-repartir",
-          "texto": "Si quieres, te ayudo a averiguar de quién son.",
-          "contestacion": "Gracias, pero mejor que no pasen por más manos. Si a media tarde nadie los reclama, bajo al registro y pregunto allí.\n\nNo es desconfianza. Es que cuando un sobre pierde dueño, enseguida gana testigos."
+          "id": "de-donde-vienen",
+          "texto": "¿Llevan algún matasellos o remite que aclare la procedencia?",
+          "contestacion": "Dos tienen matasellos de la delegación y uno viene de fuera. El de fuera pesa algo más y no lleva remite. Eso es todo lo que sé sin abrirlos, y prefiero no especular."
         },
         {
-          "id": "de-donde-vienen",
-          "texto": "¿Sabes al menos de dónde vienen?",
-          "contestacion": "Dos tienen matasellos de aquí y uno de fuera. El de fuera pesa más y no lleva remite. Eso es todo lo que sé sin abrirlos, y prefiero seguir sabiendo solo eso."
+          "id": "no-guardar-sobres",
+          "texto": "Guardar sobres ajenos en la mesa suele traer más problemas que soluciones.",
+          "contestacion": "No me lo recuerdes, que ya se me está haciendo largo. Si a media tarde no ha venido nadie a reclamarlos, los bajo al registro general y que se encarguen allí."
+        },
+        {
+          "id": "ayudar-repartir",
+          "texto": "Puedo echar un vistazo a las bandejas de mi pasillo, por si acaso.",
+          "contestacion": "Agradezco el detalle, pero mejor que no circulen más de la cuenta. Cuando un sobre pierde dueño, en esta planta enseguida gana testigos y comentarios."
         }
       ]
     },
@@ -40,19 +45,19 @@
       "espera_acciones": 1,
       "opciones": [
         {
-          "id": "cubrir-llamadas",
-          "texto": "¿Quieres que te cubra si vuelven a llamar?",
-          "contestacion": "No hace falta, gracias. Centralita ya me cubre bastante: hoy me han preguntado dos veces si podía localizarme y las dos veces les he dicho que lo intentaría.\n\nSi llaman por algo urgente, entonces sí: diles que sigo al teléfono."
-        },
-        {
           "id": "como-te-pasas",
-          "texto": "¿Cómo consiguen pasarte una llamada contigo mismo?",
+          "texto": "¿Cómo consiguen pasarte una llamada con tu propia extensión?",
           "contestacion": "Si lo descubres, me lo dices. Mi teoría es que hay dos fichas mías en el listín y ninguna quiere admitir que sobra.\n\nHe probado a colgar una línea y ha sonado la otra, así que de momento empate."
         },
         {
-          "id": "recibido",
-          "texto": "Recibido.",
-          "contestacion": "Perfecto. Si llaman preguntando si he recibido algo, diles que no sabes nada. Técnicamente también será verdad hasta que te lo cuente."
+          "id": "dudar-centralita",
+          "texto": "Estar al teléfono todo el día no parece la forma más eficiente de atender llamadas.",
+          "contestacion": "Cierto, pero tampoco es que yo haya pedido esta bifurcación. Centralita simplemente transfiere y yo intento no discutir con la centralita. Si preguntan por mí, diles que existo pero estoy ocupado."
+        },
+        {
+          "id": "cubrir-llamadas",
+          "texto": "Si entra una llamada urgente por tu línea, puedo tomar nota del recado.",
+          "contestacion": "Se agradece la disposición. Si es algo urgente, apunta solo el nombre y la hora. Del resto del enredo de extensiones me encargo yo cuando recupere la línea única."
         }
       ]
     },
@@ -60,19 +65,19 @@
       "espera_acciones": 1,
       "opciones": [
         {
-          "id": "avisar-listado",
-          "texto": "Te aviso si veo tu nombre en el directorio.",
-          "contestacion": "Gracias. Si salgo, dime solo en qué pantalla. Iba a pedirte que la imprimieras, pero mejor no dejar otro papel con mi nombre dando vueltas.\n\nA estas alturas prefiero pruebas pequeñas."
-        },
-        {
           "id": "cuatro-anos",
-          "texto": "Cuatro años de prácticas no suena muy normal.",
-          "contestacion": "Ya. Cada vez que pregunto me dicen que mi situación está «en trámite». El primer año preguntaba qué trámite. El segundo, cuándo terminaba. Ahora solo pregunto si sigo cobrando este mes.\n\nDe momento, sí."
+          "texto": "¿Cuatro años en prácticas? ¿Nadie en Personal te ha dado una explicación clara?",
+          "contestacion": "Cada vez que pregunto me dicen que mi situación está «en trámite». El primer año preguntaba qué trámite. El segundo, cuándo terminaba. Ahora solo pregunto si sigo cobrando este mes.\n\nDe momento, sí."
         },
         {
           "id": "no-nominas",
-          "texto": "No puedo ayudarte con nóminas, lo siento.",
-          "contestacion": "No pasa nada. Yo tampoco puedo ayudarme con nóminas y llevo bastante más tiempo intentándolo.\n\nSi ves algo raro en el directorio, con que me lo digas basta."
+          "texto": "El directorio no sustituye un contrato, deberías exigir tu regularización por escrito.",
+          "contestacion": "Razón no te falta, pero aquí pedir las cosas por escrito a veces solo sirve para que abran una carpeta nueva con tu nombre. De momento me conformo con saber en qué pantalla figuro."
+        },
+        {
+          "id": "avisar-listado",
+          "texto": "Miraré el directorio interno cuando consulte mis consultas, por si figura tu ficha.",
+          "contestacion": "Te lo agradezco. Si aparezco, avísame solo de la sección que me han asignado. Prefiero no armar revuelo en Personal hasta confirmar qué datos tienen."
         }
       ]
     },
@@ -81,18 +86,18 @@
       "opciones": [
         {
           "id": "que-procedimiento",
-          "texto": "¿Qué procedimiento nuevo no piensas aprender?",
+          "texto": "¿A qué procedimiento nuevo te refieres exactamente?",
           "contestacion": "El del escáner nuevo, para empezar. Tiene seis botones para hacer lo que el anterior hacía con dos y una luz que parpadea incluso cuando no lo toca nadie.\n\nEn tres semanas será problema de otra persona. Lo considero planificación."
         },
         {
-          "id": "dejar-manana",
-          "texto": "Entendido. Lo que llegue tarde puede esperar a mañana.",
-          "contestacion": "Exacto. Mañana seguirá siendo papel y nosotros seguiremos siendo funcionarios. Si alguna de esas dos cosas cambia esta tarde, entonces sí me avisas."
+          "id": "cerrar-hoy",
+          "texto": "Entiendo la postura, pero dejar tareas pendientes a última hora acumula retrasos.",
+          "contestacion": "Tú mismo. Yo también pensaba así cuando entré aquí. Luego descubrí que el archivo vuelve a llenarse por la noche aunque lo dejes impoluto.\n\nNo te quito la diligencia, solo te ahorro la sorpresa del día después."
         },
         {
-          "id": "cerrar-hoy",
-          "texto": "Prefiero dejarlo todo cerrado antes de irme.",
-          "contestacion": "Tú mismo. Yo también hacía eso cuando empecé. Luego descubrí que el archivo vuelve a llenarse por la noche aunque uno lo deje vacío.\n\nNo te quito la ilusión; solo te ahorro la sorpresa."
+          "id": "dejar-manana",
+          "texto": "Puedo filtrar los documentos de última hora y pasarte solo lo estrictamente urgente.",
+          "contestacion": "Me parece una buena tregua. Si viene alguien en persona a pedirlo, me lo pasas. Lo demás se queda en la bandeja hasta mañana, que el papel no se evapora por esperar unas horas."
         }
       ]
     }

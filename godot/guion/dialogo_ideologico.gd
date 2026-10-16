@@ -12,6 +12,7 @@ const SUPERFICIE_OFICINA_JUBILACION := "oficina:jubilacion:postcierre"
 const SUPERFICIE_CAREO_EXPOSICION := "careo:exposicion"
 
 const SUPERFICIES_COMPANEROS := {
+	DecisionIdeologicaExpediente.ACTOR_CUNADO: SUPERFICIE_OFICINA_CUNADO,
 	DecisionIdeologicaExpediente.ACTOR_BECARIO: SUPERFICIE_OFICINA_BECARIO,
 	DecisionIdeologicaExpediente.ACTOR_JUBILACION: SUPERFICIE_OFICINA_JUBILACION,
 }
@@ -20,7 +21,22 @@ const VARIANTES := {
 	SUPERFICIE_OFICINA_CUNADO:
 	[
 		{
+			"clave": "COMPA_CUNADO_3",
+			"prioridad": 20,
+			"requiere_eleccion":
+			{
+				"evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL,
+				"etiqueta": "opcion:responsabilidad_compartida",
+			},
+			"actor_recuerda":
+			{
+				"actor": DecisionIdeologicaExpediente.ACTOR_CUNADO,
+				"evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL,
+			},
+		},
+		{
 			"clave": "IDEOLOGIA_924_CUNADO_COLECTIVO",
+			"prioridad": 10,
 			"requiere_evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL,
 			"requiere_eleccion":
 			{
@@ -36,7 +52,22 @@ const VARIANTES := {
 			},
 		},
 		{
+			"clave": "COMPA_CUNADO_2",
+			"prioridad": 20,
+			"requiere_eleccion":
+			{
+				"evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL,
+				"etiqueta": "opcion:revision_procedimental",
+			},
+			"actor_recuerda":
+			{
+				"actor": DecisionIdeologicaExpediente.ACTOR_CUNADO,
+				"evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL,
+			},
+		},
+		{
 			"clave": "IDEOLOGIA_924_CUNADO_PROCEDIMIENTO",
+			"prioridad": 10,
 			"requiere_evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL,
 			"requiere_eleccion":
 			{
@@ -52,7 +83,22 @@ const VARIANTES := {
 			},
 		},
 		{
+			"clave": "COMPA_CUNADO_1",
+			"prioridad": 20,
+			"requiere_eleccion":
+			{
+				"evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL,
+				"etiqueta": "opcion:conciliacion_interna",
+			},
+			"actor_recuerda":
+			{
+				"actor": DecisionIdeologicaExpediente.ACTOR_CUNADO,
+				"evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL,
+			},
+		},
+		{
 			"clave": "IDEOLOGIA_924_CUNADO_NEGOCIADO",
+			"prioridad": 10,
 			"requiere_evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL,
 			"requiere_eleccion":
 			{

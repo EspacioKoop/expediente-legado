@@ -49,6 +49,16 @@ class AgentProtocolTest(unittest.TestCase):
         self.assertIn("read_file/grep_search", prompt)
         self.assertIn("No hagas commit, push, PR ni merge", prompt)
 
+    def test_prompt_multifichero_enumera_rutas_sin_contexto_adicional(self):
+        packet = self.packet()
+        prompt = mod.render_worker_prompt(packet, "qwen")
+        self.assertIn("Rutas permitidas (lista cerrada)", prompt)
+        self.assertIn("- scripts/a.py", prompt)
+        self.assertIn("- scripts/test_a.py", prompt)
+        self.assertNotIn("Único fichero que puedes modificar", prompt)
+        self.assertIn("ninguna ruta fuera de la lista", prompt)
+        self.assertIn("No leas AGENTS.md", prompt)
+
     def test_prompt_es_autosuficiente_y_prohibe_contexto_extra(self):
         # #1901: los workers agotaban turnos leyendo normas, wiki y memorias.
         issue = {
