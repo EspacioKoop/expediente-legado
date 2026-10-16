@@ -67,6 +67,7 @@ metadata/issue_padre = 79
 
 [node name="Cuerpo" type="MeshInstance3D" parent="."]
 position = Vector3(0, 1.01, 0)
+scale = Vector3(1.2, 1.0, 0.8)
 mesh = SubResource("Cuerpo")
 material_override = SubResource("MaderaOscura")
 
