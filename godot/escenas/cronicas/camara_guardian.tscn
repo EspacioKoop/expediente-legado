@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://b8m3guardiancamara"]
+
+[ext_resource type="Script" uid="uid://c3m4r4gu4rd1n" path="res://guion/cronicas_camara_guardian_3d.gd" id="1_camara"]
+
+[node name="CamaraGuardian" type="Node3D"]
+script = ExtResource("1_camara")

@@ -7,8 +7,8 @@ albedo_color = Color(0.20, 0.105, 0.055, 1)
 roughness = 0.92
 
 [sub_resource type="StandardMaterial3D" id="MatSnow"]
-albedo_color = Color(0.82, 0.90, 0.95, 1)
-roughness = 0.72
+albedo_color = Color(0.95, 0.95, 0.95, 1)
+roughness = 0.70
 
 [sub_resource type="StandardMaterial3D" id="MatDark"]
 albedo_color = Color(0.055, 0.035, 0.025, 1)

@@ -9,6 +9,10 @@ class_name InicioDiorama3D
 extends Node3D
 
 const TAM_VIEWPORT := Vector2i(384, 216)
+# El fondo no necesita renderizarse a 60/120 Hz: la UI sigue a FPS nativos.
+const INTERVALO_RENDER := 1.0 / 30.0
+const ENERGIA_AMBIENTAL_BASE := 0.42
+const DURACION_PARPADEO := 0.12
 const CRT_SHADER: Shader = preload("res://arte/crt_menu_inicio.gdshader")
 
 const CAMARA_POS := Vector3(0.0, 1.56, 2.55)
@@ -66,6 +70,8 @@ var _offset_mira := Vector3.ZERO
 var _oscurecer := 0.0
 var _energia_base := 0.0
 var _siguiente_fallo_fluorescente := 0.0
+var _fin_parpadeo := -1.0
+var _acumulador_render := 0.0
 var _inactividad := 0.0
 var _attract_activo := false
 var _tiempo_plano_attract := 0.0
@@ -89,9 +95,10 @@ func obtener_textura() -> ViewportTexture:
 func configurar_activo(activo: bool) -> void:
 	set_process(activo)
 	set_process_input(activo)
+	_acumulador_render = 0.0
 	if _viewport != null:
 		_viewport.render_target_update_mode = (
-			SubViewport.UPDATE_ALWAYS if activo else SubViewport.UPDATE_DISABLED
+			SubViewport.UPDATE_ONCE if activo else SubViewport.UPDATE_DISABLED
 		)
 	if _exterior != null:
 		_exterior.configurar_activo(activo)
@@ -114,6 +121,11 @@ func configurar_reduccion_movimiento(activa: bool) -> void:
 		_papel_bandeja.position = _papel_pos_base
 		_papel_bandeja.rotation.y = 0.0
 	if activa:
+		# Al reducir movimiento no congelamos un parpadeo a media intensidad.
+		_fin_parpadeo = -1.0
+		_siguiente_fallo_fluorescente = _tiempo + randf_range(7.0, 16.0)
+		if _luz_fluorescente != null:
+			_luz_fluorescente.light_energy = _energia_base
 		_offset_pos = ZONAS.get(_zona_actual, ZONAS.continuar).pos
 		_offset_mira = ZONAS.get(_zona_actual, ZONAS.continuar).mira
 		_oscurecer = ZONAS.get(_zona_actual, ZONAS.continuar).oscurecer
@@ -138,15 +150,24 @@ func _input(event: InputEvent) -> void:
 
 
 func _process(delta: float) -> void:
-	_tiempo += delta
-	_procesar_attract(delta)
+	# Un único frame 3D cada ~33 ms. Los controles 2D no se limitan.
+	_acumulador_render += delta
+	if _acumulador_render < INTERVALO_RENDER:
+		return
+	var paso := _acumulador_render
+	_acumulador_render = 0.0
+	_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+	if _reduccion_movimiento:
+		return
+	_tiempo += paso
+	_procesar_attract(paso)
 	var datos: Dictionary = ZONAS.get(_zona_actual, ZONAS.continuar)
 	var velocidad := VELOCIDAD_DERIVA_ATTRACT if _attract_activo else VELOCIDAD_DERIVA
 	if not _reduccion_movimiento:
-		_offset_pos = _offset_pos.lerp(datos.pos, minf(1.0, velocidad * delta))
-		_offset_mira = _offset_mira.lerp(datos.mira, minf(1.0, velocidad * delta))
-		_oscurecer = lerpf(_oscurecer, datos.oscurecer, minf(1.0, velocidad * delta))
-		_camara.fov = lerpf(_camara.fov, _fov_objetivo, minf(1.0, velocidad * delta))
+		_offset_pos = _offset_pos.lerp(datos.pos, minf(1.0, velocidad * paso))
+		_offset_mira = _offset_mira.lerp(datos.mira, minf(1.0, velocidad * paso))
+		_oscurecer = lerpf(_oscurecer, datos.oscurecer, minf(1.0, velocidad * paso))
+		_camara.fov = lerpf(_camara.fov, _fov_objetivo, minf(1.0, velocidad * paso))
 		_actualizar_ambiente()
 		_actualizar_fluorescente()
 		_actualizar_detalles_ambientales()
@@ -224,18 +245,23 @@ func _actualizar_ambiente() -> void:
 	if _entorno == null:
 		return
 	_entorno.ambient_light_energy = maxf(
-		0.05, 0.30 * (1.0 - _oscurecer) * _multiplicador_luz_attract
+		0.05, ENERGIA_AMBIENTAL_BASE * (1.0 - _oscurecer) * _multiplicador_luz_attract
 	)
 
 
 func _actualizar_fluorescente() -> void:
 	if _luz_fluorescente == null:
 		return
+	if _fin_parpadeo >= 0.0:
+		if _tiempo >= _fin_parpadeo:
+			_luz_fluorescente.light_energy = _energia_base
+			_fin_parpadeo = -1.0
+			_siguiente_fallo_fluorescente = _tiempo + randf_range(7.0, 16.0)
+		return
 	if _tiempo >= _siguiente_fallo_fluorescente:
+		# El bajón dura 120 ms; antes quedaba oscuro los siguientes 7-16 s.
 		_luz_fluorescente.light_energy = _energia_base * 0.15
-		_siguiente_fallo_fluorescente = _tiempo + randf_range(7.0, 16.0) + 0.12
-	elif _tiempo >= _siguiente_fallo_fluorescente - 0.12:
-		_luz_fluorescente.light_energy = _energia_base
+		_fin_parpadeo = _tiempo + DURACION_PARPADEO
 
 
 func _actualizar_detalles_ambientales() -> void:
@@ -259,7 +285,7 @@ func _construir() -> void:
 	_viewport = SubViewport.new()
 	_viewport.name = "RenderInicio3D"
 	_viewport.size = TAM_VIEWPORT
-	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 	_viewport.own_world_3d = true
 	_viewport.msaa_3d = Viewport.MSAA_DISABLED
 	_viewport.screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED
@@ -275,7 +301,7 @@ func _construir() -> void:
 	_entorno.background_color = Color(0.015, 0.017, 0.02)
 	_entorno.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	_entorno.ambient_light_color = Color(0.30, 0.34, 0.38)
-	_entorno.ambient_light_energy = 0.30
+	_entorno.ambient_light_energy = ENERGIA_AMBIENTAL_BASE
 	world_environment.environment = _entorno
 	mundo.add_child(world_environment)
 	FiltroPantalla.aplicar(world_environment, PreferenciasSiga.cargar())
@@ -296,8 +322,8 @@ func _construir() -> void:
 
 
 func _construir_sala(raiz: Node3D) -> void:
-	var color_pared := Color(0.10, 0.10, 0.11)
-	var color_suelo := Color(0.07, 0.07, 0.075)
+	var color_pared := Color(0.12, 0.12, 0.13)
+	var color_suelo := Color(0.09, 0.09, 0.095)
 	_agregar_caja(raiz, "Suelo", Vector3(0.0, -0.05, -1.0), Vector3(6.0, 0.10, 7.0), color_suelo)
 
 	# Marco de pared con hueco central: la ventana exterior asoma por él sin
@@ -436,6 +462,8 @@ func _construir_exterior(raiz: Node3D) -> void:
 	_exterior.position = Vector3(0.0, 1.42, -2.56)
 	raiz.add_child(_exterior)
 	_exterior.configurar(Clima.LLUVIA)
+	# La ventana usa otro SubViewport 3D: limitar solo su uso en el menú.
+	_exterior.limitar_refresco_para_menu(true)
 
 
 func _agregar_caja(raiz: Node3D, nombre: String, pos: Vector3, tam: Vector3, color: Color) -> void:

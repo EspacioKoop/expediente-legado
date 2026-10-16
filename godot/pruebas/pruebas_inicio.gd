@@ -209,8 +209,15 @@ func _probar() -> void:
 	inicio._diorama.configurar_activo(true)
 	_comprobar(inicio._diorama.is_processing(), "reactivar el diorama restaura su proceso")
 	_comprobar(
-		inicio._diorama.get("_viewport").render_target_update_mode == SubViewport.UPDATE_ALWAYS,
-		"reactivar el diorama restaura el render en vivo"
+		inicio._diorama.get("_viewport").render_target_update_mode == SubViewport.UPDATE_ONCE,
+		"reactivar el diorama dibuja un cuadro inmediato sin render continuo"
+	)
+	_comprobar(
+		(
+			inicio._diorama.get("_exterior").get("_viewport").render_target_update_mode
+			== SubViewport.UPDATE_ONCE
+		),
+		"reactivar el diorama repinta también el exterior una vez"
 	)
 	_comprobar(
 		vapor != null and not vapor.visible, "reducir movimiento elimina el vapor no esencial"
