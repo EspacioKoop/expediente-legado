@@ -49,6 +49,17 @@ const TAMANOS := {
 	"fragmento_archivo": Vector3(0.58, 0.92, 0.58),
 }
 
+const FALLOS_PARA_AYUDA := 2
+const AYUDA_CONTEXTUAL := {
+	"fragmento_puerta":
+	"El pilar vertical de terracota busca un marco de zócalo alto y umbral monumental.",
+	"fragmento_sello":
+	"La impronta cilíndrica de hematita exige el lecho plano del sello ceremonial.",
+	"fragmento_ola": "La franja de lapislázuli curvado encaja en la cuenca del canal de aducción.",
+	"fragmento_archivo":
+	"La gavia de arcilla seca requiere la base cuadrada de las estanterías de tablillas.",
+}
+
 const COLOR_LADRILLO := Color(0.42, 0.23, 0.16)
 const COLOR_ARCHIVO := Color(0.30, 0.34, 0.31)
 const COLOR_PAPEL := Color(0.67, 0.61, 0.46)
@@ -57,6 +68,7 @@ const COLOR_AGUA_VERTICAL := Color(0.12, 0.32, 0.46)
 const COLOR_SELLO_CELESTE := Color(0.62, 0.19, 0.16)
 
 var _estado_puzzle: Dictionary = {}
+var _fallos_fragmentos: Dictionary = {}
 var _fragmentos: Dictionary = {}
 var _anclas: Dictionary = {}
 var _barrios: Dictionary = {}
@@ -168,17 +180,86 @@ static func registrar_semilla(
 	return true
 
 
+## Señal diegética de error que compara proporciones y pigmento sin revelar
+## directamente la respuesta.
+static func generar_senal_diegetica(fragmento: String, ancla: String) -> Dictionary:
+	var fragmento_esperado := ""
+	for clave in ENCAJES.keys():
+		if String(ENCAJES[clave]) == ancla:
+			fragmento_esperado = String(clave)
+			break
+
+	if fragmento_esperado.is_empty() or not ENCAJES.has(fragmento):
+		return {
+			"forma": "desencaje_geometria",
+			"color": "pigmento_dispar",
+			"descripcion": "El fragmento no encaja en la cavidad.",
+		}
+
+	var tam_actual: Vector3 = TAMANOS.get(fragmento, Vector3.ONE)
+	var tam_esperado: Vector3 = TAMANOS.get(fragmento_esperado, Vector3.ONE)
+	var col_actual: Color = COLORES.get(fragmento, Color.WHITE)
+	var col_esperado: Color = COLORES.get(fragmento_esperado, Color.WHITE)
+
+	var senal_forma := "proporcion_dispar"
+	if tam_actual.y > tam_esperado.y * 1.15:
+		senal_forma = "exceso_altura"
+	elif tam_actual.y < tam_esperado.y * 0.85:
+		senal_forma = "insuficiente_altura"
+	elif tam_actual.x > tam_esperado.x * 1.15:
+		senal_forma = "exceso_anchura"
+	elif tam_actual.x < tam_esperado.x * 0.85:
+		senal_forma = "insuficiente_anchura"
+
+	var senal_color := "pigmento_incompatible"
+	if col_actual.b > col_actual.r and col_esperado.r > col_esperado.b:
+		senal_color = "tono_frio_en_lecho_calido"
+	elif col_actual.r > col_actual.b and col_esperado.b > col_esperado.r:
+		senal_color = "tono_calido_en_lecho_frio"
+	elif col_actual.v < col_esperado.v * 0.85:
+		senal_color = "pigmento_oscuro"
+	elif col_actual.v > col_esperado.v * 1.15:
+		senal_color = "pigmento_claro"
+
+	var desc := (
+		"Rechazo de encaje: forma %s y color %s."
+		% [
+			senal_forma.replace("_", " "),
+			senal_color.replace("_", " "),
+		]
+	)
+
+	return {
+		"forma": senal_forma,
+		"color": senal_color,
+		"descripcion": desc,
+	}
+
+
+static func obtener_ayuda_contextual(fragmento: String) -> String:
+	return String(AYUDA_CONTEXTUAL.get(fragmento, ""))
+
+
 ## Contrato lógico del puzzle. Devuelve un estado nuevo y nunca destruye el
 ## anterior: una pareja incorrecta pide reversión y deja el progreso intacto.
-static func evaluar_colocacion(estado: Dictionary, fragmento: String, ancla: String) -> Dictionary:
+## Ante un fallo emite señales diegéticas de forma/color y contabiliza el error.
+static func evaluar_colocacion(
+	estado: Dictionary, fragmento: String, ancla: String, fallos_previos: int = 0
+) -> Dictionary:
 	var siguiente := estado.duplicate(true)
 	if not ENCAJES.has(fragmento) or String(ENCAJES[fragmento]) != ancla:
+		var nuevos_fallos := fallos_previos + 1
+		var ayuda_habilitada := nuevos_fallos >= FALLOS_PARA_AYUDA
 		return {
 			"aceptada": false,
 			"revertir": true,
 			"estado": siguiente,
 			"total": siguiente.size(),
 			"completa": siguiente.size() == FRAGMENTOS_NECESARIOS,
+			"fallos": nuevos_fallos,
+			"senal_diegetica": generar_senal_diegetica(fragmento, ancla),
+			"ayuda_contextual_habilitada": ayuda_habilitada,
+			"ayuda_contextual": obtener_ayuda_contextual(fragmento) if ayuda_habilitada else "",
 		}
 
 	siguiente[fragmento] = true
@@ -188,6 +269,10 @@ static func evaluar_colocacion(estado: Dictionary, fragmento: String, ancla: Str
 		"estado": siguiente,
 		"total": siguiente.size(),
 		"completa": siguiente.size() == FRAGMENTOS_NECESARIOS,
+		"fallos": 0,
+		"senal_diegetica": {},
+		"ayuda_contextual_habilitada": false,
+		"ayuda_contextual": "",
 	}
 
 
@@ -222,22 +307,72 @@ func resuelto() -> bool:
 	return progreso() == FRAGMENTOS_NECESARIOS
 
 
+func fallos_fragmento(fragmento: String) -> int:
+	return int(_fallos_fragmentos.get(fragmento, 0))
+
+
+func ayuda_contextual_disponible(fragmento: String) -> bool:
+	return fallos_fragmento(fragmento) >= FALLOS_PARA_AYUDA
+
+
+func obtener_ayuda(fragmento: String) -> String:
+	if not ayuda_contextual_disponible(fragmento):
+		return ""
+	return obtener_ayuda_contextual(fragmento)
+
+
 ## Punto de entrada para una interacción 3D posterior: la lógica ya es jugable
 ## sin acoplarla a HUD, drag-and-drop 2D ni un controlador nocturno paralelo.
 func colocar_fragmento(
 	fragmento: String, ancla: String, reduccion_movimiento: bool = false
 ) -> Dictionary:
 	var ya_colocado := _estado_puzzle.has(fragmento)
-	var resultado := evaluar_colocacion(_estado_puzzle, fragmento, ancla)
+	var fallos_actuales: int = int(_fallos_fragmentos.get(fragmento, 0))
+	var resultado := evaluar_colocacion(_estado_puzzle, fragmento, ancla, fallos_actuales)
 	if not bool(resultado["aceptada"]):
+		_fallos_fragmentos[fragmento] = int(resultado["fallos"])
+		_aplicar_error(
+			fragmento, ancla, resultado["senal_diegetica"] as Dictionary, reduccion_movimiento
+		)
 		return resultado
 
+	_fallos_fragmentos.erase(fragmento)
 	_estado_puzzle = resultado["estado"]
 	if not ya_colocado:
 		_aplicar_acierto(fragmento, reduccion_movimiento)
 	if bool(resultado["completa"]):
 		_abrir_ruta(reduccion_movimiento)
 	return resultado
+
+
+func _aplicar_error(
+	fragmento: String,
+	ancla: String,
+	_senal: Dictionary,
+	reduccion_movimiento: bool,
+) -> void:
+	var puzzle := get_node_or_null("CiudadImposible/PuzzleTablilla") as Node3D
+	if puzzle == null:
+		return
+	var nodo_ancla := puzzle.get_node_or_null(ancla) as MeshInstance3D
+	if nodo_ancla == null:
+		return
+
+	var color_origen: Color = COLORES.get(fragmento, COLOR_LADRILLO)
+	var mat_error := StandardMaterial3D.new()
+	mat_error.albedo_color = color_origen.darkened(0.2)
+	mat_error.emission_enabled = true
+	mat_error.emission = color_origen
+	mat_error.emission_energy_multiplier = 0.8
+	nodo_ancla.material_override = mat_error
+
+	if reduccion_movimiento:
+		return
+
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_SINE)
+	tween.set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(mat_error, "emission_energy_multiplier", 0.0, 0.35)
 
 
 func _montar_prototipo() -> void:

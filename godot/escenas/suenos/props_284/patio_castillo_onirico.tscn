@@ -18,14 +18,14 @@ mesh = SubResource("Patio")
 material_override = SubResource("MatPatio")
 
 [node name="PortadaNorte" parent="." instance=ExtResource("1_muro")]
-position = Vector3(0, 0, -6.1)
+position = Vector3(0, 0, -7.5)
 
 [node name="PortadaSur" parent="." instance=ExtResource("1_muro")]
-position = Vector3(0, 0, 6.1)
+position = Vector3(0, 0, 7.5)
 rotation_degrees = Vector3(0, 180, 0)
 
 [node name="PortadaEste" parent="." groups=["castillo_umbral"] instance=ExtResource("1_muro")]
-position = Vector3(6.1, 0, 0)
+position = Vector3(7.5, 0, 0)
 rotation_degrees = Vector3(0, -90, 0)
 
 [node name="EscaleraImposible" parent="." groups=["castillo_anomalia"] instance=ExtResource("2_escalera")]

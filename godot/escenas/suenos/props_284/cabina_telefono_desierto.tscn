@@ -3,14 +3,14 @@
 [ext_resource type="ArrayMesh" path="res://escenas/suenos/props_284/cabina_telefono_desierto_psx.obj" id="1_cabina"]
 
 [sub_resource type="StandardMaterial3D" id="MatFrame"]
-albedo_color = Color(0.16, 0.08, 0.055, 1)
-metallic = 0.42
-roughness = 0.63
+albedo_color = Color(0.22, 0.12, 0.07, 1)
+metallic = 0.48
+roughness = 0.58
 
 [sub_resource type="StandardMaterial3D" id="MatGlass"]
-albedo_color = Color(0.33, 0.48, 0.52, 0.24)
+albedo_color = Color(0.28, 0.42, 0.48, 0.18)
 transparency = 1
-roughness = 0.12
+roughness = 0.15
 
 [sub_resource type="QuadMesh" id="GlassPanel"]
 size = Vector2(1.28, 2.10)
