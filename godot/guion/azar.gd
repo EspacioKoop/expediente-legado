@@ -36,6 +36,7 @@ const DOMINIOS := [
 	"dia",  # lo que varía de un día a otro
 	"clima",  # el tiempo que hace (#143)
 	"sueno",  # salas y deformaciones de la noche (#79, #86, #87)
+	"oficina_infinita",  # mutador nocturno reproducible de oficina infinita (#2442)
 	"combate",  # las tiradas de la Ventanilla y del careo
 	"presentacion",  # variaciones que no deciden nada
 ]
