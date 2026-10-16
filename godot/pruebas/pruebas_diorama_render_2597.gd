@@ -110,6 +110,16 @@ func _probar_render_exterior() -> void:
 		vista.render_target_update_mode == SubViewport.UPDATE_ONCE,
 		"el exterior solo repinta al vencer el intervalo"
 	)
+	exterior._reduccion_movimiento = false
+	exterior._tiempo = 0.0
+	exterior._acumulador_render = 0.0
+	exterior._process(0.016)
+	_comprobar(exterior._tiempo == 0.0, "el exterior no simula cuadros que descarta")
+	exterior._process(0.018)
+	_comprobar(
+		is_equal_approx(exterior._tiempo, 0.034),
+		"el exterior simula el tiempo real acumulado al dibujar"
+	)
 	vista.free()
 	exterior.free()
 
