@@ -17,9 +17,17 @@ const ESTADO_INVALIDO := "invalido"
 const ETAPAS := [
 	{"id": "bastion", "escena": "res://escenas/cronicas/bastion_nombres_ausentes.tscn", "acto": 1},
 	{"id": "patio_juramentos", "escena": "res://escenas/cronicas/patio_juramentos.tscn", "acto": 1},
-	{"id": "scriptorium_versiones", "escena": "res://escenas/cronicas/scriptorium_versiones.tscn", "acto": 1},
+	{
+		"id": "scriptorium_versiones",
+		"escena": "res://escenas/cronicas/scriptorium_versiones.tscn",
+		"acto": 1
+	},
 	{"id": "torre_tiempo", "escena": "res://escenas/cronicas/torre_tiempo.tscn", "acto": 2},
-	{"id": "galeria_identidades", "escena": "res://escenas/cronicas/galeria_identidades.tscn", "acto": 2},
+	{
+		"id": "galeria_identidades",
+		"escena": "res://escenas/cronicas/galeria_identidades.tscn",
+		"acto": 2
+	},
 	{"id": "puente_ausencia", "escena": "res://escenas/cronicas/puente_ausencia.tscn", "acto": 2},
 	{"id": "estuario_maestro", "escena": "res://escenas/cronicas/estuario_maestro.tscn", "acto": 3},
 	{"id": "umbral_heredera", "escena": "res://escenas/cronicas/umbral_heredera.tscn", "acto": 3},
