@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="ArrayMesh" path="res://escenas/suenos/props_284/archivador_desierto_psx.obj" id="1_archivo"]
 
@@ -6,6 +6,35 @@
 albedo_color = Color(0.18, 0.20, 0.19, 1)
 metallic = 0.62
 roughness = 0.58
+
+[sub_resource type="StandardMaterial3D" id="MatCajonGasto"]
+albedo_color = Color(0.26, 0.26, 0.24, 1)
+metallic = 0.35
+roughness = 0.82
+
+[sub_resource type="StandardMaterial3D" id="MatOxido"]
+albedo_color = Color(0.33, 0.22, 0.14, 1)
+metallic = 0.5
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="MatPolvo"]
+albedo_color = Color(0.52, 0.44, 0.33, 1)
+metallic = 0.0
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="MatPlaca"]
+albedo_color = Color(0.62, 0.58, 0.48, 1)
+metallic = 0.1
+roughness = 0.75
+
+[sub_resource type="BoxMesh" id="PlacaEtiqueta"]
+size = Vector3(0.32, 0.1, 0.02)
+
+[sub_resource type="BoxMesh" id="CajonFrente"]
+size = Vector3(0.9, 0.34, 0.04)
+
+[sub_resource type="BoxMesh" id="TapaPolvo"]
+size = Vector3(1.0, 0.03, 0.62)
 
 [sub_resource type="CylinderMesh" id="Handle"]
 top_radius = 0.045
@@ -19,26 +48,56 @@ radial_segments = 8
 mesh = ExtResource("1_archivo")
 material_override = SubResource("MatCabinet")
 
+[node name="TapaPolvo" type="MeshInstance3D" parent="."]
+mesh = SubResource("TapaPolvo")
+material_override = SubResource("MatPolvo")
+position = Vector3(0, 2.09, 0)
+
+[node name="PlacaEtiqueta" type="MeshInstance3D" parent="."]
+mesh = SubResource("PlacaEtiqueta")
+material_override = SubResource("MatPlaca")
+position = Vector3(0.12, 1.98, 0.31)
+
+[node name="CajonFrente1" type="MeshInstance3D" parent="."]
+mesh = SubResource("CajonFrente")
+material_override = SubResource("MatCajonGasto")
+position = Vector3(0, 1.75, 0.48)
+
+[node name="CajonFrente2" type="MeshInstance3D" parent="."]
+mesh = SubResource("CajonFrente")
+material_override = SubResource("MatCajonGasto")
+position = Vector3(0, 1.30, 0.48)
+
+[node name="CajonFrente3" type="MeshInstance3D" parent="."]
+mesh = SubResource("CajonFrente")
+material_override = SubResource("MatCajonGasto")
+position = Vector3(0, 0.85, 0.48)
+
+[node name="CajonFrente4" type="MeshInstance3D" parent="."]
+mesh = SubResource("CajonFrente")
+material_override = SubResource("MatCajonGasto")
+position = Vector3(0, 0.40, 0.48)
+
 [node name="Tirador1" type="MeshInstance3D" parent="."]
 mesh = SubResource("Handle")
-material_override = SubResource("MatCabinet")
+material_override = SubResource("MatOxido")
 position = Vector3(0, 1.75, 0.50)
 rotation_degrees = Vector3(90, 0, 0)
 
 [node name="Tirador2" type="MeshInstance3D" parent="."]
 mesh = SubResource("Handle")
-material_override = SubResource("MatCabinet")
+material_override = SubResource("MatOxido")
 position = Vector3(0, 1.30, 0.50)
 rotation_degrees = Vector3(90, 0, 0)
 
 [node name="Tirador3" type="MeshInstance3D" parent="."]
 mesh = SubResource("Handle")
-material_override = SubResource("MatCabinet")
+material_override = SubResource("MatOxido")
 position = Vector3(0, 0.85, 0.50)
 rotation_degrees = Vector3(90, 0, 0)
 
 [node name="Tirador4" type="MeshInstance3D" parent="."]
 mesh = SubResource("Handle")
-material_override = SubResource("MatCabinet")
+material_override = SubResource("MatOxido")
 position = Vector3(0, 0.40, 0.50)
 rotation_degrees = Vector3(90, 0, 0)
