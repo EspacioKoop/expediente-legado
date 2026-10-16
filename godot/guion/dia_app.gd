@@ -767,11 +767,14 @@ func _reasignar() -> void:
 
 
 func _refrescar_rotulos(espacio: Dictionary) -> void:
-	_presentacion.refrescar_rotulo(
-		_rotulo,
-		jornada,
-		tr(String(espacio.get("rotulo", ""))),
-		Callable(self, "tr"),
+	(
+		_presentacion
+		. refrescar_rotulo(
+			_rotulo,
+			jornada,
+			tr(String(espacio.get("rotulo", ""))),
+			Callable(self, "tr"),
+		)
 	)
 
 
