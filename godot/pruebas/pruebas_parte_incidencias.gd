@@ -165,13 +165,13 @@ func _init() -> void:
 	comprobar("draw calls máximas", rendimiento["draw_calls_max"], 330)
 	comprobar("dos muestras reportadas", rendimiento["muestras"], 2)
 	reportador._agregar_muestra(-1.0, 999.0)
-	comprobar(
-		"muestra invalida descartada", reportador._resumen_rendimiento()["muestras"], 2
-	)
+	comprobar("muestra invalida descartada", reportador._resumen_rendimiento()["muestras"], 2)
 	for i in range(20):
 		reportador._agregar_muestra(80.0, 100.0)
 	comprobar(
-		"ventana circular limitada a doce muestras", reportador._resumen_rendimiento()["muestras"], 12
+		"ventana circular limitada a doce muestras",
+		reportador._resumen_rendimiento()["muestras"],
+		12
 	)
 	reportador.free()
 
