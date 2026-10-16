@@ -152,7 +152,9 @@ static func _aplicar_cotas(resultado: Dictionary) -> Dictionary:
 
 
 static func _acotar_shake(valor: Variant) -> Dictionary:
-	var shake := valor if valor is Dictionary else {}
+	var shake: Dictionary = {}
+	if valor is Dictionary:
+		shake = valor
 	return {
 		"duracion": clampf(float(shake.get("duracion", 0.0)), 0.0, MAX_SHAKE_DURACION),
 		"intensidad": clampf(float(shake.get("intensidad", 0.0)), 0.0, MAX_SHAKE_INTENSIDAD),
@@ -160,7 +162,9 @@ static func _acotar_shake(valor: Variant) -> Dictionary:
 
 
 static func _acotar_flash(valor: Variant) -> Dictionary:
-	var flash := valor if valor is Dictionary else {}
+	var flash: Dictionary = {}
+	if valor is Dictionary:
+		flash = valor
 	return {
 		"duracion": clampf(float(flash.get("duracion", 0.0)), 0.0, MAX_FLASH_DURACION),
 		"intensidad": clampf(float(flash.get("intensidad", 0.0)), 0.0, MAX_FLASH_INTENSIDAD),
