@@ -31,9 +31,16 @@ class TestCinematicasUmbral(unittest.TestCase):
             start = TEXT.index(f"static func {name}()")
             end = TEXT.find("\nstatic func ", start + 1)
             chunk = TEXT[start:] if end < 0 else TEXT[start:end]
-            assert chunk.count('"tipo": "3d"') == 3, name
-            assert chunk.count('"segundos":') >= 3, name
-            assert chunk.count('"decorado": decorado') == 3, name
+            # Cada escena crea tres planos con _plano(), que añade sus
+            # campos obligatorios de tipo, segundos y decorado.
+            assert chunk.count("_plano(") == 3, name
+            assert chunk.count("decorado,") == 3, name
+
+        # El helper centraliza los campos comunes de todos los planos.
+        helper = TEXT[TEXT.index("static func _plano("):TEXT.index("static func _expediente_imposible()")]
+        assert '"tipo": "3d"' in helper
+        assert '"segundos": segundos' in helper
+        assert '"decorado": decorado' in helper
 
     def test_api_valida_y_resuelve_con_motor_comun(self):
         assert "Cinematica.validar(declarados)" in TEXT
