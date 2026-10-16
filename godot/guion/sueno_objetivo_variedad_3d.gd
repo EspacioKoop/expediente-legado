@@ -47,7 +47,7 @@ func configurar(objetivo_id: String, tipo: String, actor: Node3D, puntos: Array)
 		or _actor == null
 		or not is_instance_valid(_actor)
 		or _puntos.is_empty()
-		or _tipo not in [TIPO_SECUENCIA, TIPO_PERMANENCIA, TIPO_RETORNO]
+		or _tipo not in [TIPO_RECORRIDO, TIPO_SECUENCIA, TIPO_PERMANENCIA, TIPO_RETORNO]
 	):
 		return false
 
@@ -77,6 +77,7 @@ func _physics_process(delta: float) -> void:
 	if not _luces.is_empty() and is_instance_valid(_luces[0]):
 		var proporcion := _tiempo_permanencia / TIEMPO_PERMANENCIA
 		_luces[0].light_energy = lerpf(ENERGIA_LUZ_BASE, ENERGIA_LUZ_ACTIVA, proporcion)
+		_luces[0].omni_range = lerpf(RANGO_LUZ, RANGO_LUZ * 1.25, proporcion)
 	if _tiempo_permanencia >= TIEMPO_PERMANENCIA:
 		_completar()
 
@@ -87,7 +88,7 @@ func _crear_zona(indice: int, punto: Vector3) -> void:
 	zona.position = punto
 	zona.collision_layer = 0
 	zona.collision_mask = 1
-	zona.monitoring = indice == 0
+	zona.monitoring = true
 	zona.set_meta("paso", indice)
 
 	var colision := CollisionShape3D.new()
@@ -113,15 +114,28 @@ func _crear_zona(indice: int, punto: Vector3) -> void:
 func _al_entrar(cuerpo: Node3D, indice: int) -> void:
 	if _terminado or cuerpo != _actor:
 		return
-	if _tipo in [TIPO_SECUENCIA, TIPO_RETORNO]:
-		if indice != _indice_secuencia:
-			return
-		_indice_secuencia += 1
-		if _indice_secuencia >= _puntos.size():
+	if _tipo == TIPO_RECORRIDO:
+		if indice == 0:
 			_completar()
+		return
+	if _tipo in [TIPO_SECUENCIA, TIPO_RETORNO]:
+		if indice == _indice_secuencia:
+			_indice_secuencia += 1
+			if _indice_secuencia >= _puntos.size():
+				_completar()
+				return
+			_actualizar_luces()
+			rumbo_cambiado.emit(_puntos[_indice_secuencia])
 			return
-		_actualizar_luces()
-		rumbo_cambiado.emit(_puntos[_indice_secuencia])
+		if indice == 0:
+			_indice_secuencia = 1
+			_actualizar_luces()
+			if _puntos.size() > 1:
+				rumbo_cambiado.emit(_puntos[1])
+		else:
+			_indice_secuencia = 0
+			_actualizar_luces()
+			rumbo_cambiado.emit(_puntos[0])
 		return
 	if _tipo == TIPO_PERMANENCIA and indice == 0:
 		_dentro_permanencia = true
@@ -145,12 +159,17 @@ func _actualizar_luces() -> void:
 			continue
 		if _tipo in [TIPO_SECUENCIA, TIPO_RETORNO]:
 			var activa := indice == _indice_secuencia
-			luz.visible = activa
-			luz.light_energy = ENERGIA_LUZ_ACTIVA if activa else 0.0
-			zona.set_deferred("monitoring", activa)
-		else:
+			luz.visible = true
+			luz.light_energy = ENERGIA_LUZ_ACTIVA if activa else ENERGIA_LUZ_BASE
+			zona.set_deferred("monitoring", true)
+		elif _tipo == TIPO_PERMANENCIA:
 			luz.visible = indice == 0
 			luz.light_energy = ENERGIA_LUZ_BASE
+			luz.omni_range = RANGO_LUZ
+			zona.set_deferred("monitoring", indice == 0)
+		else:
+			luz.visible = indice == 0
+			luz.light_energy = ENERGIA_LUZ_ACTIVA
 			zona.set_deferred("monitoring", indice == 0)
 
 
