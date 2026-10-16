@@ -19,6 +19,9 @@ bottom_radius = 0.72
 height = 0.12
 radial_segments = 32
 
+[sub_resource type="BoxMesh" id="Hand"]
+size = Vector3(0.055, 0.56, 0.035)
+
 [node name="RelojEscolarAnomalo" type="Node3D"]
 
 [node name="Marco" type="MeshInstance3D" parent="."]
