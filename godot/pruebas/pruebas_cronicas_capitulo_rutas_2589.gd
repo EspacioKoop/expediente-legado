@@ -39,7 +39,9 @@ func _probar_rutas_y_bloqueos() -> void:
 		"abrir escena sin completarla no adelanta progreso",
 	)
 	_comprobar(
-		not bool(CronicasCapituloRutas.registrar_salida(sesion, "torre_tiempo", true)["registrado"]),
+		not bool(
+			CronicasCapituloRutas.registrar_salida(sesion, "torre_tiempo", true)["registrado"]
+		),
 		"no permite saltar estancias",
 	)
 	var primera := CronicasCapituloRutas.registrar_salida(sesion, "bastion", true)
@@ -48,10 +50,13 @@ func _probar_rutas_y_bloqueos() -> void:
 	var siguiente: Dictionary = primera["siguiente"]
 	_comprobar(siguiente.get("id") == "patio_juramentos", "siguiente estancia prevista")
 	_comprobar(
-		[
-			CronicasCapituloRutas.ESTADO_PENDIENTE,
-			CronicasCapituloRutas.ESTADO_JUGABLE,
-		].has(String(siguiente.get("estado", ""))),
+		(
+			[
+				CronicasCapituloRutas.ESTADO_PENDIENTE,
+				CronicasCapituloRutas.ESTADO_JUGABLE,
+			]
+			. has(String(siguiente.get("estado", "")))
+		),
 		"nueva sala indica si está disponible sin saltársela",
 	)
 	var progreso: Dictionary = primera["sesion"]
@@ -64,14 +69,23 @@ func _probar_rutas_y_bloqueos() -> void:
 		"reanudar la sesión produce el mismo punto exacto",
 	)
 	_comprobar(
-		CronicasCapituloRutas.etapa_actual({}).get("estado")
-		== CronicasCapituloRutas.ESTADO_INVALIDO,
+		(
+			CronicasCapituloRutas.etapa_actual({}).get("estado")
+			== CronicasCapituloRutas.ESTADO_INVALIDO
+		),
 		"estado ausente falla cerrado",
 	)
 	_comprobar(
-		CronicasCapituloRutas.etapa_actual(
-			{"capitulo": CronicasCapituloRutas.CAPITULO, "completadas": ["torre_tiempo"]}
-		).get("estado") == CronicasCapituloRutas.ESTADO_INVALIDO,
+		(
+			(
+				CronicasCapituloRutas
+				. etapa_actual(
+					{"capitulo": CronicasCapituloRutas.CAPITULO, "completadas": ["torre_tiempo"]}
+				)
+				. get("estado")
+			)
+			== CronicasCapituloRutas.ESTADO_INVALIDO
+		),
 		"progreso adulterado y fuera de orden no concede atajos",
 	)
 
