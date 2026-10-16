@@ -23,9 +23,7 @@ func _probar_fluorescente() -> void:
 	diorama._siguiente_fallo_fluorescente = 9.0
 	diorama._actualizar_fluorescente()
 	_comprobar(is_equal_approx(luz.light_energy, 0.12), "el fallo atenúa el fluorescente")
-	_comprobar(
-		is_equal_approx(diorama._fin_parpadeo, 10.12), "el parpadeo termina tras 120 ms"
-	)
+	_comprobar(is_equal_approx(diorama._fin_parpadeo, 10.12), "el parpadeo termina tras 120 ms")
 
 	diorama._tiempo = 10.06
 	diorama._actualizar_fluorescente()
@@ -63,8 +61,7 @@ func _probar_render_menu() -> void:
 	vista.render_target_update_mode = SubViewport.UPDATE_DISABLED
 	diorama._process(0.016)
 	_comprobar(
-		vista.render_target_update_mode == SubViewport.UPDATE_DISABLED,
-		"no repinta antes de 33 ms"
+		vista.render_target_update_mode == SubViewport.UPDATE_DISABLED, "no repinta antes de 33 ms"
 	)
 	diorama._process(0.018)
 	_comprobar(
@@ -80,9 +77,7 @@ func _probar_render_exterior() -> void:
 	var vista := SubViewport.new()
 	exterior._viewport = vista
 	exterior._reduccion_movimiento = true
-	_comprobar(
-		not exterior._render_limitado_menu, "la ventana del juego conserva refresco normal"
-	)
+	_comprobar(not exterior._render_limitado_menu, "la ventana del juego conserva refresco normal")
 	exterior.limitar_refresco_para_menu(true)
 	_comprobar(
 		vista.render_target_update_mode == SubViewport.UPDATE_ONCE,
