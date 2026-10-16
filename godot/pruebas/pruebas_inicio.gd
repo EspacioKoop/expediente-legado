@@ -67,15 +67,19 @@ func _probar() -> void:
 	var estado := inicio.find_child("EstadoInicio", true, false)
 	_comprobar(estado != null, "el aviso de estado sigue presente sobre el diorama")
 	_comprobar(
-		inicio._continuar.custom_minimum_size.y >= 36.0,
-		"acciones tienen presencia visual suficiente"
+		inicio._continuar.custom_minimum_size.y >= 56.0,
+		"acciones alcanzan tamaño legible y pulsable en 1080p"
 	)
 	_comprobar(
 		(
-			inicio._continuar.custom_minimum_size.x >= 360.0
-			and inicio._continuar.custom_minimum_size.x <= 400.0
+			inicio._continuar.custom_minimum_size.x >= 440.0
+			and inicio._continuar.custom_minimum_size.x <= 500.0
 		),
-		"#1449: las acciones mantienen un ancho compacto y consistente"
+		"#2596: botones suficientemente anchos y consistentes para fuente de 27 px"
+	)
+	_comprobar(
+		inicio._continuar.get_theme_font_size("font_size") >= 26,
+		"#2596: la tipografía del menú es legible sin zoom",
 	)
 	_comprobar(
 		inicio._continuar.size_flags_horizontal == Control.SIZE_SHRINK_END,

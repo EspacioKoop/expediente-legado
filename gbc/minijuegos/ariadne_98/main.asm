@@ -57,6 +57,16 @@ DEF TILE_3              EQU 22
 
 DEF HILO_MAX EQU 9
 
+; Mejor marca local: pasos hasta completar el recorrido Centro -> Salida.
+; Cero significa "sin marca" para no tratar una SRAM corrupta como record perfecto.
+DEF SRAM_MAGIC0           EQU $A000
+DEF SRAM_MAGIC1           EQU $A001
+DEF SRAM_MAGIC2           EQU $A002
+DEF SRAM_VERSION          EQU $A003
+DEF SRAM_MEJOR_PASOS      EQU $A004
+DEF SRAM_CHECKSUM         EQU $A005
+DEF SRAM_VERSION_ACTUAL   EQU 1
+
 DEF LAB_ANCHO EQU 16
 DEF LAB_ALTO  EQU 12
 DEF LAB_X     EQU 2
@@ -98,6 +108,8 @@ Inicio:
     ld [wTeclasNuevas], a
     ld [wCentroAlcanzado], a
     ld [wPuertaGaleriasAbierta], a
+    ld [wPasos], a
+    ld [wMejorPasos], a
 
     call CargarTiles
     call ConfigurarPaletas
@@ -175,6 +187,7 @@ IniciarJuego:
     ld [wNivelActual], a
     ld [wCentroAlcanzado], a
     ld [wPuertaGaleriasAbierta], a
+    ld [wPasos], a
     ld a, ESTADO_JUEGO
     ld [wEstado], a
     call ReiniciarHilo
@@ -249,6 +262,7 @@ IntentarMover:
     ret z
 .no_puerta:
     push af
+    call IncrementarPasos
     call BorrarJugador
     call GestionarHilo
     ld a, b
@@ -299,6 +313,14 @@ IntentarMover:
     or a
     ret z
     call MostrarSalida
+    ret
+
+IncrementarPasos:
+    ld a, [wPasos]
+    cp $FF
+    ret z
+    inc a
+    ld [wPasos], a
     ret
 
 ProcesarTransicion:
@@ -553,6 +575,7 @@ DibujarTitulo:
 
 MostrarSalida:
     call DesactivarLCD
+    call ActualizarMejorMarcaSRAM
     call LimpiarFondo
 
     ; Pantalla de victoria tras alcanzar el Centro y regresar
@@ -579,6 +602,74 @@ MostrarSalida:
     ld a, ESTADO_SALIDA
     ld [wEstado], a
     call ActivarLCD
+    ret
+
+ActualizarMejorMarcaSRAM:
+    ; Solo se llama al confirmar la victoria. Contactos, reinicios y recorridos
+    ; incompletos nunca escriben una marca falsa.
+    xor a
+    ld [wMejorPasos], a
+    call HabilitarSRAM
+    ld a, [SRAM_MAGIC0]
+    cp $41 ; A
+    jr nz, .comparar
+    ld a, [SRAM_MAGIC1]
+    cp $52 ; R
+    jr nz, .comparar
+    ld a, [SRAM_MAGIC2]
+    cp $49 ; I
+    jr nz, .comparar
+    ld a, [SRAM_VERSION]
+    cp SRAM_VERSION_ACTUAL
+    jr nz, .comparar
+    ld a, [SRAM_MEJOR_PASOS]
+    ld b, a
+    xor $A7
+    ld c, a
+    ld a, [SRAM_CHECKSUM]
+    cp c
+    jr nz, .comparar
+    ld a, b
+    ld [wMejorPasos], a
+.comparar:
+    ld a, [wPasos]
+    or a
+    jr z, .proteger
+    ld b, a
+    ld a, [wMejorPasos]
+    or a
+    jr z, .guardar
+    cp b
+    jr c, .proteger
+    jr z, .proteger
+.guardar:
+    ld a, b
+    ld [wMejorPasos], a
+    ld [SRAM_MEJOR_PASOS], a
+    ld a, $41
+    ld [SRAM_MAGIC0], a
+    ld a, $52
+    ld [SRAM_MAGIC1], a
+    ld a, $49
+    ld [SRAM_MAGIC2], a
+    ld a, SRAM_VERSION_ACTUAL
+    ld [SRAM_VERSION], a
+    ld a, b
+    xor $A7
+    ld [SRAM_CHECKSUM], a
+.proteger:
+    jp ProtegerSRAM
+
+HabilitarSRAM:
+    ld a, $0A
+    ld [rRAMG], a
+    xor a
+    ld [rRAMB], a
+    ret
+
+ProtegerSRAM:
+    xor a
+    ld [rRAMG], a
     ret
 
 DibujarHUD:
@@ -1269,6 +1360,8 @@ wHiloHasta: ds HILO_MAX
 wNivelActual: ds 1
 wCentroAlcanzado: ds 1
 wPuertaGaleriasAbierta: ds 1
+wPasos: ds 1
+wMejorPasos: ds 1
 wCruceSeguroX: ds 1
 wCruceSeguroY: ds 1
 
