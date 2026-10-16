@@ -30,6 +30,16 @@ class AgentWorkerPrPolicyTest(unittest.TestCase):
         self.assertIn('echo "run=false" >> "$GITHUB_OUTPUT"', self.guard)
         self.assertIn("ya tiene una PR abierta", self.guard)
 
+    def test_pr_cierra_su_issue_al_fusionarse(self):
+        # Cada issue del pool es un TaskPacket de un fichero: la PR lo cumple
+        # entero. Con `Refs` el issue seguía abierto y la cadena
+        # `agent:blocked` no avanzaba (#2502).
+        self.assertIn('--body "Closes #$ISSUE', self.publish)
+        self.assertNotIn('--body "Refs #$ISSUE', self.publish)
+        autopilot = (WORKFLOW.parent / "agent-autopilot.yml").read_text(encoding="utf-8")
+        self.assertIn('--body "Closes #$ISSUE', autopilot)
+        self.assertNotIn('--body "Refs #$ISSUE', autopilot)
+
     def test_rama_se_publica_antes_de_intentar_crear_pr(self):
         self.assertLess(
             self.publish.index('git push -u origin "$BRANCH"'),

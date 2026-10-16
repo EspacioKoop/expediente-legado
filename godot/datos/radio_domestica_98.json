@@ -9,14 +9,14 @@
           "desde": "08:00",
           "hasta": "15:59",
           "titulo": "Boletín del barrio",
-          "transcripcion": "Tráfico lento junto al mercado, obras en la avenida y aviso de lluvia para la tarde."
+          "transcripcion": "— Elena: Tráfico atascado en la rotonda del mercado por las obras de la avenida. Tomás, nos entra una llamada.\n— Paco: Hola Elena, soy Paco del puesto de ultramarinos. Quería recordar que justo este otoño de 1998 cumplimos treinta años aquí, cuando la avenida era aún de adoquines y teníamos la cabina telefónica de fichas al lado. A ver si reabren pronto el paso peatonal.\n— Elena: Tomamos nota, Paco. Y atención vecinos: previsión de lluvia para última hora de la tarde."
         },
         {
           "id": "mesa_local",
           "desde": "16:00",
           "hasta": "23:59",
           "titulo": "Mesa local",
-          "transcripcion": "La mesa comenta la prueba de horarios de la planta 4: ampliar el servicio puede ayudar, pero el cambio debería revisarse con la plantilla antes de consolidarlo.",
+          "transcripcion": "— Tomás: Seguimos en la Mesa Local. Sobre la prueba de horarios en la Planta 4, yo insisto en que ampliar el servicio por las tardes alivia el colapso de atención al ciudadano.\n— Clara: Entiendo tu punto, Tomás, pero modificar turnos sin consultar antes a la plantilla genera sobrecarga en el personal. Un buen servicio público nace de la negociación, no de la prisa.\n— Tomás: En eso coincido: la reforma debe revisarse con los trabajadores antes de consolidarla.",
           "atencion_requerida": 2,
           "exposicion_ideologica": {
             "id": "radio:onda_barrio_98:turnos-atencion-planta4",
@@ -37,14 +37,14 @@
           "desde": "08:00",
           "hasta": "15:59",
           "titulo": "Previa deportiva",
-          "transcripcion": "Resultados, convocatorias y horarios de competiciones ficticias de la ciudad."
+          "transcripcion": "— Santi: Bienvenidos a la Previa Deportiva. Guille, ¿tenemos ya convocatorias para el derbi del domingo?\n— Guille: Confirmadas, Santi. El municipal recupera a su capitán tras la sanción, aunque la enfermería sigue llena. Recordamos que los partidos de liga local cambian esta semana a las cuatro de la tarde."
         },
         {
           "id": "tercer_tiempo",
           "desde": "16:00",
           "hasta": "23:59",
           "titulo": "Tercer tiempo",
-          "transcripcion": "La mesa comenta la jornada deportiva y abre el teléfono a oyentes ficticios."
+          "transcripcion": "— Manolo: Abrimos los micrófonos de Tercer Tiempo. Hola, ¿quién nos llama?\n— Vicente: Buenas noches, Manolo, soy Vicente del barrio oeste. Viendo el ambiente del campo recordaba este 1998 cuando remodelaron la grada de preferencia y teníamos que seguir los partidos de pie bajo la lluvia.\n— Manolo: ¡Qué memorias, Vicente! Aquella marea de chubasqueros amarillos en el viejo estadio."
         }
       ]
     },
@@ -57,14 +57,14 @@
           "desde": "08:00",
           "hasta": "15:59",
           "titulo": "Archivo de voces",
-          "transcripcion": "Una selección de entrevistas y pequeñas piezas documentales de producción propia."
+          "transcripcion": "— Beatriz: En Archivo de Voces recuperamos hoy una cinta grabada en el taller del encuadernador Mariano.\n— Mariano: Las herramientas de mano casi no cambian con las décadas. Cuando un libro entra roto, lo importante no es tapar el tiempo, sino devolverle la firmeza a sus costuras."
         },
         {
           "id": "alas_sobre_el_desierto",
           "desde": "16:00",
           "hasta": "23:59",
           "titulo": "Alas sobre el desierto",
-          "transcripcion": "El programa relata un ave imposible que reúne a quienes buscan respuestas al otro lado de siete valles.",
+          "transcripcion": "— Marta: Hoy en Alas sobre el Desierto nos acercamos a la alegoría persa del Simurgh, inmortalizada por Farid al Din Attar.\n— Julián: Treinta pájaros emprenden un viaje iniciático cruzando siete valles exigentes en busca de su rey, el Simurgh. Al llegar exhaustos a la cumbre, descubren que 'Si-murgh' significa literalmente 'treinta aves': el soberano que buscaban no era una figura externa, sino el espejo de su propia unión reflexiva.",
           "atencion_requerida": 2,
           "semilla": {
             "id_mito": "simurgh",
@@ -83,14 +83,14 @@
           "desde": "08:00",
           "hasta": "15:59",
           "titulo": "Cartas del Atlántico",
-          "transcripcion": "Crónicas culturales, música de archivo ficticia y correspondencia de oyentes sobre viajes, islas y memoria."
+          "transcripcion": "— Gonzalo: Leemos la carta de Irene desde la isla verde.\n— Irene: 'El sonido del mar en la radio me devuelve a las travesías en marea alta, cuando las cartas tardaban dos semanas en cruzar el estuario y la memoria de las casas costeras quedaba guardada en cuadernos de viaje'."
         },
         {
           "id": "islas_fuera_del_tiempo",
           "desde": "16:00",
           "hasta": "23:59",
           "titulo": "Islas fuera del tiempo",
-          "transcripcion": "Una pieza de producción propia compara relatos de viajeros que regresan y descubren que el lugar conocido ya no conserva el mismo tiempo.",
+          "transcripcion": "— Carmen: En Islas fuera del tiempo examinamos los testimonios de navegantes que aseguran haber desembarcado en orillas olvidadas.\n— Mateo: Lo inquietante de sus relatos no es la travesía, Carmen, sino el regreso: al volver a su puerto natal descubren que la ciudad ha envejecido décadas en lo que para ellos fue apenas un atardecer.",
           "atencion_requerida": 2,
           "semilla": {
             "id_mito": "tir_na_nog",

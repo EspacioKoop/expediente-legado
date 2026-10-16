@@ -38,7 +38,7 @@ class AgentWorkerProtocolTest(unittest.TestCase):
         self.assertNotIn("- id: plan_gemini\n", WORKFLOW)
         block = step("- id: protocol\n")
         self.assertIn("--max-files", block)
-        self.assertIn("AGENT_POOL_MAX_FILES", block)
+        self.assertIn("agent_scope_limit.py --issue-json /tmp/agent-issue.json", block)
 
     def test_mailbox_b2b_se_refresca_antes_de_implementar(self):
         protocol = WORKFLOW.index("- id: protocol\n")

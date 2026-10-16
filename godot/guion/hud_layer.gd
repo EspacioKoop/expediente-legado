@@ -76,7 +76,16 @@ func debe_ser_visible(tipo: StringName) -> bool:
 		return primaria == StringName() or primaria == INTERACCION
 	if tipo == MODAL:
 		return true
-	return tipo == _primaria_activa()
+	# Un tutorial superior debe poder convivir con el botón inferior de
+	# interacción: esconderlo justo al mirar SIGA bloqueaba la primera tarea.
+	# No se aplica si una tarjeta de fase, diálogo o modal ocupa la atención.
+	var junto_al_tutorial := (
+		tipo == INTERACCION
+		and esta_activa(TUTORIAL)
+		and not esta_activa(FASE)
+		and not esta_activa(DIALOGO)
+	)
+	return tipo == _primaria_activa() or junto_al_tutorial
 
 
 func _primaria_activa() -> StringName:

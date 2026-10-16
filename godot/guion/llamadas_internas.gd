@@ -15,18 +15,36 @@ const TIPOS := [
 		"id": "companero",
 		"prompt": "teléfono interno · buscan a un compañero",
 		"respuesta": "Buscan a un compañero. Transfieres la llamada.",
+		"respuestas":
+		[
+			"Centralita: «¿Extensión 204? Pase con el compañero». Transfieres la llamada.",
+			"Centralita: «Preguntan por el responsable de guardia». Le pasas la llamada.",
+			"Centralita: «Llamada de inspección para tu compañero». Avisas y la descuelga.",
+		],
 		"reaccion_companero": true,
 	},
 	{
 		"id": "administrativo",
 		"prompt": "teléfono interno · aviso administrativo",
 		"respuesta": "Un aviso administrativo genérico. Tomas nota y cuelgas.",
+		"respuestas":
+		[
+			"Centralita: «Aviso: la máquina de café estará en revisión». Tomas nota y cuelgas.",
+			"Centralita: «Suministros: repuestas cintas y papel continuo». Dices recibido.",
+			"Centralita: «Aviso interno: apagar los monitores CRT al salir». Dices entendido.",
+		],
 		"reaccion_companero": false,
 	},
 	{
 		"id": "equivocada",
 		"prompt": "teléfono interno · llamada equivocada",
 		"respuesta": "Se han equivocado de extensión. Cortas sin más.",
+		"respuestas":
+		[
+			"Centralita: «¿Hemeroteca local?». Aclaras que es la oficina y cuelgan.",
+			"Centralita: «¿Licencias de obras?». Explicas el error y cortan.",
+			"Centralita: «¿Taller de recambios?». Indicas el error de marcado y cuelgas.",
+		],
 		"reaccion_companero": false,
 	},
 ]
@@ -40,6 +58,13 @@ static func plan(jornada: Dictionary) -> Array[Dictionary]:
 	for indice in cantidad:
 		var tipo: Dictionary = TIPOS[(dia + indice) % TIPOS.size()]
 		var desde := primera + indice * 125
+		var respuestas: Array = tipo.get("respuestas", [])
+		var idx_resp := (dia + indice * 2) % maxi(1, respuestas.size())
+		var respuesta := (
+			String(respuestas[idx_resp])
+			if not respuestas.is_empty()
+			else String(tipo.get("respuesta", ""))
+		)
 		(
 			salida
 			. append(
@@ -47,7 +72,7 @@ static func plan(jornada: Dictionary) -> Array[Dictionary]:
 					"id": "d%d-%d" % [dia, indice],
 					"tipo": String(tipo["id"]),
 					"prompt": String(tipo["prompt"]),
-					"respuesta": String(tipo["respuesta"]),
+					"respuesta": respuesta,
 					"reaccion_companero": bool(tipo["reaccion_companero"]),
 					"desde": desde,
 					"hasta": desde + DURACION_VENTANA_MIN,

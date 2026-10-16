@@ -78,7 +78,7 @@ La pregunta operativa antes de crear cualquier issue es: **“¿alguien puede em
 
 - **Nivel 1:** @eGurucharri decide prioridad, integra y valida en playtest.
 - **Nivel 2:** agentes asistidos desde chat (Claude, ChatGPT, Codex, Odiseo…). Investigan, planifican, implementan cortes y **delegan** al pool.
-- **Nivel 3:** el pool autónomo (`agent-pool.yml`) y Jules (label `jules`, `agent-jules.yml`). Ejecutan issues delegados de **un solo fichero**, con el contexto dentro del issue; no sustituyen al nivel 2.
+- **Nivel 3:** el pool autónomo (`agent-pool.yml`) y Jules (label `jules`, `agent-jules.yml`). Ejecutan issues delegados de **un solo fichero por defecto**. El piloto explícito con la label `agent:multi-file` permite hasta **tres rutas concretas por issue, incluidos los tests**; no amplía rutas protegidas ni salta CLAIM, guards o CI. Cada worker recibe el contexto del issue y no sustituye al nivel 2.
 
 El reparto detallado (dónde se ejecuta cada agente, qué capa de modelos usa, quién revisa los drafts del pool y qué pasa al agotarse una cuota) está en la [doctrina de agentes](docs/agents/doctrina.md). Si esa página contradice este archivo, manda este.
 
@@ -147,6 +147,12 @@ bash scripts/escanear_secretos.sh
 ```
 
 `escanear_secretos.sh` pasa gitleaks por los commits de la rama (`origin/main..HEAD`) con la salida redactada; el workflow `secretos.yml` hace lo mismo con cada PR y cada push a `main`. Un falso positivo se silencia con su huella en `.gitleaksignore`, nunca desactivando el gate. Un secreto real que ya se empujó no se arregla con otro commit: hay que rotarlo y avisar a @eGurucharri.
+
+## CI quality gates
+
+- **Lint**: `bash scripts/check_gdscript.sh` (GDScript), `mvn checkstyle:check pmd:check spotbugs:check` (Java), `npm run lint` (JS) — all must pass.
+- **Tests**: run `bash scripts/check_gdscript.sh && python3 scripts/verificar_godot.py && npm test && mvn test`.
+- **PR verification**: PR must include `Closes #${ISSUE_NUMBER}` and label `agent:auto`. CI must report all gates green before merge.
 
 Desde `backend/`:
 
