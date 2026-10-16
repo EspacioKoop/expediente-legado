@@ -8,6 +8,10 @@
 albedo_color = Color(0.082, 0.078, 0.071, 1)
 roughness = 1.0
 
+[sub_resource type="StandardMaterial3D" id="MatClaustroAnomalia"]
+albedo_color = Color(0.07, 0.065, 0.06, 1)
+roughness = 1.0
+
 [sub_resource type="PlaneMesh" id="SueloClaustro"]
 size = Vector2(15, 15)
 
@@ -43,7 +47,8 @@ scale = Vector3(0.74, 0.74, 0.74)
 [node name="ArcadaOesteElevada" parent="." groups=["castillo_anomalia"] instance=ExtResource("1_arcada")]
 position = Vector3(-5.0, 0.85, 0)
 rotation_degrees = Vector3(0, 90, 0)
-scale = Vector3(0.74, 0.74, 0.74)
+scale = Vector3(0.75, 0.75, 0.75)
+material_override = SubResource("MatClaustroAnomalia")
 
 [node name="EscaleraReflejoA" parent="." instance=ExtResource("2_escalera")]
 position = Vector3(-1.55, 0.02, 0.85)
@@ -53,7 +58,8 @@ scale = Vector3(0.82, 0.82, 0.82)
 [node name="EscaleraReflejoB" parent="." groups=["castillo_anomalia"] instance=ExtResource("2_escalera")]
 position = Vector3(1.55, 2.75, -0.85)
 rotation_degrees = Vector3(180, 212, 0)
-scale = Vector3(0.82, 0.82, 0.82)
+scale = Vector3(0.83, 0.83, 0.83)
+material_override = SubResource("MatClaustroAnomalia")
 
 [node name="EstandarteNorte" parent="." instance=ExtResource("3_estandarte")]
 position = Vector3(0, 4.7, -4.85)
@@ -61,6 +67,7 @@ position = Vector3(0, 4.7, -4.85)
 [node name="EstandarteSurInvertido" parent="." groups=["castillo_anomalia"] instance=ExtResource("3_estandarte")]
 position = Vector3(0, 2.1, 4.85)
 rotation_degrees = Vector3(180, 180, 0)
+material_override = SubResource("MatClaustroAnomalia")
 
 [node name="LuzClaustroBaja" type="OmniLight3D" parent="."]
 position = Vector3(0, 1.75, 0)
