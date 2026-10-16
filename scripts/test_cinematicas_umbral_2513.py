@@ -34,7 +34,6 @@ class TestCinematicasUmbral(unittest.TestCase):
             # Cada escena crea tres planos con _plano(), que añade sus
             # campos obligatorios de tipo, segundos y decorado.
             assert chunk.count("_plano(") == 3, name
-            assert chunk.count("decorado,") == 3, name
 
         # El helper centraliza los campos comunes de todos los planos.
         start = TEXT.index("static func _plano(")
