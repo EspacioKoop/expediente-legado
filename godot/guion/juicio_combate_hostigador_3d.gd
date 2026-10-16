@@ -113,8 +113,7 @@ static func pintar_linea(
 			# Durante TELEGRAFIAR (o un estado transitorio) la línea ya anuncia
 			# la dirección bloqueada: preparación tenue antes del disparo real.
 			fase = "preparacion"
-	elif estado == ARQUETIPOS.VULNERABLE:
-		fase = "recuperacion"
+	# En la ventana VULNERABLE la línea se retira para señalar que ya no hace daño.
 	linea.visible = fase != ""
 	if not linea.visible:
 		return
@@ -122,13 +121,11 @@ static func pintar_linea(
 	var direccion := ARQUETIPO_HOST.direccion_linea(rumbo)
 	linea.position = posicion_rival + Vector3(0.0, 0.06, 0.0) + direccion * (LINEA_ALCANCE * 0.5)
 	linea.rotation = Vector3(0.0, rumbo, 0.0)
-	# Legibilidad de la ventana: preparación estrecha y tenue, disparo intenso
-	# y completo, recuperación verde tenue que marca el castigo disponible.
+	# Preparación ámbar y disparo intenso. La recuperación oculta la línea,
+	# como exige el contrato jugable de la ventana de castigo.
 	match fase:
 		"disparo":
 			_aplicar_fase_linea(linea, Color(1.0, 0.12, 0.08, 0.85), 1.0, 1.0)
-		"recuperacion":
-			_aplicar_fase_linea(linea, Color(0.20, 0.90, 0.35, 0.22), 0.4, 0.5)
 		_:
 			_aplicar_fase_linea(linea, Color(1.0, 0.72, 0.18, 0.30), 0.6, 1.0)
 
