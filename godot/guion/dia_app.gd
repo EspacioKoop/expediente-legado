@@ -315,8 +315,7 @@ func _espacio_de(fase: String) -> Dictionary:
 	# #1182: literatura modula la PRESENTACION de una sala que el sueño ya
 	# selecciono. No toca Sueno.noche(), fuentes #87, salidas ni hechos SIGA.
 	espacio_sueno = SuenoLiteratura.aplicar(espacio_sueno, _registro_literario_para_sueno(), cual)
-	# #2477: Entrada 49 solo deforma la primera sala de la noche a partir de una
-	# decisión ya persistida. No altera selección, duración, salidas ni progreso.
+	# La decisión persistida de Entrada 49 solo deforma la primera sala.
 	return Entrada49Sueno.aplicar(espacio_sueno, partida.estado, cual)
 
 
@@ -376,7 +375,7 @@ func _process(delta: float) -> void:
 			return
 		_entrar_en("archivo")
 		return
-	_rotulo.text = _texto_de_rotulo(Sueno.senal_de_noche(Jornada.noche_restante(jornada)))
+	_refrescar_rotulos({"rotulo": Sueno.senal_de_noche(Jornada.noche_restante(jornada))})
 
 
 ## Escribe la partida y dice si pudo. Si no pudo, apunta el tránsito que se
@@ -772,16 +771,16 @@ func _reasignar() -> void:
 
 
 func _refrescar_rotulos(espacio: Dictionary) -> void:
-	_rotulo.text = _texto_de_rotulo(tr(espacio.get("rotulo", "")))
+	(
+		_presentacion
+		. refrescar_rotulo(
+			_rotulo,
+			jornada,
+			tr(String(espacio.get("rotulo", ""))),
+			Callable(self, "tr"),
+		)
+	)
 
 
 func _texto_de_rotulo(sitio: String) -> String:
-	return (
-		tr("DIA_ROTULO")
-		% [
-			jornada["dia"],
-			sitio,
-			jornada["dinero"],
-			"" if jornada["gato"]["presente"] else tr("DIA_SIN_GATO")
-		]
-	)
+	return _presentacion.texto_de_rotulo(jornada, sitio, Callable(self, "tr"))
