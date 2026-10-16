@@ -104,10 +104,41 @@ static func pintar_linea(
 ) -> void:
 	if linea == null:
 		return
-	linea.visible = telegraph == "linea"
+	var estado := String(unidad.get("estado", ""))
+	var fase := ""
+	if telegraph == "linea":
+		if estado == ARQUETIPOS.DISPARAR_LINEA:
+			fase = "disparo"
+		else:
+			# Durante TELEGRAFIAR (o un estado transitorio) la línea ya anuncia
+			# la dirección bloqueada: preparación tenue antes del disparo real.
+			fase = "preparacion"
+	elif estado == ARQUETIPOS.VULNERABLE:
+		fase = "recuperacion"
+	linea.visible = fase != ""
 	if not linea.visible:
 		return
 	var rumbo := float(unidad.get("rumbo_bloqueado", 0.0))
 	var direccion := ARQUETIPO_HOST.direccion_linea(rumbo)
 	linea.position = posicion_rival + Vector3(0.0, 0.06, 0.0) + direccion * (LINEA_ALCANCE * 0.5)
 	linea.rotation = Vector3(0.0, rumbo, 0.0)
+	# Legibilidad de la ventana: preparación estrecha y tenue, disparo intenso
+	# y completo, recuperación verde tenue que marca el castigo disponible.
+	match fase:
+		"disparo":
+			_aplicar_fase_linea(linea, Color(1.0, 0.12, 0.08, 0.85), 1.0, 1.0)
+		"recuperacion":
+			_aplicar_fase_linea(linea, Color(0.20, 0.90, 0.35, 0.22), 0.4, 0.5)
+		_:
+			_aplicar_fase_linea(linea, Color(1.0, 0.72, 0.18, 0.30), 0.6, 1.0)
+
+
+static func _aplicar_fase_linea(
+	linea: MeshInstance3D, color: Color, ancho: float, largo: float
+) -> void:
+	var material := linea.material_override as StandardMaterial3D
+	if material != null:
+		material.albedo_color = color
+		if material.emission_enabled:
+			material.emission = color
+	linea.scale = Vector3(ancho, 1.0, largo)
