@@ -15,8 +15,8 @@ roughness = 0.9
 albedo_color = Color(0.08, 0.075, 0.07, 1)
 roughness = 1.0
 
-[sub_resource type="BoxMesh" id="MarcaBox"]
-size = Vector3(0.26, 0.015, 0.1)
+[sub_resource type="PlaneMesh" id="MarcaBox"]
+size = Vector2(0.26, 0.1)
 
 [sub_resource type="TorusMesh" id="VacioToro"]
 inner_radius = 0.46
