@@ -84,14 +84,17 @@ func configurar_reduccion_movimiento(activa: bool) -> void:
 
 
 func _process(delta: float) -> void:
+	var paso := delta
 	if _render_limitado_menu:
 		_acumulador_render += delta
-		if _acumulador_render >= INTERVALO_RENDER_MENU:
-			_acumulador_render = fposmod(_acumulador_render, INTERVALO_RENDER_MENU)
-			_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+		if _acumulador_render < INTERVALO_RENDER_MENU:
+			return
+		paso = _acumulador_render
+		_acumulador_render = 0.0
+		_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 	if _reduccion_movimiento:
 		return
-	_tiempo += delta
+	_tiempo += paso
 	if _nubes != null and is_instance_valid(_nubes):
 		_nubes.position.x = fposmod(_tiempo * 0.12 + 8.0, 16.0) - 8.0
 	if _niebla != null and is_instance_valid(_niebla) and _niebla.visible:
