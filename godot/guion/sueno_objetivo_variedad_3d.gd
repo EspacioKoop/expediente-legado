@@ -128,14 +128,16 @@ func _al_entrar(cuerpo: Node3D, indice: int) -> void:
 			rumbo_cambiado.emit(_puntos[_indice_secuencia])
 			return
 		if indice == 0:
-			_indice_secuencia = 1
-			_actualizar_luces()
-			if _puntos.size() > 1:
-				rumbo_cambiado.emit(_puntos[1])
+			if _indice_secuencia != 1:
+				_indice_secuencia = 1
+				_actualizar_luces()
+				if _puntos.size() > 1:
+					rumbo_cambiado.emit(_puntos[1])
 		else:
-			_indice_secuencia = 0
-			_actualizar_luces()
-			rumbo_cambiado.emit(_puntos[0])
+			if _indice_secuencia != 0:
+				_indice_secuencia = 0
+				_actualizar_luces()
+				rumbo_cambiado.emit(_puntos[0])
 		return
 	if _tipo == TIPO_PERMANENCIA and indice == 0:
 		_dentro_permanencia = true
