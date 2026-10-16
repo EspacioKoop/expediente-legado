@@ -41,6 +41,22 @@ func esta_resuelta() -> bool:
 	return _resuelta
 
 
+func estado_alineacion() -> String:
+	if not is_instance_valid(_reflector):
+		return "fuera"
+	if _reflector.esta_alineado():
+		return "alineado"
+	var angulo := _reflector.angulo_actual()
+	var diff := absf(wrapf(angulo - AquilesReflector.ANGULO_OBJETIVO, -180.0, 180.0))
+	if diff <= 15.1:
+		return "casi"
+	return "fuera"
+
+
+func esta_casi_alineado() -> bool:
+	return estado_alineacion() == "casi"
+
+
 func _montar_puzzle() -> void:
 	_reflector = AquilesReflector.new()
 	_reflector.name = "ReflectorAquiles"
@@ -62,12 +78,57 @@ func _montar_puzzle() -> void:
 
 
 func _al_alineacion_cambiada(alineado: bool) -> void:
+	if _resuelta:
+		if is_instance_valid(_sello):
+			_sello.habilitar(false)
+		return
+	alineado = alineado and estado_alineacion() == "alineado"
 	var revelada := aplicar_lectura_espacial(false, alineado)
 	_sello.habilitar(revelada and not _resuelta)
+	_actualizar_feedback_visual(estado_alineacion())
+
+
+func _actualizar_feedback_visual(estado: String) -> void:
+	if not is_instance_valid(_reflector):
+		return
+	var disco := _reflector.get_node_or_null("DiscoReflector") as Node3D
+	if disco == null:
+		return
+	var indicador := disco.get_node_or_null("IndicadorAlineacion") as MeshInstance3D
+	var haz := disco.get_node_or_null("HazReflejado") as SpotLight3D
+	if indicador == null or haz == null:
+		return
+
+	match estado:
+		"alineado":
+			indicador.material_override = _material_indicador(AquilesReflector.COLOR_REFLEJO, true)
+			haz.light_energy = 5.0
+		"casi":
+			indicador.material_override = _material_indicador(AquilesReflector.COLOR_BRONCE, true)
+			haz.light_energy = 2.2
+		_:
+			indicador.material_override = _material_indicador(AquilesReflector.COLOR_APAGADO, false)
+			haz.light_energy = 0.35
+
+
+func _material_indicador(color: Color, emision: bool = false) -> StandardMaterial3D:
+	var material := StandardMaterial3D.new()
+	material.albedo_color = color
+	material.metallic = 0.72
+	material.roughness = 0.22
+	if emision:
+		material.emission_enabled = true
+		material.emission = color
+		material.emission_energy_multiplier = 1.4
+	return material
 
 
 func _al_sellado(_actor: Node) -> void:
 	if _resuelta:
+		return
+	if estado_alineacion() != "alineado":
+		if is_instance_valid(_sello):
+			_sello.habilitar(false)
 		return
 	if not aplicar_resolucion("sellar", reduccion_movimiento):
 		return
