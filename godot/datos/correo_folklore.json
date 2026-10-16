@@ -146,6 +146,28 @@
       ]
     },
     {
+      "id": "folklore-cunado-archivo-fantasma",
+      "remitente": "Su compañero",
+      "direccion": "interno04@archivo.local",
+      "asunto": "FW: ALERTA FANTASMA.EXE — no abrir correos",
+      "cuerpo": "Me acaba de llegar esto de otra sección. Dicen que hay un ejecutable FANTASMA.EXE que entra oculto en el asunto del correo y te borra los ficheros de trabajo si no reagrupas las carpetas.\n\nPor si acaso no abras nada sospechoso y manda este aviso a todos tus contactos antes de las doce.",
+      "companero_id": "cunado",
+      "dia_entrega": 3,
+      "acciones_max": 3,
+      "hora": "10:14",
+      "tipo": "companero",
+      "importancia_narrativa": false,
+      "adjunto": "",
+      "folklore_digital": true,
+      "estado_folklore": "rumor",
+      "cadena_id": "archivo-fantasma",
+      "origen_aparente": "Aviso alarmista sin verificar",
+      "relacionados": [
+        "folklore-aduanero-archivo-fantasma",
+        "folklore-sistemas-archivo-fantasma"
+      ]
+    },
+    {
       "id": "folklore-aduanero-archivo-fantasma",
       "remitente": "El inspector",
       "direccion": "inspeccion@archivo.local",
@@ -161,8 +183,10 @@
       "folklore_digital": true,
       "estado_folklore": "desconocido",
       "cadena_id": "archivo-fantasma",
+      "reenvio_de": "folklore-cunado-archivo-fantasma",
       "origen_aparente": "Aviso técnico anónimo",
       "relacionados": [
+        "folklore-cunado-archivo-fantasma",
         "folklore-sistemas-archivo-fantasma"
       ]
     },
@@ -182,6 +206,7 @@
       "estado_folklore": "desmentido",
       "cadena_id": "archivo-fantasma",
       "relacionados": [
+        "folklore-cunado-archivo-fantasma",
         "folklore-aduanero-archivo-fantasma"
       ]
     },
