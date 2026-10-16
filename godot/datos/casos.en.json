@@ -441,7 +441,7 @@
           "id": "memo5@5",
           "tipo": "MEMORANDO",
           "folio": "MEMO-1978-014",
-          "contenido": "Identical text in all three archived copies (1978, 1993, 2007), including the same spelling mistake on the third line. The 2007 copy bears a handwritten note in the margin: 'this is for the auditor reading it now, no matter when now is.'",
+          "contenido": "Identical text in all three archived copies (1978, 1993, 2007), including the same spelling mistake on the third line. The 2007 copy bears a handwritten note in the margin: 'this is for the auditor reading it now, no matter when now is.' The file indicates that this note and the 1993 closing report share an unusual signature stroke, but it does not name the person who first compared them.",
           "fecha": "2007-04-09"
         },
         {
@@ -457,6 +457,20 @@
           "folio": "EMP-AUD-1993",
           "contenido": "Previous auditor, special commission of 1993. Closing note in their own report on this file, word for word identical to what any later auditor would write upon reaching the same conclusion.",
           "fecha": "1993-05-02"
+        },
+        {
+          "id": "resguardo1978@5",
+          "tipo": "INVENTARIO",
+          "folio": "ARC-1978-014",
+          "fecha": "1978-04-09",
+          "contenido": "Central Archive, intake box 14. The ledger records the arrival of a copy of memorandum MEMO-1978-014 and notes that it already bore a typo on the third line. The 'original supplied by' field was left empty. The stamp proves the box was received in 1978; it does not establish when the text was written or who typed it."
+        },
+        {
+          "id": "cotejo2007@5",
+          "tipo": "ACTA",
+          "folio": "ACTA-2007-014",
+          "fecha": "2007-04-12",
+          "contenido": "Internal Archive handwriting comparison between the marginal note on memorandum MEMO-1978-014 and the closing statement attributed to the special auditor of 1993. The same opening stroke and an unusual break in the final signature were observed. The report records only a graphic resemblance: it does not establish that one person wrote both documents or how the note travelled between the recorded years."
         }
       ],
       "pistas": [
@@ -483,6 +497,36 @@
           "registroOrigen": "acta5@5",
           "registroOrigen2": "memo5@5",
           "descripcion": "The review interval set by this report matches, year for year, the dates of the three memorandum copies — as though in 2007 someone already knew when the next one would appear."
+        },
+        {
+          "id": "pista65@5",
+          "registroOrigen": "resguardo1978@5",
+          "descripcion": "A copy of the memorandum was already on file in 1978, but the intake entry does not identify who provided the alleged original.",
+          "fraseGatillo": "The 'original supplied by' field was left empty."
+        },
+        {
+          "id": "pista66@5",
+          "registroOrigen": "cotejo2007@5",
+          "descripcion": "The comparison notes similarities between handwriting from two periods but refuses to certify that the same person wrote both.",
+          "fraseGatillo": "it does not establish that one person wrote both documents"
+        },
+        {
+          "id": "pista67@5",
+          "registroOrigen": "resguardo1978@5",
+          "registroOrigen2": "memo5@5",
+          "descripcion": "The 1978 receipt confirms a physical intake before the later copies, but the current memorandum combines versions without proving which was typed first."
+        },
+        {
+          "id": "pista68@5",
+          "registroOrigen": "cotejo2007@5",
+          "registroOrigen2": "empleado5@5",
+          "descripcion": "The comparison report finds shared features in the 1993 auditor's alleged writing and the later note. This resemblance does not identify the author or turn the auditor's conclusion into a prophecy."
+        },
+        {
+          "id": "pista69@5",
+          "registroOrigen": "resguardo1978@5",
+          "registroOrigen2": "acta5@5",
+          "descripcion": "The 1978 box precedes the 1993 and 2007 reviews described in the file; the later report stipulates an interval but provides no original order establishing it."
         }
       ],
       "sospechosos": [
@@ -740,21 +784,21 @@
           "id": "actaA@8",
           "tipo": "ACTA",
           "folio": "ACTA-1998-427A",
-          "contenido": "It was determined that employee #427 was reassigned to janitorial duties in the basement, where they remain. Final closure of the file.",
+          "contenido": "It was determined that employee #427 was reassigned to janitorial duties in the basement, where they remain. Final closure of the file. Signing time: 14:00. This report does not refer to the other two closures signed that day.",
           "fecha": "1998-11-05"
         },
         {
           "id": "actaB@8",
           "tipo": "ACTA",
           "folio": "ACTA-1998-427B",
-          "contenido": "It was determined that employee #427 left the building through a fourth-floor window. There were no witnesses. Final closure of the file.",
+          "contenido": "It was determined that employee #427 left the building through a fourth-floor window. There were no witnesses. Final closure of the file. Signing time: 14:00. This report does not refer to the other two closures signed that day.",
           "fecha": "1998-11-05"
         },
         {
           "id": "actaC@8",
           "tipo": "ACTA",
           "folio": "ACTA-1998-427C",
-          "contenido": "It was determined that the premises were completely dismantled forty-eight hours after this investigation began, including the file itself, which you are nevertheless still reading. Final closure of the file.",
+          "contenido": "It was determined that the premises were completely dismantled forty-eight hours after this investigation began, including the file itself, which you are nevertheless still reading. Final closure of the file. Signing time: 14:00. This report does not refer to the other two closures signed that day.",
           "fecha": "1998-11-05"
         },
         {
@@ -763,6 +807,20 @@
           "folio": "FAX-1998-427",
           "contenido": "Transmission with no identified sender and no record of sending or receipt. The entire text reads: 'Very good. You made it this far.'",
           "fecha": "1998-11-05"
+        },
+        {
+          "id": "controlTerminal8@8",
+          "tipo": "CONTROL",
+          "folio": "CTRL-1998-427",
+          "fecha": "1998-11-05",
+          "contenido": "Terminal C operations log, 5 November 1998: button presses were recorded at 08:17 and 08:32 under workstation code #427. The system stores terminal events, not images or personal identification. The 'operator present' field was left unverified; the log does not establish who pressed the button."
+        },
+        {
+          "id": "mantenimientoVentanas8@8",
+          "tipo": "OFICIO",
+          "folio": "MANT-1998-427",
+          "fecha": "1998-11-06",
+          "contenido": "Physical inspection of the fourth floor, 6 November 1998. The inspected windows still have continuous seals and mechanical fastenings fitted during the initial construction; the Maintenance ledger records no repairs to make them openable. The report describes their condition at inspection and cannot establish who was on the fourth floor the day before."
         }
       ],
       "pistas": [
@@ -795,6 +853,36 @@
           "registroOrigen": "actaB@8",
           "registroOrigen2": "actaC@8",
           "descripcion": "Report B says #427 left through a fourth-floor window; Report C says the premises were dismantled forty-eight hours after the investigation began. Neither report was written after the other: they share the same signing time."
+        },
+        {
+          "id": "pista70@8",
+          "registroOrigen": "controlTerminal8@8",
+          "descripcion": "Terminal C recorded button presses under #427's code on the date of the three closure reports, without verifying the operator's identity.",
+          "fraseGatillo": "The 'operator present' field was left unverified"
+        },
+        {
+          "id": "pista71@8",
+          "registroOrigen": "mantenimientoVentanas8@8",
+          "descripcion": "The inspection found intact seals on fourth-floor windows, but it took place the day after the alleged departure.",
+          "fraseGatillo": "still have continuous seals and mechanical fastenings"
+        },
+        {
+          "id": "pista72@8",
+          "registroOrigen": "controlTerminal8@8",
+          "registroOrigen2": "empleado427@8",
+          "descripcion": "#427's only contractual task was to press a button, and the terminal retains presses under that workstation code. The system records activity, not the employee's presence or identity."
+        },
+        {
+          "id": "pista73@8",
+          "registroOrigen": "mantenimientoVentanas8@8",
+          "registroOrigen2": "actaB@8",
+          "descripcion": "Report B says #427 left through a fourth-floor window; the later inspection finds continuous fastenings and seals. This challenges the claim without reconstructing what happened."
+        },
+        {
+          "id": "pista74@8",
+          "registroOrigen": "controlTerminal8@8",
+          "registroOrigen2": "actaA@8",
+          "descripcion": "Report A says #427 was reassigned to Janitorial Services, while the terminal still registered button presses under the same code that day. Without a reassignment time or identity check, these facts are not necessarily incompatible."
         }
       ],
       "sospechosos": [
@@ -1096,6 +1184,20 @@
           "folio": "ACT-1998-044",
           "contenido": "Document regularization meeting, 6 March 1998. It is agreed to treat every earlier reference to Circular 0/98 as valid \"for administrative continuity\", even though no earlier version is on record at the General Secretariat or the Print Shop. Signed: Clara Valdés, head of the Technical Secretariat.",
           "fecha": "1998-03-06"
+        },
+        {
+          "id": "cubiertaArchivo11@11",
+          "tipo": "REGISTRO_ARCHIVO",
+          "folio": "CUB-1997-C0",
+          "fecha": "1997-11-27",
+          "contenido": "Archive covering sheet, linked to entry ARC-1997-C0, 27 November 1997: an envelope labelled 'Circular 0/98' was received with no inventory of enclosed pages and instructions not to open it without authorization from the General Secretariat. The covering sheet confirms an envelope and its label, not that it contained a circular with that text."
+        },
+        {
+          "id": "revisionAsiento11@11",
+          "tipo": "ACTA",
+          "folio": "REV-1998-018",
+          "fecha": "1998-03-07",
+          "contenido": "Intake ledger review, 7 March 1998. Entry ARC-1997-C0 was written beside records 1841 and 1842, but the ledger cannot independently date the ink of that annotation. The entry is to remain on file, neither validated nor deleted, until the envelope's contents can be found. No alternative issue date for Circular 0/98 is established."
         }
       ],
       "pistas": [
@@ -1140,6 +1242,36 @@
           "registroOrigen": "acta11@11",
           "registroOrigen2": "imprenta11@11",
           "descripcion": "The minutes validate earlier references to the circular \"for administrative continuity\", even though the print shop states there were no earlier versions."
+        },
+        {
+          "id": "pista75@11",
+          "registroOrigen": "cubiertaArchivo11@11",
+          "descripcion": "In 1997 the Archive registered an envelope labelled Circular 0/98, but the receipt includes no list or verification of its contents.",
+          "fraseGatillo": "with no inventory of enclosed pages"
+        },
+        {
+          "id": "pista76@11",
+          "registroOrigen": "revisionAsiento11@11",
+          "descripcion": "The 1998 review could not independently date the 1997 ledger annotation and left it on file without validating it.",
+          "fraseGatillo": "cannot independently date the ink"
+        },
+        {
+          "id": "pista77@11",
+          "registroOrigen": "cubiertaArchivo11@11",
+          "registroOrigen2": "archivo11@11",
+          "descripcion": "The Archive ledger calls the item received in November 1997 Circular 0/98, whereas the covering sheet attests only to an envelope with that label, not to the circular inside."
+        },
+        {
+          "id": "pista78@11",
+          "registroOrigen": "cubiertaArchivo11@11",
+          "registroOrigen2": "imprenta11@11",
+          "descripcion": "The 1997 envelope cover and the print shop's first typesetting in March 1998 can coexist if the envelope label did not match its contents; that hypothesis remains unverified."
+        },
+        {
+          "id": "pista79@11",
+          "registroOrigen": "revisionAsiento11@11",
+          "registroOrigen2": "acta11@11",
+          "descripcion": "The Secretariat regularized earlier references on 6 March 1998, but a ledger review the following day still declined to certify the date of the older annotation."
         }
       ],
       "sospechosos": [
