@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://guion/cronicas_bastion_3d.gd" id="1_bastion"]
+
+[node name="BastionNombresAusentes" type="Node3D"]
+script = ExtResource("1_bastion")

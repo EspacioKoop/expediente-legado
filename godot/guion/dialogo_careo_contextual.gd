@@ -37,7 +37,9 @@ static func opciones(tiene_contexto_documental: bool) -> Array[Dictionary]:
 
 	var salida: Array[Dictionary] = []
 	for id_rama in ids:
-		var rama: Dictionary = RAMAS[id_rama]
+		var rama := _rama(id_rama)
+		if rama.is_empty():
+			continue
 		(
 			salida
 			. append(
@@ -62,16 +64,15 @@ static func registrar(jornada: Dictionary, folio: String, id_rama: String) -> Di
 	var previa = memorias.get(folio_id, {})
 	if typeof(previa) == TYPE_DICTIONARY and not previa.is_empty():
 		var anterior := _rama(String(previa.get("rama", "")))
-		if anterior.is_empty():
-			return {"valida": false}
-		return {
-			"valida": true,
-			"nueva": false,
-			"respuesta": String(anterior.get("reentrada", "")),
-		}
+		if not anterior.is_empty():
+			return {
+				"valida": true,
+				"nueva": false,
+				"respuesta": String(anterior.get("reentrada", "")),
+			}
 
 	memorias[folio_id] = {
-		"rama": id_rama,
+		"rama": id_rama.strip_edges(),
 		"dia": maxi(1, int(jornada.get("dia", 1))),
 	}
 	jornada[CAMPO] = memorias
@@ -83,11 +84,26 @@ static func registrar(jornada: Dictionary, folio: String, id_rama: String) -> Di
 
 
 static func reentrada(jornada: Dictionary, folio: String) -> String:
-	var memoria = _memorias(jornada).get(folio.strip_edges(), {})
-	if typeof(memoria) != TYPE_DICTIONARY:
+	var folio_id := folio.strip_edges()
+	if folio_id.is_empty():
+		return ""
+	var memorias := _memorias(jornada)
+	var memoria = memorias.get(folio_id, {})
+	if typeof(memoria) != TYPE_DICTIONARY or memoria.is_empty():
 		return ""
 	var rama := _rama(String(memoria.get("rama", "")))
 	return String(rama.get("reentrada", "")) if not rama.is_empty() else ""
+
+
+static func rama_registrada(jornada: Dictionary, folio: String) -> String:
+	var folio_id := folio.strip_edges()
+	if folio_id.is_empty():
+		return ""
+	var memoria = _memorias(jornada).get(folio_id, {})
+	if typeof(memoria) != TYPE_DICTIONARY:
+		return ""
+	var id_rama := String(memoria.get("rama", "")).strip_edges()
+	return id_rama if not _rama(id_rama).is_empty() else ""
 
 
 static func claves() -> Array[String]:
@@ -104,7 +120,10 @@ static func claves() -> Array[String]:
 
 
 static func _rama(id_rama: String) -> Dictionary:
-	var rama = RAMAS.get(id_rama, {})
+	var id_limpio := id_rama.strip_edges()
+	if id_limpio.is_empty() or not RAMAS.has(id_limpio):
+		return {}
+	var rama = RAMAS.get(id_limpio, {})
 	return rama if typeof(rama) == TYPE_DICTIONARY else {}
 
 

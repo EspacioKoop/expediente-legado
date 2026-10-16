@@ -99,7 +99,7 @@ jobs:
 
       - name: Checkout
         if: steps.select.outputs.run == 'true'
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: main
           fetch-depth: 0
@@ -135,7 +135,7 @@ jobs:
             if [[ -n "$requested" ]]; then
               message="El proveedor solicitado ($requested) no esta disponible con la configuracion actual."
             else
-              message="No hay ningun backend de agente configurado: OmniRoute privado, Qwen directo/fallbacks o Gemini."
+              message="No hay ningún backend de agente configurado: Qwen directo, slots de fallback o Gemini."
             fi
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "$message"
             echo "run=false" >> "$GITHUB_OUTPUT"
@@ -708,9 +708,9 @@ jobs:
           title="$(gh issue view "$ISSUE" --json title --jq .title)"
           url="$(gh pr create --base main --head "$BRANCH" --draft \
             --title "agent($PROVIDER): #$ISSUE $title" \
-            --body "Refs #$ISSUE
+            --body "Closes #$ISSUE
 
-          Implementación autónoma. Plan reservado en #182; cambios limitados al CLAIM; preflight ejecutado. PR draft, sin auto-merge.")"
+          Implementación autónoma. Plan reservado en #1713; cambios limitados al CLAIM; preflight ejecutado. PR draft, sin auto-merge.")"
           echo "url=$url" >> "$GITHUB_OUTPUT"
           gh issue edit "$ISSUE" --add-label agent:pr-open --remove-label agent:working --remove-label agent:auto --remove-label agent:qwen --remove-label agent:gemini >/dev/null 2>&1 || true
           gh issue comment "$ISSUE" --body "Agent autopilot ($PROVIDER): $url"
