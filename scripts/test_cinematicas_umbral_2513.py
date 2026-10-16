@@ -37,7 +37,9 @@ class TestCinematicasUmbral(unittest.TestCase):
             assert chunk.count("decorado,") == 3, name
 
         # El helper centraliza los campos comunes de todos los planos.
-        helper = TEXT[TEXT.index("static func _plano("):TEXT.index("static func _expediente_imposible()")]
+        start = TEXT.index("static func _plano(")
+        end = TEXT.index("static func _expediente_imposible()")
+        helper = TEXT[start:end]
         assert '"tipo": "3d"' in helper
         assert '"segundos": segundos' in helper
         assert '"decorado": decorado' in helper
