@@ -1,5 +1,7 @@
 extends SceneTree
 
+const OficinaInfinita = preload("res://guion/oficina_infinita.gd")
+
 var _pasadas = 0
 var _fallos = 0
 
@@ -12,7 +14,6 @@ func _initialize() -> void:
 
 
 func _probar_determinismo() -> void:
-	var OficinaInfinita := preload("res://guion/oficina_infinita.gd")
 	# Jornada con lluvia (día 3) para que haya candidatos (HUMEDAD)
 	var jornada = {"dia": 3, "vuelta": 2, "eventos": [], "leido_hoy": []}
 	var raiz = 12345
@@ -23,7 +24,6 @@ func _probar_determinismo() -> void:
 
 
 func _probar_mutacion_segura() -> void:
-	var OficinaInfinita := preload("res://guion/oficina_infinita.gd")
 	var espacio_original = {"bloques": []}
 	var mutador = {"id": OficinaInfinita.HUMEDAD}
 	var result = OficinaInfinita.aplicar(espacio_original, mutador, false)
