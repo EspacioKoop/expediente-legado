@@ -553,9 +553,7 @@ func _clave_conversacion_contextual(
 	# reacción ideológica/religiosa ya ganada y no modifica presencia o estado.
 	var clave_fallback := clave_archivado
 	if clave_fallback.is_empty():
-		clave_fallback = DialogoHorarioCompaneros.resolver(
-			actor_id, Jornada.hora_decimal(jornada)
-		)
+		clave_fallback = DialogoHorarioCompaneros.resolver(actor_id, Jornada.hora_decimal(jornada))
 	if not clave_fallback.is_empty():
 		return clave_fallback
 	return clave_dialogo
