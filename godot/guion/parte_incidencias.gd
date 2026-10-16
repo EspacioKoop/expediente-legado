@@ -116,8 +116,9 @@ static func diagnostico(
 		"reduccion_movimiento": reduccion_movimiento,
 	}
 	# No adjuntar FPS si el reportador no dispone de muestras previas a F9.
-	if not rendimiento.is_empty():
-		candidato.merge(rendimiento)
+	for clave in LIMITES_RENDIMIENTO:
+		if rendimiento.has(clave):
+			candidato[clave] = rendimiento[clave]
 	return filtrar_diagnostico(candidato)
 
 
