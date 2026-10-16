@@ -41,10 +41,28 @@ func _ejecutar() -> void:
 	Inicio._apertura_creditos_mostrada = true
 	var inicio := Inicio.new()
 	ventana.add_child(inicio)
+	# La escena .tscn de producción pone la raíz a tamaño completo.
+	# El test instancia el script directamente; sin esa geometría, FondoInicio
+	# tiene tamaño cero y se captura solo el gris de la ventana (#2597).
+	inicio.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_comprobar(
+		inicio.size.x >= ANCHO and inicio.size.y >= ALTO,
+		"la raíz del menú ocupa el viewport de 1920x1080",
+	)
+	var fondo_rect := inicio.get_node_or_null("FondoInicio") as TextureRect
+	_comprobar(
+		fondo_rect != null and fondo_rect.size.x >= ANCHO and fondo_rect.size.y >= ALTO,
+		"el diorama tiene una superficie de fondo a pantalla completa",
+	)
 	for i in 20:
 		await process_frame
 	await RenderingServer.frame_post_draw
 
+	var metodo := RenderingServer.get_current_rendering_method()
+	_comprobar(
+		metodo == "forward_plus",
+		"el runner debe renderizar con Forward+ real, no fallback a %s" % metodo,
+	)
 	_comprobar(inicio.get_node_or_null("FondoInicio") != null, "la escena conserva FondoInicio")
 	_comprobar(inicio._diorama is InicioDiorama3D, "el menú usa InicioDiorama3D real")
 	_comprobar(
@@ -83,6 +101,11 @@ func _capturar(nombre_archivo: String, superficie: String) -> void:
 		imagen.get_width() == ANCHO and imagen.get_height() == ALTO,
 		"%s mantiene 1920x1080" % superficie,
 	)
+	# #2597: la evidencia anterior aprobaba PNG grandes con todo el
+	# fondo gris (#4d4d4d). Eso no demuestra que el diorama exista a la vista.
+	_comprobar(
+		_fondo_3d_visible(imagen), "%s muestra realmente el diorama, no gris plano" % superficie
+	)
 	var png := imagen.save_png_to_buffer()
 	_comprobar(png.size() >= MINIMO_BYTES_PNG, "%s codifica PNG no trivial" % superficie)
 	var error := imagen.save_png(_salida.path_join(nombre_archivo))
@@ -97,6 +120,21 @@ func _capturar(nombre_archivo: String, superficie: String) -> void:
 			}
 		)
 	)
+
+
+## Muestra una región libre de controles del menú: su zona derecha debe
+## contener detalle 3D. Exigir sólo un PNG no sirve: en la evidencia anterior
+## había 88 muestras idénticas (77,77,77), pese a ser un PNG de 78 KB.
+static func _fondo_3d_visible(imagen: Image) -> bool:
+	if imagen.is_empty() or imagen.get_width() < ANCHO or imagen.get_height() < ALTO:
+		return false
+	var colores := {}
+	for y in range(120, ALTO - 60, 120):
+		for x in range(800, ANCHO - 60, 120):
+			var p := imagen.get_pixel(x, y)
+			var clave := Vector3i(int(p.r * 24.0), int(p.g * 24.0), int(p.b * 24.0))
+			colores[clave] = true
+	return colores.size() >= 8
 
 
 func _guardar_manifest() -> void:
