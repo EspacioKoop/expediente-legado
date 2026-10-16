@@ -48,7 +48,6 @@ scale = Vector3(0.74, 0.74, 0.74)
 position = Vector3(-5.0, 0.85, 0)
 rotation_degrees = Vector3(0, 90, 0)
 scale = Vector3(0.75, 0.75, 0.75)
-material_override = SubResource("MatClaustroAnomalia")
 
 [node name="EscaleraReflejoA" parent="." instance=ExtResource("2_escalera")]
 position = Vector3(-1.55, 0.02, 0.85)
@@ -59,7 +58,6 @@ scale = Vector3(0.82, 0.82, 0.82)
 position = Vector3(1.55, 2.75, -0.85)
 rotation_degrees = Vector3(180, 212, 0)
 scale = Vector3(0.83, 0.83, 0.83)
-material_override = SubResource("MatClaustroAnomalia")
 
 [node name="EstandarteNorte" parent="." instance=ExtResource("3_estandarte")]
 position = Vector3(0, 4.7, -4.85)
@@ -67,7 +65,6 @@ position = Vector3(0, 4.7, -4.85)
 [node name="EstandarteSurInvertido" parent="." groups=["castillo_anomalia"] instance=ExtResource("3_estandarte")]
 position = Vector3(0, 2.1, 4.85)
 rotation_degrees = Vector3(180, 180, 0)
-material_override = SubResource("MatClaustroAnomalia")
 
 [node name="LuzClaustroBaja" type="OmniLight3D" parent="."]
 position = Vector3(0, 1.75, 0)
@@ -82,3 +79,17 @@ light_color = Color(0.58, 0.5, 0.37, 1)
 light_energy = 0.36
 omni_range = 10.5
 shadow_enabled = true
+
+# Applied to the actual mesh children, not their Node3D scene roots.
+[node name="ArcadaPSX" parent="ArcadaOesteElevada" index="0"]
+material_override = SubResource("MatClaustroAnomalia")
+
+[node name="EscaleraAnularPSX" parent="EscaleraReflejoB" index="0"]
+material_override = SubResource("MatClaustroAnomalia")
+
+[node name="Tela" parent="EstandarteSurInvertido" index="0"]
+material_override = SubResource("MatClaustroAnomalia")
+
+[editable path="ArcadaOesteElevada"]
+[editable path="EscaleraReflejoB"]
+[editable path="EstandarteSurInvertido"]
