@@ -12,6 +12,8 @@ static func abrir(
 	nomina: Label,
 	cerrar: Callable,
 	traducir: Callable,
+	estado: Dictionary,
+	guardar: Callable,
 ) -> CanvasLayer:
 	if anfitrion == null or not cerrar.is_valid() or not traducir.is_valid():
 		return null
@@ -22,6 +24,7 @@ static func abrir(
 	var pantalla := CanvasLayer.new()
 	anfitrion.add_child(pantalla)
 	pantalla.add_child(load("res://escenas/visor.tscn").instantiate())
+	Entrada49Panel.montar(pantalla, estado, guardar)
 
 	var volver := Button.new()
 	volver.theme = EstiloSiga.tema()
