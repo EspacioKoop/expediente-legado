@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="ArrayMesh" path="res://escenas/suenos/props_284/taquillas_escolares_psx.obj" id="1_taquillas"]
 
@@ -7,8 +7,56 @@ albedo_color = Color(0.16, 0.18, 0.18, 1)
 metallic = 0.55
 roughness = 0.62
 
+[sub_resource type="StandardMaterial3D" id="MatPuerta"]
+albedo_color = Color(0.23, 0.36, 0.47, 1)
+metallic = 0.35
+roughness = 0.5
+cull_mode = 2
+
+[sub_resource type="StandardMaterial3D" id="MatAsa"]
+albedo_color = Color(0.85, 0.78, 0.42, 1)
+metallic = 0.8
+roughness = 0.35
+cull_mode = 2
+
+[sub_resource type="QuadMesh" id="QuadPuerta"]
+size = Vector2(0.7, 2.1)
+
+[sub_resource type="QuadMesh" id="QuadAsa"]
+size = Vector2(0.05, 0.28)
+
 [node name="TaquillasEscolares" type="Node3D"]
 
 [node name="Malla" type="MeshInstance3D" parent="."]
 mesh = ExtResource("1_taquillas")
 material_override = SubResource("MatTaquillas")
+
+[node name="PuertaIzquierda" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.75, 1.1, 0.316)
+mesh = SubResource("QuadPuerta")
+material_override = SubResource("MatPuerta")
+
+[node name="PuertaCentro" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0.316)
+mesh = SubResource("QuadPuerta")
+material_override = SubResource("MatPuerta")
+
+[node name="PuertaDerecha" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 1.1, 0.316)
+mesh = SubResource("QuadPuerta")
+material_override = SubResource("MatPuerta")
+
+[node name="AsaIzquierda" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.46, 1.05, 0.326)
+mesh = SubResource("QuadAsa")
+material_override = SubResource("MatAsa")
+
+[node name="AsaCentro" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.29, 1.05, 0.326)
+mesh = SubResource("QuadAsa")
+material_override = SubResource("MatAsa")
+
+[node name="AsaDerecha" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.04, 1.05, 0.326)
+mesh = SubResource("QuadAsa")
+material_override = SubResource("MatAsa")
