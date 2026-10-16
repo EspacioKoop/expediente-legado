@@ -154,6 +154,55 @@ func _init() -> void:
 		true,
 	)
 
+	# #2696: el muestreo se hace ANTES de pausar F9, y solo viaja con opt-in.
+	var reportador := load("res://guion/reportador_f9.gd").new()
+	comprobar("sin muestras no hay rendimiento", reportador._resumen_rendimiento(), {})
+	reportador._agregar_muestra(60.0, 210.0)
+	reportador._agregar_muestra(48.0, 330.0)
+	var rendimiento: Dictionary = reportador._resumen_rendimiento()
+	comprobar("FPS medio de las muestras", rendimiento["fps_media"], 54)
+	comprobar("FPS mínimo del intervalo", rendimiento["fps_min"], 48)
+	comprobar("draw calls máximas", rendimiento["draw_calls_max"], 330)
+	comprobar("dos muestras reportadas", rendimiento["muestras"], 2)
+	reportador._agregar_muestra(-1.0, 999.0)
+	comprobar(
+		"muestra invalida descartada", reportador._resumen_rendimiento()["muestras"], 2
+	)
+	for i in range(20):
+		reportador._agregar_muestra(80.0, 100.0)
+	comprobar(
+		"ventana circular limitada a doce muestras", reportador._resumen_rendimiento()["muestras"], 12
+	)
+	reportador.free()
+
+	var inyectado := {
+		"build": "manipulado",
+		"fps_media": 999,
+		"fps_min": -8,
+		"draw_calls_max": "mi ruta privada",
+		"muestras": 300,
+	}
+	var filtrado_fps := Parte.filtrar_diagnostico(inyectado)
+	comprobar("FPS acotados a 240", filtrado_fps["fps_media"], 240)
+	comprobar("FPS negativo acotado a cero", filtrado_fps["fps_min"], 0)
+	comprobar("draw calls con texto descartadas", filtrado_fps.has("draw_calls_max"), false)
+	comprobar("número de muestras acotado", filtrado_fps["muestras"], 12)
+	comprobar(
+		"no se reemplaza el build del motor",
+		Parte.diagnostico("res://escenas/dia.tscn", false, inyectado)["build"] == "manipulado",
+		false,
+	)
+	comprobar(
+		"datos de rendimiento solo llegan con diagnóstico consentido",
+		Parte.crear_payload(campos, filtrado_fps)["diagnostic"].has("fps_media"),
+		true,
+	)
+	comprobar(
+		"payload sin diagnóstico no lleva FPS",
+		Parte.crear_payload(campos)["diagnostic"].has("fps_media"),
+		false,
+	)
+
 	var ruta_build := "user://build-info-prueba.txt"
 	var archivo := FileAccess.open(ruta_build, FileAccess.WRITE)
 	archivo.store_string("SIGA-98 alpha playtest\nbuild_sha=0123456789abcdef\n")
