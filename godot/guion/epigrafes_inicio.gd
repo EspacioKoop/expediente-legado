@@ -55,9 +55,7 @@ func _montar() -> void:
 
 	var caja := VBoxContainer.new()
 	caja.alignment = BoxContainer.ALIGNMENT_CENTER
-	# Los Labels con SHRINK_CENTER reducían su anchura efectiva hasta producir
-	# columnas de una sola palabra/letra al mostrar las citas en el Beelink.
-	# El ancho debe pertenecer a la caja Y a cada Label que hace autowrap.
+	# El VBox necesita anchura REAL antes de calcular el wrap de las etiquetas.
 	var ancho_lectura := minf(get_viewport_rect().size.x * 0.82, 1100.0)
 	caja.custom_minimum_size.x = ancho_lectura
 	caja.add_theme_constant_override("separation", 16)
