@@ -40,14 +40,14 @@ def _chunk(name: str) -> str:
 
 
 class TestCinematicasPsicodelicas(unittest.TestCase):
-    def test_ids_estables_y_motor_comun():
+    def test_ids_estables_y_motor_comun(self):
         for cinematic_id in IDS:
             assert cinematic_id in TEXT
         assert "Cinematica.validar(declarados)" in TEXT
         assert "Cinematica.resolver(declarados, datos, vistas)" in TEXT
 
 
-    def test_todas_son_largas_y_multiescenario():
+    def test_todas_son_largas_y_multiescenario(self):
         for name in FUNCS:
             chunk = _chunk(name)
             assert chunk.count("_plano(") >= 8, name
@@ -57,26 +57,26 @@ class TestCinematicasPsicodelicas(unittest.TestCase):
             assert escenarios >= 4, name
 
 
-    def test_figuras_humanas_forman_parte_del_montaje():
+    def test_figuras_humanas_forman_parte_del_montaje(self):
         assert "static func _figura(" in TEXT
         for name in FUNCS:
             chunk = _chunk(name)
             assert "_figura(" in chunk or "figura" in chunk or "operador" in chunk
 
 
-    def test_no_hay_autoplay_ni_mutacion_de_partida():
+    def test_no_hay_autoplay_ni_mutacion_de_partida(self):
         for token in ("change_scene", "Partida.", "get_tree().", ".reproducir("):
             assert token not in ALL_TEXT
 
 
-    def test_nuevas_piezas_extienden_montaje_y_personajes():
+    def test_nuevas_piezas_extienden_montaje_y_personajes(self):
         assert "static func _jardin_colgante(" in TEXT
         assert "static func _faro(" in TEXT
         assert "CAMBIOS GUARDADOS" in TEXT
         assert "IDENTIDAD PROVISIONAL" in TEXT
 
 
-    def test_gran_ruptura_combina_historia_edades_y_gato():
+    def test_gran_ruptura_combina_historia_edades_y_gato(self):
         chunk = _chunk("_gran_ruptura_siga")
         assert chunk.count("_plano(") >= 14
         assert "Puyi" in chunk
@@ -87,7 +87,7 @@ class TestCinematicasPsicodelicas(unittest.TestCase):
         assert "Alejandría" in chunk
 
 
-    def test_procesion_es_coral_y_cruza_todos_los_mundos():
+    def test_procesion_es_coral_y_cruza_todos_los_mundos(self):
         chunk = _chunk("_procesion_de_los_archivados")
         assert chunk.count("_plano(") >= 11
         assert "Cuatro personas esperan" in chunk
@@ -97,7 +97,7 @@ class TestCinematicasPsicodelicas(unittest.TestCase):
         assert "TURNO ACTUAL" in chunk
 
 
-    def test_personajes_largos_usan_rocketbox_y_no_maniquies_de_cajas():
+    def test_personajes_largos_usan_rocketbox_y_no_maniquies_de_cajas(self):
         assert '"rocketbox/male_adult_13"' in TEXT
         assert '"rocketbox/business_male_02"' in TEXT
         assert '"rocketbox/business_male_03"' in TEXT
@@ -106,7 +106,7 @@ class TestCinematicasPsicodelicas(unittest.TestCase):
         assert "_pieza(pos + Vector3" not in figura
 
 
-    def test_plato_admite_personas_y_modelos_3d_reales():
+    def test_plato_admite_personas_y_modelos_3d_reales(self):
         puente = Path("godot/guion/cinematica_personas_3d.gd").read_text(encoding="utf-8")
         app = Path("godot/guion/cinematica_app.gd").read_text(encoding="utf-8")
         assert "Modelos.persona(" in puente
@@ -115,7 +115,7 @@ class TestCinematicasPsicodelicas(unittest.TestCase):
         assert "CinematicaPersonas3D.montar(_decorado, decorado)" in app
 
 
-    def test_decorados_cotidianos_reutilizan_props_3d_del_repo():
+    def test_decorados_cotidianos_reutilizan_props_3d_del_repo(self):
         for modelo in (
             "oficina_psx/desk1",
             "oficina_psx/file_cabinet_large",
@@ -126,7 +126,7 @@ class TestCinematicasPsicodelicas(unittest.TestCase):
         assert 'decorado["modelos"] = modelos' in TEXT
 
 
-    def test_ciudad_imposible_usa_props_reales_y_gravedad_invertida():
+    def test_ciudad_imposible_usa_props_reales_y_gravedad_invertida(self):
         chunk = _chunk("ciudad_bajo_el_archivo")
         assert chunk.count("_plano(") >= 10
         assert "_archivo_infinito(" in chunk
@@ -142,7 +142,7 @@ class TestCinematicasPsicodelicas(unittest.TestCase):
             assert modelo in IMPOSSIBLE_TEXT
 
 
-    def test_coral_historico_usa_cinco_identidades_reales():
+    def test_coral_historico_usa_cinco_identidades_reales(self):
         chunk = _chunk("cinco_oficinas_del_tiempo")
         assert chunk.count("_plano(") >= 10
         for persona in (
@@ -163,6 +163,6 @@ class TestCinematicasPsicodelicas(unittest.TestCase):
             assert retrato in chunk
 
 
-    def test_catalogo_principal_respeta_limite_de_lineas():
+    def test_catalogo_principal_respeta_limite_de_lineas(self):
         assert len(TEXT.splitlines()) <= 1000
         assert len(IMPOSSIBLE_TEXT.splitlines()) <= 1000
