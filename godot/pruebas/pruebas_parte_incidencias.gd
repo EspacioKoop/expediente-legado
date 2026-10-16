@@ -155,7 +155,7 @@ func _init() -> void:
 	)
 
 	# #2696: el muestreo se hace ANTES de pausar F9, y solo viaja con opt-in.
-	var reportador := load("res://guion/reportador_f9.gd").new()
+	var reportador: Variant = load("res://guion/reportador_f9.gd").new()
 	comprobar("sin muestras no hay rendimiento", reportador._resumen_rendimiento(), {})
 	reportador._agregar_muestra(60.0, 210.0)
 	reportador._agregar_muestra(48.0, 330.0)
