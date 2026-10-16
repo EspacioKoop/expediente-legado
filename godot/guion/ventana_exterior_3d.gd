@@ -13,6 +13,7 @@ class_name VentanaExterior3D
 extends Node3D
 
 const TAM_VIEWPORT := Vector2i(320, 180)
+const INTERVALO_RENDER_MENU := 1.0 / 30.0
 const FONDO_BARRIO_98 := preload("res://assets/texturas/ventana_casa_ai_98/fondo_barrio_98.webp")
 const ESTADO_DEFECTO := Clima.DESPEJADO
 
@@ -28,6 +29,9 @@ var _suelo_nieve: Node3D
 var _estado := ""
 var _tiempo := 0.0
 var _reduccion_movimiento := false
+var _activo := true
+var _render_limitado_menu := false
+var _acumulador_render := 0.0
 
 
 func _ready() -> void:
@@ -50,11 +54,29 @@ func configurar(estado_clima: String) -> void:
 ## La lluvia sigue el mismo patrón que un fuego o un reloj: un bucle ya
 ## estable, no un desplazamiento nuevo en pantalla, así que se deja intacta.
 func configurar_activo(activo: bool) -> void:
+	_activo = activo
 	set_process(activo)
-	if _viewport != null:
-		_viewport.render_target_update_mode = (
-			SubViewport.UPDATE_ALWAYS if activo else SubViewport.UPDATE_DISABLED
-		)
+	_acumulador_render = 0.0
+	_actualizar_modo_render()
+
+
+## Solo el diorama de inicio solicita 30 Hz; las ventanas en juego conservan
+## su refresco normal y el mismo tamaño de viewport.
+func limitar_refresco_para_menu(limitado: bool) -> void:
+	_render_limitado_menu = limitado
+	_acumulador_render = 0.0
+	_actualizar_modo_render()
+
+
+func _actualizar_modo_render() -> void:
+	if _viewport == null:
+		return
+	if not _activo:
+		_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	elif _render_limitado_menu:
+		_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+	else:
+		_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 
 
 func configurar_reduccion_movimiento(activa: bool) -> void:
@@ -62,6 +84,11 @@ func configurar_reduccion_movimiento(activa: bool) -> void:
 
 
 func _process(delta: float) -> void:
+	if _render_limitado_menu:
+		_acumulador_render += delta
+		if _acumulador_render >= INTERVALO_RENDER_MENU:
+			_acumulador_render = fposmod(_acumulador_render, INTERVALO_RENDER_MENU)
+			_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 	if _reduccion_movimiento:
 		return
 	_tiempo += delta
