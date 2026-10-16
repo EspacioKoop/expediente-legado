@@ -17,7 +17,17 @@ const CLAVES_DIAGNOSTICO := [
 	"escena",
 	"renderer",
 	"reduccion_movimiento",
+	"fps_media",
+	"fps_min",
+	"draw_calls_max",
+	"muestras",
 ]
+const LIMITES_RENDIMIENTO := {
+	"fps_media": 240,
+	"fps_min": 240,
+	"draw_calls_max": 100000,
+	"muestras": 12,
+}
 
 
 static func cargar_configuracion(ruta: String = RUTA_CONFIG) -> Dictionary:
@@ -87,7 +97,9 @@ static func texto_interfaz(clave: String, configuracion: Dictionary = {}) -> Str
 	return clave
 
 
-static func diagnostico(escena: String, reduccion_movimiento: bool) -> Dictionary:
+static func diagnostico(
+	escena: String, reduccion_movimiento: bool, rendimiento: Dictionary = {}
+) -> Dictionary:
 	var caracteristicas = ProjectSettings.get_setting(
 		"application/config/features", PackedStringArray()
 	)
@@ -103,6 +115,9 @@ static func diagnostico(escena: String, reduccion_movimiento: bool) -> Dictionar
 		String(ProjectSettings.get_setting("rendering/renderer/rendering_method", "desconocido")),
 		"reduccion_movimiento": reduccion_movimiento,
 	}
+	# No adjuntar FPS si el reportador no dispone de muestras previas a F9.
+	if not rendimiento.is_empty():
+		candidato.merge(rendimiento)
 	return filtrar_diagnostico(candidato)
 
 
@@ -165,7 +180,14 @@ static func url_issue_preparado(payload: Dictionary, configuracion: Dictionary =
 static func filtrar_diagnostico(candidato: Dictionary) -> Dictionary:
 	var resultado := {}
 	for clave in CLAVES_DIAGNOSTICO:
-		if candidato.has(clave):
+		if not candidato.has(clave):
+			continue
+		if LIMITES_RENDIMIENTO.has(clave):
+			var dato: Variant = candidato[clave]
+			if not (dato is int or dato is float) or not is_finite(float(dato)):
+				continue
+			resultado[clave] = clampi(int(dato), 0, LIMITES_RENDIMIENTO[clave])
+		else:
 			resultado[clave] = candidato[clave]
 	return resultado
 
