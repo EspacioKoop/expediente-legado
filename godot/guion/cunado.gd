@@ -63,13 +63,18 @@ const AL_CAER := [
 	"CUNADO_DERROTA_4",
 ]
 
-## No necesita vocabulario nuevo para el despido: estas tres frases ya forman
+## No necesita vocabulario nuevo para el despido: estas frases ya forman
 ## parte de su voz y, fuera del contexto del duelo, siguen siendo deliberadamente
-## ambiguas. Reutilizarlas evita que la tercera superficie cree una segunda voz.
+## ambiguas. Ampliar la rotación con la serie completa de caídas evita la repetición
+## en vidas consecutivas sin crear una segunda voz.
 const AL_DESPEDIR := [
 	"CUNADO_DERROTA_2",
 	"CUNADO_PIERDE_4",
 	"CUNADO_PIERDE_1",
+	"CUNADO_DERROTA_3",
+	"CUNADO_PIERDE_5",
+	"CUNADO_DERROTA_1",
+	"CUNADO_DERROTA_4",
 ]
 
 const POR_MOMENTO := {
@@ -121,11 +126,14 @@ static func _anotar_prohibida(palabras: Array, texto: String) -> void:
 
 ## Lo que dice en un momento dado. [param azar] es el mismo generador del
 ## combate: el cuñado es ambiente y no debe tener su propia suerte.
-static func comentario(momento: String, azar: Callable) -> String:
+## Modula la elección según el contexto de la escena o ronda para reducir
+## repeticiones mecánicas.
+static func comentario(momento: String, azar: Callable, contexto: Dictionary = {}) -> String:
 	var frases: Array = POR_MOMENTO.get(momento, [])
 	if frases.is_empty():
 		return ""
-	return TranslationServer.translate(frases[int(azar.call() * frases.size()) % frases.size()])
+	var idx := _seleccionar_indice(momento, frases.size(), azar, contexto)
+	return TranslationServer.translate(frases[idx])
 
 
 ## La frase del despido se elige por un dato persistido, no por azar de escena.
@@ -136,11 +144,11 @@ static func clave_despido(indice: int) -> String:
 
 ## Lo que comenta de una ronda, a partir de su crónica. Habla de la habilidad
 ## si se ha gastado una, porque es lo que un cuñado miraría; si no, del
-## resultado.
+## resultado. Transmite los datos de la ronda como contexto para matizar la frase.
 static func sobre_ronda(ronda: Dictionary, azar: Callable) -> String:
 	if not ronda.get("habilidad", "").is_empty():
-		return comentario("habilidad", azar)
-	return comentario(ronda.get("veredicto", ""), azar)
+		return comentario("habilidad", azar, ronda)
+	return comentario(ronda.get("veredicto", ""), azar, ronda)
 
 
 ## Todo lo que puede llegar a decir en las tres superficies. Existe para que la
@@ -156,3 +164,28 @@ static func todas_las_frases() -> Array:
 		if not claves.has(clave):
 			claves.append(clave)
 	return claves.map(TranslationServer.translate)
+
+
+static func _seleccionar_indice(
+	momento: String, tamano: int, azar: Callable, contexto: Dictionary = {}
+) -> int:
+	if tamano <= 1:
+		return 0
+
+	var tirada := float(azar.call()) if azar.is_valid() else 0.0
+	var semilla := int(absf(tirada) * 1000000.0)
+
+	var sesgo := 0
+	if not contexto.is_empty():
+		var dano_r := int(contexto.get("dano_al_rival", 0))
+		var dano_j := int(contexto.get("dano_al_jugador", 0))
+		var hab := String(contexto.get("habilidad", ""))
+		var replica := String(contexto.get("replica", ""))
+
+		sesgo += dano_r * 3 + dano_j * 5
+		if not hab.is_empty():
+			sesgo += hab.hash()
+		if not replica.is_empty():
+			sesgo += replica.hash()
+
+	return posmod(momento.hash() + semilla + sesgo, tamano)
