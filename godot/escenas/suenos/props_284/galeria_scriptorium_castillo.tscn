@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="PackedScene" path="res://escenas/suenos/props_284/muro_torre_castillo.tscn" id="1_muro"]
 [ext_resource type="PackedScene" path="res://escenas/suenos/props_284/escalera_anular_castillo.tscn" id="2_escalera"]
@@ -10,6 +10,31 @@ roughness = 1.0
 
 [sub_resource type="PlaneMesh" id="SueloGaleria"]
 size = Vector2(16, 8)
+
+[sub_resource type="StandardMaterial3D" id="MatPiedraPilar"]
+albedo_color = Color(0.16, 0.152, 0.14, 1)
+roughness = 0.98
+
+[sub_resource type="StandardMaterial3D" id="MatLosaPiedra"]
+albedo_color = Color(0.12, 0.112, 0.104, 1)
+roughness = 1.0
+
+[sub_resource type="CylinderMesh" id="Pilar"]
+top_radius = 0.28
+bottom_radius = 0.34
+height = 4.2
+radial_segments = 8
+rings = 1
+
+[sub_resource type="BoxMesh" id="LosaPiedra"]
+size = Vector3(1.6, 0.06, 1.6)
+
+[sub_resource type="StandardMaterial3D" id="MatPapel"]
+albedo_color = Color(0.78, 0.72, 0.58, 1)
+roughness = 0.85
+
+[sub_resource type="QuadMesh" id="Pergamino"]
+size = Vector2(0.62, 0.44)
 
 [sub_resource type="StandardMaterial3D" id="MatAtril"]
 albedo_color = Color(0.19, 0.13, 0.08, 1)
@@ -60,3 +85,85 @@ light_color = Color(0.72, 0.58, 0.32, 1)
 light_energy = 0.62
 omni_range = 4.5
 shadow_enabled = true
+
+[node name="PilarArcadaNO" type="MeshInstance3D" parent="."]
+position = Vector3(-2.45, 2.1, -3.3)
+mesh = SubResource("Pilar")
+material_override = SubResource("MatPiedraPilar")
+
+[node name="PilarArcadaNC" type="MeshInstance3D" parent="."]
+position = Vector3(0.0, 2.1, -3.3)
+mesh = SubResource("Pilar")
+material_override = SubResource("MatPiedraPilar")
+
+[node name="PilarArcadaNE" type="MeshInstance3D" parent="."]
+position = Vector3(2.45, 2.1, -3.3)
+mesh = SubResource("Pilar")
+material_override = SubResource("MatPiedraPilar")
+
+[node name="PilarArcadaSO" type="MeshInstance3D" parent="."]
+position = Vector3(-2.45, 2.1, 3.3)
+mesh = SubResource("Pilar")
+material_override = SubResource("MatPiedraPilar")
+
+[node name="PilarArcadaSC" type="MeshInstance3D" parent="."]
+position = Vector3(0.0, 2.1, 3.3)
+mesh = SubResource("Pilar")
+material_override = SubResource("MatPiedraPilar")
+
+[node name="PilarArcadaSE" type="MeshInstance3D" parent="."]
+position = Vector3(2.45, 2.1, 3.3)
+mesh = SubResource("Pilar")
+material_override = SubResource("MatPiedraPilar")
+
+[node name="CaminoLosaUno" type="MeshInstance3D" parent="."]
+position = Vector3(-1.2, 0.03, 0.0)
+mesh = SubResource("LosaPiedra")
+material_override = SubResource("MatLosaPiedra")
+
+[node name="CaminoLosaDos" type="MeshInstance3D" parent="."]
+position = Vector3(0.8, 0.03, 0.0)
+mesh = SubResource("LosaPiedra")
+material_override = SubResource("MatLosaPiedra")
+
+[node name="CaminoLosaTres" type="MeshInstance3D" parent="."]
+position = Vector3(2.8, 0.03, 0.0)
+mesh = SubResource("LosaPiedra")
+material_override = SubResource("MatLosaPiedra")
+
+[node name="AtrilAprendiz" type="MeshInstance3D" parent="."]
+position = Vector3(-1.9, 0.58, 2.1)
+rotation_degrees = Vector3(0, 110, 0)
+mesh = SubResource("Atril")
+material_override = SubResource("MatAtril")
+
+[node name="PergaminoAprendiz" type="MeshInstance3D" parent="."]
+position = Vector3(-1.78, 0.92, 2.18)
+rotation_degrees = Vector3(-62, 110, 0)
+mesh = SubResource("Pergamino")
+material_override = SubResource("MatPapel")
+
+[node name="AtrilCopista" type="MeshInstance3D" parent="."]
+position = Vector3(-1.9, 0.58, -2.1)
+rotation_degrees = Vector3(0, 70, 0)
+mesh = SubResource("Atril")
+material_override = SubResource("MatAtril")
+
+[node name="PergaminoCopista" type="MeshInstance3D" parent="."]
+position = Vector3(-1.78, 0.92, -2.18)
+rotation_degrees = Vector3(-62, 70, 0)
+mesh = SubResource("Pergamino")
+material_override = SubResource("MatPapel")
+
+[node name="PergaminoCodice" type="MeshInstance3D" parent="."]
+position = Vector3(-1.9, 0.92, 0.0)
+rotation_degrees = Vector3(-62, 90, 0)
+mesh = SubResource("Pergamino")
+material_override = SubResource("MatPapel")
+
+[node name="LuzFondoGaleria" type="OmniLight3D" parent="."]
+position = Vector3(1.5, 2.6, 0)
+light_color = Color(0.55, 0.45, 0.3, 1)
+light_energy = 0.35
+omni_range = 6.0
+shadow_enabled = false
