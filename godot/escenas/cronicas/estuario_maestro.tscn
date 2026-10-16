@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://guion/cronicas_estuario_maestro_3d.gd" id="1_estuario"]
+
+[node name="EstuarioDelMaestro" type="Node3D"]
+script = ExtResource("1_estuario")
