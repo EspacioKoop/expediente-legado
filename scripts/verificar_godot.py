@@ -177,6 +177,12 @@ def ejecutar():
                 18,
             ),
             (
+                "siga-softlocks-runtime-20261016",
+                ["--script", "pruebas/pruebas_siga_transiciones_runtime_20261016.gd"],
+                40,
+                12,
+            ),
+            (
                 "terminal-siga-956",
                 ["--script", "pruebas/pruebas_terminal_siga_956.gd"],
                 30,
