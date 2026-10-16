@@ -15,11 +15,11 @@ IDS = [
 
 
 class TestCinematicasUmbral(unittest.TestCase):
-    def test_catalogo_declara_cinco_ids_estables():
+    def test_catalogo_declara_cinco_ids_estables(self):
         for cinematic_id in IDS:
             assert cinematic_id in TEXT
 
-    def test_cada_cinematica_tiene_tres_planos_3d():
+    def test_cada_cinematica_tiene_tres_planos_3d(self):
         funcs = [
             "_expediente_imposible",
             "_siga_fantasma",
@@ -35,11 +35,11 @@ class TestCinematicasUmbral(unittest.TestCase):
             assert chunk.count('"segundos":') >= 3, name
             assert chunk.count('"decorado": decorado') == 3, name
 
-    def test_api_valida_y_resuelve_con_motor_comun():
+    def test_api_valida_y_resuelve_con_motor_comun(self):
         assert "Cinematica.validar(declarados)" in TEXT
         assert "Cinematica.resolver(declarados, datos, vistas)" in TEXT
 
-    def test_no_hay_autoplay_ni_mutacion_de_partida():
+    def test_no_hay_autoplay_ni_mutacion_de_partida(self):
         forbidden = ["change_scene", "Partida.", "get_tree().", "reproducir("]
         for token in forbidden:
             assert token not in TEXT
