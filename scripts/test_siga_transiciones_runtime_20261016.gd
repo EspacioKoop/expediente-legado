@@ -59,7 +59,7 @@ func _probar_transiciones_caso_siga() -> void:
 
 	var caso: Dictionary = contenido.casos[0]
 	var estado_partida := Partida.nueva()
-	var evaluacion := _evaluar_expediente_siga(caso, estado_partida)
+	var evaluacion := _evaluar_expediente_siga(caso, estado_partida, [])
 
 	comprobar("el expediente inicial permite lectura", evaluacion["lectura_disponible"], true)
 	comprobar(
@@ -237,11 +237,12 @@ func _fixture_grafo_bloqueo_continuacion() -> Dictionary:
 	return g
 
 
-func _evaluar_expediente_siga(caso: Dictionary, estado_partida: Dictionary) -> Dictionary:
+func _evaluar_expediente_siga(
+	caso: Dictionary, estado_partida: Dictionary, leidos: Array = []
+) -> Dictionary:
 	var registros: Array = caso.get("registros", [])
 	var lectura_disponible := not registros.is_empty()
-	var reconstructible := ReconstruccionExpediente.tarjetas(caso).size() >= 2
-	var reconstruccion_bloqueada := not reconstructible
+	var reconstruccion_bloqueada := leidos.size() < 2
 	var acusacion_disponible := not Acusacion.esta_cerrado(
 		estado_partida, String(caso.get("id", ""))
 	)
