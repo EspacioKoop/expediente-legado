@@ -159,7 +159,7 @@ class CatalogoExpedientesTest(unittest.TestCase):
 
         self.assertEqual(caso["titulo"], "CASO_11_TITULO")
         self.assertEqual(caso["anioSuceso"], 1998)
-        self.assertEqual(len(caso["registros"]), 6)
+        self.assertEqual(len(caso["registros"]), 8)
         self.assertEqual(len(caso["sospechosos"]), 3)
         self.assertGreaterEqual(sum("fraseGatillo" in pista for pista in caso["pistas"]), 3)
         textos = TEXTOS.read_text(encoding="utf-8")
