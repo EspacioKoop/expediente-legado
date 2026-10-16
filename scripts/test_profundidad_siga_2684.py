@@ -156,6 +156,27 @@ class ProfundidadSiga2684Test(unittest.TestCase):
                     for afirmacion in prohibidas:
                         self.assertNotIn(afirmacion, texto.lower())
 
+    def test_diez_enlaces_de_pistas_se_pueden_consultar_en_el_corcho(self):
+        enlaces = {
+            "conceptoBienestar@6": {"pista58@2", "pista59@2"},
+            "conceptoPiso13@6": {"pista63@3"},
+            "conceptoMontalvo@6": {"pista62@3", "pista64@3"},
+            "conceptoMemoRepetido@6": {"pista67@5", "pista68@5"},
+            "conceptoArchivoMuerto@6": {"pista69@5"},
+            "concepto427@8": {"pista72@8", "pista73@8"},
+        }
+        for idioma, ruta in RUTAS.items():
+            datos = json.loads(ruta.read_text(encoding="utf-8"))
+            conceptos = {c["id"]: c for c in datos["conceptos"]}
+            todas_las_pistas = {
+                pista["id"] for caso in datos["casos"] for pista in caso["pistas"]
+            }
+            with self.subTest(locale=idioma):
+                self.assertEqual(len(conceptos), 16)
+                for concepto_id, pistas in enlaces.items():
+                    self.assertTrue(pistas <= set(conceptos[concepto_id]["pistas"]))
+                    self.assertTrue(pistas <= todas_las_pistas)
+
     def test_el_caso_8_aporta_hora_verificable_a_las_tres_actas(self):
         for idioma, catalogo in self.catalogos.items():
             c = catalogo["caso8@8"]
