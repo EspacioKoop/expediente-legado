@@ -32,6 +32,22 @@ const LLAMADAS := [
 		"resto": 2,
 		"texto": "¿Está Julián? ... Perdón, me he equivocado de número.",
 		"mensaje": "¿Julián? ... Ah. Perdón, número equivocado.",
+		"variantes":
+		[
+			{
+				"min_llamadas_previas": 1,
+				"max_llamadas_previas": 1,
+				"texto":
+				"¿Julián? Vuelvo a probar... Ah, no, perdón. Sigue siendo el mismo número.",
+				"mensaje": "Otra vez me he equivocado de número. Perdone las molestias.",
+			},
+			{
+				"min_llamadas_previas": 2,
+				"texto":
+				"Disculpe, ¿otra vez el mismo sitio? Me he debido equivocar al marcar de nuevo.",
+				"mensaje": "Disculpe la molestia de nuevo. Error al marcar el número.",
+			},
+		],
 	},
 	{
 		"id": "administracion_alquiler",
@@ -43,6 +59,15 @@ const LLAMADAS := [
 		"requiere_alquiler_pendiente": true,
 		"texto": "Le recordamos que mañana vence el alquiler. Este aviso no realiza ningún cobro.",
 		"mensaje": "Recordatorio: mañana vence el alquiler. Use la vía de pago habitual.",
+		"variantes":
+		[
+			{
+				"min_llamadas_previas": 1,
+				"texto":
+				"Recordatorio de la administración de fincas: aviso de vencimiento del periodo de alquiler.",
+				"mensaje": "Administración de fincas: aviso mensual de vencimiento de alquiler.",
+			},
+		],
 	},
 	{
 		"id": "comercial_enciclopedia",
@@ -53,6 +78,19 @@ const LLAMADAS := [
 		"resto": 3,
 		"texto": "Buenas tardes. Hacemos una encuesta breve sobre lectura en el hogar.",
 		"mensaje": "Encuestas Editorial Horizonte. Volveremos a intentarlo otro día.",
+		"variantes":
+		[
+			{
+				"min_llamadas_previas": 1,
+				"texto":
+				(
+					"Buenas tardes de nuevo. Le llamamos otra vez de Editorial Horizonte "
+					+ "para la consulta sobre hábitos de lectura."
+				),
+				"mensaje":
+				"Editorial Horizonte. Reiteramos el contacto para la encuesta sobre lectura.",
+			},
+		],
 	},
 	{
 		"id": "companera_cierre",
@@ -64,6 +102,15 @@ const LLAMADAS := [
 		"min_cerrados_hoy": 1,
 		"texto": "Vi que hoy cerraste expedientes. Te llamaba por una tontería; nada urgente.",
 		"mensaje": "Te llamaba por una tontería del turno. Mañana te lo digo en persona.",
+		"variantes":
+		[
+			{
+				"min_llamadas_previas": 1,
+				"texto":
+				"Hola de nuevo. Veo que sigues avanzando con los expedientes. Mañana lo comentamos con calma.",
+				"mensaje": "Seguimiento de expedientes del turno. Hablamos mañana en el archivo.",
+			},
+		],
 	},
 	{
 		"id": "centralita_interna",
@@ -75,6 +122,15 @@ const LLAMADAS := [
 		"min_cerrados_hoy": 2,
 		"texto": "Prueba de línea interna. No se requiere ninguna acción.",
 		"mensaje": "Prueba de línea interna completada. No hace falta devolver la llamada.",
+		"variantes":
+		[
+			{
+				"min_llamadas_previas": 1,
+				"texto":
+				"Comprobación periódica de la línea interna. Verificación finalizada con éxito.",
+				"mensaje": "Comprobación periódica completada. Registro de línea actualizado.",
+			},
+		],
 	},
 ]
 
@@ -88,10 +144,19 @@ const CONTACTOS := [
 		[
 			{
 				"min_llamadas_previas": 1,
+				"max_llamadas_previas": 1,
 				"texto":
 				(
 					"Centralita SIGA. Reiteramos que el edificio permanece "
 					+ "cerrado fuera del horario laboral. Por favor, no insista."
+				),
+			},
+			{
+				"min_llamadas_previas": 2,
+				"texto":
+				(
+					"Centralita SIGA. Locución automática: la línea de centralita "
+					+ "permanece cerrada hasta la mañana."
 				),
 			},
 		],
@@ -112,6 +177,15 @@ const CONTACTOS := [
 					+ "a abrir mañana a primera hora, como de costumbre."
 				),
 			},
+			{
+				"min_llamadas_previas": 1,
+				"mismo_dia": true,
+				"texto":
+				(
+					"Ultramarinos La Esquina. Le recordamos que el "
+					+ "establecimiento se encuentra cerrado por hoy."
+				),
+			},
 		],
 	},
 	{
@@ -123,10 +197,19 @@ const CONTACTOS := [
 		[
 			{
 				"min_llamadas_previas": 1,
+				"max_llamadas_previas": 1,
 				"texto":
 				(
 					"Videoclub Mirador. Grabación automática: si consulta por "
 					+ "el catálogo de novedades, se actualiza los viernes."
+				),
+			},
+			{
+				"min_llamadas_previas": 2,
+				"texto":
+				(
+					"Videoclub Mirador. El buzón de devoluciones exterior está "
+					+ "disponible durante toda la noche."
 				),
 			},
 		],
@@ -200,13 +283,14 @@ static func preparar_casa(jornada: Dictionary) -> Dictionary:
 	telefono[DIA_PREPARADO] = dia
 	telefono[DESCOLGADO] = false
 	telefono[LLAMADA_ACTIVA] = ""
-	var procesadas: Array = telefono[PROCESADAS]
 	for llamada in LLAMADAS:
 		var llamada_id := String(llamada.get("id", ""))
-		if llamada_id.is_empty() or procesadas.has(llamada_id) or not _cumple(llamada, jornada):
+		if llamada_id.is_empty() or not _cumple(llamada, jornada):
+			continue
+		if _ya_procesada_hoy_o_definitiva(telefono, jornada, llamada):
 			continue
 		telefono[LLAMADA_ACTIVA] = llamada_id
-		return _con_dia(llamada, dia)
+		return _con_dia(llamada, dia, jornada)
 	return {}
 
 
@@ -219,7 +303,7 @@ static func llamada_activa(jornada: Dictionary) -> Dictionary:
 	if llamada.is_empty():
 		telefono[LLAMADA_ACTIVA] = ""
 		return {}
-	return _con_dia(llamada, int(jornada.get("dia", 1)))
+	return _con_dia(llamada, int(jornada.get("dia", 1)), jornada)
 
 
 static func descolgar(jornada: Dictionary) -> Dictionary:
@@ -461,10 +545,94 @@ static func _buscar_contacto(contacto_id: String) -> Dictionary:
 	return {}
 
 
-static func _con_dia(llamada: Dictionary, dia: int) -> Dictionary:
+static func _con_dia(llamada: Dictionary, dia: int, jornada: Dictionary = {}) -> Dictionary:
 	var salida := llamada.duplicate(true)
 	salida["dia"] = dia
+	if not jornada.is_empty():
+		var variante := _resolver_variante_llamada(llamada, jornada)
+		if not variante.is_empty():
+			if variante.has("texto"):
+				salida["texto"] = String(variante["texto"])
+			if variante.has("mensaje"):
+				salida["mensaje"] = String(variante["mensaje"])
 	return salida
+
+
+static func _ya_procesada_hoy_o_definitiva(
+	telefono: Dictionary, jornada: Dictionary, llamada: Dictionary
+) -> bool:
+	var llamada_id := String(llamada.get("id", ""))
+	var procesadas: Array = telefono.get(PROCESADAS, [])
+	var cada := int(llamada.get("cada", 0))
+	var dia_actual := int(jornada.get("dia", 1))
+
+	if cada > 0:
+		var historial: Array = telefono.get(HISTORIAL, [])
+		for entrada in historial:
+			if typeof(entrada) != TYPE_DICTIONARY:
+				continue
+			if (
+				String(entrada.get("id", "")) == llamada_id
+				and int(entrada.get("dia", 1)) == dia_actual
+			):
+				return true
+		return false
+
+	return procesadas.has(llamada_id)
+
+
+static func _resolver_variante_llamada(llamada: Dictionary, jornada: Dictionary) -> Dictionary:
+	var variantes = llamada.get("variantes", [])
+	if typeof(variantes) != TYPE_ARRAY or variantes.is_empty():
+		return {}
+
+	var llamada_id := String(llamada.get("id", ""))
+	var telefono := estado(jornada)
+	var historial: Array = telefono.get(HISTORIAL, [])
+	var dia_actual := int(jornada.get("dia", 1))
+
+	var llamadas_previas := 0
+	var tuvo_mismo_dia := false
+	var tuvo_otro_dia := false
+
+	for entrada in historial:
+		if typeof(entrada) != TYPE_DICTIONARY:
+			continue
+		if (
+			String(entrada.get("id", "")) == llamada_id
+			and String(entrada.get("tipo", "")).begins_with("entrante")
+		):
+			llamadas_previas += 1
+			var dia_entrada := int(entrada.get("dia", 1))
+			if dia_entrada == dia_actual:
+				tuvo_mismo_dia = true
+			else:
+				tuvo_otro_dia = true
+
+	for variante in variantes:
+		if typeof(variante) != TYPE_DICTIONARY:
+			continue
+		var coincide := true
+		if variante.has("min_llamadas_previas"):
+			if llamadas_previas < int(variante.get("min_llamadas_previas", 0)):
+				coincide = false
+		if variante.has("max_llamadas_previas"):
+			if llamadas_previas > int(variante.get("max_llamadas_previas", 999999)):
+				coincide = false
+		if variante.has("mismo_dia"):
+			if bool(variante.get("mismo_dia")) != tuvo_mismo_dia:
+				coincide = false
+		if variante.has("dia_diferente"):
+			if bool(variante.get("dia_diferente")) != tuvo_otro_dia:
+				coincide = false
+		if variante.has("min_cerrados_hoy"):
+			if int(jornada.get("cerrados_hoy", 0)) < int(variante.get("min_cerrados_hoy", 0)):
+				coincide = false
+
+		if coincide:
+			return variante
+
+	return {}
 
 
 static func _fallo(motivo: String) -> Dictionary:
