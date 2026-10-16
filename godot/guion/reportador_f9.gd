@@ -11,6 +11,7 @@ const MAX_MUESTRAS := 12
 
 var _acumulado_muestra := 0.0
 var _muestras_rendimiento: Array[Dictionary] = []
+var _escena_muestreada := ""
 var _fondo: ColorRect
 var _app: ParteIncidenciasApp
 var _pausa_previa := false
@@ -27,6 +28,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if get_tree().paused or _fondo.visible:
 		return
+	_sincronizar_escena()
 	_acumulado_muestra += delta
 	if _acumulado_muestra < INTERVALO_MUESTRA:
 		return
@@ -34,6 +36,20 @@ func _process(delta: float) -> void:
 	var fps := Performance.get_monitor(Performance.TIME_FPS)
 	var dibujos := Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
 	_agregar_muestra(fps, dibujos)
+
+
+## Al cambiar de escena no mezclar frames de oficina, calle, casa y sueño.
+func _sincronizar_escena() -> void:
+	var actual := get_tree().current_scene
+	_registrar_escena(actual.scene_file_path if actual != null else "")
+
+
+func _registrar_escena(ruta: String) -> void:
+	if ruta == _escena_muestreada:
+		return
+	_escena_muestreada = ruta
+	_muestras_rendimiento.clear()
+	_acumulado_muestra = 0.0
 
 
 ## Los tests pueden proporcionar mediciones sintéticas sin un renderizador GPU.
@@ -107,6 +123,7 @@ func _montar() -> void:
 func _abrir() -> void:
 	if _fondo.visible:
 		return
+	_sincronizar_escena()
 	_pausa_previa = get_tree().paused
 	_mouse_previo = Input.mouse_mode
 	_foco_previo = get_viewport().gui_get_focus_owner()
