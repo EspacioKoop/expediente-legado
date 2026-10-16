@@ -159,11 +159,36 @@ static func cuerpo_de(companero: Dictionary) -> String:
 
 ## Lo que dice hoy. Rota con el día y no al azar: alguien que dijera otra cosa
 ## cada vez que pasas por delante no está hablando, está sorteando.
-static func frase_de(companero: Dictionary, dia: int) -> String:
-	var frases: Array = companero["frases"]
+##
+## Permite distinguir a becario, teléfono, jubilación y correspondencia en
+## momentos repetidos y vueltas nuevas cuando se pasa `contexto` con `vuelta`
+## o `repeticion`.
+static func frase_de(companero: Dictionary, dia: int, contexto: Dictionary = {}) -> String:
+	var frases: Array = companero.get("frases", [])
 	if frases.is_empty():
 		return ""
-	return frases[maxi(dia - 1, 0) % frases.size()]
+	var base_dia := maxi(dia - 1, 0)
+	var id := String(companero.get("id", ""))
+	var vuelta := int(contexto.get("vuelta", contexto.get("vuelta_num", 0)))
+	var repeticion := int(
+		contexto.get("repeticion", contexto.get("interaccion", contexto.get("veces", 0)))
+	)
+
+	var indice := base_dia
+	if id in ["becario", "telefono", "jubilacion", "correspondencia"]:
+		match id:
+			"becario":
+				indice = base_dia + vuelta + repeticion
+			"telefono":
+				indice = base_dia + (vuelta * 2) + repeticion
+			"jubilacion":
+				indice = base_dia + vuelta + (repeticion / 2)
+			"correspondencia":
+				indice = base_dia + (vuelta * 3) + repeticion
+	else:
+		indice = base_dia + vuelta + repeticion
+
+	return frases[maxi(indice, 0) % frases.size()]
 
 
 ## Todo lo que la plantilla puede llegar a decir. Existe para que la prueba lo
