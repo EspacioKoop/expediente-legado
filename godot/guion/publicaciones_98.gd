@@ -68,9 +68,15 @@ const CATALOGO := [
 				(
 					"Tres lectores describen golpes detrás de tabiques, una bombilla "
 					+ "que siempre está encendida y una puerta que juraban no haber "
-					+ "visto antes. La propia revista remata la sección con una nota "
-					+ "pequeña: «relatos no comprobados; no derribe paredes por su "
-					+ "cuenta»."
+					+ "visto antes.\n\n"
+					+ "«En mi escalera el timbre suena a las tres de la madrugada y "
+					+ "cuando abro no hay nadie, pero el ascensor baja solo», escribe "
+					+ "Tomás B., vecino del primer piso. Elena R. añade: «Desde "
+					+ "octubre oigo pasos en el patio interior a la misma hora exacta, "
+					+ "como si alguien contase baldosas antes de subir». La redacción "
+					+ "responde: «Agradecemos las notas; insistimos en revisar primero "
+					+ "las bajantes de la finca. Relatos no comprobados; no derribe "
+					+ "paredes por su cuenta»."
 				),
 			},
 		],
@@ -119,8 +125,15 @@ const CATALOGO := [
 				(
 					"El comentario editorial propone una lectura sencilla: dos "
 					+ "acciones separadas pueden reflejarse entre sí sin ser idénticas. "
-					+ "El cuaderno lo ilustra con dos columnas de ejemplos cotidianos y "
-					+ "evita convertir la tradición en un cuestionario."
+					+ "El cuaderno lo ilustra con fragmentos de la mesa redonda sobre "
+					+ "tradición oral de mayo de 1998:\n\n"
+					+ "—Ponente 1: «No hay que buscar un doble idéntico, sino una "
+					+ "respuesta que encaje. La simetría del texto no es un espejo "
+					+ "plano, es un eco». —Ponente 2: «Como cuando dos vecinos "
+					+ "repiten una misma costumbre en plantas distintas sin habérselo "
+					+ "dicho nunca». —Moderadora: «Precisamente ahí radica la "
+					+ "atención que exige la lectura: en notar la correspondencia sin "
+					+ "forzar la alegoría»."
 				),
 			},
 			{
@@ -166,8 +179,14 @@ const CATALOGO := [
 				(
 					"Vecinos y comerciantes discrepan sobre el nuevo horario. Los "
 					+ "tenderos esperan más ventas al final del día; quienes viven "
-					+ "encima piden que la carga y descarga termine antes de la noche. "
-					+ "El ayuntamiento probará el cambio durante un mes."
+					+ "encima piden que la carga y descarga termine antes de la noche.\n\n"
+					+ "—Manolo, pescadero: «Si abrimos hasta las ocho, la gente que "
+					+ "sale de trabajar puede pasar a por pescado fresco. A nosotros nos "
+					+ "da la vida». —Doña Carmen, vecina del segundo: «A mí me parece "
+					+ "bien la venta, pero los camiones a las siete de la tarde atrancan "
+					+ "el portal y no hay quien descanse». —Concejal de distrito: "
+					+ "«Haremos una prueba piloto de cuatro semanas y ajustaremos la "
+					+ "carga antes de tomar una decisión definitiva»."
 				),
 			},
 			{
