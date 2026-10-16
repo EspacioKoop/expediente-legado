@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Shader" path="res://arte/sueno_fotorrealista/material_microdetalle.gdshader" id="1_shader"]
 
@@ -19,8 +19,17 @@ shader_parameter/roughness_base = 0.10
 shader_parameter/grime_strength = 0.12
 shader_parameter/wetness = 0.92
 shader_parameter/emission_color = Color(0.055, 0.13, 0.12, 1)
-shader_parameter/emission_energy = 0.24
+shader_parameter/emission_energy = 0.32
 shader_parameter/micro_scale = 52.0
+
+[sub_resource type="ShaderMaterial" id="Humedad"]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_base = Color(0.085, 0.105, 0.10, 1)
+shader_parameter/metallic_amount = 0.0
+shader_parameter/roughness_base = 0.06
+shader_parameter/grime_strength = 0.05
+shader_parameter/wetness = 1.0
+shader_parameter/micro_scale = 64.0
 
 [sub_resource type="ShaderMaterial" id="Goma"]
 shader = ExtResource("1_shader")
@@ -52,6 +61,9 @@ size = Vector3(0.42, 0.018, 0.018)
 
 [sub_resource type="BoxMesh" id="Gota"]
 size = Vector3(0.018, 0.10, 0.009)
+
+[sub_resource type="BoxMesh" id="Pata"]
+size = Vector3(0.10, 0.04, 0.42)
 
 [node name="CRTCondensacion" type="Node3D"]
 metadata/origen_reconocible = "televisor_casa"
@@ -115,26 +127,36 @@ position = Vector3(-0.09, 0.62, 0.296)
 mesh = SubResource("Ranura")
 material_override = SubResource("Goma")
 
+[node name="PataIzquierda" type="MeshInstance3D" parent="."]
+position = Vector3(-0.32, 0.02, 0)
+mesh = SubResource("Pata")
+material_override = SubResource("Goma")
+
+[node name="PataDerecha" type="MeshInstance3D" parent="."]
+position = Vector3(0.32, 0.02, 0)
+mesh = SubResource("Pata")
+material_override = SubResource("Goma")
+
 [node name="Condensacion1" type="MeshInstance3D" parent="."]
 position = Vector3(-0.26, 0.50, -0.328)
 rotation = Vector3(0, 0, -0.08)
 scale = Vector3(1, 1.35, 1)
 mesh = SubResource("Gota")
-material_override = SubResource("Cristal")
+material_override = SubResource("Humedad")
 
 [node name="Condensacion2" type="MeshInstance3D" parent="."]
 position = Vector3(0.02, 0.38, -0.328)
 rotation = Vector3(0, 0, 0.04)
 scale = Vector3(0.75, 1.72, 1)
 mesh = SubResource("Gota")
-material_override = SubResource("Cristal")
+material_override = SubResource("Humedad")
 
 [node name="Condensacion3" type="MeshInstance3D" parent="."]
 position = Vector3(0.19, 0.52, -0.328)
 rotation = Vector3(0, 0, -0.03)
 scale = Vector3(0.65, 0.88, 1)
 mesh = SubResource("Gota")
-material_override = SubResource("Cristal")
+material_override = SubResource("Humedad")
 
 [node name="AnclaInteraccion" type="Marker3D" parent="."]
 position = Vector3(0, 0.44, -0.58)
