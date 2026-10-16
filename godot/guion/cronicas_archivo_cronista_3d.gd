@@ -1,6 +1,6 @@
 ## Escena 3D de investigación para el Archivo del Cronista Velado (#2589).
 ## Ofrece tres actas incompatibles que se inspeccionan y contrastan con el cronista.
-## La versión fundamentada abre la fuga; se puede reintentar y es strictly local.
+## La versión fundamentada abre la fuga; se puede reintentar y es estrictamente local.
 class_name CronicasArchivoCronista3D
 extends Node3D
 
@@ -144,8 +144,8 @@ func contrastar_con_cronista() -> void:
 		return
 
 	# Ciclar entre versiones no fundamentadas y la fundamentada para permitir reintentos.
-	var indices_prueba := [0, 2, ACTA_FUNDAMENTADA]
-	var opcion := indices_prueba[_intento_cronista % indices_prueba.size()]
+	var indices_prueba: Array[int] = [0, 2, ACTA_FUNDAMENTADA]
+	var opcion: int = indices_prueba[_intento_cronista % indices_prueba.size()]
 	_intento_cronista += 1
 	seleccionar_version(opcion)
 
