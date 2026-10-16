@@ -100,17 +100,28 @@ static func tiene_ramas(id_dependiente: String) -> bool:
 
 ## Siempre ofrece una respuesta pragmática y una de conversación. Cliente y
 ## tiempo solo aparecen cuando el estado normal del juego las justifica.
+## Si ya existe una memoria registrada para la conversación ramificada, no ofrece
+## nuevas opciones para evitar duplicar la elección en segundas charlas.
 static func opciones(
-	dependiente: Dictionary, jornada: Dictionary, clima: String
+	dependiente: Dictionary, jornada: Dictionary, clima: String = ""
 ) -> Array[Dictionary]:
 	var id_dependiente := String(dependiente.get("id", ""))
 	if not RAMAS.has(id_dependiente):
 		return []
 
+	if _tiene_memoria(jornada, id_dependiente):
+		return []
+
+	var dep_completo := dependiente
+	if not dep_completo.has("superficie"):
+		dep_completo = DependientesTiendas.de(id_dependiente)
+
+	var clima_resuelto := _resolver_clima(jornada, clima)
+
 	var ids := ["pragmatica", "curiosidad"]
-	if DependientesTiendas.es_cliente(dependiente, jornada):
+	if DependientesTiendas.es_cliente(dep_completo, jornada):
 		ids.append("cliente")
-	if [Clima.LLUVIA, Clima.NIEVE, Clima.NIEBLA].has(clima):
+	if _es_clima_conocido(clima_resuelto):
 		ids.append("tiempo")
 
 	var salida: Array[Dictionary] = []
@@ -132,7 +143,7 @@ static func opciones(
 
 
 ## Primera escritura gana. Repetir el callback o intentar cambiar de enfoque no
-## reinterpreta la conversación ya guardada.
+## reinterpreta la conversación ya guardada ni duplica la elección.
 static func registrar(jornada: Dictionary, id_dependiente: String, id_rama: String) -> Dictionary:
 	var rama := _rama(id_dependiente, id_rama)
 	if rama.is_empty():
@@ -147,8 +158,15 @@ static func registrar(jornada: Dictionary, id_dependiente: String, id_rama: Stri
 		return {
 			"valida": true,
 			"nueva": false,
-			"respuesta": String(anterior.get("reentrada", "")),
+			"respuesta": reentrada(jornada, id_dependiente),
 		}
+
+	var dep := DependientesTiendas.de(id_dependiente)
+	var clima_resuelto := _resolver_clima(jornada, "")
+	if id_rama == "cliente" and not DependientesTiendas.es_cliente(dep, jornada):
+		return {"valida": false}
+	if id_rama == "tiempo" and not _es_clima_conocido(clima_resuelto):
+		return {"valida": false}
 
 	memorias[id_dependiente] = {
 		"rama": id_rama,
@@ -162,13 +180,29 @@ static func registrar(jornada: Dictionary, id_dependiente: String, id_rama: Stri
 	}
 
 
-static func reentrada(jornada: Dictionary, id_dependiente: String) -> String:
+## La reentrada depende del contexto actual: si la rama guardada fue "cliente",
+## debe haber compras constatadas; si fue "tiempo", el clima conocido debe incluir
+## lluvia, nieve o niebla (no cielo despejado).
+static func reentrada(jornada: Dictionary, id_dependiente: String, clima: String = "") -> String:
 	var memorias := _memorias(jornada)
 	var memoria = memorias.get(id_dependiente, {})
-	if typeof(memoria) != TYPE_DICTIONARY:
+	if typeof(memoria) != TYPE_DICTIONARY or memoria.is_empty():
 		return ""
-	var rama := _rama(id_dependiente, String(memoria.get("rama", "")))
-	return String(rama.get("reentrada", "")) if not rama.is_empty() else ""
+
+	var id_rama := String(memoria.get("rama", ""))
+	var rama := _rama(id_dependiente, id_rama)
+	if rama.is_empty():
+		return ""
+
+	var dep := DependientesTiendas.de(id_dependiente)
+	var clima_resuelto := _resolver_clima(jornada, clima)
+
+	if id_rama == "cliente" and not DependientesTiendas.es_cliente(dep, jornada):
+		return ""
+	if id_rama == "tiempo" and not _es_clima_conocido(clima_resuelto):
+		return ""
+
+	return String(rama.get("reentrada", ""))
 
 
 static func claves(id_dependiente: String) -> Array[String]:
@@ -183,6 +217,25 @@ static func claves(id_dependiente: String) -> Array[String]:
 			if not clave.is_empty() and not salida.has(clave):
 				salida.append(clave)
 	return salida
+
+
+static func _tiene_memoria(jornada: Dictionary, id_dependiente: String) -> bool:
+	var memorias := _memorias(jornada)
+	var memoria = memorias.get(id_dependiente, {})
+	return typeof(memoria) == TYPE_DICTIONARY and not memoria.is_empty()
+
+
+static func _resolver_clima(jornada: Dictionary, clima: String) -> String:
+	if not clima.is_empty():
+		return clima
+	var forzado := String(jornada.get("clima_forzado", ""))
+	if not forzado.is_empty():
+		return forzado
+	return Clima.estado(int(jornada.get("dia", 1)))
+
+
+static func _es_clima_conocido(clima_resuelto: String) -> bool:
+	return [Clima.LLUVIA, Clima.NIEVE, Clima.NIEBLA].has(clima_resuelto)
 
 
 static func _rama(id_dependiente: String, id_rama: String) -> Dictionary:

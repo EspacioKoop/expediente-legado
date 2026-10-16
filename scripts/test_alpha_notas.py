@@ -4,7 +4,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPORTAR = ROOT / "dist" / "exportar-godot-alpha.sh"
-NOTAS = ROOT / "docs" / "alpha-playtest-2026-09-15.md"
+NOTAS = ROOT / "docs" / "alpha-playtest-2026-10-07.md"
 
 
 class AlphaNotasTest(unittest.TestCase):
@@ -14,7 +14,7 @@ class AlphaNotasTest(unittest.TestCase):
         cls.notas = NOTAS.read_text(encoding="utf-8")
 
     def test_empaquetado_exige_notas_versionadas(self):
-        self.assertIn('NOTAS_ALPHA="$RAIZ/docs/alpha-playtest-2026-09-15.md"', self.exportar)
+        self.assertIn('NOTAS_ALPHA="$RAIZ/docs/alpha-playtest-2026-10-07.md"', self.exportar)
         self.assertIn('if [ ! -f "$NOTAS_ALPHA" ]', self.exportar)
 
     def test_linux_y_windows_reciben_las_mismas_notas(self):
@@ -35,18 +35,18 @@ class AlphaNotasTest(unittest.TestCase):
         self.assertIn('source_ref=$BUILD_REF', self.exportar)
         self.assertIn('notes=$NOTAS_NOMBRE', self.exportar)
 
-    def test_notas_identifican_baseline_y_gates_humanos(self):
-        self.assertIn("0b828dd7a3d0061801b90f8cf94119d8e5277580", self.notas)
-        self.assertIn("## Gates humanos que esta alpha debe resolver", self.notas)
-        self.assertIn("CI/Alpha automáticas", self.notas)
-        self.assertIn("no equivalen", self.notas)
+    def test_notas_identifican_baseline_y_no_validan_gates(self):
+        # El guion del pase end-to-end (#9) fija el build exacto y deja claro que
+        # una casilla marcada es una observación humana, no un gate cerrado.
+        self.assertIn("35a2f362bc62c3b61194081baf661f3a43714bcf", self.notas)
         self.assertIn("BUILD-INFO.txt", self.notas)
+        self.assertIn("no cierra por sí solo ningún gate", self.notas)
 
-    def test_notas_separan_extras_del_recorrido_y_pr_abierta(self):
-        self.assertIn("## Pruebas focales de las novedades", self.notas)
-        self.assertIn("PR #503", self.notas)
-        self.assertIn("no forma parte de esta alpha", self.notas)
-        self.assertIn("runtime activo sigue siendo Peanut-GB", self.notas)
+    def test_notas_guian_el_recorrido_canonico(self):
+        self.assertIn("## Recorrido canónico (#9)", self.notas)
+        self.assertIn("## Controles", self.notas)
+        self.assertIn("## Cómo anotar", self.notas)
+        self.assertIn("F9", self.notas)
 
 
 if __name__ == "__main__":

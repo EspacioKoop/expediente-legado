@@ -35,7 +35,7 @@ jobs:
       XDG_CONFIG_HOME: ${{ github.workspace }}/.tmp-evidencia-830/config
       XDG_CACHE_HOME: ${{ github.workspace }}/.tmp-evidencia-830/cache
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           lfs: true
 
@@ -62,12 +62,29 @@ jobs:
       - name: Validar contrato de evidencia
         run: python3 -m unittest -v scripts/test_evidencia_inicio_830.py
 
+      - name: Instalar Vulkan por software para Forward+
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends mesa-vulkan-drivers vulkan-tools
+          # La ruta ICD de Lavapipe cambia según la distribución de Mesa.
+          echo "ICDs instalados:"
+          find /usr/share/vulkan/icd.d -maxdepth 1 -type f -name '*.json' -print
+          icd="$(find /usr/share/vulkan/icd.d -maxdepth 1 -type f -iname '*lvp*.json' -print -quit)"
+          if [ -z "$icd" ]; then
+            echo "::error::No se instaló el ICD Vulkan de Lavapipe"
+            exit 1
+          fi
+          echo "VK_ICD_FILENAMES=$icd" >> "$GITHUB_ENV"
+          VK_ICD_FILENAMES="$icd" xvfb-run -a vulkaninfo --summary
+
       - name: Renderizar menú normal y reducido
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p evidencia-inicio-830 "$XDG_DATA_HOME" "$XDG_CONFIG_HOME" "$XDG_CACHE_HOME"
-          xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
+          xvfb-run -a godot4 --path godot --rendering-method forward_plus \
             --script res://pruebas/capturar_inicio_830.gd -- \
             "$GITHUB_WORKSPACE/evidencia-inicio-830"
           test -s evidencia-inicio-830/inicio-normal.png

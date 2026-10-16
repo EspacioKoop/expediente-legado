@@ -39,7 +39,7 @@ class CableadoPlanDelegadoTest(unittest.TestCase):
         fuentes = re.findall(r"--source\s+(\S+)", paso)
         self.assertEqual(["/tmp/delegado.json"], fuentes)
         self.assertIn("steps.delegated.outputs.found == 'true'", paso)
-        self.assertIn("vars.AGENT_POOL_MAX_FILES || '1'", paso)
+        self.assertIn("scripts/agent_scope_limit.py --issue-json /tmp/agent-issue.json", paso)
         self.assertIn('--max-files "$MAX_FILES"', paso)
         self.assertIn("status == 5", paso)
         self.assertIn("agent:decompose", paso)
