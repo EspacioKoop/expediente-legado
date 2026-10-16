@@ -15,14 +15,15 @@ func _probar() -> void:
 	get_root().add_child(escritorio)
 	await process_frame
 
-	var app := CronicasOs98Enlace.registrar(escritorio)
+	var avisos := [0]
+	var app := CronicasOs98Enlace.registrar(escritorio, func(): avisos[0] += 1)
 	_comprobar(app != null, "alta con EscritorioSigaApp existente")
 	if app == null:
 		escritorio.queue_free()
 		_terminar()
 		return
 	_comprobar(app.id == CronicasOs98Enlace.ID_APP, "id estable del programa")
-	_comprobar(not app.persistir_estado, "ningún guardado en EstadoAplicacionesSiga")
+	_comprobar(app.persistir_estado, "solo metadata verificable en EstadoAplicacionesSiga")
 	_comprobar(not app.multiples_instancias, "una instancia por escritorio")
 
 	app.abrir(escritorio)
@@ -54,6 +55,7 @@ func _probar() -> void:
 	var sala := viewport.get_node_or_null("PartidaCronicas") as CronicasBastion3D
 	_comprobar(sala != null, "escena jugable dentro de ventana OS98")
 	_comprobar(contenido.juego_en_curso(), "estado local activo")
+	_comprobar(avisos[0] == 0, "arrancar programa no acredita visita")
 
 	escritorio.minimizar(app.id)
 	await process_frame
@@ -67,6 +69,7 @@ func _probar() -> void:
 	sala.registrar_lectura()
 	sala.registrar_resultado_duelo(true)
 	_comprobar(sala.solicitar_salida(), "retorno desde final real del prólogo")
+	_comprobar(avisos[0] == 1, "solo cruzar umbral acredita visita")
 	await process_frame
 	_comprobar(not contenido.juego_en_curso(), "sala liberada tras regreso")
 	_comprobar(contenido.prologos_locales() == 1, "solo cuenta local")
@@ -81,6 +84,7 @@ func _probar() -> void:
 		"cerrar devuelve a shell sin abandonar Dia",
 	)
 	_comprobar(Input.mouse_mode == Input.MOUSE_MODE_VISIBLE, "sin ratón capturado al cerrar")
+	_comprobar(avisos[0] == 1, "cerrar programa no acredita visita adicional")
 
 	escritorio.queue_free()
 	await process_frame

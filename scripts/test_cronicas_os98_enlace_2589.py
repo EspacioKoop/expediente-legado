@@ -31,6 +31,6 @@ class CronicasOs98Enlace2589Test(unittest.TestCase):
         comprobar_contrato(
             self,
             "pruebas/pruebas_cronicas_os98_enlace_2589.gd",
-            "22 pasadas, 0 fallos",
+            "25 pasadas, 0 fallos",
             timeout=50,
         )
