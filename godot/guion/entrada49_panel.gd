@@ -12,7 +12,7 @@ const CLAVE_ESTADO := "entrada49"
 static func montar(pantalla: CanvasLayer, estado: Dictionary, guardar: Callable) -> Button:
 	var acceso := Button.new()
 	acceso.name = "Entrada49Acceso"
-	acceso.text = "Entrada 49"
+	acceso.text = TranslationServer.translate("ENTRADA49_ACCESO")
 	acceso.theme = EstiloSiga.tema()
 	acceso.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 	acceso.offset_left = -190
@@ -45,7 +45,7 @@ static func _abrir(pantalla: CanvasLayer, estado: Dictionary, guardar: Callable)
 	fondo.add_child(columna)
 
 	var titulo := Label.new()
-	titulo.text = "IMPORTACIÓN PATRIMONIAL · ENTRADA 49"
+	titulo.text = TranslationServer.translate("ENTRADA49_TITULO")
 	columna.add_child(titulo)
 
 	var analisis := Entrada49.analizar_fuentes(datos)
@@ -77,7 +77,7 @@ static func _abrir(pantalla: CanvasLayer, estado: Dictionary, guardar: Callable)
 		fila.add_child(boton)
 
 	var cerrar := Button.new()
-	cerrar.text = "Cerrar"
+	cerrar.text = TranslationServer.translate("ESCRITORIO_CERRAR")
 	cerrar.pressed.connect(fondo.queue_free)
 	columna.add_child(cerrar)
 
