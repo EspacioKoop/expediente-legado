@@ -145,7 +145,6 @@ func _montar_entorno() -> void:
 	luz_sol.shadow_enabled = true
 	add_child(luz_sol)
 
-	# Suelo principal y plataforma del estuario
 	_crear_bloque("SueloCanal", Vector3(0, -0.5, 0), Vector3(20, 1.0, 24), COLOR_PIEDRA)
 	_crear_bloque(
 		"AguaEstuarioIzquierda", Vector3(-9.5, -0.4, 0), Vector3(3, 0.8, 24), COLOR_AGUA, false
@@ -154,24 +153,20 @@ func _montar_entorno() -> void:
 		"AguaEstuarioDerecha", Vector3(9.5, -0.4, 0), Vector3(3, 0.8, 24), COLOR_AGUA, false
 	)
 
-	# Paredes y límites
 	_crear_bloque("MuroNorte", Vector3(0, 2.5, -11.5), Vector3(20, 5.0, 1.0), COLOR_PIEDRA)
 	_crear_bloque("MuroSur", Vector3(0, 2.5, 11.5), Vector3(20, 5.0, 1.0), COLOR_PIEDRA)
 	_crear_bloque("MuroOeste", Vector3(-11.0, 2.5, 0), Vector3(1.0, 5.0, 24), COLOR_PIEDRA)
 	_crear_bloque("MuroEste", Vector3(11.0, 2.5, 0), Vector3(1.0, 5.0, 24), COLOR_PIEDRA)
 
-	# Atriles para los 3 minirretos
 	_crear_bloque("AtrilReto1", Vector3(-5.0, 0.75, 2.0), Vector3(1.6, 1.5, 1.2), COLOR_MADERA)
 	_crear_bloque("AtrilReto2", Vector3(0.0, 0.75, -2.0), Vector3(1.6, 1.5, 1.2), COLOR_MADERA)
 	_crear_bloque("AtrilReto3", Vector3(5.0, 0.75, 2.0), Vector3(1.6, 1.5, 1.2), COLOR_MADERA)
 
-	# Estilo visual Mentor y Salida
 	_crear_bloque("EstatuaMaestro", Vector3(0.0, 1.5, -7.5), Vector3(1.8, 3.0, 1.8), COLOR_MENTOR)
 	_crear_bloque(
 		"MarcoUmbral", Vector3(0.0, 2.5, -10.8), Vector3(4.0, 5.0, 0.5), COLOR_PIEDRA_CLARA
 	)
 
-	# Rotulos indicativos 3D
 	_crear_rotulo("Reto I: Evidencia", Vector3(-5.0, 2.0, 2.0))
 	_crear_rotulo("Reto II: Dicotomia", Vector3(0.0, 2.0, -2.0))
 	_crear_rotulo("Reto III: Hipotesis", Vector3(5.0, 2.0, 2.0))
@@ -400,7 +395,6 @@ func _cerrar_panel_dialogo() -> void:
 		_caminante.process_mode = Node.PROCESS_MODE_INHERIT
 
 
-# --- MINIRRETO 1: Contrastar afirmación con evidencia ---
 func _iniciar_reto1() -> void:
 	if _reto1_resuelto:
 		_mostrar_mensaje_hud("Reto I superado: Afirmación contrastada con evidencia.")
@@ -415,25 +409,31 @@ func _iniciar_reto1() -> void:
 	var opciones := [
 		{
 			"texto": "A) Aceptar el texto oficial sin dudar.",
-			"callback":
-			func():
-				_evaluar_reto1(false, "Has aceptado una afirmación sin contrastar."),
+			"callback": Callable(self, "_on_reto1_opcion_a"),
 		},
 		{
 			"texto": "B) Contrastar con las marcas de erosión y sedimentos en el dique.",
-			"callback":
-			func():
-				_evaluar_reto1(true, "¡Correcto! La erosión física desmiente la versión oficial."),
+			"callback": Callable(self, "_on_reto1_opcion_b"),
 		},
 		{
 			"texto": "C) Descartar todo el manuscrito por considerarlo ficción.",
-			"callback":
-			func():
-				_evaluar_reto1(false, "Descartar sin analizar ignora las pistas en las contradicciones."),
+			"callback": Callable(self, "_on_reto1_opcion_c"),
 		},
 	]
 
 	_abrir_panel_dialogo(enunciado, opciones)
+
+
+func _on_reto1_opcion_a() -> void:
+	_evaluar_reto1(false, "Has aceptado una afirmación sin contrastar.")
+
+
+func _on_reto1_opcion_b() -> void:
+	_evaluar_reto1(true, "¡Correcto! La erosión física desmiente la versión oficial.")
+
+
+func _on_reto1_opcion_c() -> void:
+	_evaluar_reto1(false, "Descartar sin analizar ignora las pistas en las contradicciones.")
 
 
 func _evaluar_reto1(exito: bool, mensaje: String) -> void:
@@ -445,7 +445,6 @@ func _evaluar_reto1(exito: bool, mensaje: String) -> void:
 		_mostrar_mensaje_hud(mensaje + " Reintenta o consulta al Maestro.")
 
 
-# --- MINIRRETO 2: Refutar una falsa dicotomía ---
 func _iniciar_reto2() -> void:
 	if _reto2_resuelto:
 		_mostrar_mensaje_hud("Reto II superado: Falsa dicotomía refutada.")
@@ -460,26 +459,32 @@ func _iniciar_reto2() -> void:
 	var opciones := [
 		{
 			"texto": "A) Atribuir la culpa exclusivamente a los conservadores.",
-			"callback":
-			func():
-				_evaluar_reto2(false, "Caes en la trampa del dilema."),
+			"callback": Callable(self, "_on_reto2_opcion_a"),
 		},
 		{
 			"texto": "B) Atribuir la culpa exclusivamente a los reformistas.",
-			"callback":
-			func():
-				_evaluar_reto2(false, "Eliges entre solo dos opciones preconcebidas."),
+			"callback": Callable(self, "_on_reto2_opcion_b"),
 		},
 		{
 			"texto":
 			"C) Refutar dicotomía: existió una orden de traslado coordinada e interrumpida.",
-			"callback":
-			func():
-				_evaluar_reto2(true, "¡Correcto! La disyuntiva excluía la causa real."),
+			"callback": Callable(self, "_on_reto2_opcion_c"),
 		},
 	]
 
 	_abrir_panel_dialogo(enunciado, opciones)
+
+
+func _on_reto2_opcion_a() -> void:
+	_evaluar_reto2(false, "Caes en la trampa del dilema.")
+
+
+func _on_reto2_opcion_b() -> void:
+	_evaluar_reto2(false, "Eliges entre solo dos opciones preconcebidas.")
+
+
+func _on_reto2_opcion_c() -> void:
+	_evaluar_reto2(true, "¡Correcto! La disyuntiva excluía la causa real.")
 
 
 func _evaluar_reto2(exito: bool, mensaje: String) -> void:
@@ -491,7 +496,6 @@ func _evaluar_reto2(exito: bool, mensaje: String) -> void:
 		_mostrar_mensaje_hud(mensaje + " Pide ayuda al Maestro o reintenta.")
 
 
-# --- MINIRRETO 3: Revisar una hipótesis ---
 func _iniciar_reto3() -> void:
 	if _reto3_resuelto:
 		_mostrar_mensaje_hud("Reto III superado: Hipótesis revisada ante evidencia.")
@@ -506,26 +510,32 @@ func _iniciar_reto3() -> void:
 	var opciones := [
 		{
 			"texto": "A) Ocultar los recibos para no modificar la hipótesis inicial.",
-			"callback":
-			func():
-				_evaluar_reto3(false, "Suprimir datos para proteger una hipótesis es un error."),
+			"callback": Callable(self, "_on_reto3_opcion_a"),
 		},
 		{
 			"texto":
 			"B) Reformular hipótesis: la actividad siguió hasta una orden externa repentina.",
-			"callback":
-			func():
-				_evaluar_reto3(true, "¡Correcto! Revisar hipótesis ante nuevos datos es clave."),
+			"callback": Callable(self, "_on_reto3_opcion_b"),
 		},
 		{
 			"texto": "C) Abandonar la investigación por contradictoria.",
-			"callback":
-			func():
-				_evaluar_reto3(false, "La contradicción aparente es el motor del hallazgo."),
+			"callback": Callable(self, "_on_reto3_opcion_c"),
 		},
 	]
 
 	_abrir_panel_dialogo(enunciado, opciones)
+
+
+func _on_reto3_opcion_a() -> void:
+	_evaluar_reto3(false, "Suprimir datos para proteger una hipótesis es un error.")
+
+
+func _on_reto3_opcion_b() -> void:
+	_evaluar_reto3(true, "¡Correcto! Revisar hipótesis ante nuevos datos es clave.")
+
+
+func _on_reto3_opcion_c() -> void:
+	_evaluar_reto3(false, "La contradicción aparente es el motor del hallazgo.")
 
 
 func _evaluar_reto3(exito: bool, mensaje: String) -> void:
@@ -537,7 +547,6 @@ func _evaluar_reto3(exito: bool, mensaje: String) -> void:
 		_mostrar_mensaje_hud(mensaje + " Revisa la evidencia o habla con el Maestro.")
 
 
-# --- INTERACCIÓN CON EL MENTOR ---
 func _interactuar_mentor() -> void:
 	var total_fallos := _fallos_reto1 + _fallos_reto2 + _fallos_reto3
 	var resueltos := _cantidad_retos_resueltos()
@@ -563,29 +572,42 @@ func _interactuar_mentor() -> void:
 	var opciones := []
 
 	if total_fallos > 0 and resueltos < 3:
-		opciones.append(
-			{
-				"texto": "1) Pedir orientación sobre las fallas metodológicas.",
-				"callback": func(): _orientacion_mentor(),
-			}
+		(
+			opciones
+			. append(
+				{
+					"texto": "1) Pedir orientación sobre las fallas metodológicas.",
+					"callback": Callable(self, "_orientacion_mentor"),
+				}
+			)
 		)
 
-	opciones.append(
-		{
-			"texto": "2) Cuestionar al Maestro («¿Acaso vuestra taxonomía no descarta otras voces?»).",
-			"callback": func(): _cuestionar_mentor(),
-		}
+	(
+		opciones
+		. append(
+			{
+				"texto":
+				"2) Cuestionar al Maestro («¿Acaso vuestra taxonomía no descarta otras voces?»).",
+				"callback": Callable(self, "_cuestionar_mentor"),
+			}
+		)
 	)
 
-	opciones.append(
-		{
-			"texto": "3) Agradecer la lección y continuar.",
-			"callback":
-			func(): _mostrar_mensaje_hud("El Maestro asiente en silencio. Continúa cuando gustes."),
-		}
+	(
+		opciones
+		. append(
+			{
+				"texto": "3) Agradecer la lección y continuar.",
+				"callback": Callable(self, "_on_mentor_agradecer"),
+			}
+		)
 	)
 
 	_abrir_panel_dialogo(saludo, opciones)
+
+
+func _on_mentor_agradecer() -> void:
+	_mostrar_mensaje_hud("El Maestro asiente en silencio. Continúa cuando gustes.")
 
 
 func _orientacion_mentor() -> void:
@@ -614,7 +636,11 @@ func _cuestionar_mentor() -> void:
 	var opciones := [
 		{
 			"texto": "Aceptar el reconocimiento del Maestro.",
-			"callback": func(): _mostrar_mensaje_hud("Puedes cruzar el umbral cuando lo desees."),
+			"callback": Callable(self, "_on_aceptar_reconocimiento"),
 		}
 	]
 	_abrir_panel_dialogo(respuesta, opciones)
+
+
+func _on_aceptar_reconocimiento() -> void:
+	_mostrar_mensaje_hud("Puedes cruzar el umbral cuando lo desees.")
