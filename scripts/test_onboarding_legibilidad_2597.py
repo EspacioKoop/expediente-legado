@@ -46,11 +46,28 @@ class GuiaContextualTest(unittest.TestCase):
         self.assertNotIn('Area3D.new()', CODE)
 
     def test_objetivos_describen_la_interaccion_verdadera(self):
-        self.assertIn("al acercarte se abre SIGA-98", CODE)
+        self.assertIn("Mira al terminal: al ver «Usar»", CODE)
+        self.assertIn("control indicado", CODE)
+        self.assertNotIn("al acercarte se abre SIGA-98", CODE)
         self.assertIn("atraviesa la puerta de salida", CODE)
         self.assertIn("Entra al acercarte", CODE)
         self.assertIn("Busca la cama y acércate para dormir", CODE)
         self.assertNotIn("Interactuar: E", CODE)
+
+    def test_terminal_es_interaccion_voluntaria_y_remapeable(self):
+        clima = (ROOT / "godot/guion/dia_clima_app.gd").read_text(encoding="utf-8")
+        detector = (ROOT / "godot/guion/detector_interaccion_3d.gd").read_text(
+            encoding="utf-8"
+        )
+        preferencias = (ROOT / "godot/guion/preferencias_siga.gd").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("zona.monitoring = false", clima)
+        self.assertIn("zona.monitorable = false", clima)
+        self.assertIn("terminal.activado.connect(_activar_terminal_siga)", clima)
+        self.assertIn('evento.is_action_pressed("interactuar")', detector)
+        self.assertIn('"interactuar": {"teclado": 69, "mando": JOY_BUTTON_A}', preferencias)
+        self.assertIn("texto.custom_minimum_size.y = 110", CODE)
 
     def test_indicaciones_se_refrescan_en_cambios_de_progreso(self):
         self.assertIn('_segundos_hasta_guia = 0.25', CODE)

@@ -105,7 +105,7 @@ func _montar_onboarding_archivo() -> void:
 	_pista_puesto.offset_left = -450
 	_pista_puesto.offset_top = 90
 	_pista_puesto.offset_right = 450
-	_pista_puesto.offset_bottom = 240
+	_pista_puesto.offset_bottom = 290
 	_pista_puesto.add_theme_stylebox_override("panel", HUDEstilo.caja_tutorial())
 	_hud.add_child(_pista_puesto)
 
@@ -125,11 +125,21 @@ func _montar_onboarding_archivo() -> void:
 
 	var texto := Label.new()
 	texto.name = "TextoPistaPuesto"
-	texto.text = "%s\n%s" % [tr(CLAVE_PUESTO_ONBOARDING), tr(CLAVE_ACCION_ONBOARDING)]
+	# La zona de proximidad original del puesto se desactiva en DiaClimaApp.
+	# SIGA solo se abre si el jugador MIRA al terminal y usa Interactuar.
+	# La acción es remapeable; el prompt del detector enseña su botón real.
+	texto.text = (
+		"%s\n%s\n%s"
+		% [
+			tr(CLAVE_PUESTO_ONBOARDING),
+			tr(CLAVE_ACCION_ONBOARDING),
+			"Mira al terminal: al ver «Usar», pulsa el control indicado abajo.",
+		]
+	)
 	texto.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	texto.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	texto.custom_minimum_size.x = 820
-	texto.custom_minimum_size.y = 68
+	texto.custom_minimum_size.y = 110
 	texto.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	texto.add_theme_font_size_override("font_size", 24)
 	texto.add_theme_color_override("font_color", HUDEstilo.TEXTO_TUTORIAL)
@@ -196,8 +206,8 @@ func _consejo_de_fase() -> String:
 			if int(jornada.get("acciones", 0)) > 0:
 				return (
 					"OBJETIVO · ARCHIVO\n"
-					+ "Busca tu puesto: al acercarte se abre SIGA-98. "
-					+ "Lee expedientes y decide qué hacer con las pruebas."
+					+ "Busca el terminal verde SIGA-98 y míralo hasta ver «Usar». "
+					+ "Pulsa el control indicado para abrirlo y lee tu expediente."
 				)
 			return (
 				"OBJETIVO · FIN DE TURNO\n"

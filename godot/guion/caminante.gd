@@ -202,10 +202,17 @@ func _montar_interaccion() -> void:
 	_prompt_interaccion.name = "PromptInteraccion"
 	_prompt_interaccion.theme = EstiloSiga.tema()
 	_prompt_interaccion.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_prompt_interaccion.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_prompt_interaccion.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_prompt_interaccion.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_prompt_interaccion.add_theme_font_size_override("font_size", 26)
+	_prompt_interaccion.add_theme_color_override("font_color", Color(0.96, 0.97, 0.93))
+	_prompt_interaccion.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.95))
+	_prompt_interaccion.add_theme_constant_override("outline_size", 6)
 	_prompt_interaccion.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
-	_prompt_interaccion.offset_left = -260
-	_prompt_interaccion.offset_top = -74
-	_prompt_interaccion.offset_right = 260
+	_prompt_interaccion.offset_left = -380
+	_prompt_interaccion.offset_top = -106
+	_prompt_interaccion.offset_right = 380
 	_prompt_interaccion.offset_bottom = -30
 	_prompt_interaccion.visible = false
 
