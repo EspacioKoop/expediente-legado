@@ -555,7 +555,9 @@ func _clave_conversacion_contextual(
 	# #963: la hora solo entra como último fallback contextual. No tapa una
 	# reacción ideológica/religiosa ya ganada y no modifica presencia o estado.
 	var clave_horaria := DialogoHorarioCompaneros.resolver(actor_id, Jornada.hora_decimal(jornada))
-	return clave_horaria if not clave_horaria.is_empty() else clave_dialogo
+	if not clave_horaria.is_empty():
+		return clave_horaria
+	return clave_dialogo
 
 
 func _al_cerrar_dialogo() -> void:
