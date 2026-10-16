@@ -105,7 +105,7 @@
           "id": "circular2@2",
           "tipo": "CIRCULAR",
           "folio": "CIRC-1988-012",
-          "contenido": "Every request for special furniture must be ruled on by the Workplace Welfare Committee, which shall meet when quorum is present. The committee has not met since its creation because quorum has never been reached.",
+          "contenido": "Every request for special furniture must be ruled on by the Workplace Welfare Committee, which shall meet when quorum is present. The committee has not met since its creation because quorum has never been reached. The final decision requires the signature of the Head of Workplace Welfare. Without that approval, the Warehouse cannot deliver the furniture even if the item is in stock.",
           "fecha": "1988-06-01"
         },
         {
@@ -121,6 +121,20 @@
           "folio": "OF-1987-200",
           "contenido": "Notice is hereby given that the Workplace Welfare Department is eliminated as part of an administrative restructuring, effective from this date.",
           "fecha": "1987-05-04"
+        },
+        {
+          "id": "dictamenMedico2@2",
+          "tipo": "OFICIO",
+          "folio": "MED-1990-018",
+          "contenido": "Occupational Health Service. Assessment of R. Salcido, Warehouse: a lumbar injury requires an adjustable chair with back support for sorting duties. The workstation should be adapted before 01/04/1990. The clinical recommendation does not itself authorize purchase or delivery. A copy is sent to the Workplace Welfare Committee for processing; no acknowledgement from the committee is on file.",
+          "fecha": "1990-03-12"
+        },
+        {
+          "id": "recepcionSilla2@2",
+          "tipo": "ACTA",
+          "folio": "REC-1992-006",
+          "contenido": "Furniture Warehouse, entry record dated 17/09/1992: one adjustable chair, consignment 6-B, destination label 'R. Salcido / OF-1990-114'. The unit is available in storage, but the authorization signature field is blank. The 'delivered to employee' box is also empty. This record proves receipt by the warehouse, not delivery to the intended recipient.",
+          "fecha": "1992-09-17"
         }
       ],
       "pistas": [
@@ -147,6 +161,36 @@
           "registroOrigen": "oficio2@2",
           "registroOrigen2": "empleado2@2",
           "descripcion": "The original 1990 request was never marked approved, rejected, or cancelled: fourteen offices later, it is still in process under the name of an employee who has already retired."
+        },
+        {
+          "id": "pista55@2",
+          "registroOrigen": "dictamenMedico2@2",
+          "descripcion": "Occupational Health recommended adapting Salcido's workstation before April 1990, while explicitly leaving purchase authorization outside its remit.",
+          "fraseGatillo": "The clinical recommendation does not itself authorize purchase or delivery."
+        },
+        {
+          "id": "pista56@2",
+          "registroOrigen": "recepcionSilla2@2",
+          "descripcion": "A chair intended for Salcido physically reached the warehouse in 1992, but both the authorization signature and the employee's delivery acknowledgement were missing.",
+          "fraseGatillo": "the authorization signature field is blank"
+        },
+        {
+          "id": "pista57@2",
+          "registroOrigen": "dictamenMedico2@2",
+          "registroOrigen2": "recepcionSilla2@2",
+          "descripcion": "The medical need was documented in 1990, and by 1992 a chair labelled for Salcido existed. Neither document proves that the employee was able to use it."
+        },
+        {
+          "id": "pista58@2",
+          "registroOrigen": "circular2@2",
+          "registroOrigen2": "recepcionSilla2@2",
+          "descripcion": "Circular 12 reserves decisions for a committee unable to reach quorum, while the receipt record leaves the authorization signature blank. The procedure remains blocked even after the requested item exists."
+        },
+        {
+          "id": "pista59@2",
+          "registroOrigen": "recepcionSilla2@2",
+          "registroOrigen2": "empleado2@2",
+          "descripcion": "In 1992 a chair labelled for Salcido was in storage; when he retired in 1996, he was still waiting for an answer. The physical item and the administrative decision followed separate paths."
         }
       ],
       "sospechosos": [
@@ -197,7 +241,7 @@
           "id": "acta3@3",
           "tipo": "ACTA",
           "folio": "ACTA-1993-009",
-          "contenido": "Minutes of the Ad Honorem Committee meeting authorizing the transfer. Attendees: L. Pardo, R. Guzmán, [name illegible in the digitized original]. No record of this committee was found in any official company organization chart.",
+          "contenido": "Minutes of the Ad Honorem Committee meeting authorizing the transfer. Attendees: L. Pardo, R. Guzmán, [name illegible in the digitized original]. No record of this committee was found in any official company organization chart. A control note in the attendance-list margin gives the third, illegible entry the internal code EMP-0233. The note does not prove that the named employee attended or wrote it.",
           "fecha": "1993-06-28"
         },
         {
@@ -206,6 +250,20 @@
           "folio": "EMP-0233",
           "contenido": "E. Montalvo. Administrative assistant, 1988-1993. Last pay slip: June 1993. No resignation or termination recorded after the transfer.",
           "fecha": "1993-06-30"
+        },
+        {
+          "id": "controlAcceso3@3",
+          "tipo": "CONTROL",
+          "folio": "ACC-1993-0233",
+          "contenido": "Access control, 05/07/1993, 07:12: card EMP-0233 accepted at the Technical Archive entrance. No second card reading was recorded during the shift. The reader does not identify who presents the card, nor does it record a floor or final destination. Security's inventory still lists the card as active.",
+          "fecha": "1993-07-05"
+        },
+        {
+          "id": "inventarioRotulos3@3",
+          "tipo": "INVENTARIO",
+          "folio": "INV-1993-013",
+          "contenido": "Signage inventory made before the transfer, revised on 02/07/1993. The plate numbered 13 is assigned to a technical storage-room entrance near the roof of level twelve. This internal numbering does not appear on the plans as an additional floor and does not establish an occupied office. The entry records a door and a plate; it does not certify who used that entrance.",
+          "fecha": "1993-07-02"
         }
       ],
       "pistas": [
@@ -232,6 +290,36 @@
           "registroOrigen": "acta3@3",
           "registroOrigen2": "empleado3@3",
           "descripcion": "The illegible name on the meeting attendance list shares the same employee code that appears in E. Montalvo's personnel file."
+        },
+        {
+          "id": "pista60@3",
+          "registroOrigen": "controlAcceso3@3",
+          "descripcion": "Card EMP-0233 was used on the appointed transfer date, but the access log identifies neither the holder nor their arrival on a thirteenth floor.",
+          "fraseGatillo": "The reader does not identify who presents the card"
+        },
+        {
+          "id": "pista61@3",
+          "registroOrigen": "inventarioRotulos3@3",
+          "descripcion": "The company had a plate numbered 13 on a technical storage room; that number is not an additional floor and does not establish that the Special Liaison Department exists.",
+          "fraseGatillo": "does not appear on the plans as an additional floor"
+        },
+        {
+          "id": "pista62@3",
+          "registroOrigen": "memo3@3",
+          "registroOrigen2": "controlAcceso3@3",
+          "descripcion": "On the day the transfer order required reporting for duty, someone used card EMP-0233 at the Technical Archive. The date and employee code match, but the person and destination remain unverified."
+        },
+        {
+          "id": "pista63@3",
+          "registroOrigen": "oficio3@3",
+          "registroOrigen2": "inventarioRotulos3@3",
+          "descripcion": "The building report rules out a thirteenth floor, while the signage inventory records a door marked 13. Both documents can be true without proving what '13th floor' meant in the transfer order."
+        },
+        {
+          "id": "pista64@3",
+          "registroOrigen": "controlAcceso3@3",
+          "registroOrigen2": "inventarioRotulos3@3",
+          "descripcion": "The access log records a card being used at the Technical Archive, and the signage inventory describes a door marked 13 there. Neither proves that the cardholder reached that storeroom or that it was Montalvo."
         }
       ],
       "sospechosos": [
@@ -353,7 +441,7 @@
           "id": "memo5@5",
           "tipo": "MEMORANDO",
           "folio": "MEMO-1978-014",
-          "contenido": "Identical text in all three archived copies (1978, 1993, 2007), including the same spelling mistake on the third line. The 2007 copy bears a handwritten note in the margin: 'this is for the auditor reading it now, no matter when now is.'",
+          "contenido": "Identical text in all three archived copies (1978, 1993, 2007), including the same spelling mistake on the third line. The 2007 copy bears a handwritten note in the margin: 'this is for the auditor reading it now, no matter when now is.' The file indicates that this note and the 1993 closing report share an unusual signature stroke, but it does not name the person who first compared them.",
           "fecha": "2007-04-09"
         },
         {
@@ -369,6 +457,20 @@
           "folio": "EMP-AUD-1993",
           "contenido": "Previous auditor, special commission of 1993. Closing note in their own report on this file, word for word identical to what any later auditor would write upon reaching the same conclusion.",
           "fecha": "1993-05-02"
+        },
+        {
+          "id": "resguardo1978@5",
+          "tipo": "INVENTARIO",
+          "folio": "ARC-1978-014",
+          "fecha": "1978-04-09",
+          "contenido": "Central Archive, intake box 14. The ledger records the arrival of a copy of memorandum MEMO-1978-014 and notes that it already bore a typo on the third line. The 'original supplied by' field was left empty. The stamp proves the box was received in 1978; it does not establish when the text was written or who typed it."
+        },
+        {
+          "id": "cotejo2007@5",
+          "tipo": "ACTA",
+          "folio": "ACTA-2007-014",
+          "fecha": "2007-04-12",
+          "contenido": "Internal Archive handwriting comparison between the marginal note on memorandum MEMO-1978-014 and the closing statement attributed to the special auditor of 1993. The same opening stroke and an unusual break in the final signature were observed. The report records only a graphic resemblance: it does not establish that one person wrote both documents or how the note travelled between the recorded years."
         }
       ],
       "pistas": [
@@ -395,6 +497,36 @@
           "registroOrigen": "acta5@5",
           "registroOrigen2": "memo5@5",
           "descripcion": "The review interval set by this report matches, year for year, the dates of the three memorandum copies — as though in 2007 someone already knew when the next one would appear."
+        },
+        {
+          "id": "pista65@5",
+          "registroOrigen": "resguardo1978@5",
+          "descripcion": "A copy of the memorandum was already on file in 1978, but the intake entry does not identify who provided the alleged original.",
+          "fraseGatillo": "The 'original supplied by' field was left empty."
+        },
+        {
+          "id": "pista66@5",
+          "registroOrigen": "cotejo2007@5",
+          "descripcion": "The comparison notes similarities between handwriting from two periods but refuses to certify that the same person wrote both.",
+          "fraseGatillo": "it does not establish that one person wrote both documents"
+        },
+        {
+          "id": "pista67@5",
+          "registroOrigen": "resguardo1978@5",
+          "registroOrigen2": "memo5@5",
+          "descripcion": "The 1978 receipt confirms a physical intake before the later copies, but the current memorandum combines versions without proving which was typed first."
+        },
+        {
+          "id": "pista68@5",
+          "registroOrigen": "cotejo2007@5",
+          "registroOrigen2": "empleado5@5",
+          "descripcion": "The comparison report finds shared features in the 1993 auditor's alleged writing and the later note. This resemblance does not identify the author or turn the auditor's conclusion into a prophecy."
+        },
+        {
+          "id": "pista69@5",
+          "registroOrigen": "resguardo1978@5",
+          "registroOrigen2": "acta5@5",
+          "descripcion": "The 1978 box precedes the 1993 and 2007 reviews described in the file; the later report stipulates an interval but provides no original order establishing it."
         }
       ],
       "sospechosos": [
@@ -652,21 +784,21 @@
           "id": "actaA@8",
           "tipo": "ACTA",
           "folio": "ACTA-1998-427A",
-          "contenido": "It was determined that employee #427 was reassigned to janitorial duties in the basement, where they remain. Final closure of the file.",
+          "contenido": "It was determined that employee #427 was reassigned to janitorial duties in the basement, where they remain. Final closure of the file. Signing time: 14:00. This report does not refer to the other two closures signed that day.",
           "fecha": "1998-11-05"
         },
         {
           "id": "actaB@8",
           "tipo": "ACTA",
           "folio": "ACTA-1998-427B",
-          "contenido": "It was determined that employee #427 left the building through a fourth-floor window. There were no witnesses. Final closure of the file.",
+          "contenido": "It was determined that employee #427 left the building through a fourth-floor window. There were no witnesses. Final closure of the file. Signing time: 14:00. This report does not refer to the other two closures signed that day.",
           "fecha": "1998-11-05"
         },
         {
           "id": "actaC@8",
           "tipo": "ACTA",
           "folio": "ACTA-1998-427C",
-          "contenido": "It was determined that the premises were completely dismantled forty-eight hours after this investigation began, including the file itself, which you are nevertheless still reading. Final closure of the file.",
+          "contenido": "It was determined that the premises were completely dismantled forty-eight hours after this investigation began, including the file itself, which you are nevertheless still reading. Final closure of the file. Signing time: 14:00. This report does not refer to the other two closures signed that day.",
           "fecha": "1998-11-05"
         },
         {
@@ -675,6 +807,20 @@
           "folio": "FAX-1998-427",
           "contenido": "Transmission with no identified sender and no record of sending or receipt. The entire text reads: 'Very good. You made it this far.'",
           "fecha": "1998-11-05"
+        },
+        {
+          "id": "controlTerminal8@8",
+          "tipo": "CONTROL",
+          "folio": "CTRL-1998-427",
+          "fecha": "1998-11-05",
+          "contenido": "Terminal C operations log, 5 November 1998: button presses were recorded at 08:17 and 08:32 under workstation code #427. The system stores terminal events, not images or personal identification. The 'operator present' field was left unverified; the log does not establish who pressed the button."
+        },
+        {
+          "id": "mantenimientoVentanas8@8",
+          "tipo": "OFICIO",
+          "folio": "MANT-1998-427",
+          "fecha": "1998-11-06",
+          "contenido": "Physical inspection of the fourth floor, 6 November 1998. The inspected windows still have continuous seals and mechanical fastenings fitted during the initial construction; the Maintenance ledger records no repairs to make them openable. The report describes their condition at inspection and cannot establish who was on the fourth floor the day before."
         }
       ],
       "pistas": [
@@ -707,6 +853,36 @@
           "registroOrigen": "actaB@8",
           "registroOrigen2": "actaC@8",
           "descripcion": "Report B says #427 left through a fourth-floor window; Report C says the premises were dismantled forty-eight hours after the investigation began. Neither report was written after the other: they share the same signing time."
+        },
+        {
+          "id": "pista70@8",
+          "registroOrigen": "controlTerminal8@8",
+          "descripcion": "Terminal C recorded button presses under #427's code on the date of the three closure reports, without verifying the operator's identity.",
+          "fraseGatillo": "The 'operator present' field was left unverified"
+        },
+        {
+          "id": "pista71@8",
+          "registroOrigen": "mantenimientoVentanas8@8",
+          "descripcion": "The inspection found intact seals on fourth-floor windows, but it took place the day after the alleged departure.",
+          "fraseGatillo": "still have continuous seals and mechanical fastenings"
+        },
+        {
+          "id": "pista72@8",
+          "registroOrigen": "controlTerminal8@8",
+          "registroOrigen2": "empleado427@8",
+          "descripcion": "#427's only contractual task was to press a button, and the terminal retains presses under that workstation code. The system records activity, not the employee's presence or identity."
+        },
+        {
+          "id": "pista73@8",
+          "registroOrigen": "mantenimientoVentanas8@8",
+          "registroOrigen2": "actaB@8",
+          "descripcion": "Report B says #427 left through a fourth-floor window; the later inspection finds continuous fastenings and seals. This challenges the claim without reconstructing what happened."
+        },
+        {
+          "id": "pista74@8",
+          "registroOrigen": "controlTerminal8@8",
+          "registroOrigen2": "actaA@8",
+          "descripcion": "Report A says #427 was reassigned to Janitorial Services, while the terminal still registered button presses under the same code that day. Without a reassignment time or identity check, these facts are not necessarily incompatible."
         }
       ],
       "sospechosos": [
@@ -1008,6 +1184,20 @@
           "folio": "ACT-1998-044",
           "contenido": "Document regularization meeting, 6 March 1998. It is agreed to treat every earlier reference to Circular 0/98 as valid \"for administrative continuity\", even though no earlier version is on record at the General Secretariat or the Print Shop. Signed: Clara Valdés, head of the Technical Secretariat.",
           "fecha": "1998-03-06"
+        },
+        {
+          "id": "cubiertaArchivo11@11",
+          "tipo": "REGISTRO_ARCHIVO",
+          "folio": "CUB-1997-C0",
+          "fecha": "1997-11-27",
+          "contenido": "Archive covering sheet, linked to entry ARC-1997-C0, 27 November 1997: an envelope labelled 'Circular 0/98' was received with no inventory of enclosed pages and instructions not to open it without authorization from the General Secretariat. The covering sheet confirms an envelope and its label, not that it contained a circular with that text."
+        },
+        {
+          "id": "revisionAsiento11@11",
+          "tipo": "ACTA",
+          "folio": "REV-1998-018",
+          "fecha": "1998-03-07",
+          "contenido": "Intake ledger review, 7 March 1998. Entry ARC-1997-C0 was written beside records 1841 and 1842, but the ledger cannot independently date the ink of that annotation. The entry is to remain on file, neither validated nor deleted, until the envelope's contents can be found. No alternative issue date for Circular 0/98 is established."
         }
       ],
       "pistas": [
@@ -1052,6 +1242,36 @@
           "registroOrigen": "acta11@11",
           "registroOrigen2": "imprenta11@11",
           "descripcion": "The minutes validate earlier references to the circular \"for administrative continuity\", even though the print shop states there were no earlier versions."
+        },
+        {
+          "id": "pista75@11",
+          "registroOrigen": "cubiertaArchivo11@11",
+          "descripcion": "In 1997 the Archive registered an envelope labelled Circular 0/98, but the receipt includes no list or verification of its contents.",
+          "fraseGatillo": "with no inventory of enclosed pages"
+        },
+        {
+          "id": "pista76@11",
+          "registroOrigen": "revisionAsiento11@11",
+          "descripcion": "The 1998 review could not independently date the 1997 ledger annotation and left it on file without validating it.",
+          "fraseGatillo": "cannot independently date the ink"
+        },
+        {
+          "id": "pista77@11",
+          "registroOrigen": "cubiertaArchivo11@11",
+          "registroOrigen2": "archivo11@11",
+          "descripcion": "The Archive ledger calls the item received in November 1997 Circular 0/98, whereas the covering sheet attests only to an envelope with that label, not to the circular inside."
+        },
+        {
+          "id": "pista78@11",
+          "registroOrigen": "cubiertaArchivo11@11",
+          "registroOrigen2": "imprenta11@11",
+          "descripcion": "The 1997 envelope cover and the print shop's first typesetting in March 1998 can coexist if the envelope label did not match its contents; that hypothesis remains unverified."
+        },
+        {
+          "id": "pista79@11",
+          "registroOrigen": "revisionAsiento11@11",
+          "registroOrigen2": "acta11@11",
+          "descripcion": "The Secretariat regularized earlier references on 6 March 1998, but a ledger review the following day still declined to certify the date of the older annotation."
         }
       ],
       "sospechosos": [
@@ -1098,7 +1318,9 @@
       "resumen": "Created in 1988 to rule on requests for special furniture. It has never reached quorum since its founding, leaving R. Salcido's chair request in process for six years. Its founding record reproduces, word for word, the wording of the 1958 founding charter of the [[Ad Honorem Committee]] — including the clause defining quorum in a way that no number of attendees can satisfy.",
       "pistas": [
         "pista3@2",
-        "pista22@2"
+        "pista22@2",
+        "pista58@2",
+        "pista59@2"
       ]
     },
     {
@@ -1138,7 +1360,8 @@
       "resumen": "Destination of [[E. Montalvo]]'s 1993 transfer, according to a memorandum stamped as received. The building has twelve floors according to every current plan. The transfer order was signed by the [[Ad Honorem Committee]].",
       "pistas": [
         "pista5@3",
-        "pista6@3"
+        "pista6@3",
+        "pista63@3"
       ]
     },
     {
@@ -1147,7 +1370,9 @@
       "tipo": "PERSONA",
       "resumen": "Administrative assistant, 1988-1993. Transferred to [[The 13th Floor / Special Liaison]] by instruction of the [[Ad Honorem Committee]]. There is no resignation, termination, or pay slip after the transfer date.",
       "pistas": [
-        "pista5@3"
+        "pista5@3",
+        "pista62@3",
+        "pista64@3"
       ]
     },
     {
@@ -1157,7 +1382,9 @@
       "resumen": "A memorandum with identical folio, date, and typing errors appears filed separately in 1978, 1993, and 2007. The most recent copy includes a note addressed literally to whoever is reading it now. Stored in the [[Dead Archive]].",
       "pistas": [
         "pista9@5",
-        "pista10@5"
+        "pista10@5",
+        "pista67@5",
+        "pista68@5"
       ]
     },
     {
@@ -1167,7 +1394,8 @@
       "resumen": "Repository for files that, according to a 2007 report, must be 'reviewed' every fifteen years despite no recorded administrative reason for doing so. The uncirculated 1958 founding charter of the [[Ad Honorem Committee]] also surfaced there. Sooner or later, files with no clear sender or destination end up there too, such as the file of [[Employee #427]].",
       "pistas": [
         "pista9@5",
-        "pista19@8"
+        "pista19@8",
+        "pista69@5"
       ]
     },
     {
@@ -1219,7 +1447,9 @@
       "tipo": "PERSONA",
       "resumen": "Fifteen years pressing a button without anyone asking why. The file contains three mutually incompatible closing reports, followed by [[The Senderless Transmission]].",
       "pistas": [
-        "pista18@8"
+        "pista18@8",
+        "pista72@8",
+        "pista73@8"
       ]
     },
     {

@@ -105,7 +105,7 @@
           "id": "circular2@2",
           "tipo": "CIRCULAR",
           "folio": "CIRC-1988-012",
-          "contenido": "Toda solicitud de mobiliario especial deberá ser dictaminada por el Comité de Bienestar Laboral, el cual sesionará cuando exista quórum. El comité no ha sesionado desde su fundación por falta de quórum.",
+          "contenido": "Toda solicitud de mobiliario especial deberá ser dictaminada por el Comité de Bienestar Laboral, el cual sesionará cuando exista quórum. El comité no ha sesionado desde su fundación por falta de quórum. La resolución final requiere la firma de la Jefatura de Bienestar Laboral. Sin ese visto bueno, Almacén no puede entregar el mobiliario aunque lo tenga disponible.",
           "fecha": "1988-06-01"
         },
         {
@@ -121,6 +121,20 @@
           "folio": "OF-1987-200",
           "contenido": "Se notifica la eliminación de la Jefatura de Bienestar Laboral por reestructuración administrativa, efectiva a partir de esta fecha.",
           "fecha": "1987-05-04"
+        },
+        {
+          "id": "dictamenMedico2@2",
+          "tipo": "OFICIO",
+          "folio": "MED-1990-018",
+          "contenido": "Servicio Médico Laboral. Valoración de R. Salcido, Almacén: la lesión lumbar hace necesaria una silla regulable con respaldo para su puesto de clasificación. Se recomienda adaptar el puesto antes del 01/04/1990. La recomendación clínica no autoriza por sí sola la compra ni su entrega. Se remite copia al Comité de Bienestar Laboral para su trámite; no consta acuse del comité.",
+          "fecha": "1990-03-12"
+        },
+        {
+          "id": "recepcionSilla2@2",
+          "tipo": "ACTA",
+          "folio": "REC-1992-006",
+          "contenido": "Almacén de mobiliario, registro de entrada 17/09/1992: una silla regulable, remito 6-B, etiqueta de destino 'R. Salcido / OF-1990-114'. La unidad está disponible en depósito, pero el campo de firma autorizante está en blanco. La casilla 'entregado al empleado' también permanece vacía. El registro acredita recepción por Almacén, no entrega a su destinatario.",
+          "fecha": "1992-09-17"
         }
       ],
       "pistas": [
@@ -147,6 +161,36 @@
           "registroOrigen": "oficio2@2",
           "registroOrigen2": "empleado2@2",
           "descripcion": "La solicitud original de 1990 nunca fue marcada como aprobada, rechazada ni cancelada: sigue en trámite, catorce oficinas después, a nombre de un empleado que ya se jubiló."
+        },
+        {
+          "id": "pista55@2",
+          "registroOrigen": "dictamenMedico2@2",
+          "descripcion": "El Servicio Médico recomendó adaptar el puesto de Salcido antes de abril de 1990, pero dejó expresamente la autorización de compra fuera de su competencia.",
+          "fraseGatillo": "La recomendación clínica no autoriza por sí sola la compra ni su entrega."
+        },
+        {
+          "id": "pista56@2",
+          "registroOrigen": "recepcionSilla2@2",
+          "descripcion": "Una silla destinada a Salcido llegó físicamente al almacén en 1992, pero faltaban la firma autorizante y el acuse de entrega al empleado.",
+          "fraseGatillo": "el campo de firma autorizante está en blanco"
+        },
+        {
+          "id": "pista57@2",
+          "registroOrigen": "dictamenMedico2@2",
+          "registroOrigen2": "recepcionSilla2@2",
+          "descripcion": "La necesidad médica estaba documentada en 1990 y en 1992 existía una silla etiquetada para Salcido. Ninguno de los dos documentos demuestra que el trabajador pudiera usarla."
+        },
+        {
+          "id": "pista58@2",
+          "registroOrigen": "circular2@2",
+          "registroOrigen2": "recepcionSilla2@2",
+          "descripcion": "La Circular 12 reserva la decisión al comité sin quórum y el acta de recepción deja en blanco la firma autorizante. El obstáculo afecta al trámite incluso cuando el objeto solicitado ya existe."
+        },
+        {
+          "id": "pista59@2",
+          "registroOrigen": "recepcionSilla2@2",
+          "registroOrigen2": "empleado2@2",
+          "descripcion": "En 1992 había una silla con el nombre de Salcido en depósito; en su jubilación de 1996 el empleado todavía esperaba una respuesta. La recepción del bien y la resolución del derecho siguieron caminos distintos."
         }
       ],
       "sospechosos": [
@@ -197,7 +241,7 @@
           "id": "acta3@3",
           "tipo": "ACTA",
           "folio": "ACTA-1993-009",
-          "contenido": "Acta de reunión del Comité Ad Honorem donde se autoriza el traslado. Lista de asistentes: L. Pardo, R. Guzmán, [nombre ilegible en el original digitalizado]. No se encontró este comité en ningún organigrama oficial de la empresa.",
+          "contenido": "Acta de reunión del Comité Ad Honorem donde se autoriza el traslado. Lista de asistentes: L. Pardo, R. Guzmán, [nombre ilegible en el original digitalizado]. No se encontró este comité en ningún organigrama oficial de la empresa. Anotación de control en el margen de la lista: el tercer asiento, sin nombre legible, lleva la clave interna EMP-0233. La anotación no acredita presencia física ni autoría de esa persona.",
           "fecha": "1993-06-28"
         },
         {
@@ -206,6 +250,20 @@
           "folio": "EMP-0233",
           "contenido": "E. Montalvo. Auxiliar administrativo 1988-1993. Último recibo de nómina: junio de 1993. Sin renuncia ni baja registrada después del traslado.",
           "fecha": "1993-06-30"
+        },
+        {
+          "id": "controlAcceso3@3",
+          "tipo": "CONTROL",
+          "folio": "ACC-1993-0233",
+          "contenido": "Control de acceso, 05/07/1993, 07:12: tarjeta EMP-0233 admitida en la puerta del Archivo Técnico. No hay constancia de una segunda lectura durante el turno. El lector no identifica a la persona que presenta la tarjeta, ni registra planta o destino final. La tarjeta sigue figurando activa en el inventario de Seguridad.",
+          "fecha": "1993-07-05"
+        },
+        {
+          "id": "inventarioRotulos3@3",
+          "tipo": "INVENTARIO",
+          "folio": "INV-1993-013",
+          "contenido": "Inventario de señalética anterior al traslado, revisado el 02/07/1993. La placa con el número 13 está asignada al acceso de un depósito técnico junto a la cubierta del nivel doce. Esa numeración interna no figura en el plano como planta adicional ni acredita un despacho ocupado. La ficha registra una puerta y una placa; no certifica quién utilizó ese acceso.",
+          "fecha": "1993-07-02"
         }
       ],
       "pistas": [
@@ -232,6 +290,36 @@
           "registroOrigen": "acta3@3",
           "registroOrigen2": "empleado3@3",
           "descripcion": "El nombre ilegible en la lista de asistentes del acta comparte la misma clave de empleado que aparece en el expediente de E. Montalvo."
+        },
+        {
+          "id": "pista60@3",
+          "registroOrigen": "controlAcceso3@3",
+          "descripcion": "La tarjeta EMP-0233 se utilizó el día señalado para el traslado, pero el control de acceso no identifica al portador ni acredita que llegara al piso trece.",
+          "fraseGatillo": "El lector no identifica a la persona que presenta la tarjeta"
+        },
+        {
+          "id": "pista61@3",
+          "registroOrigen": "inventarioRotulos3@3",
+          "descripcion": "La empresa tenía una placa marcada 13 en un depósito técnico; ese número no corresponde a una planta adicional ni demuestra que exista el Departamento de Enlace Especial.",
+          "fraseGatillo": "no figura en el plano como planta adicional"
+        },
+        {
+          "id": "pista62@3",
+          "registroOrigen": "memo3@3",
+          "registroOrigen2": "controlAcceso3@3",
+          "descripcion": "El día en que el traslado ordenaba presentarse, alguien utilizó la tarjeta EMP-0233 en Archivo Técnico. Coinciden la fecha y la clave, no necesariamente la persona ni el destino."
+        },
+        {
+          "id": "pista63@3",
+          "registroOrigen": "oficio3@3",
+          "registroOrigen2": "inventarioRotulos3@3",
+          "descripcion": "El oficio descarta una planta trece, mientras el inventario registra una puerta identificada con 13. Ambas piezas pueden ser ciertas sin demostrar qué significaba 'piso 13' en la orden de traslado."
+        },
+        {
+          "id": "pista64@3",
+          "registroOrigen": "controlAcceso3@3",
+          "registroOrigen2": "inventarioRotulos3@3",
+          "descripcion": "El control sitúa un uso de tarjeta en Archivo Técnico y el inventario describe allí una puerta con la placa 13. Los documentos no prueban que el portador llegara a ese depósito ni que fuera Montalvo."
         }
       ],
       "sospechosos": [
@@ -353,7 +441,7 @@
           "id": "memo5@5",
           "tipo": "MEMORANDO",
           "folio": "MEMO-1978-014",
-          "contenido": "Texto idéntico en las tres copias archivadas (1978, 1993, 2007), incluida la misma falta de ortografía en la tercera línea. La copia de 2007 trae, al margen y a mano: 'esto es para el auditor que lo esté leyendo ahora, sin importar cuándo sea ahora.'",
+          "contenido": "Texto idéntico en las tres copias archivadas (1978, 1993, 2007), incluida la misma falta de ortografía en la tercera línea. La copia de 2007 trae, al margen y a mano: 'esto es para el auditor que lo esté leyendo ahora, sin importar cuándo sea ahora.' La carpeta indica que la letra de esta nota y la del informe de cierre de 1993 presentan el mismo rasgo en la firma, aunque no identifica quién efectuó el primer cotejo.",
           "fecha": "2007-04-09"
         },
         {
@@ -369,6 +457,20 @@
           "folio": "EMP-AUD-1993",
           "contenido": "Auditor predecesor, comisión especial de 1993. Nota de cierre de su propio informe sobre este expediente, palabra por palabra idéntica a la que cualquier auditor posterior redactaría al llegar a la misma conclusión.",
           "fecha": "1993-05-02"
+        },
+        {
+          "id": "resguardo1978@5",
+          "tipo": "INVENTARIO",
+          "folio": "ARC-1978-014",
+          "fecha": "1978-04-09",
+          "contenido": "Archivo Central, caja de ingreso 14. El libro registra la llegada de una copia del memorándum MEMO-1978-014 y consigna que ya presentaba una errata en la tercera línea. El campo 'original presentado por' quedó sin rellenar. El sello acredita que la caja fue recibida en 1978; no acredita cuándo se escribió el texto ni quién lo mecanografió."
+        },
+        {
+          "id": "cotejo2007@5",
+          "tipo": "ACTA",
+          "folio": "ACTA-2007-014",
+          "fecha": "2007-04-12",
+          "contenido": "Cotejo interno de Archivo entre la nota manuscrita del memorándum MEMO-1978-014 y el cierre atribuido al auditor especial de 1993. Se observan el mismo trazo inicial y una interrupción peculiar en la última firma. El informe solo constata semejanza gráfica: no determina si la misma persona escribió ambos documentos ni cómo pudo circular la nota entre los años indicados."
         }
       ],
       "pistas": [
@@ -395,6 +497,36 @@
           "registroOrigen": "acta5@5",
           "registroOrigen2": "memo5@5",
           "descripcion": "La periodicidad de revisión que fija esta acta coincide, año con año, con las fechas de las tres copias del memo — como si ya se supiera, en 2007, cuándo iba a aparecer la siguiente."
+        },
+        {
+          "id": "pista65@5",
+          "registroOrigen": "resguardo1978@5",
+          "descripcion": "La copia del memorándum ya estaba registrada en el Archivo en 1978, pero el asiento no identifica a quien aportó el supuesto original.",
+          "fraseGatillo": "El campo 'original presentado por' quedó sin rellenar."
+        },
+        {
+          "id": "pista66@5",
+          "registroOrigen": "cotejo2007@5",
+          "descripcion": "El cotejo observa semejanzas entre dos manuscritos de épocas distintas, pero se niega a certificar una autoría común.",
+          "fraseGatillo": "no determina si la misma persona escribió ambos documentos"
+        },
+        {
+          "id": "pista67@5",
+          "registroOrigen": "resguardo1978@5",
+          "registroOrigen2": "memo5@5",
+          "descripcion": "El resguardo de 1978 confirma una recepción física anterior a las copias posteriores, pero el memo consultado reúne versiones sin probar cuál se mecanografió primero."
+        },
+        {
+          "id": "pista68@5",
+          "registroOrigen": "cotejo2007@5",
+          "registroOrigen2": "empleado5@5",
+          "descripcion": "El acta de cotejo encuentra rasgos comunes entre el escrito atribuido al auditor de 1993 y la nota posterior. Esa coincidencia no identifica al autor ni convierte la conclusión del auditor en una profecía."
+        },
+        {
+          "id": "pista69@5",
+          "registroOrigen": "resguardo1978@5",
+          "registroOrigen2": "acta5@5",
+          "descripcion": "La caja de 1978 existe antes de las revisiones de 1993 y 2007 mencionadas en el expediente; el acta tardía establece un intervalo, pero no muestra la orden original que lo inició."
         }
       ],
       "sospechosos": [
@@ -652,21 +784,21 @@
           "id": "actaA@8",
           "tipo": "ACTA",
           "folio": "ACTA-1998-427A",
-          "contenido": "Se determinó que el empleado #427 fue reasignado a labores de conserjería en el sótano, donde permanece. Cierre definitivo del expediente.",
+          "contenido": "Se determinó que el empleado #427 fue reasignado a labores de conserjería en el sótano, donde permanece. Cierre definitivo del expediente. Hora de firma: 14:00. El acta no remite a los otros dos cierres del mismo día.",
           "fecha": "1998-11-05"
         },
         {
           "id": "actaB@8",
           "tipo": "ACTA",
           "folio": "ACTA-1998-427B",
-          "contenido": "Se determinó que el empleado #427 abandonó el inmueble por una ventana del cuarto piso. No hubo testigos. Cierre definitivo del expediente.",
+          "contenido": "Se determinó que el empleado #427 abandonó el inmueble por una ventana del cuarto piso. No hubo testigos. Cierre definitivo del expediente. Hora de firma: 14:00. El acta no remite a los otros dos cierres del mismo día.",
           "fecha": "1998-11-05"
         },
         {
           "id": "actaC@8",
           "tipo": "ACTA",
           "folio": "ACTA-1998-427C",
-          "contenido": "Se determinó que las instalaciones fueron desmanteladas por completo cuarenta y ocho horas después de iniciada esta investigación, incluido el expediente mismo, que sin embargo usted sigue leyendo. Cierre definitivo del expediente.",
+          "contenido": "Se determinó que las instalaciones fueron desmanteladas por completo cuarenta y ocho horas después de iniciada esta investigación, incluido el expediente mismo, que sin embargo usted sigue leyendo. Cierre definitivo del expediente. Hora de firma: 14:00. El acta no remite a los otros dos cierres del mismo día.",
           "fecha": "1998-11-05"
         },
         {
@@ -675,6 +807,20 @@
           "folio": "FAX-1998-427",
           "contenido": "Transmisión sin remitente identificado, sin registro de envío ni de recepción. El texto dice, en su totalidad: 'Muy bien. Ha llegado hasta aquí.'",
           "fecha": "1998-11-05"
+        },
+        {
+          "id": "controlTerminal8@8",
+          "tipo": "CONTROL",
+          "folio": "CTRL-1998-427",
+          "fecha": "1998-11-05",
+          "contenido": "Parte de operaciones del terminal C, 05/11/1998: se registraron pulsaciones del botón a las 08:17 y 08:32 bajo el código de puesto #427. El sistema guarda eventos de terminal, no imágenes ni identificaciones personales. La columna 'operador presente' quedó sin verificar; el registro no demuestra quién accionó el botón."
+        },
+        {
+          "id": "mantenimientoVentanas8@8",
+          "tipo": "OFICIO",
+          "folio": "MANT-1998-427",
+          "fecha": "1998-11-06",
+          "contenido": "Inspección física de la cuarta planta, 06/11/1998. Las ventanas revisadas mantienen precintos continuos y cierres mecánicos instalados durante la obra inicial; no constan reparaciones de apertura en el libro de Mantenimiento. El parte describe el estado de las ventanas al inspeccionarlas, no demuestra quién estuvo en la cuarta planta la jornada anterior."
         }
       ],
       "pistas": [
@@ -707,6 +853,36 @@
           "registroOrigen": "actaB@8",
           "registroOrigen2": "actaC@8",
           "descripcion": "El Acta B dice que #427 salió por una ventana del cuarto piso; el Acta C dice que las instalaciones fueron desmanteladas cuarenta y ocho horas después de iniciar la investigación. Ninguna de las dos actas fue escrita después de la otra: comparten la misma hora de firma."
+        },
+        {
+          "id": "pista70@8",
+          "registroOrigen": "controlTerminal8@8",
+          "descripcion": "El terminal C registró pulsaciones bajo el código #427 el día de los tres cierres, sin una verificación de la identidad de su operador.",
+          "fraseGatillo": "La columna 'operador presente' quedó sin verificar"
+        },
+        {
+          "id": "pista71@8",
+          "registroOrigen": "mantenimientoVentanas8@8",
+          "descripcion": "La inspección encontró intactos los cierres de las ventanas de la cuarta planta, pero se realizó al día siguiente del supuesto abandono.",
+          "fraseGatillo": "mantienen precintos continuos y cierres mecánicos"
+        },
+        {
+          "id": "pista72@8",
+          "registroOrigen": "controlTerminal8@8",
+          "registroOrigen2": "empleado427@8",
+          "descripcion": "La única función contractual de #427 era pulsar un botón y el terminal conserva pulsaciones de su código. El sistema registra actividad, no la presencia ni la identidad del empleado."
+        },
+        {
+          "id": "pista73@8",
+          "registroOrigen": "mantenimientoVentanas8@8",
+          "registroOrigen2": "actaB@8",
+          "descripcion": "El Acta B afirma una salida por una ventana de la cuarta planta; el parte posterior observa cierres y precintos continuos. La inspección cuestiona esa versión, sin reconstruir lo que ocurrió."
+        },
+        {
+          "id": "pista74@8",
+          "registroOrigen": "controlTerminal8@8",
+          "registroOrigen2": "actaA@8",
+          "descripcion": "El Acta A declara que #427 fue destinado a Conserjería, mientras el terminal seguía registrando pulsaciones de su código ese mismo día. Sin hora de reasignación ni identificación, no está demostrado que ambas actividades sean incompatibles."
         }
       ],
       "sospechosos": [
@@ -1008,6 +1184,20 @@
           "folio": "ACT-1998-044",
           "contenido": "Reunión de regularización documental, 06/03/1998. Se acuerda considerar válidas todas las referencias previas a Circular 0/98 «por continuidad administrativa», aunque no conste una versión anterior en Secretaría General ni en Imprenta. Firma: Clara Valdés, jefa de Secretaría Técnica.",
           "fecha": "1998-03-06"
+        },
+        {
+          "id": "cubiertaArchivo11@11",
+          "tipo": "REGISTRO_ARCHIVO",
+          "folio": "CUB-1997-C0",
+          "fecha": "1997-11-27",
+          "contenido": "Hoja de cubierta de Archivo, asiento relacionado ARC-1997-C0, 27/11/1997: se recibe un sobre rotulado 'Circular 0/98', sin inventario de folios interiores y con orden de no abrir hasta autorización de Secretaría General. La cubierta confirma una etiqueta y la recepción de un sobre; no certifica que dentro hubiera una circular con ese contenido."
+        },
+        {
+          "id": "revisionAsiento11@11",
+          "tipo": "ACTA",
+          "folio": "REV-1998-018",
+          "fecha": "1998-03-07",
+          "contenido": "Revisión del libro de entradas, 07/03/1998. El asiento ARC-1997-C0 fue escrito junto a los registros 1841 y 1842, pero el libro no permite datar de forma independiente la tinta de esa anotación. Se acuerda conservar el asiento sin validarlo ni suprimirlo hasta localizar el contenido del sobre. No se acredita una fecha alternativa de emisión de la Circular 0/98."
         }
       ],
       "pistas": [
@@ -1052,6 +1242,36 @@
           "registroOrigen": "acta11@11",
           "registroOrigen2": "imprenta11@11",
           "descripcion": "El acta da por válidas las referencias previas a la circular «por continuidad administrativa», aunque Imprenta afirma que no hubo versiones anteriores."
+        },
+        {
+          "id": "pista75@11",
+          "registroOrigen": "cubiertaArchivo11@11",
+          "descripcion": "Archivo registró en 1997 un sobre rotulado como Circular 0/98, pero la recepción no incluye relación ni verificación de su contenido.",
+          "fraseGatillo": "sin inventario de folios interiores"
+        },
+        {
+          "id": "pista76@11",
+          "registroOrigen": "revisionAsiento11@11",
+          "descripcion": "La revisión de 1998 no logró fechar independientemente la anotación del libro de 1997 y decidió conservarla sin validarla.",
+          "fraseGatillo": "no permite datar de forma independiente la tinta"
+        },
+        {
+          "id": "pista77@11",
+          "registroOrigen": "cubiertaArchivo11@11",
+          "registroOrigen2": "archivo11@11",
+          "descripcion": "El libro de Archivo llama Circular 0/98 al documento recibido en noviembre de 1997, mientras la hoja de cubierta solo da fe de un sobre con ese rótulo, no de la circular dentro."
+        },
+        {
+          "id": "pista78@11",
+          "registroOrigen": "cubiertaArchivo11@11",
+          "registroOrigen2": "imprenta11@11",
+          "descripcion": "La cubierta de 1997 y la primera composición de Imprenta de marzo de 1998 pueden coexistir si el rótulo del sobre no refleja su contenido; esa hipótesis sigue sin verificar."
+        },
+        {
+          "id": "pista79@11",
+          "registroOrigen": "revisionAsiento11@11",
+          "registroOrigen2": "acta11@11",
+          "descripcion": "Secretaría regularizó las referencias anteriores el 6 de marzo de 1998, pero la revisión del libro del día siguiente todavía rechazó certificar la fecha de la anotación más antigua."
         }
       ],
       "sospechosos": [
@@ -1098,7 +1318,9 @@
       "resumen": "Creado en 1988 para dictaminar solicitudes de mobiliario especial. No ha alcanzado quórum ni una sola vez desde su fundación, lo que dejó seis años en trámite la silla de R. Salcido. Su acta de creación reproduce, palabra por palabra, la fórmula del acta fundacional del [[Comité Ad Honorem]] de 1958 — incluida la cláusula que define el quórum de un modo que ningún número de asistentes puede satisfacer.",
       "pistas": [
         "pista3@2",
-        "pista22@2"
+        "pista22@2",
+        "pista58@2",
+        "pista59@2"
       ]
     },
     {
@@ -1138,7 +1360,8 @@
       "resumen": "Destino del traslado de [[E. Montalvo]] en 1993, según un memorándum sellado de recibido. El edificio, de acuerdo con todos los planos vigentes, tiene doce pisos. La orden de traslado la firmó el [[Comité Ad Honorem]].",
       "pistas": [
         "pista5@3",
-        "pista6@3"
+        "pista6@3",
+        "pista63@3"
       ]
     },
     {
@@ -1147,7 +1370,9 @@
       "tipo": "PERSONA",
       "resumen": "Auxiliar administrativo 1988-1993. Trasladado a [[El piso 13 / Enlace Especial]] por instrucción del [[Comité Ad Honorem]]. No hay renuncia, baja ni recibo de nómina posterior a la fecha del traslado.",
       "pistas": [
-        "pista5@3"
+        "pista5@3",
+        "pista62@3",
+        "pista64@3"
       ]
     },
     {
@@ -1157,7 +1382,9 @@
       "resumen": "Un memorándum con folio, fecha y errores de mecanografía idénticos aparece archivado por separado en 1978, 1993 y 2007. La copia más reciente incluye una nota dirigida, literalmente, a quien lo esté leyendo ahora. Guardado en el [[Archivo Muerto]].",
       "pistas": [
         "pista9@5",
-        "pista10@5"
+        "pista10@5",
+        "pista67@5",
+        "pista68@5"
       ]
     },
     {
@@ -1167,7 +1394,8 @@
       "resumen": "Depósito de expedientes que, según un acta de 2007, deben 'revisarse' cada quince años sin que exista razón administrativa registrada para ello. Ahí apareció también la versión no circulada del acta fundacional del [[Comité Ad Honorem]], de 1958. Ahí, tarde o temprano, terminan también los expedientes sin remitente ni destino claro, como el de [[Empleado #427]].",
       "pistas": [
         "pista9@5",
-        "pista19@8"
+        "pista19@8",
+        "pista69@5"
       ]
     },
     {
@@ -1219,7 +1447,9 @@
       "tipo": "PERSONA",
       "resumen": "Quince años presionando un botón sin que nadie preguntara para qué. Su expediente tiene tres actas de cierre incompatibles entre sí, y después llegó [[La transmisión sin remitente]].",
       "pistas": [
-        "pista18@8"
+        "pista18@8",
+        "pista72@8",
+        "pista73@8"
       ]
     },
     {
