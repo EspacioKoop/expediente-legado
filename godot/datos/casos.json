@@ -121,6 +121,20 @@
           "folio": "OF-1987-200",
           "contenido": "Se notifica la eliminación de la Jefatura de Bienestar Laboral por reestructuración administrativa, efectiva a partir de esta fecha.",
           "fecha": "1987-05-04"
+        },
+        {
+          "id": "dictamenMedico2@2",
+          "tipo": "DICTAMEN",
+          "folio": "MED-1990-018",
+          "contenido": "Servicio Médico Laboral. Valoración de R. Salcido, Almacén: la lesión lumbar hace necesaria una silla regulable con respaldo para su puesto de clasificación. Se recomienda adaptar el puesto antes del 01/04/1990. La recomendación clínica no autoriza por sí sola la compra ni su entrega. Se remite copia al Comité de Bienestar Laboral para su trámite; no consta acuse del comité.",
+          "fecha": "1990-03-12"
+        },
+        {
+          "id": "recepcionSilla2@2",
+          "tipo": "ACTA",
+          "folio": "REC-1992-006",
+          "contenido": "Almacén de mobiliario, registro de entrada 17/09/1992: una silla regulable, remito 6-B, etiqueta de destino 'R. Salcido / OF-1990-114'. La unidad está disponible en depósito, pero el campo de firma autorizante está en blanco. La casilla 'entregado al empleado' también permanece vacía. El registro acredita recepción por Almacén, no entrega a su destinatario.",
+          "fecha": "1992-09-17"
         }
       ],
       "pistas": [
@@ -147,6 +161,36 @@
           "registroOrigen": "oficio2@2",
           "registroOrigen2": "empleado2@2",
           "descripcion": "La solicitud original de 1990 nunca fue marcada como aprobada, rechazada ni cancelada: sigue en trámite, catorce oficinas después, a nombre de un empleado que ya se jubiló."
+        },
+        {
+          "id": "pista55@2",
+          "registroOrigen": "dictamenMedico2@2",
+          "descripcion": "El Servicio Médico recomendó adaptar el puesto de Salcido antes de abril de 1990, pero dejó expresamente la autorización de compra fuera de su competencia.",
+          "fraseGatillo": "La recomendación clínica no autoriza por sí sola la compra ni su entrega."
+        },
+        {
+          "id": "pista56@2",
+          "registroOrigen": "recepcionSilla2@2",
+          "descripcion": "Una silla destinada a Salcido llegó físicamente al almacén en 1992, pero faltaban la firma autorizante y el acuse de entrega al empleado.",
+          "fraseGatillo": "el campo de firma autorizante está en blanco"
+        },
+        {
+          "id": "pista57@2",
+          "registroOrigen": "dictamenMedico2@2",
+          "registroOrigen2": "recepcionSilla2@2",
+          "descripcion": "La necesidad médica estaba documentada en 1990 y en 1992 existía una silla etiquetada para Salcido. Ninguno de los dos documentos demuestra que el trabajador pudiera usarla."
+        },
+        {
+          "id": "pista58@2",
+          "registroOrigen": "circular2@2",
+          "registroOrigen2": "recepcionSilla2@2",
+          "descripcion": "La Circular 12 reserva la decisión al comité sin quórum y el acta de recepción deja en blanco la firma autorizante. El obstáculo afecta al trámite incluso cuando el objeto solicitado ya existe."
+        },
+        {
+          "id": "pista59@2",
+          "registroOrigen": "recepcionSilla2@2",
+          "registroOrigen2": "empleado2@2",
+          "descripcion": "En 1992 había una silla con el nombre de Salcido en depósito; en su jubilación de 1996 el empleado todavía esperaba una respuesta. La recepción del bien y la resolución del derecho siguieron caminos distintos."
         }
       ],
       "sospechosos": [
@@ -206,6 +250,20 @@
           "folio": "EMP-0233",
           "contenido": "E. Montalvo. Auxiliar administrativo 1988-1993. Último recibo de nómina: junio de 1993. Sin renuncia ni baja registrada después del traslado.",
           "fecha": "1993-06-30"
+        },
+        {
+          "id": "controlAcceso3@3",
+          "tipo": "CONTROL",
+          "folio": "ACC-1993-0233",
+          "contenido": "Control de acceso, 05/07/1993, 07:12: tarjeta EMP-0233 admitida en la puerta del Archivo Técnico. No hay constancia de una segunda lectura durante el turno. El lector no identifica a la persona que presenta la tarjeta, ni registra planta o destino final. La tarjeta sigue figurando activa en el inventario de Seguridad.",
+          "fecha": "1993-07-05"
+        },
+        {
+          "id": "inventarioRotulos3@3",
+          "tipo": "INVENTARIO",
+          "folio": "INV-1993-013",
+          "contenido": "Inventario de señalética anterior al traslado, revisado el 02/07/1993. La placa con el número 13 está asignada al acceso de un depósito técnico junto a la cubierta del nivel doce. Esa numeración interna no figura en el plano como planta adicional ni acredita un despacho ocupado. La ficha registra una puerta y una placa; no certifica quién utilizó ese acceso.",
+          "fecha": "1993-07-02"
         }
       ],
       "pistas": [
@@ -232,6 +290,36 @@
           "registroOrigen": "acta3@3",
           "registroOrigen2": "empleado3@3",
           "descripcion": "El nombre ilegible en la lista de asistentes del acta comparte la misma clave de empleado que aparece en el expediente de E. Montalvo."
+        },
+        {
+          "id": "pista60@3",
+          "registroOrigen": "controlAcceso3@3",
+          "descripcion": "La tarjeta EMP-0233 se utilizó el día señalado para el traslado, pero el control de acceso no identifica al portador ni acredita que llegara al piso trece.",
+          "fraseGatillo": "El lector no identifica a la persona que presenta la tarjeta"
+        },
+        {
+          "id": "pista61@3",
+          "registroOrigen": "inventarioRotulos3@3",
+          "descripcion": "La empresa tenía una placa marcada 13 en un depósito técnico; ese número no corresponde a una planta adicional ni demuestra que exista el Departamento de Enlace Especial.",
+          "fraseGatillo": "no figura en el plano como planta adicional"
+        },
+        {
+          "id": "pista62@3",
+          "registroOrigen": "memo3@3",
+          "registroOrigen2": "controlAcceso3@3",
+          "descripcion": "El día en que el traslado ordenaba presentarse, alguien utilizó la tarjeta EMP-0233 en Archivo Técnico. Coinciden la fecha y la clave, no necesariamente la persona ni el destino."
+        },
+        {
+          "id": "pista63@3",
+          "registroOrigen": "oficio3@3",
+          "registroOrigen2": "inventarioRotulos3@3",
+          "descripcion": "El oficio descarta una planta trece, mientras el inventario registra una puerta identificada con 13. Ambas piezas pueden ser ciertas sin demostrar qué significaba 'piso 13' en la orden de traslado."
+        },
+        {
+          "id": "pista64@3",
+          "registroOrigen": "controlAcceso3@3",
+          "registroOrigen2": "inventarioRotulos3@3",
+          "descripcion": "El control sitúa un uso de tarjeta en Archivo Técnico y el inventario describe allí una puerta con la placa 13. Los documentos no prueban que el portador llegara a ese depósito ni que fuera Montalvo."
         }
       ],
       "sospechosos": [
