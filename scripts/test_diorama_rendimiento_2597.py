@@ -26,6 +26,7 @@ class DioramaRendimiento2597Test(unittest.TestCase):
         self.assertIn("SubViewport.UPDATE_DISABLED", texto)
         self.assertNotIn("SubViewport.UPDATE_ALWAYS", texto)
         self.assertIn("DURACION_PARPADEO := 0.12", texto)
+        self.assertIn("ENERGIA_AMBIENTAL_BASE := 0.42", texto)
 
     def test_ventanas_ajenas_al_menu_siguen_a_fps_nativos(self):
         texto = EXTERIOR.read_text(encoding="utf-8")
@@ -36,7 +37,7 @@ class DioramaRendimiento2597Test(unittest.TestCase):
         self.assertIn("SubViewport.UPDATE_DISABLED", texto)
 
     def test_logica_de_render_y_parpadeo_en_motor_godot(self):
-        comprobar_contrato(self, PRUEBA, "18 pasadas, 0 fallos", timeout=45)
+        comprobar_contrato(self, PRUEBA, "20 pasadas, 0 fallos", timeout=45)
 
 
 if __name__ == "__main__":
