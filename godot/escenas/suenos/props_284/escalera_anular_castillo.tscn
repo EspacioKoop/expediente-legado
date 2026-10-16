@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="ArrayMesh" path="res://escenas/suenos/props_284/escalera_anular_castillo_psx.obj" id="1_escalera"]
 
@@ -7,8 +7,112 @@ albedo_color = Color(0.24, 0.225, 0.205, 1)
 roughness = 0.97
 metallic = 0.01
 
+[sub_resource type="StandardMaterial3D" id="MatMarca"]
+albedo_color = Color(0.42, 0.28, 0.14, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="MatVacio"]
+albedo_color = Color(0.08, 0.075, 0.07, 1)
+roughness = 1.0
+
+[sub_resource type="BoxMesh" id="MarcaBox"]
+size = Vector3(0.26, 0.015, 0.1)
+
+[sub_resource type="TorusMesh" id="VacioToro"]
+inner_radius = 0.46
+outer_radius = 0.92
+
 [node name="EscaleraAnularCastillo" type="Node3D"]
 
 [node name="EscaleraAnularPSX" type="MeshInstance3D" parent="."]
 mesh = ExtResource("1_escalera")
 material_override = SubResource("MatStone")
+
+[node name="VacioCentral" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.06, 0)
+mesh = SubResource("VacioToro")
+material_override = SubResource("MatVacio")
+
+[node name="MarcaPeldano00" type="MeshInstance3D" parent="."]
+position = Vector3(1.75, 0.212, 0)
+rotation_degrees = Vector3(0, -90, 0)
+mesh = SubResource("MarcaBox")
+material_override = SubResource("MatMarca")
+
+[node name="MarcaPeldano01" type="MeshInstance3D" parent="."]
+position = Vector3(1.659, 0.452, 0.555)
+rotation_degrees = Vector3(0, -71.5, 0)
+mesh = SubResource("MarcaBox")
+material_override = SubResource("MatMarca")
+
+[node name="MarcaPeldano02" type="MeshInstance3D" parent="."]
+position = Vector3(1.388, 0.692, 1.066)
+rotation_degrees = Vector3(0, -52.5, 0)
+mesh = SubResource("MarcaBox")
+material_override = SubResource("MatMarca")
+
+[node name="MarcaPeldano03" type="MeshInstance3D" parent="."]
+position = Vector3(0.978, 0.932, 1.451)
+rotation_degrees = Vector3(0, -34, 0)
+mesh = SubResource("MarcaBox")
+material_override = SubResource("MatMarca")
+
+[node name="MarcaPeldano04" type="MeshInstance3D" parent="."]
+position = Vector3(0.438, 1.172, 1.694)
+rotation_degrees = Vector3(0, -14.5, 0)
+mesh = SubResource("MarcaBox")
+material_override = SubResource("MatMarca")
+
+[node name="MarcaPeldano05" type="MeshInstance3D" parent="."]
+position = Vector3(-0.122, 1.412, 1.746)
+rotation_degrees = Vector3(0, 4, 0)
+mesh = SubResource("MarcaBox")
+material_override = SubResource("MatMarca")
+
+[node name="MarcaPeldano06" type="MeshInstance3D" parent="."]
+position = Vector3(-0.67, 1.652, 1.617)
+rotation_degrees = Vector3(0, 22.5, 0)
+mesh = SubResource("MarcaBox")
+material_override = SubResource("MatMarca")
+
+[node name="MarcaPeldano07" type="MeshInstance3D" parent="."]
+position = Vector3(-1.148, 1.892, 1.321)
+rotation_degrees = Vector3(0, 41, 0)
+mesh = SubResource("MarcaBox")
+material_override = SubResource("MatMarca")
+
+[node name="MarcaPeldano08" type="MeshInstance3D" parent="."]
+position = Vector3(-1.508, 2.132, 0.889)
+rotation_degrees = Vector3(0, 59.5, 0)
+mesh = SubResource("MarcaBox")
+material_override = SubResource("MatMarca")
+
+[node name="MarcaPeldano09" type="MeshInstance3D" parent="."]
+position = Vector3(-1.712, 2.372, 0.364)
+rotation_degrees = Vector3(0, 78, 0)
+mesh = SubResource("MarcaBox")
+material_override = SubResource("MatMarca")
+
+[node name="MarcaPeldano10" type="MeshInstance3D" parent="."]
+position = Vector3(-1.733, 2.192, -0.244)
+rotation_degrees = Vector3(0, 98, 0)
+mesh = SubResource("MarcaBox")
+material_override = SubResource("MatMarca")
+
+[node name="MarcaPeldano11" type="MeshInstance3D" parent="."]
+position = Vector3(-1.545, 2.01, -0.821)
+rotation_degrees = Vector3(0, 118, 0)
+mesh = SubResource("MarcaBox")
+material_override = SubResource("MatMarca")
+
+[node name="MarcaPeldano12" type="MeshInstance3D" parent="."]
+position = Vector3(-1.194, 1.832, -1.28)
+rotation_degrees = Vector3(0, 137, 0)
+mesh = SubResource("MarcaBox")
+material_override = SubResource("MatMarca")
+
+[node name="MarcaPeldano13" type="MeshInstance3D" parent="."]
+position = Vector3(-0.74, 1.652, -1.586)
+rotation_degrees = Vector3(0, 155, 0)
+mesh = SubResource("MarcaBox")
+material_override = SubResource("MatMarca")
