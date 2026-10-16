@@ -27,14 +27,14 @@ albedo_color = Color(0.62, 0.58, 0.48, 1)
 metallic = 0.1
 roughness = 0.75
 
-[sub_resource type="BoxMesh" id="PlacaEtiqueta"]
-size = Vector3(0.32, 0.1, 0.02)
+[sub_resource type="QuadMesh" id="PlacaEtiqueta"]
+size = Vector2(0.32, 0.1)
 
-[sub_resource type="BoxMesh" id="CajonFrente"]
-size = Vector3(0.9, 0.34, 0.04)
+[sub_resource type="QuadMesh" id="CajonFrente"]
+size = Vector2(0.9, 0.34)
 
-[sub_resource type="BoxMesh" id="TapaPolvo"]
-size = Vector3(1.0, 0.03, 0.62)
+[sub_resource type="PlaneMesh" id="TapaPolvo"]
+size = Vector2(1.0, 0.62)
 
 [sub_resource type="CylinderMesh" id="Handle"]
 top_radius = 0.045
