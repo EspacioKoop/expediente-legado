@@ -102,7 +102,7 @@ func _montar_interacciones() -> void:
 		var hotspot := Interactuable3D.new()
 		hotspot.name = "PesoDuat_%02d" % indice
 		hotspot.verbo = Interactuable3D.Verbo.USAR
-		hotspot.nombre_objeto = "contrapeso"
+		hotspot.nombre_objeto = "contrapeso %s (%s)" % [_nombre_objeto(id_objeto), "fuera"]
 		hotspot.sonido = Interactuable3D.SIN_SONIDO
 		hotspot.set_meta("duat_objeto_id", id_objeto)
 		hotspot.set_meta("duat_estado", "fuera")
@@ -172,7 +172,8 @@ func _actualizar_pesos() -> void:
 		var hotspot := interactuable(id_objeto)
 		if hotspot != null:
 			hotspot.set_meta("duat_estado", estado)
-		_mover_peso(area, destino)
+			hotspot.nombre_objeto = "contrapeso %s (%s)" % [_nombre_objeto(id_objeto), estado]
+		_mover_peso(area, destino, estado)
 
 
 func _posicion_en_bandeja(base: Vector3, indice: int) -> Vector3:
@@ -181,11 +182,34 @@ func _posicion_en_bandeja(base: Vector3, indice: int) -> Vector3:
 	return base + Vector3((float(columna) - 1.0) * 0.44, 0.0, float(fila) * 0.44)
 
 
-func _mover_peso(area: Area3D, destino: Vector3) -> void:
+func _nombre_objeto(id_objeto: String) -> String:
+	for obj in _estado_pesaje.get("objetos", []):
+		if typeof(obj) == TYPE_DICTIONARY and String(obj.get("id", "")) == id_objeto:
+			var nombre := String(obj.get("nombre", "")).strip_edges()
+			if not nombre.is_empty():
+				return nombre
+			break
+	return id_objeto
+
+
+func _mover_peso(area: Area3D, destino: Vector3, estado: String = "fuera") -> void:
+	var visual := area.get_node_or_null("Visual") as MeshInstance3D
+	var escala_objetivo := Vector3.ONE
+	if estado == "observado":
+		escala_objetivo = Vector3(1.1, 1.1, 1.1)
+	elif estado == "sellado":
+		escala_objetivo = Vector3(0.9, 1.25, 0.9)
+
 	if _reduccion_movimiento:
 		area.position = destino
+		if visual != null:
+			visual.scale = escala_objetivo
 		return
+
 	var tween := create_tween()
+	tween.set_parallel(true)
 	tween.set_trans(Tween.TRANS_SINE)
 	tween.set_ease(Tween.EASE_IN_OUT)
 	tween.tween_property(area, "position", destino, 0.18)
+	if visual != null:
+		tween.tween_property(visual, "scale", escala_objetivo, 0.18)
