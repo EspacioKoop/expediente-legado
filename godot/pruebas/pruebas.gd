@@ -454,8 +454,8 @@ func _contenido() -> void:
 		registros += c["registros"].size()
 		pistas += c["pistas"].size()
 		sospechosos += c["sospechosos"].size()
-	comprobar("cincuenta y cuatro registros", registros, 54)
-	comprobar("sesenta y cuatro pistas", pistas, 64)
+	comprobar("sesenta registros", registros, 60)
+	comprobar("setenta y nueve pistas", pistas, 79)
 	comprobar("treinta y seis sospechosos", sospechosos, 36)
 	comprobar("seis casos principales", contenido.principales().size(), 6)
 	var anios_decimales := contenido.casos.filter(
