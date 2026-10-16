@@ -1,6 +1,7 @@
 [gd_scene load_steps=3 format=3]
 
 [ext_resource type="ArrayMesh" path="res://escenas/suenos/props_284/muro_arco_castillo_psx.obj" id="1_arco"]
+# Wall tower modular: base, remate, gaps (modularized for easier reading)
 
 [sub_resource type="StandardMaterial3D" id="MatStone"]
 albedo_color = Color(0.215, 0.205, 0.19, 1)
