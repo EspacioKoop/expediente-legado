@@ -7,7 +7,7 @@ extends Node3D
 signal completado
 
 const ESCENA_CAMINANTE := preload("res://escenas/caminante.tscn")
-const SECUENCIA_OBJETIVO := [1, 2, 0]
+const SECUENCIA_OBJETIVO: Array[int] = [1, 2, 0]
 const NOMBRES_ESTADO := ["Amanecer (I)", "Cenit (II)", "Crepúsculo (III)"]
 const COLOR_PIEDRA := Color(0.22, 0.24, 0.28)
 const COLOR_PIEDRA_CLARA := Color(0.35, 0.36, 0.38)
@@ -15,7 +15,7 @@ const COLOR_BRONCE := Color(0.55, 0.38, 0.22)
 const COLOR_DORADO := Color(0.85, 0.72, 0.38)
 const COLOR_DESALINEADO := Color(0.72, 0.32, 0.28)
 
-var _estados_dispositivos := [0, 0, 0]
+var _estados_dispositivos: Array[int] = [0, 0, 0]
 var _indicio_leido := false
 var _sincronizado := false
 var _reintentos := 0
@@ -150,7 +150,7 @@ func _montar_mundo() -> void:
 	_pieza("MuroSur", Vector3(0, 2.7, 9.7), Vector3(16, 5.4, 0.9), COLOR_PIEDRA)
 
 	# Pedestales para los 3 dispositivos
-	var posiciones_x := [-4.0, 0.0, 4.0]
+	var posiciones_x: Array[float] = [-4.0, 0.0, 4.0]
 	for i in range(3):
 		var x: float = posiciones_x[i]
 		_pieza("Pedestal_%d" % i, Vector3(x, 0.5, -2.0), Vector3(1.4, 1.0, 1.4), COLOR_PIEDRA_CLARA)
@@ -222,8 +222,10 @@ func _montar_interactuables() -> void:
 	)
 	indicio.activado.connect(func(_actor: Node): registrar_lectura_indicio())
 
-	var posiciones_x := [-4.0, 0.0, 4.0]
-	var nombres_disp := ["Pendulo del Alba", "Reloj del Cenit", "Campana del Crepúsculo"]
+	var posiciones_x: Array[float] = [-4.0, 0.0, 4.0]
+	var nombres_disp: Array[String] = [
+		"Pendulo del Alba", "Reloj del Cenit", "Campana del Crepúsculo"
+	]
 
 	for i in range(3):
 		var px: float = posiciones_x[i]
@@ -306,7 +308,7 @@ func _objeto(
 
 
 func _nombre_dispositivo(indice: int) -> String:
-	var nombres := ["Pendulo del Alba", "Reloj del Cenit", "Campana del Crepúsculo"]
+	var nombres: Array[String] = ["Pendulo del Alba", "Reloj del Cenit", "Campana del Crepúsculo"]
 	if indice >= 0 and indice < nombres.size():
 		return nombres[indice]
 	return "Dispositivo %d" % indice
@@ -315,10 +317,10 @@ func _nombre_dispositivo(indice: int) -> String:
 func _actualizar_aspecto_dispositivo(indice: int) -> void:
 	if indice < 0 or indice >= _mallas_dispositivos.size():
 		return
-	var estado := _estados_dispositivos[indice]
-	var malla := _mallas_dispositivos[indice]
+	var estado: int = _estados_dispositivos[indice]
+	var malla: MeshInstance3D = _mallas_dispositivos[indice]
 	malla.rotation_degrees.y = estado * 120.0
-	var label := _rotulos_dispositivos[indice]
+	var label: Label3D = _rotulos_dispositivos[indice]
 	var estado_txt: String = NOMBRES_ESTADO[estado]
 	label.text = "%s\n[%s]" % [_nombre_dispositivo(indice), estado_txt]
 
