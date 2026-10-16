@@ -173,6 +173,15 @@ func _init() -> void:
 		reportador._resumen_rendimiento()["muestras"],
 		12
 	)
+	reportador._registrar_escena("res://escenas/dia.tscn")
+	comprobar("otra escena limpia muestras anteriores", reportador._resumen_rendimiento(), {})
+	reportador._agregar_muestra(25.0, 999.0)
+	reportador._registrar_escena("res://escenas/dia.tscn")
+	comprobar(
+		"misma escena mantiene su muestra", reportador._resumen_rendimiento()["muestras"], 1
+	)
+	reportador._registrar_escena("res://escenas/casa.tscn")
+	comprobar("al ir a casa no contamina FPS", reportador._resumen_rendimiento(), {})
 	reportador.free()
 
 	var inyectado := {
