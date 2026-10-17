@@ -73,8 +73,8 @@ const ZONAS_DIA := [
 	{
 		"id": "calle-primera-farola",
 		"sitio": "calle",
-		"camara": Vector3(1.2, 1.6, -10.5),
-		"mira": Vector3(0.0, 2.5, -10.0)
+		"camara": Vector3(-2.0, 1.8, -12.5),
+		"mira": Vector3(0.0, 1.9, -9.4)
 	},
 	{
 		"id": "calle-cartel-sur",
@@ -91,8 +91,8 @@ const ZONAS_DIA := [
 	{
 		"id": "calle-cruce-central",
 		"sitio": "calle",
-		"camara": Vector3(0.2, 1.7, 0.0),
-		"mira": Vector3(3.1, 1.4, 1.0)
+		"camara": Vector3(-1.4, 1.8, -4.2),
+		"mira": Vector3(1.2, 1.65, 2.0)
 	},
 	{
 		"id": "calle-cartel-norte",
@@ -103,8 +103,8 @@ const ZONAS_DIA := [
 	{
 		"id": "calle-tercera-farola",
 		"sitio": "calle",
-		"camara": Vector3(1.4, 1.65, 9.3),
-		"mira": Vector3(0.0, 2.5, 10.0)
+		"camara": Vector3(-2.2, 1.75, 7.0),
+		"mira": Vector3(0.0, 2.0, 9.6)
 	},
 	{
 		"id": "calle-portal",
@@ -177,8 +177,8 @@ const FORMAS_SUENO := [
 	{
 		"id": "desierto",
 		"forma": "peine",
-		"camara": Vector3(-9.5, 1.65, -9.0),
-		"mira": Vector3(5.0, 1.35, 0.0)
+		"camara": Vector3(-4.3, 2.35, 5.7),
+		"mira": Vector3(0.0, 1.35, 0.0)
 	},
 	{
 		"id": "castillo",
@@ -223,6 +223,7 @@ const CAMARAS_VERTICALES := {
 	"sueno_aquiles_alineacion":
 	{"camara": Vector3(-2.6, 2.2, 7.0), "mira": Vector3(-1.6, 1.3, 0.5)},
 	"sueno_tir_na_nog": {"camara": Vector3(-2.6, 1.8, 2.8), "mira": Vector3(-1.8, 1.1, 0.6)},
+	"sueno_baba_yaga": {"camara": Vector3(6.8, 2.4, 5.2), "mira": Vector3(-0.8, 1.4, 0.8)},
 }
 
 
@@ -391,7 +392,7 @@ static func _decorado_sueno(forma: Dictionary) -> Dictionary:
 
 	# Montaña y Duat aparecían casi negros en las capturas de Forward+.
 	# Añadir un relleno de rodaje no modifica el sueño jugable ni su estado.
-	if id == "montana" or id == "duat":
+	if id == "montana" or id == "duat" or id == "desierto":
 		var luces: Array = decorado.get("luces", []).duplicate(true)
 		luces.append(
 			{
