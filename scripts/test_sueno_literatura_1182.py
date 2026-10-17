@@ -9,6 +9,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 SUENO_LITERATURA = ROOT / "godot" / "guion" / "sueno_literatura.gd"
 DIA = ROOT / "godot" / "guion" / "dia_app.gd"
+DIA_LITERATURA = ROOT / "godot" / "guion" / "dia_literatura_app.gd"
 CATALOGO = ROOT / "godot" / "datos" / "literatura_obras.json"
 TEST_GODOT = "res://pruebas/pruebas_sueno_literatura_1182.gd"
 
@@ -18,6 +19,7 @@ class SuenoLiteratura1182Test(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.modulo = SUENO_LITERATURA.read_text(encoding="utf-8")
         cls.dia = DIA.read_text(encoding="utf-8")
+        cls.helper = DIA_LITERATURA.read_text(encoding="utf-8")
         cls.catalogo = json.loads(CATALOGO.read_text(encoding="utf-8"))
 
     def test_consumidor_usa_solo_insight_literario(self) -> None:
@@ -35,10 +37,21 @@ class SuenoLiteratura1182Test(unittest.TestCase):
         self.assertNotIn("GestorLiteratura.obtener_registro_literario()", tramo)
 
     def test_integracion_no_exige_autoload_al_compilar(self) -> None:
-        self.assertIn("if not is_inside_tree():", self.dia)
-        self.assertIn('get_node_or_null("/root/GestorLiteratura")', self.dia)
-        self.assertIn('gestor.has_method("obtener_registro_literario")', self.dia)
-        self.assertIn("return {}", self.dia)
+        self.assertIn(
+            'const DIA_LITERATURA_APP = preload("res://guion/dia_literatura_app.gd")',
+            self.dia,
+        )
+        self.assertIn(
+            "return DIA_LITERATURA_APP.registro_para_sueno(self)", self.dia
+        )
+        self.assertNotIn('get_node_or_null("/root/GestorLiteratura")', self.dia)
+        self.assertEqual(self.helper.count("if not host.is_inside_tree():"), 2)
+        self.assertIn('get_node_or_null("/root/GestorLiteratura")', self.helper)
+        self.assertIn('gestor.has_method("obtener_registro_literario")', self.helper)
+        self.assertIn(
+            "return registro if typeof(registro) == TYPE_DICTIONARY else {}",
+            self.helper,
+        )
 
     def test_catalogo_declara_motivos_no_hechos(self) -> None:
         obra = self.catalogo["obras"][0]
