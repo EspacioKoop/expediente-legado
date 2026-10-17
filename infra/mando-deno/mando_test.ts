@@ -308,13 +308,15 @@ Deno.test("esc neutraliza los caracteres de HTML", () => {
 
 
 Deno.test("mando no publica infraestructura privada ni expone el contenido rechazado", async () => {
-  for (const [titulo, cuerpo] of [
-    ["infra(agentes): ajustar workers", "Plan de capacidad"],
-    ["Juego 3D: optimización", "Usar datos del Beelink"],
-    ["P0 | agent(mistral-paid): una escena", "Crear una escena"],
-    ["Arreglar CI del juego", "API_KEY=TEST_PRIVATE_VALUE"],
-    ["Revisar el renderizado", "Apoyarse en WireGuard"],
-  ]) {
+  for (
+    const [titulo, cuerpo] of [
+      ["infra(agentes): ajustar workers", "Plan de capacidad"],
+      ["Juego 3D: optimización", "Usar datos del Beelink"],
+      ["P0 | agent(mistral-paid): una escena", "Crear una escena"],
+      ["Arreglar CI del juego", "API_KEY=TEST_PRIVATE_VALUE"],
+      ["Revisar el renderizado", "Apoyarse en WireGuard"],
+    ]
+  ) {
     vaciarCache();
     const sim = simulador();
     const handler = crearHandler(config({ fetch: sim.fetch }));
@@ -323,8 +325,10 @@ Deno.test("mando no publica infraestructura privada ni expone el contenido recha
     assertEquals(response.status, 502, "rechaza creación no pública");
     const html = await response.text();
     assert(!html.includes("TEST_PRIVATE_VALUE"), "no refleja un valor de prueba");
-    assert(!sim.llamadas.some((x) => x.method === "POST" && x.url.endsWith("/issues")),
-      "no llama al endpoint de creación");
+    assert(
+      !sim.llamadas.some((x) => x.method === "POST" && x.url.endsWith("/issues")),
+      "no llama al endpoint de creación",
+    );
   }
 });
 
@@ -334,9 +338,12 @@ Deno.test("mando no permite redirigir su repositorio mediante configuración", a
   const handler = crearHandler(config({ repository: "eGurucharri/infra-casa", fetch: sim.fetch }));
   const cookie = await entrar(handler);
   const response = await handler(post("/orden", {
-    titulo: "Corregir la oficina", cuerpo: "Una incidencia legítima de Godot",
+    titulo: "Corregir la oficina",
+    cuerpo: "Una incidencia legítima de Godot",
   }, { cookie }));
   assertEquals(response.status, 502, "rechaza destino ajeno");
-  assert(!sim.llamadas.some((x) => x.method === "POST" && x.url.endsWith("/issues")),
-    "no crea nada fuera del repositorio");
+  assert(
+    !sim.llamadas.some((x) => x.method === "POST" && x.url.endsWith("/issues")),
+    "no crea nada fuera del repositorio",
+  );
 });
