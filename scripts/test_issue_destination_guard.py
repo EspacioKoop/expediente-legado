@@ -29,6 +29,7 @@ class GuardTests(unittest.TestCase):
             ("Juego: optimizar", "Medir el Beelink y sus recursos."),
             ("Escena de oficina", "Subir un log de /home/usuario/.config/test"),
             ("Arreglar las tareas", "GROQ_API_KEY=abc123 (dato ficticio)"),
+            ("Reparar la misión", "AUTH_TOKEN=secreto_simulado"),
             ("Optimizar gameplay", "Endpoint local 192.168.1.22 para QA."),
             ("P0 | agent(mistral-paid): cinemáticas", "Implementar cinematicas Godot."),
             ("Mejorar audio", "Migrar proveedor a WireGuard."),
@@ -39,7 +40,7 @@ class GuardTests(unittest.TestCase):
 
     def test_other_repository_and_invalid_envelopes(self):
         self.assertFalse(guard.permitir_issue("eGurucharri/infra-casa", "Corregir el juego", "Juego."))
-        self.assertFalse(guard.permitir_issue("EspacioKoop/expediente-legado", "Juego", "Juego."))
+        self.assertFalse(guard.permitir_issue("EspacioKoop/expediente-legado", "1234", "Juego."))
         self.assertFalse(guard.permitir_issue("EspacioKoop/expediente-legado", "Corregir juego", ""))
         self.assertFalse(guard.permitir_issue("EspacioKoop/expediente-legado", "Corregir juego", "x" * 16001))
 
