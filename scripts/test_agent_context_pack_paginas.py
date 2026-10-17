@@ -168,20 +168,19 @@ class TestReadPage(unittest.TestCase):
             page = read_page(root, big_file)
             self.assertIsNone(page)
 
-    @unittest.expectedFailure
     def test_read_page_ruta_fuera_de_raiz(self) -> None:
-        """read_page debería devolver None cuando la ruta está fuera de la raíz.
+        """Una ruta fuera de la raíz es un error del llamador, no una página vacía.
 
-        Fallo conocido: read_page ejecuta path.relative_to(root) sin capturar ValueError,
-        provocando una excepción en lugar de devolver None.
+        `read_pages` ya descarta esas rutas antes de llamar a `read_page`, así que
+        aquí lanzar `ValueError` es el contrato: no se convierte en `None` silencioso.
         """
         with tempfile.TemporaryDirectory() as tmpdir1, tempfile.TemporaryDirectory() as tmpdir2:
             root = Path(tmpdir1)
             fuera_file = Path(tmpdir2) / "fuera.md"
             fuera_file.write_text("# Fuera", encoding="utf-8")
 
-            page = read_page(root, fuera_file)
-            self.assertIsNone(page)
+            with self.assertRaises(ValueError):
+                read_page(root, fuera_file)
 
 
 if __name__ == "__main__":
