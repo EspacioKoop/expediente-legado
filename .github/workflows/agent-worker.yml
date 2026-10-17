@@ -704,7 +704,6 @@ jobs:
           CONTROL: ${{ steps.guard.outputs.control }}
         run: |
           set -euo pipefail
-          outside="$(jq -r '.outside | join(",")' /tmp/claim-guard.json)"
           previous="$(
             gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$ISSUE/comments?per_page=100" --jq '.[]' |
               jq -s '[.[] | select(.user.login == "github-actions[bot]" and ((.body // "") | startswith("AGENT_POOL_REPLAN ")))] | length'
@@ -741,9 +740,9 @@ jobs:
 
           if (( attempt <= MAX_REPLANS )); then
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-              "AGENT_POOL_REPLAN attempt=$attempt provider=$PROVIDER worker=$WORKER observed_paths=$outside
+              "AGENT_POOL_REPLAN attempt=$attempt
 
-              La implementacion intento modificar rutas fuera del CLAIM. El worker ya restauro esos cambios y no publicara nada de este intento. El proximo plan debe reinspeccionar la integracion, incluir las rutas observadas solo si son realmente necesarias y volver a comprobar #182."
+              La implementacion intento modificar rutas fuera del CLAIM. El worker restauro esos cambios. Revisar la evidencia privada del handoff y volver a comprobar la reserva antes de reintentar."
             gh workflow run agent-worker.yml --repo "$GITHUB_REPOSITORY" --ref main \
               -f issue="$ISSUE" -f provider="$PROVIDER" -f worker="$WORKER"
             echo "scheduled=true" >> "$GITHUB_OUTPUT"
@@ -751,7 +750,7 @@ jobs:
             gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
               --add-label agent:needs-human >/dev/null
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-              "AGENT_POOL_REPLAN attempt=$attempt provider=$PROVIDER worker=$WORKER observed_paths=$outside
+              "AGENT_POOL_REPLAN attempt=$attempt
 
               Se agoto el limite de $MAX_REPLANS replans automaticos del pool. Los cambios fuera del CLAIM fueron restaurados y no se publico ningun PR."
             echo "scheduled=false" >> "$GITHUB_OUTPUT"
