@@ -66,7 +66,7 @@ function simulador(): { fetch: typeof fetch; llamadas: Llamada[] } {
         },
       }));
     }
-    if (url.includes("/issues/1713/comments")) {
+    if (url.includes("/issues/2905/comments")) {
       return Promise.resolve(responder([
         {
           body: "CLAIM issue=#5 agent=Atenea branch=feature/5 files=a",
@@ -99,7 +99,7 @@ function config(extra: Partial<MandoConfig> = {}): MandoConfig {
     githubToken: "gh-falso",
     repository: "EspacioKoop/expediente-legado",
     gatewayUrl: "https://gateway.test",
-    registroIssue: 1713,
+    registroIssue: 2905,
     fetch: simulador().fetch,
     now: () => Date.parse("2026-09-29T01:00:00Z"),
     ...extra,
