@@ -94,6 +94,15 @@ func _capturar_plano(reproductor: Node3D, plano: Dictionary, indice: int, reducc
 	)
 	var muestras := _colores_de_imagen(imagen)
 	_comprobar(muestras >= 5, "%s: detalle visible, no pantalla plana (%d)" % [nombre, muestras])
+	var lectura := _lectura_central(imagen)
+	_comprobar(
+		float(lectura["media"]) >= 18.0,
+		"%s: plano demasiado oscuro (%.1f/255)" % [nombre, float(lectura["media"])]
+	)
+	_comprobar(
+		float(lectura["contraste"]) >= 10.0,
+		"%s: encuadre plano sin contraste (%.1f)" % [nombre, float(lectura["contraste"])]
+	)
 	var ruta := _salida.path_join(nombre)
 	var resultado := imagen.save_jpg(ruta, 0.88)
 	_comprobar(resultado == OK, "%s: guardar imagen" % nombre)
@@ -108,6 +117,8 @@ func _capturar_plano(reproductor: Node3D, plano: Dictionary, indice: int, reducc
 					"movimiento_reducido": reduccion,
 					"rotulo": String(plano.get("rotulo", "")),
 					"colores_muestra": muestras,
+					"luminancia_media": lectura["media"],
+					"contraste_p10_p90": lectura["contraste"],
 					"sha256": FileAccess.get_sha256(ruta),
 				}
 			)
@@ -125,6 +136,28 @@ static func _colores_de_imagen(imagen: Image) -> int:
 			var clave := Vector3i(int(pixel.r * 20), int(pixel.g * 20), int(pixel.b * 20))
 			colores[clave] = true
 	return colores.size()
+
+
+## No basta con cinco colores distintos: una pared gris o un plano negro
+## con ruido de textura supera el detector anterior. La lectura recorta barras
+## cinematográficas y compara p10/p90 para no confundir ruido con composición.
+static func _lectura_central(imagen: Image) -> Dictionary:
+	var valores: Array[float] = []
+	var total := 0.0
+	for y in range(220, 860, 80):
+		for x in range(360, 1560, 100):
+			var p := imagen.get_pixel(x, y)
+			var luz := 255.0 * (0.2126 * p.r + 0.7152 * p.g + 0.0722 * p.b)
+			valores.append(luz)
+			total += luz
+	valores.sort()
+	var ultimo := valores.size() - 1
+	var p10 := valores[int(float(ultimo) * 0.10)]
+	var p90 := valores[int(float(ultimo) * 0.90)]
+	return {
+		"media": total / float(valores.size()),
+		"contraste": p90 - p10
+	}
 
 
 func _generar_mosaico() -> void:
