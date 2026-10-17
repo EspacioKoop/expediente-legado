@@ -48,7 +48,7 @@ jobs:
           marker="PR_READY issue=#$issue pr=#$pr sha=$SHA"
           python3 scripts/gestionar_reservas_rollover.py --comments-output /tmp/reservas-ready.json
           if ! jq -r '.[].body' /tmp/reservas-ready.json | grep -Fq "$marker"; then
-            gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --repo "$GITHUB_REPOSITORY" --body "$marker pruebas=CI-canónico-verde limites=PR-draft;sin-validación-humana provider=$provider"
+            gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --repo "$GITHUB_REPOSITORY" --body "$marker pruebas=CI-canónico-verde limites=PR-draft;sin-validación-humana provider=$provider" || true
           fi
           gh issue edit "$issue" --repo "$GITHUB_REPOSITORY" --add-label agent:pr-open --remove-label agent:needs-human >/dev/null 2>&1 || true
           gh issue comment "$issue" --repo "$GITHUB_REPOSITORY" --body "Agent autopilot: CI verde en $SHA; PR #$pr queda draft para revisión humana." || true

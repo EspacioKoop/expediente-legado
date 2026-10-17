@@ -93,12 +93,25 @@ def _tokens(texto: str) -> list[str]:
 
 def _coincidencias_alias(nombre: str) -> list[Arcano]:
     colapsado = _colapsar(Path(nombre).stem)
-    coincidencias: list[Arcano] = []
+    coincidencias_raw: list[tuple[Arcano, str]] = []
     for arcano in ARCANOS:
         aliases = (arcano.nombre_fuente, *arcano.aliases)
-        if any(_colapsar(alias) and _colapsar(alias) in colapsado for alias in aliases):
-            coincidencias.append(arcano)
-    return coincidencias
+        for alias in aliases:
+            c_alias = _colapsar(alias)
+            if c_alias and c_alias in colapsado:
+                coincidencias_raw.append((arcano, c_alias))
+
+    coincidencias_validas: list[Arcano] = []
+    for arcano, c_alias in coincidencias_raw:
+        is_strict_substring = any(
+            c_alias in ot_alias and c_alias != ot_alias
+            for _, ot_alias in coincidencias_raw
+        )
+        if not is_strict_substring:
+            if arcano not in coincidencias_validas:
+                coincidencias_validas.append(arcano)
+
+    return coincidencias_validas
 
 
 def resolver_arcano(nombre: str) -> Arcano:
