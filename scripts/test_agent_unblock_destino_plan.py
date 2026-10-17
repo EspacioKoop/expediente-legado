@@ -26,13 +26,12 @@ class FicherosDelPlanTest(unittest.TestCase):
         cuerpo = "Este texto no contiene ningun bloque de plan de agente."
         self.assertEqual(ficheros_del_plan(cuerpo), [])
 
-    @unittest.expectedFailure
     def test_cuerpo_con_plan_dentro_de_bloque_de_codigo(self):
-        """La regex actual re.findall(r"AGENT_PLAN_BEGIN\\s*(\\{.*?\\})\\s*AGENT_PLAN_END")
+        """Un plan envuelto en un bloque de codigo NO es un plan delegado.
 
-        requiere que la llave '{' empiece inmediatamente tras el marcador. Si el JSON
-        esta envuelto en un bloque markdown ```json ... ```, la funcion devuelve []
-        en lugar de extraer la lista de ficheros.
+        Es el mismo contrato que `agent_delegated_plan.py`, que ignora los planes
+        dentro de fences Markdown: si aqui se aceptara, el desbloqueo podria mover
+        una tarea con un plan que el resto del pool rechaza.
         """
         cuerpo = (
             "AGENT_PLAN_BEGIN\n"
@@ -41,7 +40,7 @@ class FicherosDelPlanTest(unittest.TestCase):
             "```\n"
             "AGENT_PLAN_END"
         )
-        self.assertEqual(ficheros_del_plan(cuerpo), ["scripts/test.py"])
+        self.assertEqual(ficheros_del_plan(cuerpo), [])
 
     def test_cuerpo_con_multiples_planes_retorna_el_ultimo(self):
         cuerpo = (
