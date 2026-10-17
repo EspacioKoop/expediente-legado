@@ -22,9 +22,7 @@ void fragment() {
 
     if (activo < 0.01) {
         COLOR = vec4(0.0);
-        return;
-    }
-
+    } else {
     vec2 uv = FRAGCOORD.xy / vec2(1920.0, 1080.0);
     float scanline = 0.7 + 0.3 * sin(uv.y * 240.0 * 3.14159265 + t * 40.0);
     float desincronia = sin(t * 60.0 + uv.x * 10.0) * 0.02;
@@ -32,7 +30,8 @@ void fragment() {
     float roll = sin(t * 8.0) * 0.005;
 
     vec2 uv_dist = uv + vec2(desincronia + roll, 0.0);
-    float viñeta = 1.0 - smoothstep(0.3, 0.9, length(uv_dist - 0.5) * 1.2);
+    float vineta = 1.0 - smoothstep(0.3, 0.9, length(uv_dist - 0.5) * 1.2);
 
-    COLOR = vec4(vec3(0.15 + ruido * 0.1) * scanline * viñeta, activo);
+    COLOR = vec4(vec3(0.15 + ruido * 0.1) * scanline * vineta, activo);
+    }
 }
