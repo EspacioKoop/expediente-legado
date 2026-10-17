@@ -806,7 +806,7 @@ class AgentPoolTest(unittest.TestCase):
         self.assertIn("AGENT_POOL_SAME_WORKER_RETRY", cleanup)
         self.assertIn("-f retry_hint=", cleanup)
         self.assertIn("AGENT_POOL_WORKER_FAILURE", cleanup)
-        self.assertIn("solo esta clase de fallo rota worker/proveedor", cleanup)
+        self.assertIn("solo esta clase de fallo rota el slot de ejecución", cleanup)
 
     def test_worker_cancelado_libera_estado_sin_penalizar_slot(self):
         worker = (ROOT / ".github" / "workflows" / "agent-worker.yml").read_text(

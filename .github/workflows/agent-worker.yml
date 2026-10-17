@@ -444,7 +444,6 @@ jobs:
             --max-files "$MAX_FILES" \
             --output .agent-plan.json 2>/tmp/agent-plan-error.txt || status=$?
           if (( status != 0 )); then
-            reason="$(tr '\n' ' ' < /tmp/agent-plan-error.txt)"
             target=agent:needs-human
             (( status == 5 )) && target=agent:decompose
             for label in agent:auto agent:pool agent:qwen agent:gemini agent:working; do
@@ -452,7 +451,7 @@ jobs:
             done
             gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label "$target" >/dev/null
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-              "Agent pool: AGENT_PLAN delegado no ejecutable ($reason). Destino: $target." >/dev/null
+              "Agent pool: AGENT_PLAN delegado no ejecutable; revisar el registro de la ejecución. Destino: $target." >/dev/null
             echo "reserved=false" >> "$GITHUB_OUTPUT"
             echo "reason=plan-delegado-invalido" >> "$GITHUB_OUTPUT"
             exit 0
@@ -498,7 +497,7 @@ jobs:
               --remove-label agent:working --remove-label agent:needs-human \
               >/dev/null 2>&1 || true
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-              "Agent pool: $(grep '^reason=' "$GITHUB_OUTPUT"|cut -d= -f2-). Se reencola automáticamente; la colisión de CLAIM no requiere intervención humana." || true
+              "Agent pool: se ha detectado un solape de CLAIM. Se reencola automáticamente; la colisión no requiere intervención humana." || true
           fi
 
       - name: Renovar lease Deno · implementing
@@ -705,7 +704,6 @@ jobs:
           CONTROL: ${{ steps.guard.outputs.control }}
         run: |
           set -euo pipefail
-          outside="$(jq -r '.outside | join(",")' /tmp/claim-guard.json)"
           previous="$(
             gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$ISSUE/comments?per_page=100" --jq '.[]' |
               jq -s '[.[] | select(.user.login == "github-actions[bot]" and ((.body // "") | startswith("AGENT_POOL_REPLAN ")))] | length'
@@ -742,9 +740,9 @@ jobs:
 
           if (( attempt <= MAX_REPLANS )); then
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-              "AGENT_POOL_REPLAN attempt=$attempt provider=$PROVIDER worker=$WORKER observed_paths=$outside
+              "AGENT_POOL_REPLAN attempt=$attempt
 
-              La implementacion intento modificar rutas fuera del CLAIM. El worker ya restauro esos cambios y no publicara nada de este intento. El proximo plan debe reinspeccionar la integracion, incluir las rutas observadas solo si son realmente necesarias y volver a comprobar #182."
+              La implementacion intento modificar rutas fuera del CLAIM. El worker restauro esos cambios. Revisar la evidencia privada del handoff y volver a comprobar la reserva antes de reintentar."
             gh workflow run agent-worker.yml --repo "$GITHUB_REPOSITORY" --ref main \
               -f issue="$ISSUE" -f provider="$PROVIDER" -f worker="$WORKER"
             echo "scheduled=true" >> "$GITHUB_OUTPUT"
@@ -752,7 +750,7 @@ jobs:
             gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
               --add-label agent:needs-human >/dev/null
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-              "AGENT_POOL_REPLAN attempt=$attempt provider=$PROVIDER worker=$WORKER observed_paths=$outside
+              "AGENT_POOL_REPLAN attempt=$attempt
 
               Se agoto el limite de $MAX_REPLANS replans automaticos del pool. Los cambios fuera del CLAIM fueron restaurados y no se publico ningun PR."
             echo "scheduled=false" >> "$GITHUB_OUTPUT"
@@ -1215,7 +1213,7 @@ jobs:
                 gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
                   --add-label agent:needs-human >/dev/null 2>&1 || true
                 gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-                  "Agent pool: $WORKER terminó sin diff para la tarea mono-fichero. No se penaliza ni rota el worker; se pausa el issue para comprobar si ya estaba resuelto o si el corte necesita redefinirse." || true
+                  "Agent pool: el intento terminó sin diff para la tarea mono-fichero. No se penaliza ni rota el worker; se pausa el issue para comprobar si ya estaba resuelto o si el corte necesita redefinirse." || true
                 exit 0
                 ;;
               same_worker_fix|split_or_same_worker)
@@ -1237,7 +1235,7 @@ jobs:
                   gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
                     --add-label agent:needs-human >/dev/null 2>&1 || true
                   gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-                    "Agent pool: $category se repitió con $WORKER. Se detiene sin penalizar el slot; requiere ajustar el corte o revisar el fallo antes de otro intento." || true
+                    "Agent pool: $category se repitió en el mismo slot. Se detiene sin penalizarlo; requiere ajustar el corte o revisar el fallo antes de otro intento." || true
                   exit 0
                 fi
 
@@ -1339,12 +1337,12 @@ jobs:
                   gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
                     --add-label agent:needs-human >/dev/null 2>&1 || true
                   gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-                    "Agent pool agotó los workers compatibles tras $category. Último fallo: $WORKER. Requiere revisión humana o AGENT_POOL_RETRY_RESET." || true
+                    "Agent pool agotó los workers compatibles tras $category. Requiere revisión humana o AGENT_POOL_RETRY_RESET." || true
                 else
                   detalle=""
                   [[ "$category" == quota_or_overload ]] && detalle=" El slot queda en cooldown de cuota."
                   gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-                    "Agent pool reencolado tras $category en $WORKER; solo esta clase de fallo rota worker/proveedor.$detalle" || true
+                    "Agent pool reencolado tras $category; solo esta clase de fallo rota el slot de ejecución.$detalle" || true
                 fi
                 exit 0
                 ;;
