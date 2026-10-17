@@ -44,6 +44,8 @@ def main() -> int:
         if args.guard.stat().st_size > MAX_BYTES:
             raise ValueError("oversized guard")
         data = json.loads(args.guard.read_text(encoding="utf-8"))
+        if not isinstance(data, dict):
+            raise ValueError("invalid guard envelope")
         tracked_raw = subprocess.run(
             ["git", "-C", str(args.repo), "ls-files", "--cached", "-z"],
             check=True, capture_output=True, timeout=10,
