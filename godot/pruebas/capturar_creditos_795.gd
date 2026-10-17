@@ -66,13 +66,13 @@ func _ejecutar() -> void:
 		print("EVIDENCIA_CREDITOS_795_FALLO fallos=%d" % _fallos)
 		quit(1)
 		return
-	print("EVIDENCIA_CREDITOS_795_OK capturas=%d resolucion=%dx%d" % [_capturas.size(), ANCHO, ALTO])
+	print(
+		"EVIDENCIA_CREDITOS_795_OK capturas=%d resolucion=%dx%d" % [_capturas.size(), ANCHO, ALTO]
+	)
 	quit(0)
 
 
-func _capturar_plano(
-	reproductor: Node3D, plano: Dictionary, indice: int, reduccion: bool
-) -> void:
+func _capturar_plano(reproductor: Node3D, plano: Dictionary, indice: int, reduccion: bool) -> void:
 	reproductor.reproducir([plano])
 	if reduccion:
 		reproductor.set("_reduccion_movimiento", true)
@@ -98,16 +98,19 @@ func _capturar_plano(
 	var resultado := imagen.save_jpg(ruta, 0.88)
 	_comprobar(resultado == OK, "%s: guardar imagen" % nombre)
 	if resultado == OK:
-		_capturas.append(
-			{
-				"indice": indice,
-				"id": String(plano.get("nombre", "")),
-				"archivo": nombre,
-				"movimiento_reducido": reduccion,
-				"rotulo": String(plano.get("rotulo", "")),
-				"colores_muestra": muestras,
-				"sha256": FileAccess.get_sha256(ruta),
-			}
+		(
+			_capturas
+			. append(
+				{
+					"indice": indice,
+					"id": String(plano.get("nombre", "")),
+					"archivo": nombre,
+					"movimiento_reducido": reduccion,
+					"rotulo": String(plano.get("rotulo", "")),
+					"colores_muestra": muestras,
+					"sha256": FileAccess.get_sha256(ruta),
+				}
+			)
 		)
 	reproductor.saltar()
 
@@ -144,7 +147,10 @@ func _generar_mosaico() -> void:
 		mosaico.blit_rect(
 			miniatura,
 			Rect2i(Vector2i.ZERO, MINIATURA),
-			Vector2i((indice % CUADRICULA_COLUMNAS) * MINIATURA.x, (indice / CUADRICULA_COLUMNAS) * MINIATURA.y)
+			Vector2i(
+				(indice % CUADRICULA_COLUMNAS) * MINIATURA.x,
+				(indice / CUADRICULA_COLUMNAS) * MINIATURA.y
+			)
 		)
 	_comprobar(mosaico.save_png(_salida.path_join("contacto_creditos_795.png")) == OK, "mosaico")
 
