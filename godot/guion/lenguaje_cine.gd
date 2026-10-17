@@ -19,9 +19,15 @@
 ##   un plano quieto no parezca un fotograma congelado.
 ## - **Grano y viñeta**, sutiles: la textura de la imagen de cine, no un filtro.
 ##
+## Extensiones para montaje onírico 1998 (opt-in por plano):
+## - **Grano no estroboscópico**: grano continuo tipo película, sin salto a 24Hz.
+## - **Interrupción CRT**: señal analógica perdida, scanlines, desincronía.
+## - **Superposición tipográfica**: texto irregular, "roto", sobre la imagen.
+##
 ## Un plano puede ajustar la óptica con `fov` y `foco` (distancia en metros);
 ## si no, la hereda. La reducción de movimiento quita la mano y deja las franjas
-## puestas sin animarlas: el formato no se mueve, se enmarca.
+## puestas sin animarlas: el formato no se mueve, se enmarca. También desactiva
+## parpadeo/animación de CRT, superposición y grano no estroboscópico.
 class_name LenguajeCine
 extends RefCounted
 
@@ -40,6 +46,13 @@ const AMPLITUD_MANO := 0.012
 const RITMO_MANO := 0.23
 const GRANO := 0.045
 const VINETA := 0.35
+## Parámetros por defecto de interrupción CRT (opt-in por plano).
+const CRT_INTENSIDAD_DEF := 0.6
+const CRT_DURACION_DEF := 0.15
+## Parámetros por defecto de superposición tipográfica (opt-in por plano).
+const SUP_INTENSIDAD_DEF := 0.8
+const SUP_RUIDO_DEF := 0.02
+const SUP_SCANLINE_DEF := 0.3
 
 
 ## Alto de CADA franja, en píxeles, para un cuadro de [param tamano]. Cero si
