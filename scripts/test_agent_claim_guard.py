@@ -231,7 +231,8 @@ class AgentClaimGuardTest(unittest.TestCase):
         )[0]
         self.assertIn("continue-on-error: true", qwen)
         self.assertIn("continue-on-error: true", gemini)
-        self.assertIn("observed_paths", workflow)
+        self.assertIn('--evidence "$path"', workflow)
+        self.assertNotIn("AGENT_POOL_REPLAN attempt=$attempt provider=", workflow)
         self.assertNotRegex(workflow, r"(?m)^La implementacion intento")
         self.assertNotRegex(workflow, r"(?m)^Se agoto el limite")
 
