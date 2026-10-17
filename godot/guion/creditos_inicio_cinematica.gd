@@ -270,6 +270,9 @@ static func planos() -> Array:
 		if not optica.is_empty():
 			camara = optica["camara"]
 			mira = optica["mira"]
+		var energia_relleno := 3.6
+		if nombre == "sueno_aquiles" or nombre == "sueno_aquiles_alineacion" or nombre == "sueno_gilgamesh":
+			energia_relleno = 7.2
 		# Luz de apoyo SOLO de plató: los verticales jugables no cambian.
 		# La luz próxima a cámara evita depender de una lámpara situada detrás
 		# de grandes figuras o paredes al usar la óptica propia del montaje.
@@ -288,13 +291,7 @@ static func planos() -> Array:
 				{
 					"pos": camara.lerp(mira, 0.25) + Vector3(0.0, 1.5, 0.0),
 					"color": Color(0.90, 0.88, 0.80),
-					"energia": (
-						7.2
-						if nombre == "sueno_aquiles"
-						or nombre == "sueno_aquiles_alineacion"
-						or nombre == "sueno_gilgamesh"
-						else 3.6
-					),
+					"energia": energia_relleno,
 					"alcance": 32.0,
 					"carcasa": false,
 					"sombras": false
