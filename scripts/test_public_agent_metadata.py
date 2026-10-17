@@ -19,7 +19,8 @@ class PublicAgentMetadataTest(unittest.TestCase):
         self.assertNotIn('agent($PROVIDER): #$ISSUE', src)
         self.assertNotIn('agent=Pool-$PROVIDER', src)
         self.assertNotIn('agent/${PROVIDER}', src)
-        self.assertNotIn('worker \`$WORKER\`', src)
+        self.assertNotIn('con $WORKER"', src)
+        self.assertIn('git commit -m "agent: avanzar #$ISSUE con pool"', src)
 
     def test_autopilot_uses_neutral_public_identifiers(self):
         src = (ROOT / "agent-autopilot.yml").read_text(encoding="utf-8")
@@ -30,6 +31,7 @@ class PublicAgentMetadataTest(unittest.TestCase):
         self.assertNotIn('agent($PROVIDER): #$ISSUE', src)
         self.assertNotIn('agent=Autopilot-$PROVIDER', src)
         self.assertNotIn('branch=agent/${provider}-', src)
+        self.assertIn('git commit -m "agent: avanzar #$ISSUE con autopilot"', src)
 
     def test_run_id_still_remains_last_for_reconciler(self):
         # El parser de agent_reconciler._run_id depende de sufijo -<run>.
