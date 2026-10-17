@@ -220,14 +220,9 @@ const VERTICALES := [
 ## la cámara radial enseñaba un muro oscuro y en Tír na nÓg apuntaba a la
 ## pared del fondo en vez de a la mesa y al umbral. Solo cambia el montaje.
 const CAMARAS_VERTICALES := {
-	"sueno_aquiles_alineacion": {
-		"camara": Vector3(-2.6, 2.2, 7.0),
-		"mira": Vector3(-1.6, 1.3, 0.5)
-	},
-	"sueno_tir_na_nog": {
-		"camara": Vector3(-2.6, 1.8, 2.8),
-		"mira": Vector3(-1.8, 1.1, 0.6)
-	},
+	"sueno_aquiles_alineacion":
+	{"camara": Vector3(-2.6, 2.2, 7.0), "mira": Vector3(-1.6, 1.3, 0.5)},
+	"sueno_tir_na_nog": {"camara": Vector3(-2.6, 1.8, 2.8), "mira": Vector3(-1.8, 1.1, 0.6)},
 }
 
 
@@ -274,7 +269,8 @@ static func planos() -> Array:
 		# Luz de apoyo SOLO de plató: los verticales jugables no cambian.
 		var decorado := {
 			"escena": ruta,
-			"luces": [
+			"luces":
+			[
 				{
 					"pos": Vector3(0.0, 4.0, 2.0),
 					"color": Color(0.72, 0.80, 0.91),
