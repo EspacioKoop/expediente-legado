@@ -40,6 +40,14 @@ class CreditosInicioCinematicaTest(unittest.TestCase):
         self.assertEqual(self.creditos.count('"res://escenas/sueno_'), 11)
         self.assertIn("const CAMARAS_VERTICALES := {", self.creditos)
         self.assertIn('CAMARAS_VERTICALES.get(nombre, {})', self.creditos)
+        self.assertIn("creditos_luz_onirica.tscn", self.creditos)
+        self.assertIn("camara.lerp(mira, 0.25)", self.creditos)
+        self.assertIn('"sueno_aquiles":', self.creditos)
+        self.assertIn('"sueno_gilgamesh":', self.creditos)
+        self.assertIn('"sueno_yggdrasil":', self.creditos)
+        luz = ROOT / "godot" / "escenas" / "creditos_luz_onirica.tscn"
+        self.assertTrue(luz.is_file())
+        self.assertIn("DirectionalLight3D", luz.read_text(encoding="utf-8"))
         self.assertIn('"carcasa": false', self.creditos)
         self.assertIn('"sombras": false', self.creditos)
         for identidad in (
