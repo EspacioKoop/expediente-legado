@@ -167,7 +167,7 @@ jobs:
             exit 0
           fi
 
-          branch="agent/${PROVIDER}-${ISSUE}-${GITHUB_RUN_ID}"
+          branch="agent/pool-${ISSUE}-${GITHUB_RUN_ID}"
           control="github-fallback"
           lease_id=""
 
@@ -461,7 +461,7 @@ jobs:
           if grep -q '"files": \[\]' .agent-plan.json 2>/dev/null; then
             printf 'reserved=false\nreason=sin-corte-seguro\n' >> "$GITHUB_OUTPUT"
             gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human --remove-label agent:working >/dev/null 2>&1 || true
-            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Agent pool ($PROVIDER): no encontro un corte seguro y concreto; requiere revision humana." || true
+            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Agent pool: no encontro un corte seguro y concreto; requiere revision humana." || true
             exit 0
           fi
 
@@ -472,7 +472,7 @@ jobs:
             --body-file .agent-plan.json
           files="$(jq -r '.files|join(",")' .agent-plan.json)"
           goal="$(jq -r '.goal|gsub("[[:space:]]+";"-")' .agent-plan.json)"
-          claim="CLAIM issue=#$ISSUE agent=Pool-$PROVIDER branch=$BRANCH files=$files goal=$goal lease=2h"
+          claim="CLAIM issue=#$ISSUE agent=Pool branch=$BRANCH files=$files goal=$goal lease=2h"
           cid="$(gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$(python3 scripts/gestionar_reservas_rollover.py --active)/comments" -f body="$claim" --jq .id)"
           python3 scripts/gestionar_reservas_rollover.py --comments-output /tmp/reservas.json
           # Capa única de lectura de #182 (#1662): misma semántica que el barrido
@@ -1053,7 +1053,7 @@ jobs:
           set -euo pipefail
           git config user.name "agent-pool[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "agent: avanzar #$ISSUE con $WORKER"
+          git commit -m "agent: avanzar #$ISSUE con pool"
           gh auth setup-git
           gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE" > /tmp/worker-prepublish-issue.json
           jq -r '.body // ""' /tmp/worker-prepublish-issue.json > /tmp/worker-prepublish-body.md
@@ -1063,10 +1063,10 @@ jobs:
           git push -u origin "$BRANCH"
           title="$(gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json title --jq .title)"
           if ! pr_salida="$(gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH" --draft \
-            --title "agent($PROVIDER): #$ISSUE $title" \
+            --title "agent: #$ISSUE $title" \
             --body "Closes #$ISSUE
 
-          Implementacion autonoma mediante worker \`$WORKER\`. Plan reservado en el registro de reservas activo; cambios limitados al CLAIM; preflight ejecutado. Reviewer acotado: \`$REVIEW_STATUS/$REVIEW_VERDICT\`. Protocolo v1: ResultPacket $RESULT_VALID/$RESULT_STATUS; handoff-loss proxy $HANDOFF_LOSS%. PR draft, sin auto-merge." 2>&1)"; then
+          Implementacion autonoma del juego. Plan reservado en el registro de reservas activo; cambios limitados al CLAIM; preflight ejecutado. Reviewer acotado: \`$REVIEW_STATUS/$REVIEW_VERDICT\`. Protocolo v1: ResultPacket $RESULT_VALID/$RESULT_STATUS; handoff-loss proxy $HANDOFF_LOSS%. PR draft, sin auto-merge." 2>&1)"; then
             if grep -Eiq 'not permitted to create or approve pull requests|createPullRequest|Resource not accessible by integration' <<<"$pr_salida"; then
               gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
                 --add-label agent:needs-human \
@@ -1076,7 +1076,7 @@ jobs:
                 --remove-label agent:qwen \
                 --remove-label agent:gemini >/dev/null 2>&1 || true
               gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-                "Agent pool ($WORKER) completó implementación, preflight y reviewer y publicó la rama \`$BRANCH\`, pero GitHub Actions no tiene permiso para crear PRs. Habilita Settings → Actions → General → Workflow permissions → Allow GitHub Actions to create and approve pull requests o abre la PR manualmente desde esa rama. El worker no se penaliza." || true
+                "Agent pool completó implementación, preflight y reviewer y publicó la rama \`$BRANCH\`, pero GitHub Actions no tiene permiso para crear PRs. Habilita Settings → Actions → General → Workflow permissions → Allow GitHub Actions to create and approve pull requests o abre la PR manualmente desde esa rama. El worker no se penaliza." || true
               gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --repo "$GITHUB_REPOSITORY" \
                 --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=agent-pool-pr-policy-block" \
                 >/dev/null || true
@@ -1100,7 +1100,7 @@ jobs:
             --remove-label agent:pool \
             --remove-label agent:qwen \
             --remove-label agent:gemini >/dev/null 2>&1 || true
-          gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Agent pool ($WORKER): $url"
+          gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Agent pool: $url"
           # Euriclea se dispara por PR para no depender de la capacidad limitada del
           # barrido periódico. Es best-effort: si Actions no acepta el dispatch,
           # el cron de agent-review.yml sigue siendo el fallback y el worker no falla.
@@ -1155,7 +1155,7 @@ jobs:
                 --remove-label agent:gemini \
                 >/dev/null 2>&1 || true
               gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-                "Agent pool ($WORKER) fue cancelado, pero ya existe PR #$pr; se conserva la reserva y se normaliza el estado a agent:pr-open." || true
+                "Agent pool fue cancelado, pero ya existe PR #$pr; se conserva la reserva y se normaliza el estado a agent:pr-open." || true
             else
               if [[ "${RESERVED:-}" == true && -n "${BRANCH:-}" ]]; then
                 gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --repo "$GITHUB_REPOSITORY" \
@@ -1166,7 +1166,7 @@ jobs:
                 --remove-label agent:working --remove-label agent:needs-human \
                 >/dev/null 2>&1 || true
               gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-                "Agent pool ($WORKER) fue cancelado antes de publicar PR; se libera el CLAIM y la tarea vuelve a cola sin penalizar al worker." || true
+                "Agent pool fue cancelado antes de publicar PR; se libera el CLAIM y la tarea vuelve a cola sin penalizar al worker." || true
             fi
             exit 0
           fi
@@ -1362,7 +1362,7 @@ jobs:
             --add-label agent:needs-human --remove-label agent:working \
             >/dev/null 2>&1 || true
           gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-            "Agent pool ($WORKER) se detuvo después de reservar/implementar: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" || true
+            "Agent pool se detuvo después de reservar/implementar: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" || true
           if [[ "${RESERVED:-}" == true && -z "$pr" ]]; then
             gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --repo "$GITHUB_REPOSITORY" \
               --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=agent-pool-fallo-antes-de-PR" \
