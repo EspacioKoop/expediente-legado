@@ -154,10 +154,7 @@ static func _lectura_central(imagen: Image) -> Dictionary:
 	var ultimo := valores.size() - 1
 	var p10 := valores[int(float(ultimo) * 0.10)]
 	var p90 := valores[int(float(ultimo) * 0.90)]
-	return {
-		"media": total / float(valores.size()),
-		"contraste": p90 - p10
-	}
+	return {"media": total / float(valores.size()), "contraste": p90 - p10}
 
 
 func _generar_mosaico() -> void:
