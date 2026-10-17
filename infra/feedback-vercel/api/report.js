@@ -8,6 +8,21 @@ const CATEGORIES = new Set([
   "otro",
 ]);
 const MAX_BODY = 16000;
+// F9 solo genera incidencias del juego. Evitar que logs de la casa o credenciales
+// se publiquen como issues: nunca incorporar el contenido rechazado a errores.
+const PRIVATE_FEEDBACK = [
+  /\b(?:infra[-_ ]casa|omniroute|tailscale|wireguard|homelab|beelink|locomotora|leviat[aá]n)\b/i,
+  /\bhermes[-_ ](?:gateway|router|mcp|provider|dispatcher|bridge)\b/i,
+  /\b(?:mistral[-_ ]paid|quota[-_ ]domain|provider[-_ ]routing)\b/i,
+  /(?:^|[^A-Za-z0-9])(?:[A-Za-z0-9]+_)*(?:API_KEY|AUTH_TOKEN|ACCESS_TOKEN|PASSWORD|PRIVATE_KEY)\s*[:=]/im,
+  /(?:\/home\/[A-Za-z0-9._-]+\/|\/Users\/[A-Za-z0-9._-]+\/|[A-Z]:\\Users\\)/i,
+  /\b(?:192\.168|10\.(?:\d{1,3}\.){2}|172\.(?:1[6-9]|2\d|3[01])\.|100\.(?:6[4-9]|[789]\d|1[01]\d|12[0-7])\.)/,
+];
+
+function contieneInfraPrivada(titulo, cuerpo) {
+  return PRIVATE_FEEDBACK.some((pattern) => pattern.test(titulo + "\n" + cuerpo));
+}
+
 
 function cleanText(value, max) {
   if (typeof value !== "string") return "";
@@ -33,6 +48,13 @@ async function createGitHubIssue(payload) {
   );
   if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository)) {
     throw new Error("GITHUB_REPOSITORY inválido");
+  }
+  if (repository.toLowerCase() !== DEFAULT_REPOSITORY.toLowerCase()) {
+    throw new Error("Destino GitHub no permitido para el feedback del juego");
+  }
+
+  if (contieneInfraPrivada(payload.title, payload.body)) {
+    throw new Error("Reporte no apto para un repositorio público");
   }
 
   const category = CATEGORIES.has(payload.category) ? payload.category : "otro";

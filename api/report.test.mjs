@@ -194,9 +194,9 @@ describe("api/report.js handler", () => {
     );
   });
 
-  test("successful report creation with email, custom repository, labels, and escaped HTML", async () => {
+  test("successful report creation with email, fixed repository, labels, and escaped HTML", async () => {
     process.env.GITHUB_TOKEN = "gh_test_token";
-    process.env.GITHUB_REPOSITORY = "mi-org/mi-repo";
+    process.env.GITHUB_REPOSITORY = "EspacioKoop/expediente-legado";
     process.env.GITHUB_LABELS = "feedback, playtest, urgente";
     process.env.RESEND_API_KEY = "re_test_key";
     process.env.REPORT_EMAIL_TO = "destino@example.com";
@@ -211,7 +211,7 @@ describe("api/report.js handler", () => {
           status: 201,
           json: async () => ({
             number: 202,
-            html_url: "https://github.com/mi-org/mi-repo/issues/202?a=1&b=2",
+            html_url: "https://github.com/EspacioKoop/expediente-legado/issues/202?a=1&b=2",
           }),
         };
       }
@@ -260,9 +260,43 @@ describe("api/report.js handler", () => {
     );
     assert.ok(
       emailPayload.html.includes(
-        "https://github.com/mi-org/mi-repo/issues/202?a=1&amp;b=2",
+        "https://github.com/EspacioKoop/expediente-legado/issues/202?a=1&amp;b=2",
       ),
     );
+  });
+
+  test("rejects private operational text and non-game destinations without POST or leakage", async () => {
+    process.env.GITHUB_TOKEN = "gh_example_token";
+    let calls = 0;
+    globalThis.fetch = async () => {
+      calls++;
+      throw new Error("fetch must not run");
+    };
+    const standard = {
+      source: "siga98-f9",
+      category: "bug",
+      title: "Interfaz de juego",
+      body: "La cámara se atasca en SIGA-98.",
+    };
+    for (const message of [
+      "HERMES_CUSTOM_GROQ_API_KEY=EXAMPLE_NEVER_PUBLISH",
+      "Mira este log en /home/testuser/.config/hermes/gateway",
+      "Conectar la red por WireGuard",
+      "Equipo local 192.168.1.28 no responde",
+    ]) {
+      const res = createMockRes();
+      await handler(createMockReq({ body: { ...standard, body: message } }), res);
+      assert.equal(res.statusCode, 502);
+      assert.equal(res.body.error, "upstream_failure");
+      assert.equal(res.body.detail, "Reporte no apto para un repositorio público");
+      assert.ok(!JSON.stringify(res.body).includes(message));
+    }
+    process.env.GITHUB_REPOSITORY = "eGurucharri/infra-casa";
+    const res = createMockRes();
+    await handler(createMockReq({ body: standard }), res);
+    assert.equal(res.statusCode, 502);
+    assert.equal(res.body.detail, "Destino GitHub no permitido para el feedback del juego");
+    assert.equal(calls, 0);
   });
 
   test("upstream failure when GITHUB_TOKEN is missing or GitHub API fails", async () => {
