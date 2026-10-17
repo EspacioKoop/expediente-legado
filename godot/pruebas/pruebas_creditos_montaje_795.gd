@@ -25,6 +25,7 @@ func _probar() -> void:
 	_comprobar(Cinematica.validar(planos).is_empty(), "contrato Cinematica.validar")
 
 	var localizaciones := {}
+	var decorados_visuales := {}
 	var camaras := {}
 	var verticales := {}
 	var con_rotulo := 0
@@ -36,6 +37,16 @@ func _probar() -> void:
 		var decorado: Dictionary = plano.get("decorado", {})
 		_comprobar(plano.get("tipo", "") == "3d", "plano 3d: " + nombre)
 		_comprobar(not decorado.is_empty(), "decorado no vacio: " + nombre)
+		# La zona interna no es visible: eliminarla evita falsos positivos
+		# cuando dos cámaras filman en realidad el mismo conjunto de objetos.
+		var decorado_visual := decorado.duplicate(true)
+		decorado_visual.erase("zona_creditos")
+		var huella_visual := hash(decorado_visual)
+		_comprobar(
+			not decorados_visuales.has(huella_visual),
+			"decorado visual no repetido: " + nombre
+		)
+		decorados_visuales[huella_visual] = true
 		_comprobar(not localizaciones.has(nombre), "localizacion no repetida: " + nombre)
 		localizaciones[nombre] = true
 		_comprobar(plano.has("camara") and plano.has("mira"), "encuadre completo: " + nombre)
@@ -78,6 +89,7 @@ func _probar() -> void:
 			identidades_sueno[identidad] = true
 
 	_comprobar(localizaciones.size() == 40, "ninguna localizacion se repite")
+	_comprobar(decorados_visuales.size() == 40, "ningun decorado visual se repite")
 	_comprobar(camaras.size() == 40, "ningun encuadre se reutiliza")
 	_comprobar(zonas_dia == 22, "22 rincones de vigilia")
 	_comprobar(identidades_sueno.size() == 7, "siete identidades por diccionario")
