@@ -37,12 +37,11 @@ class TestAgentFeederPuntos(unittest.TestCase):
             0,
         )
 
-    @unittest.expectedFailure
     def test_labels_none_lanza_type_error(self) -> None:
-        # Destapa fallo real en agent_feeder._labels: issue.get("labels", [])
-        # devuelve None si la clave "labels" existe con valor None,
-        # provocando TypeError al iterar.
-        self.assertEqual(score_points({"title": None, "labels": None}), 0)
+        # GitHub siempre devuelve `labels` como lista: `None` es una entrada
+        # inválida y fallar con TypeError es preferible a puntuarla como 0.
+        with self.assertRaises(TypeError):
+            score_points({"title": None, "labels": None})
 
     def test_etiqueta_bug_suma_40_puntos(self) -> None:
         issue = {"title": "Error en login", "labels": ["bug"]}
