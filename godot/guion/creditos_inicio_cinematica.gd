@@ -262,7 +262,7 @@ static func planos() -> Array:
 		var angulo := 0.48 * float(n) + 0.40
 		var camara := Vector3(5.5 * cos(angulo), 1.9 + 0.12 * float(n % 4), 5.5 * sin(angulo))
 		var mira := Vector3(0.0, 1.2, 0.0)
-		var nombre := ruta.get_file().get_basename()
+		var nombre: String = String(ruta).get_file().get_basename()
 		var optica: Dictionary = CAMARAS_VERTICALES.get(nombre, {})
 		if not optica.is_empty():
 			camara = optica["camara"]
