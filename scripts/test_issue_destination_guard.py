@@ -46,11 +46,15 @@ class GuardTests(unittest.TestCase):
     def test_decompose_guards_parent_single_plan_and_each_child(self):
         workflow = (Path(__file__).resolve().parents[1] / ".github/workflows/agent-decompose.yml").read_text()
         call = "python3 scripts/issue_destination_guard.py"
-        self.assertEqual(workflow.count(call), 3)
+        self.assertEqual(workflow.count(call), 4)
         self.assertLess(workflow.index(call), workflow.index('association="$(jq -r'))
         self.assertLess(
             workflow.index(call, workflow.index("plan=\"$(jq -c '{files:.files,goal:.goal}'")),
             workflow.index('gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "$(printf'),
+        )
+        self.assertLess(
+            workflow.index(call, workflow.index('reason="$(jq -r')),
+            workflow.index('gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \\'),
         )
         self.assertLess(workflow.rindex(call), workflow.index('url="$(gh issue create'))
 
