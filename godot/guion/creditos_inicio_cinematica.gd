@@ -271,7 +271,7 @@ static func planos() -> Array:
 			camara = optica["camara"]
 			mira = optica["mira"]
 		var energia_relleno := 3.6
-		if nombre == "sueno_aquiles" or nombre == "sueno_aquiles_alineacion" or nombre == "sueno_gilgamesh":
+		if nombre in ["sueno_aquiles", "sueno_aquiles_alineacion", "sueno_gilgamesh"]:
 			energia_relleno = 7.2
 		# Luz de apoyo SOLO de plató: los verticales jugables no cambian.
 		# La luz próxima a cámara evita depender de una lámpara situada detrás
