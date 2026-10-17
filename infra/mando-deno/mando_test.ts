@@ -305,3 +305,45 @@ Deno.test("esc neutraliza los caracteres de HTML", () => {
     "esc",
   );
 });
+
+Deno.test("mando no publica infraestructura privada ni expone el contenido rechazado", async () => {
+  for (
+    const [titulo, cuerpo] of [
+      ["infra(agentes): ajustar workers", "Plan de capacidad"],
+      ["Juego 3D: optimización", "Usar datos del Beelink"],
+      ["P0 | agent(mistral-paid): una escena", "Crear una escena"],
+      ["Arreglar CI del juego", "API_KEY=TEST_PRIVATE_VALUE"],
+      ["Reparar la interfaz", "GROQ_API_KEY=EXAMPLE_PRIVATE"],
+      ["Revisar el renderizado", "Apoyarse en WireGuard"],
+    ]
+  ) {
+    vaciarCache();
+    const sim = simulador();
+    const handler = crearHandler(config({ fetch: sim.fetch }));
+    const cookie = await entrar(handler);
+    const response = await handler(post("/orden", { titulo, cuerpo, modo: "issue" }, { cookie }));
+    assertEquals(response.status, 502, "rechaza creación no pública");
+    const html = await response.text();
+    assert(!html.includes("TEST_PRIVATE_VALUE"), "no refleja un valor de prueba");
+    assert(
+      !sim.llamadas.some((x) => x.method === "POST" && x.url.endsWith("/issues")),
+      "no llama al endpoint de creación",
+    );
+  }
+});
+
+Deno.test("mando no permite redirigir su repositorio mediante configuración", async () => {
+  vaciarCache();
+  const sim = simulador();
+  const handler = crearHandler(config({ repository: "eGurucharri/infra-casa", fetch: sim.fetch }));
+  const cookie = await entrar(handler);
+  const response = await handler(post("/orden", {
+    titulo: "Corregir la oficina",
+    cuerpo: "Una incidencia legítima de Godot",
+  }, { cookie }));
+  assertEquals(response.status, 502, "rechaza destino ajeno");
+  assert(
+    !sim.llamadas.some((x) => x.method === "POST" && x.url.endsWith("/issues")),
+    "no crea nada fuera del repositorio",
+  );
+});

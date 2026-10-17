@@ -63,6 +63,12 @@ jobs:
           [[ "$issue" =~ ^[0-9]+$ ]] || exit 2
           ISSUE="$issue"
           issue_meta="$(gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE")"
+          # Solo descomponer tareas del juego: el texto privado no llega a
+          # comentarios ni subissues públicos si el parent es de otro scope.
+          jq -r '.body // ""' <<<"$issue_meta" > /tmp/issue-publication-body.md
+          python3 scripts/issue_destination_guard.py --repo "$GITHUB_REPOSITORY" \
+            --title "$(jq -r '.title' <<<"$issue_meta")" \
+            --body-file /tmp/issue-publication-body.md
           association="$(jq -r '.author_association // ""' <<<"$issue_meta")"
           author="$(jq -r '.user.login // ""' <<<"$issue_meta")"
           if [[ "$author" != "github-actions[bot]" && ! "$association" =~ ^(OWNER|MEMBER|COLLABORATOR)$ ]]; then
@@ -206,6 +212,10 @@ jobs:
           needs_human="$(jq -r '.needs_human // false' /tmp/agent-decompose.json)"
           if [[ "$needs_human" == true ]]; then
             reason="$(jq -r '.reason' /tmp/agent-decompose.json)"
+            printf '%s' "$reason" > /tmp/human-gate-publication-body.md
+            python3 scripts/issue_destination_guard.py --repo "$GITHUB_REPOSITORY" \
+              --title "$(jq -r '.title' /tmp/agent-issue.json)" \
+              --body-file /tmp/human-gate-publication-body.md
             gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
               --remove-label agent:decompose --add-label agent:needs-human >/dev/null
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
@@ -214,6 +224,10 @@ jobs:
           elif [[ "$fits" == true ]]; then
             task="$(jq -c '.subtasks[0]' /tmp/agent-decompose.json)"
             plan="$(jq -c '{files:.files,goal:.goal}' <<<"$task")"
+            printf '%s' "$plan" > /tmp/single-issue-publication-body.md
+            python3 scripts/issue_destination_guard.py --repo "$GITHUB_REPOSITORY" \
+              --title "$(jq -r '.title' /tmp/agent-issue.json)" \
+              --body-file /tmp/single-issue-publication-body.md
             queue_label=agent:auto
             [[ "$REQUESTED_PROVIDER" == qwen ]] && queue_label=agent:qwen
             [[ "$REQUESTED_PROVIDER" == gemini ]] && queue_label=agent:gemini
@@ -290,6 +304,9 @@ jobs:
 
           El planner de nivel 2 ya fijó este corte. El worker de nivel 3 ejecuta el TaskPacket y no vuelve a planificar.
           EOF
+            # Validar la propuesta del modelo, no solo el issue padre.
+            python3 scripts/issue_destination_guard.py --repo "$GITHUB_REPOSITORY" \
+              --title "$title" --body-file /tmp/subissue.md
             url="$(gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body-file /tmp/subissue.md --label "$queue_label")"
             number="${url##*/}"
             [[ "$number" =~ ^[0-9]+$ ]] || exit 5

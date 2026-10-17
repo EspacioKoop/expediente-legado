@@ -223,6 +223,19 @@ jobs:
           lfs: true
           persist-credentials: false
 
+      - name: Proteger frontera pública antes de arrancar worker
+        if: steps.guard.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ inputs.issue }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE" > /tmp/worker-publication-issue.json
+          jq -r '.body // ""' /tmp/worker-publication-issue.json > /tmp/worker-publication-body.md
+          python3 scripts/issue_destination_guard.py --repo "$GITHUB_REPOSITORY" \
+            --title "$(jq -r '.title' /tmp/worker-publication-issue.json)" \
+            --body-file /tmp/worker-publication-body.md
+
       - name: Renovar lease Deno · planning
         if: steps.guard.outputs.run == 'true' && steps.guard.outputs.control == 'deno'
         continue-on-error: true
@@ -452,6 +465,11 @@ jobs:
             exit 0
           fi
 
+          # El planner también puede introducir datos ajenos al issue padre.
+          # Validar el plan ANTES de publicar su goal/files en CLAIM.
+          python3 scripts/issue_destination_guard.py --repo "$GITHUB_REPOSITORY" \
+            --title "$(jq -r '.title' /tmp/worker-publication-issue.json)" \
+            --body-file .agent-plan.json
           files="$(jq -r '.files|join(",")' .agent-plan.json)"
           goal="$(jq -r '.goal|gsub("[[:space:]]+";"-")' .agent-plan.json)"
           claim="CLAIM issue=#$ISSUE agent=Pool-$PROVIDER branch=$BRANCH files=$files goal=$goal lease=2h"
@@ -1037,6 +1055,11 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "agent: avanzar #$ISSUE con $WORKER"
           gh auth setup-git
+          gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE" > /tmp/worker-prepublish-issue.json
+          jq -r '.body // ""' /tmp/worker-prepublish-issue.json > /tmp/worker-prepublish-body.md
+          python3 scripts/issue_destination_guard.py --repo "$GITHUB_REPOSITORY" \
+            --title "$(jq -r '.title' /tmp/worker-prepublish-issue.json)" \
+            --body-file /tmp/worker-prepublish-body.md
           git push -u origin "$BRANCH"
           title="$(gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json title --jq .title)"
           if ! pr_salida="$(gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH" --draft \

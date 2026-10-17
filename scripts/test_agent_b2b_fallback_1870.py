@@ -41,6 +41,9 @@ class AgentB2BFallback1870Test(unittest.TestCase):
             intentos = raiz / "mailbox.jsonl"
             scripts = raiz / "scripts"
             scripts.mkdir()
+            # El shell real ejecuta este guard antes de publicar; el canario
+            # debe copiarlo en vez de suprimir el preflight de privacidad.
+            shutil.copy2(ROOT / "scripts/issue_destination_guard.py", scripts / "issue_destination_guard.py")
             # El wrapper importa el cliente versionado; solo se intercepta red.
             cliente = scripts / "agent_b2b_mailbox.py"
             cliente.write_text(textwrap.dedent('''\
@@ -79,7 +82,12 @@ class AgentB2BFallback1870Test(unittest.TestCase):
                 with open(os.environ["CANARIO_REGISTRO"], "a", encoding="utf-8") as out:
                     out.write(json.dumps({"command": nombre, "args": args}) + "\\n")
                 if nombre == "gh":
-                    if args[:2] == ["issue", "view"]:
+                    if args[:2] == ["api", "repos/EspacioKoop/expediente-legado/issues/1870"]:
+                        print(json.dumps({
+                            "title": "Canario de fallback para el videojuego",
+                            "body": "Ejercicio offline de revisión y publicación de PR.",
+                        }))
+                    elif args[:2] == ["issue", "view"]:
                         print("Canario mailbox aislado")
                     elif args[:2] == ["pr", "create"]:
                         print("https://github.com/example/canario/pull/7")
@@ -102,7 +110,7 @@ class AgentB2BFallback1870Test(unittest.TestCase):
                 "SIGA98_FEEDBACK_FALLBACK_URL": "https://example.invalid/api/report",
                 "TASK_ID": "example/canario#1870@abc123",
                 "GITHUB_RUN_ID": "7",
-                "GITHUB_REPOSITORY": "example/canario",
+                "GITHUB_REPOSITORY": "EspacioKoop/expediente-legado",
                 "GITHUB_OUTPUT": str(raiz / "outputs"),
                 "ISSUE": "1870",
                 "PROVIDER": "qwen",
