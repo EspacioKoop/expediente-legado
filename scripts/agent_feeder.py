@@ -100,11 +100,15 @@ def eligible(
         return False, "label-bloqueante"
     if any(label.startswith(BLOCKING_PREFIXES) for label in labels):
         return False, "estado-agente"
+    if "area:infra" in labels:
+        return False, "fuera-alcance-publico"
 
     title = str(issue.get("title") or "").strip()
     lower = title.lower()
     if not title:
         return False, "sin-titulo"
+    if lower.startswith(("infra:", "infra(", "infraestructura:")):
+        return False, "fuera-alcance-publico"
     if lower.startswith(BLOCKING_TITLE_PREFIXES):
         return False, "tipo-humano"
     if any(fragment in lower for fragment in BLOCKING_TITLE_FRAGMENTS):
@@ -140,8 +144,6 @@ def score_points(issue: dict[str, Any]) -> int:
         points += 5
 
     lowered = title.lower()
-    if lowered.startswith("infra(") or lowered.startswith("infra:"):
-        points += 30
     if lowered.startswith("test(") or lowered.startswith("test:"):
         points += 30
     if "area:accesibilidad" in labels:

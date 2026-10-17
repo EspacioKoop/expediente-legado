@@ -86,14 +86,25 @@ class AgentFeederTest(unittest.TestCase):
         self.assertIsNone(result["selected"])
         self.assertEqual(1, result["rejected"]["activo-reciente"])
 
-    def test_prioriza_bug_infra_y_prioridad_baja(self):
+    def test_descarta_infra_aunque_tenga_prioridad(self):
         candidates = [
             issue(11, "Feature normal"),
             issue(12, "infra: mejora de cola", ["prioridad:P3"]),
             issue(13, "Bug funcional", ["bug", "prioridad:P2"]),
         ]
         result = mod.select_candidate(candidates, [], now=NOW)
-        self.assertEqual(12, result["selected"]["number"])
+        self.assertEqual(13, result["selected"]["number"])
+        self.assertEqual(1, result["rejected"]["fuera-alcance-publico"])
+
+    def test_etiqueta_operativa_excluida_sin_confundir_export(self):
+        candidates = [
+            issue(31, "Optimizar cola", ["area:infra", "bug"]),
+            issue(32, "infra(agentes): bajar esperas", ["bug"]),
+            issue(33, "test: export Godot reproducible"),
+        ]
+        result = mod.select_candidate(candidates, [], now=NOW)
+        self.assertEqual(33, result["selected"]["number"])
+        self.assertEqual(2, result["rejected"]["fuera-alcance-publico"])
 
     def test_umbral_descarta_p3_generico_pero_no_test_autocontenido(self):
         candidates = [
