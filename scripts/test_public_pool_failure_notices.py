@@ -43,6 +43,9 @@ class PublicPoolNoticesTests(unittest.TestCase):
         self.assertIn("se ha detectado un solape de CLAIM", self.worker)
         self.assertNotIn("AGENT_PLAN delegado no ejecutable ($reason)", self.worker)
         self.assertNotIn("$(grep '^reason='", self.worker)
+        self.assertIn("AGENT_POOL_REPLAN attempt=$attempt", self.worker)
+        self.assertNotIn("AGENT_POOL_REPLAN attempt=$attempt provider=", self.worker)
+        self.assertNotIn("observed_paths=$outside", self.worker)
 
 
 if __name__ == "__main__":
