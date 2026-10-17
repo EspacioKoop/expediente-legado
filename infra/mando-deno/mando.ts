@@ -42,7 +42,7 @@ export function configDesdeEntorno(): MandoConfig {
     repository: Deno.env.get("GITHUB_REPOSITORY") ?? "EspacioKoop/expediente-legado",
     gatewayUrl: (Deno.env.get("MANDO_GATEWAY_URL") ??
       "https://siga98-feedback-deno.expediente-legado.deno.net").replace(/\/+$/, ""),
-    registroIssue: 1713,
+    registroIssue: 2905,
     fetch: (input, init) => fetch(input, init),
     now: () => Date.now(),
   };
@@ -266,7 +266,7 @@ async function leerPrs(config: MandoConfig): Promise<PrAbierta[]> {
 
 const TIPOS_REGISTRO = /^(CLAIM|HEARTBEAT|PR_DRAFT|PR_READY|CI_FIX|RELEASE)\b/;
 
-// Reduce el registro de #1713 a la última entrada por issue: si es RELEASE,
+// Reduce el registro vigente a la última entrada por issue: si es RELEASE,
 // la reserva ya no está viva. Solo mira la ventana reciente (las leases duran
 // 48 h), así que no es un sustituto del workflow de reservas.
 export function reservasVivas(
