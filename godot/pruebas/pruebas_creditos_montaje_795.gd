@@ -72,20 +72,27 @@ func _probar() -> void:
 			_comprobar(rotulo.length() <= 36, "rotulo legible: " + nombre)
 			_comprobar(atribuciones.has(rotulo), "rotulo solo del catalogo: " + nombre)
 
-		if decorado.has("escena"):
-			var ruta := String(decorado["escena"])
-			verticales[ruta] = true
-			_comprobar(ResourceLoader.exists(ruta, "PackedScene"), "escena disponible: " + ruta)
-		elif decorado.has("zona_creditos"):
+		if decorado.has("zona_creditos"):
 			zonas_dia += 1
 			_comprobar(
 				String(decorado["zona_creditos"]) == nombre,
 				"zona de vigilia con decorado propio: " + nombre
 			)
-		else:
+		elif nombre.begins_with("sueno-"):
 			var identidad := String(decorado.get("identidad_onirica", ""))
 			_comprobar(not identidad.is_empty(), "identidad de sueno: " + nombre)
 			identidades_sueno[identidad] = true
+			if decorado.has("escena"):
+				var iluminacion := String(decorado["escena"])
+				_comprobar(
+					ResourceLoader.exists(iluminacion, "PackedScene"),
+					"plato onirico iluminado: " + nombre
+				)
+		else:
+			var ruta := String(decorado.get("escena", ""))
+			_comprobar(not ruta.is_empty(), "vertical con escena: " + nombre)
+			verticales[ruta] = true
+			_comprobar(ResourceLoader.exists(ruta, "PackedScene"), "escena disponible: " + ruta)
 
 	_comprobar(localizaciones.size() == 40, "ninguna localizacion se repite")
 	_comprobar(decorados_visuales.size() == 40, "ningun decorado visual se repite")
