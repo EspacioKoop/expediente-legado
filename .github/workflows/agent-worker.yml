@@ -465,6 +465,11 @@ jobs:
             exit 0
           fi
 
+          # El planner también puede introducir datos ajenos al issue padre.
+          # Validar el plan ANTES de publicar su goal/files en CLAIM.
+          python3 scripts/issue_destination_guard.py --repo "$GITHUB_REPOSITORY" \
+            --title "$(jq -r '.title' /tmp/worker-publication-issue.json)" \
+            --body-file .agent-plan.json
           files="$(jq -r '.files|join(",")' .agent-plan.json)"
           goal="$(jq -r '.goal|gsub("[[:space:]]+";"-")' .agent-plan.json)"
           claim="CLAIM issue=#$ISSUE agent=Pool-$PROVIDER branch=$BRANCH files=$files goal=$goal lease=2h"
