@@ -76,7 +76,7 @@ func _capturar_plano(reproductor: Node3D, plano: Dictionary, indice: int, reducc
 	reproductor.reproducir([plano])
 	if reduccion:
 		reproductor.set("_reduccion_movimiento", true)
-	for _paso in 8:
+	for _paso in 4:
 		await process_frame
 	reproductor.call("_mover_camara", plano, 0.5)
 	await RenderingServer.frame_post_draw
