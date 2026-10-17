@@ -41,15 +41,17 @@ class TestResolverArcano(unittest.TestCase):
         self.assertEqual(resolver_arcano("bateleur.jpg").carta_id, "el-mago")
         self.assertEqual(resolver_arcano("pendu.png").carta_id, "el-colgado")
 
-    @unittest.expectedFailure
     def test_resolver_alias_papesse_sacerdotisa(self) -> None:
-        """El alias 'papesse' para La Sacerdotisa falla porque coincide erróneamente con 'pape' (El Hierofante).
+        """Verifica que 'papesse' resuelve a La Sacerdotisa y 'pape' a El Hierofante.
 
-        _coincidencias_alias detecta tanto 'papesse' (Sacerdotisa) como 'pape' (Hierofante,
-        contenido dentro de 'papesse'), por lo que lanza TarotImportError por ambigüedad.
+        Si un alias es subcadena estricta de otro alias más largo que coincide,
+        gana el más largo, evitando la ambigüedad errónea entre papesse y pape.
         """
-        arcano = resolver_arcano("papesse.png")
-        self.assertEqual(arcano.carta_id, "la-sacerdotisa")
+        arcano_sacerdotisa = resolver_arcano("papesse.png")
+        self.assertEqual(arcano_sacerdotisa.carta_id, "la-sacerdotisa")
+
+        arcano_hierofante = resolver_arcano("pape.png")
+        self.assertEqual(arcano_hierofante.carta_id, "el-hierofante")
 
     def test_resolver_por_numero_arabigo(self) -> None:
         """Verifica resolución por número en el nombre de archivo cuando no hay alias."""
