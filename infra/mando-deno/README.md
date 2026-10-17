@@ -2,7 +2,7 @@
 
 Una web con token para ver el estado de los agentes y dar órdenes desde cualquier sitio, incluido el móvil (#1778).
 
-- **Sala:** issues en cola del pool agrupados por label (`needs-human` primero), PRs abiertas con su estado de CI, reservas vivas de #1713 en las últimas 72 h y `/health` del gateway de producción.
+- **Sala:** issues en cola del pool agrupados por label (`needs-human` primero), PRs abiertas con su estado de CI, reservas vivas del registro activo #2905 en las últimas 72 h y `/health` del gateway de producción.
 - **Órdenes:** crea un issue. Si eliges «Delegar al pool», le pone `agent:auto` en la misma llamada. Con objetivo y rutas añade un bloque `AGENT_PLAN_BEGIN/END`, sin valla de código, para que el worker se salte el planificador.
 
 La app solo lee GitHub y el gateway; no tiene KV propio. Vive en la org `siga-98` de Deno Deploy, separada del gateway `siga98-feedback-deno` (org `expediente-legado`), así que un fallo aquí no toca la memoria de agentes ni los leases del pool.
