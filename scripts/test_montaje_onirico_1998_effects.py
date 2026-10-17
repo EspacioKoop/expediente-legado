@@ -3,6 +3,7 @@
 These are structural regression checks, not a replacement for a visual playtest.
 """
 from pathlib import Path
+import json
 import re
 import unittest
 
@@ -74,7 +75,7 @@ class MontajeOnirico1998EffectsTests(unittest.TestCase):
         self.assertIn('mat_sup.set_shader_parameter("quieto", _reduccion_movimiento)', self.reproductor)
         self.assertIn('mat_grano.set_shader_parameter("no_estroboscopico"', self.reproductor)
 
-    def test_sonido_has_original_audio_cues_families(self):
+    def test_sonido_has_available_cc0_cues(self):
         self.assertIn("crt_interrupcion", self.sonido)
         self.assertIn("texto_superposicion", self.sonido)
         self.assertIn('"crt_interrupcion": "error_003.ogg"', self.sonido)
@@ -84,7 +85,7 @@ class MontajeOnirico1998EffectsTests(unittest.TestCase):
         self.assertIn("CATALOGO := {", self.sonido)
         self.assertIn("FAMILIAS := {", self.sonido)
 
-    def test_sonido_has_fallback_for_new_families(self):
+    def test_sonido_uses_existing_catalog(self):
         self.assertIn('"crt_interrupcion": "error_003.ogg"', self.sonido)
         self.assertIn('"texto_superposicion": "click_001.ogg"', self.sonido)
 
@@ -98,10 +99,15 @@ class MontajeOnirico1998EffectsTests(unittest.TestCase):
             self.assertNotIn(forbidden, self.sup_shader)
             self.assertNotIn(forbidden, self.grano_shader)
 
-    def test_original_audio_cues_are_synthesis_not_recorded(self):
-        # Los assets chip/ son síntesis reproducible (#1813), no grabaciones
-        self.assertIn("audio", str(ROOT / "godot/assets/procedencia.json"))
-        self.assertIn("error_003.ogg", self.sonido)
+    def test_audio_cues_have_cc0_provenance(self):
+        manifest = ROOT / "godot" / "assets" / "procedencia.json"
+        assets = {a["ruta"]: a for a in json.loads(manifest.read_text(encoding="utf-8"))["assets"]}
+        for path in ("audio/error_003.ogg", "audio/click_001.ogg"):
+            with self.subTest(path=path):
+                self.assertIn(path, assets)
+                self.assertEqual("CC0-1.0", assets[path]["licencia"])
+                self.assertEqual("Kenney", assets[path]["autor"])
+
 
 
 if __name__ == "__main__":
