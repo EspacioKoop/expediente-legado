@@ -15,7 +15,7 @@ HELPER = (ROOT / "godot/guion/dia_literatura_app.gd").read_text(encoding="utf-8"
 
 
 def cuerpo(nombre):
-    match = re.search(rf"(?ms)^func {re.escape(nombre)}\\([^\\n]*\\) -> [^\\n]*:\\n(.*?)(?=^func |\\Z)", DIA)
+    match = re.search(r"(?ms)^func " + re.escape(nombre) + r"\([^)]*\) -> [^\n]*:\n(.*?)(?=^func |\Z)", DIA)
     if not match:
         raise AssertionError(f"Falta el hook {nombre}")
     return match.group(1)
@@ -29,7 +29,7 @@ class DiaLiteratura1761Test(unittest.TestCase):
         self.assertIn("DIA_LITERATURA_APP.vincular_partida(self, partida.estado)", vincular)
         self.assertIn("return DIA_LITERATURA_APP.registro_para_sueno(self)", registro)
         self.assertNotIn('get_node_or_null("/root/GestorLiteratura")', DIA)
-        self.assertIn('self._vincular_literatura_partida', "self._vincular_literatura_partida")
+        self.assertIn("_vincular_literatura_partida()", DIA)
         self.assertIn("_registro_literario_para_sueno()", DIA)
 
     def test_helper_conserva_fallback_en_gates_sin_arbol(self):
