@@ -36,6 +36,7 @@ const ZONAS_DIA := [
 	{
 		"id": "archivo-cafetera",
 		"sitio": "oficina",
+		"radio_creditos": 3.4,
 		"camara": Vector3(-3.9, 1.6, 2.8),
 		"mira": Vector3(-6.0, 1.0, 4.1)
 	},
@@ -299,14 +300,27 @@ static func _decorado_dia(zona: Dictionary) -> Dictionary:
 	# Los muebles de la misma sala fuera del encuadre se omiten del plató para
 	# que el contenido 3D de cada zona sea realmente distinto, no solo su etiqueta.
 	var objetivo: Vector3 = zona["mira"]
+	var radio := float(zona.get("radio_creditos", 4.3))
 	var objetos: Array = []
 	for objeto in decorado.get("bultos", []):
 		if not (objeto is Dictionary):
 			continue
 		var pos: Vector3 = objeto.get("pos", Vector3.ZERO)
-		if Vector2(pos.x, pos.z).distance_to(Vector2(objetivo.x, objetivo.z)) <= 4.3:
+		if Vector2(pos.x, pos.z).distance_to(Vector2(objetivo.x, objetivo.z)) <= radio:
 			objetos.append(objeto)
 	decorado["bultos"] = objetos
+	# Las pantallas de la calle tienen posiciones propias. Recortarlas al
+	# escaparate que se filma diferencia el extremo y la primera farola sin
+	# falsear el decorado con identificadores que no llegan a renderizarse.
+	if sitio == "calle":
+		var pantallas: Array = []
+		for pantalla in decorado.get("pantallas", []):
+			if not (pantalla is Dictionary):
+				continue
+			var pos: Vector3 = pantalla.get("pos", Vector3.ZERO)
+			if Vector2(pos.x, pos.z).distance_to(Vector2(objetivo.x, objetivo.z)) <= 3.5:
+				pantallas.append(pantalla)
+		decorado["pantallas"] = pantallas
 	decorado["zona_creditos"] = String(zona["id"])
 	return decorado
 
