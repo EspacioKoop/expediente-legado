@@ -27,9 +27,7 @@ void fragment() {
         // En reducción de movimiento: solo muestra el texto limpio con scanlines sutiles
         vec4 txt = texture(texto_textura, uv);
         COLOR = vec4(txt.rgb * scanline, txt.a * intensidad);
-        return;
-    }
-    
+    } else {
     // Desplazamiento irregular por carácter (simulado por bloques UV)
     vec2 bloque = floor(uv * vec2(40.0, 20.0)) / vec2(40.0, 20.0);
     vec2 desplazamiento = vec2(
@@ -45,4 +43,5 @@ void fragment() {
     
     float alpha = txt.a * intensidad * (1.0 - corte * 0.7);
     COLOR = vec4(txt.rgb * scanline, alpha);
+    }
 }
