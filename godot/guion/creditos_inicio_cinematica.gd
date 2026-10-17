@@ -134,6 +134,7 @@ const ZONAS_DIA := [
 	{
 		"id": "casa-cocina",
 		"sitio": "casa",
+		"radio_creditos": 3.2,
 		"camara": Vector3(2.1, 1.7, -0.6),
 		"mira": Vector3(5.05, 1.0, 4.15)
 	},
