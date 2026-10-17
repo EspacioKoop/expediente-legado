@@ -105,6 +105,19 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Guardar frontera pública antes de la ejecución
+        if: steps.select.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ steps.select.outputs.issue }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE" > /tmp/autopilot-publication-issue.json
+          jq -r '.body // ""' /tmp/autopilot-publication-issue.json > /tmp/autopilot-publication-body.md
+          python3 scripts/issue_destination_guard.py --repo "$GITHUB_REPOSITORY" \
+            --title "$(jq -r '.title' /tmp/autopilot-publication-issue.json)" \
+            --body-file /tmp/autopilot-publication-body.md
+
       - id: route
         name: Elegir proveedor con Kev
         if: steps.select.outputs.run == 'true'
@@ -704,6 +717,11 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "agent: avanzar #$ISSUE con $PROVIDER"
           gh auth setup-git
+          gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE" > /tmp/autopilot-prepublish-issue.json
+          jq -r '.body // ""' /tmp/autopilot-prepublish-issue.json > /tmp/autopilot-prepublish-body.md
+          python3 scripts/issue_destination_guard.py --repo "$GITHUB_REPOSITORY" \
+            --title "$(jq -r '.title' /tmp/autopilot-prepublish-issue.json)" \
+            --body-file /tmp/autopilot-prepublish-body.md
           git push -u origin "$BRANCH"
           title="$(gh issue view "$ISSUE" --json title --jq .title)"
           url="$(gh pr create --base main --head "$BRANCH" --draft \
