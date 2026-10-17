@@ -421,7 +421,7 @@ export function permiteOrdenPublica(repo: string, orden: Orden): boolean {
     /\bhermes[-_ ](?:gateway|router|mcp|provider|proveedor|dispatcher|bridge)\b/i,
     /\b(?:mistral[-_ ]paid|mistral de pago|quota[-_ ]domain|provider[-_ ]routing)\b/i,
     /\b(?:cuotas? de (?:tokens|modelo|modelos|proveedores|IA)|capacidad de proveedores)\b/i,
-    /\b(?:api[_ -]?key|auth[_ -]?token|password|private[_ -]?key)\s*[:=]/i,
+    /(?:\b|_)(?:api[_ -]?key|auth[_ -]?token|password|private[_ -]?key)\s*[:=]/i,
     /(?:\/home\/[A-Za-z0-9._-]+\/|\/Users\/[A-Za-z0-9._-]+\/|[A-Z]:\\Users\\)/i,
     /\b(?:192\.168|10\.(?:\d{1,3}\.){2}|172\.(?:1[6-9]|2\d|3[01])\.|100\.(?:6[4-9]|[789]\d|1[01]\d|12[0-7])\.)/,
     /\bagent\s*\(\s*[a-z][a-z0-9_-]*\s*\)/i,
