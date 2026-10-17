@@ -59,6 +59,20 @@ class GuardTests(unittest.TestCase):
         )
         self.assertLess(workflow.rindex(call), workflow.index('url="$(gh issue create'))
 
+    def test_autopilot_and_pool_preflight_and_claim_order(self):
+        for name in ("agent-autopilot.yml", "agent-worker.yml"):
+            workflow = (Path(__file__).resolve().parents[1] / ".github/workflows" / name).read_text()
+            call = "python3 scripts/issue_destination_guard.py"
+            with self.subTest(name=name):
+                self.assertEqual(workflow.count(call), 3)
+                first = workflow.index(call)
+                plan = workflow.index(call, first + 1)
+                before_push = workflow.index(call, plan + 1)
+                self.assertLess(first, plan)
+                self.assertLess(plan, workflow.index('claim="CLAIM issue='))
+                self.assertIn("--body-file .agent-plan.json", workflow)
+                self.assertLess(before_push, workflow.index('git push -u origin "$BRANCH"'))
+
     def test_cli_denial_does_not_print_private_content(self):
         with tempfile.TemporaryDirectory() as folder:
             file = Path(folder) / "input.md"
