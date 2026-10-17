@@ -13,15 +13,6 @@ sys.modules[SPEC.name] = mod
 SPEC.loader.exec_module(mod)
 
 
-
-# Fixtures por partes: el escaner de secretos (gitleaks) no distingue un valor
-# falso de una asignacion real. El prefijo `sk-sp-` es el que elige la URL.
-CLAVE_QWEN = "QWEN_" + "API_KEY"
-CLAVE_GEMINI = "GEMINI_" + "API_KEY"
-FALSA_SK_SP = "sk-" + "sp-" + "12345"
-FALSA_SK_OTRA = "sk-" + "other-" + "12345"
-FALSA_GEMINI = "gemini-" + "falsa"
-
 class EtiquetasDeTest(unittest.TestCase):
     def test_pr_con_etiquetas_validas(self):
         pr = {
@@ -135,8 +126,8 @@ class CadenaParaTest(unittest.TestCase):
 
     def test_cadena_principal_sintetica_qwen_y_gemini(self):
         entorno_sk_sp = {
-            CLAVE_QWEN: FALSA_SK_SP,
-            CLAVE_GEMINI: FALSA_GEMINI,
+            "QWEN_API_KEY": "sk-sp-x",
+            "GEMINI_API_KEY": "g",
             "GEMINI_MODEL": "gemini-2.0-flash",
         }
         cadena = mod.cadena_para(mod.PRINCIPAL, entorno_sk_sp)
@@ -148,7 +139,7 @@ class CadenaParaTest(unittest.TestCase):
         self.assertEqual(cadena[1].modelo, "gemini-2.0-flash")
 
         entorno_dashscope = {
-            CLAVE_QWEN: FALSA_SK_OTRA,
+            "QWEN_API_KEY": "sk-other-x",
         }
         cadena_dash = mod.cadena_para(mod.PRINCIPAL, entorno_dashscope)
         self.assertEqual(len(cadena_dash), 1)
@@ -158,7 +149,7 @@ class CadenaParaTest(unittest.TestCase):
         )
 
         entorno_custom_qwen = {
-            CLAVE_QWEN: FALSA_SK_SP,
+            "QWEN_API_KEY": "sk-sp-x",
             "QWEN_BASE_URL": "https://custom.qwen.url/v1",
             "QWEN_MODEL": "custom-qwen-model",
         }
