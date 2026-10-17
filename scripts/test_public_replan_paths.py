@@ -34,6 +34,29 @@ class PublicReplanPathsTests(unittest.TestCase):
             with self.subTest(case=repr(case)):
                 self.assertIsNone(public_paths(case, tracked))
 
+    def test_cli_allows_tracked_only_and_never_echoes_untracked_name(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            (root / "godot").mkdir()
+            (root / "godot" / "escena.gd").write_text("extends Node\n")
+            subprocess.run(["git", "-C", folder, "init", "-q"], check=True)
+            subprocess.run(
+                ["git", "-C", folder, "add", "godot/escena.gd"], check=True
+            )
+            guard = root / "guard.json"
+            command = [
+                sys.executable, str(ROOT / "scripts/public_replan_paths.py"),
+                "--guard", str(guard), "--repo", folder,
+            ]
+            guard.write_text('{"outside":["godot/escena.gd"]}')
+            good = subprocess.run(command, capture_output=True, text=True)
+            self.assertEqual(good.returncode, 0)
+            self.assertEqual(good.stdout.strip(), "godot/escena.gd")
+            guard.write_text('{"outside":["private_runtime_gateway.json"]}')
+            bad = subprocess.run(command, capture_output=True, text=True)
+            self.assertEqual(bad.returncode, 2)
+            self.assertNotIn("private_runtime_gateway.json", bad.stderr + bad.stdout)
+
     def test_workflow_preserves_replan_counter_and_no_route_leaks(self):
         s = (ROOT / ".github/workflows/agent-autopilot.yml").read_text()
         replan = s.split("- id: replan\n", 1)[1].split("- name: Validar diff y preflight", 1)[0]
