@@ -35,9 +35,13 @@ class CreditosInicioCinematicaTest(unittest.TestCase):
         self.assertNotIn("BoxMesh", self.creditos)
         for espacio in ("OFICINA", "CALLE", "CASA"):
             self.assertIn("EspaciosCatalogo." + espacio, self.creditos)
-        self.assertIn('{"escena": ruta}', self.creditos)
+        self.assertIn('"escena": ruta,', self.creditos)
         self.assertIn("const VERTICALES := [", self.creditos)
         self.assertEqual(self.creditos.count('"res://escenas/sueno_'), 11)
+        self.assertIn("const CAMARAS_VERTICALES := {", self.creditos)
+        self.assertIn('CAMARAS_VERTICALES.get(nombre, {})', self.creditos)
+        self.assertIn('"carcasa": false', self.creditos)
+        self.assertIn('"sombras": false', self.creditos)
         for identidad in (
             "SuenoVacio", "SuenoEscuela", "SuenoMontana",
             "SuenoDesierto", "SuenoCastillo", "SuenoDuat",
