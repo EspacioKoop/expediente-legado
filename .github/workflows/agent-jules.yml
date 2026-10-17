@@ -59,7 +59,7 @@ jobs:
             # Sin PR de Jules que cerrar, el RELEASE va por issue y rama sintética.
             # Si nunca hubo CLAIM, un RELEASE de más es inocuo.
             gh issue comment "$registro" --repo "$GITHUB_REPOSITORY" \
-              --body "RELEASE issue=#$ISSUE branch=$branch motivo=jules-$ACTION" >/dev/null
+              --body "RELEASE issue=#$ISSUE branch=$branch motivo=jules-$ACTION" >/dev/null || true
             exit 0
           fi
 
@@ -88,7 +88,7 @@ jobs:
           files="$(jq -r '.files | join(",")' /tmp/plan.json)"
           goal="$(jq -r '.goal | gsub("[[:space:]]+"; "-")' /tmp/plan.json)"
           gh issue comment "$registro" --repo "$GITHUB_REPOSITORY" --body \
-            "CLAIM issue=#$ISSUE agent=Jules branch=$branch files=$files goal=$goal lease=48h" >/dev/null
+            "CLAIM issue=#$ISSUE agent=Jules branch=$branch files=$files goal=$goal lease=48h" >/dev/null || true
           echo "CLAIM de Jules publicado en #$registro: $files"
 
 
@@ -163,12 +163,12 @@ jobs:
             motivo="jules-pr-cerrada"
             [[ "$MERGED" == true ]] && motivo="jules-pr-mergeada"
             gh issue comment "$registro" --repo "$GITHUB_REPOSITORY" --body \
-              "RELEASE issue=#$issue pr=#$PR branch=$claim_branch motivo=$motivo actual_branch=$HEAD_BRANCH" >/dev/null
+              "RELEASE issue=#$issue pr=#$PR branch=$claim_branch motivo=$motivo actual_branch=$HEAD_BRANCH" >/dev/null || true
             exit 0
           fi
 
           gh issue comment "$registro" --repo "$GITHUB_REPOSITORY" --body \
-            "PR_DRAFT issue=#$issue pr=#$PR sha=$HEAD_SHA branch=$HEAD_BRANCH pruebas=CI-canonica-por-pull_request alcance=jules-task-$task_id limites=sin-auto-merge" >/dev/null
+            "PR_DRAFT issue=#$issue pr=#$PR sha=$HEAD_SHA branch=$HEAD_BRANCH pruebas=CI-canonica-por-pull_request alcance=jules-task-$task_id limites=sin-auto-merge" >/dev/null || true
           echo "PR Jules #$PR enlazada con issue #$issue ($HEAD_BRANCH)."
 
 
@@ -304,7 +304,7 @@ jobs:
             exit 0
           fi
 
-          gh issue comment "$registro" --repo "$GITHUB_REPOSITORY" --body             "$marca pruebas=CI-canonica+checks-core-verdes alcance=jules-task-$task_id limites=sin-auto-merge" >/dev/null
+          gh issue comment "$registro" --repo "$GITHUB_REPOSITORY" --body             "$marca pruebas=CI-canonica+checks-core-verdes alcance=jules-task-$task_id limites=sin-auto-merge" >/dev/null || true
           echo "PR_READY de Jules #$PR publicado en #$registro."
 
   # Jules es capacidad burst: un fallo terminal suyo no debe dejar una tarea
@@ -380,7 +380,7 @@ jobs:
             [[ "$(jq '.files | length' /tmp/plan.json)" -eq 0 ]]; then
             gh issue comment "$registro" --repo "$GITHUB_REPOSITORY" --body \
               "RELEASE issue=#$ISSUE branch=jules/issue-$ISSUE motivo=jules-error-sin-PR-plan-invalido" \
-              >/dev/null
+              >/dev/null || true
             gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
               --remove-label jules --add-label agent:needs-human >/dev/null 2>&1 || true
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
@@ -391,7 +391,7 @@ jobs:
 
           gh issue comment "$registro" --repo "$GITHUB_REPOSITORY" --body \
             "RELEASE issue=#$ISSUE branch=jules/issue-$ISSUE motivo=jules-error-sin-PR-fallback-pool" \
-            >/dev/null
+            >/dev/null || true
 
           gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
             --remove-label jules --add-label agent:auto >/dev/null
