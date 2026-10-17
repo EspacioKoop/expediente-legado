@@ -48,7 +48,9 @@ func _probar() -> void:
 		var camara_id := str(plano["camara"])
 		_comprobar(not camaras.has(camara_id), "encuadre no repetido: " + nombre)
 		camaras[camara_id] = true
-		_comprobar(String(plano.get("voz", "")).is_empty(), "sin texto en subtitulo 18 px: " + nombre)
+		_comprobar(
+			String(plano.get("voz", "")).is_empty(), "sin texto en subtitulo 18 px: " + nombre
+		)
 
 		var rotulo := String(plano.get("rotulo", ""))
 		if rotulo.is_empty():
@@ -84,13 +86,11 @@ func _probar() -> void:
 		"duracion de apertura contenida"
 	)
 	_comprobar(
-		String(planos[planos.size() - 2].get("rotulo", ""))
-		== _credito_de(fuente, "direccion"),
+		String(planos[planos.size() - 2].get("rotulo", "")) == _credito_de(fuente, "direccion"),
 		"direccion en el penultimo plano"
 	)
 	_comprobar(
-		String(planos[planos.size() - 1].get("rotulo", ""))
-		== _credito_de(fuente, "titulo"),
+		String(planos[planos.size() - 1].get("rotulo", "")) == _credito_de(fuente, "titulo"),
 		"titulo final desde la fuente canonica"
 	)
 	_comprobar(
