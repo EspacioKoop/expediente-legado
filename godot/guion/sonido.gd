@@ -118,6 +118,18 @@ const FAMILIAS := {
 	"firmar": ["chip/ui_firmar_01.ogg"],
 	"error": ["chip/ui_error_01.ogg"],
 	"coger": ["impactSoft_medium_000.ogg", "impactSoft_medium_001.ogg"],
+	"crt_interrupcion":
+	[
+		"chip/crt_interrupcion_01.ogg",
+		"chip/crt_interrupcion_02.ogg",
+		"chip/crt_interrupcion_03.ogg",
+	],
+	"texto_superposicion":
+	[
+		"chip/texto_glitch_01.ogg",
+		"chip/texto_glitch_02.ogg",
+		"chip/texto_glitch_03.ogg",
+	],
 }
 const FAMILIAS_RESPALDO := {
 	"abrir": ["impactMetal_light_000.ogg", "impactMetal_light_001.ogg"],
@@ -129,6 +141,8 @@ const FAMILIAS_RESPALDO := {
 	"marcar": ["switch_002.ogg"],
 	"firmar": ["confirmation_001.ogg"],
 	"error": ["error_003.ogg"],
+	"crt_interrupcion": ["error_003.ogg"],
+	"texto_superposicion": ["click_001.ogg"],
 }
 const VARIACION_TONO := 1.08
 
