@@ -74,6 +74,18 @@ Reglas obligatorias:
 
 La pregunta operativa antes de crear cualquier issue es: **“¿alguien puede empezar este trabajo hoy con un resultado verificable?”** Si la respuesta es no, documenta la idea en el padre/ROADMAP y no aumentes el backlog.
 
+## Frontera del repositorio público
+
+**Este repositorio es público y su backlog pertenece al juego**, no a la infraestructura personal o reutilizable de agentes. Antes de crear un issue, una PR o una tarea para Jules/pool, clasifica el **contenido real** del cambio (no solo su título):
+
+- **Aquí:** jugabilidad, SIGA-98, escenas, gráficos, audio, localización, accesibilidad, errores del juego y pruebas/export/CI específicas de este proyecto. También pueden permanecer los contratos públicos mínimos de colaboración (issue, PR, SHA, labels, CLAIM/RELEASE), sin detalles del entorno que los ejecuta.
+- **Solo en el repositorio privado de infraestructura:** Hermes, selección y cuotas de proveedores/modelos, cuentas, tokens, costes, topología y nodos domésticos, redes, servicios MCP, mensajes internos B2B, salud/capacidad de workers, colas/routing genéricos, control-plane Deno reutilizable y runbooks de despliegue privados. **No crear aquí issues de seguimiento, PRs ni nuevos módulos sobre esos asuntos**, aunque un agente del juego los consuma.
+- **Cambios mixtos:** separar el código del juego del código de infraestructura *antes de abrir una PR*. Una PR de cine, audio o gameplay no puede incluir cambios en servidores de agentes, OAuth/MCP, infraestructura doméstica ni workflows ajenos a las pruebas del juego. Una PR mezclada debe quedar bloqueada hasta su separación.
+- **Hallazgos históricos:** reconciliar con el seguimiento privado autorizado, cerrar el issue público con un aviso mínimo y no duplicar el trabajo. No borrar a ciegas código que aún use el juego: migración, compatibilidad y rollback se resuelven en un corte separado y verificado.
+- **Sin acceso al repositorio privado:** detener únicamente la parte de infraestructura y comunicar el bloqueo de forma saneada; nunca usar este repositorio público como alternativa. No copiar aquí URLs/hosts privados, secretos, snapshots de cuotas, conversaciones internas o trazas operativas.
+
+La frontera aplica también a encargos para agentes gratuitos y a la automatización que crea issues; etiquetar un asunto como `agent:*` no lo convierte en trabajo del juego.
+
 ## Niveles de trabajo
 
 - **Nivel 1:** @eGurucharri decide prioridad, integra y valida en playtest.
