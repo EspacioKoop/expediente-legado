@@ -288,7 +288,13 @@ static func planos() -> Array:
 				{
 					"pos": camara.lerp(mira, 0.25) + Vector3(0.0, 1.5, 0.0),
 					"color": Color(0.90, 0.88, 0.80),
-					"energia": 3.6,
+					"energia": (
+						7.2
+						if nombre == "sueno_aquiles"
+						or nombre == "sueno_aquiles_alineacion"
+						or nombre == "sueno_gilgamesh"
+						else 3.6
+					),
 					"alcance": 32.0,
 					"carcasa": false,
 					"sombras": false
@@ -418,10 +424,16 @@ static func _decorado_sueno(forma: Dictionary) -> Dictionary:
 			}
 		)
 		decorado["luces"] = luces
-		# La prueba visual de #284 necesita un sol direccional; a diferencia
-		# del mundo de sueño jugable, el plató de CinematicaApp solo monta
-		# luces puntuales y su ambiente fijo. Una escena de iluminación
-		# exclusiva recupera el relieve sin modificar Sueno/Jornada.
+		# La variante por píxel evita las superficies negras que provoca
+		# la iluminación por vértice sobre paredes con muy pocos polígonos.
+		# Se limita al decorado cinematográfico, no al sueño jugable.
+		decorado["luz_por_pixel"] = true
+		if id == "montana" or id == "duat":
+			decorado["color_suelo"] = Color(decorado["color_suelo"]).lightened(0.25)
+			decorado["color_muro"] = Color(decorado["color_muro"]).lightened(0.25)
+			decorado["color_techo"] = Color(decorado["color_techo"]).lightened(0.25)
+		# La prueba visual de #284 usa luz direccional; solo este plató
+		# incorpora su rig para mantener el tratamiento del juego intacto.
 		decorado["escena"] = "res://escenas/creditos_luz_onirica.tscn"
 	return decorado
 
