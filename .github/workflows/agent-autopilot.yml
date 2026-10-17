@@ -159,7 +159,7 @@ jobs:
           echo "run=true" >> "$GITHUB_OUTPUT"
           echo "provider=$provider" >> "$GITHUB_OUTPUT"
           echo "source=$source" >> "$GITHUB_OUTPUT"
-          echo "branch=agent/${provider}-${ISSUE}-${GITHUB_RUN_ID}" >> "$GITHUB_OUTPUT"
+          echo "branch=agent/autopilot-${ISSUE}-${GITHUB_RUN_ID}" >> "$GITHUB_OUTPUT"
           echo "Kev router: provider=$provider source=$source"
 
       - id: qwen
@@ -415,7 +415,7 @@ jobs:
             --body-file .agent-plan.json
           files="$(jq -r '.files|join(",")' .agent-plan.json)"
           goal="$(jq -r '.goal|gsub("[[:space:]]+";"-")' .agent-plan.json)"
-          claim="CLAIM issue=#$ISSUE agent=Autopilot-$PROVIDER branch=$BRANCH files=$files goal=$goal lease=2h"
+          claim="CLAIM issue=#$ISSUE agent=Autopilot branch=$BRANCH files=$files goal=$goal lease=2h"
           cid="$(gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$(python3 scripts/gestionar_reservas_rollover.py --active)/comments" -f body="$claim" --jq .id)"
           python3 scripts/gestionar_reservas_rollover.py --comments-output /tmp/reservas.json
           # Capa única de lectura de #182 (#1662), la misma que usa el worker.
@@ -730,13 +730,13 @@ jobs:
           git push -u origin "$BRANCH"
           title="$(gh issue view "$ISSUE" --json title --jq .title)"
           url="$(gh pr create --base main --head "$BRANCH" --draft \
-            --title "agent($PROVIDER): #$ISSUE $title" \
+            --title "agent: #$ISSUE $title" \
             --body "Closes #$ISSUE
 
           Implementación autónoma. Plan reservado en el registro de reservas activo; cambios limitados al CLAIM; preflight ejecutado. PR draft, sin auto-merge.")"
           echo "url=$url" >> "$GITHUB_OUTPUT"
           gh issue edit "$ISSUE" --add-label agent:pr-open --remove-label agent:working --remove-label agent:auto --remove-label agent:qwen --remove-label agent:gemini >/dev/null 2>&1 || true
-          gh issue comment "$ISSUE" --body "Agent autopilot ($PROVIDER): $url"
+          gh issue comment "$ISSUE" --body "Agent autopilot: $url"
           gh workflow run ci.yml --ref "$BRANCH"
 
       - name: Marcar fallo
