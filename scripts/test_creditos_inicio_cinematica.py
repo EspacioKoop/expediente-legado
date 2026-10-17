@@ -24,7 +24,7 @@ class CreditosInicioCinematicaTest(unittest.TestCase):
         self.assertIn("CreditosInicio.bloques_completos()", self.creditos)
         for nombre in ("eGurucharri", "VaroTv7", "Godot Engine", "SameBoy"):
             self.assertNotIn(nombre, self.creditos)
-        self.assertIn('entrada.get("nombre", "")', self.creditos)
+        self.assertIn('entradas[entrada].get("nombre", "")', self.creditos)
         self.assertNotIn("ENTRADAS_POR_PLANO", self.creditos)
         self.assertNotIn("paginas.append", self.creditos)
 
