@@ -461,7 +461,7 @@ jobs:
           if grep -q '"files": \[\]' .agent-plan.json 2>/dev/null; then
             printf 'reserved=false\nreason=sin-corte-seguro\n' >> "$GITHUB_OUTPUT"
             gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human --remove-label agent:working >/dev/null 2>&1 || true
-            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Agent pool ($PROVIDER): no encontro un corte seguro y concreto; requiere revision humana." || true
+            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Agent pool: no encontro un corte seguro y concreto; requiere revision humana." || true
             exit 0
           fi
 
@@ -1053,7 +1053,7 @@ jobs:
           set -euo pipefail
           git config user.name "agent-pool[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "agent: avanzar #$ISSUE con $WORKER"
+          git commit -m "agent: avanzar #$ISSUE con pool"
           gh auth setup-git
           gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE" > /tmp/worker-prepublish-issue.json
           jq -r '.body // ""' /tmp/worker-prepublish-issue.json > /tmp/worker-prepublish-body.md
