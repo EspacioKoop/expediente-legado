@@ -426,9 +426,15 @@ static func _decorado_sueno(forma: Dictionary) -> Dictionary:
 		# Se limita al decorado cinematográfico, no al sueño jugable.
 		decorado["luz_por_pixel"] = true
 		if id == "montana" or id == "duat":
-			decorado["color_suelo"] = Color(decorado["color_suelo"]).lightened(0.25)
-			decorado["color_muro"] = Color(decorado["color_muro"]).lightened(0.25)
-			decorado["color_techo"] = Color(decorado["color_techo"]).lightened(0.25)
+			# SuenoGeometria construye suelo, paredes y techo en una sola
+			# malla, pintada por el material de muro. La textura oscura
+			# del sueño no debe ocultar el contorno entero en esta toma.
+			decorado["textura_muro"] = ""
+			decorado["color_muro"] = (
+				Color(0.56, 0.41, 0.43)
+				if id == "montana"
+				else Color(0.46, 0.45, 0.62)
+			)
 		# La prueba visual de #284 usa luz direccional; solo este plató
 		# incorpora su rig para mantener el tratamiento del juego intacto.
 		decorado["escena"] = "res://escenas/creditos_luz_onirica.tscn"
