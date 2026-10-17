@@ -1,6 +1,8 @@
 ## #795/#2527: comprobar el montaje como datos Godot, no por grep.
 extends SceneTree
 
+const ESCENA_CINEMATICA := preload("res://escenas/cinematica.tscn")
+
 var _pasadas := 0
 var _fallos := 0
 
@@ -97,8 +99,41 @@ func _probar() -> void:
 		float(planos[planos.size() - 1].get("segundos", 0.0)) >= 3.5,
 		"el titulo respira antes del final"
 	)
+	await _probar_movimiento_y_salto(planos)
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
+
+
+func _probar_movimiento_y_salto(planos: Array) -> void:
+	# Reproducción real en el plató común: se comprueba que la alternativa
+	# accesible detiene la cámara en el destino y que saltar termina limpiamente.
+	var app := ESCENA_CINEMATICA.instantiate()
+	root.add_child(app)
+	var plano: Dictionary = planos[0].duplicate(true)
+	plano["segundos"] = 1.0
+	app.call("reproducir", [plano])
+	var camara: Camera3D = app.get("_camara")
+	_comprobar(camara != null, "el reproductor crea una camara 3D")
+	if camara != null:
+		app.set("_reduccion_movimiento", true)
+		app.call("_mover_camara", plano, 0.4)
+		_comprobar(
+			camara.global_position.is_equal_approx(Vector3(plano["camara"])),
+			"con reduccion de movimiento la camara queda quieta en destino"
+		)
+		app.set("_reduccion_movimiento", false)
+		app.call("_mover_camara", plano, 0.0)
+		_comprobar(
+			camara.global_position.distance_to(Vector3(plano["camara"])) > 0.05,
+			"sin reduccion se conserva el travelling"
+		)
+	var finalizado := {"ok": false}
+	app.connect("terminada", func(): finalizado["ok"] = true)
+	app.call("saltar")
+	_comprobar(finalizado["ok"], "saltar emite la terminacion")
+	_comprobar(not bool(app.get("_reproduciendo")), "saltar detiene el montaje")
+	app.queue_free()
+	await process_frame
 
 
 func _credito_de(bloques: Array, id: String) -> String:
