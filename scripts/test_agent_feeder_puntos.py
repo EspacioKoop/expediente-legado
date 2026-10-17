@@ -66,14 +66,14 @@ class TestAgentFeederPuntos(unittest.TestCase):
         issue_p2_p1 = {"labels": ["prioridad:P2", "prioridad:P1"]}
         self.assertEqual(score_points(issue_p2_p1), 15)
 
-    def test_prefijos_de_titulo_infra_y_test(self) -> None:
-        self.assertEqual(score_points({"title": "infra: actualizar runner"}), 30)
-        self.assertEqual(score_points({"title": "infra(ci): refactor pip"}), 30)
+    def test_el_prefijo_infra_no_obtiene_bonificacion(self) -> None:
+        self.assertEqual(score_points({"title": "infra: actualizar runner"}), 0)
+        self.assertEqual(score_points({"title": "infra(ci): refactor pip"}), 0)
         self.assertEqual(score_points({"title": "test: añadir tests de puntos"}), 30)
         self.assertEqual(score_points({"title": "test(feeder): test de unidad"}), 30)
 
         # Insensible a mayúsculas
-        self.assertEqual(score_points({"title": "INFRA: REFACTOR"}), 30)
+        self.assertEqual(score_points({"title": "INFRA: REFACTOR"}), 0)
         self.assertEqual(score_points({"title": "Test(core): test"}), 30)
 
         # No coincide si está en medio del título
@@ -92,8 +92,8 @@ class TestAgentFeederPuntos(unittest.TestCase):
                 {"name": "area:accesibilidad"},
             ],
         }
-        # 40 (bug) + 25 (P3) + 30 (infra:) + 5 (accesibilidad) = 100
-        self.assertEqual(score_points(issue_dict_labels), 100)
+        # 40 (bug) + 25 (P3) + 5 (accesibilidad) = 70
+        self.assertEqual(score_points(issue_dict_labels), 70)
 
         issue_mixed_labels = {
             "labels": [
@@ -111,8 +111,8 @@ class TestAgentFeederPuntos(unittest.TestCase):
             "title": "infra(db): corregir migración",
             "labels": ["bug", "prioridad:P3", "area:accesibilidad"],
         }
-        # 40 (bug) + 25 (P3) + 30 (infra) + 5 (accesibilidad) = 100
-        self.assertEqual(score_points(max_score_issue), 100)
+        # 40 (bug) + 25 (P3) + 5 (accesibilidad) = 70
+        self.assertEqual(score_points(max_score_issue), 70)
 
         combo_issue = {
             "title": "test: probar accesibilidad",
@@ -127,7 +127,7 @@ class TestAgentFeederPuntos(unittest.TestCase):
             "title": "infra: bug critico",
             "labels": ["bug", "prioridad:P3"],
             "createdAt": "2026-10-01T10:00:00Z",
-        }  # 40 + 25 + 30 = 95 puntos
+        }  # 40 + 25 = 65 puntos
 
         issue_med = {
             "number": 20,
