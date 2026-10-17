@@ -41,6 +41,8 @@ class CreditosInicioCinematicaTest(unittest.TestCase):
         self.assertIn("const CAMARAS_VERTICALES := {", self.creditos)
         self.assertIn('CAMARAS_VERTICALES.get(nombre, {})', self.creditos)
         self.assertIn("creditos_luz_onirica.tscn", self.creditos)
+        self.assertIn('decorado["luz_por_pixel"] = true', self.creditos)
+        self.assertIn('"energia": energia_relleno', self.creditos)
         self.assertIn("camara.lerp(mira, 0.25)", self.creditos)
         self.assertIn('"sueno_aquiles":', self.creditos)
         self.assertIn('"sueno_gilgamesh":', self.creditos)
