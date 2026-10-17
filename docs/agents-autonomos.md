@@ -54,7 +54,7 @@ La prioridad es:
 
 1. código y tests actuales;
 2. issue y plan actual;
-3. #181, #1713 y Normas Platino;
+3. #181, #2905 y Normas Platino;
 4. contexto auxiliar seleccionado por las herramientas del repo.
 
 Memoria, wiki, métricas o respuestas de modelos pueden orientar; nunca sustituyen el estado actual del código, el issue ni CI.

@@ -1043,7 +1043,7 @@ jobs:
             --title "agent($PROVIDER): #$ISSUE $title" \
             --body "Closes #$ISSUE
 
-          Implementacion autonoma mediante worker \`$WORKER\`. Plan reservado en #1713; cambios limitados al CLAIM; preflight ejecutado. Reviewer acotado: \`$REVIEW_STATUS/$REVIEW_VERDICT\`. Protocolo v1: ResultPacket $RESULT_VALID/$RESULT_STATUS; handoff-loss proxy $HANDOFF_LOSS%. PR draft, sin auto-merge." 2>&1)"; then
+          Implementacion autonoma mediante worker \`$WORKER\`. Plan reservado en el registro de reservas activo; cambios limitados al CLAIM; preflight ejecutado. Reviewer acotado: \`$REVIEW_STATUS/$REVIEW_VERDICT\`. Protocolo v1: ResultPacket $RESULT_VALID/$RESULT_STATUS; handoff-loss proxy $HANDOFF_LOSS%. PR draft, sin auto-merge." 2>&1)"; then
             if grep -Eiq 'not permitted to create or approve pull requests|createPullRequest|Resource not accessible by integration' <<<"$pr_salida"; then
               gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
                 --add-label agent:needs-human \

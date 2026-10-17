@@ -136,7 +136,7 @@ class AgentMemoryContractTest(unittest.TestCase):
             self.assertIn("Normas Platino", doc)
             self.assertIn("wiki", doc.lower())
             self.assertIn("memoria Deno KV", doc)
-            self.assertIn("repositorio/issue/#181/#1713 + histórico #182 + Normas Platino", doc)
+            self.assertIn("repositorio/issue/#181/#2905 + históricos #182 y #1713 + Normas Platino", doc)
 
         self.assertIn("memoria operativa transitoria", self.deno_readme)
 

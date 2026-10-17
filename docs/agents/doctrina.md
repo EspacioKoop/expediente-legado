@@ -52,7 +52,7 @@ Trampa conocida: con herramientas activadas, `auto/best-free` puede elegir model
 Cuando un agente de nivel 2 agota su cuota o su sesión a mitad de un corte, el siguiente tiene que poder retomarlo sin preguntar:
 
 1. **Deja el trabajo en la rama.** Commit y push, aunque sea un WIP. Lo que queda solo en un disco local no existe para el relevo.
-2. **Publica el estado en #1713.**
+2. **Publica el estado en #2905.**
 
    ```text
    HEARTBEAT issue=#N branch=<rama> estado=<hecho>;<pendiente> relevo=<agente-o-libre>
