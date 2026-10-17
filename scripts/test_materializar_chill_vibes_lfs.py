@@ -70,7 +70,7 @@ class TestVerificarIndiceLFS(unittest.TestCase):
 
         mock_ejecutar_git.assert_called_once_with(
             self.repo,
-            ["show", f":{mod.DESTINO_REL / self.asset_a['destino_sugerido']}"],
+            ["show", f":{(mod.DESTINO_REL / self.asset_a['destino_sugerido']).as_posix()}"],
             binario=True,
         )
 
