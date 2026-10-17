@@ -23,7 +23,7 @@ PRIVATE = (
     re.compile(r"\bhermes[-_ ](?:gateway|router|mcp|provider|proveedor|dispatcher|bridge)\b", re.I),
     re.compile(r"\b(?:mistral[-_ ]paid|mistral de pago|quota[-_ ]domain|provider[-_ ]routing)\b", re.I),
     re.compile(r"\b(?:cuotas? de (?:tokens|modelo|modelos|proveedores|IA)|capacidad de proveedores)\b", re.I),
-    re.compile(r"\b(?:api[_ -]?key|auth[_ -]?token|password|private[_ -]?key)\s*[:=]", re.I),
+    re.compile(r"(?:\b|_)(?:api[_ -]?key|auth[_ -]?token|password|private[_ -]?key)\s*[:=]", re.I),
     re.compile(r"(?:/home/[A-Za-z0-9._-]+/|/Users/[A-Za-z0-9._-]+/|[A-Z]:\\Users\\)", re.I),
     re.compile(r"\b(?:192\.168|10\.(?:\d{1,3}\.){2}|172\.(?:1[6-9]|2\d|3[01])\.|100\.(?:6[4-9]|[789]\d|1[01]\d|12[0-7])\.)"),
     re.compile(r"\bagent\s*\(\s*[a-z][a-z0-9_-]*\s*\)", re.I),
