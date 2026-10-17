@@ -1215,7 +1215,7 @@ jobs:
                 gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
                   --add-label agent:needs-human >/dev/null 2>&1 || true
                 gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-                  "Agent pool: $WORKER terminó sin diff para la tarea mono-fichero. No se penaliza ni rota el worker; se pausa el issue para comprobar si ya estaba resuelto o si el corte necesita redefinirse." || true
+                  "Agent pool: el intento terminó sin diff para la tarea mono-fichero. No se penaliza ni rota el worker; se pausa el issue para comprobar si ya estaba resuelto o si el corte necesita redefinirse." || true
                 exit 0
                 ;;
               same_worker_fix|split_or_same_worker)
@@ -1237,7 +1237,7 @@ jobs:
                   gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
                     --add-label agent:needs-human >/dev/null 2>&1 || true
                   gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-                    "Agent pool: $category se repitió con $WORKER. Se detiene sin penalizar el slot; requiere ajustar el corte o revisar el fallo antes de otro intento." || true
+                    "Agent pool: $category se repitió en el mismo slot. Se detiene sin penalizarlo; requiere ajustar el corte o revisar el fallo antes de otro intento." || true
                   exit 0
                 fi
 
@@ -1339,12 +1339,12 @@ jobs:
                   gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
                     --add-label agent:needs-human >/dev/null 2>&1 || true
                   gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-                    "Agent pool agotó los workers compatibles tras $category. Último fallo: $WORKER. Requiere revisión humana o AGENT_POOL_RETRY_RESET." || true
+                    "Agent pool agotó los workers compatibles tras $category. Requiere revisión humana o AGENT_POOL_RETRY_RESET." || true
                 else
                   detalle=""
                   [[ "$category" == quota_or_overload ]] && detalle=" El slot queda en cooldown de cuota."
                   gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-                    "Agent pool reencolado tras $category en $WORKER; solo esta clase de fallo rota worker/proveedor.$detalle" || true
+                    "Agent pool reencolado tras $category; solo esta clase de fallo rota el slot de ejecución.$detalle" || true
                 fi
                 exit 0
                 ;;
