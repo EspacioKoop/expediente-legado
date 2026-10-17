@@ -1,0 +1,123 @@
+name: Evidencia créditos 795
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/evidencia-creditos-795.yml'
+      - '.github/actions/upload-artifact/**'
+      - '.godot-version'
+      - 'godot/guion/creditos_inicio_cinematica.gd'
+      - 'godot/guion/creditos_inicio.gd'
+      - 'godot/guion/cinematica_app.gd'
+      - 'godot/guion/espacio_3d.gd'
+      - 'godot/escenas/sueno_*.tscn'
+      - 'godot/pruebas/capturar_creditos_795.gd'
+      - 'scripts/test_evidencia_creditos_795.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evidencia:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      LIBGL_ALWAYS_SOFTWARE: '1'
+      GALLIUM_DRIVER: llvmpipe
+      XDG_DATA_HOME: ${{ github.workspace }}/.tmp-evidencia-creditos/data
+      XDG_CONFIG_HOME: ${{ github.workspace }}/.tmp-evidencia-creditos/config
+      XDG_CACHE_HOME: ${{ github.workspace }}/.tmp-evidencia-creditos/cache
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          lfs: true
+
+      - name: Instalar Godot declarado por el proyecto
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat .godot-version)"
+          archivo="Godot_v${version}_linux.x86_64.zip"
+          base="https://github.com/godotengine/godot-builds/releases/download/${version}"
+          curl --fail --location --retry 3 "$base/$archivo" -o "$RUNNER_TEMP/$archivo"
+          curl --fail --location --retry 3 "$base/SHA512-SUMS.txt" -o "$RUNNER_TEMP/SHA512-SUMS.txt"
+          cd "$RUNNER_TEMP"
+          grep -F " $archivo" SHA512-SUMS.txt | sha512sum --check --strict
+          unzip -q "$archivo"
+          mkdir -p godot-bin
+          mv "Godot_v${version}_linux.x86_64" godot-bin/godot4
+          chmod +x godot-bin/godot4
+          echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
+
+      - name: Instalar Vulkan por software para Forward+
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends mesa-vulkan-drivers vulkan-tools
+          icd="$(find /usr/share/vulkan/icd.d -maxdepth 1 -type f -iname '*lvp*.json' -print -quit)"
+          if [ -z "$icd" ]; then
+            echo "::error::No se encontró el ICD de Lavapipe"
+            exit 1
+          fi
+          echo "VK_ICD_FILENAMES=$icd" >> "$GITHUB_ENV"
+          VK_ICD_FILENAMES="$icd" xvfb-run -a vulkaninfo --summary
+
+      - name: Importar proyecto 3D
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$XDG_DATA_HOME" "$XDG_CONFIG_HOME" "$XDG_CACHE_HOME"
+          godot4 --headless --editor --path godot --quit
+
+      - name: Validar contrato de evidencia
+        run: python3 -m unittest -v scripts.test_evidencia_creditos_795
+
+      - name: Renderizar 40 tomas de créditos y tres estados accesibles
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidencia-creditos-795
+          xvfb-run -a godot4 --path godot --rendering-method forward_plus \
+            --script res://pruebas/capturar_creditos_795.gd -- \
+            "$GITHUB_WORKSPACE/evidencia-creditos-795"
+          test -s evidencia-creditos-795/contacto_creditos_795.png
+          test -s evidencia-creditos-795/manifest.json
+          python3 - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          directorio = Path("evidencia-creditos-795")
+          datos = json.loads((directorio / "manifest.json").read_text(encoding="utf-8"))
+          assert datos["issue"] == 795 and datos["corte"] == 2527
+          assert datos["resolucion"] == [1920, 1080]
+          assert datos["veredicto_automatico"] is False
+          assert datos["requiere_revision_humana"] is True
+          normales = [c for c in datos["capturas"] if not c["movimiento_reducido"]]
+          reducidas = [c for c in datos["capturas"] if c["movimiento_reducido"]]
+          assert len(normales) == 40 and len(reducidas) == 3
+          assert [c["indice"] for c in normales] == list(range(40))
+          assert [c["indice"] for c in reducidas] == [0, 24, 39]
+          for captura in datos["capturas"]:
+              archivo = directorio / captura["archivo"]
+              assert archivo.is_file() and archivo.stat().st_size > 12000, archivo
+              assert hashlib.sha256(archivo.read_bytes()).hexdigest() == captura["sha256"]
+          print("43 capturas 1080p verificadas. Revisión humana pendiente.")
+          PY
+
+      - name: Adjuntar capturas y mosaico para validación humana
+        if: always()
+        uses: ./.github/actions/upload-artifact
+        with:
+          name: evidencia-creditos-795-${{ github.sha }}
+          path: evidencia-creditos-795/
+          if-no-files-found: error
+          retention-days: 14
