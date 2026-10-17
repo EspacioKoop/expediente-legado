@@ -299,15 +299,8 @@ class TestContextCommand(unittest.TestCase):
         self.assertEqual(ret, 0)
         self.assertIn("ci-brain-sqlite", buf.getvalue())
 
-    @unittest.expectedFailure
     def test_context_command_salida_json_valida(self) -> None:
-        """Comprueba que la salida de context_command se pueda parsear con json.loads.
-
-        Fallo conocido en ci_brain.py: en la funcion context_command(), linea 617,
-        se concatena la cadena literal '\\n' en lugar de un caracter de salto de linea '\\n':
-        `rendered = json.dumps(result, ensure_ascii=False, indent=2) + "\\n"`
-        Esto provoca un error `json.decoder.JSONDecodeError: Extra data` al parsear la salida.
-        """
+        """Comprueba que la salida de context_command se pueda parsear con json.loads."""
         query_file = Path(self.tmpdir.name) / "query.txt"
         query_file.write_text("despliegue", encoding="utf-8")
 
@@ -323,18 +316,10 @@ class TestContextCommand(unittest.TestCase):
         with contextlib.redirect_stdout(buf):
             context_command(args)
 
-        # Esta llamada fallara con JSONDecodeError debido al '\\n' literal al final
         json.loads(buf.getvalue())
 
-    @unittest.expectedFailure
     def test_context_command_busqueda_por_argumento_query(self) -> None:
-        """Comprueba que context_command encuentre memorias al pasar --query.
-
-        Fallo conocido en ci_brain.py: en la funcion context_command(), linea 603,
-        se concatena el literal '\\n': `query_text += "\\n" + args.query`.
-        La expresion regular `TOKEN_RE` ([A-Za-z0-9_./:-]{4,}) captura "ndespliegue"
-        en lugar de "despliegue", por lo que no encuentra la coincidencia en la base de datos.
-        """
+        """Comprueba que context_command encuentre memorias al pasar --query."""
         args = Namespace(
             sqlite=str(self.db_path),
             query="despliegue",
