@@ -121,6 +121,7 @@ const ZONAS_DIA := [
 	{
 		"id": "casa-televisor",
 		"sitio": "casa",
+		"radio_creditos": 3.3,
 		"camara": Vector3(-1.6, 1.6, 2.6),
 		"mira": Vector3(-3.55, 1.1, 1.35)
 	},
@@ -134,7 +135,7 @@ const ZONAS_DIA := [
 		"id": "casa-cocina",
 		"sitio": "casa",
 		"camara": Vector3(2.1, 1.7, -0.6),
-		"mira": Vector3(4.6, 1.2, -1.6)
+		"mira": Vector3(5.05, 1.0, 4.15)
 	},
 	{
 		"id": "casa-pasillo",
@@ -321,6 +322,16 @@ static func _decorado_dia(zona: Dictionary) -> Dictionary:
 			if Vector2(pos.x, pos.z).distance_to(Vector2(objetivo.x, objetivo.z)) <= 3.5:
 				pantallas.append(pantalla)
 		decorado["pantallas"] = pantallas
+		# El recorrido cambia de farola, no se reilumina toda la calle
+		# con los mismos tres focos en cada plano.
+		var luces: Array = []
+		for luz in decorado.get("luces", []):
+			if not (luz is Dictionary):
+				continue
+			var pos: Vector3 = luz.get("pos", Vector3.ZERO)
+			if Vector2(pos.x, pos.z).distance_to(Vector2(objetivo.x, objetivo.z)) <= 8.0:
+				luces.append(luz)
+		decorado["luces"] = luces
 	decorado["zona_creditos"] = String(zona["id"])
 	return decorado
 
