@@ -37,6 +37,10 @@ class EvidenciaCreditos795Test(unittest.TestCase):
         self.assertIn("reproductor.set(\"_reduccion_movimiento\", true)", self.captura)
         self.assertIn("contacto_creditos_795.png", self.captura)
         self.assertIn("Image.INTERPOLATE_BILINEAR", self.captura)
+        self.assertIn('float(lectura["media"]) >= 18.0', self.captura)
+        self.assertIn('float(lectura["contraste"]) >= 10.0', self.captura)
+        self.assertIn('"luminancia_media": lectura["media"]', self.captura)
+        self.assertIn('"contraste_p10_p90": lectura["contraste"]', self.captura)
 
     def test_garantias_de_evidencia_y_integridad(self) -> None:
         self.assertIn("imagen.save_jpg(ruta, 0.88)", self.captura)
