@@ -9,7 +9,7 @@ El flujo humano sigue en [CONTRIBUTING.md](CONTRIBUTING.md), el contexto en [REA
 | Qué | Dónde |
 | --- | --- |
 | Prioridad y punto de control | [Plan maestro #181](https://github.com/EspacioKoop/expediente-legado/issues/181) |
-| Reservas activas | [Registro central #1713](https://github.com/EspacioKoop/expediente-legado/issues/1713) |
+| Reservas activas | [Registro central #2905](https://github.com/EspacioKoop/expediente-legado/issues/2905) |
 | Fases y versiones | [ROADMAP.md](ROADMAP.md) |
 | Flujo de ramas y gates | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Estado general | [README.md](README.md) |
@@ -18,19 +18,19 @@ El flujo humano sigue en [CONTRIBUTING.md](CONTRIBUTING.md), el contexto en [REA
 
 Lee también el issue concreto, sus comentarios, PRs relacionadas, reviews y CI. En este proyecto una decisión que evita duplicar trabajo suele estar en un comentario posterior al cuerpo original.
 
-`#182` queda como registro histórico. Mientras dure el rollover, consúltalo para detectar reservas heredadas aún vivas; todo `CLAIM`, `HEARTBEAT`, `PR_READY`, `CI_FIX` y `RELEASE` nuevo se publica en [#1713](https://github.com/EspacioKoop/expediente-legado/issues/1713).
+`#182` y `#1713` quedan como registros históricos (GitHub no admite más de 2500 comentarios por issue). Mientras dure el rollover, consúltalos para detectar reservas heredadas aún vivas; todo `CLAIM`, `HEARTBEAT`, `PR_READY`, `CI_FIX` y `RELEASE` nuevo se publica en [#2905](https://github.com/EspacioKoop/expediente-legado/issues/2905).
 
 ## Ciclo obligatorio
 
 1. Comprueba `main`, PR abiertos, issue, comentarios, plan maestro y reservas.
 2. Elige un pendiente prioritario **libre**. No abras un segundo corte si ya hay una PR activa que cubre el mismo hueco. Un issue con `agent:auto`, `agent:pool`, `agent:qwen`, `agent:gemini` o `jules` **no está libre**: está delegado al nivel 3 (ver «Niveles de trabajo»).
-3. Antes de modificar archivos publica en #1713:
+3. Antes de modificar archivos publica en #2905:
 
    ```text
    CLAIM issue=#N agent=<nombre> branch=<rama> files=<rutas> goal=<objetivo> lease=48h
    ```
 
-4. Relee inmediatamente #1713. Gana la reserva activa anterior por fecha de GitHub; en empate, el comentario con ID menor. Si hay solape, no edites esos archivos. **Una reserva protege archivos, no bloquea la cooperación:** puedes revisar, proponer, entregar parches o commits al titular y trabajar rutas no reservadas del mismo issue con tu propio CLAIM. Editar lo reservado exige acuerdo del titular registrado en #1713 ([guía de cooperación de las Normas Platino](https://github.com/EspacioKoop/normas_platino/blob/main/docs/COOPERACION_AUTONOMA.md), EspacioKoop/normas_platino#16).
+4. Relee inmediatamente #2905. Gana la reserva activa anterior por fecha de GitHub; en empate, el comentario con ID menor. Si hay solape, no edites esos archivos. **Una reserva protege archivos, no bloquea la cooperación:** puedes revisar, proponer, entregar parches o commits al titular y trabajar rutas no reservadas del mismo issue con tu propio CLAIM. Editar lo reservado exige acuerdo del titular registrado en #2905 ([guía de cooperación de las Normas Platino](https://github.com/EspacioKoop/normas_platino/blob/main/docs/COOPERACION_AUTONOMA.md), EspacioKoop/normas_platino#16).
 5. La lease dura 48 horas mientras no exista una PR abierta. Para renovar trabajo sin PR publica:
 
    ```text
@@ -42,7 +42,7 @@ Lee también el issue concreto, sus comentarios, PRs relacionadas, reviews y CI.
 7. Mantén el corte pequeño. Un paraguas como #279/#282/#283 se ejecuta por verticales, no con una reescritura total.
 8. Añade regresión ejecutable cuando cambie comportamiento. La inspección textual puede complementar, no sustituir, una prueba del contrato real cuando Godot pueda ejecutarlo.
 9. Ejecuta las pruebas canónicas cuando el entorno local disponga de la toolchain necesaria y revisa el diff final. Si no puede ejecutarse el preflight local, documenta la limitación y deja que CI valide el SHA del PR antes de marcarlo `PR_READY`.
-10. Abre PR a `main` y registra en #1713:
+10. Abre PR a `main` y registra en #2905:
 
    ```text
    PR_READY issue=#N pr=#M sha=<sha> pruebas=<qué pasó> limites=<qué no cubre>
@@ -94,7 +94,7 @@ Revisar y comentar un issue delegado sigue siendo cooperación normal.
 
 ## Archivos compartidos
 
-Reserva expresamente los archivos compartidos enumerados en #1713. Entre ellos están:
+Reserva expresamente los archivos compartidos enumerados en #2905. Entre ellos están:
 
 - `README.md`, `AGENTS.md`, `CONTRIBUTING.md`, `ROADMAP.md`;
 - `godot/datos/textos.csv`, `godot/datos/casos.json`;
@@ -113,7 +113,7 @@ Una reserva de un issue no concede automáticamente todos los archivos que ese i
 - inventar procedencia, licencias, hashes, hechos de expedientes o resultados de playtest;
 - decir que algo está validado visualmente o con mando si solo pasó CI headless.
 
-Si una herramienta escribe por error en `main`, revierte inmediatamente sin force-push, deja constancia en #1713 y continúa únicamente desde una rama propia.
+Si una herramienta escribe por error en `main`, revierte inmediatamente sin force-push, deja constancia en #2905 y continúa únicamente desde una rama propia.
 
 ## GDScript: preflight local y CI
 

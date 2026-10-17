@@ -11,8 +11,8 @@ import scripts.gestionar_reservas_rollover as rollover
 class ReservasRolloverTest(unittest.TestCase):
     def test_config_declara_registro_activo_y_lectura_historica(self):
         activo, lectura = rollover.cargar_config()
-        self.assertEqual(activo, 1713)
-        self.assertEqual(lectura, [182, 1713])
+        self.assertEqual(activo, 2905)
+        self.assertEqual(lectura, [182, 1713, 2905])
 
     def test_config_rechaza_duplicados(self):
         with TemporaryDirectory() as tmp:
@@ -108,8 +108,9 @@ class ReservasRolloverTest(unittest.TestCase):
             )
         self.assertEqual(codigo, 0)
         posts = [path for method, path, _ in llamadas if method == "POST"]
-        self.assertTrue(any(path.endswith("/issues/1713/comments") for path in posts))
+        self.assertTrue(any(path.endswith("/issues/2905/comments") for path in posts))
         self.assertFalse(any(path.endswith("/issues/182/comments") for path in posts))
+        self.assertFalse(any(path.endswith("/issues/1713/comments") for path in posts))
 
 
 if __name__ == "__main__":

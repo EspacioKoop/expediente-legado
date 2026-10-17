@@ -30,7 +30,7 @@ Una tarea del worker modifica un solo fichero por defecto. Los trabajos mayores 
 El coordinador puede añadir la label exacta `agent:multi-file` al issue
 para permitir **hasta tres rutas explícitas**, incluyendo tests. Un issue sin
 esa label mantiene el límite de **un fichero**. No cambia el máximo técnico
-interno del parser, las rutas protegidas, los CLAIM de #1713 ni los gates de CI.
+interno del parser, las rutas protegidas, los CLAIM del registro de reservas activo ni los gates de CI.
 
 El workflow determina el máximo a partir del JSON de la API de GitHub con
 `scripts/agent_scope_limit.py`; no confía en texto del issue ni en el

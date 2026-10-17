@@ -7,7 +7,7 @@ Este directorio contiene auditorías, decisiones de diseño, investigación, evi
 | Área | Documento / issue | Uso |
 | --- | --- | --- |
 | Prioridad operativa | [#181](https://github.com/EspacioKoop/expediente-legado/issues/181) | Qué va primero y cuál es el siguiente gate |
-| Reservas | [#1713](https://github.com/EspacioKoop/expediente-legado/issues/1713) · histórico [#182](https://github.com/EspacioKoop/expediente-legado/issues/182) | Coordinación activa; #182 solo conserva reservas heredadas durante el rollover |
+| Reservas | [#2905](https://github.com/EspacioKoop/expediente-legado/issues/2905) · históricos [#182](https://github.com/EspacioKoop/expediente-legado/issues/182) y [#1713](https://github.com/EspacioKoop/expediente-legado/issues/1713) | Coordinación activa; #182 y #1713 solo conservan reservas heredadas durante el rollover |
 | Fases | [ROADMAP.md](../ROADMAP.md) | Dirección v0.6 → 1.0 |
 | Entrada al repo | [README.md](../README.md) | Estado general, stack y comandos |
 | Flujo de contribución | [AGENTS.md](../AGENTS.md), [CONTRIBUTING.md](../CONTRIBUTING.md) | Ramas, PR, CI, merge |
