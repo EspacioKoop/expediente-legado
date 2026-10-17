@@ -212,6 +212,10 @@ jobs:
           needs_human="$(jq -r '.needs_human // false' /tmp/agent-decompose.json)"
           if [[ "$needs_human" == true ]]; then
             reason="$(jq -r '.reason' /tmp/agent-decompose.json)"
+            printf '%s' "$reason" > /tmp/human-gate-publication-body.md
+            python3 scripts/issue_destination_guard.py --repo "$GITHUB_REPOSITORY" \
+              --title "$(jq -r '.title' /tmp/agent-issue.json)" \
+              --body-file /tmp/human-gate-publication-body.md
             gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
               --remove-label agent:decompose --add-label agent:needs-human >/dev/null
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
