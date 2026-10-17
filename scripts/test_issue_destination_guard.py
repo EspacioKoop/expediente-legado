@@ -43,6 +43,17 @@ class GuardTests(unittest.TestCase):
         self.assertFalse(guard.permitir_issue("EspacioKoop/expediente-legado", "Corregir juego", ""))
         self.assertFalse(guard.permitir_issue("EspacioKoop/expediente-legado", "Corregir juego", "x" * 16001))
 
+    def test_decompose_guards_parent_single_plan_and_each_child(self):
+        workflow = (Path(__file__).resolve().parents[1] / ".github/workflows/agent-decompose.yml").read_text()
+        call = "python3 scripts/issue_destination_guard.py"
+        self.assertEqual(workflow.count(call), 3)
+        self.assertLess(workflow.index(call), workflow.index('association="$(jq -r'))
+        self.assertLess(
+            workflow.index(call, workflow.index("plan=\"$(jq -c '{files:.files,goal:.goal}'")),
+            workflow.index('gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "$(printf'),
+        )
+        self.assertLess(workflow.rindex(call), workflow.index('url="$(gh issue create'))
+
     def test_cli_denial_does_not_print_private_content(self):
         with tempfile.TemporaryDirectory() as folder:
             file = Path(folder) / "input.md"
