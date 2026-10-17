@@ -313,6 +313,7 @@ Deno.test("mando no publica infraestructura privada ni expone el contenido recha
       ["Juego 3D: optimización", "Usar datos del Beelink"],
       ["P0 | agent(mistral-paid): una escena", "Crear una escena"],
       ["Arreglar CI del juego", "API_KEY=TEST_PRIVATE_VALUE"],
+      ["Reparar la interfaz", "GROQ_API_KEY=EXAMPLE_PRIVATE"],
       ["Revisar el renderizado", "Apoyarse en WireGuard"],
     ]
   ) {
