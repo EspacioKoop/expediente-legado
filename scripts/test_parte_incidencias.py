@@ -81,7 +81,23 @@ class ParteIncidenciasTest(unittest.TestCase):
         self.assertIn("_mouse_previo = Input.mouse_mode", self.reportador)
         self.assertIn("Input.mouse_mode = _mouse_previo", self.reportador)
         self.assertIn("_foco_previo = get_viewport().gui_get_focus_owner()", self.reportador)
-        self.assertIn("_app.abrir(PreferenciasSiga.cargar(), true)", self.reportador)
+        self.assertIn("_app.abrir(PreferenciasSiga.cargar(), true, _resumen_rendimiento())", self.reportador)
+
+    def test_f9_muestrea_antes_de_pausar_y_solo_consiente_un_resumen(self):
+        self.assertIn("const INTERVALO_MUESTRA := 0.5", self.reportador)
+        self.assertIn("const MAX_MUESTRAS := 12", self.reportador)
+        self.assertIn("Performance.TIME_FPS", self.reportador)
+        self.assertIn("Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME", self.reportador)
+        self.assertIn("if get_tree().paused or _fondo.visible:", self.reportador)
+        self.assertIn("_resumen_rendimiento()", self.reportador)
+        self.assertIn('"fps_min"', self.reportador)
+        self.assertIn('"draw_calls_max"', self.reportador)
+        self.assertNotIn("OS.get_environment", self.reportador)
+        self.assertNotIn("OS.get_user_data_dir", self.reportador)
+        self.assertIn("LIMITES_RENDIMIENTO", self.nucleo)
+        self.assertIn("if rendimiento.has(clave):", self.nucleo)
+        self.assertIn("_rendimiento_previo", self.app)
+        self.assertIn("if not _diagnostico.button_pressed:", self.app)
 
     def test_endpoint_esta_fuera_del_codigo_y_se_inyecta_al_exportar(self):
         self.assertEqual(self.config["feedback_url"], "")

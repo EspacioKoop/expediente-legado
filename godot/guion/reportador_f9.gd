@@ -5,6 +5,13 @@
 ## foco y modo del ratón al cerrar.
 extends CanvasLayer
 
+# Muestreo circular acotado: ninguna serie temporal llega al informe o a disco.
+const INTERVALO_MUESTRA := 0.5
+const MAX_MUESTRAS := 12
+
+var _acumulado_muestra := 0.0
+var _muestras_rendimiento: Array[Dictionary] = []
+var _escena_muestreada := ""
 var _fondo: ColorRect
 var _app: ParteIncidenciasApp
 var _pausa_previa := false
@@ -16,6 +23,63 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 1000
 	_montar()
+
+
+func _process(delta: float) -> void:
+	if get_tree().paused or _fondo.visible:
+		return
+	_sincronizar_escena()
+	_acumulado_muestra += delta
+	if _acumulado_muestra < INTERVALO_MUESTRA:
+		return
+	_acumulado_muestra = fposmod(_acumulado_muestra, INTERVALO_MUESTRA)
+	var fps := Performance.get_monitor(Performance.TIME_FPS)
+	var dibujos := Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
+	_agregar_muestra(fps, dibujos)
+
+
+## Al cambiar de escena no mezclar frames de oficina, calle, casa y sueño.
+func _sincronizar_escena() -> void:
+	var actual := get_tree().current_scene
+	_registrar_escena(actual.scene_file_path if actual != null else "")
+
+
+func _registrar_escena(ruta: String) -> void:
+	if ruta == _escena_muestreada:
+		return
+	_escena_muestreada = ruta
+	_muestras_rendimiento.clear()
+	_acumulado_muestra = 0.0
+
+
+## Los tests pueden proporcionar mediciones sintéticas sin un renderizador GPU.
+func _agregar_muestra(fps: float, dibujos: float) -> void:
+	if not is_finite(fps) or not is_finite(dibujos) or fps <= 0.0 or dibujos < 0.0:
+		return
+	_muestras_rendimiento.append(
+		{"fps": clampi(roundi(fps), 1, 240), "dibujos": clampi(roundi(dibujos), 0, 100000)}
+	)
+	while _muestras_rendimiento.size() > MAX_MUESTRAS:
+		_muestras_rendimiento.pop_front()
+
+
+func _resumen_rendimiento() -> Dictionary:
+	if _muestras_rendimiento.is_empty():
+		return {}
+	var total_fps := 0
+	var minimo_fps := 240
+	var max_dibujos := 0
+	for muestra in _muestras_rendimiento:
+		var fps: int = muestra["fps"]
+		total_fps += fps
+		minimo_fps = mini(minimo_fps, fps)
+		max_dibujos = maxi(max_dibujos, int(muestra["dibujos"]))
+	return {
+		"fps_media": roundi(float(total_fps) / _muestras_rendimiento.size()),
+		"fps_min": minimo_fps,
+		"draw_calls_max": max_dibujos,
+		"muestras": _muestras_rendimiento.size(),
+	}
 
 
 func _input(evento: InputEvent) -> void:
@@ -59,6 +123,7 @@ func _montar() -> void:
 func _abrir() -> void:
 	if _fondo.visible:
 		return
+	_sincronizar_escena()
 	_pausa_previa = get_tree().paused
 	_mouse_previo = Input.mouse_mode
 	_foco_previo = get_viewport().gui_get_focus_owner()
@@ -68,7 +133,7 @@ func _abrir() -> void:
 	_fondo.visible = true
 	# Desde F9 el diagnóstico técnico queda preactivado y visible. La persona
 	# tester puede desmarcarlo antes de enviar.
-	_app.abrir(PreferenciasSiga.cargar(), true)
+	_app.abrir(PreferenciasSiga.cargar(), true, _resumen_rendimiento())
 
 
 func _cerrar() -> void:

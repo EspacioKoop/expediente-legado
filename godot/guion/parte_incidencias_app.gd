@@ -23,6 +23,7 @@ var _estado: Label
 var _http: HTTPRequest
 var _configuracion: Dictionary = {}
 var _reduccion_movimiento := false
+var _rendimiento_previo: Dictionary = {}
 var _payload_pendiente: Dictionary = {}
 var _urls_pendientes: Array[String] = []
 var _indice_endpoint := 0
@@ -37,8 +38,13 @@ func _ready() -> void:
 	visible = false
 
 
-func abrir(preferencias: Dictionary, diagnostico_por_defecto: bool = false) -> void:
+func abrir(
+	preferencias: Dictionary,
+	diagnostico_por_defecto: bool = false,
+	rendimiento_previo: Dictionary = {}
+) -> void:
 	_reduccion_movimiento = bool(preferencias.get("reduccion_movimiento", false))
+	_rendimiento_previo = ParteIncidencias.filtrar_diagnostico(rendimiento_previo)
 	_reiniciar(diagnostico_por_defecto)
 	visible = true
 	_categoria.grab_focus()
@@ -215,7 +221,7 @@ func _diagnostico_actual() -> Dictionary:
 	var escena := ""
 	if get_tree().current_scene != null:
 		escena = get_tree().current_scene.scene_file_path
-	return ParteIncidencias.diagnostico(escena, _reduccion_movimiento)
+	return ParteIncidencias.diagnostico(escena, _reduccion_movimiento, _rendimiento_previo)
 
 
 func _preparar_payload() -> Dictionary:
