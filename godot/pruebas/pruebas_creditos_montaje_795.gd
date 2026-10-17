@@ -43,8 +43,7 @@ func _probar() -> void:
 		decorado_visual.erase("zona_creditos")
 		var huella_visual := hash(decorado_visual)
 		_comprobar(
-			not decorados_visuales.has(huella_visual),
-			"decorado visual no repetido: " + nombre
+			not decorados_visuales.has(huella_visual), "decorado visual no repetido: " + nombre
 		)
 		decorados_visuales[huella_visual] = true
 		_comprobar(not localizaciones.has(nombre), "localizacion no repetida: " + nombre)
