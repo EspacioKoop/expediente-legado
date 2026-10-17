@@ -39,6 +39,10 @@ class PublicPoolNoticesTests(unittest.TestCase):
         self.assertIn("se repitió en el mismo slot", self.worker)
         self.assertIn("agotó los workers compatibles", self.worker)
         self.assertIn("reencolado tras $category", self.worker)
+        self.assertIn("AGENT_PLAN delegado no ejecutable; revisar el registro", self.worker)
+        self.assertIn("se ha detectado un solape de CLAIM", self.worker)
+        self.assertNotIn("AGENT_PLAN delegado no ejecutable ($reason)", self.worker)
+        self.assertNotIn("$(grep '^reason='", self.worker)
 
 
 if __name__ == "__main__":
