@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[node name="LuzRodajeCreditos" type="Node3D"]
+
+[node name="LuzDireccional" type="DirectionalLight3D" parent="."]
+rotation = Vector3(-0.942478, -0.523599, 0)
+light_color = Color(0.8, 0.86, 0.97, 1)
+light_energy = 2.2
+shadow_enabled = false
