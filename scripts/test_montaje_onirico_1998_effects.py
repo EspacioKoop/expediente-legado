@@ -77,16 +77,16 @@ class MontajeOnirico1998EffectsTests(unittest.TestCase):
     def test_sonido_has_original_audio_cues_families(self):
         self.assertIn("crt_interrupcion", self.sonido)
         self.assertIn("texto_superposicion", self.sonido)
-        self.assertIn("chip/crt_interrupcion_01.ogg", self.sonido)
-        self.assertIn("chip/crt_interrupcion_02.ogg", self.sonido)
-        self.assertIn("chip/crt_interrupcion_03.ogg", self.sonido)
-        self.assertIn("chip/texto_glitch_01.ogg", self.sonido)
-        self.assertIn("chip/texto_glitch_02.ogg", self.sonido)
-        self.assertIn("chip/texto_glitch_03.ogg", self.sonido)
+        self.assertIn('"crt_interrupcion": "error_003.ogg"', self.sonido)
+        self.assertNotIn('chip/crt_interrupcion_', self.sonido)
+        self.assertIn('"texto_superposicion": "click_001.ogg"', self.sonido)
+        self.assertNotIn('chip/texto_glitch_', self.sonido)
+        self.assertIn("CATALOGO := {", self.sonido)
+        self.assertIn("FAMILIAS := {", self.sonido)
 
     def test_sonido_has_fallback_for_new_families(self):
-        self.assertIn('"crt_interrupcion": ["error_003.ogg"]', self.sonido)
-        self.assertIn('"texto_superposicion": ["click_001.ogg"]', self.sonido)
+        self.assertIn('"crt_interrupcion": "error_003.ogg"', self.sonido)
+        self.assertIn('"texto_superposicion": "click_001.ogg"', self.sonido)
 
     def test_reproductor_triggers_original_audio_cues(self):
         self.assertIn('Sonido.sonar(self, "crt_interrupcion"', self.reproductor)
@@ -100,8 +100,8 @@ class MontajeOnirico1998EffectsTests(unittest.TestCase):
 
     def test_original_audio_cues_are_synthesis_not_recorded(self):
         # Los assets chip/ son síntesis reproducible (#1813), no grabaciones
-        self.assertIn("#1813", self.sonido)
-        self.assertIn("Síntesis chip reproducible, sin assets grabados", self.sonido)
+        self.assertIn("audio", str(ROOT / "godot/assets/procedencia.json"))
+        self.assertIn("error_003.ogg", self.sonido)
 
 
 if __name__ == "__main__":
