@@ -405,7 +405,34 @@ export function construirOrden(form: FormData): Orden | string {
   };
 }
 
+// La sala de mando pública solo puede crear tareas del juego; los encargos de
+// infraestructura operativa se gestionan fuera de esta aplicación. Rechazamos
+// antes de llamar a GitHub. No se imprime el texto rechazado en HTML/logs.
+export function permiteOrdenPublica(repo: string, orden: Orden): boolean {
+  if (repo.toLowerCase() !== "espaciokoop/expediente-legado") return false;
+  const titulo = orden.titulo;
+  const contenido = titulo + "\n" + orden.cuerpo;
+  if (/^(?:P[0-3]\s*[|:–-]\s*)?(?:infra|infraestructura)\s*[:( /-]/i.test(titulo)) {
+    return false;
+  }
+  const prohibidos = [
+    /\b(?:infra[-_ ]casa|omniroute|tailscale|wireguard|homelab|home[- ]lab)\b/i,
+    /\b(?:beelink|locomotora|leviat[aá]n)\b/i,
+    /\bhermes[-_ ](?:gateway|router|mcp|provider|proveedor|dispatcher|bridge)\b/i,
+    /\b(?:mistral[-_ ]paid|mistral de pago|quota[-_ ]domain|provider[-_ ]routing)\b/i,
+    /\b(?:cuotas? de (?:tokens|modelo|modelos|proveedores|IA)|capacidad de proveedores)\b/i,
+    /\b(?:api[_ -]?key|auth[_ -]?token|password|private[_ -]?key)\s*[:=]/i,
+    /(?:\/home\/[A-Za-z0-9._-]+\/|\/Users\/[A-Za-z0-9._-]+\/|[A-Z]:\\Users\\)/i,
+    /\b(?:192\.168|10\.(?:\d{1,3}\.){2}|172\.(?:1[6-9]|2\d|3[01])\.|100\.(?:6[4-9]|[789]\d|1[01]\d|12[0-7])\.)/,
+    /\bagent\s*\(\s*[a-z][a-z0-9_-]*\s*\)/i,
+  ];
+  return !prohibidos.some((patron) => patron.test(contenido));
+}
+
 async function crearIssue(config: MandoConfig, orden: Orden): Promise<number> {
+  if (!permiteOrdenPublica(config.repository, orden)) {
+    throw new Error("La orden no pertenece al repositorio público del juego.");
+  }
   const data = await gh(config, `/repos/${config.repository}/issues`, {
     method: "POST",
     body: JSON.stringify({ title: orden.titulo, body: orden.cuerpo, labels: orden.labels }),
