@@ -444,7 +444,6 @@ jobs:
             --max-files "$MAX_FILES" \
             --output .agent-plan.json 2>/tmp/agent-plan-error.txt || status=$?
           if (( status != 0 )); then
-            reason="$(tr '\n' ' ' < /tmp/agent-plan-error.txt)"
             target=agent:needs-human
             (( status == 5 )) && target=agent:decompose
             for label in agent:auto agent:pool agent:qwen agent:gemini agent:working; do
@@ -452,7 +451,7 @@ jobs:
             done
             gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label "$target" >/dev/null
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-              "Agent pool: AGENT_PLAN delegado no ejecutable ($reason). Destino: $target." >/dev/null
+              "Agent pool: AGENT_PLAN delegado no ejecutable; revisar el registro de la ejecución. Destino: $target." >/dev/null
             echo "reserved=false" >> "$GITHUB_OUTPUT"
             echo "reason=plan-delegado-invalido" >> "$GITHUB_OUTPUT"
             exit 0
@@ -498,7 +497,7 @@ jobs:
               --remove-label agent:working --remove-label agent:needs-human \
               >/dev/null 2>&1 || true
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-              "Agent pool: $(grep '^reason=' "$GITHUB_OUTPUT"|cut -d= -f2-). Se reencola automáticamente; la colisión de CLAIM no requiere intervención humana." || true
+              "Agent pool: se ha detectado un solape de CLAIM. Se reencola automáticamente; la colisión no requiere intervención humana." || true
           fi
 
       - name: Renovar lease Deno · implementing
