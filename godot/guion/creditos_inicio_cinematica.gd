@@ -221,7 +221,10 @@ const VERTICALES := [
 ## pared del fondo en vez de a la mesa y al umbral. Solo cambia el montaje.
 const CAMARAS_VERTICALES := {
 	"sueno_aquiles_alineacion":
-	{"camara": Vector3(-2.6, 2.2, 7.0), "mira": Vector3(-1.6, 1.3, 0.5)},
+	{"camara": Vector3(-3.4, 6.0, 15.0), "mira": Vector3(0.0, 4.6, 0.0)},
+	"sueno_aquiles": {"camara": Vector3(0.0, 6.2, 18.0), "mira": Vector3(0.0, 4.6, 0.0)},
+	"sueno_gilgamesh": {"camara": Vector3(0.0, 6.2, 17.5), "mira": Vector3(0.0, 2.5, -1.8)},
+	"sueno_yggdrasil": {"camara": Vector3(0.0, 10.5, 15.5), "mira": Vector3(0.0, 1.5, 0.0)},
 	"sueno_tir_na_nog": {"camara": Vector3(-2.6, 1.8, 2.8), "mira": Vector3(-1.8, 1.1, 0.6)},
 	"sueno_baba_yaga": {"camara": Vector3(6.8, 2.4, 5.2), "mira": Vector3(-0.8, 1.4, 0.8)},
 }
@@ -268,15 +271,25 @@ static func planos() -> Array:
 			camara = optica["camara"]
 			mira = optica["mira"]
 		# Luz de apoyo SOLO de plató: los verticales jugables no cambian.
+		# La luz próxima a cámara evita depender de una lámpara situada detrás
+		# de grandes figuras o paredes al usar la óptica propia del montaje.
 		var decorado := {
 			"escena": ruta,
 			"luces":
 			[
 				{
-					"pos": Vector3(0.0, 4.0, 2.0),
-					"color": Color(0.72, 0.80, 0.91),
-					"energia": 1.8,
-					"alcance": 17.0,
+					"pos": Vector3(0.0, 6.0, 2.0),
+					"color": Color(0.86, 0.89, 0.97),
+					"energia": 2.8,
+					"alcance": 27.0,
+					"carcasa": false,
+					"sombras": false
+				},
+				{
+					"pos": camara.lerp(mira, 0.25) + Vector3(0.0, 1.5, 0.0),
+					"color": Color(0.90, 0.88, 0.80),
+					"energia": 3.6,
+					"alcance": 32.0,
 					"carcasa": false,
 					"sombras": false
 				}
@@ -405,6 +418,11 @@ static func _decorado_sueno(forma: Dictionary) -> Dictionary:
 			}
 		)
 		decorado["luces"] = luces
+		# La prueba visual de #284 necesita un sol direccional; a diferencia
+		# del mundo de sueño jugable, el plató de CinematicaApp solo monta
+		# luces puntuales y su ambiente fijo. Una escena de iluminación
+		# exclusiva recupera el relieve sin modificar Sueno/Jornada.
+		decorado["escena"] = "res://escenas/creditos_luz_onirica.tscn"
 	return decorado
 
 
