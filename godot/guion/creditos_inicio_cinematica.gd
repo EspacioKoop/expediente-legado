@@ -171,8 +171,8 @@ const FORMAS_SUENO := [
 	{
 		"id": "montana",
 		"forma": "embudo",
-		"camara": Vector3(-10.5, 1.65, -11.5),
-		"mira": Vector3(5.2, 1.25, 2.0)
+		"camara": Vector3(-3.5, 2.7, 7.5),
+		"mira": Vector3(0.0, 1.3, 0.0)
 	},
 	{
 		"id": "desierto",
@@ -189,8 +189,8 @@ const FORMAS_SUENO := [
 	{
 		"id": "duat",
 		"forma": "gilgamesh",
-		"camara": Vector3(5.0, 2.5, 10.0),
-		"mira": Vector3(0.0, 1.2, -4.0)
+		"camara": Vector3(1.5, 2.8, 4.8),
+		"mira": Vector3(0.0, 1.3, -1.0)
 	},
 	{
 		"id": "horror-texturas",
@@ -215,6 +215,20 @@ const VERTICALES := [
 	"res://escenas/sueno_tir_na_nog.tscn",
 	"res://escenas/sueno_yggdrasil.tscn",
 ]
+
+## Correcciones nacidas de capturas reales del gate visual #795: en Aquiles
+## la cámara radial enseñaba un muro oscuro y en Tír na nÓg apuntaba a la
+## pared del fondo en vez de a la mesa y al umbral. Solo cambia el montaje.
+const CAMARAS_VERTICALES := {
+	"sueno_aquiles_alineacion": {
+		"camara": Vector3(-2.6, 2.2, 7.0),
+		"mira": Vector3(-1.6, 1.3, 0.5)
+	},
+	"sueno_tir_na_nog": {
+		"camara": Vector3(-2.6, 1.8, 2.8),
+		"mira": Vector3(-1.8, 1.1, 0.6)
+	},
+}
 
 
 static func planos() -> Array:
@@ -252,9 +266,26 @@ static func planos() -> Array:
 		var angulo := 0.48 * float(n) + 0.40
 		var camara := Vector3(5.5 * cos(angulo), 1.9 + 0.12 * float(n % 4), 5.5 * sin(angulo))
 		var mira := Vector3(0.0, 1.2, 0.0)
-		salida.append(
-			_plano(ruta.get_file().get_basename(), {"escena": ruta}, camara, mira, indice, bloques)
-		)
+		var nombre := ruta.get_file().get_basename()
+		var optica: Dictionary = CAMARAS_VERTICALES.get(nombre, {})
+		if not optica.is_empty():
+			camara = optica["camara"]
+			mira = optica["mira"]
+		# Luz de apoyo SOLO de plató: los verticales jugables no cambian.
+		var decorado := {
+			"escena": ruta,
+			"luces": [
+				{
+					"pos": Vector3(0.0, 4.0, 2.0),
+					"color": Color(0.72, 0.80, 0.91),
+					"energia": 1.8,
+					"alcance": 17.0,
+					"carcasa": false,
+					"sombras": false
+				}
+			]
+		}
+		salida.append(_plano(nombre, decorado, camara, mira, indice, bloques))
 
 	# Título al final y sin una pantalla negra 2D: lo cierra la última vertical.
 	salida[salida.size() - 1]["segundos"] = 4.0
@@ -340,27 +371,44 @@ static func _decorado_dia(zona: Dictionary) -> Dictionary:
 static func _decorado_sueno(forma: Dictionary) -> Dictionary:
 	var id := String(forma["id"])
 	var base := Sueno.espacio(String(forma["forma"]), 0)
+	var decorado: Dictionary
 	match id:
 		"vacio":
-			return SuenoVacio.adaptar_espacio(base)
+			decorado = SuenoVacio.adaptar_espacio(base)
 		"escuela":
-			return SuenoEscuela.adaptar_espacio(base)
+			decorado = SuenoEscuela.adaptar_espacio(base)
 		"montana":
-			return SuenoMontana.adaptar_espacio(base)
+			decorado = SuenoMontana.adaptar_espacio(base)
 		"desierto":
-			return SuenoDesierto.adaptar_espacio(base)
+			decorado = SuenoDesierto.adaptar_espacio(base)
 		"castillo":
-			return SuenoCastillo.adaptar_espacio(base)
+			decorado = SuenoCastillo.adaptar_espacio(base)
 		"duat":
 			var jornada_local := {"dia": 1}
 			SemillasOniricas.activar_semilla_onirica(
 				jornada_local, SuenoDuat.ID, SuenoDuat.FUENTE_TV
 			)
-			return SuenoDuat.adaptar_espacio(base, jornada_local, [], 0, true)
+			decorado = SuenoDuat.adaptar_espacio(base, jornada_local, [], 0, true)
 		_:
-			var horror := HorrorTexturas.aplicar(base, String(forma["forma"]), 2)
-			horror["identidad_onirica"] = "horror-texturas"
-			return horror
+			decorado = HorrorTexturas.aplicar(base, String(forma["forma"]), 2)
+			decorado["identidad_onirica"] = "horror-texturas"
+
+	# Montaña y Duat aparecían casi negros en las capturas de Forward+.
+	# Añadir un relleno de rodaje no modifica el sueño jugable ni su estado.
+	if id == "montana" or id == "duat":
+		var luces: Array = decorado.get("luces", []).duplicate(true)
+		luces.append(
+			{
+				"pos": Vector3(0.0, 4.2, 0.0),
+				"color": Color(0.70, 0.81, 0.95),
+				"energia": 2.7,
+				"alcance": 20.0,
+				"carcasa": false,
+				"sombras": false
+			}
+		)
+		decorado["luces"] = luces
+	return decorado
 
 
 ## Un nombre, no una página de atribuciones. El catálogo completo permanece
