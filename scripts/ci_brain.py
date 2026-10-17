@@ -721,7 +721,7 @@ def context_command(args: argparse.Namespace) -> int:
     if args.query_file:
         query_text = Path(args.query_file).read_text(encoding="utf-8", errors="replace")
     if args.query:
-        query_text += "\\n" + args.query
+        query_text += "\n" + args.query
     paths: list[str] = []
     if args.paths_json:
         raw = json.loads(Path(args.paths_json).read_text(encoding="utf-8"))
@@ -734,7 +734,7 @@ def context_command(args: argparse.Namespace) -> int:
         result = build_memory_context(conn, query_text, paths, limit=args.limit)
     finally:
         conn.close()
-    rendered = json.dumps(result, ensure_ascii=False, indent=2) + "\\n"
+    rendered = json.dumps(result, ensure_ascii=False, indent=2) + "\n"
     if args.output:
         Path(args.output).write_text(rendered, encoding="utf-8")
     sys.stdout.write(rendered)
