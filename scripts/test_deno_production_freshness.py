@@ -82,15 +82,14 @@ class DenoProductionFreshnessTest(unittest.TestCase):
         }
         self.assertIn("kv_configured != true", mod.validate_health(SOURCE, health))
 
-    def test_workflow_no_bloquea_pr_y_vigila_produccion(self):
-        workflow = WORKFLOW.read_text(encoding="utf-8")
-        self.assertNotIn("pull_request:", workflow)
-        self.assertIn("schedule:", workflow)
-        self.assertIn("workflow_dispatch:", workflow)
-        self.assertIn("vars.SIGA98_FEEDBACK_FALLBACK_URL", workflow)
-        self.assertIn("/health", workflow)
-        self.assertIn("scripts/check_deno_production.py", workflow)
-        self.assertIn("ref: main", workflow)
+    def test_monitor_periodico_es_privado_y_el_deploy_sigue_verificando(self):
+        self.assertFalse(WORKFLOW.exists())
+        deploy = (
+            ROOT / ".github" / "workflows" / "feedback-deno-deploy.yml"
+        ).read_text(encoding="utf-8")
+        self.assertIn("scripts/check_deno_production.py", deploy)
+        self.assertIn("infra/feedback-deno/main.ts", deploy)
+        self.assertIn("deploy --prod", deploy)
 
 
 if __name__ == "__main__":
