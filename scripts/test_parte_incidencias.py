@@ -5,6 +5,8 @@ from unittest import mock
 import re
 import subprocess
 import shutil
+import sys
+import tempfile
 import unittest
 
 
@@ -98,6 +100,42 @@ class ParteIncidenciasTest(unittest.TestCase):
         self.assertIn("if rendimiento.has(clave):", self.nucleo)
         self.assertIn("_rendimiento_previo", self.app)
         self.assertIn("if not _diagnostico.button_pressed:", self.app)
+
+    def test_export_f9_prioriza_deno_ante_403_sin_perder_fallback(self):
+        script = self.export.split(" <<'PY'\n", 1)[1].split("\nPY\n", 1)[0]
+        cloudflare = "https://cloudflare.example.org/api/report"
+        deno = "https://deno.example.org/api/report"
+        vercel = "https://vercel.example.org/api/report"
+        with tempfile.TemporaryDirectory() as folder:
+            config = Path(folder) / "incidencias.json"
+            def exportar(order: str, fallback: str = deno):
+                config.write_text('{"feedback_url":"","feedback_urls":[]}', encoding="utf-8")
+                run = subprocess.run(
+                    [sys.executable, "-c", script, str(config),
+                     cloudflare, fallback, vercel, order],
+                    capture_output=True, text=True,
+                )
+                return run, json.loads(config.read_text(encoding="utf-8"))
+
+            normal, data = exportar("")
+            self.assertEqual(0, normal.returncode)
+            self.assertEqual([cloudflare, deno, vercel], data["feedback_urls"])
+            degradado, data = exportar("deno_first")
+            self.assertEqual(0, degradado.returncode)
+            self.assertEqual([deno, cloudflare, vercel], data["feedback_urls"])
+            self.assertEqual(deno, data["feedback_url"])
+            sin_respaldo, data = exportar("deno_first", "")
+            self.assertEqual(0, sin_respaldo.returncode)
+            self.assertEqual([cloudflare, vercel], data["feedback_urls"])
+            invalido, _ = exportar("otro")
+            self.assertNotEqual(0, invalido.returncode)
+
+    def test_export_alpha_solo_degrada_orden_si_falla_health(self):
+        self.assertIn('id: f9-gateway-health', self.workflow)
+        self.assertIn('scripts/check_feedback_worker_production.py', self.workflow)
+        self.assertIn('order=deno_first', self.workflow)
+        self.assertIn('steps.f9-gateway-health.outputs.order', self.workflow)
+        self.assertIn('SIGA98_F9_GATEWAY_ORDER', self.export)
 
     def test_endpoint_esta_fuera_del_codigo_y_se_inyecta_al_exportar(self):
         self.assertEqual(self.config["feedback_url"], "")
