@@ -23,6 +23,13 @@ FAST_EXACT = {
     "docs/agents-autonomos.md",
     "scripts/check_deno_production.py",
     "scripts/test_deno_production_freshness.py",
+    # Sólo contratos y canarios del gateway F9: se ejecutan sin red,
+    # incluso en fast, mediante el paso obligatorio de ci.yml.
+    ".github/workflows/feedback-worker-production-smoke.yml",
+    "scripts/check_feedback_worker_production.py",
+    "scripts/test_feedback_guard_attestation.py",
+    "scripts/test_feedback_scope_guard.py",
+    "scripts/test_check_deno_production_contrato.py",
 }
 
 
