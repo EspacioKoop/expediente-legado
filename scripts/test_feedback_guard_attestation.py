@@ -2,9 +2,13 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
+import socket
+import ssl
 import sys
 import unittest
+from urllib.error import HTTPError, URLError
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -80,6 +84,26 @@ class GuardAttestationTest(unittest.TestCase):
         ):
             with self.subTest(url=url), self.assertRaises(ValueError):
                 cf.health_url(url)
+
+    def test_smoke_reports_bounded_error_category_not_sensitive_content(self):
+        cases = [
+            (HTTPError("https://sensitive.example.test/private", 403,
+                       "private response", None, None), "GET /health HTTP 403"),
+            (URLError(socket.gaierror(-2, "sensitive DNS name")),
+             "DNS no resuelto"),
+            (URLError(ssl.SSLError("sensitive certificate")), "error TLS"),
+            (URLError(TimeoutError("sensitive path")), "timeout"),
+            (json.JSONDecodeError("private JSON", "secret body", 0),
+             "JSON de /health inválido"),
+            (ValueError("sensitive URL"), "URL, tamaño o contrato de /health inválido"),
+        ]
+        for exc, expected in cases:
+            with self.subTest(error=type(exc).__name__):
+                result = cf.public_failure_reason(exc)
+                self.assertEqual(expected, result)
+                self.assertNotIn("sensitive", result)
+                self.assertNotIn("private", result)
+                self.assertNotIn("secret", result)
 
     def test_smoke_never_posts_and_uses_documented_variable(self):
         workflow = (
