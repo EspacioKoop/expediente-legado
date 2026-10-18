@@ -4,9 +4,9 @@
 ## Esta escena solo se incorpora en los créditos, sin alterar el sueño jugable.
 extends Node3D
 
-@export_enum("montana", "duat") var identidad: String = "montana"
-
 const LUZ_PLATO := preload("res://escenas/creditos_luz_onirica.tscn")
+
+@export_enum("montana", "duat") var identidad: String = "montana"
 
 
 func _ready() -> void:
@@ -34,6 +34,24 @@ func _ready() -> void:
 						malla.visible = false
 			var prototipo := SuenoDuat.crear_prototipo_3d({}, true)
 			prototipo.name = "PresentacionDuatCreditos795"
+			_realzar_materiales_duat(prototipo)
 			plato.add_child(prototipo)
 		_:
 			push_error("Creditos795: identidad desconocida: " + identidad)
+
+
+## El prototipo del Duat utiliza la textura PBR oscura de la vertical jugable.
+## El corredor de créditos exige ver la pirámide y la balanza a 1080p.
+## Solo duplicamos los materiales DE ESTA INSTANCIA, sin alterar recursos
+## compartidos, geometría ni la versión jugable del sueño.
+func _realzar_materiales_duat(prototipo: Node3D) -> void:
+	for nodo in prototipo.find_children("*", "MeshInstance3D", true, false):
+		var pieza := nodo as MeshInstance3D
+		var origen := pieza.material_override as StandardMaterial3D
+		if origen == null:
+			continue
+		var material := origen.duplicate() as StandardMaterial3D
+		material.emission_enabled = true
+		material.emission = origen.albedo_color.lightened(0.36)
+		material.emission_energy_multiplier = 1.15
+		pieza.material_override = material
