@@ -119,6 +119,7 @@ func _probar() -> void:
 	)
 	await _probar_movimiento_y_salto(planos)
 	await _probar_presentaciones_reales(planos)
+	await _probar_reproduccion_completa(planos)
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 
@@ -180,6 +181,56 @@ func _probar_presentaciones_reales(planos: Array) -> void:
 				"malla 3D propia en " + String(plano["nombre"])
 			)
 		app.saltar()
+	app.queue_free()
+	await process_frame
+
+
+## La captura 1080p comprueba cada decorado por separado, pero no la
+## reproducción sin cortes: un error de reloj, rótulo o transición podría
+## bloquear la apertura aun con los 43 JPG verdes.
+## Se avanza el reloj del reproductor en memoria, sin esperar 86 segundos
+## reales ni depender de la velocidad del runner de CI.
+func _probar_reproduccion_completa(planos: Array) -> void:
+	var app := ESCENA_CINEMATICA.instantiate()
+	root.add_child(app)
+	var entrados: Array[int] = []
+	var terminaciones := {"total": 0}
+	app.plano_entrado.connect(func(indice: int, _plano: Dictionary): entrados.append(indice))
+	app.terminada.connect(func(): terminaciones["total"] += 1)
+	app.reproducir(planos)
+	_comprobar(bool(app.get("_reproduciendo")), "el rodaje completo empieza")
+
+	for i in planos.size():
+		var plano: Dictionary = planos[i]
+		_comprobar(
+			int(app.get("_plano")) == i,
+			"se entra ordenadamente al plano %02d" % i
+		)
+		var rotulo := app.get("_rotulo") as Label
+		_comprobar(
+			rotulo != null and rotulo.text == String(plano.get("rotulo", "")),
+			"rotulo correcto en el plano %02d" % i
+		)
+		var duracion := float(plano["segundos"])
+		app.call("_process", duracion * 0.5)
+		_comprobar(
+			int(app.get("_plano")) == i,
+			"el plano %02d no se corta prematuramente" % i
+		)
+		app.call("_process", duracion * 0.5 + 0.02)
+		if i < planos.size() - 1:
+			_comprobar(
+				int(app.get("_plano")) == i + 1,
+				"la siguiente toma aparece tras el reloj: %02d" % i
+			)
+
+	_comprobar(entrados.size() == planos.size(), "se han proyectado los 40 planos")
+	for i in entrados.size():
+		_comprobar(entrados[i] == i, "sin saltos ni repeticiones en el montaje: %02d" % i)
+	_comprobar(terminaciones["total"] == 1, "fin emitido una sola vez")
+	_comprobar(not bool(app.get("_reproduciendo")), "la apertura termina sin softlock")
+	var rotulo_final := app.get("_rotulo") as Label
+	_comprobar(rotulo_final != null and rotulo_final.text.is_empty(), "rótulo limpio al acabar")
 	app.queue_free()
 	await process_frame
 
