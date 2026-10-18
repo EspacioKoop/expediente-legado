@@ -38,6 +38,28 @@ class CiScopeTest(unittest.TestCase):
         )
         self.assertEqual("fast", result["mode"])
 
+    def test_smoke_cloudflare_y_regresiones_f9_fast_sin_runtime(self):
+        # Estos scripts se ejecutan en el preflight obligatorio, sin red/POST.
+        archivos = [
+            ".github/workflows/feedback-worker-production-smoke.yml",
+            "scripts/check_feedback_worker_production.py",
+            "scripts/test_feedback_guard_attestation.py",
+            "scripts/test_feedback_scope_guard.py",
+            "scripts/test_check_deno_production_contrato.py",
+        ]
+        result = mod.classify(archivos)
+        self.assertEqual("fast", result["mode"])
+        self.assertEqual([], result["outside"])
+        # El Worker real, la CI canónica y el clasificador exigen suite completa.
+        for path in [
+            "infra/feedback-worker/worker.js",
+            ".github/workflows/ci.yml",
+            "scripts/ci_scope.py",
+            "godot/main.gd",
+        ]:
+            with self.subTest(path=path):
+                self.assertEqual("full", mod.classify(archivos + [path])["mode"])
+
     def test_sala_de_mando_deno_es_fast(self):
         # #1778: app Deno aparte con su propio workflow de fmt/check/test.
         result = mod.classify(
