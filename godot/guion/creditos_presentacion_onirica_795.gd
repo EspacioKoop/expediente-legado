@@ -57,6 +57,13 @@ func _realzar_materiales_duat(prototipo: Node3D) -> void:
 			continue
 		var material := origen.duplicate() as StandardMaterial3D
 		material.emission_enabled = true
-		material.emission = origen.albedo_color.lightened(0.36)
-		material.emission_energy_multiplier = 1.15
+		# La primera captura reveló una pirámide quemada en blanco.
+		# Piedra fría frente al bronce de la balanza; ambos visibles sin
+		# convertir el Duat en un cartel de luz blanca.
+		material.emission = (
+			Color(0.40, 0.43, 0.55)
+			if pieza.name.begins_with("Piramide")
+			else Color(0.58, 0.42, 0.27)
+		)
+		material.emission_energy_multiplier = 0.45
 		pieza.material_override = material
