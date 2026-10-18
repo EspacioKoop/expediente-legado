@@ -275,15 +275,16 @@ jobs:
           DENO_REPORT_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
         run: |
           set -euo pipefail
-          echo "order=default" >> "$GITHUB_OUTPUT"
+          order=default
           if [[ -z "${CF_REPORT_URL:-}" || -z "${DENO_REPORT_URL:-}" ]]; then
             echo "F9: sin dos gateways configurados; mantener orden tradicional."
           elif ! python3 scripts/check_feedback_worker_production.py \
               --source infra/feedback-worker/worker.js \
               --url "$CF_REPORT_URL"; then
-            echo "order=deno_first" >> "$GITHUB_OUTPUT"
+            order=deno_first
             echo "::warning::F9: el primario Cloudflare no supera /health; Deno se probará primero en las nuevas alphas."
           fi
+          printf 'order=%s\\n' "$order" >> "$GITHUB_OUTPUT"
 
       - name: Exportar alpha Linux y Windows
         env:
