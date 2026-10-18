@@ -13,7 +13,14 @@ from pathlib import Path
 import re
 import sys
 from urllib.parse import urlsplit, urlunsplit
-from urllib.request import Request, urlopen
+from urllib.request import HTTPRedirectHandler, Request, build_opener
+
+
+class NoRedirect(HTTPRedirectHandler):
+    """Never follow a 3xx to another host or an insecure/private target."""
+
+    def redirect_request(self, request, fp, code, msg, headers, newurl):
+        return None
 
 
 FIELD_RE = {
@@ -84,7 +91,7 @@ def main() -> int:
         else:
             # Despliegue real: GET a /health, nunca envío de datos de juego.
             request = Request(health_url(args.url), headers={"Accept": "application/json"})
-            with urlopen(request, timeout=15) as response:
+            with build_opener(NoRedirect()).open(request, timeout=15) as response:
                 raw = response.read(8193)
         if len(raw) > 8192:
             raise ValueError("health supera tamaño máximo")
