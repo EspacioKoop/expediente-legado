@@ -105,22 +105,14 @@ class GuardAttestationTest(unittest.TestCase):
                 self.assertNotIn("private", result)
                 self.assertNotIn("secret", result)
 
-    def test_smoke_never_posts_and_uses_documented_variable(self):
-        workflow = (
-            ROOT / ".github/workflows/feedback-worker-production-smoke.yml"
-        ).read_text(encoding="utf-8")
-        self.assertIn("workflow_dispatch:", workflow)
-        self.assertIn("schedule:", workflow)
-        self.assertIn("push:", workflow)
-        self.assertIn("branches: [main]", workflow)
-        self.assertIn("'infra/feedback-worker/**'", workflow)
-        self.assertIn("vars.SIGA98_FEEDBACK_URL", workflow)
-        self.assertIn('echo "::error::SIGA98_FEEDBACK_URL', workflow)
-        self.assertIn('exit 1', workflow)
-        self.assertNotIn('exit 0', workflow)
-        self.assertIn("scripts/check_feedback_worker_production.py", workflow)
-        self.assertNotIn("POST", workflow)
-        self.assertNotIn("secrets.", workflow)
+    def test_public_repo_contains_game_f9_check_not_operational_schedule(self):
+        # El healthcheck que se usa al exportar alphas es lógica del juego;
+        # monitorizar periódicamente la instalación corresponde a infra-casa.
+        operational = ROOT / ".github/workflows/feedback-worker-production-smoke.yml"
+        self.assertFalse(operational.exists())
+        alpha = (ROOT / ".github/workflows/alpha-playtest.yml").read_text()
+        self.assertIn("scripts/check_feedback_worker_production.py", alpha)
+        self.assertIn("SIGA98_F9_GATEWAY_ORDER", alpha)
 
 
 if __name__ == "__main__":
