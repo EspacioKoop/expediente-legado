@@ -202,10 +202,7 @@ func _probar_reproduccion_completa(planos: Array) -> void:
 
 	for i in planos.size():
 		var plano: Dictionary = planos[i]
-		_comprobar(
-			int(app.get("_plano")) == i,
-			"se entra ordenadamente al plano %02d" % i
-		)
+		_comprobar(int(app.get("_plano")) == i, "se entra ordenadamente al plano %02d" % i)
 		var rotulo := app.get("_rotulo") as Label
 		_comprobar(
 			rotulo != null and rotulo.text == String(plano.get("rotulo", "")),
@@ -213,15 +210,11 @@ func _probar_reproduccion_completa(planos: Array) -> void:
 		)
 		var duracion := float(plano["segundos"])
 		app.call("_process", duracion * 0.5)
-		_comprobar(
-			int(app.get("_plano")) == i,
-			"el plano %02d no se corta prematuramente" % i
-		)
+		_comprobar(int(app.get("_plano")) == i, "el plano %02d no se corta prematuramente" % i)
 		app.call("_process", duracion * 0.5 + 0.02)
 		if i < planos.size() - 1:
 			_comprobar(
-				int(app.get("_plano")) == i + 1,
-				"la siguiente toma aparece tras el reloj: %02d" % i
+				int(app.get("_plano")) == i + 1, "la siguiente toma aparece tras el reloj: %02d" % i
 			)
 
 	_comprobar(entrados.size() == planos.size(), "se han proyectado los 40 planos")
