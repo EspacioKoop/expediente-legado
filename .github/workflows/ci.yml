@@ -50,6 +50,14 @@ jobs:
           echo "Base CI: $base"
           python scripts/ci_scope.py --base "$base" --head HEAD --github-output "$GITHUB_OUTPUT"
 
+      - name: Validar contrato de publicación F9 (sin red ni POST)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/test_feedback_guard_attestation.py
+          python3 scripts/test_feedback_scope_guard.py
+          python3 scripts/test_check_deno_production_contrato.py
+
       - name: Preflight GDScript fail-fast
         if: steps.scope.outputs.mode == 'full'
         shell: bash

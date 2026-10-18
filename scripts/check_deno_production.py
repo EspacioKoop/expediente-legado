@@ -11,6 +11,7 @@ from typing import Any
 
 VERSION_RE = re.compile(r"\bversion:\s*(\d+)\s*,")
 FEATURE_RE = re.compile(r"^\s*(agent_[a-z0-9_]+):\s*true\s*,?\s*$", re.MULTILINE)
+PUBLICATION_GUARD_RE = re.compile(r"\bpublication_guard:\s*(\d+)\s*,")
 
 
 def expected_contract(source: str) -> dict[str, Any]:
@@ -18,10 +19,16 @@ def expected_contract(source: str) -> dict[str, Any]:
     if not match:
         raise ValueError("main.ts no declara version en /health")
     features = sorted(set(FEATURE_RE.findall(source)))
-    return {
+    contract = {
         "version": int(match.group(1)),
         "features": features,
     }
+    # Legacy fixtures without this flag remain valid. Real main.ts declares
+    # it, so a deployed version without the guard fails the freshness test.
+    guard = PUBLICATION_GUARD_RE.search(source)
+    if guard:
+        contract["publication_guard"] = int(guard.group(1))
+    return contract
 
 
 def validate_health(source: str, health: dict[str, Any]) -> list[str]:
@@ -43,6 +50,11 @@ def validate_health(source: str, health: dict[str, Any]) -> list[str]:
 
     if health.get("kv_configured") is not True:
         errors.append("kv_configured != true")
+    if "publication_guard" in expected and (
+        type(health.get("publication_guard")) is not int
+        or health["publication_guard"] != expected["publication_guard"]
+    ):
+        errors.append("publication_guard ausente o desactualizado en producción")
 
     return errors
 

@@ -221,6 +221,8 @@ async function handler(
       ok: true,
       service: "siga98-feedback-deno",
       version: 4,
+      // The production freshness check must reject versions without this guard.
+      publication_guard: 1,
       github_configured: Boolean(Deno.env.get("GITHUB_TOKEN")),
       kv_configured: kvConfigured,
       agent_memory: true,

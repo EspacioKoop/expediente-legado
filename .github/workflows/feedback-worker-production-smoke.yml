@@ -1,0 +1,33 @@
+name: Cloudflare F9 publication guard smoke
+
+on:
+  schedule:
+    - cron: '37 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    env:
+      WORKER_URL: ${{ vars.SIGA98_FEEDBACK_URL }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Verificar /health y filtro público sin crear issues
+        run: |
+          set -euo pipefail
+          if [[ -z "${WORKER_URL:-}" ]]; then
+            echo "::warning::SIGA98_FEEDBACK_URL sin configurar; Cloudflare NO verificado."
+            echo "Cloudflare F9: sin URL configurada; no se ha verificado el despliegue." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          python3 scripts/check_feedback_worker_production.py \
+            --source infra/feedback-worker/worker.js \
+            --url "$WORKER_URL"
+          echo "Cloudflare F9: filtro de publicación versionado y salud verificados." >> "$GITHUB_STEP_SUMMARY"
