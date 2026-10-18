@@ -170,6 +170,8 @@ export default {
         ok: true,
         service: "siga98-feedback",
         version: 2,
+        // Public contract for verifying the deployed issue-publishing guard.
+        publication_guard: 1,
         github_configured: Boolean(env.GITHUB_TOKEN),
       });
     }
