@@ -25,6 +25,13 @@ func _ready() -> void:
 			if presentacion == null:
 				push_error("Creditos795: no se pudo montar la cima del sueño")
 		"duat":
+			# El prototipo incluye pirámides por encima de tres metros.
+			# El volumen cerrado de la forma base taparía su arquitectura.
+			for hijo in plato.get_children():
+				if hijo is StaticBody3D:
+					var malla := hijo.get_node_or_null("Malla") as MeshInstance3D
+					if malla != null:
+						malla.visible = false
 			var prototipo := SuenoDuat.crear_prototipo_3d({}, true)
 			prototipo.name = "PresentacionDuatCreditos795"
 			plato.add_child(prototipo)
