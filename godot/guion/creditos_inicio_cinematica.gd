@@ -298,6 +298,39 @@ static func planos() -> Array:
 				}
 			]
 		}
+		# Acentos arquitectónicos de rodaje, nunca presentes en el sueño
+		# jugable. Las verticales originales se siguen montando por `escena`.
+		# El gate de imagen midió sujetos ilegibles sobre fondo casi negro.
+		if nombre == "sueno_aquiles_alineacion":
+			decorado["bultos"] = [
+				{
+					"pos": Vector3(-4.3, 3.25, -2.5),
+					"tam": Vector3(1.05, 6.5, 0.25),
+					"color": Color(0.42, 0.52, 0.62),
+					"emisivo": true
+				},
+				{
+					"pos": Vector3(4.3, 3.25, -2.5),
+					"tam": Vector3(1.05, 6.5, 0.25),
+					"color": Color(0.60, 0.45, 0.31),
+					"emisivo": true
+				}
+			]
+		elif nombre == "sueno_gilgamesh":
+			decorado["bultos"] = [
+				{
+					"pos": Vector3(-6.2, 1.65, 3.3),
+					"tam": Vector3(1.55, 2.5, 0.22),
+					"color": Color(0.51, 0.39, 0.28),
+					"emisivo": true
+				},
+				{
+					"pos": Vector3(-1.7, 1.65, 3.3),
+					"tam": Vector3(1.55, 2.5, 0.22),
+					"color": Color(0.36, 0.47, 0.57),
+					"emisivo": true
+				}
+			]
 		salida.append(_plano(nombre, decorado, camara, mira, indice, bloques))
 
 	# Título al final y sin una pantalla negra 2D: lo cierra la última vertical.
