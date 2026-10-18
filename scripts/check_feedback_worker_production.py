@@ -11,7 +11,10 @@ import ipaddress
 import json
 from pathlib import Path
 import re
+import socket
+import ssl
 import sys
+from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit, urlunsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
@@ -77,6 +80,30 @@ def validate_health(source: str, data: object) -> list[str]:
     return errors
 
 
+def public_failure_reason(error: Exception) -> str:
+    """Categoriza el fallo sin mostrar URLs, cabeceras, bodies ni secretos."""
+    if isinstance(error, HTTPError):
+        return f"GET /health HTTP {error.code}"
+    if isinstance(error, URLError):
+        cause = error.reason
+        if isinstance(cause, socket.gaierror):
+            return "DNS no resuelto"
+        if isinstance(cause, ssl.SSLError):
+            return "error TLS"
+        if isinstance(cause, TimeoutError):
+            return "timeout"
+        return "error de conexión"
+    if isinstance(error, TimeoutError):
+        return "timeout"
+    if isinstance(error, json.JSONDecodeError):
+        return "JSON de /health inválido"
+    if isinstance(error, UnicodeError):
+        return "codificación de /health inválida"
+    if isinstance(error, ValueError):
+        return "URL, tamaño o contrato de /health inválido"
+    return "error de lectura de /health"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, required=True)
@@ -97,8 +124,8 @@ def main() -> int:
             raise ValueError("health supera tamaño máximo")
         result = json.loads(raw)
         errors = validate_health(source, result)
-    except (OSError, ValueError, UnicodeError, json.JSONDecodeError, TimeoutError) as exc:
-        print("ERROR: no se pudo validar /health del Worker", file=sys.stderr)
+    except (OSError, ValueError, UnicodeError, TimeoutError) as exc:
+        print(f"ERROR: {public_failure_reason(exc)}", file=sys.stderr)
         return 2
     print(json.dumps({"ok": not errors, "errors": errors}, ensure_ascii=False))
     return 1 if errors else 0
