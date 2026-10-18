@@ -171,8 +171,8 @@ const FORMAS_SUENO := [
 	{
 		"id": "montana",
 		"forma": "embudo",
-		"camara": Vector3(-3.5, 2.7, 7.5),
-		"mira": Vector3(0.0, 1.3, 0.0)
+		"camara": Vector3(-3.5, 3.6, 12.5),
+		"mira": Vector3(5.3, 1.25, 1.0)
 	},
 	{
 		"id": "desierto",
@@ -189,8 +189,8 @@ const FORMAS_SUENO := [
 	{
 		"id": "duat",
 		"forma": "gilgamesh",
-		"camara": Vector3(1.5, 2.8, 4.8),
-		"mira": Vector3(0.0, 1.3, -1.0)
+		"camara": Vector3(0.0, 5.8, 14.5),
+		"mira": Vector3(0.0, 2.1, -3.6)
 	},
 	{
 		"id": "horror-texturas",
@@ -431,13 +431,16 @@ static func _decorado_sueno(forma: Dictionary) -> Dictionary:
 			# del sueño no debe ocultar el contorno entero en esta toma.
 			decorado["textura_muro"] = ""
 			decorado["color_muro"] = (
-				Color(0.56, 0.41, 0.43)
-				if id == "montana"
-				else Color(0.46, 0.45, 0.62)
+				Color(0.56, 0.41, 0.43) if id == "montana" else Color(0.46, 0.45, 0.62)
 			)
 		# La prueba visual de #284 usa luz direccional; solo este plató
 		# incorpora su rig para mantener el tratamiento del juego intacto.
-		decorado["escena"] = "res://escenas/creditos_luz_onirica.tscn"
+		if id == "montana":
+			decorado["escena"] = "res://escenas/creditos_montana_795.tscn"
+		elif id == "duat":
+			decorado["escena"] = "res://escenas/creditos_duat_795.tscn"
+		else:
+			decorado["escena"] = "res://escenas/creditos_luz_onirica.tscn"
 	return decorado
 
 
