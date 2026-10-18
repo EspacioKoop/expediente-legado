@@ -102,7 +102,7 @@ class ParteIncidenciasTest(unittest.TestCase):
         self.assertIn("if not _diagnostico.button_pressed:", self.app)
 
     def test_export_f9_prioriza_deno_ante_403_sin_perder_fallback(self):
-        script = self.export.split(" <<'PY'\\n", 1)[1].split("\\nPY\\n", 1)[0]
+        script = self.export.split(" <<'PY'\n", 1)[1].split("\nPY\n", 1)[0]
         cloudflare = "https://cloudflare.example.org/api/report"
         deno = "https://deno.example.org/api/report"
         vercel = "https://vercel.example.org/api/report"
