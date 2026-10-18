@@ -284,7 +284,7 @@ jobs:
             order=deno_first
             echo "::warning::F9: el primario Cloudflare no supera /health; Deno se probará primero en las nuevas alphas."
           fi
-          printf 'order=%s\\n' "$order" >> "$GITHUB_OUTPUT"
+          printf 'order=%s\n' "$order" >> "$GITHUB_OUTPUT"
 
       - name: Exportar alpha Linux y Windows
         env:
