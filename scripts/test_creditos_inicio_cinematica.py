@@ -41,7 +41,7 @@ class CreditosInicioCinematicaTest(unittest.TestCase):
         self.assertIn("const CAMARAS_VERTICALES := {", self.creditos)
         self.assertIn('CAMARAS_VERTICALES.get(nombre, {})', self.creditos)
         self.assertIn("creditos_luz_onirica.tscn", self.creditos)
-        for identidad in ("montana", "duat"):
+        for identidad in ("montana", "duat", "desierto"):
             ruta = ROOT / "godot" / "escenas" / f"creditos_{identidad}_795.tscn"
             self.assertTrue(ruta.is_file(), identidad)
             self.assertIn(f'identidad = "{identidad}"', ruta.read_text(encoding="utf-8"))
@@ -50,6 +50,7 @@ class CreditosInicioCinematicaTest(unittest.TestCase):
         codigo = presentacion.read_text(encoding="utf-8")
         self.assertIn("SuenoMontana3D.montar(plato, espacio)", codigo)
         self.assertIn("SuenoDuat.crear_prototipo_3d({}, true)", codigo)
+        self.assertIn("SuenoDesierto3D.montar(plato, espacio)", codigo)
         self.assertIn("malla.visible = false", codigo)
         self.assertIn('decorado["luz_por_pixel"] = true', self.creditos)
         self.assertIn('"energia": energia_relleno', self.creditos)
