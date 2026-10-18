@@ -267,6 +267,24 @@ jobs:
           python3 scripts/auditar_frontera_qa.py qa "$RUNNER_TEMP/frontera-qa/qa.pck"
           python3 scripts/auditar_frontera_qa.py publico "$RUNNER_TEMP/frontera-qa/publico.pck"
 
+      - id: f9-gateway-health
+        name: Priorizar Deno si Cloudflare rechaza /health
+        shell: bash
+        env:
+          CF_REPORT_URL: ${{ vars.SIGA98_FEEDBACK_URL }}
+          DENO_REPORT_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
+        run: |
+          set -euo pipefail
+          echo "order=default" >> "$GITHUB_OUTPUT"
+          if [[ -z "${CF_REPORT_URL:-}" || -z "${DENO_REPORT_URL:-}" ]]; then
+            echo "F9: sin dos gateways configurados; mantener orden tradicional."
+          elif ! python3 scripts/check_feedback_worker_production.py \
+              --source infra/feedback-worker/worker.js \
+              --url "$CF_REPORT_URL"; then
+            echo "order=deno_first" >> "$GITHUB_OUTPUT"
+            echo "::warning::F9: el primario Cloudflare no supera /health; Deno se probará primero en las nuevas alphas."
+          fi
+
       - name: Exportar alpha Linux y Windows
         env:
           GODOT_BIN: godot4
@@ -275,6 +293,7 @@ jobs:
           # Las credenciales de GitHub/correo viven exclusivamente en servidores.
           SIGA98_FEEDBACK_URL: ${{ vars.SIGA98_FEEDBACK_URL }}
           SIGA98_FEEDBACK_FALLBACK_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
+          SIGA98_F9_GATEWAY_ORDER: ${{ steps.f9-gateway-health.outputs.order }}
         run: bash dist/exportar-godot-alpha.sh
 
       - name: Auditar los ejecutables que se van a adjuntar
