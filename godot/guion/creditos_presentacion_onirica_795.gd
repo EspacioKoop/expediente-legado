@@ -6,7 +6,7 @@ extends Node3D
 
 const LUZ_PLATO := preload("res://escenas/creditos_luz_onirica.tscn")
 
-@export_enum("montana", "duat") var identidad: String = "montana"
+@export_enum("montana", "duat", "desierto") var identidad: String = "montana"
 
 
 func _ready() -> void:
@@ -24,6 +24,11 @@ func _ready() -> void:
 			var presentacion := SuenoMontana3D.montar(plato, espacio)
 			if presentacion == null:
 				push_error("Creditos795: no se pudo montar la cima del sueño")
+		"desierto":
+			var espacio := SuenoDesierto.adaptar_espacio(Sueno.espacio("peine", 0))
+			var presentacion := SuenoDesierto3D.montar(plato, espacio)
+			if presentacion == null:
+				push_error("Creditos795: no se pudo montar el desierto")
 		"duat":
 			# El prototipo incluye pirámides por encima de tres metros.
 			# El volumen cerrado de la forma base taparía su arquitectura.
