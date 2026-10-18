@@ -221,9 +221,9 @@ const VERTICALES := [
 ## pared del fondo en vez de a la mesa y al umbral. Solo cambia el montaje.
 const CAMARAS_VERTICALES := {
 	"sueno_aquiles_alineacion":
-	{"camara": Vector3(-2.7, 5.7, 12.5), "mira": Vector3(0.0, 4.9, 0.0)},
+	{"camara": Vector3(-4.4, 5.3, 12.8), "mira": Vector3(0.0, 4.4, 0.0)},
 	"sueno_aquiles": {"camara": Vector3(0.0, 6.0, 12.0), "mira": Vector3(0.0, 4.8, 0.0)},
-	"sueno_gilgamesh": {"camara": Vector3(0.0, 5.2, 11.5), "mira": Vector3(0.0, 2.7, -2.2)},
+	"sueno_gilgamesh": {"camara": Vector3(-3.8, 4.2, 12.5), "mira": Vector3(-3.5, 1.35, 4.5)},
 	"sueno_yggdrasil": {"camara": Vector3(0.0, 10.5, 15.5), "mira": Vector3(0.0, 1.5, 0.0)},
 	"sueno_tir_na_nog": {"camara": Vector3(-2.6, 1.8, 2.8), "mira": Vector3(-1.8, 1.1, 0.6)},
 	"sueno_baba_yaga": {"camara": Vector3(6.8, 2.4, 5.2), "mira": Vector3(-0.8, 1.4, 0.8)},
