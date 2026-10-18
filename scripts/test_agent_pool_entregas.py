@@ -31,6 +31,10 @@ class EntregasPoolTest(unittest.TestCase):
     def test_solo_ramas_canonicas_del_pool(self):
         self.assertTrue(entregas.es_pr_del_pool(pr("agent/qwen-1865-36620441784")))
         self.assertTrue(entregas.es_pr_del_pool(pr("agent/gemini-12-99")))
+        self.assertTrue(entregas.es_pr_del_pool(pr("agent/pool-2715-39000000001")))
+        self.assertTrue(entregas.es_pr_del_pool(pr("agent/autopilot-2715-39000000002")))
+        self.assertFalse(entregas.es_pr_del_pool(pr("agent/pool-2715")))
+        self.assertFalse(entregas.es_pr_del_pool(pr("agent/autopilot-2715-notanumber")))
         self.assertFalse(entregas.es_pr_del_pool(pr("agent/protocol-v1-1866")))
         self.assertFalse(entregas.es_pr_del_pool(pr("feature/1-x")))
         self.assertFalse(entregas.es_pr_del_pool(pr("agent/qwen-1865")))
@@ -52,6 +56,8 @@ class EntregasPoolTest(unittest.TestCase):
         cuerpo = "Implementacion autonoma mediante worker `qwen-fallback-3`"
         self.assertEqual("qwen-fallback-3", entregas.worker_de(pr("agent/qwen-1-2", cuerpo=cuerpo)))
         self.assertEqual("desconocido", entregas.worker_de(pr("agent/qwen-1-2")))
+        self.assertEqual("pool", entregas.worker_de(pr("agent/pool-1-2")))
+        self.assertEqual("autopilot", entregas.worker_de(pr("agent/autopilot-1-2")))
 
     def test_resumen_filtra_humanas_y_calcula_tasa(self):
         prs = [
@@ -73,6 +79,24 @@ class EntregasPoolTest(unittest.TestCase):
         self.assertEqual(0.5, resultado["tasa_fusion"])
         self.assertEqual(1, resultado["por_worker"]["qwen-primary"]["MERGED"])
         self.assertEqual(1, resultado["por_worker"]["gemini-primary"]["total"])
+
+    def test_cuenta_entregas_neutrales_sin_identidad_del_proveedor(self):
+        prs = [
+            pr("agent/pool-2715-39000000001", "MERGED",
+               "Implementacion autonoma del juego."),
+            pr("agent/autopilot-2662-39000000002", "OPEN",
+               "Implementacion autonoma del juego."),
+            pr("agent/protocol-v1-123", "MERGED"),
+        ]
+        salida = entregas.resumen(prs)
+        self.assertEqual(2, salida["total"])
+        self.assertEqual({"OPEN": 1, "MERGED": 1, "CLOSED": 0},
+                         salida["por_estado"])
+        self.assertEqual({"total": 1, "MERGED": 1},
+                         salida["por_worker"]["pool"])
+        self.assertEqual({"total": 1, "MERGED": 0},
+                         salida["por_worker"]["autopilot"])
+        self.assertNotIn("desconocido", salida["por_worker"])
 
     def test_filtro_desde_excluye_pr_antigua(self):
         prs = [

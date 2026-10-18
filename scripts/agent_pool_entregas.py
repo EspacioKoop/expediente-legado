@@ -3,8 +3,9 @@
 
 El embudo operativo mide hasta dónde llega cada worker; este informe mide el
 resultado final observable en GitHub a partir de las PR publicadas por el
-pool. Cuentan las ramas canónicas agent/(qwen|gemini)-N-RUN y las PR creadas
-automáticamente por Jules con su marcador estable en el cuerpo.
+pool. Cuentan tanto las ramas heredadas agent/(qwen|gemini)-N-RUN como las
+ramas neutrales agent/(pool|autopilot)-N-RUN, y las PR de Jules con
+su marcador estable en el cuerpo.
 
 Uso:
     python3 scripts/agent_pool_entregas.py --dias 7
@@ -24,7 +25,7 @@ import sys
 from typing import Any
 
 
-PR_POOL_RE = re.compile(r"^agent/(qwen|gemini)-\d+-\d+$")
+PR_POOL_RE = re.compile(r"^agent/(qwen|gemini|pool|autopilot)-\d+-\d+$")
 JULES_MARKER = "PR created automatically by Jules for task"
 WORKER_RE = re.compile(
     r"Implementaci[oó]n autonoma mediante worker `(?P<worker>[A-Za-z0-9._-]+)`",
@@ -50,6 +51,11 @@ def worker_de(pr: dict[str, Any]) -> str:
         return match.group("worker")
     if JULES_MARKER.lower() in cuerpo.lower():
         return "jules"
+    rama = PR_POOL_RE.fullmatch(str(pr.get("headRefName", "")))
+    if rama and rama.group(1) in {"pool", "autopilot"}:
+        # Las nuevas PR no publican el worker real. Agrupar por clase de
+        # ejecución preserva las métricas sin reintroducir su identidad.
+        return rama.group(1)
     return "desconocido"
 
 
