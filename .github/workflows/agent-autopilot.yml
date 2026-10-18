@@ -436,7 +436,7 @@ jobs:
           if grep -q '^reserved=false$' "$GITHUB_OUTPUT"; then
             gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=colision-autopilot" >/dev/null || true
             gh issue edit "$ISSUE" --add-label agent:needs-human >/dev/null || true
-            gh issue comment "$ISSUE" --body "Agent autopilot detenido: $(grep '^reason=' "$GITHUB_OUTPUT"|cut -d= -f2-)" || true
+            gh issue comment "$ISSUE" --body "Agent autopilot: reserva detenida por solape con otra tarea. Revisar registro de reservas y reintentar." || true
           fi
 
       - name: Afinar contexto y memoria por rutas reservadas
@@ -604,7 +604,9 @@ jobs:
           MAX_REPLANS: '2'
         run: |
           set -euo pipefail
-          outside="$(jq -r '.outside | join(",")' /tmp/claim-guard.json)"
+          # Solo es seguro publicar rutas que ya figuran en git (repo público).
+          # Las rutas nuevas/no trackeadas pueden contener datos operativos.
+          outside="$(python3 scripts/public_replan_paths.py --guard /tmp/claim-guard.json --repo . 2>/dev/null || true)"
           previous="$(
             gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$ISSUE/comments?per_page=100" --jq '.[]' |
               jq -s '[.[] | select(.user.login == "github-actions[bot]" and ((.body // "") | startswith("AUTOPILOT_REPLAN ")))] | length'
@@ -618,9 +620,23 @@ jobs:
             --remove-label agent:working --remove-label agent:needs-human \
             >/dev/null 2>&1 || true
 
+          if [[ -z "$outside" ]]; then
+            # No se auto-replanifica sin evidencia segura: el siguiente planner
+            # carecería de las rutas y podría producir el mismo desvío.
+            gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human >/dev/null
+            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
+              "AUTOPILOT_REPLAN attempt=$attempt
+
+              La implementación intentó modificar rutas que no se pueden publicar con seguridad. Se requiere revisión humana del log de Actions. No se ha publicado PR." || true
+            echo "scheduled=false" >> "$GITHUB_OUTPUT"
+            git reset --hard HEAD
+            git clean -fd
+            exit 0
+          fi
+
           if (( attempt <= MAX_REPLANS )); then
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-              "AUTOPILOT_REPLAN attempt=$attempt provider=$PROVIDER observed_paths=$outside
+              "AUTOPILOT_REPLAN attempt=$attempt observed_paths=$outside
 
               La implementación intentó modificar rutas fuera del CLAIM. El runner ya restauró esos cambios y no se publicará nada de este intento. El próximo plan debe reinspeccionar la integración, incluir las rutas observadas solo si son realmente necesarias y volver a pasar la comprobación de solapes de #182."
             gh workflow run agent-autopilot.yml --repo "$GITHUB_REPOSITORY" --ref main \
@@ -630,7 +646,7 @@ jobs:
             gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
               --add-label agent:needs-human >/dev/null
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-              "AUTOPILOT_REPLAN attempt=$attempt provider=$PROVIDER observed_paths=$outside
+              "AUTOPILOT_REPLAN attempt=$attempt observed_paths=$outside
 
               Se agotó el límite de $MAX_REPLANS replans automáticos para esta revisión de main. Los cambios fuera del CLAIM fueron restaurados y no se publicó ningún PR."
             echo "scheduled=false" >> "$GITHUB_OUTPUT"
