@@ -162,6 +162,7 @@ func _probar_presentaciones_reales(planos: Array) -> void:
 	root.add_child(app)
 	for caso in [
 		{"indice": 24, "presentacion": "PresentacionMontana284", "malla": "CimaNevada"},
+		{"indice": 25, "presentacion": "PresentacionDesierto284", "malla": "ArenaCaminable"},
 		{"indice": 27, "presentacion": "PresentacionDuatCreditos795", "malla": "PiramideInvertida"},
 	]:
 		var plano: Dictionary = planos[int(caso["indice"])].duplicate(true)
