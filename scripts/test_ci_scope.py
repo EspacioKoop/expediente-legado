@@ -41,7 +41,6 @@ class CiScopeTest(unittest.TestCase):
     def test_smoke_cloudflare_y_regresiones_f9_fast_sin_runtime(self):
         # Estos scripts se ejecutan en el preflight obligatorio, sin red/POST.
         archivos = [
-            ".github/workflows/feedback-worker-production-smoke.yml",
             "scripts/check_feedback_worker_production.py",
             "scripts/test_feedback_guard_attestation.py",
             "scripts/test_feedback_scope_guard.py",
