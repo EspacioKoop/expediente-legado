@@ -118,6 +118,7 @@ func _probar() -> void:
 		"el titulo respira antes del final"
 	)
 	await _probar_movimiento_y_salto(planos)
+	await _probar_presentaciones_reales(planos)
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 
@@ -150,6 +151,34 @@ func _probar_movimiento_y_salto(planos: Array) -> void:
 	app.call("saltar")
 	_comprobar(finalizado["ok"], "saltar emite la terminacion")
 	_comprobar(not bool(app.get("_reproduciendo")), "saltar detiene el montaje")
+	app.queue_free()
+	await process_frame
+
+
+## El catálogo de datos no basta: se exigen mallas de las presentaciones 3D.
+## Antes de #2527 la cima, las nubes y el Duat no se montaban y aparecían negros.
+func _probar_presentaciones_reales(planos: Array) -> void:
+	var app := ESCENA_CINEMATICA.instantiate()
+	root.add_child(app)
+	for caso in [
+		{"indice": 24, "presentacion": "PresentacionMontana284", "malla": "CimaNevada"},
+		{"indice": 27, "presentacion": "PresentacionDuatCreditos795", "malla": "PiramideInvertida"},
+	]:
+		var plano: Dictionary = planos[int(caso["indice"])].duplicate(true)
+		app.reproducir([plano])
+		await process_frame
+		var plato: Node3D = app.get("_decorado")
+		_comprobar(plato != null, "plato 3D de " + String(plano["nombre"]))
+		if plato != null:
+			_comprobar(
+				plato.find_child(String(caso["presentacion"]), true, false) != null,
+				"presentacion real en " + String(plano["nombre"])
+			)
+			_comprobar(
+				plato.find_child(String(caso["malla"]), true, false) != null,
+				"malla 3D propia en " + String(plano["nombre"])
+			)
+		app.saltar()
 	app.queue_free()
 	await process_frame
 
