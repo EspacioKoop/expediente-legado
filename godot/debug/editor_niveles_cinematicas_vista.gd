@@ -7,6 +7,7 @@ signal transformacion_cambiada(indice: int, posicion: Vector3)
 
 const TAMANO_MINIMO := Vector2(640, 420)
 const COLOR_SELECCION := Color(0.95, 0.72, 0.18)
+const LENGUAJE_CINE := preload("res://guion/lenguaje_cine.gd")
 
 var _viewport: SubViewport
 var _mundo: Node3D
@@ -162,16 +163,39 @@ func _color_tipo(tipo: String) -> Color:
 			return Color(0.72, 0.55, 0.38)
 
 
-func mostrar_plano_cinematica(plano: Dictionary) -> void:
+func mostrar_plano_cinematica(plano: Dictionary, avance: float = 1.0) -> void:
+	if String(plano.get("tipo", "3d")) != "3d":
+		_camara.position = Vector3(8.0, 7.0, 10.0)
+		_camara.look_at(Vector3.ZERO)
+		_marcador_mira.visible = false
+		return
+	_marcador_mira.visible = true
 	var cam: Variant = plano.get("camara", [8.0, 7.0, 10.0])
 	var mira: Variant = plano.get("mira", [0.0, 0.0, 0.0])
 	if not (cam is Array and cam.size() == 3 and mira is Array and mira.size() == 3):
 		return
-	var destino := Vector3(float(mira[0]), float(mira[1]), float(mira[2]))
-	_camara.position = Vector3(float(cam[0]), float(cam[1]), float(cam[2]))
-	_camara.look_at(destino)
-	_camara.fov = clampf(float(plano.get("fov", 60.0)), 1.0, 179.0)
-	_marcador_mira.position = destino
+	var destino := Vector3(float(cam[0]), float(cam[1]), float(cam[2]))
+	var destino_mira := Vector3(float(mira[0]), float(mira[1]), float(mira[2]))
+	var origen_cam: Variant = plano.get("camara_desde", destino)
+	var origen_mira: Variant = plano.get("mira_desde", destino_mira)
+	if not (origen_cam is Array and origen_cam.size() == 3):
+		origen_cam = cam
+	if not (origen_mira is Array and origen_mira.size() == 3):
+		origen_mira = mira
+	var origen := Vector3(float(origen_cam[0]), float(origen_cam[1]), float(origen_cam[2]))
+	var mira_inicial := Vector3(float(origen_mira[0]), float(origen_mira[1]), float(origen_mira[2]))
+	var t := clampf(avance, 0.0, 1.0)
+	var mira_actual := destino_mira
+	if plano.has("camara_desde") or plano.has("mira_desde"):
+		var suave := t * t * (3.0 - 2.0 * t)
+		_camara.position = origen.lerp(destino, suave)
+		mira_actual = mira_inicial.lerp(destino_mira, suave)
+	else:
+		# Conserva el pequeño acercamiento heredado del reproductor runtime.
+		_camara.position = destino + destino.normalized() * -0.25 * t
+	_camara.look_at(mira_actual, Vector3.UP)
+	_camara.fov = LENGUAJE_CINE.fov_de(plano)
+	_marcador_mira.position = mira_actual
 
 
 func posicion_colocacion(indice: int) -> Vector3:
