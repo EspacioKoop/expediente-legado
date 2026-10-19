@@ -1,6 +1,12 @@
+"""Contrato de montaje de créditos #795/#2527.
+
+El corte 2 reemplaza la paginación de licencias en voz por un rodaje de
+localizaciones únicas y rótulos destacados. El corte 4 conserva las
+atribuciones completas por separado; no se deben duplicar en la apertura.
+"""
+
 from pathlib import Path
 import unittest
-
 
 ROOT = Path(__file__).resolve().parents[1]
 CREDITOS = ROOT / "godot" / "guion" / "creditos_inicio_cinematica.gd"
@@ -14,32 +20,71 @@ class CreditosInicioCinematicaTest(unittest.TestCase):
         self.inicio = INICIO.read_text(encoding="utf-8")
         self.reproductor = REPRODUCTOR.read_text(encoding="utf-8")
 
-    def test_consume_fuente_canonica_sin_duplicar_creditos(self) -> None:
+    def test_fuente_canonica_sin_nombres_ni_licencias_duplicados(self) -> None:
         self.assertIn("CreditosInicio.bloques_completos()", self.creditos)
-        self.assertNotIn("eGurucharri", self.creditos)
-        self.assertNotIn("VaroTv7", self.creditos)
-        self.assertNotIn("Godot Engine", self.creditos)
+        for nombre in ("eGurucharri", "VaroTv7", "Godot Engine", "SameBoy"):
+            self.assertNotIn(nombre, self.creditos)
+        self.assertIn('entradas[entrada].get("nombre", "")', self.creditos)
+        self.assertNotIn("ENTRADAS_POR_PLANO", self.creditos)
+        self.assertNotIn("paginas.append", self.creditos)
 
-    def test_todos_los_planos_son_3d_y_reutilizan_espacios_reales(self) -> None:
+    def test_rodaje_usa_lugares_3d_y_las_verticales(self) -> None:
         self.assertIn('"tipo": "3d"', self.creditos)
         self.assertNotIn('"tipo": "2d"', self.creditos)
         self.assertNotIn("MeshInstance3D", self.creditos)
         self.assertNotIn("BoxMesh", self.creditos)
-        for espacio in ("EspaciosCatalogo.OFICINA", "EspaciosCatalogo.CALLE", "EspaciosCatalogo.CASA"):
-            self.assertIn(espacio, self.creditos)
-        self.assertIn('"decorado": _decorado_para(indice)', self.creditos)
+        for espacio in ("OFICINA", "CALLE", "CASA"):
+            self.assertIn("EspaciosCatalogo." + espacio, self.creditos)
+        self.assertIn('"escena": ruta,', self.creditos)
+        self.assertIn("const VERTICALES := [", self.creditos)
+        self.assertEqual(self.creditos.count('"res://escenas/sueno_'), 11)
+        self.assertIn("const CAMARAS_VERTICALES := {", self.creditos)
+        self.assertIn('CAMARAS_VERTICALES.get(nombre, {})', self.creditos)
+        self.assertIn("creditos_luz_onirica.tscn", self.creditos)
+        for identidad in ("montana", "duat", "desierto"):
+            ruta = ROOT / "godot" / "escenas" / f"creditos_{identidad}_795.tscn"
+            self.assertTrue(ruta.is_file(), identidad)
+            self.assertIn(f'identidad = "{identidad}"', ruta.read_text(encoding="utf-8"))
+            self.assertIn(f"creditos_{identidad}_795.tscn", self.creditos)
+        presentacion = (ROOT / "godot" / "guion" / "creditos_presentacion_onirica_795.gd")
+        codigo = presentacion.read_text(encoding="utf-8")
+        self.assertIn("SuenoMontana3D.montar(plato, espacio)", codigo)
+        self.assertIn("SuenoDuat.crear_prototipo_3d({}, true)", codigo)
+        self.assertIn("SuenoDesierto3D.montar(plato, espacio)", codigo)
+        self.assertIn("malla.visible = false", codigo)
+        self.assertIn('decorado["luz_por_pixel"] = true', self.creditos)
+        self.assertIn('"energia": energia_relleno', self.creditos)
+        self.assertIn("camara.lerp(mira, 0.25)", self.creditos)
+        self.assertIn('"sueno_aquiles":', self.creditos)
+        self.assertIn('"sueno_gilgamesh":', self.creditos)
+        self.assertIn('"sueno_yggdrasil":', self.creditos)
+        luz = ROOT / "godot" / "escenas" / "creditos_luz_onirica.tscn"
+        self.assertTrue(luz.is_file())
+        self.assertIn("DirectionalLight3D", luz.read_text(encoding="utf-8"))
+        self.assertIn('"carcasa": false', self.creditos)
+        self.assertIn('"sombras": false', self.creditos)
+        for identidad in (
+            "SuenoVacio", "SuenoEscuela", "SuenoMontana",
+            "SuenoDesierto", "SuenoCastillo", "SuenoDuat",
+            "HorrorTexturas",
+        ):
+            self.assertIn(identidad + ".", self.creditos)
 
-    def test_direccion_y_titulo_consumen_los_datos_del_bloque(self) -> None:
-        self.assertIn('bloque_id == "direccion"', self.creditos)
-        self.assertIn('bloque_id == "titulo"', self.creditos)
-        self.assertIn('primera.get("nombre", bloque.get("titulo", ""))', self.creditos)
-        self.assertIn('"fundido_hasta"] = 0.18', self.creditos)
+    def test_texto_selectivo_en_rotulo_y_no_en_voz(self) -> None:
+        self.assertIn('"_rotulo_para(indice, bloques)"'.strip('"'), self.creditos)
+        self.assertIn('"rotulo": _rotulo_para(indice, bloques)', self.creditos)
+        self.assertNotIn('"voz":', self.creditos)
+        self.assertIn('id = "direccion"', self.creditos)
+        self.assertIn('id = "titulo"', self.creditos)
+        self.assertIn('salida[salida.size() - 1]["fundido_hasta"] = 0.18', self.creditos)
 
-    def test_listas_largas_se_paginan_sin_inventar_contenido(self) -> None:
-        self.assertIn("const ENTRADAS_POR_PLANO := 4", self.creditos)
-        self.assertIn('entrada.get("nombre", "")', self.creditos)
-        self.assertIn('entrada.get("licencia", "")', self.creditos)
-        self.assertIn('paginas.append("  ·  ".join(PackedStringArray(actual)))', self.creditos)
+    def test_localizaciones_y_travellings_distintos(self) -> None:
+        self.assertIn("const ZONAS_DIA := [", self.creditos)
+        self.assertEqual(self.creditos.count('"sitio": '), 22)
+        self.assertIn('decorado["zona_creditos"] = String(zona["id"])', self.creditos)
+        self.assertIn('decorado["bultos"] = objetos', self.creditos)
+        self.assertIn('"camara_desde": camara + paso', self.creditos)
+        self.assertIn('"mira_desde": mira', self.creditos)
 
     def test_inicio_reproduce_una_sola_vez_por_sesion(self) -> None:
         self.assertIn("static var _apertura_creditos_mostrada := false", self.inicio)
@@ -59,21 +104,22 @@ class CreditosInicioCinematicaTest(unittest.TestCase):
         self.assertIn("_diorama.configurar_activo(true)", self.inicio)
         self.assertIn("_enfocar_menu_inicial()", self.inicio)
 
-    def test_skip_reutiliza_teclado_mando_y_añade_raton(self) -> None:
+    def test_skip_por_teclado_mando_y_raton(self) -> None:
         self.assertIn('evento.is_action_pressed("ui_accept")', self.reproductor)
         self.assertIn('evento.is_action_pressed("ui_cancel")', self.reproductor)
         self.assertIn("evento is InputEventMouseButton", self.inicio)
         self.assertIn("click.button_index == MOUSE_BUTTON_LEFT", self.inicio)
         self.assertIn('_apertura_creditos.call("saltar")', self.inicio)
 
-    def test_reduccion_de_movimiento_sigue_en_el_reproductor_comun(self) -> None:
+    def test_reduccion_de_movimiento_heredada_del_reproductor(self) -> None:
         self.assertIn(
             'PreferenciasSiga.cargar().get("reduccion_movimiento", false)',
             self.reproductor,
         )
         self.assertNotIn("PreferenciasSiga", self.creditos)
+        self.assertIn('if _reduccion_movimiento:', self.reproductor)
+        self.assertIn("_camara.global_position = destino", self.reproductor)
         self.assertIn('"camara_desde":', self.creditos)
-        self.assertIn('"mira_desde":', self.creditos)
 
 
 if __name__ == "__main__":
