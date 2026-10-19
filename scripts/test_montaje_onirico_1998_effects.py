@@ -53,10 +53,21 @@ class MontajeOnirico1998EffectsTests(unittest.TestCase):
     def test_reproductor_has_crt_and_superposicion_nodes(self):
         self.assertIn("_crt: ColorRect", self.reproductor)
         self.assertIn("_superposicion: ColorRect", self.reproductor)
+
+        self.assertIn("_vista_superposicion: SubViewport", self.reproductor)
+        self.assertIn("_etiqueta_superposicion: Label", self.reproductor)
         self.assertIn("interrupcion_crt.gdshader", self.reproductor)
         self.assertIn("superposicion_tipografica.gdshader", self.reproductor)
         self.assertIn("_configurar_efectos_plano", self.reproductor)
         self.assertIn("_actualizar_textura_superposicion", self.reproductor)
+
+    def test_superposicion_mantiene_un_viewport_renderizable(self):
+        self.assertIn("_vista_superposicion = SubViewport.new()", self.reproductor)
+        self.assertIn("_vista_superposicion.render_target_update_mode = SubViewport.UPDATE_ALWAYS", self.reproductor)
+        self.assertIn("_lienzo.add_child(_vista_superposicion)", self.reproductor)
+        self.assertIn("_vista_superposicion.add_child(_etiqueta_superposicion)", self.reproductor)
+        self.assertIn("_vista_superposicion.size = Vector2i(_lienzo.size)", self.reproductor)
+        self.assertIn("_vista_superposicion.get_texture()", self.reproductor)
 
     def test_reproductor_configures_effects_per_shot(self):
         self.assertIn("interrupcion_crt", self.reproductor)

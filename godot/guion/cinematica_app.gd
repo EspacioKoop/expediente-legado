@@ -62,6 +62,10 @@ var _grano: ColorRect
 var _crt: ColorRect
 ## Superposición tipográfica irregular opt-in: texto "roto" sobre la imagen.
 var _superposicion: ColorRect
+## El viewport vive mientras vive el reproductor: una textura de un viewport
+## local, sin árbol, nunca llega a dibujar el rótulo que consume el shader.
+var _vista_superposicion: SubViewport
+var _etiqueta_superposicion: Label
 var _franja_superior: ColorRect
 var _franja_inferior: ColorRect
 ## Reloj de toda la cinemática, no del plano: las franjas entran al empezar la
@@ -252,23 +256,9 @@ func _configurar_efectos_plano(plano: Dictionary) -> void:
 
 ## Genera una textura con el texto de superposición para el shader.
 func _actualizar_textura_superposicion(texto: String) -> void:
-	var etiqueta := Label.new()
-	etiqueta.theme = EstiloSiga.tema()
-	etiqueta.add_theme_font_size_override("font_size", 42)
-	etiqueta.add_theme_color_override("font_color", EstiloSiga.BLANCO)
-	etiqueta.add_theme_color_override("font_outline_color", EstiloSiga.NEGRO)
-	etiqueta.add_theme_constant_override("outline_size", 3)
-	etiqueta.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	etiqueta.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	etiqueta.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	etiqueta.text = texto
-	etiqueta.size = _lienzo.size
-
-	var viewport := SubViewport.new()
-	viewport.size = _lienzo.size
-	viewport.add_child(etiqueta)
-
-	var textura := viewport.get_texture()
+	_etiqueta_superposicion.text = texto
+	_vista_superposicion.size = Vector2i(_lienzo.size)
+	var textura := _vista_superposicion.get_texture()
 	_superposicion.material.set_shader_parameter("texto_textura", textura)
 
 
@@ -492,6 +482,20 @@ func _montar() -> void:
 	_superposicion.material = material_sup
 	_superposicion.visible = false
 	_lienzo.add_child(_superposicion)
+
+	_vista_superposicion = SubViewport.new()
+	_vista_superposicion.name = "TextoSuperposicion"
+	_vista_superposicion.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	_vista_superposicion.transparent_bg = true
+	_lienzo.add_child(_vista_superposicion)
+
+	_etiqueta_superposicion = _texto(42)
+	_etiqueta_superposicion.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_etiqueta_superposicion.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_etiqueta_superposicion.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_etiqueta_superposicion.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_etiqueta_superposicion.add_theme_constant_override("outline_size", 3)
+	_vista_superposicion.add_child(_etiqueta_superposicion)
 
 	_franja_superior = _franja()
 	_franja_inferior = _franja()
