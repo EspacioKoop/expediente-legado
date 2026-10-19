@@ -162,18 +162,19 @@ CLI moderno `deno deploy` para publicar `siga98-feedback-deno` en producción.
 
 El token puede ser un token de organización de Deno Deploy y solo se inyecta en
 el paso de despliegue. Si falta, el workflow deja un warning y termina sin
-romper el resto del repositorio; el smoke periódico seguirá señalando la deriva.
+romper el resto del repositorio; la vigilancia periódica operativa se realiza
+fuera de este repositorio.
 
 Tras desplegar, si `SIGA98_FEEDBACK_FALLBACK_URL` está configurada, el workflow
 espera hasta un minuto a que `/health` refleje el contrato declarado por
 `main.ts` y lo valida con `scripts/check_deno_production.py`. Esto evita que un
 merge correcto deje silenciosamente producción en una versión antigua.
 
-## Freshness de producción
+## Freshness del despliegue del juego
 
-`.github/workflows/feedback-deno-production-smoke.yml` compara periódicamente el `/health` desplegado con el contrato declarado por `main.ts`. Extrae la versión y las features `agent_*=true` directamente del source, por lo que no hay que mantener otro número de versión en YAML.
+`scripts/check_deno_production.py` valida el contrato declarado en `main.ts` (versión, flags `agent_*`, estado KV y guard de publicación). El workflow de despliegue del juego ejecuta este checker tras `deno deploy --prod`, para no aceptar un despliegue obsoleto.
 
-El smoke corre tras cambios del gateway integrados en `main`, cada seis horas y por `workflow_dispatch`. No corre en pull requests: una PR que sube la versión no debe fallar solo porque producción todavía sirve la versión anterior antes del merge. Tras integrar el cambio, el check falla hasta que se haga `deno deploy --prod`, dejando visible la deriva que antes aparecía como 404 silencioso en los agentes.
+La **vigilancia periódica del servicio ya instalado** es una tarea operativa y se realiza fuera de este repositorio público. Esta separación no altera la API F9 ni la validación de una nueva versión del juego.
 
 ## Healthcheck
 
