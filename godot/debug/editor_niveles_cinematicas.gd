@@ -3,6 +3,8 @@ extends Window
 
 const CONTRATO := preload("res://debug/editor_niveles_cinematicas_contrato.gd")
 const ESTILO_SIGA := preload("res://guion/estilo_siga.gd")
+const ESPACIOS_CATALOGO := preload("res://guion/espacios_catalogo.gd")
+const EDITOR_CATALOGO := preload("res://debug/editor_niveles_cinematicas_catalogo.gd")
 
 const TIPOS_DOC := ["nivel", "cinematica"]
 const TIPOS_PLANO := ["3d", "2d"]
@@ -34,6 +36,7 @@ var _colocacion_esc_x: SpinBox
 var _colocacion_esc_y: SpinBox
 var _colocacion_esc_z: SpinBox
 var _colocacion_extra: TextEdit
+var _biblioteca_mueble: OptionButton
 
 var _plano_tipo: OptionButton
 var _plano_segundos: SpinBox
@@ -225,6 +228,7 @@ func _al_cambiar_tipo(_idx: int) -> void:
 
 func _al_cambiar_metadatos(_valor: Variant) -> void:
 	_refrescar_diagnostico()
+	_actualizar_previsualizacion()
 
 
 func _tipo_actual() -> String:
@@ -280,7 +284,10 @@ func _actualizar_previsualizacion() -> void:
 	if not is_instance_valid(_vista):
 		return
 	if _tipo_actual() == "nivel":
-		_vista.cargar_colocaciones(_doc_actual.get("colocaciones", []))
+		var fase := _fase.get_item_text(_fase.selected) if _fase.item_count > 0 else "archivo"
+		_vista.mostrar_nivel(
+			ESPACIOS_CATALOGO.POR_FASE.get(fase, {}), _doc_actual.get("colocaciones", [])
+		)
 		return
 	var muestra: Dictionary = _timeline.muestra_actual()
 	_al_cambiar_tiempo(int(muestra["indice"]), float(muestra["avance"]))
@@ -289,29 +296,35 @@ func _actualizar_previsualizacion() -> void:
 func _al_cambiar_tiempo(indice: int, avance: float) -> void:
 	var planos: Array = _doc_actual.get("planos", [])
 	if indice < 0 or indice >= planos.size():
+		_vista.mostrar_decorado({})
 		_vista.mostrar_plano_cinematica({})
 		return
-	_vista.mostrar_plano_cinematica(planos[indice], avance)
+	var plano: Dictionary = planos[indice]
+	_vista.mostrar_decorado(plano.get("decorado", {}))
+	_vista.mostrar_plano_cinematica(plano, avance)
 
 
 func _al_seleccionar_vista(indice: int) -> void:
+	if _tipo_actual() != "nivel":
+		_estado.text = "Objeto del decorado %d seleccionado; arrástralo para moverlo" % indice
+		return
 	_editando_indice = indice
 	_lista.select(indice)
 	_refrescar_detalle()
 
 
 func _al_transformacion_cambiada_vista(indice: int, posicion: Vector3) -> void:
-	if _tipo_actual() != "nivel":
+	var indice_plano := int(_timeline.muestra_actual().get("indice", -1))
+	var resultado := CONTRATO.actualizar_posicion(
+		_doc_actual, _tipo_actual(), indice, indice_plano, posicion
+	)
+	if resultado.is_empty():
 		return
-	var colocaciones: Array = _doc_actual.get("colocaciones", [])
-	if indice < 0 or indice >= colocaciones.size():
-		return
-	var colocacion: Dictionary = colocaciones[indice]
-	var transform: Dictionary = colocacion.get("transform", {})
-	transform["posicion"] = [posicion.x, posicion.y, posicion.z]
-	colocacion["transform"] = transform
-	colocaciones[indice] = colocacion
-	_refrescar_lista()
+	if _tipo_actual() == "nivel":
+		_refrescar_lista()
+	else:
+		if _editando_indice == indice_plano and is_instance_valid(_plano_decorado):
+			_plano_decorado.text = JSON.stringify(resultado["decorado"], "  ")
 	_refrescar_diagnostico()
 
 
@@ -342,6 +355,10 @@ func _refrescar_detalle() -> void:
 
 func _montar_detalle_nivel() -> void:
 	_detalle.add_child(_etiqueta("Colocación / Elemento de nivel"))
+	_detalle.add_child(_etiqueta("Biblioteca de muebles del juego:"))
+	var biblioteca := CONTRATO.crear_biblioteca_muebles(_anadir_mueble_catalogado)
+	_biblioteca_mueble = biblioteca["selector"]
+	_detalle.add_child(biblioteca["fila"])
 
 	var c: Dictionary = {}
 	if _editando_indice >= 0:
@@ -514,11 +531,32 @@ func _montar_detalle_cinematica() -> void:
 		var dec_json := JSON.stringify(p.get("decorado", {}), "  ")
 		_plano_decorado.text = dec_json
 		_detalle.add_child(_plano_decorado)
+		_detalle.add_child(_etiqueta("Escenario catalogado para el plano:"))
+		var selector_escenario := EDITOR_CATALOGO.selector_escenario(_plano_decorado, _estado)
+		_detalle.add_child(selector_escenario["fila"])
+		_detalle.add_child(_etiqueta("Objetos del decorado:"))
+		var biblioteca_decorado := EDITOR_CATALOGO.biblioteca_decorado(_plano_decorado, _estado)
+		_biblioteca_mueble = biblioteca_decorado["selector"]
+		_detalle.add_child(biblioteca_decorado["fila"])
 
 	var btns := HBoxContainer.new()
 	_detalle.add_child(btns)
 	_boton_accion(btns, "Aplicar", _aplicar_plano)
 	_boton_accion(btns, "Limpiar", _limpiar_detalle_cinematica)
+
+
+func _anadir_mueble_catalogado() -> void:
+	if _biblioteca_mueble == null or _biblioteca_mueble.item_count == 0:
+		return
+	var recurso := _biblioteca_mueble.get_item_text(_biblioteca_mueble.selected)
+	_editando_indice = CONTRATO.agregar_mueble_a_nivel(_doc_actual, recurso)
+	if _editando_indice < 0:
+		return
+	_refrescar_lista()
+	_lista.select(_editando_indice)
+	_refrescar_detalle()
+	_refrescar_diagnostico()
+	_estado.text = "Mueble catalogado añadido; ajusta su transformación y guarda"
 
 
 func _aplicar_colocacion() -> void:
