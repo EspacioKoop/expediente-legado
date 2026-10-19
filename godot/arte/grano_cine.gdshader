@@ -27,9 +27,9 @@ float ruido_octavas(vec2 p, float t) {
 
 void fragment() {
 	float t = quieto ? 0.0 : (no_estroboscopico ? TIME : floor(TIME * 24.0));
-	float ruido = no_estroboscopico 
-        ? ruido_octavas(FRAGCOORD.xy * 0.01, t) 
-        : azar(FRAGCOORD.xy + t) - 0.5;
+	float ruido = no_estroboscopico
+		? ruido_octavas(FRAGCOORD.xy * 0.01, t)
+		: azar(FRAGCOORD.xy + t) - 0.5;
 	vec2 centro = UV - 0.5;
 	float borde = smoothstep(0.35, 0.85, length(centro * vec2(1.0, 0.8)));
 	float oscuro = borde * vineta;
