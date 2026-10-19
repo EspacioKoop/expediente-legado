@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Shader" path="res://arte/sueno_fotorrealista/material_microdetalle.gdshader" id="1_shader"]
 
@@ -24,12 +24,23 @@ shader_parameter/micro_scale = 52.0
 
 [sub_resource type="ShaderMaterial" id="Humedad"]
 shader = ExtResource("1_shader")
-shader_parameter/albedo_base = Color(0.085, 0.105, 0.10, 1)
+shader_parameter/albedo_base = Color(0.10, 0.12, 0.115, 1)
 shader_parameter/metallic_amount = 0.0
-shader_parameter/roughness_base = 0.06
+shader_parameter/roughness_base = 0.14
 shader_parameter/grime_strength = 0.05
 shader_parameter/wetness = 1.0
 shader_parameter/micro_scale = 64.0
+
+[sub_resource type="ShaderMaterial" id="BrilloFosforo"]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_base = Color(0.015, 0.035, 0.032, 1)
+shader_parameter/metallic_amount = 0.0
+shader_parameter/roughness_base = 0.40
+shader_parameter/grime_strength = 0.05
+shader_parameter/wetness = 0.0
+shader_parameter/emission_color = Color(0.09, 0.26, 0.23, 1)
+shader_parameter/emission_energy = 0.75
+shader_parameter/micro_scale = 40.0
 
 [sub_resource type="ShaderMaterial" id="Goma"]
 shader = ExtResource("1_shader")
@@ -39,10 +50,19 @@ shader_parameter/roughness_base = 0.88
 shader_parameter/grime_strength = 0.18
 
 [sub_resource type="BoxMesh" id="Carcasa"]
-size = Vector3(0.88, 0.72, 0.58)
+size = Vector3(0.88, 0.72, 0.60)
+
+[sub_resource type="BoxMesh" id="Tubo"]
+size = Vector3(0.60, 0.44, 0.26)
+
+[sub_resource type="BoxMesh" id="TuboPunta"]
+size = Vector3(0.44, 0.30, 0.14)
 
 [sub_resource type="BoxMesh" id="Pantalla"]
 size = Vector3(0.64, 0.45, 0.035)
+
+[sub_resource type="BoxMesh" id="Fosforo"]
+size = Vector3(0.56, 0.38, 0.002)
 
 [sub_resource type="BoxMesh" id="MarcoH"]
 size = Vector3(0.71, 0.045, 0.055)
@@ -62,6 +82,12 @@ size = Vector3(0.42, 0.018, 0.018)
 [sub_resource type="BoxMesh" id="Gota"]
 size = Vector3(0.018, 0.10, 0.009)
 
+[sub_resource type="SphereMesh" id="Perla"]
+radius = 0.009
+height = 0.018
+radial_segments = 12
+rings = 6
+
 [sub_resource type="BoxMesh" id="Pata"]
 size = Vector3(0.10, 0.04, 0.42)
 
@@ -71,14 +97,29 @@ metadata/uso = "sueno"
 metadata/issue = 87
 
 [node name="Carcasa" type="MeshInstance3D" parent="."]
-position = Vector3(0, 0.40, 0)
+position = Vector3(0, 0.40, -0.01)
 mesh = SubResource("Carcasa")
+material_override = SubResource("Plastico")
+
+[node name="VolumenTrasero" type="MeshInstance3D" parent="."]
+position = Vector3(-0.055, 0.36, 0.40)
+mesh = SubResource("Tubo")
+material_override = SubResource("Plastico")
+
+[node name="VolumenTraseroPunta" type="MeshInstance3D" parent="."]
+position = Vector3(-0.055, 0.36, 0.545)
+mesh = SubResource("TuboPunta")
 material_override = SubResource("Plastico")
 
 [node name="Pantalla" type="MeshInstance3D" parent="."]
 position = Vector3(-0.055, 0.43, -0.308)
 mesh = SubResource("Pantalla")
 material_override = SubResource("Cristal")
+
+[node name="CaraFosforo" type="MeshInstance3D" parent="."]
+position = Vector3(-0.055, 0.43, -0.327)
+mesh = SubResource("Fosforo")
+material_override = SubResource("BrilloFosforo")
 
 [node name="MarcoSuperior" type="MeshInstance3D" parent="."]
 position = Vector3(-0.055, 0.685, -0.33)
@@ -110,6 +151,21 @@ material_override = SubResource("Goma")
 position = Vector3(0.355, 0.37, -0.345)
 rotation = Vector3(1.5708, 0, 0)
 mesh = SubResource("Mando")
+material_override = SubResource("Goma")
+
+[node name="RejillaAltavoz1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.055, 0.115, -0.316)
+mesh = SubResource("Ranura")
+material_override = SubResource("Goma")
+
+[node name="RejillaAltavoz2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.055, 0.092, -0.316)
+mesh = SubResource("Ranura")
+material_override = SubResource("Goma")
+
+[node name="RejillaAltavoz3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.055, 0.069, -0.316)
+mesh = SubResource("Ranura")
 material_override = SubResource("Goma")
 
 [node name="Ranura1" type="MeshInstance3D" parent="."]
@@ -156,6 +212,25 @@ position = Vector3(0.19, 0.52, -0.328)
 rotation = Vector3(0, 0, -0.03)
 scale = Vector3(0.65, 0.88, 1)
 mesh = SubResource("Gota")
+material_override = SubResource("Humedad")
+
+[node name="Condensacion4" type="MeshInstance3D" parent="."]
+position = Vector3(-0.15, 0.585, -0.328)
+rotation = Vector3(0, 0, 0.07)
+scale = Vector3(0.8, 1.05, 1)
+mesh = SubResource("Gota")
+material_override = SubResource("Humedad")
+
+[node name="Condensacion5" type="MeshInstance3D" parent="."]
+position = Vector3(0.13, 0.30, -0.33)
+scale = Vector3(1, 0.6, 0.65)
+mesh = SubResource("Perla")
+material_override = SubResource("Humedad")
+
+[node name="Condensacion6" type="MeshInstance3D" parent="."]
+position = Vector3(-0.02, 0.57, -0.33)
+scale = Vector3(0.85, 0.5, 0.6)
+mesh = SubResource("Perla")
 material_override = SubResource("Humedad")
 
 [node name="AnclaInteraccion" type="Marker3D" parent="."]
