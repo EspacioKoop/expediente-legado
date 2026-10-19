@@ -19,6 +19,7 @@ var _estado: Label
 var _doc_actual: Dictionary = {}
 var _editando_indice: int = -1
 var _vista: SubViewportContainer
+var _timeline: HBoxContainer
 
 var _colocacion_tipo: OptionButton
 var _colocacion_id: LineEdit
@@ -172,6 +173,10 @@ func _montar() -> void:
 	izq.add_child(
 		_etiqueta("Línea de tiempo / elementos (selecciona un plano para previsualizarlo):")
 	)
+	_timeline = load("res://debug/editor_niveles_cinematicas_timeline.gd").new()
+	_timeline.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_timeline.muestra_cambiada.connect(_al_cambiar_tiempo)
+	izq.add_child(_timeline)
 	_lista = ItemList.new()
 	_lista.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_lista.item_selected.connect(_al_seleccionar)
@@ -265,6 +270,9 @@ func _refrescar_lista() -> void:
 			if not rot.is_empty():
 				txt += " — %s" % rot
 			_lista.add_item(txt)
+	_timeline.configurar(
+		_doc_actual.get("planos", []) if tipo == "cinematica" else [], tipo == "cinematica"
+	)
 	_actualizar_previsualizacion()
 
 
@@ -274,9 +282,16 @@ func _actualizar_previsualizacion() -> void:
 	if _tipo_actual() == "nivel":
 		_vista.cargar_colocaciones(_doc_actual.get("colocaciones", []))
 		return
+	var muestra: Dictionary = _timeline.muestra_actual()
+	_al_cambiar_tiempo(int(muestra["indice"]), float(muestra["avance"]))
+
+
+func _al_cambiar_tiempo(indice: int, avance: float) -> void:
 	var planos: Array = _doc_actual.get("planos", [])
-	if _editando_indice >= 0 and _editando_indice < planos.size():
-		_vista.mostrar_plano_cinematica(planos[_editando_indice])
+	if indice < 0 or indice >= planos.size():
+		_vista.mostrar_plano_cinematica({})
+		return
+	_vista.mostrar_plano_cinematica(planos[indice], avance)
 
 
 func _al_seleccionar_vista(indice: int) -> void:
@@ -303,13 +318,14 @@ func _al_transformacion_cambiada_vista(indice: int, posicion: Vector3) -> void:
 func _al_seleccionar(idx: int) -> void:
 	_editando_indice = idx
 	_refrescar_detalle()
-	_actualizar_previsualizacion()
+	if _tipo_actual() == "cinematica":
+		_timeline.seleccionar_plano(idx)
+	else:
+		_actualizar_previsualizacion()
 
 
 func _al_activar_item(idx: int) -> void:
-	_editando_indice = idx
-	_refrescar_detalle()
-	_actualizar_previsualizacion()
+	_al_seleccionar(idx)
 
 
 func _refrescar_detalle() -> void:

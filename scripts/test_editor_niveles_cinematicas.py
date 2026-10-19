@@ -644,7 +644,15 @@ func _probar():
     editor.call("_nuevo")
     var cine = {
         "tipo": "cinematica", "id": id, "version": "1",
-        "planos": [{"tipo": "3d", "segundos": 2.0, "camara": [4.5, 2.0, 8.0], "mira": [0, 1, 0]}]
+        "planos": [
+            {
+                "tipo": "3d", "segundos": 2.0,
+                "camara_desde": [0.0, 2.0, 8.0], "camara": [4.5, 2.0, 8.0],
+                "mira_desde": [0.0, 1.0, 0.0], "mira": [1.0, 1.0, 0.0],
+                "fov": 45.0
+            },
+            {"tipo": "3d", "segundos": 1.0, "camara": [0, 2, 3], "mira": [0, 1, 0]}
+        ]
     }
     editor.get("_id").text = id
     editor.set("_doc_actual", cine)
@@ -688,14 +696,61 @@ func _probar():
         quit(1)
         return
     var camara_preview = vista.get_child(0).get_node("EscenaAutoría/CamaraEditor")
-    if not is_equal_approx(camara_preview.position.x, 4.5):
-        push_error("Seleccionar el plano no actualizó la cámara del viewport")
+    if not is_equal_approx(camara_preview.position.x, 0.0):
+        push_error("El inicio del plano no respeta camara_desde")
         quit(1)
         return
+    if not is_equal_approx(camara_preview.fov, 45.0):
+        push_error("La previsualización no respeta el FOV del plano")
+        quit(1)
+        return
+    var timeline = editor.get("_timeline")
+    if timeline == null or not timeline is HBoxContainer or timeline.get_child_count() != 3:
+        push_error("El editor no montó controles de timeline con playhead")
+        quit(1)
+        return
+    if not is_equal_approx(timeline.call("duracion_total"), 3.0):
+        push_error("El scrub no suma la duración de todos los planos")
+        quit(1)
+        return
+    var muestra = timeline.call("muestra_en", 2.0)
+    if muestra.get("indice", -1) != 1 or not is_equal_approx(muestra.get("avance", -1.0), 0.0):
+        push_error("El límite temporal no selecciona el siguiente plano")
+        quit(1)
+        return
+    editor.call("_al_seleccionar", 1)
+    if not is_equal_approx(timeline.call("tiempo_actual"), 2.0):
+        push_error("Seleccionar un plano no lleva el playhead a su inicio")
+        quit(1)
+        return
+    editor.call("_al_seleccionar", 0)
+    timeline.call("_establecer_tiempo", 1.0)
+    if not is_equal_approx(camara_preview.position.x, 2.25):
+        push_error("El scrub no interpola la cámara suavemente")
+        quit(1)
+        return
+    var marcador_mira = vista.get_child(0).get_node("EscenaAutoría/MiraCinematica")
+    if not is_equal_approx(marcador_mira.position.x, 0.5):
+        push_error("El scrub no interpola el punto de mira")
+        quit(1)
+        return
+    timeline.call("_establecer_tiempo", 2.0)
+    timeline.call("alternar_reproduccion")
+    timeline.call("_process", 0.5)
+    if not is_equal_approx(timeline.call("tiempo_actual"), 2.5):
+        push_error("La reproducción no avanza el tiempo del timeline")
+        quit(1)
+        return
+    timeline.call("alternar_reproduccion")
     editor.set("_editando_indice", 0)
     editor.call("_aplicar_plano")
-    if editor.get("_doc_actual")["planos"][0].has("camara_desde"):
-        push_error("Editar un plano agregó una trayectoria opcional ausente")
+    var plano_guardado = editor.get("_doc_actual")["planos"][0]
+    if plano_guardado.get("camara_desde", [])[0] != 0.0:
+        push_error("Aplicar el plano perdió su posición inicial de cámara")
+        quit(1)
+        return
+    if plano_guardado.get("mira_desde", [])[0] != 0.0:
+        push_error("Aplicar el plano perdió su posición inicial de mira")
         quit(1)
         return
 
