@@ -1,0 +1,11 @@
+{
+  "assets": {
+    "intruso": {
+      "name": "Asset Intruso",
+      "description": "Asset intruso cargado en fase 4",
+      "path": "intruso/",
+      "phase": 4,
+      "type": "asset"
+    }
+  }
+}
