@@ -13,6 +13,7 @@ const SELLO_DESPERTAR_REGLAMENTARIO := "despertar-reglamentario"
 const DIA_ESPACIOS_APP = preload("res://guion/dia_espacios_app.gd")
 const DIA_TRANSICION_APP = preload("res://guion/dia_transicion_app.gd")
 const DIA_EXPEDIENTE_APP = preload("res://guion/dia_expediente_app.gd")
+const DIA_LITERATURA_APP = preload("res://guion/dia_literatura_app.gd")
 
 var partida := Partida.new()
 var contenido := Contenido.new()
@@ -319,27 +320,14 @@ func _espacio_de(fase: String) -> Dictionary:
 	return Entrada49Sueno.aplicar(espacio_sueno, partida.estado, cual)
 
 
-## #1182: el autoload literario es una dependencia opcional de presentacion.
-## Los capturadores/gates cargan Dia como script aislado y no siempre registran
-## autoloads del proyecto; por eso no se referencia el identificador global en
-## tiempo de compilacion. Sin gestor disponible, el consumidor recibe un
-## registro vacio y conserva exactamente el sueño base.
+## #1182 / #1761: DiaApp conserva los hooks heredables; el adaptador
+## encapsula la dependencia opcional de GestorLiteratura.
 func _vincular_literatura_partida() -> void:
-	if not is_inside_tree():
-		return
-	var gestor := get_node_or_null("/root/GestorLiteratura")
-	if gestor != null and gestor.has_method("vincular_a_estado"):
-		gestor.call("vincular_a_estado", partida.estado)
+	DIA_LITERATURA_APP.vincular_partida(self, partida.estado)
 
 
 func _registro_literario_para_sueno() -> Dictionary:
-	if not is_inside_tree():
-		return {}
-	var gestor := get_node_or_null("/root/GestorLiteratura")
-	if gestor == null or not gestor.has_method("obtener_registro_literario"):
-		return {}
-	var registro = gestor.call("obtener_registro_literario")
-	return registro if typeof(registro) == TYPE_DICTIONARY else {}
+	return DIA_LITERATURA_APP.registro_para_sueno(self)
 
 
 ## El coste inesperado se cuenta al cerrar el día, sin abrir otro HUD ni otro
