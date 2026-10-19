@@ -22,14 +22,14 @@ shader_parameter/micro_scale = 34.0
 
 [sub_resource type="ShaderMaterial" id="Reflejo"]
 shader = ExtResource("1_shader")
-shader_parameter/albedo_base = Color(0.08, 0.095, 0.10, 1)
-shader_parameter/metallic_amount = 0.62
-shader_parameter/roughness_base = 0.12
-shader_parameter/grime_strength = 0.08
-shader_parameter/wetness = 0.86
-shader_parameter/emission_color = Color(0.025, 0.05, 0.06, 1)
-shader_parameter/emission_energy = 0.22
-shader_parameter/micro_scale = 46.0
+shader_parameter/albedo_base = Color(0.04, 0.045, 0.05, 1)
+shader_parameter/metallic_amount = 0.70
+shader_parameter/roughness_base = 0.08
+shader_parameter/grime_strength = 0.12
+shader_parameter/wetness = 0.92
+shader_parameter/emission_color = Color(0.015, 0.025, 0.035, 1)
+shader_parameter/emission_energy = 0.18
+shader_parameter/micro_scale = 52.0
 
 [sub_resource type="BoxMesh" id="Asiento"]
 size = Vector3(0.48, 0.10, 0.46)
