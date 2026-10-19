@@ -86,6 +86,13 @@ static func hacer(jornada: Dictionary) -> Dictionary:
 	var tipo := String(oferta["id"])
 	por_tipo[tipo] = int(por_tipo.get(tipo, 0)) + 1
 
+	# Calcular coste real de sueño para aviso determinista.
+	# Sueno.ESCENAS_POR_NOCHE = 3, así que el tope es 2 escenas perdidas.
+	var racha_actual := int(estado["racha"])
+	var escenas_perdidas := ESCENAS_SUENO_PERDIDAS
+	if racha_actual >= 2:
+		escenas_perdidas = ESCENAS_SUENO_PERDIDAS_RACHA
+
 	jornada["dinero"] = int(jornada.get("dinero", 0)) + PAGO_TRABAJILLO
 	return {
 		"dia": dia,
@@ -97,6 +104,7 @@ static func hacer(jornada: Dictionary) -> Dictionary:
 		"hechos": estado["hechos"],
 		"racha": estado["racha"],
 		"racha_maxima": estado["racha_maxima"],
+		"escenas_perdidas": escenas_perdidas,
 	}
 
 
