@@ -663,6 +663,20 @@ func _probar():
         push_error("Roundtrip de nivel perdió la posición: %s; estado %s; doc %s" % [editor.get("_colocacion_pos_x").value, editor.get("_estado").text, editor.get("_doc_actual")])
         quit(1)
         return
+    var vista = editor.get("_vista")
+    if vista == null or vista.get_child_count() == 0 or not vista.get_child(0) is SubViewport:
+        push_error("El editor no montó un SubViewport 3D real")
+        quit(1)
+        return
+    if not is_equal_approx(vista.posicion_colocacion(0).x, 1.25):
+        push_error("La colocación no aparece en la posición del documento dentro del viewport")
+        quit(1)
+        return
+    vista.transformacion_cambiada.emit(0, Vector3(2.25, 2.5, -3.75))
+    if not is_equal_approx(editor.get("_doc_actual")["colocaciones"][0]["transform"]["posicion"][0], 2.25):
+        push_error("Mover una colocación en el viewport no actualiza el documento")
+        quit(1)
+        return
 
     editor.get("_tipo_doc").select(1)
     editor.get("_id").text = id
@@ -671,6 +685,11 @@ func _probar():
     await process_frame
     if editor.get("_plano_camara_x").value != 4.5:
         push_error("Roundtrip de cinemática perdió la cámara")
+        quit(1)
+        return
+    var camara_preview = vista.get_child(0).get_node("EscenaAutoría/CamaraEditor")
+    if not is_equal_approx(camara_preview.position.x, 4.5):
+        push_error("Seleccionar el plano no actualizó la cámara del viewport")
         quit(1)
         return
     editor.set("_editando_indice", 0)

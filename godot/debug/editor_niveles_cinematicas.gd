@@ -18,6 +18,7 @@ var _diagnostico: Label
 var _estado: Label
 var _doc_actual: Dictionary = {}
 var _editando_indice: int = -1
+var _vista: SubViewportContainer
 
 var _colocacion_tipo: OptionButton
 var _colocacion_id: LineEdit
@@ -145,19 +146,32 @@ func _montar() -> void:
 	_fase.item_selected.connect(_al_cambiar_metadatos)
 	cabecera.add_child(_fase)
 
-	# Divisor principal: lista a la izquierda, detalle a la derecha
+	# El viewport real ocupa la mitad izquierda; lista y propiedades quedan a la derecha.
 	var division := HSplitContainer.new()
 	division.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	division.split_offset = 500
+	division.split_offset = 820
 	raiz.add_child(division)
 
-	# Lado izquierdo: lista de elementos
-	var izq := VBoxContainer.new()
-	izq.custom_minimum_size.x = 450
-	izq.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	division.add_child(izq)
+	_vista = load("res://debug/editor_niveles_cinematicas_vista.gd").new()
+	_vista.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_vista.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_vista.custom_minimum_size = Vector2(640, 420)
+	_vista.colocacion_seleccionada.connect(_al_seleccionar_vista)
+	_vista.transformacion_cambiada.connect(_al_transformacion_cambiada_vista)
+	division.add_child(_vista)
 
-	izq.add_child(_etiqueta("Elementos (doble clic para editar):"))
+	var panel := VSplitContainer.new()
+	panel.custom_minimum_size.x = 440
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	division.add_child(panel)
+
+	var izq := VBoxContainer.new()
+	izq.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	panel.add_child(izq)
+	izq.add_child(
+		_etiqueta("Línea de tiempo / elementos (selecciona un plano para previsualizarlo):")
+	)
 	_lista = ItemList.new()
 	_lista.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_lista.item_selected.connect(_al_seleccionar)
@@ -172,12 +186,10 @@ func _montar() -> void:
 	_boton_accion(botones_lista, "Subir", _subir_elemento)
 	_boton_accion(botones_lista, "Bajar", _bajar_elemento)
 
-	# Lado derecho: detalle del elemento seleccionado
 	var der := ScrollContainer.new()
 	der.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	der.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	division.add_child(der)
-
+	panel.add_child(der)
 	_detalle = VBoxContainer.new()
 	_detalle.add_theme_constant_override("separation", 6)
 	der.add_child(_detalle)
@@ -253,16 +265,51 @@ func _refrescar_lista() -> void:
 			if not rot.is_empty():
 				txt += " — %s" % rot
 			_lista.add_item(txt)
+	_actualizar_previsualizacion()
+
+
+func _actualizar_previsualizacion() -> void:
+	if not is_instance_valid(_vista):
+		return
+	if _tipo_actual() == "nivel":
+		_vista.cargar_colocaciones(_doc_actual.get("colocaciones", []))
+		return
+	var planos: Array = _doc_actual.get("planos", [])
+	if _editando_indice >= 0 and _editando_indice < planos.size():
+		_vista.mostrar_plano_cinematica(planos[_editando_indice])
+
+
+func _al_seleccionar_vista(indice: int) -> void:
+	_editando_indice = indice
+	_lista.select(indice)
+	_refrescar_detalle()
+
+
+func _al_transformacion_cambiada_vista(indice: int, posicion: Vector3) -> void:
+	if _tipo_actual() != "nivel":
+		return
+	var colocaciones: Array = _doc_actual.get("colocaciones", [])
+	if indice < 0 or indice >= colocaciones.size():
+		return
+	var colocacion: Dictionary = colocaciones[indice]
+	var transform: Dictionary = colocacion.get("transform", {})
+	transform["posicion"] = [posicion.x, posicion.y, posicion.z]
+	colocacion["transform"] = transform
+	colocaciones[indice] = colocacion
+	_refrescar_lista()
+	_refrescar_diagnostico()
 
 
 func _al_seleccionar(idx: int) -> void:
 	_editando_indice = idx
 	_refrescar_detalle()
+	_actualizar_previsualizacion()
 
 
 func _al_activar_item(idx: int) -> void:
 	_editando_indice = idx
 	_refrescar_detalle()
+	_actualizar_previsualizacion()
 
 
 func _refrescar_detalle() -> void:
