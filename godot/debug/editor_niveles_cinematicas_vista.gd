@@ -8,12 +8,18 @@ signal transformacion_cambiada(indice: int, posicion: Vector3)
 const TAMANO_MINIMO := Vector2(640, 420)
 const COLOR_SELECCION := Color(0.95, 0.72, 0.18)
 const LENGUAJE_CINE := preload("res://guion/lenguaje_cine.gd")
+const ESPACIO3D := preload("res://guion/espacio_3d.gd")
+const MODELOS := preload("res://guion/modelos.gd")
+const CONTRATO := preload("res://debug/editor_niveles_cinematicas_contrato.gd")
 
 var _viewport: SubViewport
 var _mundo: Node3D
 var _camara: Camera3D
 var _marcador_mira: MeshInstance3D
 var _nodos_colocacion: Array[Node3D] = []
+var _raiz_escenario: Node3D
+var _huella_escenario := 0
+var _huella_colocaciones := 0
 var _indice_arrastrado := -1
 var _arrastrando := false
 var _plano_arrastre := Plane(Vector3.UP, 0.0)
@@ -107,7 +113,51 @@ func _montar_luces() -> void:
 	_mundo.add_child(luz)
 
 
+func cargar_escenario(escenario: Dictionary) -> void:
+	var huella := hash(escenario)
+	if is_instance_valid(_raiz_escenario) and huella == _huella_escenario:
+		return
+	if is_instance_valid(_raiz_escenario):
+		_raiz_escenario.queue_free()
+	_raiz_escenario = Node3D.new()
+	_raiz_escenario.name = "EscenarioCatalogado"
+	_huella_escenario = huella
+	_mundo.add_child(_raiz_escenario)
+	if not escenario.is_empty():
+		ESPACIO3D.construir(_raiz_escenario, escenario)
+	var suelo_editor := _mundo.get_node_or_null("SueloEditor") as MeshInstance3D
+	var guia_suelo := _mundo.get_node_or_null("GuiaSuelo") as MeshInstance3D
+	if suelo_editor != null:
+		suelo_editor.visible = escenario.is_empty()
+	if guia_suelo != null:
+		guia_suelo.visible = escenario.is_empty()
+
+
+func mostrar_nivel(escenario: Dictionary, colocaciones: Array) -> void:
+	cargar_escenario(escenario)
+	cargar_colocaciones(colocaciones)
+
+
+func mostrar_decorado(decorado: Variant) -> void:
+	var escenario: Dictionary = {}
+	var objetos: Array = []
+	if decorado is Dictionary:
+		escenario = decorado.duplicate(true)
+		var bultos: Variant = escenario.get("bultos", [])
+		if bultos is Array:
+			objetos = bultos
+		escenario.erase("bultos")
+	cargar_escenario(CONTRATO.espacio_para_vista(escenario))
+	cargar_colocaciones(objetos)
+
+
 func cargar_colocaciones(colocaciones: Array) -> void:
+	if _arrastrando:
+		return
+	var huella := hash(colocaciones)
+	if huella == _huella_colocaciones and not _nodos_colocacion.is_empty():
+		return
+	_huella_colocaciones = huella
 	for nodo in _nodos_colocacion:
 		if is_instance_valid(nodo):
 			nodo.queue_free()
@@ -127,21 +177,40 @@ func _crear_representacion(entrada: Dictionary, indice: int) -> Node3D:
 	raiz.set_meta("indice_documento", indice)
 	var transform: Dictionary = entrada.get("transform", {})
 	var posicion: Variant = transform.get(
-		"posicion", [float(indice % 4) * 1.5, 0.5, float(indice / 4) * 1.5]
+		"posicion", entrada.get("pos", [float(indice % 4) * 1.5, 0.5, float(indice / 4) * 1.5])
 	)
 	if posicion is Array and posicion.size() == 3:
 		raiz.position = Vector3(float(posicion[0]), float(posicion[1]), float(posicion[2]))
+	var rotacion: Variant = transform.get("rotacion", entrada.get("rotacion", [0.0, 0.0, 0.0]))
+	if rotacion is Array and rotacion.size() == 3:
+		raiz.rotation_degrees = Vector3(float(rotacion[0]), float(rotacion[1]), float(rotacion[2]))
+	var escala: Variant = transform.get("escala", entrada.get("escala", [1.0, 1.0, 1.0]))
+	if escala is Array and escala.size() == 3:
+		raiz.scale = Vector3(float(escala[0]), float(escala[1]), float(escala[2]))
+
+	var extra: Variant = entrada.get("extra", {})
+	var extra_datos: Dictionary = extra if extra is Dictionary else {}
+	var tam_dato: Variant = extra_datos.get("tam", entrada.get("tam", [2.0, 0.75, 1.0]))
+	var tam := Vector3(2.0, 0.75, 1.0)
+	if tam_dato is Array and tam_dato.size() == 3:
+		tam = Vector3(float(tam_dato[0]), float(tam_dato[1]), float(tam_dato[2]))
+	var recurso := String(entrada.get("recurso", entrada.get("modelo", "")))
+	var es_mueble := MODELOS.MATERIALES_MUEBLE.has(recurso) and MODELOS.hay(recurso)
+	if es_mueble and MODELOS.mueble(raiz, recurso, tam, Color(0.45, 0.44, 0.42)):
+		return raiz
+	if MODELOS.MATERIALES_MUEBLE.has(recurso):
+		push_warning("No se pudo cargar el modelo catalogado '%s'; se muestra una caja" % recurso)
 	var malla := MeshInstance3D.new()
 	malla.name = "Representacion"
 	var cubo := BoxMesh.new()
-	cubo.size = Vector3(1.0, 1.0, 1.0)
+	cubo.size = tam
 	malla.mesh = cubo
 	var material := StandardMaterial3D.new()
 	material.albedo_color = _color_tipo(String(entrada.get("tipo", "")))
 	material.roughness = 0.82
 	malla.material_override = material
 	malla.set_meta("indice_documento", indice)
-	malla.position.y = 0.5
+	malla.position.y = tam.y / 2.0
 	malla.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 	raiz.add_child(malla)
 	return raiz

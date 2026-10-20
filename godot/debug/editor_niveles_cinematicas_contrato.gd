@@ -2,6 +2,7 @@ extends RefCounted
 
 const CATALOGO_ESPACIOS := preload("res://guion/espacios_catalogo.gd")
 const MODELO_CINEMATICA := preload("res://guion/cinematica.gd")
+const MODELOS := preload("res://guion/modelos.gd")
 const FORMATO_NIVEL := "siga98-nivel-v1"
 const FORMATO_CINEMATICA := "siga98-cinematica-v1"
 const TIPOS_RECURSO := [
@@ -58,6 +59,8 @@ static func validar_nivel(datos: Dictionary) -> PackedStringArray:
 				errores.append("colocación %d: id contiene caracteres no válidos" % i)
 			if recurso.is_empty() and tipo != "salida" and tipo != "cartel":
 				errores.append("colocación %d (%s): falta recurso" % [i, tipo])
+			if tipo == "modelo" and not recurso.is_empty() and not MODELOS.hay(recurso):
+				errores.append("colocación %d: falta el recurso de modelo '%s'" % [i, recurso])
 			if c.has("transform"):
 				var transform: Variant = c["transform"]
 				if not transform is Dictionary:
@@ -146,6 +149,30 @@ static func validar_cinematica(datos: Dictionary) -> PackedStringArray:
 									)
 								)
 								break
+		if plano.has("decorado"):
+			var decorado: Variant = plano["decorado"]
+			if not decorado is Dictionary:
+				errores.append("plano %d: decorado debe ser un objeto" % i)
+				continue
+			var bultos: Variant = decorado.get("bultos", [])
+			if not bultos is Array:
+				errores.append("plano %d: decorado.bultos debe ser una lista" % i)
+				continue
+			for j in bultos.size():
+				var bulto: Variant = bultos[j]
+				if not bulto is Dictionary:
+					errores.append("plano %d: decorado.bultos[%d] debe ser un objeto" % [i, j])
+					continue
+				if bulto.has("modelo"):
+					var modelo: Variant = bulto["modelo"]
+					if not modelo is String:
+						errores.append(
+							"plano %d: decorado.bultos[%d].modelo debe ser texto" % [i, j]
+						)
+					elif not String(modelo).is_empty() and not MODELOS.hay(String(modelo)):
+						errores.append(
+							"plano %d: falta el recurso de modelo '%s'" % [i, String(modelo)]
+						)
 	return errores
 
 
@@ -173,6 +200,56 @@ static func vector3_desde(valor: Variant, defecto: Vector3 = Vector3.ZERO) -> Ve
 	return defecto
 
 
+static func color_desde(valor: Variant, defecto: Color = Color.WHITE) -> Color:
+	if valor is Color:
+		return valor
+	if valor is Array and (valor.size() == 3 or valor.size() == 4):
+		var alfa := float(valor[3]) if valor.size() == 4 else 1.0
+		return Color(float(valor[0]), float(valor[1]), float(valor[2]), alfa)
+	return defecto
+
+
+static func espacio_para_vista(espacio: Dictionary) -> Dictionary:
+	var salida := espacio.duplicate(true)
+	for campo in ["suelo", "centro_suelo"]:
+		if salida.has(campo):
+			salida[campo] = vector2_desde(salida[campo])
+	for campo in ["entrada", "deformacion_textura"]:
+		if salida.has(campo):
+			salida[campo] = vector3_desde(salida[campo])
+	for campo in ["color_suelo", "color_techo", "color_muro"]:
+		if salida.has(campo):
+			salida[campo] = color_desde(salida[campo])
+	for campo in ["luces", "ventanas", "salidas"]:
+		var elementos: Variant = salida.get(campo, [])
+		if not elementos is Array:
+			continue
+		for indice in elementos.size():
+			var elemento: Variant = elementos[indice]
+			if not elemento is Dictionary:
+				continue
+			elemento = elemento.duplicate(true)
+			for vector in ["pos", "tam", "rotacion"]:
+				if elemento.has(vector):
+					elemento[vector] = vector3_desde(elemento[vector])
+			if elemento.has("color"):
+				elemento["color"] = color_desde(elemento["color"])
+			elementos[indice] = elemento
+		salida[campo] = elementos
+	for campo in ["cigarros", "sitios_companeros"]:
+		var vectores: Variant = salida.get(campo, [])
+		if vectores is Array:
+			for indice in vectores.size():
+				vectores[indice] = vector3_desde(vectores[indice])
+			salida[campo] = vectores
+	var contorno: Variant = salida.get("contorno", [])
+	if contorno is Array:
+		for indice in contorno.size():
+			contorno[indice] = vector2_desde(contorno[indice])
+			salida["contorno"] = contorno
+	return salida
+
+
 static func vector2_valido(valor: Variant) -> bool:
 	if not valor is Array or valor.size() != 2:
 		return false
@@ -188,6 +265,164 @@ static func vector2_desde(valor: Variant, defecto: Vector2 = Vector2.ZERO) -> Ve
 	if vector2_valido(valor):
 		return Vector2(float(valor[0]), float(valor[1]))
 	return defecto
+
+
+static func serializar_json(valor: Variant) -> Variant:
+	if valor is Vector2:
+		return [valor.x, valor.y]
+	if valor is Vector3:
+		return [valor.x, valor.y, valor.z]
+	if valor is Color:
+		return [valor.r, valor.g, valor.b, valor.a]
+	if valor is Array:
+		var salida: Array = []
+		for elemento in valor:
+			salida.append(serializar_json(elemento))
+		return salida
+	if valor is Dictionary:
+		var salida: Dictionary = {}
+		for clave in valor:
+			salida[clave] = serializar_json(valor[clave])
+		return salida
+	return valor
+
+
+static func escenario_catalogado_json(fase: String) -> Dictionary:
+	var escenario: Variant = CATALOGO_ESPACIOS.POR_FASE.get(fase, {})
+	if not escenario is Dictionary:
+		return {}
+	return serializar_json(escenario)
+
+
+static func crear_biblioteca_muebles(
+	al_agregar: Callable, texto_boton: String = "Añadir al nivel"
+) -> Dictionary:
+	var fila := HBoxContainer.new()
+	var selector := OptionButton.new()
+	var muebles: Array = MODELOS.MATERIALES_MUEBLE.keys()
+	muebles.sort()
+	for nombre in muebles:
+		if MODELOS.hay(String(nombre)):
+			selector.add_item(String(nombre))
+	if selector.item_count == 0:
+		selector.add_item("No hay modelos disponibles")
+		selector.disabled = true
+	fila.add_child(selector)
+	var boton := Button.new()
+	boton.text = texto_boton
+	boton.pressed.connect(al_agregar)
+	boton.disabled = selector.disabled
+	fila.add_child(boton)
+	return {"fila": fila, "selector": selector}
+
+
+static func nuevo_mueble(recurso: String, numero: int) -> Dictionary:
+	var tam := Vector3(1.0, 1.0, 1.0)
+	match recurso:
+		"desk":
+			tam = Vector3(2.0, 0.75, 1.0)
+		"bookcaseClosed":
+			tam = Vector3(1.0, 1.8, 0.6)
+		"computerScreen":
+			tam = Vector3(0.5, 0.45, 0.4)
+		"chairDesk":
+			tam = Vector3(0.74, 1.14, 0.74)
+		"trashcan":
+			tam = Vector3(0.34, 0.45, 0.34)
+	var posicion := Vector3(0.0, tam.y / 2.0, 0.0)
+	return {
+		"tipo": "modelo",
+		"id": "mueble_%03d" % numero,
+		"recurso": recurso,
+		"origen": "biblioteca_catalogada",
+		"transform":
+		{
+			"posicion": [posicion.x, posicion.y, posicion.z],
+			"rotacion": [0.0, 0.0, 0.0],
+			"escala": [1.0, 1.0, 1.0],
+		},
+		"extra": {"tam": [tam.x, tam.y, tam.z]},
+	}
+
+
+static func nuevo_bulto(recurso: String, numero: int) -> Dictionary:
+	var colocacion := nuevo_mueble(recurso, numero)
+	var transform: Dictionary = colocacion["transform"]
+	var tam: Array = colocacion["extra"]["tam"]
+	return {
+		"id": colocacion["id"],
+		"modelo": recurso,
+		"pos": transform["posicion"],
+		"tam": tam,
+		"color": [0.45, 0.44, 0.42, 1.0],
+	}
+
+
+static func agregar_mueble_a_nivel(datos: Dictionary, recurso: String) -> int:
+	if not MODELOS.MATERIALES_MUEBLE.has(recurso) or not MODELOS.hay(recurso):
+		return -1
+	var colocaciones: Variant = datos.get("colocaciones", [])
+	if not colocaciones is Array:
+		return -1
+	colocaciones.append(nuevo_mueble(recurso, colocaciones.size() + 1))
+	datos["colocaciones"] = colocaciones
+	return colocaciones.size() - 1
+
+
+static func agregar_mueble_a_decorado(texto: String, recurso: String) -> Dictionary:
+	if not MODELOS.MATERIALES_MUEBLE.has(recurso) or not MODELOS.hay(recurso):
+		return {"error": "Modelo fuera de la biblioteca catalogada"}
+	var decorado: Variant = JSON.parse_string(texto) if not texto.strip_edges().is_empty() else {}
+	if not decorado is Dictionary:
+		return {"error": "Decorado: JSON inválido; corrígelo antes de añadir objetos"}
+	var bultos: Variant = decorado.get("bultos", [])
+	if not bultos is Array:
+		return {"error": "Decorado: bultos debe ser una lista"}
+	bultos.append(nuevo_bulto(recurso, bultos.size() + 1))
+	decorado["bultos"] = bultos
+	return {"decorado": decorado, "error": ""}
+
+
+static func actualizar_posicion(
+	datos: Dictionary, tipo: String, indice: int, indice_plano: int, posicion: Vector3
+) -> Dictionary:
+	if tipo == "nivel":
+		var colocaciones: Variant = datos.get("colocaciones", [])
+		if not colocaciones is Array or indice < 0 or indice >= colocaciones.size():
+			return {}
+		var colocacion: Variant = colocaciones[indice]
+		if not colocacion is Dictionary:
+			return {}
+		var transform: Variant = colocacion.get("transform", {})
+		if not transform is Dictionary:
+			transform = {}
+		transform["posicion"] = [posicion.x, posicion.y, posicion.z]
+		colocacion["transform"] = transform
+		colocaciones[indice] = colocacion
+		datos["colocaciones"] = colocaciones
+		return {"tipo": "nivel", "ok": true}
+	var planos: Variant = datos.get("planos", [])
+	if not planos is Array or indice_plano < 0 or indice_plano >= planos.size():
+		return {}
+	var plano: Variant = planos[indice_plano]
+	if not plano is Dictionary:
+		return {}
+	var decorado: Variant = plano.get("decorado", {})
+	if not decorado is Dictionary:
+		return {}
+	var bultos: Variant = decorado.get("bultos", [])
+	if not bultos is Array or indice < 0 or indice >= bultos.size():
+		return {}
+	var bulto: Variant = bultos[indice]
+	if not bulto is Dictionary:
+		return {}
+	bulto["pos"] = [posicion.x, posicion.y, posicion.z]
+	bultos[indice] = bulto
+	decorado["bultos"] = bultos
+	plano["decorado"] = decorado
+	planos[indice_plano] = plano
+	datos["planos"] = planos
+	return {"tipo": "cinematica", "ok": true, "indice_plano": indice_plano, "decorado": decorado}
 
 
 static func paquete_nivel(datos: Dictionary) -> Dictionary:

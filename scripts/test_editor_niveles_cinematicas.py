@@ -44,6 +44,7 @@ func _init():
         "fase": "archivo",
         "colocaciones": [
             {"tipo": "bulto", "id": "mesa-1", "recurso": "desk", "transform": {"posicion": [0,0,0], "rotacion": [0,0,0], "escala": [1,1,1]}},
+            {"tipo": "modelo", "id": "caja-catalogada", "recurso": "cardboardBoxClosed", "origen": "catalogo", "transform": {"posicion": [0,0,0], "rotacion": [0,0,0], "escala": [1,1,1]}},
             {"tipo": "salida", "id": "puerta-1", "recurso": "", "transform": {"posicion": [5,0,0], "rotacion": [0,0,0], "escala": [1,1,1]}, "extra": {"destino": "trayecto", "rotulo": "SALIDA"}}
         ]
     }
@@ -109,6 +110,17 @@ func _init():
         print("ERROR: Debe fallar por ID con ruta")
         quit(1)
 
+    # Un modelo inexistente debe seguir rechazándose
+    var nivel6 = {"tipo": "nivel", "id": "test", "version": "1", "fase": "archivo", "colocaciones": [{"tipo": "modelo", "id": "fantasma", "recurso": "__modelo_inexistente__", "origen": "catalogo"}]}
+    var e6 = editor.validar_nivel(nivel6)
+    var modelo_rechazado = false
+    for error in e6:
+        if "falta el recurso de modelo" in error:
+            modelo_rechazado = true
+    if not modelo_rechazado:
+        print("ERROR: Debe fallar por modelo inexistente")
+        quit(1)
+
     print("OK: validaciones de nivel inválido pasan")
     quit(0)
 '''
@@ -140,6 +152,7 @@ func _init():
             {"tipo": "2d", "segundos": 1.0, "rotulo": "SELLO", "figura": [{"rect": {"x": -1, "y": -1, "width": 2, "height": 2}, "color": [1,1,1,1]}], "desde": [0,0], "hasta": [10,0]}
         ]
     }
+    cine["planos"][0]["decorado"] = load("res://debug/editor_niveles_cinematicas_contrato.gd").escenario_catalogado_json("archivo")
     var errores = editor.validar_cinematica(cine)
     if errores.size() > 0:
         print("ERROR: " + ", ".join(errores))
@@ -194,6 +207,18 @@ func _init():
     if e4.size() == 0 or not "2d sin figura" in e4[0]:
         print("ERROR: Debe fallar por falta figura")
         quit(1)
+
+    # Un decorado no puede guardar referencias a modelos que no existen
+    var c5 = {"tipo": "cinematica", "id": "test", "version": "1", "planos": [{"tipo": "3d", "segundos": 1, "camara": [0,0,0], "mira": [0,0,0], "decorado": {"bultos": [{"modelo": "__modelo_inexistente__"}]}}]}
+    var e5 = editor.validar_cinematica(c5)
+    var referencia_rechazada = false
+    for error in e5:
+        if "falta el recurso de modelo" in error:
+            referencia_rechazada = true
+    if not referencia_rechazada:
+        print("ERROR: Debe rechazar un modelo inexistente en el decorado")
+        quit(1)
+        return
 
     print("OK: validaciones de cinematica inválida pasan")
     quit(0)
@@ -623,6 +648,12 @@ func _probar():
         quit(1)
         return
     var id = "smoke_" + str(Time.get_ticks_usec())
+    var contrato = load("res://debug/editor_niveles_cinematicas_contrato.gd")
+    var decorado_archivo = contrato.escenario_catalogado_json("archivo")
+    if decorado_archivo.is_empty() or not decorado_archivo.get("bultos", [])[0].get("pos") is Array:
+        push_error("El catálogo no produce un decorado serializable para cinemática")
+        quit(1)
+        return
     var ruta_nivel = "user://editor_niveles_cinematicas/%s_nivel.json" % id
     var ruta_cine = "user://editor_niveles_cinematicas/%s_cinematica.json" % id
     var nivel = {
@@ -649,7 +680,8 @@ func _probar():
                 "tipo": "3d", "segundos": 2.0,
                 "camara_desde": [0.0, 2.0, 8.0], "camara": [4.5, 2.0, 8.0],
                 "mira_desde": [0.0, 1.0, 0.0], "mira": [1.0, 1.0, 0.0],
-                "fov": 45.0
+                "fov": 45.0,
+                "decorado": decorado_archivo
             },
             {"tipo": "3d", "segundos": 1.0, "camara": [0, 2, 3], "mira": [0, 1, 0]}
         ]
@@ -659,6 +691,49 @@ func _probar():
     editor.call("_guardar")
     if not FileAccess.file_exists(ruta_cine):
         push_error("No se guardó la cinemática con ID compartido")
+        quit(1)
+        return
+    editor.call("_refrescar_lista")
+    await process_frame
+    var vista_cinematica = editor.get("_vista")
+    var raiz_decorado = vista_cinematica.get("_raiz_escenario")
+    if raiz_decorado == null or raiz_decorado.get_child_count() == 0:
+        push_error("El plano no previsualizó el escenario catalogado serializado")
+        quit(1)
+        return
+    editor.call("_al_seleccionar", 0)
+    var selector_decorado = editor.get("_biblioteca_mueble")
+    if selector_decorado == null or selector_decorado.item_count == 0:
+        push_error("El plano 3D no expone la biblioteca de muebles catalogados")
+        quit(1)
+        return
+    var boton_decorado = selector_decorado.get_parent().get_child(1)
+    var bultos_antes = editor.get("_doc_actual")["planos"][0]["decorado"]["bultos"].size()
+    boton_decorado.pressed.emit()
+    editor.call("_aplicar_plano")
+    var decorado_actual = editor.get("_doc_actual")["planos"][0]["decorado"]
+    if decorado_actual.get("bultos", []).size() != bultos_antes + 1:
+        push_error("Añadir objeto al decorado no se conservó al aplicar el plano")
+        quit(1)
+        return
+    var indice_bulto = decorado_actual["bultos"].size() - 1
+    vista_cinematica.transformacion_cambiada.emit(indice_bulto, Vector3(3.0, 0.375, 2.0))
+    var posicion_bulto = editor.get("_doc_actual")["planos"][0]["decorado"]["bultos"][indice_bulto]["pos"]
+    if not is_equal_approx(posicion_bulto[0], 3.0) or not is_equal_approx(posicion_bulto[2], 2.0):
+        push_error("Mover un objeto del decorado no actualizó los datos serializados")
+        quit(1)
+        return
+    editor.call("_guardar")
+    editor.call("_cargar")
+    var decorado_reabierto: Dictionary = editor.get("_doc_actual")["planos"][0]["decorado"]
+    var bultos_reabiertos: Array = decorado_reabierto.get("bultos", [])
+    if bultos_reabiertos.size() != bultos_antes + 1:
+        push_error("Roundtrip de cinemática perdió el objeto añadido al decorado")
+        quit(1)
+        return
+    var bulto_reabierto: Dictionary = bultos_reabiertos[indice_bulto]
+    if not is_equal_approx(bulto_reabierto["pos"][0], 3.0) or not is_equal_approx(bulto_reabierto["pos"][2], 2.0):
+        push_error("Roundtrip de cinemática perdió la posición del objeto del decorado")
         quit(1)
         return
 
@@ -674,6 +749,27 @@ func _probar():
     var vista = editor.get("_vista")
     if vista == null or vista.get_child_count() == 0 or not vista.get_child(0) is SubViewport:
         push_error("El editor no montó un SubViewport 3D real")
+        quit(1)
+        return
+    var raiz_escenario = vista.get("_raiz_escenario")
+    if raiz_escenario == null or raiz_escenario.get_child_count() == 0:
+        push_error("El viewport no construyó el escenario real del catálogo")
+        quit(1)
+        return
+    var biblioteca = editor.get("_biblioteca_mueble")
+    if biblioteca == null or biblioteca.item_count == 0:
+        push_error("La biblioteca no ofrece los modelos reales existentes")
+        quit(1)
+        return
+    editor.call("_anadir_mueble_catalogado")
+    if editor.get("_doc_actual")["colocaciones"].size() != 2 or editor.get("_doc_actual")["colocaciones"][1].get("tipo") != "modelo":
+        push_error("Añadir mueble no creó una colocación de modelo serializable")
+        quit(1)
+        return
+    editor.call("_guardar")
+    editor.call("_cargar")
+    if editor.get("_doc_actual").get("colocaciones", []).size() != 2:
+        push_error("Roundtrip del nivel perdió el mueble de la biblioteca")
         quit(1)
         return
     if not is_equal_approx(vista.posicion_colocacion(0).x, 1.25):
