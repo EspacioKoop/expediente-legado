@@ -17,8 +17,8 @@ albedo_color = Color(0.22, 0.13, 0.06, 1)
 metallic = 0.18
 roughness = 0.85
 
-[sub_resource type="BoxMesh" id="BoxTablero"]
-size = Vector3(0.7, 0.04, 0.5)
+[sub_resource type="PlaneMesh" id="TableroSuperficie"]
+size = Vector2(0.7, 0.5)
 
 [sub_resource type="CylinderMesh" id="CilindroPata"]
 height = 0.72
@@ -33,7 +33,7 @@ material_override = SubResource("MatMadera")
 
 [node name="Tablero" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.76, 0)
-mesh = SubResource("BoxTablero")
+mesh = SubResource("TableroSuperficie")
 material_override = SubResource("MatTablero")
 
 [node name="PataDelanteraIzq" type="MeshInstance3D" parent="."]
