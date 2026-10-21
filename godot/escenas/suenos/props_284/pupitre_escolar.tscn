@@ -1,14 +1,57 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="ArrayMesh" path="res://escenas/suenos/props_284/pupitre_escolar_psx.obj" id="1_pupitre"]
 
-[sub_resource type="StandardMaterial3D" id="MatPupitre"]
+[sub_resource type="StandardMaterial3D" id="MatMadera"]
 albedo_color = Color(0.30, 0.18, 0.09, 1)
 metallic = 0.12
 roughness = 0.78
 
+[sub_resource type="StandardMaterial3D" id="MatTablero"]
+albedo_color = Color(0.35, 0.22, 0.12, 1)
+metallic = 0.08
+roughness = 0.65
+
+[sub_resource type="StandardMaterial3D" id="MatPatas"]
+albedo_color = Color(0.22, 0.13, 0.06, 1)
+metallic = 0.18
+roughness = 0.85
+
+[sub_resource type="PlaneMesh" id="TableroSuperficie"]
+size = Vector2(0.7, 0.5)
+
+[sub_resource type="CylinderMesh" id="CilindroPata"]
+height = 0.72
+top_radius = 0.035
+bottom_radius = 0.035
+
 [node name="PupitreEscolar" type="Node3D"]
 
-[node name="Malla" type="MeshInstance3D" parent="."]
+[node name="MallaBase" type="MeshInstance3D" parent="."]
 mesh = ExtResource("1_pupitre")
-material_override = SubResource("MatPupitre")
+material_override = SubResource("MatMadera")
+
+[node name="Tablero" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.76, 0)
+mesh = SubResource("TableroSuperficie")
+material_override = SubResource("MatTablero")
+
+[node name="PataDelanteraIzq" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.31, 0.38, -0.21)
+mesh = SubResource("CilindroPata")
+material_override = SubResource("MatPatas")
+
+[node name="PataDelanteraDer" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.31, 0.38, -0.21)
+mesh = SubResource("CilindroPata")
+material_override = SubResource("MatPatas")
+
+[node name="PataTraseraIzq" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.31, 0.38, 0.21)
+mesh = SubResource("CilindroPata")
+material_override = SubResource("MatPatas")
+
+[node name="PataTraseraDer" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.31, 0.38, 0.21)
+mesh = SubResource("CilindroPata")
+material_override = SubResource("MatPatas")
