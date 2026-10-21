@@ -28,10 +28,12 @@ var _portada: Control
 var _boton_jugar: Button
 var _estado: Label
 var _indicador_etapa: Label
+var _boton_menu: Button
 var _sala: Node3D
 var _etapa_activa := ""
 var _sesion: Dictionary = {}
 var _prologos_locales := 0
+var _recompensas_locales: Array[String] = []
 
 
 func _ready() -> void:
@@ -49,6 +51,10 @@ func juego_en_curso() -> bool:
 
 func prologos_locales() -> int:
 	return _prologos_locales
+
+
+func recompensas_locales() -> Array[String]:
+	return _recompensas_locales.duplicate()
 
 
 ## El avance solo vive en la instancia del CD-ROM; no acredita progreso SIGA.
@@ -128,8 +134,10 @@ func _al_finalizar(etapa_id: String) -> void:
 
 	_cerrar_visor()
 	if String(siguiente.get("estado", "")) == CronicasCapituloRutas.ESTADO_TERMINADO:
+		if not _recompensas_locales.has("sello_custodio_siete_registros"):
+			_recompensas_locales.append("sello_custodio_siete_registros")
 		_volver_a_portada(
-			"Capítulo completado. Recompensa del CD-ROM: Sello del Custodio de "
+			"Capítulo completado. Reliquia obtenida: Sello del Custodio de "
 			+ "los Siete Registros. Es ficción: no constituye prueba para SIGA-98."
 		)
 		_boton_jugar.text = "Volver a jugar el capítulo"
@@ -142,6 +150,8 @@ func _volver_a_portada(mensaje: String) -> void:
 	_portada.show()
 	if is_instance_valid(_indicador_etapa):
 		_indicador_etapa.hide()
+	if is_instance_valid(_boton_menu):
+		_boton_menu.hide()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_estado.text = mensaje
 	_boton_jugar.grab_focus.call_deferred()
@@ -190,6 +200,34 @@ func _mostrar_etapa(indice: int, etapa_id: String) -> void:
 		String(NOMBRES_ETAPA.get(etapa_id, etapa_id)),
 	]
 	_indicador_etapa.show()
+	if not is_instance_valid(_boton_menu):
+		_boton_menu = Button.new()
+		_boton_menu.name = "VolverAlMenu"
+		_boton_menu.text = "Volver al menú"
+		_boton_menu.anchor_left = 0.76
+		_boton_menu.anchor_right = 0.97
+		_boton_menu.anchor_top = 0.93
+		_boton_menu.anchor_bottom = 0.99
+		_boton_menu.pressed.connect(_salir_al_menu)
+		add_child(_boton_menu)
+	_boton_menu.show()
+
+
+## Al salir al menú se conserva la última etapa completada, pero se reinicia
+## el desafío actual. Ningún progreso se escribe en los guardados SIGA.
+func _salir_al_menu() -> void:
+	if not juego_en_curso():
+		return
+	var anterior := _sala
+	_sala = null
+	_etapa_activa = ""
+	anterior.queue_free()
+	_cerrar_visor()
+	_volver_a_portada(
+		"Punto de paso local: continuarás desde el comienzo de la sala actual. "
+		+ "Se perderá al cerrar el CD-ROM."
+	)
+	_boton_jugar.text = "Continuar capítulo"
 
 
 ## Minimizar o cerrar OS98 libera el cursor y suspende el duelo local.
