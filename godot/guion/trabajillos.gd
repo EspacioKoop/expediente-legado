@@ -11,6 +11,10 @@ const PAGO_TRABAJILLO := 20
 const ESCENAS_SUENO_PERDIDAS := 1
 const ESCENAS_SUENO_PERDIDAS_RACHA := 2
 
+
+static func _coste_descanso(racha: int) -> int:
+	return ESCENAS_SUENO_PERDIDAS_RACHA if racha >= 2 else ESCENAS_SUENO_PERDIDAS
+
 const TIPOS := [
 	{
 		"id": "transcripcion",
@@ -86,12 +90,8 @@ static func hacer(jornada: Dictionary) -> Dictionary:
 	var tipo := String(oferta["id"])
 	por_tipo[tipo] = int(por_tipo.get(tipo, 0)) + 1
 
-	# Calcular coste real de sueño para aviso determinista.
-	# Sueno.ESCENAS_POR_NOCHE = 3, así que el tope es 2 escenas perdidas.
-	var racha_actual := int(estado["racha"])
-	var escenas_perdidas := ESCENAS_SUENO_PERDIDAS
-	if racha_actual >= 2:
-		escenas_perdidas = ESCENAS_SUENO_PERDIDAS_RACHA
+	# Compartir la regla del coste entre aviso y cálculo efectivo del sueño.
+	var escenas_perdidas := _coste_descanso(int(estado["racha"]))
 
 	jornada["dinero"] = int(jornada.get("dinero", 0)) + PAGO_TRABAJILLO
 	return {
@@ -115,7 +115,5 @@ static func hecho_hoy(jornada: Dictionary) -> bool:
 static func escenas_de_sueno(jornada: Dictionary, cantidad_normal: int) -> int:
 	if not hecho_hoy(jornada):
 		return cantidad_normal
-	var perdidas := ESCENAS_SUENO_PERDIDAS
-	if int(_estado(jornada)["racha"]) >= 2:
-		perdidas = ESCENAS_SUENO_PERDIDAS_RACHA
+	var perdidas := _coste_descanso(int(_estado(jornada)["racha"]))
 	return maxi(1, cantidad_normal - perdidas)
