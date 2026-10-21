@@ -1,33 +1,77 @@
-extends Node2D
+## Corredor estable del Hotel de los Olvidados (#2487).
+##
+## Sin reloj, desplazamiento aleatorio ni estado persistente. El host conserva
+## la responsabilidad sobre la visita y selecciona sus habitaciones.
+extends Node3D
 
-# nodo que sirve como punto de partida y conexión para las habitaciones seleccionadas
-# garantiza que el corredor nunca se deforme y permite abandonar el hotel en cualquier momento
-
-# Signal emitted when the player chooses to leave the hotel
 signal hotel_exited
 
-# Array of NodePaths to the selected rooms. The rooms must connect to this hub when added
 @export var rooms: Array[NodePath] = []
+@export var corridor_stable := true
+@export_range(4.0, 30.0, 0.5) var corridor_length := 12.0
+@export_range(2.0, 6.0, 0.5) var corridor_width := 3.0
 
-# If true, corridors connected to the hub will not deform (static geometry)
-@export var corridor_stable: bool = true
+var _exiting := false
 
 
 func _ready() -> void:
-	# Conecta cada habitación a esta instancia
+	# Geometría y colisión del corredor nacen juntas, sin animaciones.
+	if corridor_stable:
+		_crear_corredor()
 	for room_path in rooms:
-		var room = get_node_or_null(room_path)
+		var room := get_node_or_null(room_path)
 		if room == null:
-			print("HubHotel: ruta de habitación no válida ", room_path)
+			push_warning("Hotel: habitación sin resolver: %s" % room_path)
 			continue
-		# Si la habitación tiene un método de conexión, lo invoquemos
 		if room.has_method("connect_to_hub"):
-			room.connect_to_hub(self)
-		# Si la habitación expone un nodo de corredor, fijamos su estado
+			room.call("connect_to_hub", self)
 		if corridor_stable and room.has_method("set_static"):
-			room.set_static(true)  # evita deformaciones
+			room.call("set_static", true)
 
 
-# Llamada pública para abandonar el hotel
+func _crear_corredor() -> void:
+	# Superficies sólidas: piso, dos muros laterales y remate trasero.
+	var length := maxf(4.0, corridor_length)
+	var width := maxf(2.0, corridor_width)
+	_agregar_tramo("Suelo", Vector3(0, -0.10, 0), Vector3(width, 0.2, length))
+	_agregar_tramo(
+		"MuroIzquierdo", Vector3(-width * 0.5, 1.35, 0), Vector3(0.18, 2.7, length)
+	)
+	_agregar_tramo(
+		"MuroDerecho", Vector3(width * 0.5, 1.35, 0), Vector3(0.18, 2.7, length)
+	)
+	_agregar_tramo(
+		"Fondo", Vector3(0, 1.35, -length * 0.5), Vector3(width, 2.7, 0.18)
+	)
+
+
+func _agregar_tramo(nombre: String, posicion: Vector3, tamano: Vector3) -> void:
+	var solido := StaticBody3D.new()
+	solido.name = nombre
+	solido.position = posicion
+	add_child(solido)
+
+	var colision := CollisionShape3D.new()
+	var forma := BoxShape3D.new()
+	forma.size = tamano
+	colision.shape = forma
+	solido.add_child(colision)
+
+	var aspecto := MeshInstance3D.new()
+	var malla := BoxMesh.new()
+	malla.size = tamano
+	aspecto.mesh = malla
+	solido.add_child(aspecto)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel") and not _exiting:
+		get_viewport().set_input_as_handled()
+		exit_hotel()
+
+
 func exit_hotel() -> void:
-	emit_signal("hotel_exited")
+	if _exiting:
+		return
+	_exiting = true
+	hotel_exited.emit()
