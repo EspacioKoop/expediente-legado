@@ -10,12 +10,6 @@ extends RefCounted
 const PAGO_TRABAJILLO := 20
 const ESCENAS_SUENO_PERDIDAS := 1
 const ESCENAS_SUENO_PERDIDAS_RACHA := 2
-
-
-static func _coste_descanso(racha: int) -> int:
-	return ESCENAS_SUENO_PERDIDAS_RACHA if racha >= 2 else ESCENAS_SUENO_PERDIDAS
-
-
 const TIPOS := [
 	{
 		"id": "transcripcion",
@@ -33,6 +27,10 @@ const TIPOS := [
 		"cobrado": "TRABAJILLO_COBRADO_ENCUESTAS",
 	},
 ]
+
+
+static func _coste_descanso(racha: int) -> int:
+	return ESCENAS_SUENO_PERDIDAS_RACHA if racha >= 2 else ESCENAS_SUENO_PERDIDAS
 
 
 static func _estado(jornada: Dictionary) -> Dictionary:
