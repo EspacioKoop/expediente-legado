@@ -93,6 +93,12 @@ def ejecutar():
             ("importación", ["--editor", "--import", "--quit"], 120, None),
             ("suite", ["--script", "pruebas/pruebas.gd"], 120, minimo),
             (
+                "hotel-olvidados",
+                ["--script", "pruebas/pruebas_hotel_olvidados.gd"],
+                30,
+                48,
+            ),
+            (
                 "senales-multiplayer",
                 ["--script", "pruebas/pruebas_senales_multiplayer.gd"],
                 30,
