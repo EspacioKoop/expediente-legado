@@ -1,9 +1,19 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="ArrayMesh" path="res://escenas/suenos/props_284/muro_arco_castillo_psx.obj" id="1_arco"]
 
 [sub_resource type="StandardMaterial3D" id="MatStone"]
 albedo_color = Color(0.215, 0.205, 0.19, 1)
+roughness = 0.96
+metallic = 0.02
+
+[sub_resource type="StandardMaterial3D" id="MatStoneVariation1"]
+albedo_color = Color(0.235, 0.225, 0.21, 1)
+roughness = 0.96
+metallic = 0.02
+
+[sub_resource type="StandardMaterial3D" id="MatStoneVariation2"]
+albedo_color = Color(0.195, 0.185, 0.17, 1)
 roughness = 0.96
 metallic = 0.02
 
@@ -19,3 +29,23 @@ light_color = Color(0.62, 0.46, 0.31, 1)
 light_energy = 0.42
 omni_range = 4.2
 shadow_enabled = true
+
+[node name="BaseLeft" type="MeshInstance3D" parent="."]
+mesh = ExtResource("1_arco")
+material_override = SubResource("MatStoneVariation1")
+position = Vector3(-6.5, 0, 0)
+
+[node name="BaseRight" type="MeshInstance3D" parent="."]
+mesh = ExtResource("1_arco")
+material_override = SubResource("MatStoneVariation2")
+position = Vector3(6.5, 0, 0)
+
+[node name="TopLeft" type="MeshInstance3D" parent="."]
+mesh = ExtResource("1_arco")
+material_override = SubResource("MatStone")
+position = Vector3(-6.5, 4.15, 0)
+
+[node name="TopRight" type="MeshInstance3D" parent="."]
+mesh = ExtResource("1_arco")
+material_override = SubResource("MatStone")
+position = Vector3(6.5, 4.15, 0)
