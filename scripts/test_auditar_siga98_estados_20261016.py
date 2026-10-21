@@ -3,8 +3,10 @@
 import json
 import tempfile
 import unittest
+import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from auditar_siga98_estados_20261016 import ENTRADA_POR_DEFECTO, auditar, main
 
 
