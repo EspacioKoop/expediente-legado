@@ -12,6 +12,23 @@ const TAM_TERMINAL_INTERACTIVO := Vector3(1.0, 1.2, 0.8)
 const DIALOGO_LITERARIO_1180 := "biblioteca_calderon_apariencia"
 const FUENTE_LITERARIA_1180 := "npc:archivo:mediadora_98"
 const POS_MEDIADORA_LITERARIA_1180 := Vector3(3.55, 0.0, -1.35)
+const REACCIONES_FIRMA_2742 := {
+	"cunado": {
+		"sospechosoIbarra@1": "COMPA_FIRMA_2742_CUNADO_IBARRA",
+		"sospechosoProveedor@1": "COMPA_FIRMA_2742_CUNADO_PROVEEDOR",
+		"sospechosoContraloria@1": "COMPA_FIRMA_2742_CUNADO_CONTRALORIA",
+	},
+	"becario": {
+		"sospechosoIbarra@1": "COMPA_FIRMA_2742_BECARIO_IBARRA",
+		"sospechosoProveedor@1": "COMPA_FIRMA_2742_BECARIO_PROVEEDOR",
+		"sospechosoContraloria@1": "COMPA_FIRMA_2742_BECARIO_CONTRALORIA",
+	},
+	"jubilacion": {
+		"sospechosoIbarra@1": "COMPA_FIRMA_2742_JUBILACION_IBARRA",
+		"sospechosoProveedor@1": "COMPA_FIRMA_2742_JUBILACION_PROVEEDOR",
+		"sospechosoContraloria@1": "COMPA_FIRMA_2742_JUBILACION_CONTRALORIA",
+	},
+}
 var _clima_nodo: Node3D = null
 var _archivado_sesion := ArchivadoSesion3D.new()
 var _hud_prioridades: HUDLayer
@@ -543,6 +560,13 @@ func _clave_conversacion_contextual(
 	if not entrada49.is_empty():
 		return entrada49
 
+	# #2742: el destino de una firma vuelve al mundo mediante NPCs reales.
+	# Se enseña una sola vez por visita a cada compañero, sin repetir el
+	# desenlace del visor ni crear otro estado persistente: manda el veredicto.
+	var consecuencia := _reaccion_a_firma_caso1(companero, actor_id)
+	if not consecuencia.is_empty():
+		return consecuencia
+
 	# #965: el desorden del archivado ya es estado derivado y visible. Se usa
 	# como reacción narrativa antes del fallback horario, sin registrar memoria
 	# social, reputación ni consecuencias nuevas.
@@ -558,6 +582,26 @@ func _clave_conversacion_contextual(
 		return clave_fallback
 	return clave_dialogo
 
+
+## El caso@1 ya guarda a quién se imputó. Su consecuencia conversable se
+## resuelve desde esa firma incluso después de cerrar y reabrir la partida.
+## Las reacciones son puntos de vista de compañeros, no pruebas nuevas.
+func _reaccion_a_firma_caso1(
+	companero: CompaneroInteractivo3D, actor_id: String
+) -> String:
+	if jornada.get("fase", "") != "archivo":
+		return ""
+	if bool(companero.get_meta("firma_caso1_2742_mostrada", false)):
+		return ""
+	var variantes: Dictionary = REACCIONES_FIRMA_2742.get(actor_id, {})
+	if variantes.is_empty():
+		return ""
+	var firmado := Acusacion.veredicto_de(partida.estado, "caso@1")
+	var clave := String(variantes.get(firmado, ""))
+	if clave.is_empty():
+		return ""
+	companero.set_meta("firma_caso1_2742_mostrada", true)
+	return clave
 
 func _al_cerrar_dialogo() -> void:
 	_caminante.terminar_enfoque_conversacion()
