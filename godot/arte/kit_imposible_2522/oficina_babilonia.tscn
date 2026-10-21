@@ -1,0 +1,468 @@
+[gd_scene load_steps=46 format=3]
+
+[sub_resource type="StandardMaterial3D" id="Piedra"]
+albedo_color = Color(0.80, 0.74, 0.62, 1)
+roughness = 0.82
+metallic = 0.0
+
+[sub_resource type="StandardMaterial3D" id="PiedraOscura"]
+albedo_color = Color(0.55, 0.48, 0.38, 1)
+roughness = 0.86
+metallic = 0.0
+
+[sub_resource type="StandardMaterial3D" id="Ladrillo"]
+albedo_color = Color(0.47, 0.33, 0.26, 1)
+roughness = 0.88
+metallic = 0.0
+
+[sub_resource type="StandardMaterial3D" id="Madera"]
+albedo_color = Color(0.32, 0.23, 0.15, 1)
+roughness = 0.72
+metallic = 0.0
+
+[sub_resource type="StandardMaterial3D" id="MaderaClara"]
+albedo_color = Color(0.48, 0.36, 0.24, 1)
+roughness = 0.76
+metallic = 0.0
+
+[sub_resource type="StandardMaterial3D" id="Metal"]
+albedo_color = Color(0.30, 0.31, 0.34, 1)
+roughness = 0.45
+metallic = 0.85
+
+[sub_resource type="StandardMaterial3D" id="MetalOscuro"]
+albedo_color = Color(0.18, 0.18, 0.20, 1)
+roughness = 0.5
+metallic = 0.7
+
+[sub_resource type="StandardMaterial3D" id="Papel"]
+albedo_color = Color(0.86, 0.82, 0.72, 1)
+roughness = 0.92
+metallic = 0.0
+cull_mode = 0
+
+[sub_resource type="StandardMaterial3D" id="PapelTenue"]
+albedo_color = Color(0.78, 0.73, 0.63, 1)
+roughness = 0.94
+metallic = 0.0
+cull_mode = 0
+
+[sub_resource type="StandardMaterial3D" id="Lomo"]
+albedo_color = Color(0.84, 0.79, 0.68, 1)
+roughness = 0.88
+cull_mode = 0
+vertex_color_use_as_albedo = true
+
+[sub_resource type="StandardMaterial3D" id="Pantalla"]
+albedo_color = Color(0.06, 0.06, 0.05, 1)
+roughness = 0.3
+metallic = 0.4
+emission_enabled = true
+emission = Color(0.55, 0.85, 0.95, 1)
+emission_energy = 1.2
+
+[sub_resource type="StandardMaterial3D" id="Lente"]
+albedo_color = Color(0.55, 0.28, 0.18, 1)
+roughness = 0.6
+metallic = 0.0
+emission_enabled = true
+emission = Color(1.0, 0.45, 0.25, 1)
+emission_energy = 0.8
+
+[sub_resource type="StandardMaterial3D" id="MaderaOscura"]
+albedo_color = Color(0.22, 0.16, 0.11, 1)
+roughness = 0.8
+metallic = 0.0
+
+[sub_resource type="BoxMesh" id="SueloOficina"]
+size = Vector3(5.2, 0.12, 4.0)
+material = SubResource("MaderaOscura")
+
+[sub_resource type="BoxMesh" id="SueloTarima"]
+size = Vector3(5.6, 0.08, 4.4)
+material = SubResource("PiedraOscura")
+
+[sub_resource type="BoxMesh" id="Escalon"]
+size = Vector3(1.6, 0.07, 0.3)
+material = SubResource("Piedra")
+
+[sub_resource type="BoxMesh" id="MuroRelleno"]
+size = Vector3(5.4, 3.1, 0.25)
+material = SubResource("PiedraOscura")
+
+[sub_resource type="BoxMesh" id="MuroLadrillo"]
+size = Vector3(5.4, 1.7, 0.18)
+material = SubResource("Ladrillo")
+
+[sub_resource type="BoxMesh" id="Alfeizar"]
+size = Vector3(2.3, 0.16, 0.4)
+material = SubResource("Piedra")
+
+[sub_resource type="BoxMesh" id="LosaVentana"]
+size = Vector3(2.0, 2.4, 0.1)
+material = SubResource("PiedraOscura")
+
+[sub_resource type="BoxMesh" id="Escritorio"]
+size = Vector3(1.8, 0.08, 0.9)
+material = SubResource("Madera")
+
+[sub_resource type="BoxMesh" id="PataEscritorio"]
+size = Vector3(0.12, 0.76, 0.75)
+material = SubResource("Madera")
+
+[sub_resource type="BoxMesh" id="TableroSilla"]
+size = Vector3(0.5, 0.06, 0.5)
+material = SubResource("Metal")
+
+[sub_resource type="CylinderMesh" id="EjeSilla"]
+top_radius = 0.035
+bottom_radius = 0.035
+height = 0.42
+radial_segments = 10
+material = SubResource("MetalOscuro")
+
+[sub_resource type="BoxMesh" id="RespaldoSilla"]
+size = Vector3(0.5, 0.5, 0.06)
+material = SubResource("Metal")
+
+[sub_resource type="BoxMesh" id="CuerpoPC"]
+size = Vector3(0.24, 0.45, 0.42)
+material = SubResource("MetalOscuro")
+
+[sub_resource type="BoxMesh" id="PantallaPC"]
+size = Vector3(0.4, 0.34, 0.06)
+material = SubResource("Metal")
+
+[sub_resource type="BoxMesh" id="PantallaLuz"]
+size = Vector3(0.36, 0.3, 0.014)
+material = SubResource("Pantalla")
+
+[sub_resource type="BoxMesh" id="Teclado"]
+size = Vector3(0.42, 0.03, 0.15)
+material = SubResource("MetalOscuro")
+
+[sub_resource type="BoxMesh" id="Cajonera"]
+size = Vector3(0.5, 0.7, 0.45)
+material = SubResource("MaderaClara")
+
+[sub_resource type="BoxMesh" id="Cajon"]
+size = Vector3(0.02, 0.16, 0.42)
+material = SubResource("Madera")
+
+[sub_resource type="BoxMesh" id="Estanteria"]
+size = Vector3(1.4, 2.1, 0.35)
+material = SubResource("Madera")
+
+[sub_resource type="BoxMesh" id="TablaEstanteria"]
+size = Vector3(1.3, 0.05, 0.3)
+material = SubResource("MaderaClara")
+
+[sub_resource type="BoxMesh" id="LomoArchivo"]
+size = Vector3(0.08, 0.85, 0.3)
+material = SubResource("Lomo")
+
+[sub_resource type="BoxMesh" id="PilaPapeles"]
+size = Vector3(0.4, 0.22, 0.3)
+material = SubResource("Papel")
+
+[sub_resource type="BoxMesh" id="HojaCaida"]
+size = Vector3(0.3, 0.012, 0.22)
+material = SubResource("PapelTenue")
+
+[sub_resource type="BoxMesh" id="CintaPapel"]
+size = Vector3(0.28, 1.1, 0.014)
+material = SubResource("PapelTenue")
+
+[sub_resource type="CylinderMesh" id="PieLampara"]
+top_radius = 0.16
+bottom_radius = 0.2
+height = 0.05
+radial_segments = 14
+material = SubResource("MetalOscuro")
+
+[sub_resource type="CylinderMesh" id="TuboLampara"]
+top_radius = 0.022
+bottom_radius = 0.022
+height = 1.25
+radial_segments = 8
+material = SubResource("MetalOscuro")
+
+[sub_resource type="CylinderMesh" id="PantallaLampara"]
+top_radius = 0.09
+bottom_radius = 0.2
+height = 0.24
+radial_segments = 14
+material = SubResource("Lente")
+
+[sub_resource type="BoxMesh" id="SueloExtremo"]
+size = Vector3(8.6, 0.3, 2.4)
+material = SubResource("Piedra")
+
+[sub_resource type="CylinderMesh" id="Bastion"]
+top_radius = 0.75
+bottom_radius = 1.15
+height = 5.2
+radial_segments = 12
+material = SubResource("PiedraOscura")
+
+[sub_resource type="BoxMesh" id="Almenara"]
+size = Vector3(0.5, 0.45, 0.34)
+material = SubResource("Ladrillo")
+
+[sub_resource type="BoxMesh" id="LosaInclinada"]
+size = Vector3(1.7, 0.16, 1.1)
+material = SubResource("Piedra")
+
+[sub_resource type="CylinderMesh" id="TornoVelo"]
+top_radius = 0.2
+bottom_radius = 0.42
+height = 3.4
+radial_segments = 10
+material = SubResource("Piedra")
+
+[node name="OficinaBabilonia" type="Node3D"]
+metadata/issue = 2522
+metadata/origen_reconocible = "original"
+metadata/uso = "juego+y cine"
+
+[node name="LuzLampara" type="OmniLight3D" parent="."]
+position = Vector3(1.9, 1.55, -0.9)
+light_color = Color(1, 0.72, 0.4, 1)
+light_energy = 1.3
+omni_range = 6.5
+omni_attenuation = 0.85
+
+[node name="LuzVentana" type="OmniLight3D" parent="."]
+position = Vector3(-2.2, 1.9, -1.2)
+light_color = Color(0.7, 0.82, 1, 1)
+light_energy = 0.9
+omni_range = 8.0
+omni_attenuation = 0.75
+
+[node name="Tarima" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.04, 0)
+mesh = SubResource("SueloTarima")
+
+[node name="SueloOficina" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.02, 0)
+mesh = SubResource("SueloOficina")
+
+[node name="Escalon" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.02, 2.3)
+mesh = SubResource("Escalon")
+
+[node name="Escalon2" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.12, 2.62)
+scale = Vector3(1.15, 1, 1)
+mesh = SubResource("Escalon")
+
+[node name="MuroRelleno" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.58, -1.9)
+mesh = SubResource("MuroRelleno")
+
+[node name="MuroLadrillo" type="MeshInstance3D" parent="."]
+position = Vector3(0, 2.6, -1.83)
+rotation = Vector3(0, 0.02, -0.015)
+mesh = SubResource("MuroLadrillo")
+
+[node name="LosaVentana" type="MeshInstance3D" parent="."]
+position = Vector3(-2.35, 1.4, -1.85)
+rotation = Vector3(0, 0.36, 0)
+mesh = SubResource("LosaVentana")
+
+[node name="Alfeizar" type="MeshInstance3D" parent="."]
+position = Vector3(-2.42, 0.22, -1.85)
+rotation = Vector3(0, 0.36, 0)
+mesh = SubResource("Alfeizar")
+
+[node name="Escritorio" type="MeshInstance3D" parent="."]
+position = Vector3(1.8, 0.78, -1.1)
+rotation = Vector3(0, 0.12, 0)
+mesh = SubResource("Escritorio")
+
+[node name="PataIzquierda" type="MeshInstance3D" parent="."]
+position = Vector3(1.05, 0.38, -1.05)
+rotation = Vector3(0, 0.12, 0)
+mesh = SubResource("PataEscritorio")
+
+[node name="PataDerecha" type="MeshInstance3D" parent="."]
+position = Vector3(2.62, 0.38, -1.15)
+rotation = Vector3(0, 0.12, 0)
+mesh = SubResource("PataEscritorio")
+
+[node name="Cajonera" type="MeshInstance3D" parent="."]
+position = Vector3(2.5, 0.4, -1.05)
+rotation = Vector3(0, 0.12, 0)
+mesh = SubResource("Cajonera")
+
+[node name="Cajon1" type="MeshInstance3D" parent="."]
+position = Vector3(2.24, 0.55, -0.88)
+rotation = Vector3(0, 0.12, 0)
+mesh = SubResource("Cajon")
+
+[node name="Cajon2" type="MeshInstance3D" parent="."]
+position = Vector3(2.26, 0.36, -0.87)
+rotation = Vector3(0, 0.12, 0)
+mesh = SubResource("Cajon")
+
+[node name="CuerpoPC" type="MeshInstance3D" parent="."]
+position = Vector3(1.05, 1.06, -1.3)
+rotation = Vector3(0, -0.1, 0)
+mesh = SubResource("CuerpoPC")
+
+[node name="PantallaPC" type="MeshInstance3D" parent="."]
+position = Vector3(1.45, 1.16, -1.35)
+rotation = Vector3(0, 0.18, 0)
+mesh = SubResource("PantallaPC")
+
+[node name="PantallaLuz" type="MeshInstance3D" parent="."]
+position = Vector3(1.55, 1.16, -1.33)
+rotation = Vector3(0, 0.18, 0)
+mesh = SubResource("PantallaLuz")
+
+[node name="Teclado" type="MeshInstance3D" parent="."]
+position = Vector3(1.55, 0.86, -1.05)
+rotation = Vector3(0, 0.05, 0)
+mesh = SubResource("Teclado")
+
+[node name="TableroSilla" type="MeshInstance3D" parent="."]
+position = Vector3(1.5, 0.62, -0.35)
+rotation = Vector3(0, 0.2, 0)
+mesh = SubResource("TableroSilla")
+
+[node name="EjeSilla" type="MeshInstance3D" parent="."]
+position = Vector3(1.5, 0.4, -0.35)
+mesh = SubResource("EjeSilla")
+
+[node name="RespaldoSilla" type="MeshInstance3D" parent="."]
+position = Vector3(1.56, 0.92, -0.14)
+rotation = Vector3(0, 0.2, -0.08)
+mesh = SubResource("RespaldoSilla")
+
+[node name="Estanteria" type="MeshInstance3D" parent="."]
+position = Vector3(-1.2, 1.05, -1.55)
+rotation = Vector3(0, -0.06, 0)
+mesh = SubResource("Estanteria")
+
+[node name="Tabla1" type="MeshInstance3D" parent="."]
+position = Vector3(-1.18, 0.7, -1.4)
+rotation = Vector3(0, -0.06, 0)
+mesh = SubResource("TablaEstanteria")
+
+[node name="Tabla2" type="MeshInstance3D" parent="."]
+position = Vector3(-1.16, 1.35, -1.38)
+rotation = Vector3(0, -0.06, 0)
+mesh = SubResource("TablaEstanteria")
+
+[node name="Tabla3" type="MeshInstance3D" parent="."]
+position = Vector3(-1.14, 2.0, -1.36)
+rotation = Vector3(0, -0.06, 0)
+mesh = SubResource("TablaEstanteria")
+
+[node name="LomoA1" type="MeshInstance3D" parent="."]
+position = Vector3(-1.5, 1.2, -1.4)
+rotation = Vector3(0, -0.06, 0)
+mesh = SubResource("LomoArchivo")
+
+[node name="LomoA2" type="MeshInstance3D" parent="."]
+position = Vector3(-1.38, 1.24, -1.42)
+rotation = Vector3(0, -0.04, 0.1)
+mesh = SubResource("LomoArchivo")
+
+[node name="LomoB1" type="MeshInstance3D" parent="."]
+position = Vector3(-1.52, 1.85, -1.4)
+rotation = Vector3(0, -0.06, 0)
+scale = Vector3(1, 0.88, 1)
+mesh = SubResource("LomoArchivo")
+
+[node name="LomoB2" type="MeshInstance3D" parent="."]
+position = Vector3(-1.4, 1.88, -1.42)
+rotation = Vector3(0, -0.03, -0.08)
+scale = Vector3(0.9, 0.82, 1)
+mesh = SubResource("LomoArchivo")
+
+[node name="PilaPapeles" type="MeshInstance3D" parent="."]
+position = Vector3(2.0, 0.92, -1.15)
+rotation = Vector3(0, -0.05, 0)
+mesh = SubResource("PilaPapeles")
+
+[node name="HojaCaida1" type="MeshInstance3D" parent="."]
+position = Vector3(0.4, 0.0, 0.3)
+rotation = Vector3(0, 0.4, 0)
+mesh = SubResource("HojaCaida")
+
+[node name="HojaCaida2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.6, 0.0, 0.7)
+rotation = Vector3(0, -0.8, 0.02)
+mesh = SubResource("HojaCaida")
+
+[node name="CintaPapel1" type="MeshInstance3D" parent="."]
+position = Vector3(1.2, 0.8, -1.2)
+rotation = Vector3(0.05, 0.15, -0.5)
+mesh = SubResource("CintaPapel")
+
+[node name="PieLampara" type="MeshInstance3D" parent="."]
+position = Vector3(3.0, 0.03, -1.5)
+mesh = SubResource("PieLampara")
+
+[node name="TuboLampara" type="MeshInstance3D" parent="."]
+position = Vector3(3.0, 0.68, -1.5)
+mesh = SubResource("TuboLampara")
+
+[node name="PantallaLampara" type="MeshInstance3D" parent="."]
+position = Vector3(3.0, 1.45, -1.5)
+rotation = Vector3(0.35, 0, 0)
+mesh = SubResource("PantallaLampara")
+
+[node name="SueloExtremo" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.2, 3.5)
+rotation = Vector3(0, 0.04, 0.02)
+mesh = SubResource("SueloExtremo")
+
+[node name="BastionIzquierdo" type="MeshInstance3D" parent="."]
+position = Vector3(-4.6, 2.4, 2.2)
+rotation = Vector3(0, 0.36, -0.04)
+mesh = SubResource("Bastion")
+
+[node name="BastionDerecho" type="MeshInstance3D" parent="."]
+position = Vector3(4.9, 2.5, 1.4)
+rotation = Vector3(0, -0.28, 0.03)
+scale = Vector3(1.1, 0.92, 1.1)
+mesh = SubResource("Bastion")
+
+[node name="Almenara1" type="MeshInstance3D" parent="."]
+position = Vector3(-4.9, 5.05, 2.0)
+rotation = Vector3(0, 0.3, 0.08)
+mesh = SubResource("Almenara")
+
+[node name="Almenara2" type="MeshInstance3D" parent="."]
+position = Vector3(-4.5, 5.05, 2.4)
+rotation = Vector3(0, 0.34, -0.1)
+mesh = SubResource("Almenara")
+
+[node name="Almenara3" type="MeshInstance3D" parent="."]
+position = Vector3(5.1, 5.2, 1.2)
+rotation = Vector3(0, -0.24, -0.12)
+scale = Vector3(1.1, 1, 1.1)
+mesh = SubResource("Almenara")
+
+[node name="LosaInclinada1" type="MeshInstance3D" parent="."]
+position = Vector3(1.6, -0.15, 3.0)
+rotation = Vector3(0.12, 0.3, -0.08)
+mesh = SubResource("LosaInclinada")
+
+[node name="TornoVelo" type="MeshInstance3D" parent="."]
+position = Vector3(0.2, 1.5, 4.0)
+rotation = Vector3(0, 0.2, -0.06)
+scale = Vector3(0.85, 1, 0.85)
+mesh = SubResource("TornoVelo")
+
+[node name="AnclaJuego" type="Marker3D" parent="."]
+position = Vector3(1.3, 0.0, 0.2)
+
+[node name="AnclaCine" type="Marker3D" parent="."]
+position = Vector3(0, 1.15, 3.6)
+
+[node name="AnclaVentana" type="Marker3D" parent="."]
+position = Vector3(-2.6, 1.5, 0.4)
+</file>
