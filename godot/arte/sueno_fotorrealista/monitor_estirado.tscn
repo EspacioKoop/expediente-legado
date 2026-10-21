@@ -43,7 +43,7 @@ shader_parameter/emission_energy = 0.20
 shader_parameter/micro_scale = 62.0
 
 [sub_resource type="BoxMesh" id="Carcasa"]
-size = Vector3(0.86, 0.62, 0.36)
+size = Vector3(1.16, 0.62, 0.36)
 
 [sub_resource type="BoxMesh" id="Pantalla"]
 size = Vector3(0.69, 0.45, 0.025)
@@ -72,6 +72,7 @@ material_override = SubResource("Plastico")
 [node name="Pantalla" type="MeshInstance3D" parent="."]
 position = Vector3(0, 0.68, -0.198)
 mesh = SubResource("Pantalla")
+scale = Vector3(1.5, 1, 1)
 material_override = SubResource("Cristal")
 
 [node name="Cuello" type="MeshInstance3D" parent="."]
