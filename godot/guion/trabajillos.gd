@@ -15,6 +15,7 @@ const ESCENAS_SUENO_PERDIDAS_RACHA := 2
 static func _coste_descanso(racha: int) -> int:
 	return ESCENAS_SUENO_PERDIDAS_RACHA if racha >= 2 else ESCENAS_SUENO_PERDIDAS
 
+
 const TIPOS := [
 	{
 		"id": "transcripcion",
