@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="ArrayMesh" path="res://escenas/suenos/props_284/pupitre_escolar_psx.obj" id="1_pupitre"]
 
@@ -22,7 +22,8 @@ size = Vector3(0.7, 0.04, 0.5)
 
 [sub_resource type="CylinderMesh" id="CilindroPata"]
 height = 0.72
-radius = 0.035
+top_radius = 0.035
+bottom_radius = 0.035
 
 [node name="PupitreEscolar" type="Node3D"]
 
