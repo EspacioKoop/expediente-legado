@@ -65,7 +65,11 @@ func _selector() -> void:
 			_comprobar("selección de dos (%d,%d)" % [raiz, visita], primera.size(), 2)
 			_comprobar("sin repetición (%d,%d)" % [raiz, visita], motivos[0] != motivos[1], true)
 			_comprobar("repetible (%d,%d)" % [raiz, visita], primera, segunda)
-			_comprobar("dos índices distintos (%d,%d)" % [raiz, visita], indices.size() == 2 and indices[0] != indices[1], true)
+			_comprobar(
+				"dos índices distintos (%d,%d)" % [raiz, visita],
+				indices.size() == 2 and indices[0] != indices[1],
+				true
+			)
 
 	var visita_cero: Array = SELECTOR.indices_seleccionados(73, 0)
 	var visita_uno: Array = SELECTOR.indices_seleccionados(73, 1)
@@ -76,7 +80,11 @@ func _selector() -> void:
 	var copia: Array = SELECTOR.seleccionar(73, 0)
 	var motivo_real: String = SELECTOR.seleccionar(73, 0)[0]["motivo"]
 	copia[0]["motivo"] = "modificado durante la visita"
-	_comprobar("selector devuelve copias independientes", SELECTOR.seleccionar(73, 0)[0]["motivo"], motivo_real)
+	_comprobar(
+		"selector devuelve copias independientes",
+		SELECTOR.seleccionar(73, 0)[0]["motivo"],
+		motivo_real
+	)
 
 
 func _hub() -> void:
