@@ -13,6 +13,10 @@ const DECISION_ACEPTAR := "aceptar"
 const DECISION_DESCARTAR := "descartar"
 const DECISION_IGNORAR := "ignorar"
 const DECISIONES_VALIDAS := [DECISION_ACEPTAR, DECISION_DESCARTAR, DECISION_IGNORAR]
+const CONFLICTOS := {
+	"terminar_con_una_accion": ["terminar_con_dos_acciones"],
+	"terminar_con_dos_acciones": ["terminar_con_una_accion"]
+}
 
 const OBJETIVOS := [
 	{
@@ -66,8 +70,21 @@ static func tarjeta(estado: Dictionary) -> Array:
 		indices[j] = temporal
 
 	var resultado := []
-	for i in mini(CANTIDAD_OBJETIVOS, indices.size()):
-		resultado.append(OBJETIVOS[indices[i]].duplicate(true))
+	var ids_seleccionados := []
+	var i := 0
+	while resultado.size() < CANTIDAD_OBJETIVOS and i < indices.size():
+		var indice = indices[i]
+		var objetivo = OBJETIVOS[indice]
+		var id_objetivo = String(objetivo["id"])
+		var conflicto := false
+		for id_seleccionado in ids_seleccionados:
+			if id_seleccionado in CONFLICTOS and id_objetivo in CONFLICTOS[id_seleccionado]:
+				conflicto = true
+				break
+		if not conflicto:
+			resultado.append(objetivo.duplicate(true))
+			ids_seleccionados.append(id_objetivo)
+		i += 1
 	return resultado
 
 
