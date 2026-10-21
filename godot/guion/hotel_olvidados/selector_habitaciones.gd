@@ -12,12 +12,12 @@ const CATALOGO_HABITACIONES = preload("res://guion/hotel_olvidados/catalogo_habi
 const HABITACIONES_POR_VISITA := 2
 
 
-static func _indice_shuffle(raiz: int, visita: int, tamano: int) -> Array:
+static func _indice_shuffle(raiz: int, tamano: int) -> Array:
 	var indices: Array = []
 	for indice in range(tamano):
 		indices.append(indice)
 
-	var rng := Azar.generador(raiz, "sueno", [maxi(0, visita), 2475])
+	var rng := Azar.generador(raiz, "sueno", [2475])
 	for i in range(indices.size() - 1, 0, -1):
 		var j := rng.randi_range(0, i)
 		var tmp: Variant = indices[i]
@@ -35,11 +35,11 @@ static func seleccionar(raiz: int, visita: int, cantidad: int = HABITACIONES_POR
 	if cuantos == 0:
 		return []
 
-	var indices := _indice_shuffle(raiz, visita, catalogo.size())
+	var indices := _indice_shuffle(raiz, catalogo.size())
 
-	# Rotar el inicio según la visita para variar la pareja entre visitas contiguas
-	# sin perder determinismo: misma (raiz, visita) = misma selección.
-	var inicio := (visita * cuantos) % catalogo.size()
+	# La permutación permanece fija para una raíz y la ventana avanza con cada
+	# visita: si existen habitaciones alternativas, la pareja contigua cambia.
+	var inicio := posmod(visita, catalogo.size())
 	var seleccion := []
 	for k in range(cuantos):
 		var idx := (inicio + k) % catalogo.size()
@@ -55,9 +55,9 @@ static func indices_seleccionados(
 	if cuantos == 0:
 		return []
 
-	var indices := _indice_shuffle(raiz, visita, catalogo.size())
+	var indices := _indice_shuffle(raiz, catalogo.size())
 
-	var inicio := (visita * cuantos) % catalogo.size()
+	var inicio := posmod(visita, catalogo.size())
 	var resultado := []
 	for k in range(cuantos):
 		var idx := (inicio + k) % catalogo.size()
