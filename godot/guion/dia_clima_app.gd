@@ -581,9 +581,7 @@ func _clave_conversacion_contextual(
 	var clave_fallback := clave_archivado
 	if clave_fallback.is_empty():
 		clave_fallback = DialogoHorarioCompaneros.resolver(actor_id, Jornada.hora_decimal(jornada))
-	if not clave_fallback.is_empty():
-		return clave_fallback
-	return clave_dialogo
+	return clave_fallback if not clave_fallback.is_empty() else clave_dialogo
 
 
 ## El caso@1 ya guarda a quién se imputó. Su consecuencia conversable se
