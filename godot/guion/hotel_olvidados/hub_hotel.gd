@@ -34,12 +34,17 @@ func _crear_corredor() -> void:
 	var length := maxf(4.0, corridor_length)
 	var width := maxf(2.0, corridor_width)
 	_agregar_tramo("Suelo", Vector3(0, -0.10, 0), Vector3(width, 0.2, length))
-	_agregar_tramo(
-		"MuroIzquierdo", Vector3(-width * 0.5, 1.35, 0), Vector3(0.18, 2.7, length)
-	)
-	_agregar_tramo(
-		"MuroDerecho", Vector3(width * 0.5, 1.35, 0), Vector3(0.18, 2.7, length)
-	)
+	# Ambos laterales dejan huecos centrales para puertas conectadas.
+	var hueco := minf(2.2, length * 0.4)
+	var tramo := (length - hueco) * 0.5
+	var distancia := (length + hueco) * 0.25
+	for lado in [-1, 1]:
+		for mitad in [-1, 1]:
+			_agregar_tramo(
+				"Muro_%d_%d" % [lado, mitad],
+				Vector3(float(lado) * width * 0.5, 1.35, float(mitad) * distancia),
+				Vector3(0.18, 2.7, tramo)
+			)
 	_agregar_tramo(
 		"Fondo", Vector3(0, 1.35, -length * 0.5), Vector3(width, 2.7, 0.18)
 	)
