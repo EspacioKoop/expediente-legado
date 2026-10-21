@@ -45,9 +45,7 @@ func _crear_corredor() -> void:
 				Vector3(float(lado) * width * 0.5, 1.35, float(mitad) * distancia),
 				Vector3(0.18, 2.7, tramo)
 			)
-	_agregar_tramo(
-		"Fondo", Vector3(0, 1.35, -length * 0.5), Vector3(width, 2.7, 0.18)
-	)
+	_agregar_tramo("Fondo", Vector3(0, 1.35, -length * 0.5), Vector3(width, 2.7, 0.18))
 
 
 func _agregar_tramo(nombre: String, posicion: Vector3, tamano: Vector3) -> void:
