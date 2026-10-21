@@ -137,8 +137,10 @@ func _al_finalizar(etapa_id: String) -> void:
 		if not _recompensas_locales.has("sello_custodio_siete_registros"):
 			_recompensas_locales.append("sello_custodio_siete_registros")
 		_volver_a_portada(
-			"Capítulo completado. Reliquia obtenida: Sello del Custodio de "
-			+ "los Siete Registros. Es ficción: no constituye prueba para SIGA-98."
+			(
+				"Capítulo completado. Reliquia obtenida: Sello del Custodio de "
+				+ "los Siete Registros. Es ficción: no constituye prueba para SIGA-98."
+			)
 		)
 		_boton_jugar.text = "Volver a jugar el capítulo"
 		capitulo_completado.emit()
@@ -194,11 +196,14 @@ func _mostrar_etapa(indice: int, etapa_id: String) -> void:
 		_indicador_etapa.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		_indicador_etapa.add_theme_font_size_override("font_size", 16)
 		add_child(_indicador_etapa)
-	_indicador_etapa.text = "%d/%d · %s" % [
-		indice + 1,
-		CronicasCapituloRutas.ETAPAS.size(),
-		String(NOMBRES_ETAPA.get(etapa_id, etapa_id)),
-	]
+	_indicador_etapa.text = (
+		"%d/%d · %s"
+		% [
+			indice + 1,
+			CronicasCapituloRutas.ETAPAS.size(),
+			String(NOMBRES_ETAPA.get(etapa_id, etapa_id)),
+		]
+	)
 	_indicador_etapa.show()
 	if not is_instance_valid(_boton_menu):
 		_boton_menu = Button.new()
@@ -224,8 +229,10 @@ func _salir_al_menu() -> void:
 	anterior.queue_free()
 	_cerrar_visor()
 	_volver_a_portada(
-		"Punto de paso local: continuarás desde el comienzo de la sala actual. "
-		+ "Se perderá al cerrar el CD-ROM."
+		(
+			"Punto de paso local: continuarás desde el comienzo de la sala actual. "
+			+ "Se perderá al cerrar el CD-ROM."
+		)
 	)
 	_boton_jugar.text = "Continuar capítulo"
 
