@@ -43,7 +43,7 @@ shader_parameter/emission_energy = 0.20
 shader_parameter/micro_scale = 62.0
 
 [sub_resource type="BoxMesh" id="Carcasa"]
-size = Vector3(0.86, 0.62, 0.36)
+size = Vector3(1.16, 0.62, 0.36)
 
 [sub_resource type="BoxMesh" id="Pantalla"]
 size = Vector3(0.69, 0.45, 0.025)
