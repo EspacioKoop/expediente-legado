@@ -790,6 +790,21 @@ func _probar():
         return
     editor.call("_al_seleccionar", 0)
     await process_frame
+    var controles_efectos = editor.get("_efectos_plano")
+    if controles_efectos.is_empty():
+        push_error("El editor no expone los controles de efectos del plano")
+        quit(1)
+        return
+    controles_efectos["crt_activo"].button_pressed = true
+    controles_efectos["crt_intensidad"].value = 0.73
+    controles_efectos["crt_duracion"].value = 0.27
+    controles_efectos["crt_semilla"].value = 12.5
+    controles_efectos["superposicion"].text = "ARCHIVO EN TRÁNSITO"
+    controles_efectos["sup_intensidad"].value = 0.65
+    controles_efectos["sup_ruido"].value = 0.01
+    controles_efectos["sup_scanline"].value = 0.2
+    controles_efectos["sup_semilla"].value = 8.5
+    controles_efectos["grano_sin_estrobo"].button_pressed = true
     var selector_audio_plano = editor.get("_biblioteca_mueble")
     var biblioteca_audio_plano = selector_audio_plano.get_parent().get_parent()
     var filtros_audio_plano = biblioteca_audio_plano.get_child(0)
@@ -830,9 +845,52 @@ func _probar():
         push_error("El sonido elegido no se asignó al plano con su clave runtime")
         quit(1)
         return
+    var plano_con_efectos = editor.get("_doc_actual")["planos"][0]
+    if not plano_con_efectos.get("interrupcion_crt", false):
+        push_error("El plano no serializó la interrupción CRT")
+        quit(1)
+        return
+    if not is_equal_approx(float(plano_con_efectos.get("crt_intensidad", 0.0)), 0.73):
+        push_error("El editor perdió la intensidad CRT")
+        quit(1)
+        return
+    if String(plano_con_efectos.get("superposicion_texto", "")) != "ARCHIVO EN TRÁNSITO":
+        push_error("El editor no serializó la superposición tipográfica")
+        quit(1)
+        return
+    if not is_equal_approx(float(plano_con_efectos.get("sup_scanline", 0.0)), 0.2):
+        push_error("El editor perdió la intensidad de scanline")
+        quit(1)
+        return
+    if not is_equal_approx(float(plano_con_efectos.get("sup_semilla", 0.0)), 8.5):
+        push_error("El editor perdió la semilla de superposición")
+        quit(1)
+        return
+    if not plano_con_efectos.get("grano_no_estroboscopico", false):
+        push_error("El plano no guardó el modo de grano accesible")
+        quit(1)
+        return
+    var errores_efectos = contrato.validar_cinematica(editor.get("_doc_actual"))
+    if not errores_efectos.is_empty():
+        push_error("El plano con efectos no pasa el contrato: %s" % [errores_efectos])
+        quit(1)
+        return
     editor.call("_guardar")
     editor.call("_cargar")
     var decorado_reabierto: Dictionary = editor.get("_doc_actual")["planos"][0]["decorado"]
+    var efectos_reabiertos: Dictionary = editor.get("_doc_actual")["planos"][0]
+    if not efectos_reabiertos.get("interrupcion_crt", false) or not efectos_reabiertos.get("grano_no_estroboscopico", false):
+        push_error("Roundtrip perdió los efectos visuales del plano")
+        quit(1)
+        return
+    if String(efectos_reabiertos.get("superposicion_texto", "")) != "ARCHIVO EN TRÁNSITO":
+        push_error("Roundtrip perdió el texto de superposición")
+        quit(1)
+        return
+    if not is_equal_approx(float(efectos_reabiertos.get("crt_semilla", 0.0)), 12.5):
+        push_error("Roundtrip perdió la semilla del efecto CRT")
+        quit(1)
+        return
     var bultos_reabiertos: Array = decorado_reabierto.get("bultos", [])
     if bultos_reabiertos.size() != bultos_antes + 1:
         push_error("Roundtrip de cinemática perdió el objeto añadido al decorado")

@@ -5,6 +5,7 @@ const CONTRATO := preload("res://debug/editor_niveles_cinematicas_contrato.gd")
 const ESTILO_SIGA := preload("res://guion/estilo_siga.gd")
 const ESPACIOS_CATALOGO := preload("res://guion/espacios_catalogo.gd")
 const EDITOR_CATALOGO := preload("res://debug/editor_niveles_cinematicas_catalogo.gd")
+const EDITOR_EFECTOS := preload("res://debug/editor_niveles_cinematicas_efectos.gd")
 
 const TIPOS_DOC := ["nivel", "cinematica"]
 const TIPOS_PLANO := ["3d", "2d"]
@@ -62,6 +63,7 @@ var _plano_fundido_desde: SpinBox
 var _plano_fundido_hasta: SpinBox
 var _plano_sonido: LineEdit
 var _plano_sonido_tono: SpinBox
+var _efectos_plano: Dictionary = {}
 var _plano_figura: TextEdit
 var _plano_desde_x: SpinBox
 var _plano_desde_y: SpinBox
@@ -521,6 +523,9 @@ func _montar_detalle_cinematica() -> void:
 	_plano_sonido = _campo(grid_snd, "Nombre:", String(p.get("sonido", "")))
 	_plano_sonido_tono = _spin(grid_snd, "Tono:", float(p.get("sonido_tono", 1.0)), 0.1, 4.0, 0.01)
 
+	# Controles por plano para efectos ya soportados por CinematicaApp.
+	_efectos_plano = EDITOR_EFECTOS.montar(_detalle, p, _editando_indice)
+
 	# Decorado (para planos 3D con set propio)
 	if es_3d:
 		_detalle.add_child(_etiqueta("Decorado (JSON espacio, opcional):"))
@@ -637,6 +642,8 @@ func _aplicar_plano() -> void:
 	if not _plano_sonido.text.strip_edges().is_empty():
 		p["sonido"] = _plano_sonido.text.strip_edges()
 		p["sonido_tono"] = _plano_sonido_tono.value
+
+	EDITOR_EFECTOS.aplicar(p, _efectos_plano)
 
 	# Decorado
 	if es_3d:
