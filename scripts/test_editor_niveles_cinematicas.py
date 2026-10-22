@@ -1024,6 +1024,11 @@ func _init():
         print("ERROR: el índice no ofrece piezas de arte/")
         quit(1)
         return
+    var props_escena = assets.filtrar("", "modelo", "archivador_desierto_psx.obj", true)
+    if props_escena.is_empty() or not String(props_escena[0]["ruta"]).begins_with("res://escenas/"):
+        print("ERROR: el índice deja fuera los modelos organizados bajo escenas/")
+        quit(1)
+        return
     var tipos = assets.tipos()
     for esperado in ["modelo", "escena", "imagen", "audio"]:
         if not tipos.has(esperado):
