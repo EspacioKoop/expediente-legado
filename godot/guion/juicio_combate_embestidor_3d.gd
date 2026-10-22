@@ -27,6 +27,33 @@ static func montar_linea(anfitrion: Node3D) -> MeshInstance3D:
 	linea.material_override = material
 	linea.visible = false
 	anfitrion.add_child(linea)
+
+	# Dos señales físicas acompañan la trayectoria: de dónde parte la carga
+	# y dónde termina. Son solo geometría, nunca hitboxes ni detectores.
+	for nombre in ["MarcaOrigen", "MarcaDestino"]:
+		var marca := MeshInstance3D.new()
+		marca.name = nombre
+		var disco := CylinderMesh.new()
+		disco.top_radius = 0.38 if nombre == "MarcaOrigen" else 0.52
+		disco.bottom_radius = disco.top_radius
+		disco.height = 0.025
+		disco.radial_segments = 16
+		marca.mesh = disco
+		marca.position = Vector3(
+			0.0, 0.03, -LINEA_ALCANCE * 0.5 if nombre == "MarcaOrigen" else LINEA_ALCANCE * 0.5
+		)
+		marca.material_override = (
+			FEEDBACK
+			. material(
+				(
+					Color(0.98, 0.76, 0.24, 0.74)
+					if nombre == "MarcaOrigen"
+					else Color(1.0, 0.27, 0.16, 0.78)
+				),
+				true,
+			)
+		)
+		linea.add_child(marca)
 	return linea
 
 
@@ -112,10 +139,29 @@ static func pintar_linea(
 ) -> void:
 	if linea == null:
 		return
-	linea.visible = telegraph == "carga_lineal"
+	var estado := String(unidad.get("estado", ""))
+	var preparando := telegraph == "carga_lineal"
+	var cargando := estado == ARQUETIPOS.CARGAR
+	var recuperando := estado == ARQUETIPOS.RECUPERAR
+	linea.visible = preparando or cargando or recuperando
 	if not linea.visible:
 		return
 	var rumbo := float(unidad.get("rumbo_bloqueado", 0.0))
 	var direccion := ARQUETIPO_HOST.direccion_linea(rumbo)
 	linea.position = posicion_rival + Vector3(0.0, 0.06, 0.0) + direccion * (LINEA_ALCANCE * 0.5)
 	linea.rotation = Vector3(0.0, rumbo, 0.0)
+
+	# Ámbar: aviso anticipado; rojo: carga en marcha; azul y trayectoria corta:
+	# recuperación vulnerable. El rumbo sigue congelado, incluso al esquivar.
+	linea.scale.z = 0.32 if recuperando else 1.0
+	var material := linea.material_override as StandardMaterial3D
+	if material != null:
+		var color := Color(0.31, 0.78, 0.93, 0.38) if recuperando else Color(0.98, 0.19, 0.10, 0.65)
+		if preparando:
+			color = Color(0.98, 0.60, 0.12, 0.53)
+		material.albedo_color = color
+		material.emission = color
+	for nombre in ["MarcaOrigen", "MarcaDestino"]:
+		var marca := linea.get_node_or_null(nombre) as MeshInstance3D
+		if marca != null:
+			marca.visible = not recuperando
