@@ -194,7 +194,9 @@ func _mostrar_etapa(indice: int, etapa_id: String) -> void:
 		_indicador_etapa.anchor_top = 0.01
 		_indicador_etapa.anchor_bottom = 0.09
 		_indicador_etapa.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-		_indicador_etapa.add_theme_font_size_override("font_size", 16)
+		_indicador_etapa.add_theme_font_size_override("font_size", 22)
+		_indicador_etapa.add_theme_color_override("font_outline_color", Color.BLACK)
+		_indicador_etapa.add_theme_constant_override("outline_size", 4)
 		add_child(_indicador_etapa)
 	_indicador_etapa.text = (
 		"%d/%d · %s"
@@ -209,6 +211,7 @@ func _mostrar_etapa(indice: int, etapa_id: String) -> void:
 		_boton_menu = Button.new()
 		_boton_menu.name = "VolverAlMenu"
 		_boton_menu.text = tr("CRONICAS_PC_MENU")
+		_boton_menu.add_theme_font_size_override("font_size", 22)
 		_boton_menu.anchor_left = 0.76
 		_boton_menu.anchor_right = 0.97
 		_boton_menu.anchor_top = 0.93
@@ -216,6 +219,16 @@ func _mostrar_etapa(indice: int, etapa_id: String) -> void:
 		_boton_menu.pressed.connect(_salir_al_menu)
 		add_child(_boton_menu)
 	_boton_menu.show()
+
+
+## Si la sala no consumió ESC, el jugador puede regresar al menú aunque
+## tenga capturado el cursor para caminar. Esto evita depender de pulsar el
+## botón de OS98 con un ratón que el mundo 3D mantiene oculto.
+func _unhandled_input(evento: InputEvent) -> void:
+	if not juego_en_curso() or not evento.is_action_pressed("ui_cancel"):
+		return
+	_salir_al_menu()
+	get_viewport().set_input_as_handled()
 
 
 ## Al salir al menú se conserva la última etapa completada, pero se reinicia
