@@ -21,7 +21,7 @@ var _acta_seleccionada := -1
 var _cronista_consultado := false
 var _fuga_abierta := false
 var _completado := false
-var _intento_cronista := 0
+var _version_propuesta := -1
 
 var _caminante: CharacterBody3D
 var _hud: HUDLayer
@@ -80,13 +80,18 @@ func inspeccionar_acta(indice: int) -> void:
 				"Acta III — Sostiene que la fortaleza es una alegoría y nunca existió realmente."
 			)
 
-	if _actas_inspeccionadas.size() == TOTAL_ACTAS and not _cronista_consultado:
-		_mensaje(
-			(
-				"Has inspeccionado las tres actas incompatibles. "
-				+ "Dirígete al Cronista Velado para contrastar versiones."
+	# Tras conocer las tres versiones, tocar cualquier acta la propone al
+	# Cronista. La última leída queda seleccionada, pero puede cambiarse.
+	if _actas_inspeccionadas.size() == TOTAL_ACTAS:
+		_version_propuesta = indice
+		if is_instance_valid(_texto_objetivo):
+			_texto_objetivo.text += (
+				(
+					"\n\nActa %s propuesta. Contrástala con el Cronista Velado "
+					+ "o inspecciona otra acta para cambiar de versión."
+				)
+				% ["I", "II", "III"][indice]
 			)
-		)
 
 	_actualizar_interacciones()
 
@@ -95,7 +100,7 @@ func inspeccionar_acta(indice: int) -> void:
 ## Si la versión es la fundamentada (Acta II), abre la fuga.
 ## Si la versión no es válida, permite reintentar sin softlock.
 func seleccionar_version(indice: int) -> bool:
-	if _completado:
+	if _completado or indice < 0 or indice >= TOTAL_ACTAS:
 		return false
 
 	if _actas_inspeccionadas.size() < TOTAL_ACTAS:
@@ -143,11 +148,12 @@ func contrastar_con_cronista() -> void:
 		_mensaje("El Cronista Velado ya ha validado tu versión. Dirígete a la vía de fuga.")
 		return
 
-	# Ciclar entre versiones no fundamentadas y la fundamentada para permitir reintentos.
-	var indices_prueba: Array[int] = [0, 2, ACTA_FUNDAMENTADA]
-	var opcion: int = indices_prueba[_intento_cronista % indices_prueba.size()]
-	_intento_cronista += 1
-	seleccionar_version(opcion)
+	# La decisión sale de las actas físicamente inspeccionadas por el jugador;
+	# nunca se fuerza un fallo previo ni se entrega la solución por turnos.
+	if _version_propuesta < 0:
+		_mensaje("Elige primero un acta en sus atriles para defender una versión.")
+		return
+	seleccionar_version(_version_propuesta)
 
 
 ## Solicita salir por la vía de fuga tras resolver el archivo.
