@@ -927,3 +927,12 @@ CRONICAS_PC_DEMO,Demostración local: no altera la partida principal.
 CRONICAS_PC_CERRAR,Cerrar programa
 ENTRADA49_ACCESO,Entrada 49
 ENTRADA49_TITULO,IMPORTACIÓN PATRIMONIAL · ENTRADA 49
+COMPA_FIRMA_2742_CUNADO_IBARRA,"Has firmado contra Ibarra. El expediente ya aparece cerrado, pero no le han podido notificar la responsiva. El sello ha llegado antes que la carta."
+COMPA_FIRMA_2742_CUNADO_PROVEEDOR,"Contra el proveedor sin RFC, entonces. El impreso pide un destinatario y el registro mercantil dice que no existe. Pero la casilla de cerrado sí se ha llenado."
+COMPA_FIRMA_2742_CUNADO_CONTRALORIA,"¿Has remitido el asunto a Contraloría? Van a revisar su propio procedimiento. Eso en el organigrama se llama control interno; aquí lo llamamos dar la vuelta a una carpeta."
+COMPA_FIRMA_2742_BECARIO_IBARRA,"He buscado el acuse de la notificación a Ibarra para completar el asiento. No aparece. Sé a quién señala el formulario; sigo sin saber quién recibió el dinero."
+COMPA_FIRMA_2742_BECARIO_PROVEEDOR,"Al registrar la investigación del proveedor me falta hasta la razón social verificable. La orden de búsqueda consta emitida; no hay nadie identificado a quien entregársela."
+COMPA_FIRMA_2742_BECARIO_CONTRALORIA,"El oficio contra Contraloría ha vuelto a la bandeja de Contraloría. Puedo certificar el recorrido del papel, no que alguien independiente lo haya revisado."
+COMPA_FIRMA_2742_JUBILACION_IBARRA,"Una firma prueba quién aceptó la responsabilidad por escrito. No demuestra quién prestó el servicio ni dónde terminó el pago. No confundas el cierre con una respuesta."
+COMPA_FIRMA_2742_JUBILACION_PROVEEDOR,"En mis tiempos también cerrábamos expedientes contra destinatarios que no podían ser localizados. Eran los que menos protestaban. No quiere decir que quedaran resueltos."
+COMPA_FIRMA_2742_JUBILACION_CONTRALORIA,"Cuando un departamento se investiga a sí mismo, lo primero que sale limpio es el registro de entrada. De la auditoría no consta un resultado público."
