@@ -74,18 +74,18 @@ func comenzar() -> bool:
 func _abrir_etapa_actual() -> bool:
 	var etapa := CronicasCapituloRutas.etapa_actual(_sesion)
 	if String(etapa.get("estado", "")) != CronicasCapituloRutas.ESTADO_JUGABLE:
-		_volver_a_portada("Esta sala todavía no está disponible en el CD-ROM.")
+		_volver_a_portada(tr("CRONICAS_PC_SALA_PENDIENTE"))
 		return false
 
 	var recurso := ResourceLoader.load(String(etapa["escena"])) as PackedScene
 	if recurso == null:
-		_volver_a_portada("No se pudo cargar la sala del capítulo.")
+		_volver_a_portada(tr("CRONICAS_PC_CARGA_ERROR"))
 		return false
 
 	var instancia := recurso.instantiate()
 	if not instancia is Node3D or not instancia.has_signal("completado"):
 		instancia.free()
-		_volver_a_portada("La sala carece de un umbral de salida jugable.")
+		_volver_a_portada(tr("CRONICAS_PC_UMBRAL_ERROR"))
 		return false
 
 	_sala = instancia as Node3D
@@ -140,15 +140,12 @@ func _al_finalizar(etapa_id: String) -> void:
 		if not _recompensas_locales.has("sello_custodio_siete_registros"):
 			_recompensas_locales.append("sello_custodio_siete_registros")
 		_volver_a_portada(
-			(
-				"Capítulo completado. Reliquia obtenida: Sello del Custodio de "
-				+ "los Siete Registros. Es ficción: no constituye prueba para SIGA-98."
-			)
+			tr("CRONICAS_PC_FINAL")
 		)
-		_boton_jugar.text = "Volver a jugar el capítulo"
+		_boton_jugar.text = tr("CRONICAS_PC_REPETIR")
 		capitulo_completado.emit()
 	else:
-		_volver_a_portada("Capítulo en pausa: la siguiente sala no está disponible.")
+		_volver_a_portada(tr("CRONICAS_PC_CAPITULO_PAUSA"))
 
 
 func _volver_a_portada(mensaje: String) -> void:
@@ -211,7 +208,7 @@ func _mostrar_etapa(indice: int, etapa_id: String) -> void:
 	if not is_instance_valid(_boton_menu):
 		_boton_menu = Button.new()
 		_boton_menu.name = "VolverAlMenu"
-		_boton_menu.text = "Volver al menú"
+		_boton_menu.text = tr("CRONICAS_PC_MENU")
 		_boton_menu.anchor_left = 0.76
 		_boton_menu.anchor_right = 0.97
 		_boton_menu.anchor_top = 0.93
@@ -232,12 +229,9 @@ func _salir_al_menu() -> void:
 	anterior.queue_free()
 	_cerrar_visor()
 	_volver_a_portada(
-		(
-			"Punto de paso local: continuarás desde el comienzo de la sala actual. "
-			+ "Se perderá al cerrar el CD-ROM."
-		)
+		tr("CRONICAS_PC_CHECKPOINT")
 	)
-	_boton_jugar.text = "Continuar capítulo"
+	_boton_jugar.text = tr("CRONICAS_PC_CONTINUAR")
 
 
 ## Minimizar o cerrar OS98 libera el cursor y suspende el duelo local.
@@ -300,10 +294,7 @@ func _montar_portada() -> void:
 	columna.add_child(_boton_jugar)
 	var instrucciones := Label.new()
 	instrucciones.name = "Instrucciones"
-	instrucciones.text = (
-		"Explora las salas 3D, examina testimonios, resuelve mecanismos y vence a sus custodios. "
-		+ "Cada umbral desbloquea la siguiente estancia. Puedes reintentar los desafíos."
-	)
+	instrucciones.text = tr("CRONICAS_PC_INSTRUCCIONES")
 	instrucciones.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	columna.add_child(instrucciones)
 	_estado = Label.new()
