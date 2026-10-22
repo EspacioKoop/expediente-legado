@@ -1,0 +1,156 @@
+[gd_scene load_steps=15 format=3]
+
+[ext_resource type="Script" path="res://dreams/meta_dream_controller.gd" id="1_control"]
+[ext_resource type="PackedScene" path="res://escenas/caminante.tscn" id="2_caminante"]
+
+[sub_resource type="Environment" id="Entorno"]
+background_mode = 2
+background_color = Color(0.075, 0.087, 0.11, 1)
+
+[sub_resource type="StandardMaterial3D" id="Gris"]
+albedo_color = Color(0.33, 0.36, 0.39, 1)
+roughness = 0.92
+
+[sub_resource type="StandardMaterial3D" id="Papel"]
+albedo_color = Color(0.47, 0.38, 0.27, 1)
+roughness = 0.83
+
+[sub_resource type="BoxMesh" id="SueloMalla"]
+size = Vector3(16, 0.3, 16)
+
+[sub_resource type="BoxShape3D" id="SueloForma"]
+size = Vector3(16, 0.3, 16)
+
+[sub_resource type="BoxMesh" id="MuroMalla"]
+size = Vector3(16, 4.5, 0.4)
+
+[sub_resource type="BoxShape3D" id="MuroForma"]
+size = Vector3(16, 4.5, 0.4)
+
+[sub_resource type="BoxMesh" id="ArchivadorMalla"]
+size = Vector3(1.2, 2.3, 0.75)
+
+[sub_resource type="CylinderMesh" id="EcoTorso"]
+top_radius = 0.22
+bottom_radius = 0.31
+height = 1.35
+radial_segments = 12
+
+[sub_resource type="SphereMesh" id="EcoCabeza"]
+radius = 0.24
+height = 0.48
+radial_segments = 12
+rings = 6
+
+[sub_resource type="BoxMesh" id="PuertaMalla"]
+size = Vector3(2.7, 3.3, 0.09)
+
+[sub_resource type="BoxShape3D" id="SalidaForma"]
+size = Vector3(3.0, 3.2, 1.9)
+
+[node name="MetaDream" type="Node3D"]
+script = ExtResource("1_control")
+
+[node name="Ambiente" type="WorldEnvironment" parent="."]
+environment = SubResource("Entorno")
+
+[node name="LuzCarga" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-50, -25, 0)
+light_color = Color(0.65, 0.76, 0.91, 1)
+light_energy = 1.0
+shadow_enabled = true
+
+[node name="Suelo" type="StaticBody3D" parent="."]
+position = Vector3(0, -0.15, 0)
+
+[node name="Colision" type="CollisionShape3D" parent="Suelo"]
+shape = SubResource("SueloForma")
+
+[node name="Malla" type="MeshInstance3D" parent="Suelo"]
+mesh = SubResource("SueloMalla")
+material_override = SubResource("Gris")
+
+[node name="MuroNorte" type="StaticBody3D" parent="."]
+position = Vector3(0, 2.25, -8)
+
+[node name="Colision" type="CollisionShape3D" parent="MuroNorte"]
+shape = SubResource("MuroForma")
+
+[node name="Malla" type="MeshInstance3D" parent="MuroNorte"]
+mesh = SubResource("MuroMalla")
+material_override = SubResource("Gris")
+
+[node name="MuroSur" type="StaticBody3D" parent="."]
+position = Vector3(0, 2.25, 8)
+
+[node name="Colision" type="CollisionShape3D" parent="MuroSur"]
+shape = SubResource("MuroForma")
+
+[node name="Malla" type="MeshInstance3D" parent="MuroSur"]
+mesh = SubResource("MuroMalla")
+material_override = SubResource("Gris")
+
+[node name="MuroOeste" type="StaticBody3D" parent="."]
+position = Vector3(-8, 2.25, 0)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="Colision" type="CollisionShape3D" parent="MuroOeste"]
+shape = SubResource("MuroForma")
+
+[node name="Malla" type="MeshInstance3D" parent="MuroOeste"]
+mesh = SubResource("MuroMalla")
+material_override = SubResource("Gris")
+
+[node name="MuroEste" type="StaticBody3D" parent="."]
+position = Vector3(8, 2.25, 0)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="Colision" type="CollisionShape3D" parent="MuroEste"]
+shape = SubResource("MuroForma")
+
+[node name="Malla" type="MeshInstance3D" parent="MuroEste"]
+mesh = SubResource("MuroMalla")
+material_override = SubResource("Gris")
+
+[node name="Materializacion" type="Node3D" parent="."]
+visible = false
+
+[node name="ArchivoIncorrecto" type="MeshInstance3D" parent="Materializacion"]
+position = Vector3(-3.3, 1.15, -3.8)
+mesh = SubResource("ArchivadorMalla")
+material_override = SubResource("Papel")
+
+[node name="ArchivoDesplazado" type="MeshInstance3D" parent="Materializacion"]
+position = Vector3(3.3, 1.15, -2.3)
+rotation_degrees = Vector3(0, -35, 0)
+mesh = SubResource("ArchivadorMalla")
+material_override = SubResource("Papel")
+
+[node name="Ecos" type="Node3D" parent="."]
+visible = false
+
+[node name="SiluetaTardia" type="MeshInstance3D" parent="Ecos"]
+position = Vector3(0, 0.85, -4.5)
+mesh = SubResource("EcoTorso")
+material_override = SubResource("Gris")
+
+[node name="CabezaTardia" type="MeshInstance3D" parent="Ecos"]
+position = Vector3(0, 1.75, -4.5)
+mesh = SubResource("EcoCabeza")
+material_override = SubResource("Gris")
+
+[node name="IntrusoSpawn" type="Marker3D" parent="."]
+position = Vector3(4.0, 0.2, 0)
+
+[node name="Salida" type="Area3D" parent="."]
+position = Vector3(0, 1.6, -6.25)
+
+[node name="Area" type="CollisionShape3D" parent="Salida"]
+shape = SubResource("SalidaForma")
+
+[node name="UmbralVisible" type="MeshInstance3D" parent="Salida"]
+mesh = SubResource("PuertaMalla")
+material_override = SubResource("Papel")
+
+[node name="Caminante" parent="." instance=ExtResource("2_caminante")]
+position = Vector3(0, 1.0, 4.5)
