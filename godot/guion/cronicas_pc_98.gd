@@ -139,9 +139,7 @@ func _al_finalizar(etapa_id: String) -> void:
 	if String(siguiente.get("estado", "")) == CronicasCapituloRutas.ESTADO_TERMINADO:
 		if not _recompensas_locales.has("sello_custodio_siete_registros"):
 			_recompensas_locales.append("sello_custodio_siete_registros")
-		_volver_a_portada(
-			tr("CRONICAS_PC_FINAL")
-		)
+		_volver_a_portada(tr("CRONICAS_PC_FINAL"))
 		_boton_jugar.text = tr("CRONICAS_PC_REPETIR")
 		capitulo_completado.emit()
 	else:
@@ -241,9 +239,7 @@ func _salir_al_menu() -> void:
 	_etapa_activa = ""
 	anterior.queue_free()
 	_cerrar_visor()
-	_volver_a_portada(
-		tr("CRONICAS_PC_CHECKPOINT")
-	)
+	_volver_a_portada(tr("CRONICAS_PC_CHECKPOINT"))
 	_boton_jugar.text = tr("CRONICAS_PC_CONTINUAR")
 
 
