@@ -223,6 +223,9 @@ func _mostrar_etapa(indice: int, etapa_id: String) -> void:
 ## tenga capturado el cursor para caminar. Esto evita depender de pulsar el
 ## botón de OS98 con un ratón que el mundo 3D mantiene oculto.
 func _unhandled_input(evento: InputEvent) -> void:
+	# Una ventana OS98 minimizada no debe consumir Escape ni abandonar la sala.
+	if not is_visible_in_tree():
+		return
 	if not juego_en_curso() or not evento.is_action_pressed("ui_cancel"):
 		return
 	_salir_al_menu()
