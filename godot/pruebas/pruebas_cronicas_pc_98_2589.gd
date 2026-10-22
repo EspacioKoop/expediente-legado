@@ -36,10 +36,13 @@ func _probar() -> void:
 	sala.registrar_resultado_duelo(true)
 	_comprobar(sala.solicitar_salida(), "completado desde bastion real")
 	await process_frame
-	_comprobar(not programa.juego_en_curso(), "retorno a portada")
+	_comprobar(programa.juego_en_curso(), "avanza a segunda sala sin reiniciar CD-ROM")
 	_comprobar(programa.prologos_locales() == 1, "visita solo local")
 	_comprobar(completar[0] == 1, "una sola notificacion")
-	_comprobar(programa.get_node_or_null("PartidaCronicas") == null, "sala liberada")
+	_comprobar(
+		programa.get_node_or_null("PartidaCronicas") is CronicasPatioJuramentos3D,
+		"siguiente sala real: Patio de los Juramentos",
+	)
 
 	var boton := programa.find_child("CerrarPrograma", true, false) as Button
 	_comprobar(boton != null, "cierre semanticamente visible")
