@@ -1,0 +1,11 @@
+{
+  "assets": {
+    "intruso": {
+      "name": "Televisor CRT fuera de lugar",
+      "description": "Prop de un sueño distinto, instanciado en la fase cuatro del sueño meta",
+      "path": "res://arte/sueno_fotorrealista/crt_condensacion.tscn",
+      "phase": 4,
+      "type": "PackedScene"
+    }
+  }
+}
