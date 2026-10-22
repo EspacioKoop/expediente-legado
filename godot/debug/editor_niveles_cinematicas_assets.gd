@@ -24,7 +24,15 @@ extends RefCounted
 
 ## Carpetas donde vive el contenido del juego. `.godot/` y los directorios de
 ## trabajo quedan fuera: no son assets, son caché del importador.
-const RAICES: Array[String] = ["res://assets/", "res://arte/", "res://espacios/", "res://escenas/"]
+const RAICES: Array[String] = [
+	"res://assets/",
+	"res://arte/",
+	"res://espacios/",
+	"res://escenas/",
+	"res://interactables/",
+	"res://rituales/",
+	"res://scenes/",
+]
 
 const EXTENSIONES := {
 	"modelo": [".glb", ".gltf", ".fbx", ".obj"],

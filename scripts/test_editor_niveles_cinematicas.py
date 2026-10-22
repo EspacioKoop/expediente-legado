@@ -926,6 +926,16 @@ func _probar():
         push_error("La biblioteca no ofrece assets del proyecto")
         quit(1)
         return
+    var assets_idx = load("res://debug/editor_niveles_cinematicas_assets.gd")
+    for ruta_escena in [
+        "res://scenes/meta_dream.tscn",
+        "res://interactables/libros/libro_interactivo.tscn",
+        "res://rituales/literarios/ritual_cita.tscn",
+    ]:
+        if not assets_idx.hay(ruta_escena):
+            push_error("La biblioteca omite el recurso de escena del juego '%s'" % ruta_escena)
+            quit(1)
+            return
     var filtros_assets = biblioteca.get_parent().get_parent().get_child(0)
     var selector_tipo = filtros_assets.get_child(1)
     for esperado in ["audio", "imagen", "material", "fuente", "modelo", "escena"]:
@@ -1004,7 +1014,6 @@ func _probar():
     selector_catalogo.select(indice_modelo)
     selector_catalogo.item_selected.emit(indice_modelo)
     var selector_nivel = panel_biblioteca.get("selector")
-    var assets_idx = load("res://debug/editor_niveles_cinematicas_assets.gd")
     var indice_colocable = -1
     for indice in selector_nivel.item_count:
         var ruta_asset = String(selector_nivel.get_item_metadata(indice))
