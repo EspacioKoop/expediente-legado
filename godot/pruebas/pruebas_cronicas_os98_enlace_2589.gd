@@ -71,7 +71,7 @@ func _probar() -> void:
 	_comprobar(sala.solicitar_salida(), "retorno desde final real del prólogo")
 	_comprobar(avisos[0] == 1, "solo cruzar umbral acredita visita")
 	await process_frame
-	_comprobar(not contenido.juego_en_curso(), "sala liberada tras regreso")
+	_comprobar(contenido.juego_en_curso(), "siguiente sala disponible en OS98")
 	_comprobar(contenido.prologos_locales() == 1, "solo cuenta local")
 
 	var cerrar := contenido.find_child("CerrarPrograma", true, false) as Button
