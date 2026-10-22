@@ -86,9 +86,12 @@ func inspeccionar_acta(indice: int) -> void:
 		_version_propuesta = indice
 		if is_instance_valid(_texto_objetivo):
 			_texto_objetivo.text += (
-				"\n\nActa %s propuesta. Contrástala con el Cronista Velado "
-				+ "o inspecciona otra acta para cambiar de versión."
-			) % ["I", "II", "III"][indice]
+				(
+					"\n\nActa %s propuesta. Contrástala con el Cronista Velado "
+					+ "o inspecciona otra acta para cambiar de versión."
+				)
+				% ["I", "II", "III"][indice]
+			)
 
 	_actualizar_interacciones()
 
