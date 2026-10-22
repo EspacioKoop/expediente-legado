@@ -119,6 +119,9 @@ func _al_finalizar(etapa_id: String) -> void:
 	var anterior := _sala
 	_sala = null
 	_etapa_activa = ""
+	# El nodo saliente sigue en el árbol hasta el fin del frame. Liberar el
+	# nombre permite que la siguiente sala conserve la ruta estable del visor.
+	anterior.name = "PartidaCronicasSaliente"
 	anterior.queue_free()
 
 	# Contrato OS98 preexistente: haber atravesado el Bastión acredita
