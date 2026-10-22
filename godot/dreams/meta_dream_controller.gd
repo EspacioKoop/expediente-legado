@@ -92,19 +92,8 @@ func _activar_fase(nueva: int) -> void:
 ## El registro fue versionado con su ficha de procedencia en #2439.
 ## Solo permite una escena 3D de arte ya registrada en el proyecto.
 func _montar_intruso() -> void:
-	if not FileAccess.file_exists(REGISTRO_INTRUSO):
-		return
-	var registro: Variant = JSON.parse_string(FileAccess.get_file_as_string(REGISTRO_INTRUSO))
-	if not (registro is Dictionary):
-		return
-	var assets: Dictionary = (registro as Dictionary).get("assets", {})
-	var entrada: Dictionary = assets.get("intruso", {})
-	if int(entrada.get("phase", 0)) != FASE_INTRUSO:
-		return
-	var ruta := String(entrada.get("path", ""))
-	if not ruta.begins_with("res://arte/sueno_fotorrealista/"):
-		return
-	if not ResourceLoader.exists(ruta, "PackedScene"):
+	var ruta := _ruta_intruso_registrada()
+	if ruta.is_empty() or not ResourceLoader.exists(ruta, "PackedScene"):
 		return
 	var recurso := ResourceLoader.load(ruta) as PackedScene
 	if recurso == null:
@@ -118,6 +107,20 @@ func _montar_intruso() -> void:
 	add_child(_intruso)
 	if _spawn != null:
 		_intruso.global_transform = _spawn.global_transform
+
+
+func _ruta_intruso_registrada() -> String:
+	if not FileAccess.file_exists(REGISTRO_INTRUSO):
+		return ""
+	var registro: Variant = JSON.parse_string(FileAccess.get_file_as_string(REGISTRO_INTRUSO))
+	if not (registro is Dictionary):
+		return ""
+	var assets: Dictionary = (registro as Dictionary).get("assets", {})
+	var entrada: Dictionary = assets.get("intruso", {})
+	if int(entrada.get("phase", 0)) != FASE_INTRUSO:
+		return ""
+	var ruta := String(entrada.get("path", ""))
+	return ruta if ruta.begins_with("res://arte/sueno_fotorrealista/") else ""
 
 
 func _limpiar_intruso() -> void:
