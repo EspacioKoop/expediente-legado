@@ -147,6 +147,32 @@ static func _biblioteca(
 	vista_previa.custom_minimum_size = Vector2(160, 90)
 	vista_previa.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
 	vista_previa.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	var vista_material := SubViewportContainer.new()
+	vista_material.name = "VistaPreviaMaterial"
+	vista_material.custom_minimum_size = Vector2(160, 90)
+	vista_material.stretch = true
+	vista_material.visible = false
+	var viewport_material := SubViewport.new()
+	viewport_material.size = Vector2i(320, 180)
+	viewport_material.own_world_3d = true
+	viewport_material.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE
+	vista_material.add_child(viewport_material)
+	var escena_material := Node3D.new()
+	var camara_material := Camera3D.new()
+	camara_material.position = Vector3(0, 0, 2.0)
+	camara_material.current = true
+	escena_material.add_child(camara_material)
+	var luz_material := DirectionalLight3D.new()
+	luz_material.rotation_degrees = Vector3(-35, 30, 0)
+	escena_material.add_child(luz_material)
+	var muestra_material := MeshInstance3D.new()
+	muestra_material.name = "MuestraMaterial"
+	var esfera := SphereMesh.new()
+	esfera.radius = 0.45
+	esfera.height = 0.9
+	muestra_material.mesh = esfera
+	escena_material.add_child(muestra_material)
+	viewport_material.add_child(escena_material)
 	var vista_fuente := Label.new()
 	vista_fuente.name = "VistaPreviaFuente"
 	vista_fuente.text = "Aa ÁÉ 0123 · Expediente SIGA-98"
@@ -167,6 +193,7 @@ static func _biblioteca(
 	columna.add_child(fila)
 	columna.add_child(tipo_asset)
 	columna.add_child(vista_previa)
+	columna.add_child(vista_material)
 	columna.add_child(vista_fuente)
 	columna.add_child(reproducir)
 	columna.add_child(asignar_sonido)
@@ -182,6 +209,8 @@ static func _biblioteca(
 		tipo_asset.text = "%s · %s" % [tipo, ruta]
 		vista_previa.texture = null
 		vista_previa.visible = tipo == "imagen"
+		vista_material.visible = false
+		muestra_material.material_override = null
 		vista_fuente.visible = tipo == "fuente"
 		reproducir.visible = tipo == "audio"
 		asignar_sonido.visible = (
@@ -198,6 +227,11 @@ static func _biblioteca(
 			var recurso: Resource = load(ruta)
 			if recurso is Texture2D:
 				vista_previa.texture = recurso
+		elif tipo == "material":
+			var recurso_material: Resource = load(ruta)
+			if recurso_material is BaseMaterial3D:
+				muestra_material.material_override = recurso_material
+				vista_material.visible = true
 		elif tipo == "fuente":
 			var recurso_fuente: Resource = load(ruta)
 			if recurso_fuente is Font:
@@ -227,6 +261,7 @@ static func _biblioteca(
 		else:
 			tipo_asset.text = ""
 			vista_previa.visible = false
+			vista_material.visible = false
 			vista_fuente.visible = false
 			reproducir.visible = false
 			asignar_sonido.visible = false
@@ -279,6 +314,8 @@ static func _biblioteca(
 		"copiar": copiar,
 		"tipo_asset": tipo_asset,
 		"vista_previa": vista_previa,
+		"vista_material": vista_material,
+		"muestra_material": muestra_material,
 		"vista_fuente": vista_fuente,
 		"reproducir": reproducir,
 		"asignar_sonido": asignar_sonido,

@@ -39,7 +39,8 @@ const EXTENSIONES := {
 	"escena": [".tscn", ".scn"],
 	"imagen": [".png", ".jpg", ".jpeg", ".webp", ".svg"],
 	"audio": [".ogg", ".wav", ".mp3"],
-	"material": [".tres", ".res", ".gdshader"],
+	"material": [".tres", ".res"],
+	"shader": [".gdshader"],
 	"fuente": [".ttf", ".otf"],
 }
 

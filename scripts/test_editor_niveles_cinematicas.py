@@ -938,7 +938,7 @@ func _probar():
             return
     var filtros_assets = biblioteca.get_parent().get_parent().get_child(0)
     var selector_tipo = filtros_assets.get_child(1)
-    for esperado in ["audio", "imagen", "material", "fuente", "modelo", "escena"]:
+    for esperado in ["audio", "imagen", "material", "shader", "fuente", "modelo", "escena"]:
         var existe_tipo = false
         for indice in selector_tipo.item_count:
             if selector_tipo.get_item_text(indice) == esperado:
@@ -987,6 +987,36 @@ func _probar():
         push_error("La biblioteca no carga la previsualización de imagen")
         quit(1)
         return
+    var indice_material = -1
+    for indice in selector_catalogo.item_count:
+        if selector_catalogo.get_item_text(indice) == "material":
+            indice_material = indice
+            break
+    if indice_material < 0:
+        push_error("La biblioteca no ofrece el filtro de materiales")
+        quit(1)
+        return
+    selector_catalogo.select(indice_material)
+    selector_catalogo.item_selected.emit(indice_material)
+    var buscador_material: LineEdit = panel_biblioteca.get("buscador")
+    buscador_material.text = "metal_pintado.tres"
+    panel_biblioteca["refrescar"].call()
+    var selector_material: OptionButton = panel_biblioteca.get("selector")
+    if selector_material.item_count != 1:
+        push_error("La biblioteca no encuentra el material de muestra")
+        quit(1)
+        return
+    selector_material.select(0)
+    selector_material.item_selected.emit(0)
+    if (
+        not panel_biblioteca["vista_material"].visible
+        or not panel_biblioteca["muestra_material"].material_override is StandardMaterial3D
+    ):
+        push_error("La biblioteca no previsualiza materiales 3D sobre la muestra")
+        quit(1)
+        return
+    buscador_material.text = ""
+    panel_biblioteca["refrescar"].call()
     var indice_fuente = -1
     for indice in selector_catalogo.item_count:
         if selector_catalogo.get_item_text(indice) == "fuente":
