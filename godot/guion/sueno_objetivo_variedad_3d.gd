@@ -19,6 +19,7 @@ const RADIO_ZONA := 1.2
 const RANGO_LUZ := 2.8
 const ENERGIA_LUZ_BASE := 0.16
 const ENERGIA_LUZ_ACTIVA := 0.52
+const RADIO_BALIZA := 0.9
 const TIEMPO_PERMANENCIA := 1.15
 
 var _objetivo_id := ""
@@ -27,6 +28,7 @@ var _actor: Node3D
 var _puntos: Array[Vector3] = []
 var _zonas: Array[Area3D] = []
 var _luces: Array[OmniLight3D] = []
+var _balizas: Array[MeshInstance3D] = []
 var _indice_secuencia := 0
 var _dentro_permanencia := false
 var _tiempo_permanencia := 0.0
@@ -78,6 +80,8 @@ func _physics_process(delta: float) -> void:
 		var proporcion := _tiempo_permanencia / TIEMPO_PERMANENCIA
 		_luces[0].light_energy = lerpf(ENERGIA_LUZ_BASE, ENERGIA_LUZ_ACTIVA, proporcion)
 		_luces[0].omni_range = lerpf(RANGO_LUZ, RANGO_LUZ * 1.25, proporcion)
+	if not _balizas.is_empty() and is_instance_valid(_balizas[0]):
+		_balizas[0].scale = Vector3.ONE * lerpf(0.86, 1.12, _tiempo_permanencia / TIEMPO_PERMANENCIA)
 	if _tiempo_permanencia >= TIEMPO_PERMANENCIA:
 		_completar()
 
@@ -104,11 +108,36 @@ func _crear_zona(indice: int, punto: Vector3) -> void:
 	luz.shadow_enabled = false
 	zona.add_child(luz)
 
+	# Anillo luminoso en el mundo (no HUD), sin física: el punto activo se
+	# reconoce incluso con el cursor capturado o de espaldas a la luz superior.
+	var baliza := _crear_baliza()
+	zona.add_child(baliza)
 	add_child(zona)
 	zona.body_entered.connect(_al_entrar.bind(indice))
 	zona.body_exited.connect(_al_salir.bind(indice))
 	_zonas.append(zona)
 	_luces.append(luz)
+	_balizas.append(baliza)
+
+
+func _crear_baliza() -> MeshInstance3D:
+	var baliza := MeshInstance3D.new()
+	baliza.name = "AnilloObjetivo"
+	baliza.position.y = 0.08
+	var malla := TorusMesh.new()
+	malla.inner_radius = RADIO_BALIZA * 0.78
+	malla.outer_radius = RADIO_BALIZA
+	malla.ring_segments = 24
+	malla.rings = 6
+	baliza.mesh = malla
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.albedo_color = Color(0.35, 0.67, 0.95, 0.62)
+	material.emission_enabled = true
+	material.emission = Color(0.24, 0.52, 0.88)
+	baliza.material_override = material
+	return baliza
 
 
 func _al_entrar(cuerpo: Node3D, indice: int) -> void:
@@ -157,20 +186,25 @@ func _actualizar_luces() -> void:
 	for indice in _luces.size():
 		var luz := _luces[indice]
 		var zona := _zonas[indice]
+		var baliza := _balizas[indice]
 		if not is_instance_valid(luz) or not is_instance_valid(zona):
 			continue
 		if _tipo in [TIPO_SECUENCIA, TIPO_RETORNO]:
 			var activa := indice == _indice_secuencia
 			luz.visible = true
 			luz.light_energy = ENERGIA_LUZ_ACTIVA if activa else ENERGIA_LUZ_BASE
+			baliza.visible = activa
 			zona.set_deferred("monitoring", true)
 		elif _tipo == TIPO_PERMANENCIA:
 			luz.visible = indice == 0
+			baliza.visible = indice == 0
+			baliza.scale = Vector3.ONE
 			luz.light_energy = ENERGIA_LUZ_BASE
 			luz.omni_range = RANGO_LUZ
 			zona.set_deferred("monitoring", indice == 0)
 		else:
 			luz.visible = indice == 0
+			baliza.visible = indice == 0
 			luz.light_energy = ENERGIA_LUZ_ACTIVA
 			zona.set_deferred("monitoring", indice == 0)
 
@@ -188,4 +222,7 @@ func _completar() -> void:
 		if is_instance_valid(luz):
 			luz.visible = true
 			luz.light_energy = ENERGIA_LUZ_ACTIVA
+	for baliza in _balizas:
+		if is_instance_valid(baliza):
+			baliza.visible = false
 	completado.emit(_objetivo_id)
