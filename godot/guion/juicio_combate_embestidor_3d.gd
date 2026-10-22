@@ -42,9 +42,16 @@ static func montar_linea(anfitrion: Node3D) -> MeshInstance3D:
 		marca.position = Vector3(
 			0.0, 0.03, -LINEA_ALCANCE * 0.5 if nombre == "MarcaOrigen" else LINEA_ALCANCE * 0.5
 		)
-		marca.material_override = FEEDBACK.material(
-			Color(0.98, 0.76, 0.24, 0.74) if nombre == "MarcaOrigen" else Color(1.0, 0.27, 0.16, 0.78),
-			true,
+		marca.material_override = (
+			FEEDBACK
+			. material(
+				(
+					Color(0.98, 0.76, 0.24, 0.74)
+					if nombre == "MarcaOrigen"
+					else Color(1.0, 0.27, 0.16, 0.78)
+				),
+				true,
+			)
 		)
 		linea.add_child(marca)
 	return linea
