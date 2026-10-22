@@ -179,11 +179,12 @@ func _siguiente() -> void:
 ## libera también cualquier hijo que todavía estuviera sonando.
 func _sonar_plano(plano: Dictionary) -> void:
 	var nombre := String(plano.get("sonido", ""))
-	if nombre.is_empty():
-		return
-	var tono := float(plano.get("sonido_tono", 1.0))
-	Sonido.sonar(self, nombre, tono)
+	if not nombre.is_empty():
+		var tono := float(plano.get("sonido_tono", 1.0))
+		Sonido.sonar(self, nombre, tono)
 
+	# Los acentos opt-in no dependen de que haya una pista convencional.
+	# Los planos de interrupción y tipografía suelen ser deliberadamente mudos.
 	# Acentos sonoros originales para efectos opt-in del montaje onírico 1998
 	if bool(plano.get("interrupcion_crt", false)):
 		Sonido.sonar(self, "crt_interrupcion", 1.0)
