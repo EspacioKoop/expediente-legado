@@ -919,12 +919,20 @@ VENTANA_FLOJA_FALTA_CALZO,La ventana vuelve a golpear el marco · necesitas algo
 VENTANA_FLOJA_ESTABILIZADA,Ventana calzada con %s
 PROYECCION_CAOS_PUBLICO,Público descontrolado
 CRONICAS_PC_TITULO,Crónicas de las Siete Esferas: El Hijo del Nigromante
-CRONICAS_PC_FINAL,Prólogo terminado. Este recuerdo no constituye evidencia para SIGA-98.
-CRONICAS_PC_SUBTITULO,CD-ROM ficticio · 1998 · Edición de demostración
-CRONICAS_PC_JUGAR,Jugar el prólogo
-CRONICAS_PC_INSTRUCCIONES,"Usa los controles habituales de Expediente Legado. Lee dos veces el atril, desafía al custodio y atraviesa el umbral. Tras perder un duelo puedes volver a intentarlo."
-CRONICAS_PC_DEMO,Demostración local: no altera la partida principal.
+CRONICAS_PC_FINAL,Capítulo completado. Reliquia obtenida: Sello del Custodio de los Siete Registros. Es ficción y no constituye prueba para SIGA-98.
+CRONICAS_PC_SUBTITULO,CD-ROM ficticio · 1998 · Campaña independiente
+CRONICAS_PC_JUGAR,Jugar el capítulo
+CRONICAS_PC_INSTRUCCIONES,"Explora las salas 3D, examina testimonios, resuelve mecanismos y vence a sus custodios. Cada umbral desbloquea la siguiente estancia. Puedes reintentar los desafíos."
+CRONICAS_PC_DEMO,Campaña local: no altera la partida principal.
 CRONICAS_PC_CERRAR,Cerrar programa
+CRONICAS_PC_SALA_PENDIENTE,Esta sala todavía no está disponible en el CD-ROM.
+CRONICAS_PC_CARGA_ERROR,No se pudo cargar la sala del capítulo.
+CRONICAS_PC_UMBRAL_ERROR,La sala carece de un umbral de salida jugable.
+CRONICAS_PC_REPETIR,Volver a jugar el capítulo
+CRONICAS_PC_CAPITULO_PAUSA,Capítulo en pausa: la siguiente sala no está disponible.
+CRONICAS_PC_MENU,Volver al menú
+CRONICAS_PC_CHECKPOINT,Punto de paso local: continuarás desde el comienzo de la sala actual. El avance se perderá al cerrar el CD-ROM.
+CRONICAS_PC_CONTINUAR,Continuar capítulo
 ENTRADA49_ACCESO,Entrada 49
 ENTRADA49_TITULO,IMPORTACIÓN PATRIMONIAL · ENTRADA 49
 COMPA_FIRMA_2742_CUNADO_IBARRA,"Has firmado contra Ibarra. El expediente ya aparece cerrado, pero no le han podido notificar la responsiva. El sello ha llegado antes que la carta."

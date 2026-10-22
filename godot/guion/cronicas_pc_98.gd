@@ -1,25 +1,44 @@
-## Ejecutable ficticio de PC de 1998 de Cronicas (#2589).
-## El progreso aqui es local: no altera Partida, SIGA, ni semillas oniricas.
+## Ejecutable ficticio de PC de 1998 de Crónicas (#2589, #2744).
+## Su campaña reutiliza diez salas 3D con salidas verificadas. No escribe
+## Partida, SIGA, semillas oníricas ni hechos reales del expediente.
 class_name CronicasPc98
 extends Control
 
 signal cerrar_solicitado
 signal prologo_completado
+signal capitulo_completado
 
-const ESCENA_BASTION := preload("res://escenas/cronicas/bastion_nombres_ausentes.tscn")
 const TITULO := "CRONICAS_PC_TITULO"
+const NOMBRES_ETAPA := {
+	"bastion": "Bastión de los Nombres Ausentes",
+	"patio_juramentos": "Patio de los Juramentos",
+	"scriptorium_versiones": "Scriptorium de las Versiones",
+	"torre_tiempo": "Torre del Tiempo",
+	"galeria_identidades": "Galería de Identidades",
+	"puente_ausencia": "Puente de la Ausencia",
+	"estuario_maestro": "Estuario del Maestro",
+	"umbral_heredera": "Umbral de la Heredera",
+	"archivo_cronista": "Archivo del Cronista",
+	"camara_guardian": "Cámara del Guardián",
+}
 
 var modo_ventana_os98 := false
 var _marco_3d: SubViewportContainer
 var _portada: Control
 var _boton_jugar: Button
 var _estado: Label
-var _sala: CronicasBastion3D
+var _indicador_etapa: Label
+var _boton_menu: Button
+var _sala: Node3D
+var _etapa_activa := ""
+var _sesion: Dictionary = {}
 var _prologos_locales := 0
+var _recompensas_locales: Array[String] = []
 
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_sesion = CronicasCapituloRutas.nueva_sesion()
 	_montar_portada()
 	visibility_changed.connect(_al_visibilidad_cambiada)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -34,40 +53,118 @@ func prologos_locales() -> int:
 	return _prologos_locales
 
 
+func recompensas_locales() -> Array[String]:
+	return _recompensas_locales.duplicate()
+
+
+## El avance solo vive en la instancia del CD-ROM; no acredita progreso SIGA.
+func estado_capitulo_local() -> Dictionary:
+	return _sesion.duplicate(true)
+
+
 func comenzar() -> bool:
 	if juego_en_curso():
 		return false
-	_sala = ESCENA_BASTION.instantiate() as CronicasBastion3D
-	if _sala == null:
+	var siguiente := CronicasCapituloRutas.etapa_actual(_sesion)
+	if String(siguiente.get("estado", "")) == CronicasCapituloRutas.ESTADO_TERMINADO:
+		_sesion = CronicasCapituloRutas.nueva_sesion()
+	return _abrir_etapa_actual()
+
+
+func _abrir_etapa_actual() -> bool:
+	var etapa := CronicasCapituloRutas.etapa_actual(_sesion)
+	if String(etapa.get("estado", "")) != CronicasCapituloRutas.ESTADO_JUGABLE:
+		_volver_a_portada(tr("CRONICAS_PC_SALA_PENDIENTE"))
 		return false
+
+	var recurso := ResourceLoader.load(String(etapa["escena"])) as PackedScene
+	if recurso == null:
+		_volver_a_portada(tr("CRONICAS_PC_CARGA_ERROR"))
+		return false
+
+	var instancia := recurso.instantiate()
+	if not instancia is Node3D or not instancia.has_signal("completado"):
+		instancia.free()
+		_volver_a_portada(tr("CRONICAS_PC_UMBRAL_ERROR"))
+		return false
+
+	_sala = instancia as Node3D
+	_etapa_activa = String(etapa["id"])
 	_sala.name = "PartidaCronicas"
-	_sala.completado.connect(_al_finalizar)
+	_sala.connect("completado", Callable(self, "_al_finalizar").bind(_etapa_activa))
 	if modo_ventana_os98:
-		_montar_visor_3d()
+		if not is_instance_valid(_marco_3d):
+			_montar_visor_3d()
+		else:
+			var viewport := _marco_3d.get_node("ViewportCronicas") as SubViewport
+			viewport.add_child(_sala)
 	else:
 		add_child(_sala)
+
 	_portada.hide()
+	_mostrar_etapa(int(etapa["indice"]), _etapa_activa)
 	return true
 
 
-func _al_finalizar() -> void:
-	if not juego_en_curso():
+## Solo se acepta la salida real de la sala activa. La misma señal no puede
+## registrar otra etapa ni premiar al jugador por abrir o cerrar el programa.
+func _al_finalizar(etapa_id: String) -> void:
+	if not juego_en_curso() or etapa_id != _etapa_activa:
 		return
-	_prologos_locales += 1
-	_sala.queue_free()
+	var resultado := CronicasCapituloRutas.registrar_salida(_sesion, etapa_id, true)
+	if not bool(resultado.get("registrado", false)):
+		return
+
+	_sesion = resultado["sesion"]
+	var anterior := _sala
 	_sala = null
+	_etapa_activa = ""
+	# El nodo saliente sigue en el árbol hasta el fin del frame. Liberar el
+	# nombre permite que la siguiente sala conserve la ruta estable del visor.
+	anterior.name = "PartidaCronicasSaliente"
+	anterior.queue_free()
+
+	# Contrato OS98 preexistente: haber atravesado el Bastión acredita
+	# el prólogo, no las nueve etapas posteriores ni un hecho de SIGA.
+	if etapa_id == "bastion":
+		_prologos_locales += 1
+		prologo_completado.emit()
+
+	var siguiente: Dictionary = resultado["siguiente"]
+	if String(siguiente.get("estado", "")) == CronicasCapituloRutas.ESTADO_JUGABLE:
+		call_deferred("_abrir_etapa_actual")
+		return
+
+	_cerrar_visor()
+	if String(siguiente.get("estado", "")) == CronicasCapituloRutas.ESTADO_TERMINADO:
+		if not _recompensas_locales.has("sello_custodio_siete_registros"):
+			_recompensas_locales.append("sello_custodio_siete_registros")
+		_volver_a_portada(tr("CRONICAS_PC_FINAL"))
+		_boton_jugar.text = tr("CRONICAS_PC_REPETIR")
+		capitulo_completado.emit()
+	else:
+		_volver_a_portada(tr("CRONICAS_PC_CAPITULO_PAUSA"))
+
+
+func _volver_a_portada(mensaje: String) -> void:
+	_portada.show()
+	if is_instance_valid(_indicador_etapa):
+		_indicador_etapa.hide()
+	if is_instance_valid(_boton_menu):
+		_boton_menu.hide()
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	_estado.text = mensaje
+	_boton_jugar.grab_focus.call_deferred()
+
+
+func _cerrar_visor() -> void:
 	if is_instance_valid(_marco_3d):
 		_marco_3d.queue_free()
 	_marco_3d = null
-	_portada.show()
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	_estado.text = tr("CRONICAS_PC_FINAL")
-	_boton_jugar.grab_focus.call_deferred()
-	prologo_completado.emit()
 
 
 ## SubViewport propio: Crónicas 3D no debe dibujarse sobre el puesto real.
-## El programa standalone continúa usando el viewport original.
+## Cada etapa reutiliza el mismo visor, sin cargar otro mundo de SIGA.
 func _montar_visor_3d() -> void:
 	_marco_3d = SubViewportContainer.new()
 	_marco_3d.name = "Area3DCronicas"
@@ -83,6 +180,70 @@ func _montar_visor_3d() -> void:
 	viewport.handle_input_locally = true
 	_marco_3d.add_child(viewport)
 	viewport.add_child(_sala)
+
+
+func _mostrar_etapa(indice: int, etapa_id: String) -> void:
+	if not is_instance_valid(_indicador_etapa):
+		_indicador_etapa = Label.new()
+		_indicador_etapa.name = "MarcadorCapitulo"
+		_indicador_etapa.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_indicador_etapa.anchor_left = 0.55
+		_indicador_etapa.anchor_right = 0.98
+		_indicador_etapa.anchor_top = 0.01
+		_indicador_etapa.anchor_bottom = 0.09
+		_indicador_etapa.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		_indicador_etapa.add_theme_font_size_override("font_size", 22)
+		_indicador_etapa.add_theme_color_override("font_outline_color", Color.BLACK)
+		_indicador_etapa.add_theme_constant_override("outline_size", 4)
+		add_child(_indicador_etapa)
+	_indicador_etapa.text = (
+		"%d/%d · %s"
+		% [
+			indice + 1,
+			CronicasCapituloRutas.ETAPAS.size(),
+			String(NOMBRES_ETAPA.get(etapa_id, etapa_id)),
+		]
+	)
+	_indicador_etapa.show()
+	if not is_instance_valid(_boton_menu):
+		_boton_menu = Button.new()
+		_boton_menu.name = "VolverAlMenu"
+		_boton_menu.text = tr("CRONICAS_PC_MENU")
+		_boton_menu.add_theme_font_size_override("font_size", 22)
+		_boton_menu.anchor_left = 0.76
+		_boton_menu.anchor_right = 0.97
+		_boton_menu.anchor_top = 0.93
+		_boton_menu.anchor_bottom = 0.99
+		_boton_menu.pressed.connect(_salir_al_menu)
+		add_child(_boton_menu)
+	_boton_menu.show()
+
+
+## Si la sala no consumió ESC, el jugador puede regresar al menú aunque
+## tenga capturado el cursor para caminar. Esto evita depender de pulsar el
+## botón de OS98 con un ratón que el mundo 3D mantiene oculto.
+func _unhandled_input(evento: InputEvent) -> void:
+	# Una ventana OS98 minimizada no debe consumir Escape ni abandonar la sala.
+	if not is_visible_in_tree():
+		return
+	if not juego_en_curso() or not evento.is_action_pressed("ui_cancel"):
+		return
+	_salir_al_menu()
+	get_viewport().set_input_as_handled()
+
+
+## Al salir al menú se conserva la última etapa completada, pero se reinicia
+## el desafío actual. Ningún progreso se escribe en los guardados SIGA.
+func _salir_al_menu() -> void:
+	if not juego_en_curso():
+		return
+	var anterior := _sala
+	_sala = null
+	_etapa_activa = ""
+	anterior.queue_free()
+	_cerrar_visor()
+	_volver_a_portada(tr("CRONICAS_PC_CHECKPOINT"))
+	_boton_jugar.text = tr("CRONICAS_PC_CONTINUAR")
 
 
 ## Minimizar o cerrar OS98 libera el cursor y suspende el duelo local.
