@@ -534,7 +534,9 @@ func _montar_detalle_cinematica() -> void:
 		var selector_escenario := EDITOR_CATALOGO.selector_escenario(_plano_decorado, _estado)
 		_detalle.add_child(selector_escenario["fila"])
 		_detalle.add_child(_etiqueta("Objetos del decorado:"))
-		var biblioteca_decorado := EDITOR_CATALOGO.biblioteca_decorado(_plano_decorado, _estado)
+		var biblioteca_decorado := EDITOR_CATALOGO.biblioteca_decorado(
+			_plano_decorado, _estado, _plano_sonido
+		)
 		_biblioteca_mueble = biblioteca_decorado["selector"]
 		_detalle.add_child(biblioteca_decorado["fila"])
 

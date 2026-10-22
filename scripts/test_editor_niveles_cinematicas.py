@@ -790,6 +790,46 @@ func _probar():
         return
     editor.call("_al_seleccionar", 0)
     await process_frame
+    var selector_audio_plano = editor.get("_biblioteca_mueble")
+    var biblioteca_audio_plano = selector_audio_plano.get_parent().get_parent()
+    var filtros_audio_plano = biblioteca_audio_plano.get_child(0)
+    var tipos_audio_plano = filtros_audio_plano.get_child(1)
+    var indice_tipo_audio = -1
+    for indice in tipos_audio_plano.item_count:
+        if tipos_audio_plano.get_item_text(indice) == "audio":
+            indice_tipo_audio = indice
+            break
+    if indice_tipo_audio < 0:
+        push_error("La biblioteca del plano no ofrece el filtro de audio")
+        quit(1)
+        return
+    tipos_audio_plano.select(indice_tipo_audio)
+    tipos_audio_plano.item_selected.emit(indice_tipo_audio)
+    var buscador_audio_plano = filtros_audio_plano.get_child(2)
+    buscador_audio_plano.text = "ui_pulsar_01"
+    buscador_audio_plano.text_changed.emit("ui_pulsar_01")
+    var indice_audio_plano = -1
+    for indice in selector_audio_plano.item_count:
+        if String(selector_audio_plano.get_item_metadata(indice)) == "res://assets/audio/chip/ui_pulsar_01.ogg":
+            indice_audio_plano = indice
+            break
+    if indice_audio_plano < 0:
+        push_error("No se encontró el sonido del catálogo en el explorador de cinemáticas")
+        quit(1)
+        return
+    selector_audio_plano.select(indice_audio_plano)
+    selector_audio_plano.item_selected.emit(indice_audio_plano)
+    var boton_asignar_sonido = biblioteca_audio_plano.get_node("BotonAsignarSonidoPlano")
+    if not boton_asignar_sonido.visible:
+        push_error("Un sonido catalogado no se ofrece para asignar al plano")
+        quit(1)
+        return
+    boton_asignar_sonido.pressed.emit()
+    editor.call("_aplicar_plano")
+    if editor.get("_doc_actual")["planos"][0].get("sonido", "") != "pulsar":
+        push_error("El sonido elegido no se asignó al plano con su clave runtime")
+        quit(1)
+        return
     editor.call("_guardar")
     editor.call("_cargar")
     var decorado_reabierto: Dictionary = editor.get("_doc_actual")["planos"][0]["decorado"]

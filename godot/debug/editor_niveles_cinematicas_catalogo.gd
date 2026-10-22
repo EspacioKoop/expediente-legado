@@ -5,6 +5,7 @@ const CONTRATO := preload("res://debug/editor_niveles_cinematicas_contrato.gd")
 const ESPACIOS_CATALOGO := preload("res://guion/espacios_catalogo.gd")
 const MODELOS := preload("res://guion/modelos.gd")
 const ASSETS := preload("res://debug/editor_niveles_cinematicas_assets.gd")
+const SONIDO := preload("res://guion/sonido.gd")
 
 ## Cuántos assets se vuelcan en el desplegable de una vez. El proyecto tiene
 ## cientos y un `OptionButton` con todos no se navega: el filtro es la
@@ -44,7 +45,9 @@ static func selector_escenario(texto: TextEdit, estado: Label) -> Dictionary:
 ## es cierto si la lista la hace el disco y no una tabla que alguien tiene que
 ## recordar ampliar. Lo que se escribe en el documento es la ruta `res://…`, que
 ## el runtime resuelve igual que el editor.
-static func biblioteca_decorado(texto: TextEdit, estado: Label) -> Dictionary:
+static func biblioteca_decorado(
+	texto: TextEdit, estado: Label, campo_sonido: LineEdit = null
+) -> Dictionary:
 	var al_agregar := func(ruta: String) -> void:
 		var resultado := CONTRATO.agregar_asset_a_decorado(texto.text, ruta)
 		if not String(resultado.get("error", "")).is_empty():
@@ -61,7 +64,14 @@ static func biblioteca_decorado(texto: TextEdit, estado: Label) -> Dictionary:
 			return
 		texto.text = JSON.stringify(resultado["decorado"], "  ")
 		estado.text = "Personaje añadido; edita pos/giro en el decorado y pulsa Aplicar"
-	return _biblioteca("Añadir al decorado", al_agregar, al_agregar_personaje)
+	var al_asignar_sonido := func(ruta: String) -> void:
+		var clave := clave_sonido_para_ruta(ruta)
+		if campo_sonido == null or clave.is_empty():
+			estado.text = "Ese audio no está en el catálogo de sonidos de cinemática"
+			return
+		campo_sonido.text = clave
+		estado.text = "Sonido '%s' asignado al plano; pulsa Aplicar" % clave
+	return _biblioteca("Añadir al decorado", al_agregar, al_agregar_personaje, al_asignar_sonido)
 
 
 ## Inserta el asset elegido, refresca el documento y deja su tamaño editable.
@@ -91,7 +101,10 @@ static func biblioteca_nivel(al_agregar: Callable) -> Dictionary:
 
 
 static func _biblioteca(
-	texto_boton: String, al_agregar: Callable, al_agregar_personaje: Callable = Callable()
+	texto_boton: String,
+	al_agregar: Callable,
+	al_agregar_personaje: Callable = Callable(),
+	al_asignar_sonido: Callable = Callable()
 ) -> Dictionary:
 	var columna := VBoxContainer.new()
 	var filtros := HBoxContainer.new()
@@ -144,6 +157,11 @@ static func _biblioteca(
 	reproducir.name = "BotonReproducirAsset"
 	reproducir.text = "▶ Reproducir audio"
 	reproducir.visible = false
+	var asignar_sonido := Button.new()
+	asignar_sonido.name = "BotonAsignarSonidoPlano"
+	asignar_sonido.text = "Usar audio en este plano"
+	asignar_sonido.visible = false
+	asignar_sonido.disabled = not al_asignar_sonido.is_valid()
 
 	columna.add_child(filtros)
 	columna.add_child(fila)
@@ -151,6 +169,7 @@ static func _biblioteca(
 	columna.add_child(vista_previa)
 	columna.add_child(vista_fuente)
 	columna.add_child(reproducir)
+	columna.add_child(asignar_sonido)
 	columna.add_child(audio)
 
 	var todos: Array = ASSETS.indice()
@@ -165,6 +184,11 @@ static func _biblioteca(
 		vista_previa.visible = tipo == "imagen"
 		vista_fuente.visible = tipo == "fuente"
 		reproducir.visible = tipo == "audio"
+		asignar_sonido.visible = (
+			al_asignar_sonido.is_valid()
+			and tipo == "audio"
+			and not clave_sonido_para_ruta(ruta).is_empty()
+		)
 		boton_personaje.visible = (
 			al_agregar_personaje.is_valid()
 			and not CONTRATO.modelo_personaje_desde_ruta(ruta).is_empty()
@@ -205,6 +229,7 @@ static func _biblioteca(
 			vista_previa.visible = false
 			vista_fuente.visible = false
 			reproducir.visible = false
+			asignar_sonido.visible = false
 			boton_personaje.visible = false
 		if encontrados.is_empty():
 			conteo.text = "sin resultados"
@@ -218,6 +243,12 @@ static func _biblioteca(
 	buscador.text_changed.connect(func(_texto: String): refrescar.call())
 	selector.item_selected.connect(actualizar_previa)
 	reproducir.pressed.connect(func(): audio.play())
+	asignar_sonido.pressed.connect(
+		func():
+			var ruta := ruta_seleccionada(selector)
+			if not ruta.is_empty() and al_asignar_sonido.is_valid():
+				al_asignar_sonido.call(ruta)
+	)
 	copiar.pressed.connect(
 		func():
 			var ruta := ruta_seleccionada(selector)
@@ -250,12 +281,25 @@ static func _biblioteca(
 		"vista_previa": vista_previa,
 		"vista_fuente": vista_fuente,
 		"reproducir": reproducir,
+		"asignar_sonido": asignar_sonido,
 		"audio": audio,
 		"buscador": buscador,
 		"carpetas": carpetas,
 		"tipos": tipos,
 		"refrescar": refrescar,
 	}
+
+
+static func clave_sonido_para_ruta(ruta: String) -> String:
+	for clave in SONIDO.CATALOGO:
+		if ruta == SONIDO.RUTA + String(SONIDO.CATALOGO[clave]):
+			return String(clave)
+	for clave in SONIDO.FAMILIAS:
+		var ficheros: Array = SONIDO.FAMILIAS[clave]
+		for fichero in ficheros:
+			if ruta == SONIDO.RUTA + String(fichero):
+				return String(clave)
+	return ""
 
 
 ## La ruta del asset elegido. Va en los metadatos porque la etiqueta visible es
