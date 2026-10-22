@@ -81,7 +81,9 @@ func _physics_process(delta: float) -> void:
 		_luces[0].light_energy = lerpf(ENERGIA_LUZ_BASE, ENERGIA_LUZ_ACTIVA, proporcion)
 		_luces[0].omni_range = lerpf(RANGO_LUZ, RANGO_LUZ * 1.25, proporcion)
 	if not _balizas.is_empty() and is_instance_valid(_balizas[0]):
-		_balizas[0].scale = Vector3.ONE * lerpf(0.86, 1.12, _tiempo_permanencia / TIEMPO_PERMANENCIA)
+		_balizas[0].scale = (
+			Vector3.ONE * lerpf(0.86, 1.12, _tiempo_permanencia / TIEMPO_PERMANENCIA)
+		)
 	if _tiempo_permanencia >= TIEMPO_PERMANENCIA:
 		_completar()
 
