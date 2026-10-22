@@ -354,9 +354,8 @@ func _refrescar_detalle() -> void:
 
 
 func _montar_detalle_nivel() -> void:
-	_detalle.add_child(_etiqueta("Colocación / Elemento de nivel"))
-	_detalle.add_child(_etiqueta("Biblioteca de muebles del juego:"))
-	var biblioteca := CONTRATO.crear_biblioteca_muebles(_anadir_mueble_catalogado)
+	_detalle.add_child(_etiqueta("Biblioteca de assets del juego:"))
+	var biblioteca := EDITOR_CATALOGO.biblioteca_nivel(_anadir_asset_al_nivel)
 	_biblioteca_mueble = biblioteca["selector"]
 	_detalle.add_child(biblioteca["fila"])
 
@@ -545,18 +544,8 @@ func _montar_detalle_cinematica() -> void:
 	_boton_accion(btns, "Limpiar", _limpiar_detalle_cinematica)
 
 
-func _anadir_mueble_catalogado() -> void:
-	if _biblioteca_mueble == null or _biblioteca_mueble.item_count == 0:
-		return
-	var recurso := _biblioteca_mueble.get_item_text(_biblioteca_mueble.selected)
-	_editando_indice = CONTRATO.agregar_mueble_a_nivel(_doc_actual, recurso)
-	if _editando_indice < 0:
-		return
-	_refrescar_lista()
-	_lista.select(_editando_indice)
-	_refrescar_detalle()
-	_refrescar_diagnostico()
-	_estado.text = "Mueble catalogado añadido; ajusta su transformación y guarda"
+func _anadir_asset_al_nivel(ruta: String = "") -> void:
+	EDITOR_CATALOGO.anadir_a_nivel(self, ruta)
 
 
 func _aplicar_colocacion() -> void:

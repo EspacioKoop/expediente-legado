@@ -3,6 +3,10 @@ extends RefCounted
 const CATALOGO_ESPACIOS := preload("res://guion/espacios_catalogo.gd")
 const MODELO_CINEMATICA := preload("res://guion/cinematica.gd")
 const MODELOS := preload("res://guion/modelos.gd")
+const ASSETS := preload("res://debug/editor_niveles_cinematicas_assets.gd")
+## Lo que admite un id de documento: viaja a un nombre de archivo, así que todo
+## lo demás se sustituye por un guion bajo en vez de rechazar el asset.
+const CARACTERES_ID := "abcdefghijklmnopqrstuvwxyz0123456789_"
 const FORMATO_NIVEL := "siga98-nivel-v1"
 const FORMATO_CINEMATICA := "siga98-cinematica-v1"
 const TIPOS_RECURSO := [
@@ -359,6 +363,8 @@ static func nuevo_bulto(recurso: String, numero: int) -> Dictionary:
 
 
 static func agregar_mueble_a_nivel(datos: Dictionary, recurso: String) -> int:
+	if recurso.begins_with("res://"):
+		return agregar_asset_a_nivel(datos, recurso)
 	if not MODELOS.MATERIALES_MUEBLE.has(recurso) or not MODELOS.hay(recurso):
 		return -1
 	var colocaciones: Variant = datos.get("colocaciones", [])
@@ -370,6 +376,8 @@ static func agregar_mueble_a_nivel(datos: Dictionary, recurso: String) -> int:
 
 
 static func agregar_mueble_a_decorado(texto: String, recurso: String) -> Dictionary:
+	if recurso.begins_with("res://"):
+		return agregar_asset_a_decorado(texto, recurso)
 	if not MODELOS.MATERIALES_MUEBLE.has(recurso) or not MODELOS.hay(recurso):
 		return {"error": "Modelo fuera de la biblioteca catalogada"}
 	var decorado: Variant = JSON.parse_string(texto) if not texto.strip_edges().is_empty() else {}
@@ -379,6 +387,81 @@ static func agregar_mueble_a_decorado(texto: String, recurso: String) -> Diction
 	if not bultos is Array:
 		return {"error": "Decorado: bultos debe ser una lista"}
 	bultos.append(nuevo_bulto(recurso, bultos.size() + 1))
+	decorado["bultos"] = bultos
+	return {"decorado": decorado, "error": ""}
+
+
+## Un asset cualquiera del proyecto como colocación de nivel (#2942).
+##
+## El `tam` no se inventa: se mide el AABB real del asset, porque `Modelos`
+## encaja la pieza en el `tam` declarado y un tamaño de catálogo ajeno la
+## deformaría. Si no se puede medir —un recurso sin mallas— se cae a un metro
+## cúbico, que es editable a mano, en vez de a cero.
+static func nuevo_asset(ruta: String, numero: int) -> Dictionary:
+	var tam := ASSETS.medida(ruta)
+	if tam == Vector3.ZERO:
+		tam = Vector3.ONE
+	var posicion := Vector3(0.0, tam.y / 2.0, 0.0)
+	return {
+		"tipo": "modelo",
+		"id": "%s_%03d" % [id_desde_ruta(ruta), numero],
+		"recurso": ruta,
+		"origen": "biblioteca_proyecto",
+		"transform":
+		{
+			"posicion": [posicion.x, posicion.y, posicion.z],
+			"rotacion": [0.0, 0.0, 0.0],
+			"escala": [1.0, 1.0, 1.0],
+		},
+		"extra": {"tam": [tam.x, tam.y, tam.z]},
+	}
+
+
+static func nuevo_bulto_asset(ruta: String, numero: int) -> Dictionary:
+	var colocacion := nuevo_asset(ruta, numero)
+	var transform: Dictionary = colocacion["transform"]
+	return {
+		"id": colocacion["id"],
+		"modelo": ruta,
+		"pos": transform["posicion"],
+		"tam": colocacion["extra"]["tam"],
+		"color": [0.45, 0.44, 0.42, 1.0],
+	}
+
+
+## Un identificador de documento a partir de la ruta del asset. El id viaja a un
+## nombre de archivo, así que se queda solo con lo que `id_ruta_valido` admite.
+static func id_desde_ruta(ruta: String) -> String:
+	var base := ruta.get_file().get_basename().to_lower()
+	var limpio := ""
+	for indice in base.length():
+		var caracter := base[indice]
+		limpio += caracter if CARACTERES_ID.contains(caracter) else "_"
+	limpio = limpio.lstrip("_")
+	return limpio if not limpio.is_empty() else "asset"
+
+
+static func agregar_asset_a_nivel(datos: Dictionary, ruta: String) -> int:
+	if not ASSETS.es_colocable(ruta):
+		return -1
+	var colocaciones: Variant = datos.get("colocaciones", [])
+	if not colocaciones is Array:
+		return -1
+	colocaciones.append(nuevo_asset(ruta, colocaciones.size() + 1))
+	datos["colocaciones"] = colocaciones
+	return colocaciones.size() - 1
+
+
+static func agregar_asset_a_decorado(texto: String, ruta: String) -> Dictionary:
+	if not ASSETS.es_colocable(ruta):
+		return {"error": "El asset '%s' no es una pieza 3D colocable" % ruta}
+	var decorado: Variant = JSON.parse_string(texto) if not texto.strip_edges().is_empty() else {}
+	if not decorado is Dictionary:
+		return {"error": "Decorado: JSON inválido; corrígelo antes de añadir objetos"}
+	var bultos: Variant = decorado.get("bultos", [])
+	if not bultos is Array:
+		return {"error": "Decorado: bultos debe ser una lista"}
+	bultos.append(nuevo_bulto_asset(ruta, bultos.size() + 1))
 	decorado["bultos"] = bultos
 	return {"decorado": decorado, "error": ""}
 

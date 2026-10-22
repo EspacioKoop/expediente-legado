@@ -195,11 +195,14 @@ func _crear_representacion(entrada: Dictionary, indice: int) -> Node3D:
 	if tam_dato is Array and tam_dato.size() == 3:
 		tam = Vector3(float(tam_dato[0]), float(tam_dato[1]), float(tam_dato[2]))
 	var recurso := String(entrada.get("recurso", entrada.get("modelo", "")))
-	var es_mueble := MODELOS.MATERIALES_MUEBLE.has(recurso) and MODELOS.hay(recurso)
-	if es_mueble and MODELOS.mueble(raiz, recurso, tam, Color(0.45, 0.44, 0.42)):
+	# Cualquier asset del proyecto, no solo los cinco nombres catalogados: la
+	# previsualización tiene que mostrar lo mismo que montará `Espacio3D` en el
+	# juego, y ese resuelve el modelo con el mismo `Modelos.hay/cargar`.
+	var hay_modelo := not recurso.is_empty() and MODELOS.hay(recurso)
+	if hay_modelo and MODELOS.mueble(raiz, recurso, tam, Color(0.45, 0.44, 0.42)):
 		return raiz
-	if MODELOS.MATERIALES_MUEBLE.has(recurso):
-		push_warning("No se pudo cargar el modelo catalogado '%s'; se muestra una caja" % recurso)
+	if hay_modelo:
+		push_warning("No se pudo cargar el modelo '%s'; se muestra una caja" % recurso)
 	var malla := MeshInstance3D.new()
 	malla.name = "Representacion"
 	var cubo := BoxMesh.new()

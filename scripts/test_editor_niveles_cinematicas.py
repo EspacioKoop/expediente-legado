@@ -761,9 +761,13 @@ func _probar():
         push_error("La biblioteca no ofrece los modelos reales existentes")
         quit(1)
         return
-    editor.call("_anadir_mueble_catalogado")
+    if biblioteca.get_item_metadata(biblioteca.selected) == null:
+        push_error("La biblioteca no expone la ruta del asset en sus metadatos")
+        quit(1)
+        return
+    editor.call("_anadir_asset_al_nivel")
     if editor.get("_doc_actual")["colocaciones"].size() != 2 or editor.get("_doc_actual")["colocaciones"][1].get("tipo") != "modelo":
-        push_error("Añadir mueble no creó una colocación de modelo serializable")
+        push_error("Añadir un asset no creó una colocación de modelo serializable")
         quit(1)
         return
     editor.call("_guardar")
@@ -886,6 +890,221 @@ func _probar():
         os.unlink(script_path)
 
 
+def probar_indice_assets():
+    """El índice se construye del disco y cubre todo el contenido, no una tabla."""
+    script = r'''
+extends SceneTree
+
+func _init():
+    var assets = load("res://debug/editor_niveles_cinematicas_assets.gd")
+    var todos = assets.indice()
+    if todos.size() < 100:
+        print("ERROR: el índice solo encontró %d assets" % todos.size())
+        quit(1)
+        return
+    var colocables = assets.filtrar("", "", "", true)
+    if colocables.size() < 50:
+        print("ERROR: solo %d assets colocables" % colocables.size())
+        quit(1)
+        return
+    # Tiene que haber piezas fuera de assets/modelos/: ese era justo el límite
+    # de la biblioteca anterior, que solo resolvía nombres de esa carpeta.
+    var de_arte = assets.filtrar("", "", "res://arte/", true)
+    if de_arte.is_empty():
+        print("ERROR: el índice no ofrece piezas de arte/")
+        quit(1)
+        return
+    var tipos = assets.tipos()
+    for esperado in ["modelo", "escena", "imagen", "audio"]:
+        if not tipos.has(esperado):
+            print("ERROR: el índice no clasifica el tipo '%s': %s" % [esperado, tipos])
+            quit(1)
+            return
+    if assets.carpetas(colocables).size() < 10:
+        print("ERROR: el índice agrupa en muy pocas carpetas")
+        quit(1)
+        return
+    # El filtro de texto busca en la ruta completa.
+    var filtrado = assets.filtrar("", "modelo", "household_goods", true)
+    if filtrado.is_empty():
+        print("ERROR: el filtro por texto no encuentra household_goods")
+        quit(1)
+        return
+    for entrada in filtrado:
+        if not String(entrada["ruta"]).contains("household_goods"):
+            print("ERROR: el filtro devolvió algo ajeno: %s" % entrada["ruta"])
+            quit(1)
+            return
+    # Una imagen está en el índice pero no se coloca como pieza 3D.
+    var imagenes = assets.filtrar("", "imagen", "", false)
+    if imagenes.is_empty():
+        print("ERROR: el índice no lista imágenes")
+        quit(1)
+        return
+    if assets.es_colocable(String(imagenes[0]["ruta"])):
+        print("ERROR: una imagen no debe ser colocable como bulto")
+        quit(1)
+        return
+    var etiqueta = assets.etiqueta(filtrado[0])
+    if not etiqueta.contains("/"):
+        print("ERROR: la etiqueta no distingue la carpeta de origen: %s" % etiqueta)
+        quit(1)
+        return
+    print("OK: indice %d assets, %d colocables" % [todos.size(), colocables.size()])
+    quit(0)
+'''
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".gd", delete=False) as f:
+        f.write(script)
+        script_path = f.name
+    try:
+        code, out, err = godot_headless(script_path)
+        if code != 0:
+            raise AssertionError("Índice de assets falló:\n{}\n{}".format(out, err))
+        assert "OK: indice" in out
+        print("OK: la biblioteca indexa los assets reales del proyecto")
+    finally:
+        os.unlink(script_path)
+
+
+def probar_modelos_acepta_ruta_absoluta():
+    """Un bulto puede declarar cualquier asset del proyecto por su ruta res://."""
+    script = r'''
+extends SceneTree
+
+func _init():
+    var modelos = load("res://guion/modelos.gd")
+    var assets = load("res://debug/editor_niveles_cinematicas_assets.gd")
+    # El nombre suelto sigue resolviendo dentro de assets/modelos/.
+    if not modelos.hay("desk"):
+        print("ERROR: se perdió la resolución por nombre catalogado")
+        quit(1)
+        return
+    var candidatos = assets.filtrar("", "modelo", "res://arte/", true)
+    if candidatos.is_empty():
+        candidatos = assets.filtrar("", "modelo", "household_goods", true)
+    if candidatos.is_empty():
+        print("ERROR: no hay modelos indexados con los que probar")
+        quit(1)
+        return
+    var ruta = String(candidatos[0]["ruta"])
+    if not modelos.hay(ruta):
+        print("ERROR: Modelos.hay no acepta la ruta completa '%s'" % ruta)
+        quit(1)
+        return
+    if modelos.hay("res://assets/modelos/no_existe_jamas.glb"):
+        print("ERROR: Modelos.hay acepta una ruta inexistente")
+        quit(1)
+        return
+    print("OK: rutas res:// resueltas")
+    quit(0)
+'''
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".gd", delete=False) as f:
+        f.write(script)
+        script_path = f.name
+    try:
+        code, out, err = godot_headless(script_path)
+        if code != 0:
+            raise AssertionError("Resolución de rutas absolutas falló:\n{}\n{}".format(out, err))
+        assert "OK: rutas res://" in out
+        print("OK: Modelos resuelve assets por ruta completa sin perder los nombres catalogados")
+    finally:
+        os.unlink(script_path)
+
+
+def probar_asset_cualquiera_en_documento():
+    """Insertar un asset de fuera de assets/modelos/ y que sobreviva al roundtrip."""
+    script = r'''
+extends SceneTree
+
+func _init():
+    var assets = load("res://debug/editor_niveles_cinematicas_assets.gd")
+    var contrato = load("res://debug/editor_niveles_cinematicas_contrato.gd")
+    var candidatos = assets.filtrar("", "", "res://arte/", true)
+    if candidatos.is_empty():
+        print("ERROR: no hay assets de arte/ para colocar")
+        quit(1)
+        return
+    var ruta = String(candidatos[0]["ruta"])
+
+    var nivel = {"tipo": "nivel", "id": "assets-01", "version": "1", "fase": "archivo", "colocaciones": []}
+    var indice = contrato.agregar_asset_a_nivel(nivel, ruta)
+    if indice != 0:
+        print("ERROR: no se colocó el asset en el nivel")
+        quit(1)
+        return
+    var colocacion = nivel["colocaciones"][0]
+    if String(colocacion["recurso"]) != ruta or String(colocacion["origen"]) != "biblioteca_proyecto":
+        print("ERROR: la colocación no apunta al asset: %s" % colocacion)
+        quit(1)
+        return
+    if not contrato.id_ruta_valido(String(colocacion["id"])):
+        print("ERROR: el id derivado de la ruta no es válido: %s" % colocacion["id"])
+        quit(1)
+        return
+    var tam = colocacion["extra"]["tam"]
+    if tam[0] <= 0.0 or tam[1] <= 0.0 or tam[2] <= 0.0:
+        print("ERROR: el asset se colocó sin tamaño utilizable: %s" % [tam])
+        quit(1)
+        return
+    var errores_nivel = contrato.validar_nivel(nivel)
+    if errores_nivel.size() > 0:
+        print("ERROR: el nivel con el asset no valida: %s" % ", ".join(errores_nivel))
+        quit(1)
+        return
+
+    var resultado = contrato.agregar_asset_a_decorado('{"suelo": [10, 10], "bultos": []}', ruta)
+    if not String(resultado.get("error", "")).is_empty():
+        print("ERROR: " + String(resultado["error"]))
+        quit(1)
+        return
+    var decorado = resultado["decorado"]
+    var cine = {
+        "tipo": "cinematica", "id": "assets-01", "version": "1",
+        "planos": [{"tipo": "3d", "segundos": 1.0, "camara": [0, 2, 3], "mira": [0, 1, 0], "decorado": decorado}]
+    }
+    var errores_cine = contrato.validar_cinematica(cine)
+    if errores_cine.size() > 0:
+        print("ERROR: la cinemática con el asset no valida: %s" % ", ".join(errores_cine))
+        quit(1)
+        return
+    # Roundtrip por JSON: el documento es el formato de intercambio.
+    var reabierto = JSON.parse_string(JSON.stringify(cine, "  "))
+    if not reabierto is Dictionary:
+        print("ERROR: el documento con assets no serializa")
+        quit(1)
+        return
+    var bulto = reabierto["planos"][0]["decorado"]["bultos"][0]
+    if String(bulto["modelo"]) != ruta:
+        print("ERROR: el roundtrip perdió el asset: %s" % bulto)
+        quit(1)
+        return
+    if contrato.agregar_asset_a_nivel(nivel, "res://arte/no_existe.glb") != -1:
+        print("ERROR: se aceptó un asset inexistente")
+        quit(1)
+        return
+    var imagenes = assets.filtrar("", "imagen", "", false)
+    if not imagenes.is_empty():
+        var fallo = contrato.agregar_asset_a_decorado('{"bultos": []}', String(imagenes[0]["ruta"]))
+        if String(fallo.get("error", "")).is_empty():
+            print("ERROR: una imagen se aceptó como bulto 3D")
+            quit(1)
+            return
+    print("OK: asset de proyecto colocado y conservado")
+    quit(0)
+'''
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".gd", delete=False) as f:
+        f.write(script)
+        script_path = f.name
+    try:
+        code, out, err = godot_headless(script_path)
+        if code != 0:
+            raise AssertionError("Colocación de asset libre falló:\n{}\n{}".format(out, err))
+        assert "OK: asset de proyecto colocado y conservado" in out
+        print("OK: cualquier asset del proyecto se coloca, valida y sobrevive al roundtrip")
+    finally:
+        os.unlink(script_path)
+
+
 def main():
     print("=" * 60)
     print("PRUEBAS EDITOR NIVELES Y CINEMÁTICAS (#2942)")
@@ -906,6 +1125,9 @@ def main():
         ("Persistencia user://", probar_persistencia_user_dir),
         ("Solo debug/QA", probar_solo_debug_qa),
         ("Instanciar editor real", probar_escena_editor_runtime),
+        ("Índice completo de assets", probar_indice_assets),
+        ("Modelos: ruta res://", probar_modelos_acepta_ruta_absoluta),
+        ("Colocar assets del proyecto", probar_asset_cualquiera_en_documento),
     ]
 
     passed = 0
