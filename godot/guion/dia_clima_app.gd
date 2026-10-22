@@ -581,12 +581,14 @@ func _clave_conversacion_contextual(
 	var clave_fallback := clave_archivado
 	if clave_fallback.is_empty():
 		clave_fallback = DialogoHorarioCompaneros.resolver(actor_id, Jornada.hora_decimal(jornada))
-	return clave_fallback if not clave_fallback.is_empty() else clave_dialogo
+	if not clave_fallback.is_empty():
+		return clave_fallback
+	return clave_dialogo
 
 
 ## El caso@1 ya guarda a quién se imputó. Su consecuencia conversable se
 ## resuelve desde esa firma incluso después de cerrar y reabrir la partida.
-## Las reacciones son puntos de vista de compañeros, no pruebas nuevas.
+## Son opiniones de los compañeros, no pruebas nuevas.
 func _reaccion_a_firma_caso1(companero: CompaneroInteractivo3D, actor_id: String) -> String:
 	if jornada.get("fase", "") != "archivo":
 		return ""
