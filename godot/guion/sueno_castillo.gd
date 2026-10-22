@@ -172,26 +172,32 @@ static func _agregar_eco_retorno(
 		return
 	var opuesta: Vector3 = anclas[posmod(indice + int(anclas.size() / 2), anclas.size())]
 	var salidas: Array = resultado.get("salidas", []).duplicate(true)
-	salidas.append(
-		{
-			"pos": opuesta + Vector3(0.0, 1.0, 0.0),
-			"destino": "",
-			"frase": frases[1],
-			"evento": "codice_castillo",
-			"tam": Vector3(2.4, 2.0, 2.4),
-			"visible": false,
-		}
+	(
+		salidas
+		. append(
+			{
+				"pos": opuesta + Vector3(0.0, 1.0, 0.0),
+				"destino": "",
+				"frase": frases[1],
+				"evento": "codice_castillo",
+				"tam": Vector3(2.4, 2.0, 2.4),
+				"visible": false,
+			}
+		)
 	)
 	resultado["salidas"] = salidas
 	var luces: Array = resultado.get("luces", []).duplicate(true)
-	luces.append(
-		{
-			"pos": opuesta + Vector3(0.0, 1.4, 0.0),
-			"color": Color(0.34, 0.62, 0.76),
-			"energia": ENERGIA_CODICE,
-			"alcance": ALCANCE_CODICE,
-			"carcasa": false,
-		}
+	(
+		luces
+		. append(
+			{
+				"pos": opuesta + Vector3(0.0, 1.4, 0.0),
+				"color": Color(0.34, 0.62, 0.76),
+				"energia": ENERGIA_CODICE,
+				"alcance": ALCANCE_CODICE,
+				"carcasa": false,
+			}
+		)
 	)
 	resultado["luces"] = luces
 
