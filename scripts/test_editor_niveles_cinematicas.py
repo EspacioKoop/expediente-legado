@@ -707,6 +707,19 @@ func _probar():
         push_error("El plano 3D no expone la biblioteca de muebles catalogados")
         quit(1)
         return
+    var filtros_decorado = selector_decorado.get_parent().get_parent().get_child(0)
+    var tipos_decorado = filtros_decorado.get_child(1)
+    var indice_modelo_decorado = -1
+    for indice in tipos_decorado.item_count:
+        if tipos_decorado.get_item_text(indice) == "modelo":
+            indice_modelo_decorado = indice
+            break
+    if indice_modelo_decorado < 0:
+        push_error("El plano no permite filtrar modelos colocables")
+        quit(1)
+        return
+    tipos_decorado.select(indice_modelo_decorado)
+    tipos_decorado.item_selected.emit(indice_modelo_decorado)
     var boton_decorado = selector_decorado.get_parent().get_child(1)
     var bultos_antes = editor.get("_doc_actual")["planos"][0]["decorado"]["bultos"].size()
     boton_decorado.pressed.emit()
@@ -758,14 +771,111 @@ func _probar():
         return
     var biblioteca = editor.get("_biblioteca_mueble")
     if biblioteca == null or biblioteca.item_count == 0:
-        push_error("La biblioteca no ofrece los modelos reales existentes")
+        push_error("La biblioteca no ofrece assets del proyecto")
         quit(1)
         return
-    if biblioteca.get_item_metadata(biblioteca.selected) == null:
+    var filtros_assets = biblioteca.get_parent().get_parent().get_child(0)
+    var selector_tipo = filtros_assets.get_child(1)
+    for esperado in ["audio", "imagen", "material", "fuente", "modelo", "escena"]:
+        var existe_tipo = false
+        for indice in selector_tipo.item_count:
+            if selector_tipo.get_item_text(indice) == esperado:
+                existe_tipo = true
+                break
+        if not existe_tipo:
+            push_error("La biblioteca oculta el tipo de asset '%s'" % esperado)
+            quit(1)
+            return
+    var catalogo = load("res://debug/editor_niveles_cinematicas_catalogo.gd")
+    var panel_biblioteca = catalogo._biblioteca("Añadir al nivel", Callable())
+    if panel_biblioteca.get("copiar") == null or panel_biblioteca.get("vista_previa") == null:
+        push_error("El explorador no ofrece copia de ruta ni previsualización")
+        quit(1)
+        return
+    # El control integrado también debe exponer las rutas de todas las categorías.
+    var indice_audio = -1
+    var selector_catalogo = panel_biblioteca.get("tipos")
+    for indice in selector_catalogo.item_count:
+        if selector_catalogo.get_item_text(indice) == "audio":
+            indice_audio = indice
+            break
+    if indice_audio < 0:
+        push_error("La biblioteca no expone el filtro de audio")
+        quit(1)
+        return
+    selector_catalogo.select(indice_audio)
+    selector_catalogo.item_selected.emit(indice_audio)
+    var panel_audio = panel_biblioteca.get("reproducir")
+    if not panel_audio.visible or panel_biblioteca["selector"].item_count == 0:
+        push_error("La biblioteca no permite previsualizar audio")
+        quit(1)
+        return
+    var indice_imagen = -1
+    for indice in selector_catalogo.item_count:
+        if selector_catalogo.get_item_text(indice) == "imagen":
+            indice_imagen = indice
+            break
+    if indice_imagen < 0:
+        push_error("La biblioteca no expone el filtro de imágenes")
+        quit(1)
+        return
+    selector_catalogo.select(indice_imagen)
+    selector_catalogo.item_selected.emit(indice_imagen)
+    if panel_biblioteca["vista_previa"].texture == null:
+        push_error("La biblioteca no carga la previsualización de imagen")
+        quit(1)
+        return
+    var indice_fuente = -1
+    for indice in selector_catalogo.item_count:
+        if selector_catalogo.get_item_text(indice) == "fuente":
+            indice_fuente = indice
+            break
+    if indice_fuente < 0:
+        push_error("La biblioteca no expone el filtro de fuentes")
+        quit(1)
+        return
+    selector_catalogo.select(indice_fuente)
+    selector_catalogo.item_selected.emit(indice_fuente)
+    if not panel_biblioteca["vista_fuente"].visible:
+        push_error("La biblioteca no muestra la previsualización tipográfica")
+        quit(1)
+        return
+    var indice_modelo = -1
+    for indice in selector_catalogo.item_count:
+        if selector_catalogo.get_item_text(indice) == "modelo":
+            indice_modelo = indice
+            break
+    if indice_modelo < 0:
+        push_error("La biblioteca no expone el filtro de modelos")
+        quit(1)
+        return
+    selector_catalogo.select(indice_modelo)
+    selector_catalogo.item_selected.emit(indice_modelo)
+    var selector_nivel = panel_biblioteca.get("selector")
+    var assets_idx = load("res://debug/editor_niveles_cinematicas_assets.gd")
+    var indice_colocable = -1
+    for indice in selector_nivel.item_count:
+        var ruta_asset = String(selector_nivel.get_item_metadata(indice))
+        if assets_idx.es_colocable(ruta_asset):
+            indice_colocable = indice
+            break
+    if indice_colocable < 0:
+        push_error("La biblioteca no encuentra un asset 3D colocable")
+        quit(1)
+        return
+    selector_nivel.select(indice_colocable)
+    selector_nivel.item_selected.emit(indice_colocable)
+    if panel_biblioteca.get("vista_previa").texture != null:
+        push_error("La vista previa de imagen debería ocultarse al elegir un modelo")
+        quit(1)
+        return
+    var ruta_elegida = String(selector_nivel.get_item_metadata(indice_colocable))
+    if ruta_elegida.is_empty():
         push_error("La biblioteca no expone la ruta del asset en sus metadatos")
         quit(1)
         return
-    editor.call("_anadir_asset_al_nivel")
+    panel_biblioteca["fila"].free()
+    editor.call("_anadir_asset_al_nivel", ruta_elegida)
     if editor.get("_doc_actual")["colocaciones"].size() != 2 or editor.get("_doc_actual")["colocaciones"][1].get("tipo") != "modelo":
         push_error("Añadir un asset no creó una colocación de modelo serializable")
         quit(1)

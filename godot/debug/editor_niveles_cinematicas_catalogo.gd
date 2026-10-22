@@ -107,21 +107,69 @@ static func _biblioteca(texto_boton: String, al_agregar: Callable) -> Dictionary
 	boton.name = "BotonAnadirAsset"
 	boton.text = texto_boton
 	fila.add_child(boton)
+	var copiar := Button.new()
+	copiar.name = "BotonCopiarRutaAsset"
+	copiar.text = "Copiar ruta"
+	fila.add_child(copiar)
 	var conteo := Label.new()
 	conteo.name = "ConteoAssets"
 	fila.add_child(conteo)
+	var tipo_asset := Label.new()
+	tipo_asset.name = "TipoAssetSeleccionado"
+	var vista_previa := TextureRect.new()
+	vista_previa.name = "VistaPreviaAsset"
+	vista_previa.custom_minimum_size = Vector2(160, 90)
+	vista_previa.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+	vista_previa.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	var vista_fuente := Label.new()
+	vista_fuente.name = "VistaPreviaFuente"
+	vista_fuente.text = "Aa ÁÉ 0123 · Expediente SIGA-98"
+	vista_fuente.add_theme_font_size_override("font_size", 24)
+	vista_fuente.visible = false
+	var audio := AudioStreamPlayer.new()
+	var reproducir := Button.new()
+	reproducir.name = "BotonReproducirAsset"
+	reproducir.text = "▶ Reproducir audio"
+	reproducir.visible = false
 
 	columna.add_child(filtros)
 	columna.add_child(fila)
+	columna.add_child(tipo_asset)
+	columna.add_child(vista_previa)
+	columna.add_child(vista_fuente)
+	columna.add_child(reproducir)
+	columna.add_child(audio)
 
-	var colocables: Array = ASSETS.filtrar("", "", "", true)
-	_poblar_opciones(carpetas, ASSETS.carpetas(colocables), ETIQUETA_TODAS)
-	_poblar_opciones(tipos, ASSETS.tipos(colocables), ETIQUETA_TODOS)
+	var todos: Array = ASSETS.indice()
+	_poblar_opciones(carpetas, ASSETS.carpetas(todos), ETIQUETA_TODAS)
+	_poblar_opciones(tipos, ASSETS.tipos(todos), ETIQUETA_TODOS)
+
+	var actualizar_previa := func(_indice: int = 0):
+		var ruta := ruta_seleccionada(selector)
+		var tipo := ASSETS.tipo_de(ruta)
+		tipo_asset.text = "%s · %s" % [tipo, ruta]
+		vista_previa.texture = null
+		vista_previa.visible = tipo == "imagen"
+		vista_fuente.visible = tipo == "fuente"
+		reproducir.visible = tipo == "audio"
+		audio.stop()
+		if tipo == "imagen":
+			var recurso: Resource = load(ruta)
+			if recurso is Texture2D:
+				vista_previa.texture = recurso
+		elif tipo == "fuente":
+			var recurso_fuente: Resource = load(ruta)
+			if recurso_fuente is Font:
+				vista_fuente.add_theme_font_override("font", recurso_fuente)
+		elif tipo == "audio":
+			var recurso_audio: Resource = load(ruta)
+			if recurso_audio is AudioStream:
+				audio.stream = recurso_audio
 
 	var refrescar := func():
 		var carpeta := _valor_opcion(carpetas, ETIQUETA_TODAS)
 		var tipo := _valor_opcion(tipos, ETIQUETA_TODOS)
-		var encontrados: Array = ASSETS.filtrar(carpeta, tipo, buscador.text, true)
+		var encontrados: Array = ASSETS.filtrar(carpeta, tipo, buscador.text, false)
 		selector.clear()
 		for indice in mini(encontrados.size(), MAXIMO_VISIBLE):
 			var entrada: Dictionary = encontrados[indice]
@@ -131,6 +179,15 @@ static func _biblioteca(texto_boton: String, al_agregar: Callable) -> Dictionary
 			selector.set_item_tooltip(selector.item_count - 1, ruta)
 		selector.disabled = selector.item_count == 0
 		boton.disabled = selector.disabled
+		copiar.disabled = selector.disabled
+		if selector.item_count > 0:
+			selector.select(0)
+			actualizar_previa.call(0)
+		else:
+			tipo_asset.text = ""
+			vista_previa.visible = false
+			vista_fuente.visible = false
+			reproducir.visible = false
 		if encontrados.is_empty():
 			conteo.text = "sin resultados"
 		elif encontrados.size() > MAXIMO_VISIBLE:
@@ -141,6 +198,14 @@ static func _biblioteca(texto_boton: String, al_agregar: Callable) -> Dictionary
 	carpetas.item_selected.connect(func(_indice: int): refrescar.call())
 	tipos.item_selected.connect(func(_indice: int): refrescar.call())
 	buscador.text_changed.connect(func(_texto: String): refrescar.call())
+	selector.item_selected.connect(actualizar_previa)
+	reproducir.pressed.connect(func(): audio.play())
+	copiar.pressed.connect(
+		func():
+			var ruta := ruta_seleccionada(selector)
+			if not ruta.is_empty():
+				DisplayServer.clipboard_set(ruta)
+	)
 	boton.pressed.connect(
 		func():
 			var ruta := ruta_seleccionada(selector)
@@ -154,6 +219,12 @@ static func _biblioteca(texto_boton: String, al_agregar: Callable) -> Dictionary
 		"fila": columna,
 		"selector": selector,
 		"boton": boton,
+		"copiar": copiar,
+		"tipo_asset": tipo_asset,
+		"vista_previa": vista_previa,
+		"vista_fuente": vista_fuente,
+		"reproducir": reproducir,
+		"audio": audio,
 		"buscador": buscador,
 		"carpetas": carpetas,
 		"tipos": tipos,
