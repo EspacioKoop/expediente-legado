@@ -2435,6 +2435,14 @@
       "licencia": "CC0-1.0",
       "fuente": "tools/sfx_chip/generar.py",
       "sha256": "0e04ba84fc86d8524fb547b10b42295bde68a9457dfb287dafd226298bcb73da"
+    },
+    {
+      "ruta": "registry.json",
+      "titulo": "Registro local de asset intruso del sueño meta (#2439)",
+      "autor": "EspacioKoop · recurso original",
+      "licencia": "MIT",
+      "fuente": "godot/arte/sueno_fotorrealista/crt_condensacion.tscn",
+      "sha256": "0aced9b665cff92595f82e396802763d3806d714467b13c62c649c16fba5e6f5"
     }
   ]
 }
