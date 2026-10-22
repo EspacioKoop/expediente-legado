@@ -45,18 +45,23 @@ static func selector_escenario(texto: TextEdit, estado: Label) -> Dictionary:
 ## recordar ampliar. Lo que se escribe en el documento es la ruta `res://…`, que
 ## el runtime resuelve igual que el editor.
 static func biblioteca_decorado(texto: TextEdit, estado: Label) -> Dictionary:
-	return _biblioteca(
-		"Añadir al decorado",
-		func(ruta: String):
-			var resultado := CONTRATO.agregar_asset_a_decorado(texto.text, ruta)
-			if not String(resultado.get("error", "")).is_empty():
-				estado.text = resultado["error"]
-				return
-			texto.text = JSON.stringify(resultado["decorado"], "  ")
-			estado.text = (
-				"Añadido '%s' al decorado; pulsa Aplicar para previsualizarlo" % ruta.get_file()
-			)
-	)
+	var al_agregar := func(ruta: String) -> void:
+		var resultado := CONTRATO.agregar_asset_a_decorado(texto.text, ruta)
+		if not String(resultado.get("error", "")).is_empty():
+			estado.text = resultado["error"]
+			return
+		texto.text = JSON.stringify(resultado["decorado"], "  ")
+		estado.text = (
+			"Añadido '%s' al decorado; pulsa Aplicar para previsualizarlo" % ruta.get_file()
+		)
+	var al_agregar_personaje := func(ruta: String) -> void:
+		var resultado := CONTRATO.agregar_personaje_a_decorado(texto.text, ruta)
+		if not String(resultado.get("error", "")).is_empty():
+			estado.text = resultado["error"]
+			return
+		texto.text = JSON.stringify(resultado["decorado"], "  ")
+		estado.text = "Personaje añadido; edita pos/giro en el decorado y pulsa Aplicar"
+	return _biblioteca("Añadir al decorado", al_agregar, al_agregar_personaje)
 
 
 ## Inserta el asset elegido, refresca el documento y deja su tamaño editable.
@@ -85,7 +90,9 @@ static func biblioteca_nivel(al_agregar: Callable) -> Dictionary:
 	return _biblioteca("Añadir al nivel", al_agregar)
 
 
-static func _biblioteca(texto_boton: String, al_agregar: Callable) -> Dictionary:
+static func _biblioteca(
+	texto_boton: String, al_agregar: Callable, al_agregar_personaje: Callable = Callable()
+) -> Dictionary:
 	var columna := VBoxContainer.new()
 	var filtros := HBoxContainer.new()
 	var carpetas := OptionButton.new()
@@ -111,6 +118,12 @@ static func _biblioteca(texto_boton: String, al_agregar: Callable) -> Dictionary
 	copiar.name = "BotonCopiarRutaAsset"
 	copiar.text = "Copiar ruta"
 	fila.add_child(copiar)
+	var boton_personaje := Button.new()
+	boton_personaje.name = "BotonAnadirPersonaje"
+	boton_personaje.text = "Añadir personaje"
+	boton_personaje.visible = false
+	boton_personaje.disabled = not al_agregar_personaje.is_valid()
+	fila.add_child(boton_personaje)
 	var conteo := Label.new()
 	conteo.name = "ConteoAssets"
 	fila.add_child(conteo)
@@ -152,6 +165,10 @@ static func _biblioteca(texto_boton: String, al_agregar: Callable) -> Dictionary
 		vista_previa.visible = tipo == "imagen"
 		vista_fuente.visible = tipo == "fuente"
 		reproducir.visible = tipo == "audio"
+		boton_personaje.visible = (
+			al_agregar_personaje.is_valid()
+			and not CONTRATO.modelo_personaje_desde_ruta(ruta).is_empty()
+		)
 		audio.stop()
 		if tipo == "imagen":
 			var recurso: Resource = load(ruta)
@@ -188,6 +205,7 @@ static func _biblioteca(texto_boton: String, al_agregar: Callable) -> Dictionary
 			vista_previa.visible = false
 			vista_fuente.visible = false
 			reproducir.visible = false
+			boton_personaje.visible = false
 		if encontrados.is_empty():
 			conteo.text = "sin resultados"
 		elif encontrados.size() > MAXIMO_VISIBLE:
@@ -213,12 +231,20 @@ static func _biblioteca(texto_boton: String, al_agregar: Callable) -> Dictionary
 				return
 			al_agregar.call(ruta)
 	)
+	boton_personaje.pressed.connect(
+		func():
+			var ruta := ruta_seleccionada(selector)
+			if ruta.is_empty() or not al_agregar_personaje.is_valid():
+				return
+			al_agregar_personaje.call(ruta)
+	)
 	refrescar.call()
 
 	return {
 		"fila": columna,
 		"selector": selector,
 		"boton": boton,
+		"boton_personaje": boton_personaje,
 		"copiar": copiar,
 		"tipo_asset": tipo_asset,
 		"vista_previa": vista_previa,

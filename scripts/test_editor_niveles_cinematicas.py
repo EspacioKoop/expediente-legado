@@ -736,6 +736,60 @@ func _probar():
         push_error("Mover un objeto del decorado no actualizó los datos serializados")
         quit(1)
         return
+    var buscador_assets = filtros_decorado.get_child(2)
+    buscador_assets.text = "rocketbox"
+    buscador_assets.text_changed.emit("rocketbox")
+    var indice_personaje = -1
+    for indice in selector_decorado.item_count:
+        var ruta_personaje = String(selector_decorado.get_item_metadata(indice))
+        if ruta_personaje.begins_with("res://assets/modelos/rocketbox/"):
+            indice_personaje = indice
+            break
+    if indice_personaje < 0:
+        push_error("La biblioteca no ofrece avatares Rocketbox como personajes")
+        quit(1)
+        return
+    selector_decorado.select(indice_personaje)
+    selector_decorado.item_selected.emit(indice_personaje)
+    var boton_personaje = selector_decorado.get_parent().get_child(3)
+    if not boton_personaje.visible:
+        push_error("La biblioteca no activa Añadir personaje para un avatar humano")
+        quit(1)
+        return
+    var figuras_antes = editor.get("_doc_actual")["planos"][0]["decorado"].get("figuras", []).size()
+    boton_personaje.pressed.emit()
+    editor.call("_aplicar_plano")
+    var figuras_actuales = editor.get("_doc_actual")["planos"][0]["decorado"].get("figuras", [])
+    if figuras_actuales.size() != figuras_antes + 1:
+        push_error("Añadir personaje no lo guardó en el decorado del plano")
+        quit(1)
+        return
+    var figura_creada = figuras_actuales.back()
+    if not String(figura_creada.get("modelo", "")).begins_with("rocketbox/"):
+        push_error("El personaje no conservó el identificador de avatar Rocketbox")
+        quit(1)
+        return
+    var errores_personaje = contrato.validar_cinematica(editor.get("_doc_actual"))
+    if not errores_personaje.is_empty():
+        push_error("El decorado con personaje no pasa el contrato: %s" % [errores_personaje])
+        quit(1)
+        return
+    editor.call("_al_cambiar_tiempo", 0, 0.0)
+    await process_frame
+    var esqueletos_personaje = vista_cinematica.get("_raiz_escenario").find_children("*", "Skeleton3D", true, false)
+    if esqueletos_personaje.is_empty():
+        push_error("El decorado no previsualizó el modelo humano con esqueleto")
+        quit(1)
+        return
+    editor.call("_guardar")
+    editor.call("_cargar")
+    var figuras_reabiertas = editor.get("_doc_actual")["planos"][0]["decorado"].get("figuras", [])
+    if figuras_reabiertas.size() != figuras_antes + 1:
+        push_error("Roundtrip de cinemática perdió el personaje añadido")
+        quit(1)
+        return
+    editor.call("_al_seleccionar", 0)
+    await process_frame
     editor.call("_guardar")
     editor.call("_cargar")
     var decorado_reabierto: Dictionary = editor.get("_doc_actual")["planos"][0]["decorado"]
@@ -991,7 +1045,9 @@ func _probar():
         f.write(script)
         script_path = f.name
     try:
-        code, out, err = godot_headless(script_path)
+        # Los avatares riggeados importan mallas y animaciones; damos margen al
+        # runtime headless sin recortar la comprobación de la escena real.
+        code, out, err = godot_headless(script_path, timeout=180)
         if code != 0 or "SCRIPT ERROR" in out + err or "ERROR:" in out + err:
             raise AssertionError("Smoke de la escena falló:\n{}\n{}".format(out, err))
         assert "OK: escena, controles, guardado, recarga y rechazo de datos malformados" in out

@@ -177,6 +177,25 @@ static func validar_cinematica(datos: Dictionary) -> PackedStringArray:
 						errores.append(
 							"plano %d: falta el recurso de modelo '%s'" % [i, String(modelo)]
 						)
+			var figuras: Variant = decorado.get("figuras", [])
+			if not figuras is Array:
+				errores.append("plano %d: decorado.figuras debe ser una lista" % i)
+			else:
+				for j in figuras.size():
+					var figura: Variant = figuras[j]
+					if not figura is Dictionary:
+						errores.append("plano %d: decorado.figuras[%d] debe ser un objeto" % [i, j])
+						continue
+					var personaje := String(figura.get("modelo", ""))
+					if not personaje.is_empty() and not MODELOS.hay(personaje):
+						errores.append(
+							"plano %d: falta el modelo del personaje '%s'" % [i, personaje]
+						)
+					if not vector3_valido(figura.get("pos")):
+						errores.append("plano %d: figura %d.pos debe tener 3 números" % [i, j])
+					var giro: Variant = figura.get("giro", 0.0)
+					if not (giro is int or giro is float):
+						errores.append("plano %d: figura %d.giro debe ser número" % [i, j])
 	return errores
 
 
@@ -246,6 +265,18 @@ static func espacio_para_vista(espacio: Dictionary) -> Dictionary:
 			for indice in vectores.size():
 				vectores[indice] = vector3_desde(vectores[indice])
 			salida[campo] = vectores
+	var figuras: Variant = salida.get("figuras", [])
+	if figuras is Array:
+		for indice in figuras.size():
+			if not figuras[indice] is Dictionary:
+				continue
+			var figura: Dictionary = figuras[indice].duplicate(true)
+			if figura.has("pos"):
+				figura["pos"] = vector3_desde(figura["pos"])
+			if figura.has("color"):
+				figura["color"] = color_desde(figura["color"])
+			figuras[indice] = figura
+		salida["figuras"] = figuras
 	var contorno: Variant = salida.get("contorno", [])
 	if contorno is Array:
 		for indice in contorno.size():
@@ -463,6 +494,44 @@ static func agregar_asset_a_decorado(texto: String, ruta: String) -> Dictionary:
 		return {"error": "Decorado: bultos debe ser una lista"}
 	bultos.append(nuevo_bulto_asset(ruta, bultos.size() + 1))
 	decorado["bultos"] = bultos
+	return {"decorado": decorado, "error": ""}
+
+
+## Devuelve el identificador que `Modelos.persona` espera para un avatar
+## Rocketbox del catálogo de assets, o vacío para cualquier otro recurso.
+static func modelo_personaje_desde_ruta(ruta: String) -> String:
+	const PREFIJO := "res://assets/modelos/"
+	if not ruta.begins_with(PREFIJO):
+		return ""
+	var nombre := ruta.trim_prefix(PREFIJO).get_basename()
+	if not MODELOS.es_realista(nombre) or not MODELOS.hay(nombre):
+		return ""
+	return nombre
+
+
+static func agregar_personaje_a_decorado(texto: String, ruta: String) -> Dictionary:
+	var modelo := modelo_personaje_desde_ruta(ruta)
+	if modelo.is_empty():
+		return {"error": "El asset seleccionado no es un personaje humano disponible"}
+	var decorado: Variant = JSON.parse_string(texto) if not texto.strip_edges().is_empty() else {}
+	if not decorado is Dictionary:
+		return {"error": "Decorado: JSON inválido; corrígelo antes de añadir personajes"}
+	var figuras: Variant = decorado.get("figuras", [])
+	if not figuras is Array:
+		return {"error": "Decorado: figuras debe ser una lista"}
+	(
+		figuras
+		. append(
+			{
+				"modelo": modelo,
+				"pos": [0.0, 0.0, 0.0],
+				"giro": 0.0,
+				"color": [0.30, 0.28, 0.34, 1.0],
+				"rotulo": "",
+			}
+		)
+	)
+	decorado["figuras"] = figuras
 	return {"decorado": decorado, "error": ""}
 
 
