@@ -145,8 +145,61 @@ static func adaptar_espacio(
 			)
 		)
 		resultado["luces"] = luces
+		_agregar_eco_retorno(resultado, configurada, frases, codice, estado_presentacion)
 
 	return resultado
+
+
+## Al volver, la misma documentación conocida aparece en dos alas distintas:
+## elegir qué leer primero obliga a recorrer el anillo, no solo mirar otra luz.
+## Ninguno de los dos umbrales cambia de fase, concede pistas ni bloquea salida.
+static func _agregar_eco_retorno(
+	resultado: Dictionary,
+	configurada: Dictionary,
+	frases: Array,
+	codice: Dictionary,
+	estado_presentacion: Dictionary,
+) -> void:
+	if int(estado_presentacion.get("vuelta_castillo", 0)) <= 1 or frases.size() < 2:
+		return
+	if String(frases[1]).strip_edges().is_empty():
+		return
+	var anclas: Array = configurada.get("anclas", [])
+	if anclas.size() < 4:
+		return
+	var indice := anclas.find(codice.get("ancla", Vector3.ZERO))
+	if indice < 0:
+		return
+	var opuesta: Vector3 = anclas[posmod(indice + int(anclas.size() / 2), anclas.size())]
+	var salidas: Array = resultado.get("salidas", []).duplicate(true)
+	(
+		salidas
+		. append(
+			{
+				"pos": opuesta + Vector3(0.0, 1.0, 0.0),
+				"destino": "",
+				"frase": frases[1],
+				"evento": "codice_castillo",
+				"tam": Vector3(2.4, 2.0, 2.4),
+				"visible": false,
+			}
+		)
+	)
+	resultado["salidas"] = salidas
+	var luces: Array = resultado.get("luces", []).duplicate(true)
+	(
+		luces
+		. append(
+			{
+				"pos": opuesta + Vector3(0.0, 1.4, 0.0),
+				"color": Color(0.34, 0.62, 0.76),
+				"energia": ENERGIA_CODICE,
+				"alcance": ALCANCE_CODICE,
+				"carcasa": false,
+			}
+		)
+	)
+	resultado["luces"] = luces
 
 
 static func malla_base() -> ArrayMesh:
