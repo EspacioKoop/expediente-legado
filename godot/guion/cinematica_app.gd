@@ -56,6 +56,9 @@ var _rotulo: Label
 var _voz: Label
 var _fondo: ColorRect
 var _figuras: Node2D
+## Texturas de figuras 2D ya resueltas, por ruta. Se dibuja cada fotograma: sin
+## memoria, un plano con imagen pediría el recurso sesenta veces por segundo.
+var _texturas: Dictionary = {}
 var _fundido: ColorRect
 var _grano: ColorRect
 ## Interrupción CRT opt-in: scanlines, desincronía, ruido y corte a negro breve.
@@ -360,8 +363,8 @@ func _dibujar_figuras() -> void:
 
 	var duracion: float = plano["segundos"]
 	var avance: float = clampf(_transcurrido / duracion, 0.0, 1.0)
-	var desde: Vector2 = plano.get("desde", Vector2.ZERO)
-	var hasta: Vector2 = plano.get("hasta", desde)
+	var desde := _vector2_desde(plano.get("desde", Vector2.ZERO))
+	var hasta := _vector2_desde(plano.get("hasta", desde))
 	# La alternativa accesible no elimina la escena: presenta inmediatamente la
 	# figura en su pose final y conserva rótulo, voz, duración y skip.
 	var factor_movimiento := 1.0 if _reduccion_movimiento else avance
@@ -369,10 +372,72 @@ func _dibujar_figuras() -> void:
 	var centro := _lienzo.size / 2.0
 
 	for pieza in plano["figura"]:
-		var rect: Rect2 = pieza["rect"]
-		_figuras.draw_rect(
-			Rect2(centro + rect.position + deriva, rect.size), pieza.get("color", EstiloSiga.BLANCO)
+		var rect := _rect2_desde(pieza.get("rect", {}))
+		var destino := Rect2(centro + rect.position + deriva, rect.size)
+		var color := _color_desde(pieza.get("color", EstiloSiga.BLANCO))
+		var textura := _textura_de(pieza)
+		if textura == null:
+			_figuras.draw_rect(destino, color)
+		else:
+			# Una pieza con imagen conserva su `rect` como encuadre y su `color`
+			# como modulación: así el mismo plano sigue leyéndose igual cuando la
+			# textura falta, y el gris del expediente puede teñir una foto.
+			_figuras.draw_texture_rect(textura, destino, false, color)
+
+
+## Acepta el color JSON del editor y Color directo de cinemáticas GDScript.
+func _color_desde(valor: Variant) -> Color:
+	if valor is Color:
+		return valor
+	if valor is Array and valor.size() >= 3:
+		var alfa := float(valor[3]) if valor.size() >= 4 else 1.0
+		return Color(float(valor[0]), float(valor[1]), float(valor[2]), alfa)
+	return EstiloSiga.BLANCO
+
+
+## Acepta el rectángulo JSON del editor y Rect2 directo de cinemáticas GDScript.
+func _rect2_desde(valor: Variant) -> Rect2:
+	if valor is Rect2:
+		return valor
+	if valor is Dictionary:
+		return Rect2(
+			Vector2(float(valor.get("x", 0.0)), float(valor.get("y", 0.0))),
+			Vector2(float(valor.get("width", 0.0)), float(valor.get("height", 0.0)))
 		)
+	return Rect2()
+
+
+## Acepta el formato JSON del editor (pares numéricos) y el Vector2 directo que
+## usan las cinemáticas declaradas en GDScript.
+func _vector2_desde(valor: Variant) -> Vector2:
+	if valor is Vector2:
+		return valor
+	if valor is Array and valor.size() >= 2:
+		return Vector2(float(valor[0]), float(valor[1]))
+	return Vector2.ZERO
+
+
+## La imagen de una pieza 2D, si la declara y existe.
+##
+## La pieza guarda una RUTA, no un recurso: un documento de cinemática viaja
+## como JSON entre el editor y el juego, y una textura no se serializa. Si la
+## ruta falta o no es una imagen, el plano vuelve al rectángulo plano en vez de
+## quedarse en negro — una cinemática no se rompe por un asset ausente.
+func _textura_de(pieza: Dictionary) -> Texture2D:
+	var ruta := String(pieza.get("textura", "")).strip_edges()
+	if ruta.is_empty():
+		return null
+	if _texturas.has(ruta):
+		return _texturas[ruta]
+	var cargada: Texture2D = null
+	if ResourceLoader.exists(ruta):
+		var recurso: Resource = load(ruta)
+		if recurso is Texture2D:
+			cargada = recurso
+	if cargada == null:
+		push_warning("CinematicaApp: textura de figura no disponible: %s" % ruta)
+	_texturas[ruta] = cargada
+	return cargada
 
 
 ## Monta (o reutiliza) el decorado de un plano en el plató. El decorado es un
