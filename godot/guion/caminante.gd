@@ -42,6 +42,7 @@ const ALTURA_AGACHADO := 1.05
 const CAMARA_Y_NORMAL := 0.65
 const CAMARA_Y_AGACHADO := 0.30
 const IMPULSO_SALTO := 4.6
+const SALTOS_MAXIMOS := 2
 
 ## El stick derecho mira. Va en radianes POR SEGUNDO y no por fotograma, que es
 ## lo que hace que mirar cueste lo mismo en una máquina lenta que en una rápida.
@@ -78,10 +79,21 @@ var _tween_camara_dialogo: Tween
 var _dedo_movimiento_tactil := -1
 var _origen_movimiento_tactil := Vector2.ZERO
 var _movimiento_tactil := Vector2.ZERO
+var _saltos_disponibles := SALTOS_MAXIMOS
 var _acciones_tactiles: AccionesTactiles98
 
 @onready var _camara: Camera3D = $Camara
 @onready var _colision: CollisionShape3D = $Colision
+
+
+static func resolver_estado_salto(
+	saltos_disponibles: int, en_suelo: bool, salto_pulsado: bool, agachado: bool
+) -> Dictionary:
+	var disponibles := SALTOS_MAXIMOS if en_suelo else maxi(saltos_disponibles, 0)
+	var iniciar_salto := salto_pulsado and not agachado and disponibles > 0
+	if iniciar_salto:
+		disponibles -= 1
+	return {"disponibles": disponibles, "iniciar": iniciar_salto}
 
 
 func _ready() -> void:
@@ -531,7 +543,11 @@ func _physics_process(delta: float) -> void:
 
 	if not is_on_floor():
 		velocity += get_gravity() * delta
-	elif Input.is_action_just_pressed(SALTAR) and not _agachado:
+	var estado_salto := resolver_estado_salto(
+		_saltos_disponibles, is_on_floor(), Input.is_action_just_pressed(SALTAR), _agachado
+	)
+	_saltos_disponibles = int(estado_salto["disponibles"])
+	if bool(estado_salto["iniciar"]):
 		velocity.y = IMPULSO_SALTO
 
 	var entrada := (
