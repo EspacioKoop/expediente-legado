@@ -32,6 +32,8 @@ var _pronostico_historial_lista: ItemList
 var _decision_924_bloque: VBoxContainer
 var _decision_924_estado: Label
 var _decision_924_opciones: VBoxContainer
+var _boton_herramientas_secundarias: Button
+var _herramientas_secundarias: VBoxContainer
 
 
 func _ready() -> void:
@@ -42,11 +44,27 @@ func _ready() -> void:
 
 func _columna_indice() -> Control:
 	var columna: Control = super._columna_indice()
+	_boton_herramientas_secundarias = Button.new()
+	_boton_herramientas_secundarias.name = "AlternarHerramientasSecundarias"
+	_boton_herramientas_secundarias.toggle_mode = true
+	_boton_herramientas_secundarias.text = tr("MENU_GLOBAL_OPCIONES") + " +"
+	_boton_herramientas_secundarias.accessibility_name = _boton_herramientas_secundarias.text
+	_boton_herramientas_secundarias.toggled.connect(_al_alternar_herramientas_secundarias)
+	columna.add_child(_boton_herramientas_secundarias)
+
+	_herramientas_secundarias = VBoxContainer.new()
+	_herramientas_secundarias.name = "HerramientasSecundarias"
+	_herramientas_secundarias.visible = false
+	columna.add_child(_herramientas_secundarias)
+	_montar_herramientas_secundarias(_herramientas_secundarias)
+	return columna
+
+
+func _montar_herramientas_secundarias(columna: Control) -> void:
 	columna.add_child(HSeparator.new())
 
-	# Los controles opcionales no deben caer directamente sobre el gris/sombra
-	# del shell. Una superficie clara y opaca mantiene el contraste y separa la
-	# apuesta secundaria de la lista de documentos, que es la acción principal.
+	# Pronósticos y decisiones siguen disponibles, pero plegados para que la
+	# primera lectura de la pantalla señale primero la lista de documentos.
 	var panel := PanelContainer.new()
 	panel.name = "PanelPronosticoAuditoria"
 	panel.add_theme_stylebox_override("panel", EstiloSiga.caja_saliente(EstiloSiga.PAPEL))
@@ -99,7 +117,14 @@ func _columna_indice() -> Control:
 
 	_rellenar_valores_pronostico()
 	_montar_decision_924(contenido_panel)
-	return columna
+
+
+func _al_alternar_herramientas_secundarias(activas: bool) -> void:
+	_herramientas_secundarias.visible = activas
+	_boton_herramientas_secundarias.text = (
+		tr("MENU_GLOBAL_OPCIONES") + (" −" if activas else " +")
+	)
+	_boton_herramientas_secundarias.accessibility_name = _boton_herramientas_secundarias.text
 
 
 func _al_elegir_caso(indice: int) -> void:
