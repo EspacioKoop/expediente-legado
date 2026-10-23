@@ -30,6 +30,7 @@ var _asistente_siga_avatar: GatoAsistente2D
 var _asistente_os98_paseo: GatoAsistentePaseoOs98
 var _arrastrando_asistente := false
 var _arrastre_asistente_offset := Vector2.ZERO
+var _arrastre_asistente_posicion_inicial := Vector2.ZERO
 
 
 func _espacio_de(fase: String) -> Dictionary:
@@ -786,12 +787,21 @@ func _al_input_asistente_siga(evento: InputEvent, avatar: Control) -> void:
 	if evento is InputEventMouseButton and evento.button_index == MOUSE_BUTTON_LEFT:
 		if evento.pressed:
 			_arrastrando_asistente = true
+			_arrastre_asistente_posicion_inicial = avatar.position
 			if is_instance_valid(_asistente_os98_paseo):
 				_asistente_os98_paseo.pausar(true)
 			_arrastre_asistente_offset = avatar.get_global_mouse_position() - avatar.global_position
 		elif _arrastrando_asistente:
 			_arrastrando_asistente = false
-			_guardar_posicion_asistente_siga(avatar)
+			var hubo_arrastre := GatoAsistente2D.es_gesto_de_arrastre(
+				_arrastre_asistente_posicion_inicial, avatar.position
+			)
+			if hubo_arrastre:
+				_guardar_posicion_asistente_siga(avatar)
+			else:
+				avatar.position = _arrastre_asistente_posicion_inicial
+				if avatar is GatoAsistente2D:
+					avatar.reaccionar_a_interaccion()
 			if is_instance_valid(_asistente_os98_paseo):
 				_asistente_os98_paseo.pausar(false)
 		avatar.accept_event()

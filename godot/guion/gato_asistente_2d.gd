@@ -13,6 +13,8 @@ const ANCHO_FRAME := 48.0
 const ALTO_FRAME := 64.0
 const TAMANO_DIBUJO := Vector2(96.0, 128.0)
 const CICLO_ANIMACION := 14.0
+const UMBRAL_ARRASTRE_PIXELES := 8.0
+const DURACION_REACCION := 0.85
 const ATLAS_GATO: Texture2D = preload("res://arte/gato_asistente_gba.svg")
 const FRAME_IDLE := 0
 const FRAME_ALERTA := 1
@@ -28,6 +30,8 @@ const NIVEL_ESCASO := GatoAyuda.ESCASA
 var _nivel := NIVEL_COMPLETO
 var _reduccion_movimiento := false
 var _tiempo := 0.0
+var _reaccion_activa := false
+var _temporizador_reaccion: Timer
 
 
 func _ready() -> void:
@@ -35,7 +39,12 @@ func _ready() -> void:
 	# Solo la silueta del gato captura el arrastre. El bocadillo puede seguir
 	# dejando pasar clics a SIGA/OS98 aunque el avatar se mueva por el shell.
 	mouse_filter = Control.MOUSE_FILTER_PASS
+	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_temporizador_reaccion = Timer.new()
+	_temporizador_reaccion.one_shot = true
+	_temporizador_reaccion.timeout.connect(_al_finalizar_reaccion)
+	add_child(_temporizador_reaccion)
 	set_process(not _reduccion_movimiento)
 	queue_redraw()
 
@@ -45,6 +54,23 @@ func configurar(nivel: String, reduccion_movimiento: bool) -> void:
 	_reduccion_movimiento = reduccion_movimiento
 	_tiempo = 0.0
 	set_process(not reduccion_movimiento)
+	queue_redraw()
+
+
+static func es_gesto_de_arrastre(origen: Vector2, destino: Vector2) -> bool:
+	return origen.distance_to(destino) >= UMBRAL_ARRASTRE_PIXELES
+
+
+func reaccionar_a_interaccion() -> void:
+	if not is_inside_tree() or _temporizador_reaccion == null:
+		return
+	_reaccion_activa = true
+	_temporizador_reaccion.start(DURACION_REACCION)
+	queue_redraw()
+
+
+func _al_finalizar_reaccion() -> void:
+	_reaccion_activa = false
 	queue_redraw()
 
 
@@ -97,6 +123,8 @@ func _frame_actual() -> int:
 	var frame := FRAME_IDLE
 	if _nivel == NIVEL_ESCASO:
 		frame = FRAME_HAMBRIENTO
+	elif _reaccion_activa:
+		frame = FRAME_ALERTA
 	elif _reduccion_movimiento:
 		frame = FRAME_IDLE
 

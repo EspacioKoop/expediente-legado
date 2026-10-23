@@ -74,7 +74,7 @@ class GatoAsistenteEscritorioTest(unittest.TestCase):
             check=False,
         )
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
-        self.assertIn("19 pasadas, 0 fallos", resultado.stdout)
+        self.assertIn("26 pasadas, 0 fallos", resultado.stdout)
         self.assertNotIn("ERROR:", resultado.stdout)
         self.assertNotIn("Parse Error:", resultado.stdout)
 
