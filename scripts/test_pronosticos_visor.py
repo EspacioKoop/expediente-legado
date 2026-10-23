@@ -31,6 +31,9 @@ class PronosticosVisorTests(unittest.TestCase):
         self.assertIn("Pronosticos.abandonar(", VISOR)
 
     def test_la_tarjeta_es_opcional_y_localizada(self):
+        self.assertIn('tr("MENU_GLOBAL_OPCIONES")', VISOR)
+        self.assertIn('name = "AlternarHerramientasSecundarias"', VISOR)
+        self.assertIn('name = "HerramientasSecundarias"', VISOR)
         self.assertIn("VISOR_PRONOSTICO_TITULO,PRONÓSTICO DE AUDITORÍA", TEXTOS)
         self.assertIn("VISOR_PRONOSTICO_DISPONIBLE,Opcional", TEXTOS)
         self.assertIn("VISOR_PRONOSTICO_BLOQUEADO,", TEXTOS)
@@ -43,7 +46,7 @@ class PronosticosVisorTests(unittest.TestCase):
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
         resumen = RESUMEN.search(resultado.stdout)
         self.assertIsNotNone(resumen, resultado.stdout)
-        self.assertGreaterEqual(int(resumen.group(1)), 13, resultado.stdout)
+        self.assertGreaterEqual(int(resumen.group(1)), 21, resultado.stdout)
 
 
 if __name__ == "__main__":

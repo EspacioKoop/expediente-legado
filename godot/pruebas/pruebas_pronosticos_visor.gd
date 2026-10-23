@@ -13,6 +13,33 @@ func _ejecutar() -> void:
 	root.add_child(visor)
 	await process_frame
 
+	_comprobar(
+		not visor._herramientas_secundarias.visible,
+		"las opciones secundarias empiezan plegadas",
+	)
+	_comprobar(
+		visor._boton_herramientas_secundarias.text == visor.tr("MENU_GLOBAL_OPCIONES") + " +",
+		"el botón explica dónde están pronósticos y decisiones",
+	)
+	_comprobar(
+		visor._lista.visible and visor._lista.item_count > 0, "los documentos siguen a la vista"
+	)
+	visor._al_alternar_herramientas_secundarias(true)
+	_comprobar(visor._herramientas_secundarias.visible, "se pueden desplegar las opciones")
+	_comprobar(
+		visor._boton_herramientas_secundarias.text == visor.tr("MENU_GLOBAL_OPCIONES") + " −",
+		"el botón indica cómo plegar las opciones",
+	)
+	_comprobar(
+		(
+			visor._boton_herramientas_secundarias.accessibility_name
+			== visor._boton_herramientas_secundarias.text
+		),
+		"el nombre accesible acompaña al estado del botón",
+	)
+	visor._al_alternar_herramientas_secundarias(false)
+	_comprobar(not visor._herramientas_secundarias.visible, "se pueden volver a plegar")
+
 	visor.partida.estado = Partida.nueva()
 	visor.jornada = visor.partida.estado["jornada"]
 	visor.descubiertas = visor.partida.estado["pistas_descubiertas"]
