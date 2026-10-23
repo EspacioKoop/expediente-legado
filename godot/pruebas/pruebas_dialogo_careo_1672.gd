@@ -28,6 +28,13 @@ func _probar_modelo() -> void:
 	_comprobar(sin_contexto.size(), 2, "sin contexto documental hay dos enfoques")
 	_comprobar(con_contexto.size(), 3, "el contexto conocido habilita contraste")
 	_comprobar(con_contexto[-1]["id"], "contraste", "contraste es una rama explícita")
+	_comprobar(
+		TranslationServer.translate("DIALOGO_CAREO_APERTURA").contains(
+			"contrastar las versiones del expediente"
+		),
+		true,
+		"la apertura explica el objetivo del enfrentamiento sin usar jerga",
+	)
 
 	var primera := DialogoCareoContextual.registrar(jornada, "folio-a", "pragmatica")
 	_comprobar(primera.get("nueva"), true, "la primera rama registra memoria")
