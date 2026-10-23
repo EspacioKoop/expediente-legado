@@ -196,6 +196,18 @@ static func validar_cinematica(datos: Dictionary) -> PackedStringArray:
 						errores.append(
 							"plano %d: falta el recurso de modelo '%s'" % [i, String(modelo)]
 						)
+				if bulto.has("material"):
+					var material: Variant = bulto["material"]
+					if not material is String or not material_de_ruta_valido(String(material)):
+						(
+							errores
+							. append(
+								(
+									"plano %d: decorado.bultos[%d].material no es un material 3D del proyecto"
+									% [i, j]
+								)
+							)
+						)
 			var figuras: Variant = decorado.get("figuras", [])
 			if not figuras is Array:
 				errores.append("plano %d: decorado.figuras debe ser una lista" % i)
@@ -216,6 +228,12 @@ static func validar_cinematica(datos: Dictionary) -> PackedStringArray:
 					if not (giro is int or giro is float):
 						errores.append("plano %d: figura %d.giro debe ser número" % [i, j])
 	return errores
+
+
+static func material_de_ruta_valido(ruta: String) -> bool:
+	if ASSETS.tipo_de(ruta) != "material" or not ResourceLoader.exists(ruta):
+		return false
+	return load(ruta) is BaseMaterial3D
 
 
 static func id_ruta_valido(id: String) -> bool:
@@ -513,6 +531,22 @@ static func agregar_asset_a_decorado(texto: String, ruta: String) -> Dictionary:
 		return {"error": "Decorado: bultos debe ser una lista"}
 	bultos.append(nuevo_bulto_asset(ruta, bultos.size() + 1))
 	decorado["bultos"] = bultos
+	return {"decorado": decorado, "error": ""}
+
+
+static func asignar_material_a_ultimo_bulto(texto: String, ruta: String) -> Dictionary:
+	if not material_de_ruta_valido(ruta):
+		return {"error": "El asset seleccionado no es un material 3D del proyecto"}
+	var decorado: Variant = JSON.parse_string(texto) if not texto.strip_edges().is_empty() else {}
+	if not decorado is Dictionary:
+		return {"error": "Decorado: JSON inválido; corrígelo antes de asignar materiales"}
+	var bultos: Variant = decorado.get("bultos", [])
+	if not bultos is Array or bultos.is_empty():
+		return {"error": "Añade primero un objeto 3D al decorado para asignarle material"}
+	var ultimo: Variant = bultos[-1]
+	if not ultimo is Dictionary:
+		return {"error": "El último objeto del decorado no es válido"}
+	ultimo["material"] = ruta
 	return {"decorado": decorado, "error": ""}
 
 

@@ -137,7 +137,22 @@ static func biblioteca_decorado(
 			return
 		campo_sonido.text = clave
 		estado.text = "Sonido '%s' asignado al plano; pulsa Aplicar" % clave
-	return _biblioteca("Añadir al decorado", al_agregar, al_agregar_personaje, al_asignar_sonido)
+	var al_asignar_material := func(ruta: String) -> void:
+		var resultado := CONTRATO.asignar_material_a_ultimo_bulto(texto.text, ruta)
+		if not String(resultado.get("error", "")).is_empty():
+			estado.text = resultado["error"]
+			return
+		texto.text = JSON.stringify(resultado["decorado"], "  ")
+		estado.text = "Material asignado al último objeto; pulsa Aplicar para previsualizarlo"
+	return _biblioteca(
+		"Añadir al decorado",
+		al_agregar,
+		al_agregar_personaje,
+		al_asignar_sonido,
+		Callable(),
+		Callable(),
+		al_asignar_material
+	)
 
 
 ## Inserta el asset elegido, refresca el documento y deja su tamaño editable.
@@ -172,7 +187,8 @@ static func _biblioteca(
 	al_agregar_personaje: Callable = Callable(),
 	al_asignar_sonido: Callable = Callable(),
 	al_asignar_imagen: Callable = Callable(),
-	al_asignar_fuente: Callable = Callable()
+	al_asignar_fuente: Callable = Callable(),
+	al_asignar_material: Callable = Callable()
 ) -> Dictionary:
 	var columna := VBoxContainer.new()
 	var filtros := HBoxContainer.new()
@@ -266,6 +282,11 @@ static func _biblioteca(
 	asignar_fuente.text = "Usar fuente en rótulo"
 	asignar_fuente.visible = false
 	asignar_fuente.disabled = not al_asignar_fuente.is_valid()
+	var asignar_material := Button.new()
+	asignar_material.name = "BotonAsignarMaterialBulto"
+	asignar_material.text = "Usar material en último objeto"
+	asignar_material.visible = false
+	asignar_material.disabled = not al_asignar_material.is_valid()
 
 	columna.add_child(filtros)
 	columna.add_child(fila)
@@ -277,6 +298,7 @@ static func _biblioteca(
 	columna.add_child(asignar_sonido)
 	columna.add_child(asignar_imagen)
 	columna.add_child(asignar_fuente)
+	columna.add_child(asignar_material)
 	columna.add_child(audio)
 
 	var todos: Array = ASSETS.indice()
@@ -300,6 +322,11 @@ static func _biblioteca(
 		)
 		asignar_imagen.visible = al_asignar_imagen.is_valid() and tipo == "imagen"
 		asignar_fuente.visible = al_asignar_fuente.is_valid() and tipo == "fuente"
+		asignar_material.visible = (
+			al_asignar_material.is_valid()
+			and tipo == "material"
+			and CONTRATO.material_de_ruta_valido(ruta)
+		)
 		boton_personaje.visible = (
 			al_agregar_personaje.is_valid()
 			and not CONTRATO.modelo_personaje_desde_ruta(ruta).is_empty()
@@ -349,6 +376,7 @@ static func _biblioteca(
 			asignar_sonido.visible = false
 			asignar_imagen.visible = false
 			asignar_fuente.visible = false
+			asignar_material.visible = false
 			boton_personaje.visible = false
 		if encontrados.is_empty():
 			conteo.text = "sin resultados"
@@ -379,6 +407,12 @@ static func _biblioteca(
 			var ruta := ruta_seleccionada(selector)
 			if not ruta.is_empty() and al_asignar_fuente.is_valid():
 				al_asignar_fuente.call(ruta)
+	)
+	asignar_material.pressed.connect(
+		func():
+			var ruta := ruta_seleccionada(selector)
+			if not ruta.is_empty() and al_asignar_material.is_valid():
+				al_asignar_material.call(ruta)
 	)
 	copiar.pressed.connect(
 		func():
@@ -417,6 +451,7 @@ static func _biblioteca(
 		"asignar_sonido": asignar_sonido,
 		"asignar_imagen": asignar_imagen,
 		"asignar_fuente": asignar_fuente,
+		"asignar_material": asignar_material,
 		"audio": audio,
 		"buscador": buscador,
 		"carpetas": carpetas,
