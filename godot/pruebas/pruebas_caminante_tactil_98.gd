@@ -11,6 +11,7 @@ func _init() -> void:
 	_probar_zona_izquierda()
 	_probar_vector_analogico()
 	_probar_guardas()
+	_probar_doble_salto()
 	print("caminante_tactil_98: %d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos > 0 else 0)
 
@@ -67,6 +68,23 @@ func _probar_guardas() -> void:
 	_comprobar(
 		not CAMINANTE.debe_procesar_movimiento_tactil(true, true), "pausa bloquea movimiento"
 	)
+
+
+func _probar_doble_salto() -> void:
+	var primer_salto := CAMINANTE.resolver_estado_salto(2, true, true, false)
+	_comprobar(primer_salto["iniciar"], "salto inicial disponible desde el suelo")
+	_comprobar(primer_salto["disponibles"] == 1, "salto inicial reserva uno aéreo")
+	var segundo_salto := CAMINANTE.resolver_estado_salto(1, false, true, false)
+	_comprobar(segundo_salto["iniciar"], "segundo salto disponible en el aire")
+	_comprobar(segundo_salto["disponibles"] == 0, "segundo salto consume la reserva")
+	var tercer_salto := CAMINANTE.resolver_estado_salto(0, false, true, false)
+	_comprobar(not tercer_salto["iniciar"], "no permite un tercer salto")
+	_comprobar(tercer_salto["disponibles"] == 0, "el intento adicional no altera el límite")
+	var aterrizaje := CAMINANTE.resolver_estado_salto(0, true, false, false)
+	_comprobar(aterrizaje["disponibles"] == 2, "aterrizar restablece ambos saltos")
+	var agachado := CAMINANTE.resolver_estado_salto(1, false, true, true)
+	_comprobar(not agachado["iniciar"], "agacharse bloquea el salto")
+	_comprobar(agachado["disponibles"] == 1, "agacharse no consume el salto")
 
 
 func _comprobar(condicion: bool, mensaje: String) -> void:
