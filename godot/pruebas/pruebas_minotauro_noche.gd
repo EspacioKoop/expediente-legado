@@ -9,6 +9,7 @@ func _initialize() -> void:
 	var minotauro := SuenoMinotauro3D.new()
 	minotauro.reduccion_movimiento = true
 	root.add_child(minotauro)
+	await process_frame
 	minotauro.preparar()
 
 	var arquitectura := minotauro.get_node_or_null("LaberintoMinotauro")
@@ -21,9 +22,15 @@ func _initialize() -> void:
 		arquitectura.get_node_or_null("AlaReplegable") != null,
 		"ala topológica visible",
 	)
+	var modelo := arquitectura.get_node_or_null("PresenciaMinotauro/Cabeza") as Node3D
 	_comprobar(
-		arquitectura.get_node_or_null("PresenciaMinotauro/Cabeza") != null,
-		"presencia procedural visible",
+		(
+			modelo != null
+			and modelo.get_node_or_null("CabezaBovina/Cráneo") != null
+			and modelo.get_node_or_null("Torso") != null
+			and modelo.get_node_or_null("Pezuña") != null
+		),
+		"presencia usa el Minotauro humano-bovino autoral completo",
 	)
 	_comprobar(
 		arquitectura.get_node_or_null("AnclaAriadna_bisagra") != null,

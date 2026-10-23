@@ -70,6 +70,7 @@ func _init() -> void:
 	PruebasGato._cuenco(comprobar_cb)
 	PruebasGato._comida_propia(comprobar_cb)
 	PruebasGato._malla(comprobar_cb)
+	load("res://pruebas/pruebas_minotauro_fotorrealista.gd").todo(comprobar_cb)
 
 	PruebasSemilla._semilla(comprobar_cb)
 	load("res://pruebas/pruebas_seleccion_nocturna.gd").todo(comprobar_cb)
