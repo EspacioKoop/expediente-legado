@@ -15,9 +15,9 @@ const DURACION_MIN := 1.2
 const DURACION_MAX := 3.8
 const MARGEN := Vector2(18.0, 14.0)
 
-# Evita la columna de lanzadores de la izquierda y alterna zonas altas/bajas.
-# Al ser una secuencia fija, guardar/cargar o repetir una prueba no cambia nada
-# jugable ni introduce una fuente global de aleatoriedad.
+## Las paradas son fijas y deterministas, pero el paseo se reancla al punto
+## seguro más cercano al cargar o al soltar el avatar: así respeta la posición
+## que eligió la persona y no cruza el escritorio para volver al primer punto.
 const DESTINOS_NORMALIZADOS := [
 	Vector2(0.88, 0.78),
 	Vector2(0.70, 0.16),
@@ -43,6 +43,7 @@ func configurar(avatar: Control, escritorio: Control, reduccion_movimiento: bool
 	_pausado = false
 	_indice_destino = 0
 	_espera = PAUSA_INICIAL
+	_sincronizar_destino_con_avatar()
 	_detener_tween()
 	set_process(not reduccion_movimiento)
 
@@ -52,6 +53,7 @@ func pausar(activo: bool) -> void:
 	if activo:
 		_detener_tween()
 	else:
+		_sincronizar_destino_con_avatar()
 		_espera = PAUSA_TRAS_ARRASTRE
 
 
@@ -90,13 +92,29 @@ func siguiente_destino() -> Vector2:
 		return Vector2.ZERO
 	var normalizado: Vector2 = DESTINOS_NORMALIZADOS[_indice_destino % DESTINOS_NORMALIZADOS.size()]
 	_indice_destino = (_indice_destino + 1) % DESTINOS_NORMALIZADOS.size()
+	return _posicion_para_destino(normalizado)
 
+
+func _sincronizar_destino_con_avatar() -> void:
+	if not is_instance_valid(_avatar) or not is_instance_valid(_escritorio):
+		return
+	var distancia_minima := INF
+	var indice_cercano := 0
+	for indice in range(DESTINOS_NORMALIZADOS.size()):
+		var candidato := _posicion_para_destino(DESTINOS_NORMALIZADOS[indice])
+		var distancia := _avatar.position.distance_to(candidato)
+		if distancia < distancia_minima:
+			distancia_minima = distancia
+			indice_cercano = indice
+	_indice_destino = indice_cercano
+
+
+func _posicion_para_destino(normalizado: Vector2) -> Vector2:
 	var max_x := maxf(MARGEN.x, _escritorio.size.x - _avatar.size.x - MARGEN.x)
 	var max_y := maxf(MARGEN.y, _escritorio.size.y - _avatar.size.y - MARGEN.y)
 	var barra := _escritorio.get_node_or_null("BarraInferior") as Control
 	if barra != null and barra.is_visible_in_tree():
 		max_y = minf(max_y, maxf(MARGEN.y, barra.position.y - _avatar.size.y - MARGEN.y))
-
 	return Vector2(
 		lerpf(MARGEN.x, max_x, normalizado.x),
 		lerpf(MARGEN.y, max_y, normalizado.y),

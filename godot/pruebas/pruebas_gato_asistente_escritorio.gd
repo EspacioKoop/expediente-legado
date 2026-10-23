@@ -107,6 +107,56 @@ func _probar() -> void:
 		"reducción de movimiento congela también los nuevos in-betweens",
 	)
 
+	avatar.position = Vector2(450, 350)
+	paseo.pausar(false)
+	var destino_tras_arrastre := paseo.siguiente_destino()
+	_comprobar(
+		destino_tras_arrastre.distance_to(avatar.position) < 100.0,
+		"el paseo reanuda desde una parada cercana a la posición elegida",
+	)
+	_comprobar(
+		not GatoAsistente2D.es_gesto_de_arrastre(Vector2.ZERO, Vector2(5, 5)),
+		"un clic con desplazamiento mínimo no se clasifica como arrastre",
+	)
+	_comprobar(
+		GatoAsistente2D.es_gesto_de_arrastre(Vector2.ZERO, Vector2(9, 0)),
+		"un desplazamiento claro conserva el arrastre manual",
+	)
+	var dia_siga: Node = load("res://guion/dia_gato_app.gd").new()
+	dia_siga.set("_asistente_os98_paseo", paseo)
+	var manejar_input := Callable(dia_siga, "_al_input_asistente_siga").bind(avatar)
+	var posicion_antes_del_clic := avatar.position
+	var pulsacion := InputEventMouseButton.new()
+	pulsacion.button_index = MOUSE_BUTTON_LEFT
+	pulsacion.pressed = true
+	manejar_input.call(pulsacion)
+	_comprobar(
+		bool(dia_siga.get("_arrastrando_asistente")),
+		"el clic inicia el gesto sobre el avatar",
+	)
+	var liberacion := InputEventMouseButton.new()
+	liberacion.button_index = MOUSE_BUTTON_LEFT
+	liberacion.pressed = false
+	manejar_input.call(liberacion)
+	_comprobar(
+		(
+			not bool(dia_siga.get("_arrastrando_asistente"))
+			and not paseo._pausado
+			and avatar.position.is_equal_approx(posicion_antes_del_clic)
+		),
+		"un clic termina sin guardar una posición ni dejar pausado el paseo",
+	)
+	_comprobar(
+		avatar._frame_actual() == GatoAsistente2D.FRAME_ALERTA,
+		"el gato responde visualmente a un clic sin arrastre",
+	)
+	await create_timer(GatoAsistente2D.DURACION_REACCION + 0.1).timeout
+	_comprobar(
+		avatar._frame_actual() == GatoAsistente2D.FRAME_IDLE,
+		"la respuesta breve vuelve a la pose estable con movimiento reducido",
+	)
+	dia_siga.free()
+
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	techo.queue_free()
 	await process_frame
