@@ -63,6 +63,7 @@ var _plano_fundido_desde: SpinBox
 var _plano_fundido_hasta: SpinBox
 var _plano_sonido: LineEdit
 var _plano_sonido_tono: SpinBox
+var _plano_fuente_rotulo: LineEdit
 var _efectos_plano: Dictionary = {}
 var _plano_figura: TextEdit
 var _plano_desde_x: SpinBox
@@ -517,13 +518,13 @@ func _montar_detalle_cinematica() -> void:
 		_plano_hasta_x = _spin(grid2d, "Hasta X:", hasta.x, -500, 500, 0.1)
 		_plano_hasta_y = _spin(grid2d, "Hasta Y:", hasta.y, -500, 500, 0.1)
 
-	# Sonido opcional
 	_detalle.add_child(_etiqueta("Sonido (opcional):"))
 	var grid_snd := GridContainer.new()
 	grid_snd.columns = 4
 	_detalle.add_child(grid_snd)
 	_plano_sonido = _campo(grid_snd, "Nombre:", String(p.get("sonido", "")))
 	_plano_sonido_tono = _spin(grid_snd, "Tono:", float(p.get("sonido_tono", 1.0)), 0.1, 4.0, 0.01)
+	_plano_fuente_rotulo = EDITOR_CATALOGO.montar_fuente_rotulo(_detalle, p, _estado)
 
 	# Controles por plano para efectos ya soportados por CinematicaApp.
 	_efectos_plano = EDITOR_EFECTOS.montar(_detalle, p, _editando_indice)
@@ -644,6 +645,9 @@ func _aplicar_plano() -> void:
 	if not _plano_sonido.text.strip_edges().is_empty():
 		p["sonido"] = _plano_sonido.text.strip_edges()
 		p["sonido_tono"] = _plano_sonido_tono.value
+	var fuente_rotulo := _plano_fuente_rotulo.text.strip_edges()
+	if not fuente_rotulo.is_empty():
+		p["rotulo_fuente"] = fuente_rotulo
 
 	EDITOR_EFECTOS.aplicar(p, _efectos_plano)
 
