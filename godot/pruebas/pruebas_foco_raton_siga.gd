@@ -8,10 +8,14 @@ extends SceneTree
 
 const CAMINANTE_SCRIPT := preload("res://guion/caminante.gd")
 const CONTROLADOR_ESCRITORIO_SCRIPT := preload("res://guion/dia_escritorio_siga_app.gd")
+const CONTROLADOR_HUD_SCRIPT := preload("res://guion/dia_hud_fases_app.gd")
 
 
 class DiaPrueba:
 	extends Node
+	var partida: Partida
+	var jornada: Dictionary = {"fase": "archivo"}
+	var _hud_prioridades: HUDLayer
 	var _pantalla: CanvasLayer
 
 
@@ -25,6 +29,7 @@ func _initialize() -> void:
 
 func _probar() -> void:
 	_probar_recaptura_raton()
+	_probar_inventario_cursor_os98()
 	await _probar_recuperacion_foco()
 	await _probar_salida_menu_global()
 	for frame in 2:
@@ -70,6 +75,61 @@ func _probar_recaptura_raton() -> void:
 		not CAMINANTE_SCRIPT.debe_recapturar_raton(_raton(MOUSE_BUTTON_LEFT), true, true),
 		"un árbol pausado conserva ratón visible",
 	)
+
+
+func _probar_inventario_cursor_os98() -> void:
+	var modo_raton_original := Input.mouse_mode
+	var arbol_pausado_original := paused
+	paused = false
+
+	var dia := DiaPrueba.new()
+	dia.partida = Partida.new()
+	dia.partida.estado = Partida.nueva()
+	dia._pantalla = CanvasLayer.new()
+	var escritorio := Control.new()
+	escritorio.name = "EscritorioSiga"
+	dia._pantalla.add_child(escritorio)
+	dia._hud_prioridades = HUDLayer.new()
+	dia._hud_prioridades.visible = true
+	root.add_child(dia)
+	dia.add_child(dia._pantalla)
+	dia.add_child(dia._hud_prioridades)
+	var controlador: Node = CONTROLADOR_HUD_SCRIPT.new()
+	dia.add_child(controlador)
+
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	controlador.call("_unhandled_input", _accion("inventario"))
+	_comprobar(
+		Input.mouse_mode == Input.MOUSE_MODE_VISIBLE and paused,
+		"abrir inventario activa el modal y muestra el cursor",
+	)
+	controlador.call("_unhandled_input", _accion("cancelar"))
+	_comprobar(
+		not paused and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE,
+		"cerrar inventario vuelve al escritorio OS-98 con el cursor visible",
+	)
+	_comprobar(
+		(
+			CONTROLADOR_HUD_SCRIPT.modo_raton_al_cerrar_inventario(Input.MOUSE_MODE_CAPTURED, dia)
+			== Input.MOUSE_MODE_VISIBLE
+		),
+		"OS-98 no restaura una captura de ratón obsoleta",
+	)
+
+	dia._pantalla.remove_child(escritorio)
+	escritorio.free()
+	_comprobar(
+		(
+			CONTROLADOR_HUD_SCRIPT.modo_raton_al_cerrar_inventario(Input.MOUSE_MODE_CAPTURED, dia)
+			== Input.MOUSE_MODE_CAPTURED
+		),
+		"fuera de OS-98 se restaura la captura previa del mundo 3D",
+	)
+
+	paused = arbol_pausado_original
+	root.remove_child(dia)
+	dia.free()
+	Input.mouse_mode = modo_raton_original
 
 
 func _probar_recuperacion_foco() -> void:
