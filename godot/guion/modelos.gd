@@ -227,10 +227,22 @@ static func cargar(nombre: String) -> PackedScene:
 	if _cache.has(nombre):
 		return _cache[nombre]
 	var escena: PackedScene = null
-	for formato in FORMATOS:
-		var ruta := RUTA + nombre + formato
-		if ResourceLoader.exists(ruta):
-			escena = load(ruta)
+	for ruta in _rutas_posibles(nombre):
+		if not ResourceLoader.exists(ruta):
+			continue
+		var recurso: Resource = load(ruta)
+		if recurso is PackedScene:
+			escena = recurso
+		elif recurso is Mesh:
+			# Un `.obj` carga como malla, no como escena. Se envuelve para que el
+			# resto del módulo siga tratando con una sola forma de recurso.
+			var instancia := MeshInstance3D.new()
+			instancia.mesh = recurso
+			var empaquetada := PackedScene.new()
+			if empaquetada.pack(instancia) == OK:
+				escena = empaquetada
+			instancia.free()
+		if escena != null:
 			break
 	if escena == null:
 		push_warning("No hay modelo %s en %s" % [nombre, RUTA])
@@ -241,10 +253,29 @@ static func cargar(nombre: String) -> PackedScene:
 ## Existe para las pruebas: el catálogo puede comprobar que todo `modelo` que
 ## nombra está de verdad en el árbol, sin montar una escena 3D para verlo.
 static func hay(nombre: String) -> bool:
-	for formato in FORMATOS:
-		if ResourceLoader.exists(RUTA + nombre + formato):
+	for ruta in _rutas_posibles(nombre):
+		if ResourceLoader.exists(ruta):
 			return true
 	return false
+
+
+## Dónde buscar lo que alguien llamó [param nombre].
+##
+## Un nombre suelto es un modelo de `assets/modelos/`, como siempre. Una ruta
+## `res://…` completa se respeta tal cual: es lo que permite que un bulto declare
+## cualquier asset del proyecto —también los de `arte/`— y que el editor de
+## autoría y el juego muestren exactamente la misma pieza. Sin esto, el editor
+## podía previsualizar algo que el runtime resolvía como una caja.
+static func _rutas_posibles(nombre: String) -> PackedStringArray:
+	if nombre.begins_with("res://"):
+		var extension := "." + nombre.get_extension().to_lower()
+		if extension not in [".glb", ".gltf", ".fbx", ".obj", ".tscn", ".scn"]:
+			return PackedStringArray()
+		return PackedStringArray([nombre])
+	var rutas := PackedStringArray()
+	for formato in FORMATOS:
+		rutas.append(RUTA + nombre + formato)
+	return rutas
 
 
 ## Que respiren.

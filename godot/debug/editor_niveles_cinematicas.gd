@@ -5,6 +5,7 @@ const CONTRATO := preload("res://debug/editor_niveles_cinematicas_contrato.gd")
 const ESTILO_SIGA := preload("res://guion/estilo_siga.gd")
 const ESPACIOS_CATALOGO := preload("res://guion/espacios_catalogo.gd")
 const EDITOR_CATALOGO := preload("res://debug/editor_niveles_cinematicas_catalogo.gd")
+const EDITOR_EFECTOS := preload("res://debug/editor_niveles_cinematicas_efectos.gd")
 
 const TIPOS_DOC := ["nivel", "cinematica"]
 const TIPOS_PLANO := ["3d", "2d"]
@@ -62,6 +63,7 @@ var _plano_fundido_desde: SpinBox
 var _plano_fundido_hasta: SpinBox
 var _plano_sonido: LineEdit
 var _plano_sonido_tono: SpinBox
+var _efectos_plano: Dictionary = {}
 var _plano_figura: TextEdit
 var _plano_desde_x: SpinBox
 var _plano_desde_y: SpinBox
@@ -354,9 +356,8 @@ func _refrescar_detalle() -> void:
 
 
 func _montar_detalle_nivel() -> void:
-	_detalle.add_child(_etiqueta("Colocación / Elemento de nivel"))
-	_detalle.add_child(_etiqueta("Biblioteca de muebles del juego:"))
-	var biblioteca := CONTRATO.crear_biblioteca_muebles(_anadir_mueble_catalogado)
+	_detalle.add_child(_etiqueta("Biblioteca de assets del juego:"))
+	var biblioteca := EDITOR_CATALOGO.biblioteca_nivel(_anadir_asset_al_nivel)
 	_biblioteca_mueble = biblioteca["selector"]
 	_detalle.add_child(biblioteca["fila"])
 
@@ -522,6 +523,9 @@ func _montar_detalle_cinematica() -> void:
 	_plano_sonido = _campo(grid_snd, "Nombre:", String(p.get("sonido", "")))
 	_plano_sonido_tono = _spin(grid_snd, "Tono:", float(p.get("sonido_tono", 1.0)), 0.1, 4.0, 0.01)
 
+	# Controles por plano para efectos ya soportados por CinematicaApp.
+	_efectos_plano = EDITOR_EFECTOS.montar(_detalle, p, _editando_indice)
+
 	# Decorado (para planos 3D con set propio)
 	if es_3d:
 		_detalle.add_child(_etiqueta("Decorado (JSON espacio, opcional):"))
@@ -535,7 +539,9 @@ func _montar_detalle_cinematica() -> void:
 		var selector_escenario := EDITOR_CATALOGO.selector_escenario(_plano_decorado, _estado)
 		_detalle.add_child(selector_escenario["fila"])
 		_detalle.add_child(_etiqueta("Objetos del decorado:"))
-		var biblioteca_decorado := EDITOR_CATALOGO.biblioteca_decorado(_plano_decorado, _estado)
+		var biblioteca_decorado := EDITOR_CATALOGO.biblioteca_decorado(
+			_plano_decorado, _estado, _plano_sonido
+		)
 		_biblioteca_mueble = biblioteca_decorado["selector"]
 		_detalle.add_child(biblioteca_decorado["fila"])
 
@@ -545,18 +551,8 @@ func _montar_detalle_cinematica() -> void:
 	_boton_accion(btns, "Limpiar", _limpiar_detalle_cinematica)
 
 
-func _anadir_mueble_catalogado() -> void:
-	if _biblioteca_mueble == null or _biblioteca_mueble.item_count == 0:
-		return
-	var recurso := _biblioteca_mueble.get_item_text(_biblioteca_mueble.selected)
-	_editando_indice = CONTRATO.agregar_mueble_a_nivel(_doc_actual, recurso)
-	if _editando_indice < 0:
-		return
-	_refrescar_lista()
-	_lista.select(_editando_indice)
-	_refrescar_detalle()
-	_refrescar_diagnostico()
-	_estado.text = "Mueble catalogado añadido; ajusta su transformación y guarda"
+func _anadir_asset_al_nivel(ruta: String = "") -> void:
+	EDITOR_CATALOGO.anadir_a_nivel(self, ruta)
 
 
 func _aplicar_colocacion() -> void:
@@ -646,6 +642,8 @@ func _aplicar_plano() -> void:
 	if not _plano_sonido.text.strip_edges().is_empty():
 		p["sonido"] = _plano_sonido.text.strip_edges()
 		p["sonido_tono"] = _plano_sonido_tono.value
+
+	EDITOR_EFECTOS.aplicar(p, _efectos_plano)
 
 	# Decorado
 	if es_3d:

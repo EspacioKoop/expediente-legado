@@ -707,6 +707,19 @@ func _probar():
         push_error("El plano 3D no expone la biblioteca de muebles catalogados")
         quit(1)
         return
+    var filtros_decorado = selector_decorado.get_parent().get_parent().get_child(0)
+    var tipos_decorado = filtros_decorado.get_child(1)
+    var indice_modelo_decorado = -1
+    for indice in tipos_decorado.item_count:
+        if tipos_decorado.get_item_text(indice) == "modelo":
+            indice_modelo_decorado = indice
+            break
+    if indice_modelo_decorado < 0:
+        push_error("El plano no permite filtrar modelos colocables")
+        quit(1)
+        return
+    tipos_decorado.select(indice_modelo_decorado)
+    tipos_decorado.item_selected.emit(indice_modelo_decorado)
     var boton_decorado = selector_decorado.get_parent().get_child(1)
     var bultos_antes = editor.get("_doc_actual")["planos"][0]["decorado"]["bultos"].size()
     boton_decorado.pressed.emit()
@@ -723,9 +736,161 @@ func _probar():
         push_error("Mover un objeto del decorado no actualizó los datos serializados")
         quit(1)
         return
+    var buscador_assets = filtros_decorado.get_child(2)
+    buscador_assets.text = "rocketbox"
+    buscador_assets.text_changed.emit("rocketbox")
+    var indice_personaje = -1
+    for indice in selector_decorado.item_count:
+        var ruta_personaje = String(selector_decorado.get_item_metadata(indice))
+        if ruta_personaje.begins_with("res://assets/modelos/rocketbox/"):
+            indice_personaje = indice
+            break
+    if indice_personaje < 0:
+        push_error("La biblioteca no ofrece avatares Rocketbox como personajes")
+        quit(1)
+        return
+    selector_decorado.select(indice_personaje)
+    selector_decorado.item_selected.emit(indice_personaje)
+    var boton_personaje = selector_decorado.get_parent().get_child(3)
+    if not boton_personaje.visible:
+        push_error("La biblioteca no activa Añadir personaje para un avatar humano")
+        quit(1)
+        return
+    var figuras_antes = editor.get("_doc_actual")["planos"][0]["decorado"].get("figuras", []).size()
+    boton_personaje.pressed.emit()
+    editor.call("_aplicar_plano")
+    var figuras_actuales = editor.get("_doc_actual")["planos"][0]["decorado"].get("figuras", [])
+    if figuras_actuales.size() != figuras_antes + 1:
+        push_error("Añadir personaje no lo guardó en el decorado del plano")
+        quit(1)
+        return
+    var figura_creada = figuras_actuales.back()
+    if not String(figura_creada.get("modelo", "")).begins_with("rocketbox/"):
+        push_error("El personaje no conservó el identificador de avatar Rocketbox")
+        quit(1)
+        return
+    var errores_personaje = contrato.validar_cinematica(editor.get("_doc_actual"))
+    if not errores_personaje.is_empty():
+        push_error("El decorado con personaje no pasa el contrato: %s" % [errores_personaje])
+        quit(1)
+        return
+    editor.call("_al_cambiar_tiempo", 0, 0.0)
+    await process_frame
+    var esqueletos_personaje = vista_cinematica.get("_raiz_escenario").find_children("*", "Skeleton3D", true, false)
+    if esqueletos_personaje.is_empty():
+        push_error("El decorado no previsualizó el modelo humano con esqueleto")
+        quit(1)
+        return
+    editor.call("_guardar")
+    editor.call("_cargar")
+    var figuras_reabiertas = editor.get("_doc_actual")["planos"][0]["decorado"].get("figuras", [])
+    if figuras_reabiertas.size() != figuras_antes + 1:
+        push_error("Roundtrip de cinemática perdió el personaje añadido")
+        quit(1)
+        return
+    editor.call("_al_seleccionar", 0)
+    await process_frame
+    var controles_efectos = editor.get("_efectos_plano")
+    if controles_efectos.is_empty():
+        push_error("El editor no expone los controles de efectos del plano")
+        quit(1)
+        return
+    controles_efectos["crt_activo"].button_pressed = true
+    controles_efectos["crt_intensidad"].value = 0.73
+    controles_efectos["crt_duracion"].value = 0.27
+    controles_efectos["crt_semilla"].value = 12.5
+    controles_efectos["superposicion"].text = "ARCHIVO EN TRÁNSITO"
+    controles_efectos["sup_intensidad"].value = 0.65
+    controles_efectos["sup_ruido"].value = 0.01
+    controles_efectos["sup_scanline"].value = 0.2
+    controles_efectos["sup_semilla"].value = 8.5
+    controles_efectos["grano_sin_estrobo"].button_pressed = true
+    var selector_audio_plano = editor.get("_biblioteca_mueble")
+    var biblioteca_audio_plano = selector_audio_plano.get_parent().get_parent()
+    var filtros_audio_plano = biblioteca_audio_plano.get_child(0)
+    var tipos_audio_plano = filtros_audio_plano.get_child(1)
+    var indice_tipo_audio = -1
+    for indice in tipos_audio_plano.item_count:
+        if tipos_audio_plano.get_item_text(indice) == "audio":
+            indice_tipo_audio = indice
+            break
+    if indice_tipo_audio < 0:
+        push_error("La biblioteca del plano no ofrece el filtro de audio")
+        quit(1)
+        return
+    tipos_audio_plano.select(indice_tipo_audio)
+    tipos_audio_plano.item_selected.emit(indice_tipo_audio)
+    var buscador_audio_plano = filtros_audio_plano.get_child(2)
+    buscador_audio_plano.text = "ui_pulsar_01"
+    buscador_audio_plano.text_changed.emit("ui_pulsar_01")
+    var indice_audio_plano = -1
+    for indice in selector_audio_plano.item_count:
+        if String(selector_audio_plano.get_item_metadata(indice)) == "res://assets/audio/chip/ui_pulsar_01.ogg":
+            indice_audio_plano = indice
+            break
+    if indice_audio_plano < 0:
+        push_error("No se encontró el sonido del catálogo en el explorador de cinemáticas")
+        quit(1)
+        return
+    selector_audio_plano.select(indice_audio_plano)
+    selector_audio_plano.item_selected.emit(indice_audio_plano)
+    var boton_asignar_sonido = biblioteca_audio_plano.get_node("BotonAsignarSonidoPlano")
+    if not boton_asignar_sonido.visible:
+        push_error("Un sonido catalogado no se ofrece para asignar al plano")
+        quit(1)
+        return
+    boton_asignar_sonido.pressed.emit()
+    editor.call("_aplicar_plano")
+    if editor.get("_doc_actual")["planos"][0].get("sonido", "") != "pulsar":
+        push_error("El sonido elegido no se asignó al plano con su clave runtime")
+        quit(1)
+        return
+    var plano_con_efectos = editor.get("_doc_actual")["planos"][0]
+    if not plano_con_efectos.get("interrupcion_crt", false):
+        push_error("El plano no serializó la interrupción CRT")
+        quit(1)
+        return
+    if not is_equal_approx(float(plano_con_efectos.get("crt_intensidad", 0.0)), 0.73):
+        push_error("El editor perdió la intensidad CRT")
+        quit(1)
+        return
+    if String(plano_con_efectos.get("superposicion_texto", "")) != "ARCHIVO EN TRÁNSITO":
+        push_error("El editor no serializó la superposición tipográfica")
+        quit(1)
+        return
+    if not is_equal_approx(float(plano_con_efectos.get("sup_scanline", 0.0)), 0.2):
+        push_error("El editor perdió la intensidad de scanline")
+        quit(1)
+        return
+    if not is_equal_approx(float(plano_con_efectos.get("sup_semilla", 0.0)), 8.5):
+        push_error("El editor perdió la semilla de superposición")
+        quit(1)
+        return
+    if not plano_con_efectos.get("grano_no_estroboscopico", false):
+        push_error("El plano no guardó el modo de grano accesible")
+        quit(1)
+        return
+    var errores_efectos = contrato.validar_cinematica(editor.get("_doc_actual"))
+    if not errores_efectos.is_empty():
+        push_error("El plano con efectos no pasa el contrato: %s" % [errores_efectos])
+        quit(1)
+        return
     editor.call("_guardar")
     editor.call("_cargar")
     var decorado_reabierto: Dictionary = editor.get("_doc_actual")["planos"][0]["decorado"]
+    var efectos_reabiertos: Dictionary = editor.get("_doc_actual")["planos"][0]
+    if not efectos_reabiertos.get("interrupcion_crt", false) or not efectos_reabiertos.get("grano_no_estroboscopico", false):
+        push_error("Roundtrip perdió los efectos visuales del plano")
+        quit(1)
+        return
+    if String(efectos_reabiertos.get("superposicion_texto", "")) != "ARCHIVO EN TRÁNSITO":
+        push_error("Roundtrip perdió el texto de superposición")
+        quit(1)
+        return
+    if not is_equal_approx(float(efectos_reabiertos.get("crt_semilla", 0.0)), 12.5):
+        push_error("Roundtrip perdió la semilla del efecto CRT")
+        quit(1)
+        return
     var bultos_reabiertos: Array = decorado_reabierto.get("bultos", [])
     if bultos_reabiertos.size() != bultos_antes + 1:
         push_error("Roundtrip de cinemática perdió el objeto añadido al decorado")
@@ -758,12 +923,152 @@ func _probar():
         return
     var biblioteca = editor.get("_biblioteca_mueble")
     if biblioteca == null or biblioteca.item_count == 0:
-        push_error("La biblioteca no ofrece los modelos reales existentes")
+        push_error("La biblioteca no ofrece assets del proyecto")
         quit(1)
         return
-    editor.call("_anadir_mueble_catalogado")
+    var assets_idx = load("res://debug/editor_niveles_cinematicas_assets.gd")
+    for ruta_escena in [
+        "res://scenes/meta_dream.tscn",
+        "res://interactables/libros/libro_interactivo.tscn",
+        "res://rituales/literarios/ritual_cita.tscn",
+    ]:
+        if not assets_idx.hay(ruta_escena):
+            push_error("La biblioteca omite el recurso de escena del juego '%s'" % ruta_escena)
+            quit(1)
+            return
+    var filtros_assets = biblioteca.get_parent().get_parent().get_child(0)
+    var selector_tipo = filtros_assets.get_child(1)
+    for esperado in ["audio", "imagen", "material", "shader", "fuente", "modelo", "escena"]:
+        var existe_tipo = false
+        for indice in selector_tipo.item_count:
+            if selector_tipo.get_item_text(indice) == esperado:
+                existe_tipo = true
+                break
+        if not existe_tipo:
+            push_error("La biblioteca oculta el tipo de asset '%s'" % esperado)
+            quit(1)
+            return
+    var catalogo = load("res://debug/editor_niveles_cinematicas_catalogo.gd")
+    var panel_biblioteca = catalogo._biblioteca("Añadir al nivel", Callable())
+    if panel_biblioteca.get("copiar") == null or panel_biblioteca.get("vista_previa") == null:
+        push_error("El explorador no ofrece copia de ruta ni previsualización")
+        quit(1)
+        return
+    # El control integrado también debe exponer las rutas de todas las categorías.
+    var indice_audio = -1
+    var selector_catalogo = panel_biblioteca.get("tipos")
+    for indice in selector_catalogo.item_count:
+        if selector_catalogo.get_item_text(indice) == "audio":
+            indice_audio = indice
+            break
+    if indice_audio < 0:
+        push_error("La biblioteca no expone el filtro de audio")
+        quit(1)
+        return
+    selector_catalogo.select(indice_audio)
+    selector_catalogo.item_selected.emit(indice_audio)
+    var panel_audio = panel_biblioteca.get("reproducir")
+    if not panel_audio.visible or panel_biblioteca["selector"].item_count == 0:
+        push_error("La biblioteca no permite previsualizar audio")
+        quit(1)
+        return
+    var indice_imagen = -1
+    for indice in selector_catalogo.item_count:
+        if selector_catalogo.get_item_text(indice) == "imagen":
+            indice_imagen = indice
+            break
+    if indice_imagen < 0:
+        push_error("La biblioteca no expone el filtro de imágenes")
+        quit(1)
+        return
+    selector_catalogo.select(indice_imagen)
+    selector_catalogo.item_selected.emit(indice_imagen)
+    if panel_biblioteca["vista_previa"].texture == null:
+        push_error("La biblioteca no carga la previsualización de imagen")
+        quit(1)
+        return
+    var indice_material = -1
+    for indice in selector_catalogo.item_count:
+        if selector_catalogo.get_item_text(indice) == "material":
+            indice_material = indice
+            break
+    if indice_material < 0:
+        push_error("La biblioteca no ofrece el filtro de materiales")
+        quit(1)
+        return
+    selector_catalogo.select(indice_material)
+    selector_catalogo.item_selected.emit(indice_material)
+    var buscador_material: LineEdit = panel_biblioteca.get("buscador")
+    buscador_material.text = "metal_pintado.tres"
+    panel_biblioteca["refrescar"].call()
+    var selector_material: OptionButton = panel_biblioteca.get("selector")
+    if selector_material.item_count != 1:
+        push_error("La biblioteca no encuentra el material de muestra")
+        quit(1)
+        return
+    selector_material.select(0)
+    selector_material.item_selected.emit(0)
+    if (
+        not panel_biblioteca["vista_material"].visible
+        or not panel_biblioteca["muestra_material"].material_override is StandardMaterial3D
+    ):
+        push_error("La biblioteca no previsualiza materiales 3D sobre la muestra")
+        quit(1)
+        return
+    buscador_material.text = ""
+    panel_biblioteca["refrescar"].call()
+    var indice_fuente = -1
+    for indice in selector_catalogo.item_count:
+        if selector_catalogo.get_item_text(indice) == "fuente":
+            indice_fuente = indice
+            break
+    if indice_fuente < 0:
+        push_error("La biblioteca no expone el filtro de fuentes")
+        quit(1)
+        return
+    selector_catalogo.select(indice_fuente)
+    selector_catalogo.item_selected.emit(indice_fuente)
+    if not panel_biblioteca["vista_fuente"].visible:
+        push_error("La biblioteca no muestra la previsualización tipográfica")
+        quit(1)
+        return
+    var indice_modelo = -1
+    for indice in selector_catalogo.item_count:
+        if selector_catalogo.get_item_text(indice) == "modelo":
+            indice_modelo = indice
+            break
+    if indice_modelo < 0:
+        push_error("La biblioteca no expone el filtro de modelos")
+        quit(1)
+        return
+    selector_catalogo.select(indice_modelo)
+    selector_catalogo.item_selected.emit(indice_modelo)
+    var selector_nivel = panel_biblioteca.get("selector")
+    var indice_colocable = -1
+    for indice in selector_nivel.item_count:
+        var ruta_asset = String(selector_nivel.get_item_metadata(indice))
+        if assets_idx.es_colocable(ruta_asset):
+            indice_colocable = indice
+            break
+    if indice_colocable < 0:
+        push_error("La biblioteca no encuentra un asset 3D colocable")
+        quit(1)
+        return
+    selector_nivel.select(indice_colocable)
+    selector_nivel.item_selected.emit(indice_colocable)
+    if panel_biblioteca.get("vista_previa").texture != null:
+        push_error("La vista previa de imagen debería ocultarse al elegir un modelo")
+        quit(1)
+        return
+    var ruta_elegida = String(selector_nivel.get_item_metadata(indice_colocable))
+    if ruta_elegida.is_empty():
+        push_error("La biblioteca no expone la ruta del asset en sus metadatos")
+        quit(1)
+        return
+    panel_biblioteca["fila"].free()
+    editor.call("_anadir_asset_al_nivel", ruta_elegida)
     if editor.get("_doc_actual")["colocaciones"].size() != 2 or editor.get("_doc_actual")["colocaciones"][1].get("tipo") != "modelo":
-        push_error("Añadir mueble no creó una colocación de modelo serializable")
+        push_error("Añadir un asset no creó una colocación de modelo serializable")
         quit(1)
         return
     editor.call("_guardar")
@@ -877,11 +1182,233 @@ func _probar():
         f.write(script)
         script_path = f.name
     try:
-        code, out, err = godot_headless(script_path)
+        # Los avatares riggeados importan mallas y animaciones; damos margen al
+        # runtime headless sin recortar la comprobación de la escena real.
+        code, out, err = godot_headless(script_path, timeout=180)
         if code != 0 or "SCRIPT ERROR" in out + err or "ERROR:" in out + err:
             raise AssertionError("Smoke de la escena falló:\n{}\n{}".format(out, err))
         assert "OK: escena, controles, guardado, recarga y rechazo de datos malformados" in out
         print("OK: editor real persiste, recarga y protege documentos")
+    finally:
+        os.unlink(script_path)
+
+
+def probar_indice_assets():
+    """El índice se construye del disco y cubre todo el contenido, no una tabla."""
+    script = r'''
+extends SceneTree
+
+func _init():
+    var assets = load("res://debug/editor_niveles_cinematicas_assets.gd")
+    var todos = assets.indice()
+    if todos.size() < 100:
+        print("ERROR: el índice solo encontró %d assets" % todos.size())
+        quit(1)
+        return
+    var colocables = assets.filtrar("", "", "", true)
+    if colocables.size() < 50:
+        print("ERROR: solo %d assets colocables" % colocables.size())
+        quit(1)
+        return
+    # Tiene que haber piezas fuera de assets/modelos/: ese era justo el límite
+    # de la biblioteca anterior, que solo resolvía nombres de esa carpeta.
+    var de_arte = assets.filtrar("", "", "res://arte/", true)
+    if de_arte.is_empty():
+        print("ERROR: el índice no ofrece piezas de arte/")
+        quit(1)
+        return
+    var props_escena = assets.filtrar("", "modelo", "archivador_desierto_psx.obj", true)
+    if props_escena.is_empty() or not String(props_escena[0]["ruta"]).begins_with("res://escenas/"):
+        print("ERROR: el índice deja fuera los modelos organizados bajo escenas/")
+        quit(1)
+        return
+    var tipos = assets.tipos()
+    for esperado in ["modelo", "escena", "imagen", "audio"]:
+        if not tipos.has(esperado):
+            print("ERROR: el índice no clasifica el tipo '%s': %s" % [esperado, tipos])
+            quit(1)
+            return
+    if assets.carpetas(colocables).size() < 10:
+        print("ERROR: el índice agrupa en muy pocas carpetas")
+        quit(1)
+        return
+    # El filtro de texto busca en la ruta completa.
+    var filtrado = assets.filtrar("", "modelo", "household_goods", true)
+    if filtrado.is_empty():
+        print("ERROR: el filtro por texto no encuentra household_goods")
+        quit(1)
+        return
+    for entrada in filtrado:
+        if not String(entrada["ruta"]).contains("household_goods"):
+            print("ERROR: el filtro devolvió algo ajeno: %s" % entrada["ruta"])
+            quit(1)
+            return
+    # Una imagen está en el índice pero no se coloca como pieza 3D.
+    var imagenes = assets.filtrar("", "imagen", "", false)
+    if imagenes.is_empty():
+        print("ERROR: el índice no lista imágenes")
+        quit(1)
+        return
+    if assets.es_colocable(String(imagenes[0]["ruta"])):
+        print("ERROR: una imagen no debe ser colocable como bulto")
+        quit(1)
+        return
+    var etiqueta = assets.etiqueta(filtrado[0])
+    if not etiqueta.contains("/"):
+        print("ERROR: la etiqueta no distingue la carpeta de origen: %s" % etiqueta)
+        quit(1)
+        return
+    print("OK: indice %d assets, %d colocables" % [todos.size(), colocables.size()])
+    quit(0)
+'''
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".gd", delete=False) as f:
+        f.write(script)
+        script_path = f.name
+    try:
+        code, out, err = godot_headless(script_path)
+        if code != 0:
+            raise AssertionError("Índice de assets falló:\n{}\n{}".format(out, err))
+        assert "OK: indice" in out
+        print("OK: la biblioteca indexa los assets reales del proyecto")
+    finally:
+        os.unlink(script_path)
+
+
+def probar_modelos_acepta_ruta_absoluta():
+    """Un bulto puede declarar cualquier asset del proyecto por su ruta res://."""
+    script = r'''
+extends SceneTree
+
+func _init():
+    var modelos = load("res://guion/modelos.gd")
+    var assets = load("res://debug/editor_niveles_cinematicas_assets.gd")
+    # El nombre suelto sigue resolviendo dentro de assets/modelos/.
+    if not modelos.hay("desk"):
+        print("ERROR: se perdió la resolución por nombre catalogado")
+        quit(1)
+        return
+    var candidatos = assets.filtrar("", "modelo", "res://arte/", true)
+    if candidatos.is_empty():
+        candidatos = assets.filtrar("", "modelo", "household_goods", true)
+    if candidatos.is_empty():
+        print("ERROR: no hay modelos indexados con los que probar")
+        quit(1)
+        return
+    var ruta = String(candidatos[0]["ruta"])
+    if not modelos.hay(ruta):
+        print("ERROR: Modelos.hay no acepta la ruta completa '%s'" % ruta)
+        quit(1)
+        return
+    if modelos.hay("res://assets/modelos/no_existe_jamas.glb"):
+        print("ERROR: Modelos.hay acepta una ruta inexistente")
+        quit(1)
+        return
+    print("OK: rutas res:// resueltas")
+    quit(0)
+'''
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".gd", delete=False) as f:
+        f.write(script)
+        script_path = f.name
+    try:
+        code, out, err = godot_headless(script_path)
+        if code != 0:
+            raise AssertionError("Resolución de rutas absolutas falló:\n{}\n{}".format(out, err))
+        assert "OK: rutas res://" in out
+        print("OK: Modelos resuelve assets por ruta completa sin perder los nombres catalogados")
+    finally:
+        os.unlink(script_path)
+
+
+def probar_asset_cualquiera_en_documento():
+    """Insertar un asset de fuera de assets/modelos/ y que sobreviva al roundtrip."""
+    script = r'''
+extends SceneTree
+
+func _init():
+    var assets = load("res://debug/editor_niveles_cinematicas_assets.gd")
+    var contrato = load("res://debug/editor_niveles_cinematicas_contrato.gd")
+    var candidatos = assets.filtrar("", "", "res://arte/", true)
+    if candidatos.is_empty():
+        print("ERROR: no hay assets de arte/ para colocar")
+        quit(1)
+        return
+    var ruta = String(candidatos[0]["ruta"])
+
+    var nivel = {"tipo": "nivel", "id": "assets-01", "version": "1", "fase": "archivo", "colocaciones": []}
+    var indice = contrato.agregar_asset_a_nivel(nivel, ruta)
+    if indice != 0:
+        print("ERROR: no se colocó el asset en el nivel")
+        quit(1)
+        return
+    var colocacion = nivel["colocaciones"][0]
+    if String(colocacion["recurso"]) != ruta or String(colocacion["origen"]) != "biblioteca_proyecto":
+        print("ERROR: la colocación no apunta al asset: %s" % colocacion)
+        quit(1)
+        return
+    if not contrato.id_ruta_valido(String(colocacion["id"])):
+        print("ERROR: el id derivado de la ruta no es válido: %s" % colocacion["id"])
+        quit(1)
+        return
+    var tam = colocacion["extra"]["tam"]
+    if tam[0] <= 0.0 or tam[1] <= 0.0 or tam[2] <= 0.0:
+        print("ERROR: el asset se colocó sin tamaño utilizable: %s" % [tam])
+        quit(1)
+        return
+    var errores_nivel = contrato.validar_nivel(nivel)
+    if errores_nivel.size() > 0:
+        print("ERROR: el nivel con el asset no valida: %s" % ", ".join(errores_nivel))
+        quit(1)
+        return
+
+    var resultado = contrato.agregar_asset_a_decorado('{"suelo": [10, 10], "bultos": []}', ruta)
+    if not String(resultado.get("error", "")).is_empty():
+        print("ERROR: " + String(resultado["error"]))
+        quit(1)
+        return
+    var decorado = resultado["decorado"]
+    var cine = {
+        "tipo": "cinematica", "id": "assets-01", "version": "1",
+        "planos": [{"tipo": "3d", "segundos": 1.0, "camara": [0, 2, 3], "mira": [0, 1, 0], "decorado": decorado}]
+    }
+    var errores_cine = contrato.validar_cinematica(cine)
+    if errores_cine.size() > 0:
+        print("ERROR: la cinemática con el asset no valida: %s" % ", ".join(errores_cine))
+        quit(1)
+        return
+    # Roundtrip por JSON: el documento es el formato de intercambio.
+    var reabierto = JSON.parse_string(JSON.stringify(cine, "  "))
+    if not reabierto is Dictionary:
+        print("ERROR: el documento con assets no serializa")
+        quit(1)
+        return
+    var bulto = reabierto["planos"][0]["decorado"]["bultos"][0]
+    if String(bulto["modelo"]) != ruta:
+        print("ERROR: el roundtrip perdió el asset: %s" % bulto)
+        quit(1)
+        return
+    if contrato.agregar_asset_a_nivel(nivel, "res://arte/no_existe.glb") != -1:
+        print("ERROR: se aceptó un asset inexistente")
+        quit(1)
+        return
+    var imagenes = assets.filtrar("", "imagen", "", false)
+    if not imagenes.is_empty():
+        var fallo = contrato.agregar_asset_a_decorado('{"bultos": []}', String(imagenes[0]["ruta"]))
+        if String(fallo.get("error", "")).is_empty():
+            print("ERROR: una imagen se aceptó como bulto 3D")
+            quit(1)
+            return
+    print("OK: asset de proyecto colocado y conservado")
+    quit(0)
+'''
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".gd", delete=False) as f:
+        f.write(script)
+        script_path = f.name
+    try:
+        code, out, err = godot_headless(script_path)
+        if code != 0:
+            raise AssertionError("Colocación de asset libre falló:\n{}\n{}".format(out, err))
+        assert "OK: asset de proyecto colocado y conservado" in out
+        print("OK: cualquier asset del proyecto se coloca, valida y sobrevive al roundtrip")
     finally:
         os.unlink(script_path)
 
@@ -906,6 +1433,9 @@ def main():
         ("Persistencia user://", probar_persistencia_user_dir),
         ("Solo debug/QA", probar_solo_debug_qa),
         ("Instanciar editor real", probar_escena_editor_runtime),
+        ("Índice completo de assets", probar_indice_assets),
+        ("Modelos: ruta res://", probar_modelos_acepta_ruta_absoluta),
+        ("Colocar assets del proyecto", probar_asset_cualquiera_en_documento),
     ]
 
     passed = 0
