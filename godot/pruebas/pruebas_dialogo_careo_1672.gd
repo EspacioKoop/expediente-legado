@@ -29,6 +29,16 @@ func _probar_modelo() -> void:
 	_comprobar(con_contexto.size(), 3, "el contexto conocido habilita contraste")
 	_comprobar(con_contexto[-1]["id"], "contraste", "contraste es una rama explícita")
 	_comprobar(
+		TranslationServer.translate("CUNADO_LLEGADA_1").contains("enfrentamiento"),
+		true,
+		"la llegada evita la jerga jurídica",
+	)
+	_comprobar(
+		TranslationServer.translate("VISOR_PRONOSTICO_DUELO").contains("enfrentamiento"),
+		true,
+		"el pronóstico evita la jerga jurídica",
+	)
+	_comprobar(
 		TranslationServer.translate("DIALOGO_CAREO_APERTURA").contains(
 			"contrastar las versiones del expediente"
 		),
