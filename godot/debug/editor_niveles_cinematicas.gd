@@ -504,7 +504,9 @@ func _montar_detalle_cinematica() -> void:
 		var fig_json := JSON.stringify(p.get("figura", []), "  ")
 		_plano_figura.text = fig_json
 		_detalle.add_child(_plano_figura)
-
+		var biblioteca_imagenes := EDITOR_CATALOGO.biblioteca_imagenes(_plano_figura, _estado)
+		_biblioteca_mueble = biblioteca_imagenes["selector"]
+		_detalle.add_child(biblioteca_imagenes["fila"])
 		var grid2d := GridContainer.new()
 		grid2d.columns = 4
 		_detalle.add_child(grid2d)

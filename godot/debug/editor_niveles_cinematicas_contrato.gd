@@ -139,6 +139,19 @@ static func validar_cinematica(datos: Dictionary) -> PackedStringArray:
 								)
 					else:
 						errores.append("plano %d: figura[%d].rect debe ser un objeto" % [i, j])
+					if figura.has("textura"):
+						var textura: Variant = figura["textura"]
+						if not textura is String:
+							errores.append(
+								"plano %d: figura[%d].textura debe ser una ruta" % [i, j]
+							)
+						elif ASSETS.tipo_de(String(textura)) != "imagen":
+							errores.append(
+								(
+									"plano %d: figura[%d].textura no es una imagen del proyecto"
+									% [i, j]
+								)
+							)
 					if not color is Array or color.size() < 3 or color.size() > 4:
 						errores.append(
 							"plano %d: figura[%d].color debe tener 3 o 4 números" % [i, j]
@@ -495,6 +508,39 @@ static func agregar_asset_a_decorado(texto: String, ruta: String) -> Dictionary:
 	bultos.append(nuevo_bulto_asset(ruta, bultos.size() + 1))
 	decorado["bultos"] = bultos
 	return {"decorado": decorado, "error": ""}
+
+
+## Añade una pieza con imagen a la figura de un plano 2D.
+##
+## La imagen entra como RUTA en una pieza normal, con su propio `rect` y un
+## `color` blanco de modulación: así una figura mezcla rectángulos planos e
+## imágenes, y un documento viejo sigue válido. El encuadre se mide con el
+## tamaño real de la textura —centrado en el origen— porque una imagen estirada
+## a un rectángulo inventado se reconoce peor que el propio hueco.
+static func agregar_imagen_a_figura(texto: String, ruta: String) -> Dictionary:
+	if ASSETS.tipo_de(ruta) != "imagen":
+		return {"error": "El asset '%s' no es una imagen del proyecto" % ruta}
+	var figura: Variant = JSON.parse_string(texto) if not texto.strip_edges().is_empty() else []
+	if not figura is Array:
+		return {"error": "Figura: JSON inválido; corrígelo antes de añadir imágenes"}
+	var tam := Vector2(160.0, 90.0)
+	if ResourceLoader.exists(ruta):
+		var recurso: Resource = load(ruta)
+		if recurso is Texture2D:
+			var medida: Vector2 = (recurso as Texture2D).get_size()
+			if medida.x > 0.0 and medida.y > 0.0:
+				tam = medida
+	(
+		figura
+		. append(
+			{
+				"rect": {"x": -tam.x / 2.0, "y": -tam.y / 2.0, "width": tam.x, "height": tam.y},
+				"color": [1.0, 1.0, 1.0, 1.0],
+				"textura": ruta,
+			}
+		)
+	)
+	return {"figura": figura, "error": ""}
 
 
 ## Devuelve el identificador que `Modelos.persona` espera para un avatar

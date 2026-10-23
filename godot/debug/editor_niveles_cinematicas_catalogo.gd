@@ -38,6 +38,31 @@ static func selector_escenario(texto: TextEdit, estado: Label) -> Dictionary:
 	return {"fila": fila, "selector": selector}
 
 
+## Inserta una imagen del catálogo en la figura JSON del plano 2D seleccionado.
+static func asignar_imagen_a_plano(texto: TextEdit, estado: Label) -> Callable:
+	return func(ruta: String) -> void:
+		var resultado := CONTRATO.agregar_imagen_a_figura(texto.text, ruta)
+		if not String(resultado.get("error", "")).is_empty():
+			estado.text = resultado["error"]
+			return
+		texto.text = JSON.stringify(resultado["figura"], "  ")
+		estado.text = "Imagen '%s' añadida a la figura; pulsa Aplicar" % ruta.get_file()
+
+
+## Catálogo de imágenes para el plano 2D; mantiene el mismo índice y filtros.
+static func biblioteca_imagenes(texto: TextEdit, estado: Label) -> Dictionary:
+	var biblioteca := _biblioteca(
+		"Añadir al plano",
+		func(_ruta: String) -> void: pass,
+		func(_ruta: String) -> void: pass,
+		func(_ruta: String) -> void: pass,
+		asignar_imagen_a_plano(texto, estado)
+	)
+	biblioteca["boton"].visible = false
+	biblioteca["boton_personaje"].visible = false
+	return biblioteca
+
+
 ## La biblioteca de objetos del plano: TODO el contenido 3D del proyecto.
 ##
 ## Antes aquí había cinco nombres escritos a mano. Ahora se indexa el árbol de
@@ -104,7 +129,8 @@ static func _biblioteca(
 	texto_boton: String,
 	al_agregar: Callable,
 	al_agregar_personaje: Callable = Callable(),
-	al_asignar_sonido: Callable = Callable()
+	al_asignar_sonido: Callable = Callable(),
+	al_asignar_imagen: Callable = Callable()
 ) -> Dictionary:
 	var columna := VBoxContainer.new()
 	var filtros := HBoxContainer.new()
@@ -188,6 +214,11 @@ static func _biblioteca(
 	asignar_sonido.text = "Usar audio en este plano"
 	asignar_sonido.visible = false
 	asignar_sonido.disabled = not al_asignar_sonido.is_valid()
+	var asignar_imagen := Button.new()
+	asignar_imagen.name = "BotonAsignarImagenPlano"
+	asignar_imagen.text = "Añadir imagen a la figura 2D"
+	asignar_imagen.visible = false
+	asignar_imagen.disabled = not al_asignar_imagen.is_valid()
 
 	columna.add_child(filtros)
 	columna.add_child(fila)
@@ -197,6 +228,7 @@ static func _biblioteca(
 	columna.add_child(vista_fuente)
 	columna.add_child(reproducir)
 	columna.add_child(asignar_sonido)
+	columna.add_child(asignar_imagen)
 	columna.add_child(audio)
 
 	var todos: Array = ASSETS.indice()
@@ -218,6 +250,7 @@ static func _biblioteca(
 			and tipo == "audio"
 			and not clave_sonido_para_ruta(ruta).is_empty()
 		)
+		asignar_imagen.visible = al_asignar_imagen.is_valid() and tipo == "imagen"
 		boton_personaje.visible = (
 			al_agregar_personaje.is_valid()
 			and not CONTRATO.modelo_personaje_desde_ruta(ruta).is_empty()
@@ -265,6 +298,7 @@ static func _biblioteca(
 			vista_fuente.visible = false
 			reproducir.visible = false
 			asignar_sonido.visible = false
+			asignar_imagen.visible = false
 			boton_personaje.visible = false
 		if encontrados.is_empty():
 			conteo.text = "sin resultados"
@@ -283,6 +317,12 @@ static func _biblioteca(
 			var ruta := ruta_seleccionada(selector)
 			if not ruta.is_empty() and al_asignar_sonido.is_valid():
 				al_asignar_sonido.call(ruta)
+	)
+	asignar_imagen.pressed.connect(
+		func():
+			var ruta := ruta_seleccionada(selector)
+			if not ruta.is_empty() and al_asignar_imagen.is_valid():
+				al_asignar_imagen.call(ruta)
 	)
 	copiar.pressed.connect(
 		func():
@@ -319,6 +359,7 @@ static func _biblioteca(
 		"vista_fuente": vista_fuente,
 		"reproducir": reproducir,
 		"asignar_sonido": asignar_sonido,
+		"asignar_imagen": asignar_imagen,
 		"audio": audio,
 		"buscador": buscador,
 		"carpetas": carpetas,

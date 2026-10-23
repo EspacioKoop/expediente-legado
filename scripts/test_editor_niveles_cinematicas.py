@@ -1413,6 +1413,80 @@ func _init():
         os.unlink(script_path)
 
 
+def probar_imagen_persistente_en_plano():
+    script = r'''
+extends SceneTree
+
+func _init():
+    call_deferred("_probar")
+
+func _probar():
+    var assets = load("res://debug/editor_niveles_cinematicas_assets.gd")
+    var contrato = load("res://debug/editor_niveles_cinematicas_contrato.gd")
+    var app_script = load("res://guion/cinematica_app.gd")
+    var ruta = ""
+    for entrada in assets.indice():
+        if entrada.get("tipo") == "imagen":
+            ruta = entrada.get("ruta", "")
+            break
+    if ruta.is_empty():
+        push_error("No hay imagen del proyecto para probar")
+        quit(1)
+        return
+    var resultado = contrato.agregar_imagen_a_figura("[]", ruta)
+    if not resultado.get("error", "").is_empty():
+        push_error("No se pudo crear pieza imagen: " + resultado.error)
+        quit(1)
+        return
+    var pieza: Dictionary = resultado.figura[0]
+    if pieza.get("textura") != ruta or pieza.get("color") != [1.0, 1.0, 1.0, 1.0]:
+        push_error("La ruta/modulación de la imagen no se persiste")
+        quit(1)
+        return
+    var cine = {
+        "tipo": "cinematica", "id": "imagen-test", "version": "1",
+        "planos": [{"tipo": "2d", "segundos": 1.0, "figura": resultado.figura,
+                    "desde": [0, 0], "hasta": [0, 0]}]
+    }
+    var app = app_script.new()
+    root.add_child(app)
+    await process_frame
+    app.reproducir(cine.planos)
+    await process_frame
+    await process_frame
+    if not app.get("_texturas").has(ruta):
+        push_error("El render 2D no resolvió la textura durante el plano")
+        quit(1)
+        return
+    var textura = app.get("_texturas")[ruta]
+    if textura == null:
+        push_error("CinematicaApp no resolvió la textura persistida")
+        quit(1)
+        return
+    if not editor_validar(cine):
+        push_error("El contrato rechaza una cinemática con imagen válida")
+        quit(1)
+        return
+    print("OK: imagen de biblioteca se añade al plano 2D y el runtime la resuelve")
+    quit(0)
+
+func editor_validar(cine: Dictionary) -> bool:
+    var editor = load("res://debug/editor_niveles_cinematicas.gd").new()
+    return editor.validar_cinematica(cine).is_empty()
+'''
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.gd', delete=False) as f:
+        f.write(script)
+        script_path = f.name
+    try:
+        code, out, err = godot_headless(script_path, timeout=180)
+        if code != 0:
+            raise AssertionError("Imagen persistente en plano falló:\\n{}\\n{}".format(out, err))
+        assert "OK: imagen de biblioteca" in out
+        print("OK: imagen persistente en plano 2D y resuelta por runtime")
+    finally:
+        os.unlink(script_path)
+
+
 def main():
     print("=" * 60)
     print("PRUEBAS EDITOR NIVELES Y CINEMÁTICAS (#2942)")
@@ -1436,6 +1510,7 @@ def main():
         ("Índice completo de assets", probar_indice_assets),
         ("Modelos: ruta res://", probar_modelos_acepta_ruta_absoluta),
         ("Colocar assets del proyecto", probar_asset_cualquiera_en_documento),
+        ("Imagen persistente en plano 2D", probar_imagen_persistente_en_plano),
     ]
 
     passed = 0
