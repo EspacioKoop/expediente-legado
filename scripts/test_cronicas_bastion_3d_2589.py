@@ -17,4 +17,4 @@ class CronicasBastion3DTest(unittest.TestCase):
             self.assertNotIn(peligro, fuente)
 
     def test_sala_ejecutable_en_godot(self) -> None:
-        comprobar_contrato(self, "pruebas/pruebas_cronicas_bastion_3d_2589.gd", "27 pasadas, 0 fallos", timeout=60)
+        comprobar_contrato(self, "pruebas/pruebas_cronicas_bastion_3d_2589.gd", "41 pasadas, 0 fallos", timeout=60)

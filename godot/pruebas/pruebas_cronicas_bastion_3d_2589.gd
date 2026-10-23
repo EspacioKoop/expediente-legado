@@ -74,7 +74,93 @@ func _probar_escena() -> void:
 	get_root().remove_child(sala)
 	sala.free()
 	await process_frame
+	await _probar_archivo_cronista()
 	_terminar()
+
+
+func _probar_archivo_cronista() -> void:
+	var escena := load("res://escenas/cronicas/archivo_cronista.tscn") as PackedScene
+	_comprobar(escena != null, "Archivo del Cronista carga como escena")
+	if escena == null:
+		return
+
+	var archivo := escena.instantiate() as CronicasArchivoCronista3D
+	_comprobar(archivo != null, "controlador del Archivo del Cronista existe")
+	if archivo == null:
+		return
+
+	get_root().add_child(archivo)
+	await process_frame
+	var mural := archivo.get_node_or_null("MuroNombres") as Node3D
+	var placa := mural.get_node_or_null("PlacaRaspada_0") if mural != null else null
+	_comprobar(mural != null and placa is MeshInstance3D, "arcada y placa de memoria visibles")
+
+	var rotulo := mural.get_node_or_null("RotuloNombres") as Label3D if mural != null else null
+	_comprobar(
+		(
+			rotulo != null
+			and rotulo.text == TranslationServer.translate("CRONICAS_ARCHIVO_MURO_NOMBRES")
+		),
+		"rotulo de memoria localizado",
+	)
+	var objetivo := archivo.find_child("Objetivo", true, false) as Label
+	_comprobar(
+		(
+			objetivo != null
+			and objetivo.text == TranslationServer.translate("CRONICAS_ARCHIVO_OBJETIVO")
+		),
+		"objetivo del archivo localizado",
+	)
+
+	var inicial: Dictionary = archivo.estado_local()
+	_comprobar(
+		not bool(inicial["muro_nombres_inspeccionado"]) and int(inicial["conteo_actas"]) == 0,
+		"la pista empieza local y sin lecturas",
+	)
+	var interactuable := archivo.get_node_or_null("MuroNombresInteractuable") as Interactuable3D
+	var jugador := archivo.get_node_or_null("Caminante")
+	_comprobar(interactuable != null, "muro de nombres interactuable")
+	_comprobar(jugador is CharacterBody3D, "se conserva el caminante real")
+	if interactuable != null and jugador != null:
+		interactuable.interactuar(jugador)
+
+	var tras_inspeccion: Dictionary = archivo.estado_local()
+	_comprobar(
+		(
+			bool(tras_inspeccion["muro_nombres_inspeccionado"])
+			and int(tras_inspeccion["conteo_actas"]) == 0
+			and not bool(tras_inspeccion["fuga_abierta"])
+		),
+		"inspeccionar el muro no altera la progresión",
+	)
+	_comprobar(
+		(
+			objetivo != null
+			and objetivo.text == TranslationServer.translate("CRONICAS_ARCHIVO_NOMBRES_FRAGMENTO")
+		),
+		"el muro revela la manipulación de los nombres",
+	)
+	_comprobar(not archivo.seleccionar_version(1), "el muro no salta las actas")
+	archivo.inspeccionar_acta(0)
+	archivo.inspeccionar_acta(1)
+	archivo.inspeccionar_acta(2)
+	_comprobar(archivo.seleccionar_version(1), "el acta fundamentada aún abre la fuga")
+	var final: Dictionary = archivo.estado_local()
+	_comprobar(bool(final["fuga_abierta"]), "el Cronista admite el borrado y habilita la salida")
+	_comprobar(
+		(
+			objetivo != null
+			and (
+				objetivo.text
+				== TranslationServer.translate("CRONICAS_ARCHIVO_VERSION_FUNDAMENTADA")
+			)
+		),
+		"la confesión del Cronista está localizada",
+	)
+
+	get_root().remove_child(archivo)
+	archivo.free()
+	await process_frame
 
 
 func _comprobar(condicion: bool, nombre: String) -> void:

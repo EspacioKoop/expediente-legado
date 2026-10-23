@@ -22,6 +22,7 @@ var _cronista_consultado := false
 var _fuga_abierta := false
 var _completado := false
 var _version_propuesta := -1
+var _muro_nombres_inspeccionado := false
 
 var _caminante: CharacterBody3D
 var _hud: HUDLayer
@@ -29,6 +30,7 @@ var _texto_objetivo: Label
 var _acta_nodes: Array[Interactuable3D] = []
 var _cronista_node: Interactuable3D
 var _salida_node: Interactuable3D
+var _muro_nombres_node: Interactuable3D
 
 
 func _ready() -> void:
@@ -51,6 +53,7 @@ func estado_local() -> Dictionary:
 		"acta_seleccionada": _acta_seleccionada,
 		"fuga_abierta": _fuga_abierta,
 		"completado": _completado,
+		"muro_nombres_inspeccionado": _muro_nombres_inspeccionado,
 	}
 
 
@@ -96,6 +99,14 @@ func inspeccionar_acta(indice: int) -> void:
 	_actualizar_interacciones()
 
 
+## La inscripción aporta contexto narrativo, pero no adelanta el puzle ni persiste.
+func inspeccionar_muro_nombres() -> void:
+	if _completado:
+		return
+	_muro_nombres_inspeccionado = true
+	_mensaje(tr("CRONICAS_ARCHIVO_NOMBRES_FRAGMENTO"))
+
+
 ## Contrasta una versión elegida con el Cronista Velado.
 ## Si la versión es la fundamentada (Acta II), abre la fuga.
 ## Si la versión no es válida, permite reintentar sin softlock.
@@ -117,12 +128,7 @@ func seleccionar_version(indice: int) -> bool:
 
 	if indice == ACTA_FUNDAMENTADA:
 		_fuga_abierta = true
-		_mensaje(
-			(
-				"El Cronista Velado asiente: el Acta II es la única versión fundamentada "
-				+ "por los restos físicos del asedio. La vía de fuga queda libre."
-			)
-		)
+		_mensaje(tr("CRONICAS_ARCHIVO_VERSION_FUNDAMENTADA"))
 		_actualizar_interacciones()
 		return true
 
@@ -208,6 +214,7 @@ func _montar_mundo() -> void:
 	_pieza("AtrilActa1", Vector3(-4.5, 0.7, 1.0), Vector3(1.4, 1.4, 1.2), COLOR_MADERA_OSCURA)
 	_pieza("AtrilActa2", Vector3(0.0, 0.7, -1.5), Vector3(1.4, 1.4, 1.2), COLOR_MADERA_OSCURA)
 	_pieza("AtrilActa3", Vector3(4.5, 0.7, 1.0), Vector3(1.4, 1.4, 1.2), COLOR_MADERA_OSCURA)
+	_montar_muro_nombres()
 
 	# Escaño del Cronista
 	_pieza("EscarcaCronista", Vector3(0.0, 0.5, -6.5), Vector3(2.6, 1.0, 2.0), COLOR_PIEDRA_CLARA)
@@ -228,6 +235,90 @@ func _montar_mundo() -> void:
 	_rotulo("ACTA III", Vector3(4.5, 1.8, 1.0))
 	_rotulo("CRONISTA VELADO", Vector3(0.0, 2.2, -6.5))
 	_rotulo("VIA DE FUGA", Vector3(0.0, 3.8, -8.3))
+
+
+func _montar_muro_nombres() -> void:
+	# Una arcada original enmarca placas raspadas: pista visual de la memoria borrada.
+	var mural := Node3D.new()
+	mural.name = "MuroNombres"
+	mural.position = Vector3(-7.22, 0.0, -3.2)
+	add_child(mural)
+
+	_pieza_decorativa(
+		mural, "PiedraMural", Vector3(0.0, 2.25, 0.0), Vector3(0.3, 4.5, 5.2), COLOR_PARED
+	)
+	_pieza_decorativa(
+		mural,
+		"JambaNorte",
+		Vector3(0.22, 2.15, -2.45),
+		Vector3(0.34, 4.3, 0.42),
+		COLOR_PIEDRA_CLARA,
+	)
+	_pieza_decorativa(
+		mural,
+		"JambaSur",
+		Vector3(0.22, 2.15, 2.45),
+		Vector3(0.34, 4.3, 0.42),
+		COLOR_PIEDRA_CLARA,
+	)
+	_pieza_decorativa(
+		mural,
+		"DintelMemoria",
+		Vector3(0.22, 4.2, 0.0),
+		Vector3(0.34, 0.45, 5.2),
+		COLOR_PIEDRA_CLARA,
+	)
+
+	for indice in range(4):
+		var altura := 1.05 + float(indice) * 0.62
+		_pieza_decorativa(
+			mural,
+			"PlacaRaspada_%d" % indice,
+			Vector3(0.21, altura, 0.0),
+			Vector3(0.09, 0.22, 3.1),
+			COLOR_MADERA_OSCURA,
+		)
+		_pieza_decorativa(
+			mural,
+			"SurcoNombre_%d" % indice,
+			Vector3(0.27, altura, 0.0),
+			Vector3(0.04, 0.04, 2.55),
+			Color(0.18, 0.2, 0.22),
+		)
+
+	var rotulo := Label3D.new()
+	rotulo.name = "RotuloNombres"
+	rotulo.text = tr("CRONICAS_ARCHIVO_MURO_NOMBRES")
+	rotulo.position = Vector3(0.27, 3.75, 0.0)
+	rotulo.rotation.y = deg_to_rad(90.0)
+	rotulo.pixel_size = 0.005
+	rotulo.font_size = 22
+	rotulo.modulate = COLOR_TEXTO_INSCRIPCION
+	mural.add_child(rotulo)
+
+	var luz_memoria := OmniLight3D.new()
+	luz_memoria.name = "LuzNombresRaspados"
+	luz_memoria.position = Vector3(0.75, 2.5, 0.0)
+	luz_memoria.light_color = Color(0.52, 0.65, 0.82)
+	luz_memoria.light_energy = 0.7
+	luz_memoria.omni_range = 4.0
+	mural.add_child(luz_memoria)
+
+
+func _pieza_decorativa(
+	parent: Node3D, nombre: String, posicion: Vector3, tamano: Vector3, color: Color
+) -> void:
+	var visual := MeshInstance3D.new()
+	visual.name = nombre
+	visual.position = posicion
+	var malla := BoxMesh.new()
+	malla.size = tamano
+	visual.mesh = malla
+	var material := StandardMaterial3D.new()
+	material.albedo_color = color
+	material.roughness = 0.92
+	visual.material_override = material
+	parent.add_child(visual)
 
 
 func _pieza(
@@ -313,6 +404,15 @@ func _montar_interactuables() -> void:
 	)
 	_salida_node.activado.connect(func(_actor: Node): solicitar_fuga())
 
+	_muro_nombres_node = _objeto(
+		"MuroNombresInteractuable",
+		Vector3(-6.3, 1.8, -3.2),
+		Vector3(1.7, 2.5, 2.8),
+		Interactuable3D.Verbo.LEER,
+		tr("CRONICAS_ARCHIVO_MURO_NOMBRES"),
+	)
+	_muro_nombres_node.activado.connect(func(_actor: Node): inspeccionar_muro_nombres())
+
 	_actualizar_interacciones()
 
 
@@ -366,12 +466,7 @@ func _montar_hud() -> void:
 	_texto_objetivo.custom_minimum_size = Vector2(0, 80)
 	caja.add_child(_texto_objetivo)
 
-	_mensaje(
-		(
-			"Archivo del Cronista Velado — Inspecciona las tres actas incompatibles "
-			+ "y contrástalas con el Cronista para hallar la versión fundamentada."
-		)
-	)
+	_mensaje(tr("CRONICAS_ARCHIVO_OBJETIVO"))
 
 
 func _mensaje(texto: String) -> void:
