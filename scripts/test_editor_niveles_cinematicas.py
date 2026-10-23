@@ -1557,6 +1557,120 @@ func _probar():
         os.unlink(script_path)
 
 
+def probar_material_persistente_en_bulto_cinematico():
+    script = r'''
+extends SceneTree
+
+func _init():
+    call_deferred("_probar")
+
+func _probar():
+    var assets = load("res://debug/editor_niveles_cinematicas_assets.gd")
+    var editor_script = load("res://debug/editor_niveles_cinematicas.gd")
+    var catalogo = load("res://debug/editor_niveles_cinematicas_catalogo.gd")
+    var contrato = load("res://debug/editor_niveles_cinematicas_contrato.gd")
+    var ruta = ""
+    for entrada in assets.indice():
+        var candidata = String(entrada.get("ruta", ""))
+        if entrada.get("tipo") == "material" and load(candidata) is BaseMaterial3D:
+            ruta = candidata
+            break
+    if ruta.is_empty():
+        push_error("No hay material BaseMaterial3D del proyecto para probar")
+        quit(1)
+        return
+
+    var documento = {"bultos": [{"pos": [0, 0, 0], "tam": [1, 1, 1]}]}
+    var editor = editor_script.new()
+    var errores = editor.validar_cinematica({"tipo": "cinematica", "id": "material-test", "version": "1", "planos": [
+        {"tipo": "3d", "segundos": 2.0, "rotulo": "", "camara": [0, 2, 5], "mira": [0, 0, 0], "decorado": documento}
+    ]})
+    if not errores.is_empty():
+        push_error("El contrato rechaza decorado válido: " + str(errores))
+        quit(1)
+        return
+    var decorado_invalido = {"bultos": [{"pos": [0, 0, 0], "tam": [1, 1, 1], "material": "res://no-existe.tres"}]}
+    var errores_material_invalido = editor.validar_cinematica({"tipo": "cinematica", "id": "material-invalido", "version": "1", "planos": [
+        {"tipo": "3d", "segundos": 2.0, "rotulo": "", "camara": [0, 2, 5], "mira": [0, 0, 0], "decorado": decorado_invalido}
+    ]})
+    if errores_material_invalido.is_empty():
+        push_error("El contrato aceptó una ruta que no es un material del proyecto")
+        quit(1)
+        return
+
+    var entrada = contrato.asignar_material_a_ultimo_bulto(JSON.stringify(documento), ruta)
+    if not String(entrada.get("error", "")).is_empty():
+        push_error("No se asignó el material: " + entrada["error"])
+        quit(1)
+        return
+    if entrada["decorado"].bultos[0].get("material") != ruta:
+        push_error("La ruta de material no se guardó en el bulto")
+        quit(1)
+        return
+    var serializado = JSON.stringify(entrada["decorado"])
+    if JSON.parse_string(serializado).bultos[0].get("material") != ruta:
+        push_error("La ruta de material no sobrevive al roundtrip JSON")
+        quit(1)
+        return
+
+    var texto = TextEdit.new()
+    texto.text = JSON.stringify(documento)
+    var estado = Label.new()
+    var biblioteca = catalogo.biblioteca_decorado(texto, estado)
+    root.add_child(biblioteca["fila"])
+    biblioteca["buscador"].text = ruta.get_file()
+    biblioteca["buscador"].text_changed.emit(biblioteca["buscador"].text)
+    await process_frame
+    var selector: OptionButton = biblioteca["selector"]
+    if selector.item_count != 1 or selector.get_item_metadata(0) != ruta:
+        push_error("El filtro del catálogo no encontró el material seleccionado")
+        quit(1)
+        return
+    var boton: Button = biblioteca["asignar_material"]
+    if not boton.visible or boton.disabled:
+        push_error("El botón de asignación no aparece para un material 3D")
+        quit(1)
+        return
+    boton.pressed.emit()
+    var resultado_catalogo = JSON.parse_string(texto.text)
+    if resultado_catalogo.bultos[0].get("material") != ruta:
+        push_error("El catálogo no persistió el material en el documento")
+        quit(1)
+        return
+
+    var escena = Node3D.new()
+    root.add_child(escena)
+    var constructor = load("res://guion/espacio_3d.gd")
+    constructor.construir(escena, {"suelo": Vector2(2, 2), "bultos": [
+        {"pos": Vector3.ZERO, "tam": Vector3.ONE, "material": ruta}
+    ]})
+    await process_frame
+    var material: BaseMaterial3D = load(ruta)
+    var aplicado = false
+    for malla in escena.find_children("*", "MeshInstance3D", true, false):
+        if malla.material_override == material:
+            aplicado = true
+            break
+    if not aplicado:
+        push_error("Espacio3D no aplicó el material a la malla del bulto")
+        quit(1)
+        return
+    print("OK: catálogo, contrato, roundtrip y runtime aplican material al bulto")
+    quit(0)
+'''
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.gd', delete=False) as f:
+        f.write(script)
+        script_path = f.name
+    try:
+        code, out, err = godot_headless(script_path, timeout=180)
+        if code != 0:
+            raise AssertionError("Material persistente en bulto falló:\\n{}\\n{}".format(out, err))
+        assert "OK: catálogo, contrato, roundtrip y runtime" in out
+        print("OK: material persistente en bulto cinemático y aplicado por Espacio3D")
+    finally:
+        os.unlink(script_path)
+
+
 def main():
     print("=" * 60)
     print("PRUEBAS EDITOR NIVELES Y CINEMÁTICAS (#2942)")
@@ -1582,6 +1696,7 @@ def main():
         ("Colocar assets del proyecto", probar_asset_cualquiera_en_documento),
         ("Imagen persistente en plano 2D", probar_imagen_persistente_en_plano),
         ("Fuente persistente en rótulo", probar_fuente_persistente_en_rotulo),
+        ("Material persistente en bulto cinemático", probar_material_persistente_en_bulto_cinematico),
     ]
 
     passed = 0

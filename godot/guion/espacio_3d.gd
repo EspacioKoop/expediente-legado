@@ -102,6 +102,21 @@ static func material_declarado(
 
 ## Monta el espacio bajo [param raiz] y devuelve las salidas creadas, para que
 ## quien orquesta el día pueda escucharlas.
+static func _aplicar_material_bulto(pieza: Node3D, ruta: String) -> void:
+	if ruta.is_empty() or not ResourceLoader.exists(ruta):
+		return
+	var recurso: Resource = load(ruta)
+	if not recurso is BaseMaterial3D:
+		return
+	var material := recurso as BaseMaterial3D
+	var mallas: Array[Node] = []
+	if pieza is MeshInstance3D:
+		mallas.append(pieza)
+	mallas.append_array(pieza.find_children("*", "MeshInstance3D", true, false))
+	for nodo in mallas:
+		(nodo as MeshInstance3D).material_override = material
+
+
 static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 	# Lo primero, antes de crear una sola malla: todo lo que se monte debajo se
 	# pinta con el shader que este sitio haya pedido.
@@ -213,6 +228,7 @@ static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 		# ilumina nada, solo se ve encendido — lo que alumbra es una luz.
 		if bulto.get("emisivo", false):
 			_emisivo(pieza, bulto.get("color", Color(0.45, 0.44, 0.42)))
+		_aplicar_material_bulto(pieza, String(bulto.get("material", "")))
 
 	# Las pantallas son una superficie de contenido, no un bulto: no tienen
 	# colisión ni alteran la geometría de la calle. Sin fichero muestran nieve.
