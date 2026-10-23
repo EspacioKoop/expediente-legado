@@ -134,12 +134,13 @@ func _process(delta: float) -> void:
 
 
 func _unhandled_input(evento: InputEvent) -> void:
-	# El salto debe ser deliberado. Las transiciones suelen empezar mientras el
-	# jugador aún mantiene movimiento; aceptar cualquier `pressed` hacía que un
-	# repeat de esa tecla cerrase la cinemática en su primer fotograma (#280).
-	if not _reproduciendo:
+	# Ignorar auto-repeat al mantener Enter/Escape durante una transición.
+	# Consumir el evento ANTES del salto: terminada puede abrir un menú o
+	# devolver el control al jugador sin que esa pulsación llegue a la escena.
+	if not _reproduciendo or not evento.is_pressed() or evento.is_echo():
 		return
 	if evento.is_action_pressed("ui_accept") or evento.is_action_pressed("ui_cancel"):
+		get_viewport().set_input_as_handled()
 		saltar()
 
 
