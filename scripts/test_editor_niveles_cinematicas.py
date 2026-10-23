@@ -1487,6 +1487,76 @@ func editor_validar(cine: Dictionary) -> bool:
         os.unlink(script_path)
 
 
+def probar_fuente_persistente_en_rotulo():
+    script = r'''
+extends SceneTree
+
+func _init():
+    call_deferred("_probar")
+
+func _probar():
+    var assets = load("res://debug/editor_niveles_cinematicas_assets.gd")
+    var editor_script = load("res://debug/editor_niveles_cinematicas.gd")
+    var catalogo = load("res://debug/editor_niveles_cinematicas_catalogo.gd")
+    var ruta = ""
+    for entrada in assets.indice():
+        if entrada.get("tipo") == "fuente":
+            ruta = entrada.get("ruta", "")
+            break
+    if ruta.is_empty():
+        push_error("No hay fuente del proyecto para probar")
+        quit(1)
+        return
+    var campo = LineEdit.new()
+    var estado = Label.new()
+    catalogo.asignar_fuente_a_rotulo(campo, estado).call(ruta)
+    if campo.text != ruta:
+        push_error("El selector no asigna la ruta de fuente")
+        quit(1)
+        return
+    var plano = {"tipo": "2d", "segundos": 3.0, "rotulo": "RÓTULO", "figura": [
+        {"rect": {"x": 0, "y": 0, "width": 20, "height": 20}, "color": [1, 1, 1, 1]}
+    ], "desde": [0, 0], "hasta": [0, 0], "rotulo_fuente": campo.text}
+    var cine = {"tipo": "cinematica", "id": "fuente-test", "version": "1", "planos": [plano]}
+    var editor = editor_script.new()
+    if not editor.validar_cinematica(cine).is_empty():
+        push_error("El contrato rechaza una fuente del índice")
+        quit(1)
+        return
+    var serializado = JSON.stringify(cine)
+    if JSON.parse_string(serializado).planos[0].get("rotulo_fuente") != ruta:
+        push_error("La ruta de fuente no sobrevive al roundtrip JSON")
+        quit(1)
+        return
+    var app = load("res://guion/cinematica_app.gd").new()
+    root.add_child(app)
+    await process_frame
+    app.reproducir([plano])
+    await process_frame
+    if not app.get("_rotulo").has_theme_font_override("font"):
+        push_error("El reproductor no aplicó la fuente al rótulo")
+        quit(1)
+        return
+    if app.get("_fuentes_rotulo").get(ruta) == null:
+        push_error("El reproductor no resolvió la fuente")
+        quit(1)
+        return
+    print("OK: fuente del catálogo se asigna, persiste y se aplica al rótulo runtime")
+    quit(0)
+'''
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.gd', delete=False) as f:
+        f.write(script)
+        script_path = f.name
+    try:
+        code, out, err = godot_headless(script_path, timeout=180)
+        if code != 0:
+            raise AssertionError("Fuente persistente en rótulo falló:\\n{}\\n{}".format(out, err))
+        assert "OK: fuente del catálogo" in out
+        print("OK: fuente persistente y aplicada al rótulo cinemático")
+    finally:
+        os.unlink(script_path)
+
+
 def main():
     print("=" * 60)
     print("PRUEBAS EDITOR NIVELES Y CINEMÁTICAS (#2942)")
@@ -1511,6 +1581,7 @@ def main():
         ("Modelos: ruta res://", probar_modelos_acepta_ruta_absoluta),
         ("Colocar assets del proyecto", probar_asset_cualquiera_en_documento),
         ("Imagen persistente en plano 2D", probar_imagen_persistente_en_plano),
+        ("Fuente persistente en rótulo", probar_fuente_persistente_en_rotulo),
     ]
 
     passed = 0

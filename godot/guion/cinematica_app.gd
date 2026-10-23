@@ -59,6 +59,8 @@ var _figuras: Node2D
 ## Texturas de figuras 2D ya resueltas, por ruta. Se dibuja cada fotograma: sin
 ## memoria, un plano con imagen pediría el recurso sesenta veces por segundo.
 var _texturas: Dictionary = {}
+## Fuentes de rótulo resueltas por ruta, para no cargar el recurso en cada plano.
+var _fuentes_rotulo: Dictionary = {}
 var _fundido: ColorRect
 var _grano: ColorRect
 ## Interrupción CRT opt-in: scanlines, desincronía, ruido y corte a negro breve.
@@ -157,6 +159,10 @@ func _siguiente() -> void:
 	# Un rótulo largo es una frase y quiere cuerpo menor; uno corto es un
 	# nombre y quiere presencia.
 	_rotulo.add_theme_font_size_override("font_size", 34 if _rotulo.text.length() > 28 else 48)
+	_rotulo.remove_theme_font_override("font")
+	var fuente_rotulo := _fuente_rotulo(String(plano.get("rotulo_fuente", "")))
+	if fuente_rotulo != null:
+		_rotulo.add_theme_font_override("font", fuente_rotulo)
 
 	_actualizar_fundido(plano, 0.0)
 
@@ -384,6 +390,22 @@ func _dibujar_figuras() -> void:
 			# como modulación: así el mismo plano sigue leyéndose igual cuando la
 			# textura falta, y el gris del expediente puede teñir una foto.
 			_figuras.draw_texture_rect(textura, destino, false, color)
+
+
+func _fuente_rotulo(ruta: String) -> Font:
+	if ruta.is_empty():
+		return null
+	if _fuentes_rotulo.has(ruta):
+		return _fuentes_rotulo[ruta]
+	var fuente: Font = null
+	if ResourceLoader.exists(ruta):
+		var recurso: Resource = load(ruta)
+		if recurso is Font:
+			fuente = recurso
+	if fuente == null:
+		push_warning("CinematicaApp: fuente de rótulo no disponible: %s" % ruta)
+	_fuentes_rotulo[ruta] = fuente
+	return fuente
 
 
 ## Acepta el color JSON del editor y Color directo de cinemáticas GDScript.

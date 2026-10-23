@@ -38,6 +38,47 @@ static func selector_escenario(texto: TextEdit, estado: Label) -> Dictionary:
 	return {"fila": fila, "selector": selector}
 
 
+## Monta el control de fuente por plano y devuelve el campo que se aplica al documento.
+static func montar_fuente_rotulo(
+	detalle: VBoxContainer, plano: Dictionary, estado: Label
+) -> LineEdit:
+	var etiqueta := Label.new()
+	etiqueta.text = "Fuente del rótulo (opcional, res://):"
+	detalle.add_child(etiqueta)
+	var campo := LineEdit.new()
+	campo.placeholder_text = "Ruta de fuente res://…"
+	campo.text = String(plano.get("rotulo_fuente", ""))
+	detalle.add_child(campo)
+	var biblioteca := biblioteca_fuentes_rotulo(campo, estado)
+	detalle.add_child(biblioteca["fila"])
+	return campo
+
+
+## Asigna una fuente del catálogo al rótulo del plano seleccionado.
+static func asignar_fuente_a_rotulo(campo: LineEdit, estado: Label) -> Callable:
+	return func(ruta: String) -> void:
+		if ASSETS.tipo_de(ruta) != "fuente":
+			estado.text = "Ese recurso no es una fuente del proyecto"
+			return
+		campo.text = ruta
+		estado.text = "Fuente '%s' asignada; pulsa Aplicar" % ruta.get_file()
+
+
+## Biblioteca filtrable con acción específica para fuentes de rótulo.
+static func biblioteca_fuentes_rotulo(campo: LineEdit, estado: Label) -> Dictionary:
+	var biblioteca := _biblioteca(
+		"Añadir al plano",
+		func(_ruta: String) -> void: pass,
+		func(_ruta: String) -> void: pass,
+		func(_ruta: String) -> void: pass,
+		Callable(),
+		asignar_fuente_a_rotulo(campo, estado)
+	)
+	biblioteca["boton"].visible = false
+	biblioteca["boton_personaje"].visible = false
+	return biblioteca
+
+
 ## Inserta una imagen del catálogo en la figura JSON del plano 2D seleccionado.
 static func asignar_imagen_a_plano(texto: TextEdit, estado: Label) -> Callable:
 	return func(ruta: String) -> void:
@@ -130,7 +171,8 @@ static func _biblioteca(
 	al_agregar: Callable,
 	al_agregar_personaje: Callable = Callable(),
 	al_asignar_sonido: Callable = Callable(),
-	al_asignar_imagen: Callable = Callable()
+	al_asignar_imagen: Callable = Callable(),
+	al_asignar_fuente: Callable = Callable()
 ) -> Dictionary:
 	var columna := VBoxContainer.new()
 	var filtros := HBoxContainer.new()
@@ -219,6 +261,11 @@ static func _biblioteca(
 	asignar_imagen.text = "Añadir imagen a la figura 2D"
 	asignar_imagen.visible = false
 	asignar_imagen.disabled = not al_asignar_imagen.is_valid()
+	var asignar_fuente := Button.new()
+	asignar_fuente.name = "BotonAsignarFuenteRotulo"
+	asignar_fuente.text = "Usar fuente en rótulo"
+	asignar_fuente.visible = false
+	asignar_fuente.disabled = not al_asignar_fuente.is_valid()
 
 	columna.add_child(filtros)
 	columna.add_child(fila)
@@ -229,6 +276,7 @@ static func _biblioteca(
 	columna.add_child(reproducir)
 	columna.add_child(asignar_sonido)
 	columna.add_child(asignar_imagen)
+	columna.add_child(asignar_fuente)
 	columna.add_child(audio)
 
 	var todos: Array = ASSETS.indice()
@@ -251,6 +299,7 @@ static func _biblioteca(
 			and not clave_sonido_para_ruta(ruta).is_empty()
 		)
 		asignar_imagen.visible = al_asignar_imagen.is_valid() and tipo == "imagen"
+		asignar_fuente.visible = al_asignar_fuente.is_valid() and tipo == "fuente"
 		boton_personaje.visible = (
 			al_agregar_personaje.is_valid()
 			and not CONTRATO.modelo_personaje_desde_ruta(ruta).is_empty()
@@ -299,6 +348,7 @@ static func _biblioteca(
 			reproducir.visible = false
 			asignar_sonido.visible = false
 			asignar_imagen.visible = false
+			asignar_fuente.visible = false
 			boton_personaje.visible = false
 		if encontrados.is_empty():
 			conteo.text = "sin resultados"
@@ -323,6 +373,12 @@ static func _biblioteca(
 			var ruta := ruta_seleccionada(selector)
 			if not ruta.is_empty() and al_asignar_imagen.is_valid():
 				al_asignar_imagen.call(ruta)
+	)
+	asignar_fuente.pressed.connect(
+		func():
+			var ruta := ruta_seleccionada(selector)
+			if not ruta.is_empty() and al_asignar_fuente.is_valid():
+				al_asignar_fuente.call(ruta)
 	)
 	copiar.pressed.connect(
 		func():
@@ -360,6 +416,7 @@ static func _biblioteca(
 		"reproducir": reproducir,
 		"asignar_sonido": asignar_sonido,
 		"asignar_imagen": asignar_imagen,
+		"asignar_fuente": asignar_fuente,
 		"audio": audio,
 		"buscador": buscador,
 		"carpetas": carpetas,

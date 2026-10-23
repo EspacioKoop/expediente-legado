@@ -109,6 +109,12 @@ static func validar_cinematica(datos: Dictionary) -> PackedStringArray:
 	for i in planos_validos.size():
 		var plano: Dictionary = planos_validos[i]
 		var tipo := String(plano.get("tipo", "")).strip_edges()
+		if plano.has("rotulo_fuente"):
+			var fuente: Variant = plano["rotulo_fuente"]
+			if not fuente is String:
+				errores.append("plano %d: rotulo_fuente debe ser una ruta" % i)
+			elif ASSETS.tipo_de(String(fuente)) != "fuente":
+				errores.append("plano %d: rotulo_fuente no es una fuente del proyecto" % i)
 		if tipo == "3d":
 			for campo in ["camara", "mira"]:
 				if not vector3_valido(plano.get(campo)):
