@@ -329,7 +329,20 @@ func _cerrar_inventario() -> void:
 	if hud is HUDLayer:
 		hud.desactivar(HUDLayer.MODAL)
 	get_tree().paused = false
-	Input.mouse_mode = _mouse_previo
+	Input.mouse_mode = modo_raton_al_cerrar_inventario(_mouse_previo, dia)
+
+
+static func modo_raton_al_cerrar_inventario(modo_previo: int, dia: Node) -> int:
+	if not is_instance_valid(dia):
+		return modo_previo
+	var pantalla: Variant = dia.get("_pantalla")
+	if not pantalla is Node:
+		return modo_previo
+	var escritorio: Node = (pantalla as Node).get_node_or_null("EscritorioSiga")
+	if escritorio is CanvasItem and (escritorio as CanvasItem).is_visible_in_tree():
+		# El escritorio usa el puntero como interfaz; no hereda la captura del mundo 3D.
+		return Input.MOUSE_MODE_VISIBLE
+	return modo_previo
 
 
 func _ocultar_tarjeta_fase() -> void:
