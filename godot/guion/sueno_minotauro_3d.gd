@@ -202,10 +202,8 @@ func _montar_presencia() -> void:
 	_presencia = Node3D.new()
 	_presencia.name = "PresenciaMinotauro"
 	_arquitectura.add_child(_presencia)
-	_crear_esfera(_presencia, "Cabeza", 0.72, Vector3.ZERO, COLOR_PRESENCIA)
-	_crear_esfera(_presencia, "Morro", 0.43, Vector3(0.0, -0.18, -0.58), COLOR_PRESENCIA)
-	_crear_cuerno(_presencia, "CuernoIzquierdo", Vector3(-0.52, 0.55, 0.0), -22.0)
-	_crear_cuerno(_presencia, "CuernoDerecho", Vector3(0.52, 0.55, 0.0), 22.0)
+	var cabeza := ModeloMinotauroAutoral.crear()
+	_presencia.add_child(cabeza)
 
 	_audio_presencia = AudioStreamPlayer3D.new()
 	_audio_presencia.name = "RespiracionMinotauro"
@@ -374,16 +372,16 @@ func _crear_tramo_hilo(desde: Vector3, hasta: Vector3, indice: int) -> void:
 
 func _actualizar_presencia() -> void:
 	var presencia := String(_estado.get("presencia", SuenoMinotauro.PRESENCIAS[0]))
-	var destino := _posicion_local(SuenoMinotauro.SALIDA) + Vector3(0.0, 2.5, -2.0)
+	var destino := _posicion_local(SuenoMinotauro.SALIDA) + Vector3(0.0, 0.22, -2.0)
 	var escala := 0.62
 	if presencia == "respiracion":
-		destino = _posicion_local(SuenoMinotauro.BISAGRA) + Vector3(0.0, 2.1, -1.8)
+		destino = _posicion_local(SuenoMinotauro.BISAGRA) + Vector3(0.0, 0.22, -1.8)
 		escala = 0.78
 	elif presencia == "cruce":
-		destino = _posicion_local(SuenoMinotauro.CRUCE_SUR) + Vector3(0.0, 1.8, 0.0)
+		destino = _posicion_local(SuenoMinotauro.CRUCE_SUR) + Vector3(0.0, 0.22, 0.0)
 		escala = 0.94
 	elif presencia == "cerca":
-		destino = _posicion_local(SuenoMinotauro.CENTRO) + Vector3(0.0, 1.7, 1.2)
+		destino = _posicion_local(SuenoMinotauro.CENTRO) + Vector3(0.0, 0.22, 1.2)
 		escala = 1.15
 	_presencia.position = destino
 	_presencia.scale = Vector3.ONE * escala
@@ -439,21 +437,6 @@ func _crear_esfera(
 	nodo.material_override = _material(color)
 	padre.add_child(nodo)
 	return nodo
-
-
-func _crear_cuerno(padre: Node3D, nombre: String, posicion: Vector3, giro_z: float) -> void:
-	var malla := CylinderMesh.new()
-	malla.top_radius = 0.05
-	malla.bottom_radius = 0.18
-	malla.height = 1.0
-	malla.radial_segments = 7
-	var cuerno := MeshInstance3D.new()
-	cuerno.name = nombre
-	cuerno.mesh = malla
-	cuerno.position = posicion
-	cuerno.rotation_degrees.z = giro_z
-	cuerno.material_override = _material(Color(0.66, 0.58, 0.42))
-	padre.add_child(cuerno)
 
 
 func _material(color: Color, transparente: bool = false) -> StandardMaterial3D:
