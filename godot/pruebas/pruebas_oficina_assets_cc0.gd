@@ -24,7 +24,7 @@ func _probar() -> void:
 		for malla in Modelos._mallas(pieza):
 			_comprobar(malla.is_visible_in_tree() and malla.layers != 0, "sustituto visible")
 			for i in malla.mesh.get_surface_count():
-				var material := malla.get_active_material(i)
+				var material: Material = malla.get_active_material(i)
 				_comprobar(material != null, "todas las superficies tienen material")
 				var shader := material as ShaderMaterial
 				if shader != null:
