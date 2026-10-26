@@ -33,8 +33,10 @@ func _initialize() -> void:
 	)
 	_comprobar(malla_realista.material_override == null, "no impone shader PSX al opt-in")
 	_comprobar(
-		is_equal_approx(material_original.roughness, 0.23)
-		and is_equal_approx(material_original.metallic, 0.42),
+		(
+			is_equal_approx(material_original.roughness, 0.23)
+			and is_equal_approx(material_original.metallic, 0.42)
+		),
 		"conserva roughness y metal originales"
 	)
 
