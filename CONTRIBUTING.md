@@ -101,6 +101,14 @@ Sé específico:
 
 No uses una de estas expresiones para significar otra.
 
+## Entregas visuales y 3D
+
+El criterio por defecto es el **realismo cinematográfico del mundo de 1998**, con tratamientos retro/PSX usados deliberadamente para interfaces y anomalías. La fuente de verdad es [docs/design/direccion-artistica.md](docs/design/direccion-artistica.md), y el puente PBR importado está documentado en [docs/assets/realismo-2519.md](docs/assets/realismo-2519.md). No se da por final un asset por aumentar polígonos, ponerle una textura o superar CI.
+
+Toda PR que declare una mejora **artística final** en escenarios, personajes, criaturas, props, materiales o iluminación debe especificar: escena y cámara de destino; fuente/licencia/SHA-256 para cualquier asset nuevo; captura real desde Godot con SHA y renderer; antes/después comparable o dos ángulos; estado de la revisión humana; y qué elementos siguen siendo blockout. Sin ese pase, describir el cambio como **integración técnica**, **blockout jugable** o **pendiente de validación artística**, nunca como fotorrealismo verificado.
+
+Los cambios de arte que mejoran geometría pero no superan aún el gate artístico pueden entrar técnicamente solo si mantienen el proyecto estable, están claramente etiquetados como **parciales** y no justifican cerrar el criterio visual. La oficina (#126/#398) es el primer patrón de referencia y debe probarse también en recorrido jugable. Mantener siempre separación entre permisos de redistribución del asset, CI, evidencia visual y aprobación artística.
+
 ## Cambios de documentación
 
 Actualiza documentación en el mismo PR cuando cambie una regla estable del repositorio:
