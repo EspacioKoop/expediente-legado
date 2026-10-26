@@ -9,7 +9,7 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RESUMEN = re.compile(r"(\\d+) pasadas, 0 fallos")
+RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
 
 
 class CatedralRecorrido3DTest(unittest.TestCase):
