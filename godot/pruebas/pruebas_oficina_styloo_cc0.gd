@@ -84,8 +84,7 @@ func _probar() -> void:
 				else:
 					materia_correcta = materia_correcta and material is ShaderMaterial
 		_comprobar(
-			materia_correcta,
-			"preserva PBR por superficie o retrocede a PSX si falta material"
+			materia_correcta, "preserva PBR por superficie o retrocede a PSX si falta material"
 		)
 		pieza_fuente.free()
 
