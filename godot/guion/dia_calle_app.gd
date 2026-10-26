@@ -77,10 +77,11 @@ func _montar_animacion_ambiental(calle: Node3D) -> void:
 	# por qué encontrarse el mismo piso encendido.
 	animador.semilla = int(jornada.get("dia", 1))
 
-	_ventanas_vivas = CalleVentanasVivas.new()
-	_ventanas_vivas.name = "VentanasVivasCalle"
-	add_child(_ventanas_vivas)
-	_ventanas_vivas.adoptar(calle, animador)
+	if CalleVentanasVivas.habilitada():
+		_ventanas_vivas = CalleVentanasVivas.new()
+		_ventanas_vivas.name = "VentanasVivasCalle"
+		add_child(_ventanas_vivas)
+		_ventanas_vivas.adoptar(calle, animador)
 
 	_viento = VientoAmbiental.new()
 	_viento.name = "VientoCalle"

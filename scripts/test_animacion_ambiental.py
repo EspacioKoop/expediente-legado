@@ -206,6 +206,25 @@ class AnimacionAmbientalEnGodotTest(unittest.TestCase):
                     self.assertEqual(int(resumen.group(2)), 0, resultado.stdout)
                     self.assertGreaterEqual(int(resumen.group(1)), 18, resultado.stdout)
 
+            entorno["SIGA98" + "_SIN_VENTANAS_VIVAS"] = "1"
+            aislada = subprocess.run(
+                base + ["--script", "res://pruebas/pruebas_animacion_calle_1230.gd"],
+                env=entorno,
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                timeout=240,
+                check=False,
+            )
+            try:
+                validar(aislada.stdout, aislada.returncode, None, False)
+            except ValueError as error:
+                self.fail(f"{error}\n{aislada.stdout}")
+            resumen = re.search(r"(\d+) pasadas, (\d+) fallos", aislada.stdout)
+            self.assertIsNotNone(resumen, aislada.stdout)
+            self.assertEqual(int(resumen.group(2)), 0, aislada.stdout)
+            self.assertEqual(int(resumen.group(1)), 5, aislada.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

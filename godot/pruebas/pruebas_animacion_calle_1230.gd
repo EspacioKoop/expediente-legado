@@ -17,7 +17,37 @@ func _initialize() -> void:
 		printerr("Ejecuta esta prueba desde unittest con datos aislados.")
 		quit(1)
 		return
+	if not CalleVentanasVivas.habilitada():
+		_probar_capa_desactivada.call_deferred()
+		return
 	_probar.call_deferred()
+
+
+## #2972: con la capa desactivada por entorno, la calle se monta igual pero sin
+## el lote animado. Es la condición que QA reproducirá en Windows para acotar el
+## cierre nativo: si deja de cerrarse, el fallo queda dentro de #1230.
+func _probar_capa_desactivada() -> void:
+	var dia = DIA.instantiate()
+	root.add_child(dia)
+	await process_frame
+	dia._entrar_en("trayecto")
+	await process_frame
+	await process_frame
+
+	var calle := dia._mundo.get_node_or_null("CalleIdentidad") as Node3D
+	_comprobar(calle != null, "con la capa apagada el trayecto sigue montando la calle")
+	if calle != null:
+		var vivas := calle.get_node_or_null("FachadasVivas") as Node3D
+		_comprobar(vivas != null, "el fondo estático de #861 no depende de esta capa")
+		if vivas != null:
+			_comprobar(
+				vivas.get_node_or_null(CalleVentanasVivas.NOMBRE_LOTE) == null,
+				"el lote animado desaparece por completo"
+			)
+	_comprobar(dia._ventanas_vivas == null, "la capa de ventanas vivas no se instancia")
+	_comprobar(dia._viento != null, "el viento de la calle sigue montado sin esta capa")
+
+	_terminar(dia)
 
 
 func _probar() -> void:
