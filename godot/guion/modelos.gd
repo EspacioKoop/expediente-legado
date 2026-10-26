@@ -1,25 +1,7 @@
-## Los muebles que son malla de verdad y no una caja.
-##
-## `EspaciosCatalogo` ya lo había previsto: «una mesa es una caja **hasta que
-## haya un asset con su ficha**; llamarla mesa aquí es lo que permite
-## sustituirla luego sin tocar la geografía». Esto es ese *luego*. Un bulto
-## declara `modelo` y le sale la malla encima; sin `modelo` sigue siendo la caja
-## de siempre, así que ningún sitio existente cambia por esto.
-##
-## Tres reglas, y ninguna es de comodidad:
-##
-## 1. **La caja sigue mandando.** El modelo se ENCAJA en el `tam` declarado y la
-##    colisión sigue siendo la del bulto. La geografía es del catálogo, no del
-##    fichero que alguien descargó: si un `.glb` viniera con otra escala, lo que
-##    no puede pasar es que la sala cambie de forma por debajo. Se puede
-##    sustituir un modelo por otro y nadie se queda encerrado.
-## 2. **Se viste con el mismo shader que todo lo demás.** `Espacio3D` dice que
-##    un solo material es lo que hace que esto parezca una máquina y no un
-##    render, y un mueble importado con su propio material sería justo eso: un
-##    objeto de otro juego pegado en esta oficina. El modelo aporta la FORMA; el
-##    color lo sigue declarando el catálogo, como el de cualquier bulto.
-## 3. **Un modelo que falta no revienta la sala.** Se queda la caja. Un archivo
-##    con un archivador cúbico es peor; un archivo que no abre es inaceptable.
+## Integra modelos reales en bultos, sin modificar su caja física.
+## La escala/colisión pertenecen al catálogo. Si falta el modelo, permanece
+## el proxy. El shader común es el acabado predeterminado, salvo opt-in de
+## materiales importados previamente revisados.
 class_name Modelos
 extends RefCounted
 
@@ -102,18 +84,44 @@ const PERSONAJES_FACIALES := {
 static var _cache := {}
 
 
-## Un MUEBLE: la forma la pone el modelo y el color la casa.
-##
-## Se encaja en el `tam` declarado por el catálogo y se le impone el shader
-## común, porque un mueble importado con su propio material sería un objeto de
-## otro juego pegado en esta oficina. Un armario no tiene opinión sobre su color.
-static func mueble(cuerpo: Node3D, nombre: String, tam: Vector3, color: Color) -> bool:
+## Mueble: por defecto shader PSX; con opt-in conserva PBR por instancia.
+static func mueble(
+	cuerpo: Node3D,
+	nombre: String,
+	tam: Vector3,
+	color: Color,
+	conservar_materiales_importados: bool = false
+) -> bool:
 	var pieza := _instanciar(cuerpo, nombre)
 	if pieza == null:
 		return false
 	_encajar(pieza, tam)
-	_pintar(pieza, color, String(MATERIALES_MUEBLE.get(nombre, "")))
+	_acabado_mueble(pieza, nombre, color, conservar_materiales_importados)
 	return true
+
+
+## Solo aceptamos el opt-in cuando todas las superficies poseen material.
+## Con una importación incompleta no dejamos piezas grises sin acabado.
+static func _tiene_materiales_importados(pieza: Node3D) -> bool:
+	var mallas := _mallas(pieza)
+	if mallas.is_empty():
+		return false
+	for nodo in mallas:
+		var malla := nodo as MeshInstance3D
+		if malla.mesh == null or malla.mesh.get_surface_count() == 0:
+			return false
+		for superficie in malla.mesh.get_surface_count():
+			if malla.get_active_material(superficie) == null:
+				return false
+	return true
+
+
+static func _acabado_mueble(
+	pieza: Node3D, nombre: String, color: Color, conservar_materiales_importados: bool
+) -> void:
+	if conservar_materiales_importados and _tiene_materiales_importados(pieza):
+		return
+	_pintar(pieza, color, String(MATERIALES_MUEBLE.get(nombre, "")))
 
 
 ## Una PERSONA: conserva lo suyo.

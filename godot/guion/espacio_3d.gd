@@ -216,7 +216,11 @@ static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 			if caja_visible != null:
 				caja_visible.visible = false
 			if not Modelos.mueble(
-				pieza, modelo, bulto["tam"], bulto.get("color", Color(0.45, 0.44, 0.42))
+				pieza,
+				modelo,
+				bulto["tam"],
+				bulto.get("color", Color(0.45, 0.44, 0.42)),
+				bool(bulto.get("materiales_importados", false))
 			):
 				# Sin modelo se vuelve a la caja: un archivador cúbico es peor
 				# que uno de verdad, pero un bulto invisible es un agujero con
