@@ -13,11 +13,10 @@
 ##    fichero que alguien descargó: si un `.glb` viniera con otra escala, lo que
 ##    no puede pasar es que la sala cambie de forma por debajo. Se puede
 ##    sustituir un modelo por otro y nadie se queda encerrado.
-## 2. **Se viste con el mismo shader que todo lo demás.** `Espacio3D` dice que
-##    un solo material es lo que hace que esto parezca una máquina y no un
-##    render, y un mueble importado con su propio material sería justo eso: un
-##    objeto de otro juego pegado en esta oficina. El modelo aporta la FORMA; el
-##    color lo sigue declarando el catálogo, como el de cualquier bulto.
+## 2. **El acabado se elige por instancia.** Por defecto los muebles siguen
+##    usando el shader común. Un asset realista previamente revisado puede
+##    conservar albedo, mapas UV, normales y roughness importados; el fallback
+##    sigue siendo el acabado del proyecto cuando faltan materiales.
 ## 3. **Un modelo que falta no revienta la sala.** Se queda la caja. Un archivo
 ##    con un archivador cúbico es peor; un archivo que no abre es inaceptable.
 class_name Modelos
@@ -102,18 +101,48 @@ const PERSONAJES_FACIALES := {
 static var _cache := {}
 
 
-## Un MUEBLE: la forma la pone el modelo y el color la casa.
+## Un MUEBLE: caja física del catálogo y acabado elegido por instancia.
 ##
-## Se encaja en el `tam` declarado por el catálogo y se le impone el shader
-## común, porque un mueble importado con su propio material sería un objeto de
-## otro juego pegado en esta oficina. Un armario no tiene opinión sobre su color.
-static func mueble(cuerpo: Node3D, nombre: String, tam: Vector3, color: Color) -> bool:
+## El tratamiento PSX continúa siendo el predeterminado. Con opt-in explícito,
+## la malla conserva los materiales importados sin reescribir el recurso común:
+## dos copias del mismo modelo pueden tener acabados diferentes.
+static func mueble(
+	cuerpo: Node3D,
+	nombre: String,
+	tam: Vector3,
+	color: Color,
+	conservar_materiales_importados: bool = false
+) -> bool:
 	var pieza := _instanciar(cuerpo, nombre)
 	if pieza == null:
 		return false
 	_encajar(pieza, tam)
-	_pintar(pieza, color, String(MATERIALES_MUEBLE.get(nombre, "")))
+	_acabado_mueble(pieza, nombre, color, conservar_materiales_importados)
 	return true
+
+
+## Solo aceptamos el opt-in cuando todas las superficies poseen material.
+## Con una importación incompleta no dejamos piezas grises sin acabado.
+static func _tiene_materiales_importados(pieza: Node3D) -> bool:
+	var mallas := _mallas(pieza)
+	if mallas.is_empty():
+		return false
+	for nodo in mallas:
+		var malla := nodo as MeshInstance3D
+		if malla.mesh == null or malla.mesh.get_surface_count() == 0:
+			return false
+		for superficie in malla.mesh.get_surface_count():
+			if malla.get_active_material(superficie) == null:
+				return false
+	return true
+
+
+static func _acabado_mueble(
+	pieza: Node3D, nombre: String, color: Color, conservar_materiales_importados: bool
+) -> void:
+	if conservar_materiales_importados and _tiene_materiales_importados(pieza):
+		return
+	_pintar(pieza, color, String(MATERIALES_MUEBLE.get(nombre, "")))
 
 
 ## Una PERSONA: conserva lo suyo.
