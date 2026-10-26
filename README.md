@@ -15,11 +15,14 @@ El proyecto nació como aplicación web con Spring Boot y se está reescribiendo
 | [Wiki](https://github.com/EspacioKoop/expediente-legado/wiki) | Conceptos permanentes para jugadores, desarrolladores y agentes; si discrepa del repo, manda el repo |
 | [Agentes autónomos](docs/agents-autonomos.md) | Cola, delegación, revisión y límites de seguridad |
 | [Referencias ludonarrativas](docs/research/referencias-ludonarrativas.md) | Técnicas de investigación/presentación y sus límites de adopción |
+| [Dirección artística](docs/design/direccion-artistica.md) | Acabado realista para mundo 1998, excepciones retro y validación de assets en Godot |
 | [AGENTS.md](AGENTS.md) | Flujo obligatorio para agentes y trampas conocidas |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Ramas, PR, pruebas y revisión |
 | [Auditoría de paridad SIGA](docs/paridad-expedientes.md) | Qué comportamiento del legado existe ya en Godot y qué falta |
 | [Milestones](https://github.com/EspacioKoop/expediente-legado/milestones) | Qué está comprometido para una versión |
 | [Releases](https://github.com/EspacioKoop/expediente-legado/releases) | Qué se ha publicado |
+
+**Pauta visual para nuevas entregas:** los espacios, personas, props y criaturas han de tender al **realismo cinematográfico y material de 1998**; los recursos PSX/CRT son una decisión localizada para interfaces y anomalías, no un filtro obligatorio que sustituya los materiales PBR. Se mantiene la distinción entre blockout jugable, integración técnica y acabado artístico validado. Véase la [dirección artística canónica](docs/design/direccion-artistica.md) (#398/#2519) y la evidencia en el motor desde cámara de juego.
 
 Este repositorio adopta las [Normas Platino](https://github.com/EspacioKoop/normas_platino): **reserva antes de editar, rama propia, PR obligatorio, CI y autorización humana de integración**. El registro activo es [#2905](https://github.com/EspacioKoop/expediente-legado/issues/2905); [#182](https://github.com/EspacioKoop/expediente-legado/issues/182) y [#1713](https://github.com/EspacioKoop/expediente-legado/issues/1713) se conservan solo para reservas históricas durante el rollover. El silencio no caduca una reserva y `PR_READY` no equivale a permiso para mergear. Una reserva protege archivos, no bloquea la cooperación.
 

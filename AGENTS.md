@@ -15,6 +15,7 @@ El flujo humano sigue en [CONTRIBUTING.md](CONTRIBUTING.md), el contexto en [REA
 | Estado general | [README.md](README.md) |
 | Paridad legado → Godot | [docs/paridad-expedientes.md](docs/paridad-expedientes.md) |
 | Reparto entre agentes | [docs/agents/doctrina.md](docs/agents/doctrina.md) |
+| Dirección artística y acabado 3D | [docs/design/direccion-artistica.md](docs/design/direccion-artistica.md) |
 
 Lee también el issue concreto, sus comentarios, PRs relacionadas, reviews y CI. En este proyecto una decisión que evita duplicar trabajo suele estar en un comentario posterior al cuerpo original.
 
@@ -85,6 +86,18 @@ La pregunta operativa antes de crear cualquier issue es: **“¿alguien puede em
 - **Sin acceso al repositorio privado:** detener únicamente la parte de infraestructura y comunicar el bloqueo de forma saneada; nunca usar este repositorio público como alternativa. No copiar aquí URLs/hosts privados, secretos, snapshots de cuotas, conversaciones internas o trazas operativas.
 
 La frontera aplica también a encargos para agentes gratuitos y a la automatización que crea issues; etiquetar un asunto como `agent:*` no lo convierte en trabajo del juego.
+
+## Pauta gráfica obligatoria para todos los agentes
+
+La referencia para **cualquier** propuesta de escenario, modelo 3D, criatura, personaje, material, luz o cinemática es [la dirección artística canónica](docs/design/direccion-artistica.md) (#398), no el estilo casual del modelo generativo que produzca el asset.
+
+- **Acabado objetivo:** realismo cinematográfico de finales de los 90 para vigilia, props y criaturas materiales. El low-poly/procedural puede ser blockout jugable o decisión narrativa localizada, **no acabado final por defecto**. Una escena funcional no equivale a una escena visualmente aprobada.
+- **PSX / CRT:** efectos para interfaces, dispositivos y anomalías intencionales; no sobrescribir indiscriminadamente los materiales PBR de modelos reales. Para mobiliario auditado, `Modelos.mueble` permite `materiales_importados: true` por instancia (#2982).
+- **No producir placeholders de relleno** para aparentar avance en un issue visual. Antes de modelar de cero, buscar recursos ya licenciados/verificables y revisar medidas, UV, materiales, licencia, procedencia y LFS.
+- **Evidencia obligatoria para arte final:** capturas **reales en Godot** desde cámara de juego, renderer/SHA indicados, materiales y escala examinados, y revisión visual humana. Una prueba headless o una imagen generada no acredita fotorrealismo; sin la evidencia, declarar expresamente `blockout jugable` o `pendiente revisión artística`.
+- **Primera referencia de calidad:** oficina/archivo (#126/#398) con entrada y puesto reproducibles; consolidar esa calidad antes de escalar a calle, casa y sueño. No retocar la lógica jugable sin necesidad ni duplicar tareas de otro agente.
+
+Estas reglas afectan a agentes de los tres niveles, PRs humanas y propuestas de outsourcing; no sustituyen reservas, licencias, gates ni autorización de merge.
 
 ## Niveles de trabajo
 

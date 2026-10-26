@@ -280,6 +280,32 @@ def render_worker_prompt(packet: dict[str, Any], provider: str) -> str:
         provider,
         "Lee antes de editar y limita cada cambio al alcance explícitamente permitido.",
     )
+    visual_terms = (
+        "gráfic", "artístic", "malla", "modelo 3d", "modelado", "visual", "pbr", "fotorreal",
+        "realismo", "textur", "shader", "ilumin", "sombra", "material", "decorado",
+        "escenograf", "criatura", "low-poly", "low poly", "props", "glb", "render",
+        "cinematic", "cinemát", "asset", "atrezzo", "utilería",
+    )
+    visual_text = f"{title} {goal} {instructions}".casefold()
+    visual_task = (
+        any(term in visual_text for term in visual_terms)
+        or any(
+            path.startswith(("godot/arte/", "godot/assets/"))
+            or path.endswith((".tscn", ".tres", ".gdshader", ".glb", ".fbx"))
+            for path in files
+        )
+    )
+    visual_guidance = (
+        "## Dirección artística SIGA-98 (tarea visual)\n"
+        "Objetivo: realismo cinematográfico material de 1998 en escenarios, "
+        "muebles y criaturas; PSX/CRT solo si es diegético o narrativo. "
+        "No vendas cajas/low-poly como acabado final ni sustituyas PBR por "
+        "colores planos para ocultar carencias. Si falta un asset con derechos "
+        "verificables, informa del bloqueo; un blockout debe identificarse "
+        "como parcial. Capturas reales en Godot y revisión humana son "
+        "necesarias para aprobar arte, CI no lo acredita.\n"
+        if visual_task else ""
+    )
     return f"""# Tarea del worker
 
 Tarea: {task_id}
@@ -316,6 +342,7 @@ edites nada y devuelve status "blocked" explicando por qué.
 ## Restricciones de dominio
 {rendered_domain}
 
+{visual_guidance}
 ## Salida obligatoria
 En tu respuesta final (no en un fichero: no crees ficheros auxiliares) emite
 exactamente un bloque 'AGENT_RESULT_BEGIN' / 'AGENT_RESULT_END' con JSON válido:

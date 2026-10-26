@@ -49,6 +49,32 @@ class AgentProtocolTest(unittest.TestCase):
         self.assertIn("read_file/grep_search", prompt)
         self.assertIn("No hagas commit, push, PR ni merge", prompt)
 
+    def test_worker_visual_recibe_criterio_artistico_en_paquete(self):
+        issue = {
+            "number": 398,
+            "title": "Mejorar materiales PBR de la oficina",
+            "body": "No usar low-poly como acabado final.",
+        }
+        packet = mod.build_task_packet(
+            issue,
+            {"files": ["godot/guion/oficina_styloo_cc0.gd"], "goal": "preservar PBR en props"},
+            repository="EspacioKoop/expediente-legado",
+            base_sha="a" * 40,
+            policy_sha="b" * 40,
+            provider="qwen",
+            worker="qwen-primary",
+        )
+        prompt = mod.render_worker_prompt(packet, "qwen")
+        self.assertIn("Dirección artística SIGA-98 (tarea visual)", prompt)
+        self.assertIn("realismo cinematográfico material de 1998", prompt)
+        self.assertIn("no lo acredita.", prompt)
+        self.assertIn("No leas AGENTS.md", prompt)
+        self.assertNotIn(r"\\nObjetivo:", prompt)
+
+    def test_worker_no_visual_no_gasta_contexto_en_arte(self):
+        prompt = mod.render_worker_prompt(self.packet(), "qwen")
+        self.assertNotIn("Dirección artística SIGA-98 (tarea visual)", prompt)
+
     def test_prompt_multifichero_enumera_rutas_sin_contexto_adicional(self):
         packet = self.packet()
         prompt = mod.render_worker_prompt(packet, "qwen")

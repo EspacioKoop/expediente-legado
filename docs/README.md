@@ -16,6 +16,8 @@ Este directorio contiene auditorías, decisiones de diseño, investigación, evi
 | Paridad ideologías | [paridad-ideologias.md](paridad-ideologias.md) | Legado político y contrato transversal |
 | Paridad religión | [paridad-religion.md](paridad-religion.md) | Fronteras religión/Tarot/mitología |
 | Paridad literatura | [paridad-literatura.md](paridad-literatura.md) | Legado cultural y contrato literario |
+| Dirección artística 3D | [design/direccion-artistica.md](design/direccion-artistica.md) | Pauta canónica de realismo cinematográfico, tratamiento PSX localizado, producción de assets y revisión en Godot |
+| Contrato de importación PBR | [assets/realismo-2519.md](assets/realismo-2519.md) | Integración de materiales de modelos y primer gate de oficina |
 | Gramática simbólica | [design/gramatica-simbolica-siga98.md](design/gramatica-simbolica-siga98.md) | Convenciones simbólicas compartidas |
 | Referencias ludonarrativas | [research/referencias-ludonarrativas.md](research/referencias-ludonarrativas.md) | Técnicas externas, riesgos y mapa de adopción; no declara features integradas |
 | Procedencia de assets | `godot/assets/procedencia.json` + `docs/licencias/` | Licencia, fuente y hashes |

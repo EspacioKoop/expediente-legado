@@ -14,6 +14,12 @@ Mapa de fases hasta la primera versión completa. El registro activo de reservas
 | [Milestones](https://github.com/EspacioKoop/expediente-legado/milestones) | Qué está comprometido para una versión |
 | [Releases](https://github.com/EspacioKoop/expediente-legado/releases) | Qué se ha publicado |
 
+## Dirección gráfica vigente — 26 octubre 2026
+
+La referencia de acabado para nuevas escenas, modelos, props y criaturas es [dirección artística — realismo cinematográfico de finales de los 90](docs/design/direccion-artistica.md) (#398). Los shaders PSX, CRT y filtros siguen disponibles como lenguaje de las interfaces, medios y anomalías **cuando se justifiquen**; no deben ocultar la falta de geometría ni sustituir en bloque materiales PBR.
+
+La ruta de consolidación gráfica es **una escena de referencia jugable, antes que veinte placeholders**: planta SIGA-98 (#126) → calle/casa → sueño → mitologías (#2519). Priorizar objetos materiales y encuadres reproducibles, no cantidad de mallas o issues creados. El soporte para conservar materiales PBR por mueble se integró en #2982; la presencia de ese parámetro no acredita por sí misma ningún asset final. El gate de #126 y los criterios de #399 siguen exigiendo evaluación humana con capturas reales de Godot. Esto no desplaza el playthrough de #9 ni la prioridad funcional de #181.
+
 ## Estado de integración — 2026-09-28
 
 La referencia es `main`, con corte documental en `b21901c5b7036d27b427e022cb4a7b3659dd95ba`. Un PR cerrado sin merge no cuenta como integración y una CI verde no sustituye validación humana.
