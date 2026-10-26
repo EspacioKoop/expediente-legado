@@ -45,6 +45,14 @@ func _probar_recorrido_completo() -> void:
 		recorrido.suelo_seguro().get_node_or_null("CollisionShape3D") != null,
 		"el suelo seguro tiene collider",
 	)
+	for limite in ["LimiteOeste", "LimiteEste", "LimiteNorte", "LimiteSur"]:
+		var pared := recorrido.get_node_or_null(limite) as StaticBody3D
+		_comprobar(pared != null, "cierra perímetro: " + limite)
+		if pared != null:
+			_comprobar(
+				pared.get_node_or_null("CollisionShape3D") != null,
+				"perímetro estable tiene colisión: " + limite,
+			)
 	_comprobar(not recorrido.sello(2).habilitado, "salida empieza cerrada")
 	recorrido.sello(2).interactuar(camara)
 	_comprobar(recorrido.paso_actual() == 0, "salida no admite atajos")
