@@ -1,24 +1,7 @@
-## Los muebles que son malla de verdad y no una caja.
-##
-## `EspaciosCatalogo` ya lo había previsto: «una mesa es una caja **hasta que
-## haya un asset con su ficha**; llamarla mesa aquí es lo que permite
-## sustituirla luego sin tocar la geografía». Esto es ese *luego*. Un bulto
-## declara `modelo` y le sale la malla encima; sin `modelo` sigue siendo la caja
-## de siempre, así que ningún sitio existente cambia por esto.
-##
-## Tres reglas, y ninguna es de comodidad:
-##
-## 1. **La caja sigue mandando.** El modelo se ENCAJA en el `tam` declarado y la
-##    colisión sigue siendo la del bulto. La geografía es del catálogo, no del
-##    fichero que alguien descargó: si un `.glb` viniera con otra escala, lo que
-##    no puede pasar es que la sala cambie de forma por debajo. Se puede
-##    sustituir un modelo por otro y nadie se queda encerrado.
-## 2. **El acabado se elige por instancia.** Por defecto los muebles siguen
-##    usando el shader común. Un asset realista previamente revisado puede
-##    conservar albedo, mapas UV, normales y roughness importados; el fallback
-##    sigue siendo el acabado del proyecto cuando faltan materiales.
-## 3. **Un modelo que falta no revienta la sala.** Se queda la caja. Un archivo
-##    con un archivador cúbico es peor; un archivo que no abre es inaceptable.
+## Integra modelos reales en bultos, sin modificar su caja física.
+## La escala/colisión pertenecen al catálogo. Si falta el modelo, permanece
+## el proxy. El shader común es el acabado predeterminado, salvo opt-in de
+## materiales importados previamente revisados.
 class_name Modelos
 extends RefCounted
 
@@ -101,11 +84,7 @@ const PERSONAJES_FACIALES := {
 static var _cache := {}
 
 
-## Un MUEBLE: caja física del catálogo y acabado elegido por instancia.
-##
-## El tratamiento PSX continúa siendo el predeterminado. Con opt-in explícito,
-## la malla conserva los materiales importados sin reescribir el recurso común:
-## dos copias del mismo modelo pueden tener acabados diferentes.
+## Mueble: por defecto shader PSX; con opt-in conserva PBR por instancia.
 static func mueble(
 	cuerpo: Node3D,
 	nombre: String,
