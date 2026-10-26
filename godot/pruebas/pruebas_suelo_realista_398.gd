@@ -7,9 +7,7 @@ var _fallos := 0
 func _initialize() -> void:
 	var mundo := Node3D.new()
 	root.add_child(mundo)
-	Espacio3D._suelo(
-		mundo, Vector2(14, 10), Color(0.30, 0.29, 0.27), "linoleo", Vector2.ZERO, true
-	)
+	Espacio3D._suelo(mundo, Vector2(14, 10), Color(0.30, 0.29, 0.27), "linoleo", Vector2.ZERO, true)
 	var cuerpo := mundo.get_child(0) as StaticBody3D
 	_comprobar(cuerpo != null, "el suelo continúa teniendo cuerpo físico")
 	var malla := Espacio3D._malla_de(cuerpo)
@@ -20,8 +18,7 @@ func _initialize() -> void:
 		_comprobar(material.uv1_triplanar, "escala de textura triplanar")
 		_comprobar(material.uv1_world_triplanar, "mantiene texelado en metros del mundo")
 		_comprobar(
-			is_equal_approx(material.roughness, 0.85),
-			"rugosidad de superficie administrativa mate"
+			is_equal_approx(material.roughness, 0.85), "rugosidad de superficie administrativa mate"
 		)
 	_comprobar(
 		cuerpo.find_children("*", "CollisionShape3D", true, false).size() == 1,
