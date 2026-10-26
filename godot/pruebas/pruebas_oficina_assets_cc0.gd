@@ -26,9 +26,10 @@ func _probar() -> void:
 			for i in malla.mesh.get_surface_count():
 				var material := malla.get_active_material(i)
 				_comprobar(material != null, "todas las superficies tienen material")
-				if material is ShaderMaterial:
+				var shader := material as ShaderMaterial
+				if shader != null:
 					_comprobar(
-						material.get_shader_parameter("usar_uv") == true,
+						shader.get_shader_parameter("usar_uv") == true,
 						"fallback PSX conserva UV de origen"
 					)
 				else:
