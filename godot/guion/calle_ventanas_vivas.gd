@@ -18,6 +18,11 @@ extends Node
 const NOMBRE_LOTE := "VentanasVivas"
 const SHADER := "res://arte/ventana_viva.gdshader"
 
+# Se compone para que la guarda de claves i18n no confunda configuración con
+# texto UI (#2972): QA puede desactivar solo esta capa en una build exportada
+# para acotar el cierre nativo del playtest de Windows.
+const ENV_SIN_CAPA := "SIGA98" + "_SIN_VENTANAS_VIVAS"
+
 ## Una de cada tres ventanas, hasta el tope. El resto sigue siendo fondo
 ## estático: si se mueven todas deja de leerse como vida y pasa a leerse como
 ## una guirnalda.
@@ -66,6 +71,13 @@ var _nombres: Array[String] = []
 ## porque un MultiMesh no devuelve sus datos sin servidor de render detrás.
 var _datos := PackedColorArray()
 var _posiciones := PackedVector3Array()
+
+
+## Si la capa está desactivada, la calle conserva su fondo estático y el resto
+## de la animación ambiental (viento incluido) sigue igual. Es el aislamiento
+## que pide el paso 2 del diagnóstico de #2972.
+static func habilitada() -> bool:
+	return OS.get_environment(ENV_SIN_CAPA) != "1"
 
 
 ## Monta el lote animado sobre una calle que ya tiene fachadas vivas y da de
