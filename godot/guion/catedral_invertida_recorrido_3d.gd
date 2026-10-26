@@ -55,6 +55,7 @@ func montar_para(actor: Node3D) -> bool:
 	add_child(_catedral)
 	_catedral.preparar()
 	_montar_suelo_estable()
+	_montar_limites_estables()
 	_montar_luz()
 	for indice in PUNTOS.size():
 		_crear_sello(indice)
@@ -105,6 +106,27 @@ func _montar_suelo_estable() -> void:
 	material.roughness = 0.93
 	malla.material_override = material
 	base.add_child(malla)
+
+
+func _montar_limites_estables() -> void:
+	# Las paredes visuales rotan; cuatro colliders fijos evitan que el actor
+	# abandone el área segura durante cualquiera de las dos orientaciones.
+	var bordes := [
+		{"nombre": "LimiteOeste", "pos": Vector3(-5.46, 1.6, 0.0), "tam": Vector3(0.24, 3.2, 7.1)},
+		{"nombre": "LimiteEste", "pos": Vector3(5.46, 1.6, 0.0), "tam": Vector3(0.24, 3.2, 7.1)},
+		{"nombre": "LimiteNorte", "pos": Vector3(0.0, 1.6, -3.46), "tam": Vector3(11.1, 3.2, 0.24)},
+		{"nombre": "LimiteSur", "pos": Vector3(0.0, 1.6, 3.46), "tam": Vector3(11.1, 3.2, 0.24)},
+	]
+	for borde in bordes:
+		var pared := StaticBody3D.new()
+		pared.name = String(borde["nombre"])
+		pared.position = borde["pos"]
+		add_child(pared)
+		var colision := CollisionShape3D.new()
+		var forma := BoxShape3D.new()
+		forma.size = borde["tam"]
+		colision.shape = forma
+		pared.add_child(colision)
 
 
 func _montar_luz() -> void:
