@@ -31,6 +31,9 @@ const OFICINA := {
 	"color_muro": Color(0.58, 0.57, 0.52),
 	"color_techo": Color(0.80, 0.80, 0.76),
 	"textura_suelo": "linoleo",
+	# Materia de suelo sin dithering: el único sitio con revisión de primer plano.
+	# Otros espacios conservan intacta su paleta retro hasta pasar su propio gate.
+	"suelo_material_fisico": true,
 	"textura_muro": "gotele",
 	"textura_techo": "techo",
 	# Apartada del cuarto sitio de compañero, que está en la silla de (1, 2,1):

@@ -177,7 +177,14 @@ static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 		# ya estaba anclado al otro (#785).
 		var medidas: Vector2 = espacio.get("suelo", Vector2(10, 10))
 		var centro: Vector2 = espacio.get("centro_suelo", Vector2.ZERO)
-		_suelo(raiz, medidas, color_suelo, espacio.get("textura_suelo", ""), centro)
+		_suelo(
+			raiz,
+			medidas,
+			color_suelo,
+			espacio.get("textura_suelo", ""),
+			centro,
+			bool(espacio.get("suelo_material_fisico", false))
+		)
 		if PoliticaTecho.debe_tener(espacio):
 			_techo(
 				raiz,
@@ -670,7 +677,12 @@ static func _por_planta(
 
 
 static func _suelo(
-	raiz: Node3D, medidas: Vector2, color: Color, textura: String = "", centro := Vector2.ZERO
+	raiz: Node3D,
+	medidas: Vector2,
+	color: Color,
+	textura: String = "",
+	centro := Vector2.ZERO,
+	material_fisico: bool = false
 ) -> void:
 	var cuerpo := _caja(
 		raiz,
@@ -679,6 +691,21 @@ static func _suelo(
 		color,
 		textura
 	)
+	if material_fisico and not textura.is_empty():
+		# Acabado opt-in para linóleo de oficina: responde a luces/sombras con
+		# rugosidad física, sin la cuantización y el dithering del shader PSX.
+		# Reutiliza la textura CC0 existente; no crea física ni recursos ajenos.
+		var albedo := TexturaProcedural.por_nombre(textura, color, hash(textura))
+		if albedo != null:
+			var material := StandardMaterial3D.new()
+			material.albedo_texture = albedo
+			material.roughness = 0.85
+			material.metallic = 0.0
+			material.uv1_triplanar = true
+			material.uv1_world_triplanar = true
+			material.uv1_scale = Vector3.ONE / 1.2
+			material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+			_malla_de(cuerpo).material_override = material
 	# El suelo recibe sombra pero no la proyecta: debajo no hay nada que mirar,
 	# y es la superficie más grande de la sala. Sale gratis de cada pasada.
 	_no_proyecta_sombra(cuerpo)
