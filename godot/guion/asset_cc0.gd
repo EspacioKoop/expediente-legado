@@ -3,7 +3,9 @@ class_name AssetCc0
 extends RefCounted
 
 
-static func sustituir(cuerpo: Node3D, nombre: String, tam: Vector3) -> bool:
+static func sustituir(
+	cuerpo: Node3D, nombre: String, tam: Vector3, conservar_materiales_importados: bool = false
+) -> bool:
 	if cuerpo.has_node("AssetCc0"):
 		return true
 	var escena := Modelos.cargar(nombre)
@@ -14,7 +16,11 @@ static func sustituir(cuerpo: Node3D, nombre: String, tam: Vector3) -> bool:
 	pieza.name = "AssetCc0"
 	cuerpo.add_child(pieza)
 	Modelos._encajar(pieza, tam)
-	_adaptar_materiales(pieza)
+	# Solo los lotes auditados pueden mantener el PBR del GLB. Las escenas
+	# heredadas conservan PSX y un archivo con superficies sin material
+	# vuelve al acabado anterior en vez de dejar piezas sin tratar.
+	if not conservar_materiales_importados or not Modelos._tiene_materiales_importados(pieza):
+		_adaptar_materiales(pieza)
 	# No se retiran cuerpos, áreas ni hijos de interacción: solo el visual
 	# sustituido. La ausencia de un fichero conserva el modelo anterior.
 	for malla in anteriores:

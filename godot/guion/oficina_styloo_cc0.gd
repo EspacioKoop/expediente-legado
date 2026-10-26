@@ -50,14 +50,16 @@ static func montar(mundo: Node3D) -> bool:
 	if escritorio == null or silla == null or estanteria == null or telefono == null:
 		return false
 
+	# Los seis GLB de Styloo llevan su propia materia: conservarla si cada
+	# superficie está completa. Los packs PSX de respaldo no se modifican.
 	var sustituciones := 0
-	if AssetCc0.sustituir(escritorio, String(MODELOS.desk), bulto_escritorio.tam):
+	if AssetCc0.sustituir(escritorio, String(MODELOS.desk), bulto_escritorio.tam, true):
 		sustituciones += 1
-	if AssetCc0.sustituir(silla, String(MODELOS.principal_chair), bulto_silla.tam):
+	if AssetCc0.sustituir(silla, String(MODELOS.principal_chair), bulto_silla.tam, true):
 		sustituciones += 1
-	if AssetCc0.sustituir(estanteria, String(MODELOS.shelf), bulto_estanteria.tam):
+	if AssetCc0.sustituir(estanteria, String(MODELOS.shelf), bulto_estanteria.tam, true):
 		sustituciones += 1
-	if AssetCc0.sustituir(telefono, String(MODELOS.telephone), Vector3(0.42, 0.20, 0.30)):
+	if AssetCc0.sustituir(telefono, String(MODELOS.telephone), Vector3(0.42, 0.20, 0.30), true):
 		sustituciones += 1
 		var auricular := puesto.get_node_or_null("Auricular") as Node3D
 		if auricular != null:
@@ -115,7 +117,7 @@ static func _agregar_prop(
 	ancla.name = nombre
 	ancla.position = posicion
 	padre.add_child(ancla)
-	if AssetCc0.sustituir(ancla, modelo, tam):
+	if AssetCc0.sustituir(ancla, modelo, tam, true):
 		return true
 	ancla.queue_free()
 	return false

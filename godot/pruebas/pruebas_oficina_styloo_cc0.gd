@@ -58,6 +58,36 @@ func _probar() -> void:
 		"Styloo no añade ni retira colisiones"
 	)
 
+	# La escena real debe mantener la materia original cuando el GLB la
+	# trae completa; de lo contrario se sigue usando el acabado PSX heredado.
+	if disponible:
+		var dato_escritorio := OficinaStylooCc0._bulto_prioritario("desk")
+		var cuerpo := OficinaStylooCc0._cuerpo_en_pos(mundo, dato_escritorio.pos)
+		var visual := cuerpo.get_node_or_null("AssetCc0") as Node3D
+		_comprobar(visual != null, "escritorio Styloo existe en escena real")
+		var escena_fuente := Modelos.cargar(String(OficinaStylooCc0.MODELOS.desk))
+		var pieza_fuente := escena_fuente.instantiate() as Node3D
+		var pbr_completo := Modelos._tiene_materiales_importados(pieza_fuente)
+		var mallas_originales := Modelos._mallas(pieza_fuente)
+		var mallas_instaladas := Modelos._mallas(visual)
+		_comprobar(
+			mallas_instaladas.size() == mallas_originales.size(),
+			"mantiene submallas al sustituir el escritorio"
+		)
+		var materia_correcta := true
+		for malla_nodo in mallas_instaladas:
+			var malla := malla_nodo as MeshInstance3D
+			for superficie in malla.mesh.get_surface_count():
+				var material := malla.get_active_material(superficie)
+				if pbr_completo:
+					materia_correcta = materia_correcta and material is BaseMaterial3D
+				else:
+					materia_correcta = materia_correcta and material is ShaderMaterial
+		_comprobar(
+			materia_correcta, "preserva PBR por superficie o retrocede a PSX si falta material"
+		)
+		pieza_fuente.free()
+
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	dia.queue_free()
 	await process_frame

@@ -20,14 +20,23 @@ func _probar() -> void:
 	for pieza in importados:
 		var caja := Modelos._limites(pieza)
 		_comprobar(caja.size.length() > 0.01, "modelo tiene geometría real")
+		var es_styloo := String(pieza.scene_file_path).contains("styloo_school/")
 		for malla in Modelos._mallas(pieza):
 			_comprobar(malla.is_visible_in_tree() and malla.layers != 0, "sustituto visible")
 			for i in malla.mesh.get_surface_count():
-				var material: ShaderMaterial = malla.get_active_material(i)
-				_comprobar(material != null, "usa material PSX")
-				_comprobar(
-					material.get_shader_parameter("usar_uv") == true, "conserva UV de origen"
-				)
+				var material: Material = malla.get_active_material(i)
+				_comprobar(material != null, "todas las superficies tienen material")
+				var shader := material as ShaderMaterial
+				if shader != null:
+					_comprobar(
+						shader.get_shader_parameter("usar_uv") == true,
+						"fallback PSX conserva UV de origen"
+					)
+				else:
+					_comprobar(
+						es_styloo and material is BaseMaterial3D,
+						"solo Styloo puede conservar el material importado"
+					)
 	var colisiones := mundo.find_children("*", "CollisionShape3D", true, false).size()
 	OficinaAssetsCc0.montar(mundo)
 	_comprobar(
