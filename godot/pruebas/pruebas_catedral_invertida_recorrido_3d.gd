@@ -8,6 +8,12 @@ var _eventos := 0
 
 
 func _initialize() -> void:
+	# SceneTree inicializa antes de insertar los nodos en el árbol activo.
+	# Ejecutar en diferido garantiza transformaciones globales válidas y físicas listas.
+	call_deferred("_ejecutar_pruebas")
+
+
+func _ejecutar_pruebas() -> void:
 	_probar_recorrido_completo()
 	_probar_reduccion_movimiento()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
