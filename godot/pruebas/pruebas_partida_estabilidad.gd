@@ -72,6 +72,8 @@ func _probar_segundo_guardado_no_deriva() -> void:
 	var primer_disco := _leer_disco(RUTA)
 	partida.guardar(RUTA)
 	var segundo_disco := _leer_disco(RUTA)
+	_comprobar(not primer_disco.is_empty(), "primer guardado contiene datos legibles")
+	_comprobar(not segundo_disco.is_empty(), "segundo guardado contiene datos legibles")
 	_comprobar_diferencias(primer_disco, segundo_disco, "guardar dos veces escribe lo mismo")
 
 
@@ -127,12 +129,14 @@ func _probar_corrupta_se_aparta_y_no_se_pisa() -> void:
 	_limpiar()
 
 
-func _leer_disco(ruta: String):
+func _leer_disco(ruta: String) -> Dictionary:
 	var fichero := FileAccess.open(ruta, FileAccess.READ)
 	if fichero == null:
-		return null
-	var crudo = JSON.parse_string(fichero.get_as_text())
+		return {}
+	var crudo: Variant = JSON.parse_string(fichero.get_as_text())
 	fichero.close()
+	if typeof(crudo) != TYPE_DICTIONARY:
+		return {}
 	return crudo
 
 
