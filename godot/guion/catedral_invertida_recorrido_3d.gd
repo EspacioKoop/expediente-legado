@@ -95,6 +95,7 @@ func _montar_suelo_estable() -> void:
 	var forma := BoxShape3D.new()
 	forma.size = Vector3(11.0, 0.24, 7.4)
 	var colision := CollisionShape3D.new()
+	colision.name = "CollisionShape3D"
 	colision.shape = forma
 	base.add_child(colision)
 	var malla := MeshInstance3D.new()
@@ -123,6 +124,7 @@ func _montar_limites_estables() -> void:
 		pared.position = borde["pos"]
 		add_child(pared)
 		var colision := CollisionShape3D.new()
+	colision.name = "CollisionShape3D"
 		var forma := BoxShape3D.new()
 		forma.size = borde["tam"]
 		colision.shape = forma
