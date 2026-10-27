@@ -124,7 +124,7 @@ func _montar_limites_estables() -> void:
 		pared.position = borde["pos"]
 		add_child(pared)
 		var colision := CollisionShape3D.new()
-	colision.name = "CollisionShape3D"
+		colision.name = "CollisionShape3D"
 		var forma := BoxShape3D.new()
 		forma.size = borde["tam"]
 		colision.shape = forma
