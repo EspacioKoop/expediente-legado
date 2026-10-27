@@ -63,6 +63,11 @@ func _construir_interfaz() -> void:
 	var ayuda := Label.new()
 	ayuda.text = SoftwareSigaTextos.texto("ayuda")
 	ayuda.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	ayuda.mouse_filter = Control.MOUSE_FILTER_PASS
+	ayuda.add_theme_color_override("font_color", Color("#1f2930"))
+	ayuda.add_theme_color_override("font_pressed_color", Color("#315f86"))
+	ayuda.add_theme_color_override("font_hover_color", Color("#315f86"))
+	ayuda.add_theme_color_override("font_focus_color", Color("#315f86"))
 	izquierda.add_child(ayuda)
 
 	_lista = ItemList.new()
@@ -83,19 +88,24 @@ func _construir_interfaz() -> void:
 	_titulo = Label.new()
 	_titulo.name = "Titulo"
 	_titulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_titulo.add_theme_font_override("font", load("res://arte/font/DejaVuSansBold.ttf"))
+	_titulo.add_theme_font_size_override("font_size", 16)
 	derecha.add_child(_titulo)
 
 	_tipo = Label.new()
 	_tipo.name = "Tipo"
+	_tipo.tooltip_text = "Tipo de software (juego, herramienta, oficina, etc.)"
 	derecha.add_child(_tipo)
 
 	_origen = Label.new()
 	_origen.name = "Origen"
 	_origen.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_origen.tooltip_text = "Procedencia del software (ShareIt, BBS, CD-ROM, etc.)"
 	derecha.add_child(_origen)
 
 	_licencia = Label.new()
 	_licencia.name = "Licencia"
+	_licencia.tooltip_text = "Tipo de licencia (freeware, shareware, comercial, etc.)"
 	derecha.add_child(_licencia)
 
 	_descripcion = RichTextLabel.new()
@@ -107,6 +117,7 @@ func _construir_interfaz() -> void:
 
 	_estado = Label.new()
 	_estado.name = "Estado"
+	_estado.tooltip_text = "Estado actual del programa (instalado/disponible + fuente)"
 	derecha.add_child(_estado)
 
 	var acciones := HBoxContainer.new()
@@ -115,12 +126,14 @@ func _construir_interfaz() -> void:
 
 	_instalar = Button.new()
 	_instalar.name = "InstalarDesinstalar"
+	_instalar.tooltip_text = "Instalar o desinstalar el programa seleccionado"
 	_instalar.pressed.connect(_alternar_instalacion)
 	acciones.add_child(_instalar)
 
 	_ejecutar = Button.new()
 	_ejecutar.name = "Ejecutar"
 	_ejecutar.text = SoftwareSigaTextos.texto("ejecutar")
+	_ejecutar.tooltip_text = "Ejecutar el programa seleccionado (solo si está instalado)"
 	_ejecutar.pressed.connect(_ejecutar_seleccion)
 	acciones.add_child(_ejecutar)
 

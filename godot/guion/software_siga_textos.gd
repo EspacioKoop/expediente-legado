@@ -8,7 +8,7 @@ extends RefCounted
 const TEXTOS := {
 	"titulo_app": "Archivo de programas",
 	"cabecera": "Archivo de programas · 1998",
-	"ayuda": "Enter/doble clic instala o ejecuta. Todo ocurre dentro del OS ficticio.",
+	"ayuda": "Enter/doble clic instala o ejecuta. Todo ocurre dentro del OS ficticio.\nF1 para ayuda detallada.",
 	"ejecutar": "Ejecutar / probar",
 	"instalado_marca": "[instalado] ",
 	"fuente_marca": "[fuente] ",
