@@ -21,6 +21,7 @@ var _lectura: Label
 var _portal: Interactuable3D
 var _salida: Interactuable3D
 var _sala: Node3D
+var _colision_sala: CollisionShape3D
 
 
 func configurar(contexto: Dictionary, semilla: int) -> void:
@@ -32,7 +33,7 @@ func configurar(contexto: Dictionary, semilla: int) -> void:
 
 func _ready() -> void:
 	if _opciones.is_empty():
-		configurar({}, 0)
+		_opciones = MODELO.posibilidades({}, 0)
 	_montar()
 
 
@@ -50,11 +51,12 @@ func explorando() -> bool:
 
 func _montar() -> void:
 	for viejo in get_children():
-		if viejo.name in ["InteraccionesMuseo", "SalaPosible", "VisorMuseo"]:
+		if viejo.name in ["InteraccionesMuseo", "SalaPosible", "VisorMuseo", "SueloFisico"]:
 			remove_child(viejo)
 			viejo.queue_free()
 	_seleccion = -1
 	_explorando = false
+	_montar_suelo()
 	var interacciones := Node3D.new()
 	interacciones.name = "InteraccionesMuseo"
 	add_child(interacciones)
@@ -96,6 +98,18 @@ func _montar() -> void:
 		_portal.activado.connect(_entrar)
 	_montar_sala()
 	_montar_lector()
+
+
+func _montar_suelo() -> void:
+	var cuerpo := StaticBody3D.new()
+	cuerpo.name = "SueloFisico"
+	var colision := CollisionShape3D.new()
+	var forma := BoxShape3D.new()
+	forma.size = Vector3(20.0, 0.2, 15.0)
+	colision.shape = forma
+	colision.position.y = -0.1
+	cuerpo.add_child(colision)
+	add_child(cuerpo)
 
 
 func _zona(
@@ -163,6 +177,8 @@ func _montar_sala() -> void:
 	forma.size = Vector3(6.0, 0.2, 6.0)
 	colision.shape = forma
 	colision.position.y = -0.1
+	colision.disabled = true
+	_colision_sala = colision
 	suelo_fisico.add_child(colision)
 	_sala.add_child(suelo_fisico)
 
@@ -211,6 +227,7 @@ func _entrar(actor: Node) -> void:
 	_panel.visible = false
 	_portal.habilitado = false
 	_sala.visible = true
+	_colision_sala.set_deferred("disabled", false)
 	_salida.habilitado = true
 	_actor = actor as Node3D
 	if _actor != null:
@@ -225,6 +242,7 @@ func _salir(_actor_ignorado: Node) -> void:
 	_explorando = false
 	_salida.habilitado = false
 	_sala.visible = false
+	_colision_sala.set_deferred("disabled", true)
 	_portal.habilitado = true
 	if _actor != null and is_instance_valid(_actor):
 		_actor.global_transform = _retorno_actor
