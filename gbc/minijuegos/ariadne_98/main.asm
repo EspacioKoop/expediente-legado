@@ -1275,8 +1275,9 @@ PatronMinotauroGalerias:
     db $38, $39, $3A, $3B, $3B, $3A, $39, $38
 
 ; Secuencia determinista de coordenadas (yyyyxxxx) para el Minotauro en Centro.
+; Recorre el pasillo real: x=9, y=5..6 son muros y no pueden patrullarse.
 PatronMinotauroCentro:
-    db $57, $58, $59, $69, $79, $69, $59, $58
+    db $57, $58, $68, $78, $79, $78, $68, $58
 
 PaletaCGB:
     dw $7FFF, $56B5, $2D6B, $1084
