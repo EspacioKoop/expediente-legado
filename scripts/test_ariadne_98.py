@@ -80,6 +80,143 @@ class Ariadne98ASMTest(unittest.TestCase):
         ]:
             self.assertIn(rutina, self.asm, f"Falta rutina {rutina}")
 
+    def _mapa(self, nombre):
+        bloque = self.asm.split(f"{nombre}:", 1)[1].split("\n\n", 1)[0]
+        filas = [
+            [int(valor) for valor in linea.strip()[3:].split(",")]
+            for linea in bloque.splitlines()
+            if linea.strip().startswith("db ")
+        ]
+        self.assertEqual(len(filas), 12, f"{nombre}: altura invalida")
+        self.assertTrue(all(len(fila) == 16 for fila in filas), nombre)
+        return filas
+
+    @staticmethod
+    def _conectado(mapa, origen, destino, puerta_abierta=False):
+        pendientes = [origen]
+        visitados = {origen}
+        for x, y in pendientes:
+            if (x, y) == destino:
+                return True
+            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                nx, ny = x + dx, y + dy
+                if not (0 <= nx < 16 and 0 <= ny < 12):
+                    continue
+                tile = mapa[ny][nx]
+                if tile == 1 or (tile == 17 and not puerta_abierta):
+                    continue
+                if (nx, ny) not in visitados:
+                    visitados.add((nx, ny))
+                    pendientes.append((nx, ny))
+        return False
+
+    def test_laberintos_tienen_rutas_reales_de_ida_y_vuelta(self):
+        entrada = self._mapa("LaberintoEntrada")
+        galerias = self._mapa("LaberintoGalerias")
+        centro = self._mapa("LaberintoCentro")
+
+        # Antes del fix, Entrada (1,1) y la transicion (14,1)
+        # estaban en componentes inconexas: la partida no avanzaba a L2.
+        self.assertEqual(entrada[1][14], 19)
+        self.assertEqual(entrada[10][14], 3)
+        self.assertTrue(
+            self._conectado(entrada, (1, 1), (14, 1)),
+            "Entrada debe permitir alcanzar Galerias sin trucos",
+        )
+        self.assertTrue(
+            self._conectado(entrada, (14, 1), (14, 10)),
+            "al regresar del Centro, la salida debe ser alcanzable",
+        )
+
+        # No depende de abrir prematuramente la compuerta del Centro.
+        self.assertEqual(galerias[1][1], 19)
+        self.assertEqual(galerias[10][14], 19)
+        self.assertTrue(
+            self._conectado(galerias, (1, 1), (14, 10)),
+            "Galerias debe ser soluble con su compuerta cerrada",
+        )
+        self.assertTrue(
+            self._conectado(galerias, (14, 10), (1, 1)),
+            "Galerias permite volver a Entrada despues del Centro",
+        )
+
+        self.assertEqual(centro[1][1], 19)
+        self.assertEqual(centro[10][14], 18)
+        self.assertTrue(
+            self._conectado(centro, (1, 1), (14, 10)),
+            "el altar es alcanzable sin atravesar muros",
+        )
+        self.assertTrue(
+            self._conectado(centro, (14, 10), (1, 1)),
+            "tras tocar el altar se puede regresar al portal",
+        )
+
+    def test_patron_minotauro_no_atraviesa_muros(self):
+        for nombre_mapa, nombre_patron in (
+            ("LaberintoGalerias", "PatronMinotauroGalerias"),
+            ("LaberintoCentro", "PatronMinotauroCentro"),
+        ):
+            mapa = self._mapa(nombre_mapa)
+            bloque = self.asm.split(f"{nombre_patron}:", 1)[1]
+            linea = next(
+                valor.strip()
+                for valor in bloque.splitlines()
+                if valor.strip().startswith("db ")
+            )
+            posiciones = []
+            for literal in linea[3:].split(","):
+                empaquetada = int(literal.strip().lstrip("$"), 16)
+                posiciones.append((empaquetada & 15, empaquetada >> 4))
+
+            self.assertEqual(len(posiciones), 8, nombre_patron)
+            for indice, (x, y) in enumerate(posiciones):
+                self.assertEqual(
+                    mapa[y][x],
+                    0,
+                    f"{nombre_patron} camina por un muro en {(x, y)}",
+                )
+                siguiente = posiciones[(indice + 1) % len(posiciones)]
+                distancia = abs(x - siguiente[0]) + abs(y - siguiente[1])
+                self.assertLessEqual(
+                    distancia,
+                    1,
+                    f"{nombre_patron} teletransporta al Minotauro",
+                )
+
+    def test_contacto_no_procesa_tile_tras_retorno_a_cruce_seguro(self):
+        movimiento = self.asm.split("IntentarMover:", 1)[1].split(
+            "IncrementarPasos:", 1
+        )[0]
+        contacto = self.asm.split("ComprobarContactoMinotauro:", 1)[1].split(
+            "ReiniciarMinotauro:", 1
+        )[0]
+
+        # El choque se conserva en la pila mientras se redibuja el laberinto.
+        self.assertIn("call ComprobarContactoMinotauro\n    ;", movimiento)
+        self.assertIn("push af\n\n    call ActualizarCruceSeguro", movimiento)
+        self.assertIn("pop bc ; B=1", movimiento)
+        self.assertIn("pop af ; Tile original", movimiento)
+        self.assertIn("bit 0, b\n    ret nz", movimiento)
+        self.assertLess(
+            movimiento.index("bit 0, b"),
+            movimiento.index("cp TILE_TRANSICION"),
+        )
+        self.assertLess(
+            movimiento.index("bit 0, b"),
+            movimiento.index("cp TILE_CENTRO"),
+        )
+        self.assertLess(
+            movimiento.index("bit 0, b"),
+            movimiento.index("cp TILE_SALIDA"),
+        )
+
+        # Tanto el Minotauro inactivo como los dos ejes no coincidentes
+        # devuelven cero; solo la teletransportación devuelve uno.
+        self.assertEqual(contacto.count("jr nz, .sin_contacto"), 2)
+        self.assertIn("jr z, .sin_contacto", contacto)
+        self.assertIn("call DibujarJugador\n    ld a, 1\n    ret", contacto)
+        self.assertIn(".sin_contacto:\n    xor a\n    ret", contacto)
+
     def test_victoria_requiere_centro_y_retorno(self):
         seccion_salida = self.asm.split('.salida:')[1].split('ProcesarTransicion:')[0]
         self.assertIn('wCentroAlcanzado', seccion_salida)

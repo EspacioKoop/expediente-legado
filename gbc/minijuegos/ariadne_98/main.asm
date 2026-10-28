@@ -275,8 +275,10 @@ IntentarMover:
 
     ; Comprobar contacto con Minotauro primero (tras el movimiento de ambos)
     call ComprobarContactoMinotauro
+    ; Conservar si hubo contacto: el tile original no puede activar una
+    ; transición, el centro o la salida tras regresar al cruce seguro.
+    push af
 
-    ; Actualizar cruce seguro solo si Ariadne no sufrió colisión en esta casilla
     call ActualizarCruceSeguro
 
     call RedibujarHilo
@@ -284,7 +286,10 @@ IntentarMover:
     call DibujarMinotauro
     call ActualizarHUDHilo
 
-    pop af
+    pop bc ; B=1 si el Minotauro interceptó a Ariadne
+    pop af ; Tile original del intento de movimiento
+    bit 0, b
+    ret nz
 
     ; Comprobar celdas especiales (Transiciones, Centro, Salida)
     cp TILE_TRANSICION
@@ -387,19 +392,20 @@ ActualizarCruceSeguro:
     ret
 
 ComprobarContactoMinotauro:
+    ; A=1 al chocar; A=0 al seguir en la casilla de destino.
     ld a, [wMinotauroActivo]
     or a
-    ret z
+    jr z, .sin_contacto
     ld a, [wJugadorX]
     ld b, a
     ld a, [wMinotauroX]
     cp b
-    ret nz
+    jr nz, .sin_contacto
     ld a, [wJugadorY]
     ld b, a
     ld a, [wMinotauroY]
     cp b
-    ret nz
+    jr nz, .sin_contacto
 
     ; Contacto! Ariadne reaparece en el ultimo cruce seguro.
     ; NUNCA borra progreso externo (wCentroAlcanzado / wPuertaGaleriasAbierta).
@@ -409,6 +415,10 @@ ComprobarContactoMinotauro:
     ld a, [wCruceSeguroY]
     ld [wJugadorY], a
     call DibujarJugador
+    ld a, 1
+    ret
+.sin_contacto:
+    xor a
     ret
 
 ReiniciarMinotauro:
@@ -1216,7 +1226,8 @@ LaberintoEntrada:
     db 1,1,1,1,0,1,0,1,1,1,1,1,1,1,0,1
     db 1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,1
     db 1,0,1,1,1,1,1,1,1,1,1,1,0,1,0,1
-    db 1,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1
+    ; Paso central: une la entrada con Galerias sin convertirlo en corredor directo.
+    db 1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1
     db 1,1,1,1,1,1,1,1,1,1,0,1,0,1,0,1
     db 1,0,0,0,0,0,0,0,0,1,0,1,0,0,0,1
     db 1,0,1,1,1,1,1,1,0,1,0,1,1,1,1,1
@@ -1264,8 +1275,9 @@ PatronMinotauroGalerias:
     db $38, $39, $3A, $3B, $3B, $3A, $39, $38
 
 ; Secuencia determinista de coordenadas (yyyyxxxx) para el Minotauro en Centro.
+; Recorre el pasillo real: x=9, y=5..6 son muros y no pueden patrullarse.
 PatronMinotauroCentro:
-    db $57, $58, $59, $69, $79, $69, $59, $58
+    db $57, $58, $68, $78, $79, $78, $68, $58
 
 PaletaCGB:
     dw $7FFF, $56B5, $2D6B, $1084
