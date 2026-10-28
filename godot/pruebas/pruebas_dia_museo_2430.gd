@@ -4,6 +4,7 @@ extends SceneTree
 
 const CONTROLADOR = preload("res://guion/dia_museo_2430_app.gd")
 
+
 class DiaDoble:
 	extends Node3D
 
@@ -80,12 +81,11 @@ func _probar() -> void:
 	_comprobar(dia.jornada == jornada_antes, "ningún portal modifica Jornada")
 
 	controlador._process(0.0)
-	_comprobar(
-		mundo.get_children().filter(
-			func(nodo: Node) -> bool: return nodo.name == "GaleriaVidasNoOcurridas"
-		).size() == 1,
-		"procesar de nuevo no duplica el museo",
-	)
+	var numero_galerias := 0
+	for nodo in mundo.get_children():
+		if nodo.name == "GaleriaVidasNoOcurridas":
+			numero_galerias += 1
+	_comprobar(numero_galerias == 1, "procesar de nuevo no duplica el museo")
 	dia.queue_free()
 	await process_frame
 
