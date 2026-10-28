@@ -80,6 +80,40 @@ class Ariadne98ASMTest(unittest.TestCase):
         ]:
             self.assertIn(rutina, self.asm, f"Falta rutina {rutina}")
 
+    def test_contacto_no_procesa_tile_tras_retorno_a_cruce_seguro(self):
+        movimiento = self.asm.split("IntentarMover:", 1)[1].split(
+            "IncrementarPasos:", 1
+        )[0]
+        contacto = self.asm.split("ComprobarContactoMinotauro:", 1)[1].split(
+            "ReiniciarMinotauro:", 1
+        )[0]
+
+        # El choque se conserva en la pila mientras se redibuja el laberinto.
+        self.assertIn("call ComprobarContactoMinotauro\n    ;", movimiento)
+        self.assertIn("push af\n\n    call ActualizarCruceSeguro", movimiento)
+        self.assertIn("pop bc ; B=1", movimiento)
+        self.assertIn("pop af ; Tile original", movimiento)
+        self.assertIn("bit 0, b\n    ret nz", movimiento)
+        self.assertLess(
+            movimiento.index("bit 0, b"),
+            movimiento.index("cp TILE_TRANSICION"),
+        )
+        self.assertLess(
+            movimiento.index("bit 0, b"),
+            movimiento.index("cp TILE_CENTRO"),
+        )
+        self.assertLess(
+            movimiento.index("bit 0, b"),
+            movimiento.index("cp TILE_SALIDA"),
+        )
+
+        # Tanto el Minotauro inactivo como los dos ejes no coincidentes
+        # devuelven cero; solo la teletransportación devuelve uno.
+        self.assertEqual(contacto.count("jr nz, .sin_contacto"), 2)
+        self.assertIn("jr z, .sin_contacto", contacto)
+        self.assertIn("call DibujarJugador\n    ld a, 1\n    ret", contacto)
+        self.assertIn(".sin_contacto:\n    xor a\n    ret", contacto)
+
     def test_victoria_requiere_centro_y_retorno(self):
         seccion_salida = self.asm.split('.salida:')[1].split('ProcesarTransicion:')[0]
         self.assertIn('wCentroAlcanzado', seccion_salida)
