@@ -207,8 +207,8 @@ func _examinar(_actor_ignorado: Node, indice: int) -> void:
 		return
 	_seleccion = indice
 	var opcion: Dictionary = _opciones[indice]
-	_lectura.text = "VIDA POSIBLE · NO CONSTA EN EL EXPEDIENTE\n\n" + tr(
-		String(opcion.get("clave_texto", ""))
+	_lectura.text = (
+		"VIDA POSIBLE · NO CONSTA EN EL EXPEDIENTE\n\n" + tr(String(opcion.get("clave_texto", "")))
 	)
 	_panel.visible = true
 	var disponible := bool(opcion.get("explorable", false))
