@@ -77,8 +77,15 @@ func _probar() -> void:
 		not actor.global_transform.is_equal_approx(regreso),
 		"el actor alcanza el espacio explorable"
 	)
+	var documento := museo.get_node("SalaPosible/LeerExpedientePosible")
+	_comprobar(documento.interactuar(actor), "la vida alternativa se puede leer")
+	var ficha := museo.get_node("VisorMuseo/FichaNoCanonica")
+	_comprobar(ficha.visible, "la historia alternativa aparece al explorarla")
+	var texto := museo.get_node("VisorMuseo/FichaNoCanonica/TextoPosibilidad")
+	_comprobar(texto.text.contains("NO CANÓNICO"), "la lectura no se presenta como prueba")
 	var salida := museo.get_node("SalaPosible/RegresarMuseo")
 	_comprobar(salida.interactuar(actor), "la sala permite regresar sin softlock")
+	_comprobar(not ficha.visible, "la lectura desaparece al volver al museo")
 	_comprobar(not museo.explorando(), "salir termina la exploración")
 	_comprobar(
 		actor.global_transform.is_equal_approx(regreso), "se restituye el transform del actor"
