@@ -20,6 +20,7 @@ var _panel: PanelContainer
 var _lectura: Label
 var _portal: Interactuable3D
 var _salida: Interactuable3D
+var _documento: Interactuable3D
 var _sala: Node3D
 var _colision_sala: CollisionShape3D
 
@@ -201,6 +202,29 @@ func _montar_sala() -> void:
 	_salida.habilitado = false
 	_salida.activado.connect(_salir)
 
+	# La sala alternativa contiene un documento examinable, no solo
+	# un cartel. Usa la misma frase seleccionada y no genera hechos.
+	_documento = _zona(
+		_sala,
+		"LeerExpedientePosible",
+		Vector3(0.0, 1.0, 0.0),
+		Vector3(1.5, 1.8, 1.0),
+		"el expediente de una vida alternativa",
+	)
+	_documento.habilitado = false
+	_documento.activado.connect(_leer_vida_posible)
+
+
+func _leer_vida_posible(_actor_ignorado: Node) -> void:
+	if not _explorando or _seleccion < 0:
+		return
+	var opcion: Dictionary = _opciones[_seleccion]
+	_lectura.text = (
+		"DOCUMENTO NO CANÓNICO · VIDA QUE NO OCURRIÓ\n\n"
+		+ tr(String(opcion.get("clave_texto", "")))
+	)
+	_panel.visible = true
+
 
 func _examinar(_actor_ignorado: Node, indice: int) -> void:
 	if _explorando or indice < 0 or indice >= _opciones.size():
@@ -229,6 +253,7 @@ func _entrar(actor: Node) -> void:
 	_sala.visible = true
 	_colision_sala.set_deferred("disabled", false)
 	_salida.habilitado = true
+	_documento.habilitado = true
 	_actor = actor as Node3D
 	if _actor != null:
 		_retorno_actor = _actor.global_transform
@@ -241,6 +266,8 @@ func _salir(_actor_ignorado: Node) -> void:
 		return
 	_explorando = false
 	_salida.habilitado = false
+	_documento.habilitado = false
+	_panel.visible = false
 	_sala.visible = false
 	_colision_sala.set_deferred("disabled", true)
 	_portal.habilitado = true
