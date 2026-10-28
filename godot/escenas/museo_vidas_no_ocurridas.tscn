@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=3]
 
-[ext_resource type="Script" path="res://guion/sueno_museo_vidas_no_ocurridas.gd" id="1"]
+[ext_resource type="Script" path="res://guion/sueno_museo_escena_2430.gd" id="1"]
 
 [sub_resource type="PlaneMesh" id="Suelo"]
 size = Vector2(20, 15)
