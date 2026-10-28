@@ -151,6 +151,38 @@ class Ariadne98ASMTest(unittest.TestCase):
             "tras tocar el altar se puede regresar al portal",
         )
 
+    def test_patron_minotauro_no_atraviesa_muros(self):
+        for nombre_mapa, nombre_patron in (
+            ("LaberintoGalerias", "PatronMinotauroGalerias"),
+            ("LaberintoCentro", "PatronMinotauroCentro"),
+        ):
+            mapa = self._mapa(nombre_mapa)
+            bloque = self.asm.split(f"{nombre_patron}:", 1)[1]
+            linea = next(
+                valor.strip()
+                for valor in bloque.splitlines()
+                if valor.strip().startswith("db ")
+            )
+            posiciones = []
+            for literal in linea[3:].split(","):
+                empaquetada = int(literal.strip().lstrip("$"), 16)
+                posiciones.append((empaquetada & 15, empaquetada >> 4))
+
+            self.assertEqual(len(posiciones), 8, nombre_patron)
+            for indice, (x, y) in enumerate(posiciones):
+                self.assertEqual(
+                    mapa[y][x],
+                    0,
+                    f"{nombre_patron} camina por un muro en {(x, y)}",
+                )
+                siguiente = posiciones[(indice + 1) % len(posiciones)]
+                distancia = abs(x - siguiente[0]) + abs(y - siguiente[1])
+                self.assertLessEqual(
+                    distancia,
+                    1,
+                    f"{nombre_patron} teletransporta al Minotauro",
+                )
+
     def test_contacto_no_procesa_tile_tras_retorno_a_cruce_seguro(self):
         movimiento = self.asm.split("IntentarMover:", 1)[1].split(
             "IncrementarPasos:", 1
