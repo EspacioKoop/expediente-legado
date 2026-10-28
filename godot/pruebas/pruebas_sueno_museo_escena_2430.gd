@@ -33,7 +33,14 @@ func _probar() -> void:
 	var opciones := museo.opciones()
 	_comprobar(opciones.size() == 3, "tres vitrinas con posibilidades")
 	_comprobar(
-		opciones.filter(func(opcion: Dictionary) -> bool: return bool(opcion["explorable"])).size() == 1,
+		(
+			(
+				opciones
+				. filter(func(opcion: Dictionary) -> bool: return bool(opcion["explorable"]))
+				. size()
+			)
+			== 1
+		),
 		"exactamente una posibilidad explorable",
 	)
 	_comprobar(contexto == original, "seleccionar no modifica Partida ni contexto")
@@ -65,11 +72,10 @@ func _probar() -> void:
 	var portal := museo.get_node("InteraccionesMuseo/EntrarVidaPosible")
 	_comprobar(portal.interactuar(actor), "se entra físicamente en la vida posible")
 	_comprobar(museo.explorando(), "el museo registra entrada local")
+	_comprobar(museo.get_node("SalaPosible").visible, "la sala alternativa se muestra al entrar")
 	_comprobar(
-		museo.get_node("SalaPosible").visible, "la sala alternativa se muestra al entrar"
-	)
-	_comprobar(
-		not actor.global_transform.is_equal_approx(regreso), "el actor alcanza el espacio explorable"
+		not actor.global_transform.is_equal_approx(regreso),
+		"el actor alcanza el espacio explorable"
 	)
 	var salida := museo.get_node("SalaPosible/RegresarMuseo")
 	_comprobar(salida.interactuar(actor), "la sala permite regresar sin softlock")
