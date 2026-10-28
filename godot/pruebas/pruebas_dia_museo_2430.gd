@@ -8,8 +8,6 @@ const CONTROLADOR = preload("res://guion/dia_museo_2430_app.gd")
 class DiaDoble:
 	extends Node3D
 
-	var _mundo: Node3D
-	var _espacio_actual := {"entrada": Vector3(3.0, 0.0, 8.0)}
 	var jornada := {
 		"fase": "sueño",
 		"dia": 3,
@@ -19,6 +17,8 @@ class DiaDoble:
 		"leido_hoy": ["EXP-1998-01"],
 		"sueno_escenas": ["patio"],
 	}
+	var _mundo: Node3D
+	var _espacio_actual := {"entrada": Vector3(3.0, 0.0, 8.0)}
 
 
 var _pasadas := 0
