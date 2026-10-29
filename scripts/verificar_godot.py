@@ -218,6 +218,12 @@ def ejecutar():
                 30,
                 30,
             ),
+            (
+                "sueno-estacion-2448",
+                ["--script", "pruebas/pruebas_sueno_estacion.gd"],
+                30,
+                154,
+            ),
             ("recorrido", ["--script", "pruebas/recorrido.gd"], 60, 95),
             ("arranque", ["--quit-after", "90"], 30, None),
         ]

@@ -19,6 +19,9 @@ func _initialize() -> void:
 	_probar_borde_contexto_faltante()
 	_probar_retorno_seguro_actualizacion()
 	_probar_visitados_acumulan()
+	_probar_seguridad_no_cierra_acceso()
+	_probar_destinos_sugeridos_evitan_rebote()
+	_probar_salto_directo_entre_destinos()
 	print("Pruebas Sueño Estación: %d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 
@@ -514,3 +517,79 @@ func _probar_visitados_acumulan() -> void:
 		),
 		"visitados tiene los tres"
 	)
+
+
+## Un bloqueo de seguridad advierte sobre la vuelta, no cierra el andén: la
+## zona inestable se puede visitar y sigue listándose como accesible.
+func _probar_seguridad_no_cierra_acceso() -> void:
+	var estado = SuenoEstacion.estado_nuevo(4040)
+	SuenoEstacion.bloquear(estado, "juicio", SuenoEstacion.BLOQUEO_SEGURIDAD, "andén cedido")
+	var disp = SuenoEstacion.disponibles(estado)
+	_comprobar(disp.size() == 3, "bloqueo seguridad no reduce accesibles")
+	_comprobar(disp.has("juicio"), "juicio sigue accesible con bloqueo seguridad")
+	_comprobar(SuenoEstacion.disponible(estado, "juicio"), "disponible(juicio) true con seguridad")
+
+	# Un bloqueo de acceso en el mismo destino sí lo cierra, conviviendo con el
+	# de seguridad: no se pisan ni se anulan entre sí.
+	SuenoEstacion.bloquear(estado, "juicio", SuenoEstacion.BLOQUEO_NARRATIVO, "falta el careo")
+	_comprobar(
+		not SuenoEstacion.disponible(estado, "juicio"), "narrativo cierra el acceso a juicio"
+	)
+	_comprobar(SuenoEstacion.info_bloqueos(estado, "juicio").size() == 2, "conviven 2 bloqueos")
+
+	# Levantar solo el narrativo reabre el acceso y deja el de seguridad intacto.
+	SuenoEstacion.levantar_bloqueos_tipo(estado, "juicio", SuenoEstacion.BLOQUEO_NARRATIVO)
+	_comprobar(SuenoEstacion.disponible(estado, "juicio"), "juicio reabierto al levantar acceso")
+	_comprobar(SuenoEstacion.ir_a(estado, "juicio"), "se entra a juicio con seguridad activa")
+	_comprobar(SuenoEstacion.retorno_seguro(estado) == false, "retorno no seguro dentro de juicio")
+
+
+## La presentación aparta el tren del que se acaba de bajar, pero nunca deja la
+## estación sin salida.
+func _probar_destinos_sugeridos_evitan_rebote() -> void:
+	var estado = SuenoEstacion.estado_nuevo(5050)
+	var sugeridos = SuenoEstacion.destinos_sugeridos(estado)
+	_comprobar(sugeridos.size() == 3, "estación nueva sugiere los 3 destinos")
+	_comprobar(
+		sugeridos == SuenoEstacion.disponibles(estado), "sin rebote sugeridos == disponibles"
+	)
+
+	SuenoEstacion.ir_a(estado, "casa")
+	SuenoEstacion.volver(estado)
+	sugeridos = SuenoEstacion.destinos_sugeridos(estado)
+	_comprobar(sugeridos.size() == 2, "tras volver de casa se sugieren 2")
+	_comprobar(not sugeridos.has("casa"), "casa no se sugiere justo después de volver")
+	_comprobar(
+		SuenoEstacion.disponible(estado, "casa"), "casa sigue accesible aunque no se sugiera"
+	)
+	_comprobar(SuenoEstacion.ir_a(estado, "casa"), "volver a entrar en casa es legítimo")
+
+	# Si apartar el anterior dejaría la lista vacía, se conserva: la noche no
+	# puede quedarse sin ningún tren al que subir.
+	var cerrado = SuenoEstacion.estado_nuevo(5051)
+	SuenoEstacion.bloquear(cerrado, "infancia", SuenoEstacion.BLOQUEO_NARRATIVO, "sin recuerdo")
+	SuenoEstacion.bloquear(cerrado, "juicio", SuenoEstacion.BLOQUEO_NARRATIVO, "sin careo")
+	SuenoEstacion.ir_a(cerrado, "casa")
+	SuenoEstacion.volver(cerrado)
+	sugeridos = SuenoEstacion.destinos_sugeridos(cerrado)
+	_comprobar(sugeridos == ["casa"], "última salida se conserva aunque sea el anterior")
+
+	# Sin ningún destino accesible la lista queda vacía, sin inventar salidas.
+	var sellado = SuenoEstacion.estado_nuevo(5052)
+	for destino in SuenoEstacion.DESTINOS:
+		SuenoEstacion.bloquear(sellado, destino, SuenoEstacion.BLOQUEO_NARRATIVO, "noche cerrada")
+	_comprobar(SuenoEstacion.destinos_sugeridos(sellado).size() == 0, "noche cerrada no sugiere")
+
+
+## Saltar de un destino a otro sin pasar por la estación mueve la referencia de
+## rebote al destino que se abandona.
+func _probar_salto_directo_entre_destinos() -> void:
+	var estado = SuenoEstacion.estado_nuevo(6060)
+	SuenoEstacion.ir_a(estado, "casa")
+	_comprobar(SuenoEstacion.ir_a(estado, "infancia"), "salto directo casa -> infancia")
+	_comprobar(estado["destino_actual"] == "infancia", "destino_actual es infancia tras salto")
+	_comprobar(estado["destino_anterior"] == "casa", "salto directo deja casa como anterior")
+	_comprobar(estado["veces_entrada"] == 2, "el salto cuenta como entrada")
+	_comprobar(estado["visitados"].size() == 2, "salto directo acumula visitados")
+	_comprobar(SuenoEstacion.volver(estado) == "infancia", "volver desde el salto da infancia")
+	_comprobar(estado["destino_anterior"] == "infancia", "volver fija infancia como anterior")

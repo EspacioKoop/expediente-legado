@@ -17,6 +17,11 @@ const BLOQUEO_NARRATIVO := "narrativo"
 const BLOQUEO_PROGRESO := "progreso"
 const BLOQUEO_SEGURIDAD := "seguridad"
 
+## Un bloqueo de acceso impide subir al tren; uno de seguridad no. La zona
+## inestable se puede visitar, pero mientras estés dentro el retorno deja de
+## estar garantizado: quien integra decide si avisa o si corta la microescena.
+const BLOQUEOS_ACCESO := [BLOQUEO_NARRATIVO, BLOQUEO_PROGRESO]
+
 
 ## Estado inicial de la estación para una noche concreta.
 ##
@@ -50,28 +55,36 @@ static func _orden_destinos(raiz: int) -> Array:
 
 ## Comprueba si un destino está disponible en la estación actual.
 ##
-## Un destino está disponible si:
-## - Existe en DESTINOS
-## - No tiene un bloqueo activo que impida el acceso
-## - No es el destino desde el que se acaba de volver (evita rebote inmediato)
+## Un destino está disponible si existe en DESTINOS y no tiene un bloqueo de
+## acceso activo. El rebote inmediato no es asunto del acceso: volver al mismo
+## destino es legítimo, solo deja de sugerirse (ver `destinos_sugeridos`).
 static func disponible(estado: Dictionary, destino: String, contexto: Dictionary = {}) -> bool:
 	if not DESTINOS.has(destino):
 		return false
-	if _tiene_bloqueo_activo(estado, destino, contexto):
-		return false
-	var anterior := String(estado.get("destino_anterior", ""))
-	if anterior == destino:
-		return false
-	return true
+	return not _tiene_bloqueo_activo(estado, destino, contexto)
 
 
-## Devuelve la lista de destinos disponibles para mostrar en la UI.
+## Devuelve la lista de destinos accesibles, en el orden de presentación.
 static func disponibles(estado: Dictionary, contexto: Dictionary = {}) -> Array:
 	var resultado := []
 	for destino in estado.get("orden_presentacion", DESTINOS):
 		if disponible(estado, destino, contexto):
 			resultado.append(destino)
 	return resultado
+
+
+## Lo que la estación ofrece en pantalla: lo accesible, apartando el destino
+## del que se acaba de volver para que la noche no se quede en un ida y vuelta.
+##
+## Si apartarlo dejaría la lista vacía, se conserva: la estación nunca puede
+## quedarse sin salida mientras exista un destino accesible.
+static func destinos_sugeridos(estado: Dictionary, contexto: Dictionary = {}) -> Array:
+	var accesibles := disponibles(estado, contexto)
+	var anterior := String(estado.get("destino_anterior", ""))
+	if anterior.is_empty() or not accesibles.has(anterior) or accesibles.size() <= 1:
+		return accesibles
+	accesibles.erase(anterior)
+	return accesibles
 
 
 ## Marca un destino como visitado y actualiza el estado de la estación.
@@ -83,7 +96,12 @@ static func ir_a(estado: Dictionary, destino: String) -> bool:
 	if not disponible(estado, destino):
 		return false
 
-	estado["destino_anterior"] = String(estado.get("destino_actual", ""))
+	# Saltar de un destino a otro sin pasar por la estación sí cambia la
+	# referencia; entrar desde la estación conserva el destino del que se volvió,
+	# que es lo que la presentación necesita para no repetir el mismo tren.
+	var actual := String(estado.get("destino_actual", ""))
+	if not actual.is_empty():
+		estado["destino_anterior"] = actual
 	estado["destino_actual"] = destino
 
 	var visitados: Array = estado.get("visitados", [])
@@ -107,6 +125,7 @@ static func volver(estado: Dictionary) -> String:
 	if actual.is_empty():
 		return ""
 	estado["destino_actual"] = ""
+	estado["destino_anterior"] = actual
 	_actualizar_retorno_seguro(estado)
 	return actual
 
@@ -144,6 +163,8 @@ static func bloquear(
 		)
 	)
 	estado["bloqueos"] = bloqueos
+	# Bloquear el destino en el que estás puede retirar la garantía de vuelta.
+	_actualizar_retorno_seguro(estado)
 	return true
 
 
@@ -160,6 +181,8 @@ static func levantar_bloqueo(estado: Dictionary, destino: String, indice: int) -
 		return false
 	lista[indice]["activo"] = false
 	estado["bloqueos"] = bloqueos
+	# Levantarlo desde dentro devuelve la garantía de vuelta en el mismo acto.
+	_actualizar_retorno_seguro(estado)
 	return true
 
 
@@ -175,11 +198,13 @@ static func levantar_bloqueos_tipo(estado: Dictionary, destino: String, tipo: St
 			lista[i]["activo"] = false
 			levantados += 1
 	estado["bloqueos"] = bloqueos
+	_actualizar_retorno_seguro(estado)
 	return levantados
 
 
-## Comprueba si un destino tiene algún bloqueo activo (consultando condiciones
-## si el contexto las provee).
+## Comprueba si un destino tiene algún bloqueo de acceso activo (consultando
+## condiciones si el contexto las provee). Los de seguridad no cuentan aquí:
+## se pagan a la vuelta, no a la entrada.
 static func _tiene_bloqueo_activo(
 	estado: Dictionary, destino: String, contexto: Dictionary
 ) -> bool:
@@ -188,6 +213,8 @@ static func _tiene_bloqueo_activo(
 		return false
 	for bloqueo in bloqueos[destino]:
 		if not bool(bloqueo.get("activo", false)):
+			continue
+		if not BLOQUEOS_ACCESO.has(String(bloqueo.get("tipo", ""))):
 			continue
 		var condicion: Dictionary = bloqueo.get("condicion", {})
 		if condicion.is_empty():
