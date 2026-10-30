@@ -68,6 +68,7 @@ func _construir_interfaz() -> void:
 	_boton_atras.name = "Atras"
 	_boton_atras.text = "<"
 	_boton_atras.tooltip_text = tr("EXPLORADOR_ATRAS")
+	_boton_atras.accessibility_name = "Retroceder"
 	_estilizar_boton_barra(_boton_atras)
 	_boton_atras.pressed.connect(_ir_atras)
 	barra.add_child(_boton_atras)
@@ -76,6 +77,7 @@ func _construir_interfaz() -> void:
 	_boton_adelante.name = "Adelante"
 	_boton_adelante.text = ">"
 	_boton_adelante.tooltip_text = tr("EXPLORADOR_ADELANTE")
+	_boton_adelante.accessibility_name = "Avanzar"
 	_estilizar_boton_barra(_boton_adelante)
 	_boton_adelante.pressed.connect(_ir_adelante)
 	barra.add_child(_boton_adelante)
@@ -84,6 +86,7 @@ func _construir_interfaz() -> void:
 	_boton_arriba.name = "Arriba"
 	_boton_arriba.text = "↑"
 	_boton_arriba.tooltip_text = tr("EXPLORADOR_SUBIR")
+	_boton_arriba.accessibility_name = "Subir nivel"
 	_estilizar_boton_barra(_boton_arriba)
 	_boton_arriba.pressed.connect(_ir_arriba)
 	barra.add_child(_boton_arriba)
