@@ -1,0 +1,840 @@
+{
+  "metadata": {
+    "issue": "#2740",
+    "title": "Inventario de audio roto y referencias inexistentes",
+    "generated_at": "2026-10-27"
+  },
+  "summary": {
+    "audio_files": {
+      "total": 52,
+      "by_extension": {
+        ".ogg": 52
+      },
+      "total_size": 401883
+    },
+    "references": {
+      "total": 69,
+      "audio_players": 28,
+      "load_patterns": {
+        "load": 142,
+        "preload": 37,
+        "ResourceLoader.load": 10
+      }
+    },
+    "issues": {
+      "unreferenced": 0,
+      "broken": 2,
+      "duplicates": 0
+    }
+  },
+  "audio_files": [
+    {
+      "path": "bookFlip1.ogg",
+      "size": 18248,
+      "extension": ".ogg"
+    },
+    {
+      "path": "chip/archivador_abrir_01.ogg",
+      "size": 6016,
+      "extension": ".ogg"
+    },
+    {
+      "path": "chip/archivador_abrir_02.ogg",
+      "size": 6162,
+      "extension": ".ogg"
+    },
+    {
+      "path": "chip/archivador_abrir_03.ogg",
+      "size": 5639,
+      "extension": ".ogg"
+    },
+    {
+      "path": "chip/archivador_cerrar_01.ogg",
+      "size": 5285,
+      "extension": ".ogg"
+    },
+    {
+      "path": "chip/archivador_cerrar_02.ogg",
+      "size": 5352,
+      "extension": ".ogg"
+    },
+    {
+      "path": "chip/archivador_cerrar_03.ogg",
+      "size": 5192,
+      "extension": ".ogg"
+    },
+    {
+      "path": "chip/papel_coger_01.ogg",
+      "size": 4620,
+      "extension": ".ogg"
+    },
+    {
+      "path": "chip/papel_manojo_01.ogg",
+      "size": 6025,
+      "extension": ".ogg"
+    },
+    {
+      "path": "chip/papel_pasar_01.ogg",
+      "size": 5773,
+      "extension": ".ogg"
+    },
+    {
+      "path": "chip/teclado_rafaga_01.ogg",
+      "size": 6636,
+      "extension": ".ogg"
+    },
+    {
+      "path": "chip/teclado_rafaga_02.ogg",
+      "size": 6743,
+      "extension": ".ogg"
+    },
+    {
+      "path": "chip/teclado_rafaga_03.ogg",
+      "size": 5935,
+      "extension": ".ogg"
+    },
+    {
+      "path": "chip/teclado_tecla_01.ogg",
+      "size": 4835,
+      "extension": ".ogg"
+    },
+    {
+      "path": "chip/teclado_tecla_02.ogg",
+      "size": 4627,
+      "extension": ".ogg"
+    },
+    {
+      "path": "chip/teclado_tecla_03.ogg",
+      "size": 4976,
+      "extension": ".ogg"
+    },
+    {
+      "path": "chip/ui_error_01.ogg",
+      "size": 5362,
+      "extension": ".ogg"
+    },
+    {
+      "path": "chip/ui_firmar_01.ogg",
+      "size": 5871,
+      "extension": ".ogg"
+    },
+    {
+      "path": "chip/ui_marcar_01.ogg",
+      "size": 4942,
+      "extension": ".ogg"
+    },
+    {
+      "path": "chip/ui_pulsar_01.ogg",
+      "size": 4631,
+      "extension": ".ogg"
+    },
+    {
+      "path": "click_001.ogg",
+      "size": 4876,
+      "extension": ".ogg"
+    },
+    {
+      "path": "confirmation_001.ogg",
+      "size": 8968,
+      "extension": ".ogg"
+    },
+    {
+      "path": "doorClose_1.ogg",
+      "size": 18564,
+      "extension": ".ogg"
+    },
+    {
+      "path": "doorOpen_1.ogg",
+      "size": 22848,
+      "extension": ".ogg"
+    },
+    {
+      "path": "error_003.ogg",
+      "size": 12256,
+      "extension": ".ogg"
+    },
+    {
+      "path": "footstep00.ogg",
+      "size": 9475,
+      "extension": ".ogg"
+    },
+    {
+      "path": "footstep01.ogg",
+      "size": 9900,
+      "extension": ".ogg"
+    },
+    {
+      "path": "footstep02.ogg",
+      "size": 9528,
+      "extension": ".ogg"
+    },
+    {
+      "path": "footstep03.ogg",
+      "size": 10559,
+      "extension": ".ogg"
+    },
+    {
+      "path": "footstep_carpet_000.ogg",
+      "size": 6353,
+      "extension": ".ogg"
+    },
+    {
+      "path": "footstep_carpet_001.ogg",
+      "size": 6411,
+      "extension": ".ogg"
+    },
+    {
+      "path": "footstep_carpet_002.ogg",
+      "size": 6411,
+      "extension": ".ogg"
+    },
+    {
+      "path": "footstep_carpet_003.ogg",
+      "size": 6301,
+      "extension": ".ogg"
+    },
+    {
+      "path": "footstep_carpet_004.ogg",
+      "size": 6301,
+      "extension": ".ogg"
+    },
+    {
+      "path": "footstep_concrete_000.ogg",
+      "size": 5808,
+      "extension": ".ogg"
+    },
+    {
+      "path": "footstep_concrete_001.ogg",
+      "size": 6308,
+      "extension": ".ogg"
+    },
+    {
+      "path": "footstep_concrete_002.ogg",
+      "size": 6255,
+      "extension": ".ogg"
+    },
+    {
+      "path": "footstep_concrete_003.ogg",
+      "size": 5805,
+      "extension": ".ogg"
+    },
+    {
+      "path": "footstep_concrete_004.ogg",
+      "size": 5912,
+      "extension": ".ogg"
+    },
+    {
+      "path": "footstep_snow_000.ogg",
+      "size": 7880,
+      "extension": ".ogg"
+    },
+    {
+      "path": "footstep_snow_001.ogg",
+      "size": 7794,
+      "extension": ".ogg"
+    },
+    {
+      "path": "footstep_snow_002.ogg",
+      "size": 7694,
+      "extension": ".ogg"
+    },
+    {
+      "path": "footstep_snow_003.ogg",
+      "size": 7860,
+      "extension": ".ogg"
+    },
+    {
+      "path": "footstep_snow_004.ogg",
+      "size": 7630,
+      "extension": ".ogg"
+    },
+    {
+      "path": "handleCoins.ogg",
+      "size": 25394,
+      "extension": ".ogg"
+    },
+    {
+      "path": "impactMetal_light_000.ogg",
+      "size": 7651,
+      "extension": ".ogg"
+    },
+    {
+      "path": "impactMetal_light_001.ogg",
+      "size": 6967,
+      "extension": ".ogg"
+    },
+    {
+      "path": "impactMetal_medium_000.ogg",
+      "size": 7117,
+      "extension": ".ogg"
+    },
+    {
+      "path": "impactSoft_medium_000.ogg",
+      "size": 5351,
+      "extension": ".ogg"
+    },
+    {
+      "path": "impactSoft_medium_001.ogg",
+      "size": 5506,
+      "extension": ".ogg"
+    },
+    {
+      "path": "impactWood_heavy_000.ogg",
+      "size": 6233,
+      "extension": ".ogg"
+    },
+    {
+      "path": "switch_002.ogg",
+      "size": 7097,
+      "extension": ".ogg"
+    }
+  ],
+  "unreferenced_files": [],
+  "broken_references": [
+    {
+      "file": "godot/guion/musica.gd",
+      "reference": "res://assets/audio/musica/"
+    },
+    {
+      "file": "godot/guion/musica.gd",
+      "reference": "battle_music_01-loop.ogg"
+    }
+  ],
+  "audio_players": {
+    "godot/guion/sueno_ayuda_resonancia_3d.gd": [
+      24,
+      94
+    ],
+    "godot/guion/mezcla_audio.gd": [
+      157
+    ],
+    "godot/guion/sueno_mutador_presentacion_3d.gd": [
+      19,
+      20,
+      154,
+      161
+    ],
+    "godot/guion/musica.gd": [
+      63,
+      71,
+      83
+    ],
+    "godot/guion/sueno_castillo_3d.gd": [
+      46
+    ],
+    "godot/guion/sueno_vacio_3d.gd": [
+      16,
+      275
+    ],
+    "godot/guion/cinematica_app.gd": [
+      188
+    ],
+    "godot/guion/sueno_desierto_3d.gd": [
+      18,
+      19,
+      50,
+      71
+    ],
+    "godot/guion/efecto_apagado_portatil.gd": [
+      35
+    ],
+    "godot/guion/sueno_montana_3d.gd": [
+      41
+    ],
+    "godot/guion/caminante.gd": [
+      376
+    ],
+    "godot/guion/emulador_portatil_audio_app.gd": [
+      28,
+      432
+    ],
+    "godot/guion/casa_consecuencias_3d.gd": [
+      102
+    ],
+    "godot/guion/minicadena_domestica_98.gd": [
+      38,
+      360,
+      364,
+      373
+    ],
+    "godot/guion/rebote_postal_app.gd": [
+      25,
+      154
+    ],
+    "godot/guion/sueno_escuela_3d.gd": [
+      28,
+      29,
+      284,
+      293
+    ],
+    "godot/guion/sueno_minotauro_audio.gd": [
+      4
+    ],
+    "godot/guion/dia_app.gd": [
+      53,
+      54
+    ],
+    "godot/guion/dia_clima_visual_app.gd": [
+      565,
+      582
+    ],
+    "godot/guion/ambiente.gd": [
+      296,
+      307,
+      317,
+      355,
+      361
+    ],
+    "godot/guion/impresora_termica_portatil_3d.gd": [
+      16,
+      127
+    ],
+    "godot/guion/dia_presentacion_app.gd": [
+      47,
+      49,
+      104,
+      134
+    ],
+    "godot/guion/sonido.gd": [
+      201,
+      213,
+      233,
+      251
+    ],
+    "godot/guion/emulador_portatil_app.gd": [
+      89,
+      370
+    ],
+    "godot/guion/eco_despertar_presentacion_3d.gd": [
+      118
+    ],
+    "godot/guion/turno_serpiente_app.gd": [
+      33,
+      172
+    ],
+    "godot/guion/sueno_castillo_pulso_3d.gd": [
+      11,
+      20
+    ],
+    "godot/guion/sueno_minotauro_3d.gd": [
+      33,
+      208
+    ]
+  },
+  "references": [
+    {
+      "file": "godot/guion/musica.gd",
+      "reference": "res://assets/audio/musica/",
+      "line": null,
+      "context": "RUTA_MISSING"
+    },
+    {
+      "file": "godot/guion/musica.gd",
+      "reference": "careo",
+      "line": null,
+      "context": "CATALOGO"
+    },
+    {
+      "file": "godot/guion/musica.gd",
+      "reference": "(empty)",
+      "line": null,
+      "context": "CATALOGO"
+    },
+    {
+      "file": "godot/guion/musica.gd",
+      "reference": "final",
+      "line": null,
+      "context": "CATALOGO"
+    },
+    {
+      "file": "godot/guion/musica.gd",
+      "reference": "(empty)",
+      "line": null,
+      "context": "CATALOGO"
+    },
+    {
+      "file": "godot/guion/musica.gd",
+      "reference": "battle_music_01-loop.ogg",
+      "line": null,
+      "context": "INICIO_BUCLE_POR_FICHERO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "footstep00.ogg",
+      "line": null,
+      "context": "PASOS"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "footstep01.ogg",
+      "line": null,
+      "context": "PASOS"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "footstep02.ogg",
+      "line": null,
+      "context": "PASOS"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "footstep03.ogg",
+      "line": null,
+      "context": "PASOS"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "footstep_carpet_000.ogg",
+      "line": null,
+      "context": "PASOS_POR_SUELO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "footstep_carpet_001.ogg",
+      "line": null,
+      "context": "PASOS_POR_SUELO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "footstep_carpet_002.ogg",
+      "line": null,
+      "context": "PASOS_POR_SUELO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "footstep_carpet_003.ogg",
+      "line": null,
+      "context": "PASOS_POR_SUELO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "footstep_carpet_004.ogg",
+      "line": null,
+      "context": "PASOS_POR_SUELO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "footstep_concrete_000.ogg",
+      "line": null,
+      "context": "PASOS_POR_SUELO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "footstep_concrete_001.ogg",
+      "line": null,
+      "context": "PASOS_POR_SUELO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "footstep_concrete_002.ogg",
+      "line": null,
+      "context": "PASOS_POR_SUELO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "footstep_concrete_003.ogg",
+      "line": null,
+      "context": "PASOS_POR_SUELO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "footstep_concrete_004.ogg",
+      "line": null,
+      "context": "PASOS_POR_SUELO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "footstep_concrete_000.ogg",
+      "line": null,
+      "context": "PASOS_POR_SUELO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "footstep_concrete_001.ogg",
+      "line": null,
+      "context": "PASOS_POR_SUELO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "footstep_concrete_002.ogg",
+      "line": null,
+      "context": "PASOS_POR_SUELO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "footstep_concrete_003.ogg",
+      "line": null,
+      "context": "PASOS_POR_SUELO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "footstep_concrete_004.ogg",
+      "line": null,
+      "context": "PASOS_POR_SUELO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "footstep_snow_000.ogg",
+      "line": null,
+      "context": "PASOS_POR_SUELO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "footstep_snow_001.ogg",
+      "line": null,
+      "context": "PASOS_POR_SUELO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "footstep_snow_002.ogg",
+      "line": null,
+      "context": "PASOS_POR_SUELO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "footstep_snow_003.ogg",
+      "line": null,
+      "context": "PASOS_POR_SUELO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "footstep_snow_004.ogg",
+      "line": null,
+      "context": "PASOS_POR_SUELO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "doorOpen_1.ogg",
+      "line": null,
+      "context": "CATALOGO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "doorClose_1.ogg",
+      "line": null,
+      "context": "CATALOGO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "bookFlip1.ogg",
+      "line": null,
+      "context": "CATALOGO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "handleCoins.ogg",
+      "line": null,
+      "context": "CATALOGO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "impactSoft_medium_000.ogg",
+      "line": null,
+      "context": "CATALOGO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "error_003.ogg",
+      "line": null,
+      "context": "CATALOGO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "click_001.ogg",
+      "line": null,
+      "context": "CATALOGO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "chip/archivador_abrir_01.ogg",
+      "line": null,
+      "context": "FAMILIAS"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "chip/archivador_abrir_02.ogg",
+      "line": null,
+      "context": "FAMILIAS"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "chip/archivador_abrir_03.ogg",
+      "line": null,
+      "context": "FAMILIAS"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "chip/archivador_cerrar_01.ogg",
+      "line": null,
+      "context": "FAMILIAS"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "chip/archivador_cerrar_02.ogg",
+      "line": null,
+      "context": "FAMILIAS"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "chip/archivador_cerrar_03.ogg",
+      "line": null,
+      "context": "FAMILIAS"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "chip/papel_coger_01.ogg",
+      "line": null,
+      "context": "FAMILIAS"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "chip/papel_pasar_01.ogg",
+      "line": null,
+      "context": "FAMILIAS"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "chip/papel_manojo_01.ogg",
+      "line": null,
+      "context": "FAMILIAS"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "chip/teclado_tecla_01.ogg",
+      "line": null,
+      "context": "FAMILIAS"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "chip/teclado_tecla_02.ogg",
+      "line": null,
+      "context": "FAMILIAS"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "chip/teclado_tecla_03.ogg",
+      "line": null,
+      "context": "FAMILIAS"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "chip/teclado_rafaga_01.ogg",
+      "line": null,
+      "context": "FAMILIAS"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "chip/teclado_rafaga_02.ogg",
+      "line": null,
+      "context": "FAMILIAS"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "chip/teclado_rafaga_03.ogg",
+      "line": null,
+      "context": "FAMILIAS"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "chip/ui_pulsar_01.ogg",
+      "line": null,
+      "context": "FAMILIAS"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "chip/ui_marcar_01.ogg",
+      "line": null,
+      "context": "FAMILIAS"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "chip/ui_firmar_01.ogg",
+      "line": null,
+      "context": "FAMILIAS"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "chip/ui_error_01.ogg",
+      "line": null,
+      "context": "FAMILIAS"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "impactSoft_medium_000.ogg",
+      "line": null,
+      "context": "FAMILIAS"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "impactSoft_medium_001.ogg",
+      "line": null,
+      "context": "FAMILIAS"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "impactMetal_light_000.ogg",
+      "line": null,
+      "context": "FAMILIAS_RESPALDO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "impactMetal_light_001.ogg",
+      "line": null,
+      "context": "FAMILIAS_RESPALDO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "impactMetal_medium_000.ogg",
+      "line": null,
+      "context": "FAMILIAS_RESPALDO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "bookFlip1.ogg",
+      "line": null,
+      "context": "FAMILIAS_RESPALDO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "click_001.ogg",
+      "line": null,
+      "context": "FAMILIAS_RESPALDO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "click_001.ogg",
+      "line": null,
+      "context": "FAMILIAS_RESPALDO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "click_001.ogg",
+      "line": null,
+      "context": "FAMILIAS_RESPALDO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "switch_002.ogg",
+      "line": null,
+      "context": "FAMILIAS_RESPALDO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "confirmation_001.ogg",
+      "line": null,
+      "context": "FAMILIAS_RESPALDO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "error_003.ogg",
+      "line": null,
+      "context": "FAMILIAS_RESPALDO"
+    },
+    {
+      "file": "godot/guion/sonido.gd",
+      "reference": "impactWood_heavy_000.ogg",
+      "line": null,
+      "context": "IMPACTO_CAREO"
+    }
+  ]
+}
