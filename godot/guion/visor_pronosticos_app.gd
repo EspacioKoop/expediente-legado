@@ -492,7 +492,7 @@ func _construir() -> void:
 	_guia_lectura.name = "PasoInvestigacion"
 	_guia_lectura.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_guia_lectura.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_guia_lectura.add_theme_font_size_override("font_size", 15)
+	_guia_lectura.add_theme_font_size_override("font_size", 18)
 	_guia_lectura.add_theme_color_override("font_color", EstiloSiga.NEGRO)
 	fila.add_child(_guia_lectura)
 	_boton_siguiente_folio = Button.new()
@@ -533,7 +533,6 @@ func _actualizar_guia_lectura() -> void:
 		return
 	var cerrado := Acusacion.esta_cerrado(partida.estado, String(caso.get("id", "")))
 	var abiertos_hoy := _ids_leidos_del_caso().size()
-	var total := caso.get("registros", []).size()
 	var siguiente := -1 if cerrado else _indice_folio_pendiente()
 	var puede_abrir := false
 	var relectura := false
@@ -558,7 +557,9 @@ func _actualizar_guia_lectura() -> void:
 		else "Sin folios pendientes"
 	)
 	if cerrado:
-		_guia_lectura.text = "Expediente cerrado · Puedes consultar los documentos sin tomar otra decisión."
+		_guia_lectura.text = (
+			"Expediente cerrado · Puedes consultar los documentos sin tomar otra decisión."
+		)
 	elif siguiente >= 0 and not puede_abrir:
 		_guia_lectura.text = (
 			"Turno sin acciones · Relee los folios disponibles o sal del puesto para continuar."
