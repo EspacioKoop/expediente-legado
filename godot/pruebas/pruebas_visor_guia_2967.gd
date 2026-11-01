@@ -29,15 +29,9 @@ func _ejecutar() -> void:
 		),
 		"el botón usa el handler del visor",
 	)
-	_comprobar(
-		visor._guia_lectura.text.contains("PASO 1/3"), "primero orienta a abrir un folio"
-	)
-	_comprobar(
-		visor._indice_folio_pendiente() == 0, "el primer folio pendiente es el primero"
-	)
-	_comprobar(
-		not visor._boton_siguiente_folio.disabled, "la primera lectura es accesible"
-	)
+	_comprobar(visor._guia_lectura.text.contains("PASO 1/3"), "primero orienta a abrir un folio")
+	_comprobar(visor._indice_folio_pendiente() == 0, "el primer folio pendiente es el primero")
+	_comprobar(not visor._boton_siguiente_folio.disabled, "la primera lectura es accesible")
 	_comprobar(
 		visor._lista.item_count == visor.caso["registros"].size(),
 		"la guía no oculta los documentos ni los altera",
@@ -48,12 +42,8 @@ func _ejecutar() -> void:
 	visor.jornada["leido_hoy"] = [primero["folio"]]
 	visor.jornada["leidos_total"] = [primero["id"]]
 	visor._refrescar_estado()
-	_comprobar(
-		visor._indice_folio_pendiente() == 1, "el siguiente folio se calcula desde Jornada"
-	)
-	_comprobar(
-		visor._guia_lectura.text.contains("PASO 2/3"), "la guía pide comparar otro folio"
-	)
+	_comprobar(visor._indice_folio_pendiente() == 1, "el siguiente folio se calcula desde Jornada")
+	_comprobar(visor._guia_lectura.text.contains("PASO 2/3"), "la guía pide comparar otro folio")
 	_comprobar(visor._reconstruir.disabled, "la guía no desbloquea reconstruir antes de tiempo")
 
 	visor.jornada["leido_hoy"].append(segundo["folio"])
@@ -76,12 +66,8 @@ func _ejecutar() -> void:
 
 	visor.jornada["leido_hoy"] = []
 	visor._refrescar_estado()
-	_comprobar(
-		visor._indice_folio_pendiente() == 0, "otro día permite proponer relecturas"
-	)
-	_comprobar(
-		visor._boton_siguiente_folio.text == "Releer folio", "identifica la relectura"
-	)
+	_comprobar(visor._indice_folio_pendiente() == 0, "otro día permite proponer relecturas")
+	_comprobar(visor._boton_siguiente_folio.text == "Releer folio", "identifica la relectura")
 	_comprobar(
 		visor._guia_lectura.accessibility_name == visor._guia_lectura.text,
 		"la instrucción también es accesible",
