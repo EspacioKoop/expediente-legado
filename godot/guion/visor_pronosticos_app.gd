@@ -34,6 +34,8 @@ var _decision_924_estado: Label
 var _decision_924_opciones: VBoxContainer
 var _boton_herramientas_secundarias: Button
 var _herramientas_secundarias: VBoxContainer
+var _guia_lectura: Label
+var _boton_siguiente_folio: Button
 
 
 func _ready() -> void:
@@ -471,3 +473,125 @@ func _nombre_estado(estado: String) -> String:
 			return tr("VISOR_PRONOSTICO_ESTADO_FALLADO")
 		_:
 			return tr("VISOR_PRONOSTICO_ESTADO_SIN_RESOLVER")
+
+## #2967: la tarea principal de SIGA se explica en una franja breve y cambiante,
+## no entre las herramientas opcionales. No guarda otro progreso: lee Jornada,
+## Acusacion y los registros del expediente canónico.
+func _construir() -> void:
+	super._construir()
+	var raiz := get_child(0) as VBoxContainer
+	if raiz == null:
+		return
+	var panel := PanelContainer.new()
+	panel.name = "GuiaLecturaSiga"
+	panel.add_theme_stylebox_override("panel", EstiloSiga.caja_saliente(EstiloSiga.PAPEL))
+	var fila := HBoxContainer.new()
+	fila.add_theme_constant_override("separation", 10)
+	panel.add_child(fila)
+	_guia_lectura = Label.new()
+	_guia_lectura.name = "PasoInvestigacion"
+	_guia_lectura.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_guia_lectura.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_guia_lectura.add_theme_font_size_override("font_size", 15)
+	_guia_lectura.add_theme_color_override("font_color", EstiloSiga.NEGRO)
+	fila.add_child(_guia_lectura)
+	_boton_siguiente_folio = Button.new()
+	_boton_siguiente_folio.name = "LeerSiguienteFolio"
+	_boton_siguiente_folio.text = "Leer folio pendiente"
+	_boton_siguiente_folio.pressed.connect(_abrir_siguiente_folio)
+	fila.add_child(_boton_siguiente_folio)
+	raiz.add_child(panel)
+	raiz.move_child(panel, 1)
+	_actualizar_guia_lectura()
+
+
+func _refrescar_estado() -> void:
+	super._refrescar_estado()
+	_actualizar_guia_lectura()
+
+
+## El siguiente folio no es una pista ni un documento recomendado por la IA:
+## es el primero aún no abierto, en el orden del catálogo. Si todos los folios
+## se consultaron en otro día, se propone una relectura para poder reconstruir.
+func _indice_folio_pendiente() -> int:
+	var leidos_hoy: Array = jornada.get("leido_hoy", [])
+	var leidos_total: Array = jornada.get("leidos_total", [])
+	var relectura := -1
+	for i in caso.get("registros", []).size():
+		var registro: Dictionary = caso["registros"][i]
+		if leidos_hoy.has(registro.get("folio", "")):
+			continue
+		if not leidos_total.has(registro.get("id", "")):
+			return i
+		if relectura < 0:
+			relectura = i
+	return relectura
+
+
+func _actualizar_guia_lectura() -> void:
+	if _guia_lectura == null or _boton_siguiente_folio == null or caso.is_empty():
+		return
+	var cerrado := Acusacion.esta_cerrado(partida.estado, String(caso.get("id", "")))
+	var abiertos_hoy := _ids_leidos_del_caso().size()
+	var total := caso.get("registros", []).size()
+	var siguiente := -1 if cerrado else _indice_folio_pendiente()
+	var puede_abrir := false
+	var relectura := false
+	if siguiente >= 0:
+		var registro: Dictionary = caso["registros"][siguiente]
+		var coste := Jornada.coste_lectura(jornada, registro["folio"])
+		puede_abrir = coste <= int(jornada.get("acciones", 0))
+		relectura = jornada.get("leidos_total", []).has(registro.get("id", ""))
+		_boton_siguiente_folio.tooltip_text = (
+			"%s · %s"
+			% [
+				String(registro.get("folio", "")),
+				tr("VISOR_COSTE_GRATIS") if coste == 0 else tr("VISOR_COSTE_ACCION"),
+			]
+		)
+	else:
+		_boton_siguiente_folio.tooltip_text = ""
+	_boton_siguiente_folio.disabled = not puede_abrir or cerrado
+	_boton_siguiente_folio.text = (
+		("Releer folio" if relectura else "Leer folio pendiente")
+		if siguiente >= 0
+		else "Sin folios pendientes"
+	)
+	if cerrado:
+		_guia_lectura.text = "Expediente cerrado · Puedes consultar los documentos sin tomar otra decisión."
+	elif siguiente >= 0 and not puede_abrir:
+		_guia_lectura.text = (
+			"Turno sin acciones · Relee los folios disponibles o sal del puesto para continuar."
+		)
+	elif abiertos_hoy == 0:
+		_guia_lectura.text = (
+			"PASO 1/3 · Abre un folio. La primera lectura del día es gratis; "
+			+ "las frases destacadas pueden contener pistas."
+		)
+	elif abiertos_hoy < 2:
+		_guia_lectura.text = (
+			"PASO 2/3 · Lee otro folio de este expediente y contrasta "
+			+ "los datos. Pulsa las frases destacadas para registrar pistas."
+		)
+	else:
+		_guia_lectura.text = (
+			"PASO 3/3 · Puedes comparar lo leído con «Reconstruir». "
+			+ "Firma el formulario A-7 solo cuando tengas una hipótesis."
+		)
+	_guia_lectura.accessibility_name = _guia_lectura.text
+	_boton_siguiente_folio.accessibility_name = _boton_siguiente_folio.text
+
+
+## Mismo handler y mismas comprobaciones de gasto/guardado que el ItemList.
+## El botón no elige pistas, no salta documentos ni fuerza lecturas sin acciones.
+func _abrir_siguiente_folio() -> void:
+	if _boton_siguiente_folio == null or _boton_siguiente_folio.disabled:
+		return
+	var indice := _indice_folio_pendiente()
+	if indice < 0:
+		return
+	var id_esperado := String(caso["registros"][indice].get("id", ""))
+	_al_elegir_documento(indice)
+	if String(registro_actual.get("id", "")) == id_esperado:
+		_lista.select(indice)
+		_lista.grab_focus()
