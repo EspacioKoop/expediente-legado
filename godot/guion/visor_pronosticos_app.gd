@@ -558,13 +558,9 @@ func _actualizar_guia_lectura() -> void:
 		else "Sin folios pendientes"
 	)
 	if cerrado:
-		_guia_lectura.text = (
-			"Expediente cerrado · Los documentos siguen disponibles para consulta."
-		)
+		_guia_lectura.text = "Expediente cerrado · Los documentos siguen disponibles para consulta."
 	elif siguiente >= 0 and not puede_abrir:
-		_guia_lectura.text = (
-			"Sin acciones · Relee documentos disponibles o sal del puesto."
-		)
+		_guia_lectura.text = "Sin acciones · Relee documentos disponibles o sal del puesto."
 	elif abiertos_hoy == 0:
 		_guia_lectura.text = (
 			"PASO 1/3 · Abre un folio. La primera lectura del día es gratis; "
