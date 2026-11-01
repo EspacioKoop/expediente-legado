@@ -474,6 +474,7 @@ func _nombre_estado(estado: String) -> String:
 		_:
 			return tr("VISOR_PRONOSTICO_ESTADO_SIN_RESOLVER")
 
+
 ## #2967: la tarea principal de SIGA se explica en una franja breve y cambiante,
 ## no entre las herramientas opcionales. No guarda otro progreso: lee Jornada,
 ## Acusacion y los registros del expediente canónico.
@@ -557,13 +558,9 @@ func _actualizar_guia_lectura() -> void:
 		else "Sin folios pendientes"
 	)
 	if cerrado:
-		_guia_lectura.text = (
-			"Expediente cerrado · Puedes consultar los documentos sin tomar otra decisión."
-		)
+		_guia_lectura.text = ("Expediente cerrado · Puedes consultar los documentos sin tomar otra decisión.")
 	elif siguiente >= 0 and not puede_abrir:
-		_guia_lectura.text = (
-			"Turno sin acciones · Relee los folios disponibles o sal del puesto para continuar."
-		)
+		_guia_lectura.text = ("Turno sin acciones · Relee los folios disponibles o sal del puesto para continuar.")
 	elif abiertos_hoy == 0:
 		_guia_lectura.text = (
 			"PASO 1/3 · Abre un folio. La primera lectura del día es gratis; "
